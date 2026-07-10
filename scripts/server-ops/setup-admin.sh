@@ -80,6 +80,7 @@ User=root
 ExecStart=/usr/local/sbin/ariane-admin-status
 RuntimeDirectory=ariane
 RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
