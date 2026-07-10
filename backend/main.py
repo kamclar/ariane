@@ -2,13 +2,16 @@
 # ARIANE - FastAPI application
 # Automated ACMG Rule-based Interpretation and Annotation ENgine
 # ============================================================
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pathlib import Path
 import json
+import os
 import time
 import asyncio
+import logging
+import traceback
 from typing import Optional
 
 from backend.config import (
@@ -26,6 +29,40 @@ from backend.models import (
 )
 
 # ── App setup ──────────────────────────────────────────────────────────────
+LOG_DIR = Path(os.getenv("ARIANE_LOG_DIR", "/var/log/ariane"))
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "ariane-app.log"
+
+class ContextFormatter(logging.Formatter):
+    def format(self, record):
+        base = super().format(record)
+        extra_keys = [
+            key for key in record.__dict__
+            if key not in {
+                "name", "msg", "args", "levelname", "levelno", "pathname",
+                "filename", "module", "exc_info", "exc_text", "stack_info",
+                "lineno", "funcName", "created", "msecs", "relativeCreated",
+                "thread", "threadName", "processName", "process", "message",
+            }
+        ]
+        if not extra_keys:
+            return base
+
+        extras = {key: record.__dict__[key] for key in extra_keys}
+        try:
+            base = f"{base} | {json.dumps(extras, default=str, ensure_ascii=False)}"
+        except Exception:
+            base = f"{base} | extras={extras}"
+        return base
+
+formatter = ContextFormatter("%(asctime)s %(levelname)s %(name)s %(message)s")
+file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
+file_handler.setFormatter(formatter)
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+logging.basicConfig(level=os.getenv("ARIANE_LOG_LEVEL", "INFO"), handlers=[file_handler, stream_handler])
+logger = logging.getLogger("ariane")
+
 app = FastAPI(
     title="ARIANE",
     description="Automated ACMG Rule-based Interpretation and Annotation ENgine for BRCA1/2",
@@ -34,6 +71,76 @@ app = FastAPI(
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    request_body = None
+    try:
+        request_body = await request.json()
+    except Exception:
+        request_body = None
+
+    client_ip = request.client.host if request.client else "unknown"
+    method = request.method
+    path = request.url.path
+    query = str(request.url.query)
+
+    logger.info(
+        "request.start",
+        extra={
+            "client_ip": client_ip,
+            "method": method,
+            "path": path,
+            "query": query,
+            "body": request_body,
+        },
+    )
+
+    start_time = time.time()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        duration = round((time.time() - start_time) * 1000)
+        logger.exception(
+            "request.error",
+            extra={
+                "client_ip": client_ip,
+                "method": method,
+                "path": path,
+                "query": query,
+                "body": request_body,
+                "duration_ms": duration,
+            },
+        )
+        raise
+
+    duration = round((time.time() - start_time) * 1000)
+    response_body = None
+    try:
+        if hasattr(response, "body_iterator"):
+            response_body = "<streamed>"
+        else:
+            response_body = await response.body()
+            if isinstance(response_body, bytes):
+                response_body = response_body.decode("utf-8", errors="ignore")
+    except Exception:
+        response_body = None
+
+    logger.info(
+        "request.complete",
+        extra={
+            "client_ip": client_ip,
+            "method": method,
+            "path": path,
+            "query": query,
+            "status_code": response.status_code,
+            "duration_ms": duration,
+            "response_body": response_body,
+        },
+    )
+
+    return response
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -66,6 +173,84 @@ async def resources():
         "links": RESOURCE_LINKS,
         "splice_ps1_reference_candidates": load_splice_ps1_reference_candidates(),
     }
+
+
+def _validate_log_token(token: Optional[str]) -> None:
+    expected = os.getenv("ARIANE_LOG_VIEW_TOKEN", "")
+    if not expected:
+        raise HTTPException(
+            status_code=503,
+            detail="Log access token is not configured",
+        )
+    if not token or token != expected:
+        raise HTTPException(status_code=401, detail="Invalid log access token")
+
+
+def _tail_log_file(path: Path, lines: int = 50) -> list[str]:
+    if not path.exists():
+        return []
+    block_size = 1024
+    data = b""
+    with path.open("rb") as f:
+        f.seek(0, os.SEEK_END)
+        file_size = f.tell()
+        if file_size == 0:
+            return []
+        position = file_size
+        while len(data.splitlines()) <= lines and position > 0:
+            read_size = min(block_size, position)
+            position -= read_size
+            f.seek(position)
+            data = f.read(read_size) + data
+            if position == 0:
+                break
+    lines_data = data.splitlines()[-lines:]
+    return [line.decode("utf-8", errors="replace") for line in lines_data]
+
+
+@app.get("/api/logs")
+async def get_logs(
+    lines: int = 50,
+    level: Optional[str] = None,
+    token: Optional[str] = None,
+    token_header: Optional[str] = Header(None, alias="X-ARIANE-LOG-TOKEN"),
+    format: str = "json",
+):
+    auth_token = token or token_header
+    _validate_log_token(auth_token)
+    if lines < 1:
+        raise HTTPException(status_code=400, detail="lines must be >= 1")
+    if lines > 200:
+        lines = 200
+
+    if not LOG_FILE.exists():
+        raise HTTPException(status_code=404, detail="Log file not found")
+
+    log_lines = _tail_log_file(LOG_FILE, lines)
+    if level:
+        level = level.upper()
+        filtered = [
+            line for line in log_lines
+            if f" {level} " in line or f'"level":"{level}"' in line or f'"level": "{level}"' in line
+        ]
+        log_lines = filtered
+
+    response_payload = {
+        "status": "ok",
+        "lines_requested": lines,
+        "level": level,
+        "log_file": str(LOG_FILE),
+        "logs": log_lines,
+    }
+
+    if format.lower() == "html":
+        body = "<html><body><pre>"
+        body += "\n".join(log_lines)
+        body += "</pre></body></html>"
+        return HTMLResponse(content=body, media_type="text/html")
+
+    return response_payload
+}
 
 
 @app.post("/api/manual-evidence/evaluate")
@@ -282,9 +467,40 @@ async def _classify_one(
 
 @app.post("/api/classify")
 async def classify_variant(req: VariantRequest) -> ClassificationResult:
-    return await _classify_one(
-        req.gene, req.c_notation, req.p_notation or "", req.dup_type
-    )
+    start_time = time.time()
+    try:
+        result = await _classify_one(
+            req.gene, req.c_notation, req.p_notation or "", req.dup_type
+        )
+        duration_ms = round((time.time() - start_time) * 1000)
+        logger.info(
+            "classify.result",
+            extra={
+                "endpoint": "/api/classify",
+                "gene": req.gene,
+                "c_notation": req.c_notation,
+                "p_notation": req.p_notation,
+                "dup_type": req.dup_type,
+                "duration_ms": duration_ms,
+                "predicted_class": result.predicted_class,
+                "predicted_label": result.predicted_label,
+            },
+        )
+        return result
+    except Exception as exc:
+        duration_ms = round((time.time() - start_time) * 1000)
+        logger.exception(
+            "classify.error",
+            extra={
+                "endpoint": "/api/classify",
+                "gene": req.gene,
+                "c_notation": req.c_notation,
+                "p_notation": req.p_notation,
+                "dup_type": req.dup_type,
+                "duration_ms": duration_ms,
+            },
+        )
+        raise
 
 
 @app.post("/api/classify/batch")
@@ -300,12 +516,35 @@ async def classify_batch(req: BatchRequest) -> BatchResponse:
                 res = await _classify_one(
                     item.gene, item.c_notation, item.p_notation or "", item.dup_type
                 )
+                logger.info(
+                    "batch.variant.result",
+                    extra={
+                        "endpoint": "/api/classify/batch",
+                        "index": idx,
+                        "gene": item.gene,
+                        "c_notation": item.c_notation,
+                        "p_notation": item.p_notation,
+                        "dup_type": item.dup_type,
+                        "status": "ok",
+                    },
+                )
                 return BatchItemResult(
                     index=idx, status="ok",
                     variant=f"{item.gene} {item.c_notation}",
                     result=res,
                 )
             except Exception as exc:
+                logger.exception(
+                    "batch.variant.error",
+                    extra={
+                        "endpoint": "/api/classify/batch",
+                        "index": idx,
+                        "gene": item.gene,
+                        "c_notation": item.c_notation,
+                        "p_notation": item.p_notation,
+                        "dup_type": item.dup_type,
+                    },
+                )
                 return BatchItemResult(
                     index=idx, status="error",
                     variant=f"{item.gene} {item.c_notation}",
@@ -315,12 +554,22 @@ async def classify_batch(req: BatchRequest) -> BatchResponse:
     items = await asyncio.gather(*[_one(i, v) for i, v in enumerate(req.variants)])
     items = sorted(items, key=lambda r: r.index)
     success = sum(1 for r in items if r.status == "ok")
-    return BatchResponse(
+    result = BatchResponse(
         total=len(items),
         success_count=success,
         error_count=len(items) - success,
         results=list(items),
     )
+    logger.info(
+        "classify.batch.complete",
+        extra={
+            "endpoint": "/api/classify/batch",
+            "total": result.total,
+            "success_count": result.success_count,
+            "error_count": result.error_count,
+        },
+    )
+    return result
 
 
 @app.post("/api/clear-cache")
