@@ -1,9 +1,0 @@
-feature,benign_count,pathogenic_count,benign_percent,pathogenic_percent,pathogenic_to_benign_rate_ratio
-outside_mapped_structure_function_features,23836,1284,64.505,52.601,0.815
-BRC repeats / RAD51-binding region,9242,487,25.011,19.951,0.798
-DNA-binding domain / helical-OB-DSS1 region,256,362,0.693,14.830,21.406
-BRCT phosphopeptide-binding region,1178,140,3.188,5.735,1.799
-RING zinc-binding/E3 ligase region,576,80,1.559,3.277,2.103
-C-terminal RAD51-binding/nuclear localization context,1834,57,4.963,2.335,0.470
-coiled-coil PALB2 interaction region,22,17,0.060,0.696,11.698
-PALB2 binding N-terminal region,8,14,0.022,0.574,26.492

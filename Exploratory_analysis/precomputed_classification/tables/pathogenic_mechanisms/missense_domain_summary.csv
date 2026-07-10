@@ -1,9 +1,0 @@
-gene,enigma_domain,known_pathogenic_residue_position,count
-BRCA1,BRCT,False,29
-BRCA1,BRCT,True,23
-BRCA1,RING,False,18
-BRCA2,DBD,False,13
-BRCA1,RING,True,12
-BRCA2,DBD,True,4
-BRCA1,outside_enigma_functional_domain,False,3
-BRCA2,outside_enigma_functional_domain,False,1

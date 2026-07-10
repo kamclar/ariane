@@ -1,8 +1,0 @@
-action_group,count,high_priority_count,high_spliceai_count,median_points,top_candidate_evidence
-background_absence_only,5048,0,10,1.0,any independent variant-level evidence; otherwise low priority
-conflicting_computational_splice_context,1276,0,0,-1.0,manual RNA/splicing review and transcript-specific interpretation
-computational_signal_needs_noncomputational_support,842,812,842,2.0,"RNA, functional, PS4, PP1, PM3, or curated assertion evidence"
-near_pathogenic_threshold,446,38,5,5.0,"supporting pathogenic evidence such as PP1, PS4, PM3, RNA evidence, or curated clinical assertion"
-module1_no_signal,331,0,1,0,"ClinVar/ClinGen/ENIGMA assertion context, literature, segregation, functional data"
-near_benign_threshold,191,2,0,-4,"BS2, BS4, population evidence, or curated functional strength review"
-manual_conflict_adjudication,20,7,8,-0.5,manual review of mixed benign and pathogenic evidence

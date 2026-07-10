@@ -1,5 +1,0 @@
-gene,protein_start,protein_end,annotation_type,annotation_label,evidence_source,source_id,structure_id,curation_status,notes
-BRCA1,1642,1736,UniProt:Domain,BRCT 1,UniProtKB/Swiss-Prot,P38398,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000255"", ""source"": ""PROSITE-ProRule"", ""id"": ""PRU00033""}]"
-BRCA1,1756,1855,UniProt:Domain,BRCT 2,UniProtKB/Swiss-Prot,P38398,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000255"", ""source"": ""PROSITE-ProRule"", ""id"": ""PRU00033""}]"
-BRCA1,24,65,UniProt:Zinc finger,RING-type,UniProtKB/Swiss-Prot,P38398,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000255"", ""source"": ""PROSITE-ProRule"", ""id"": ""PRU00175""}]"
-BRCA1,1397,1424,UniProt:Region,Interaction with PALB2,UniProtKB/Swiss-Prot,P38398,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""19369211""}]"

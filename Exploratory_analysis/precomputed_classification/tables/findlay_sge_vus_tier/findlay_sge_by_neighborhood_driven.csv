@@ -1,3 +1,0 @@
-neighborhood_driven,count,median_function_score,mean_function_score,lof_count,int_count,func_count,missing_func_class_count
-no,50,-1.492,-1.278,28,9,13,0
-yes,623,-1.409,-1.388,325,163,135,0

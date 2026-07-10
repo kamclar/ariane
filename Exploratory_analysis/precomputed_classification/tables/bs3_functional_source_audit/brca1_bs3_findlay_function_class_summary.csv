@@ -1,8 +1,0 @@
-region,findlay_func_class,count
-BRCA1_BRCT_region,FUNC,1861
-BRCA1_N_terminal_RING_region,FUNC,844
-other_BRCA1_region,not_in_findlay,253
-other_BRCA1_region,FUNC,85
-BRCA1_N_terminal_RING_region,LOF,24
-BRCA1_BRCT_region,not_in_findlay,4
-BRCA1_N_terminal_RING_region,not_in_findlay,3

@@ -1,9 +1,0 @@
-gene,protein_start,protein_end,annotation_type,annotation_label,evidence_source,source_id,structure_id,curation_status,notes
-BRCA2,1,40,UniProt:Region,Interaction with PALB2,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,[]
-BRCA2,639,1000,UniProt:Region,Interaction with NPM1,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""21084279""}]"
-BRCA2,1003,2082,UniProt:Region,Interaction with RAD51,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000250"", ""source"": ""UniProtKB"", ""id"": ""P97929""}]"
-BRCA2,1338,1781,UniProt:Region,Interaction with POLH,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""24485656""}]"
-BRCA2,2270,2337,UniProt:Region,Interaction with HSF2BP,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""31242413""}]"
-BRCA2,2350,2545,UniProt:Region,Interaction with FANCD2,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,[]
-BRCA2,2481,2832,UniProt:Region,Interaction with SEM1,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""10373512""}, {""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""16205630""}]"
-BRCA2,2682,2698,UniProt:Motif,Nuclear export signal; masked by interaction with SEM1,UniProtKB/Swiss-Prot,P51587,,source_extracted_region,"[{""evidenceCode"": ""ECO:0000269"", ""source"": ""PubMed"", ""id"": ""24013206""}]"
