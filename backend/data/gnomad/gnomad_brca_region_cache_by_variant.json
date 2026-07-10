@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "created_by": "BRCA_ACMG_Prepare_gnomAD_BRCA_Region_Cache_v1_1",
+    "created_at": "2026-05-10T18:26:46.776513Z",
+    "project_dir": "/content/drive/MyDrive/Enigma",
+    "coverage_mode": "test_fixture",
+    "coverage_threshold": 25.0,
+    "coverage_mean_depth_fixture": 30.0,
+    "region_padding_bp": 50000,
+    "remote_tabix_ok": true,
+    "tabix_bin": "/content/htslib_remote_env/bin/tabix",
+    "bgzip_bin": "/content/htslib_remote_env/bin/bgzip",
+    "datasets": [
+      {
+        "name": "gnomad_v2_1_1_exomes_grch37",
+        "label": "gnomAD v2.1.1 exomes GRCh37",
+        "build": "GRCh37",
+        "release": "2.1.1",
+        "subset": "exomes"
+      },
+      {
+        "name": "gnomad_v3_1_2_genomes_grch38",
+        "label": "gnomAD v3.1.2 genomes GRCh38",
+        "build": "GRCh38",
+        "release": "3.1.2",
+        "subset": "genomes"
+      }
+    ],
+    "regions": {
+      "GRCh37": {
+        "BRCA1": {
+          "chrom": "17",
+          "start": 41196312,
+          "end": 41277500
+        },
+        "BRCA2": {
+          "chrom": "13",
+          "start": 32889611,
+          "end": 32973805
+        }
+      },
+      "GRCh38": {
+        "BRCA1": {
+          "chrom": "chr17",
+          "start": 43044295,
+          "end": 43125483
+        },
+        "BRCA2": {
+          "chrom": "chr13",
+          "start": 32315474,
+          "end": 32400266
+        }
+      }
+    },
+    "selected_urls": {
+      "gnomad_v2_1_1_exomes_grch37|13": "https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/vcf/exomes/gnomad.exomes.r2.1.1.sites.13.vcf.bgz",
+      "gnomad_v2_1_1_exomes_grch37|17": "https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/vcf/exomes/gnomad.exomes.r2.1.1.sites.17.vcf.bgz"
+    },
+    "extraction_log": [
+      {
+        "dataset": "gnomad_v2_1_1_exomes_grch37",
+        "chrom": "13",
+        "gene": "BRCA2",
+        "region": "13:32839611-33023805",
+        "source_mode": "remote",
+        "status": "ok",
+        "records": 5705
+      },
+      {
+        "dataset": "gnomad_v2_1_1_exomes_grch37",
+        "chrom": "17",
+        "gene": "BRCA1",
+        "region": "17:41146312-41327500",
+        "source_mode": "remote",
+        "status": "ok",
+        "records": 4361
+      }
+    ]
+  },
+  "by_variant": {}
+}

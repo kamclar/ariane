@@ -1,0 +1,1830 @@
+{
+  "created_at": "2026-05-10T17:20:28",
+  "records": {
+    "BRCA1:c.1534C>T": {
+      "c_notation": "c.1534C>T",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41246014-G-A",
+      "grch38_variant_id": "17-43093997-G-A",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Leu512Phe)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41246014-G-A"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43093997-G-A"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.1534C>T",
+      "variant_type": "missense"
+    },
+    "BRCA1:c.3247A>C": {
+      "c_notation": "c.3247A>C",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41244301-T-G",
+      "grch38_variant_id": "17-43092284-T-G",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Met1083Leu)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41244301-T-G"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43092284-T-G"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.3247A>C",
+      "variant_type": "missense"
+    },
+    "BRCA1:c.3668_3671dup": {
+      "c_notation": "c.3668_3671dup",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Cys1225fs)",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.3668_3671dup",
+      "variant_type": "frameshift"
+    },
+    "BRCA1:c.3891_3893del": {
+      "c_notation": "c.3891_3893del",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Ser1298del)",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.3891_3893del",
+      "variant_type": "inframe_deletion"
+    },
+    "BRCA1:c.4185G>A": {
+      "c_notation": "c.4185G>A",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41242961-C-T",
+      "grch38_variant_id": "17-43090944-C-T",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Gln1395=)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41242961-C-T"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43090944-C-T"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.4185G>A",
+      "variant_type": "synonymous"
+    },
+    "BRCA1:c.509G>A": {
+      "c_notation": "c.509G>A",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41251830-C-T",
+      "grch38_variant_id": "17-43099813-C-T",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Arg170Gln)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41251830-C-T"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43099813-C-T"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.509G>A",
+      "variant_type": "missense"
+    },
+    "BRCA1:c.5217T>A": {
+      "c_notation": "c.5217T>A",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41209129-A-T",
+      "grch38_variant_id": "17-43057112-A-T",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Asp1739Glu)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41209129-A-T"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43057112-A-T"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.5217T>A",
+      "variant_type": "missense"
+    },
+    "BRCA1:c.5551_5552insT": {
+      "c_notation": "c.5551_5552insT",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Asp1851ValfsTer29)",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.5551_5552insT",
+      "variant_type": "frameshift"
+    },
+    "BRCA1:c.628C>T": {
+      "c_notation": "c.628C>T",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA1",
+      "grch37_variant_id": "17-41247905-G-A",
+      "grch38_variant_id": "17-43095888-G-A",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Gln210Ter)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-41247905-G-A"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "17-43095888-G-A"
+        }
+      },
+      "transcript": "NM_007294.4",
+      "variant_key": "BRCA1:c.628C>T",
+      "variant_type": "nonsense"
+    },
+    "BRCA2:c.(793+1_794-1)_(1909+1_1910-1)del": {
+      "c_notation": "c.(793+1_794-1)_(1909+1_1910-1)del",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA2",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.?",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_000059.4",
+      "variant_key": "BRCA2:c.(793+1_794-1)_(1909+1_1910-1)del",
+      "variant_type": "exon_deletion"
+    },
+    "BRCA2:c.6147_6149del": {
+      "c_notation": "c.6147_6149del",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA2",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Val2050del)",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_000059.4",
+      "variant_key": "BRCA2:c.6147_6149del",
+      "variant_type": "inframe_deletion"
+    },
+    "BRCA2:c.8953+2T>C": {
+      "c_notation": "c.8953+2T>C",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA2",
+      "grch37_variant_id": "13-32953654-T-C",
+      "grch38_variant_id": "13-32379517-T-C",
+      "is_indel_or_complex": false,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(?)",
+      "pm2_cache_status": "incomplete_gnomad_status",
+      "pm2_eligible_if_absent_and_covered": true,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r2_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r2_1",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "13-32953654-T-C"
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": true,
+          "dataset": null,
+          "errors": [
+            {
+              "dataset": "gnomad_r3_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            },
+            {
+              "dataset": "gnomad_r3_1_non_cancer",
+              "error": {
+                "http_status": 400,
+                "text": "{\"errors\":[{\"message\":\"Cannot query field \\\"faf95_joint\\\" on type \\\"VariantDetails\\\".\",\"locations\":[{\"line\":12,\"column\":5}]}]}",
+                "type": "http_error"
+              }
+            }
+          ],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": true,
+              "fraction_over_20": 0.99,
+              "mean_depth": 30.0,
+              "source": "test_fixture"
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "api_error",
+          "used_fallback_dataset": false,
+          "variant_id": "13-32379517-T-C"
+        }
+      },
+      "transcript": "NM_000059.4",
+      "variant_key": "BRCA2:c.8953+2T>C",
+      "variant_type": "splice_site"
+    },
+    "BRCA2:c.9097del": {
+      "c_notation": "c.9097del",
+      "created_by": "BRCA_ACMG_Prepare_gnomAD_Cache_v1_0",
+      "gene": "BRCA2",
+      "grch37_variant_id": null,
+      "grch38_variant_id": null,
+      "is_indel_or_complex": true,
+      "max_faf95_popmax_all_sources": null,
+      "max_raw_af_all_sources": null,
+      "p_notation": "p.(Thr3033fs)",
+      "pm2_cache_status": "not_applicable_indel_or_complex",
+      "pm2_eligible_if_absent_and_covered": false,
+      "sources": {
+        "v2_1_non_cancer": {
+          "assembly": "GRCh37",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v2.1 non-cancer / GRCh37",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v2_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        },
+        "v3_1_non_cancer": {
+          "assembly": "GRCh38",
+          "coverage_ok_for_pm2": false,
+          "dataset": null,
+          "errors": [],
+          "exome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "faf95_joint": {
+            "available": false,
+            "popmax": null,
+            "popmax_population": null
+          },
+          "found": null,
+          "frequency_metric": "raw_af",
+          "genome": {
+            "ac": null,
+            "ac_hom": null,
+            "af": null,
+            "an": null,
+            "available": false,
+            "coverage": {
+              "available": false,
+              "fraction_over_20": null,
+              "mean_depth": null,
+              "source": null
+            },
+            "filters": []
+          },
+          "label": "gnomAD v3.x / GRCh38",
+          "max_raw_af": null,
+          "query_type": null,
+          "source_name": "v3_1_non_cancer",
+          "status": "no_coordinates",
+          "used_fallback_dataset": false,
+          "variant_id": null
+        }
+      },
+      "transcript": "NM_000059.4",
+      "variant_key": "BRCA2:c.9097del",
+      "variant_type": "frameshift"
+    }
+  },
+  "schema_version": "gnomad_cache_v1",
+  "sources": {
+    "coverage_fallback": {
+      "enabled": true,
+      "fraction_over_20": 0.99,
+      "mean_depth": 30.0,
+      "source": "test_fixture"
+    },
+    "dataset_config": {
+      "v2_1_non_cancer": {
+        "assembly": "GRCh37",
+        "callsets": [
+          "exome",
+          "genome"
+        ],
+        "dataset_candidates": [
+          "gnomad_r2_1_non_cancer",
+          "gnomad_r2_1"
+        ],
+        "label": "gnomAD v2.1 non-cancer / GRCh37",
+        "pm2_coverage_callsets": [
+          "exome"
+        ],
+        "required_for_pm2": true,
+        "variant_id_field": "grch37_variant_id"
+      },
+      "v3_1_non_cancer": {
+        "assembly": "GRCh38",
+        "callsets": [
+          "genome"
+        ],
+        "dataset_candidates": [
+          "gnomad_r3_non_cancer",
+          "gnomad_r3",
+          "gnomad_r3_1_non_cancer"
+        ],
+        "label": "gnomAD v3.x / GRCh38",
+        "pm2_coverage_callsets": [
+          "genome"
+        ],
+        "required_for_pm2": true,
+        "variant_id_field": "grch38_variant_id"
+      }
+    },
+    "frequency_note": "FAF/faf95 is stored when returned; otherwise raw AF is stored and marked as raw_af.",
+    "gnomad_api_url": "https://gnomad.broadinstitute.org/api",
+    "min_pm2_mean_depth": 25.0
+  },
+  "updated_at": "2026-05-10T17:23:29"
+}
