@@ -3,14 +3,19 @@
 # Automated ACMG Rule-based Interpretation and Annotation ENgine
 # ============================================================
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from pathlib import Path
 import json
+import logging
 import os
 import secrets
+import sys
 import time
 import asyncio
+import uuid
 from typing import Optional
 from fastapi import Header
 
@@ -34,6 +39,78 @@ app = FastAPI(
     description="Automated ACMG Rule-based Interpretation and Annotation ENgine for BRCA1/2",
     version="1.8.0",
 )
+
+AUDIT_LOGGER = logging.getLogger("ariane.audit")
+AUDIT_LOGGER.setLevel(logging.INFO)
+AUDIT_LOGGER.propagate = False
+if not AUDIT_LOGGER.handlers:
+    audit_handler = logging.StreamHandler(sys.stdout)
+    audit_handler.setFormatter(logging.Formatter("%(message)s"))
+    AUDIT_LOGGER.addHandler(audit_handler)
+
+
+def _request_context(request: Request) -> dict:
+    return {
+        "request_id": getattr(request.state, "request_id", ""),
+        "source_ip": request.client.host if request.client else "unknown",
+        "method": request.method,
+        "path": request.url.path,
+        "user_agent": request.headers.get("user-agent", "")[:300],
+    }
+
+
+def _audit(request: Request, event: str, level: str = "info", **fields) -> None:
+    record = {
+        "log_type": "ariane_audit",
+        "event": event,
+        **_request_context(request),
+        **fields,
+    }
+    message = json.dumps(record, ensure_ascii=True, separators=(",", ":"))
+    getattr(AUDIT_LOGGER, level)(message)
+
+
+@app.middleware("http")
+async def audit_request(request: Request, call_next):
+    request.state.request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+    started = time.monotonic()
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        _audit(
+            request,
+            "request_exception",
+            level="exception",
+            duration_ms=round((time.monotonic() - started) * 1000, 1),
+            error_type=type(exc).__name__,
+            error=str(exc)[:2000],
+        )
+        raise
+    response.headers["X-Request-ID"] = request.state.request_id
+    if request.url.path.startswith("/api/") and request.url.path != "/api/health":
+        _audit(
+            request,
+            "request_completed",
+            level="warning" if response.status_code >= 400 else "info",
+            status_code=response.status_code,
+            duration_ms=round((time.monotonic() - started) * 1000, 1),
+        )
+    return response
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    _audit(
+        request,
+        "validation_error",
+        level="warning",
+        input=jsonable_encoder(exc.body),
+        errors=jsonable_encoder(exc.errors()),
+    )
+    return JSONResponse(
+        status_code=422,
+        content={"detail": jsonable_encoder(exc.errors())},
+    )
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
@@ -74,6 +151,7 @@ async def resources():
 @app.post("/api/manual-evidence/evaluate")
 async def evaluate_manual_evidence_endpoint(
     req: ManualEvidenceRequest,
+    request: Request,
 ) -> ManualEvidenceResult:
     from backend.modules.manual_evidence import evaluate_manual_evidence
 
@@ -83,9 +161,16 @@ async def evaluate_manual_evidence_endpoint(
             [criterion.model_dump() for criterion in req.manual_criteria],
         )
     except ValueError as exc:
+        _audit(
+            request,
+            "manual_evidence_error",
+            level="warning",
+            input=req.model_dump(mode="json"),
+            error=str(exc),
+        )
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    return ManualEvidenceResult(
+    response = ManualEvidenceResult(
         predicted_class=result["predicted_class"],
         predicted_label=result["predicted_label"],
         total_points=result["total_points"],
@@ -97,6 +182,17 @@ async def evaluate_manual_evidence_endpoint(
         assessor=req.assessor,
         assessed_at=req.assessed_at,
     )
+    _audit(
+        request,
+        "manual_evidence_completed",
+        input=req.model_dump(mode="json"),
+        result={
+            "predicted_class": response.predicted_class,
+            "predicted_label": response.predicted_label,
+            "total_points": response.total_points,
+        },
+    )
+    return response
 
 
 # Semaphore limits concurrent external API calls during batch processing
@@ -284,14 +380,37 @@ async def _classify_one(
 
 
 @app.post("/api/classify")
-async def classify_variant(req: VariantRequest) -> ClassificationResult:
-    return await _classify_one(
-        req.gene, req.c_notation, req.p_notation or "", req.dup_type
+async def classify_variant(req: VariantRequest, request: Request) -> ClassificationResult:
+    input_data = req.model_dump(mode="json")
+    try:
+        response = await _classify_one(
+            req.gene, req.c_notation, req.p_notation or "", req.dup_type
+        )
+    except Exception as exc:
+        _audit(
+            request,
+            "classification_error",
+            level="exception",
+            input=input_data,
+            error_type=type(exc).__name__,
+            error=str(exc)[:2000],
+        )
+        raise
+    _audit(
+        request,
+        "classification_completed",
+        input=input_data,
+        result={
+            "predicted_class": response.predicted_class,
+            "predicted_label": response.predicted_label,
+            "total_points": response.total_points,
+        },
     )
+    return response
 
 
 @app.post("/api/classify/batch")
-async def classify_batch(req: BatchRequest) -> BatchResponse:
+async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
     """
     Classify multiple variants. Up to 200 per request.
     Results preserve input order. Per-variant errors are reported inline.
@@ -318,6 +437,20 @@ async def classify_batch(req: BatchRequest) -> BatchResponse:
     items = await asyncio.gather(*[_one(i, v) for i, v in enumerate(req.variants)])
     items = sorted(items, key=lambda r: r.index)
     success = sum(1 for r in items if r.status == "ok")
+    for input_item, output_item in zip(req.variants, items):
+        _audit(
+            request,
+            "batch_item_completed" if output_item.status == "ok" else "batch_item_error",
+            level="info" if output_item.status == "ok" else "warning",
+            item_index=output_item.index,
+            input=input_item.model_dump(mode="json"),
+            result={
+                "predicted_class": output_item.result.predicted_class,
+                "predicted_label": output_item.result.predicted_label,
+                "total_points": output_item.result.total_points,
+            } if output_item.result else None,
+            error=output_item.error,
+        )
     return BatchResponse(
         total=len(items),
         success_count=success,
@@ -327,7 +460,10 @@ async def classify_batch(req: BatchRequest) -> BatchResponse:
 
 
 @app.post("/api/clear-cache")
-async def clear_cache(x_ariane_admin_token: Optional[str] = Header(default=None)):
+async def clear_cache(
+    request: Request,
+    x_ariane_admin_token: Optional[str] = Header(default=None),
+):
     admin_token = os.getenv("ARIANE_ADMIN_TOKEN", "")
     if not admin_token:
         raise HTTPException(status_code=503, detail="Administrative API is disabled")
@@ -350,4 +486,5 @@ async def clear_cache(x_ariane_admin_token: Optional[str] = Header(default=None)
     load_gnomad_local_cache()
     load_gnomad_coverage_cache()
 
+    _audit(request, "cache_cleared")
     return {"status": "ok", "message": "All caches cleared"}

@@ -28,6 +28,17 @@ bash health-monitor.sh 30
 
 The application service is `ariane`. Application logs are stored in the systemd journal. Nginx logs are stored under `/var/log/nginx`.
 
+Structured audit events include the request ID, source IP, endpoint, submitted values, result summary, and error details. Tokens and request headers are not logged.
+
+```bash
+sudo bash audit-log.sh all today
+sudo bash audit-log.sh errors "7 days ago"
+sudo bash audit-log.sh requests today
+journalctl -u ariane --since today -o cat | grep '"log_type":"ariane_audit"'
+```
+
+Audit events can contain variant data, free-text notes, assessor names, and IP addresses. Limit journal access to administrators and define a retention period that matches local privacy requirements.
+
 ## Backups
 
 The backup installer creates one systemd timer. It removes the old cron entry to avoid duplicate runs. Backups are locked with `flock`, verified after creation, and accompanied by SHA-256 checksum files.
