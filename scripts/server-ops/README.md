@@ -7,6 +7,7 @@ Production scripts for an Ubuntu server with systemd and Nginx.
 ```bash
 sudo bash deploy-ariane.sh <git-repository-url>
 sudo bash setup-tls.sh ariane-app.duckdns.org admin@example.org
+sudo bash setup-admin.sh admin
 sudo bash setup-backup-cron.sh 03:00
 sudo bash security-check.sh
 ```
@@ -38,6 +39,16 @@ journalctl -u ariane --since today -o cat | grep '"log_type":"ariane_audit"'
 ```
 
 Audit events can contain variant data, free-text notes, assessor names, and IP addresses. Limit journal access to administrators and define a retention period that matches local privacy requirements.
+
+## Audit administration page
+
+Configure a generated password and open the page over HTTPS:
+
+```bash
+sudo bash setup-admin.sh admin
+```
+
+The script prints the password once. Store it in a password manager. The page is available at `https://ariane-app.duckdns.org/admin/audit` and uses browser Basic Auth. Audit files are stored in `/var/log/ariane/audit.jsonl`, readable only by the service account and administrators, and rotated daily for 30 days.
 
 ## Backups
 

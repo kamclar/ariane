@@ -57,6 +57,10 @@ echo -e "${GREEN}OK Python: $PYTHON_PATH${NC}"
 # 4. Create the environment file and systemd service.
 echo -e "\n${YELLOW}[2] Creating systemd service...${NC}"
 install -d -m 0750 -o root -g "$ARIANE_USER" /etc/ariane
+install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" /var/log/ariane
+touch /var/log/ariane/audit.jsonl
+chown "$ARIANE_USER:$ARIANE_USER" /var/log/ariane/audit.jsonl
+chmod 0640 /var/log/ariane/audit.jsonl
 if [ ! -f /etc/ariane/ariane.env ]; then
     printf 'ARIANE_ADMIN_TOKEN=%s\n' "$(openssl rand -hex 32)" > /etc/ariane/ariane.env
 fi
@@ -91,7 +95,7 @@ LockPersonality=true
 RestrictRealtime=true
 CapabilityBoundingSet=
 AmbientCapabilities=
-ReadWritePaths=$ARIANE_HOME/backend/data
+ReadWritePaths=$ARIANE_HOME/backend/data /var/log/ariane
 StandardOutput=journal
 StandardError=journal
 

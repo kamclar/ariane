@@ -2,12 +2,16 @@
 # ARIANE - FastAPI application
 # Automated ACMG Rule-based Interpretation and Annotation ENgine
 # ============================================================
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from pathlib import Path
+from collections import deque
+from datetime import datetime, timezone
+import html
 import json
 import logging
 import os
@@ -48,6 +52,17 @@ if not AUDIT_LOGGER.handlers:
     audit_handler.setFormatter(logging.Formatter("%(message)s"))
     AUDIT_LOGGER.addHandler(audit_handler)
 
+AUDIT_LOG_PATH = Path(os.getenv("ARIANE_AUDIT_LOG", "/var/log/ariane/audit.jsonl"))
+try:
+    if AUDIT_LOG_PATH.parent.is_dir():
+        audit_file_handler = logging.FileHandler(AUDIT_LOG_PATH, encoding="utf-8")
+        audit_file_handler.setFormatter(logging.Formatter("%(message)s"))
+        AUDIT_LOGGER.addHandler(audit_file_handler)
+except OSError:
+    AUDIT_LOGGER.exception("Failed to open the audit log file")
+
+ADMIN_SECURITY = HTTPBasic()
+
 
 def _request_context(request: Request) -> dict:
     return {
@@ -62,12 +77,35 @@ def _request_context(request: Request) -> dict:
 def _audit(request: Request, event: str, level: str = "info", **fields) -> None:
     record = {
         "log_type": "ariane_audit",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "event": event,
         **_request_context(request),
         **fields,
     }
     message = json.dumps(record, ensure_ascii=True, separators=(",", ":"))
     getattr(AUDIT_LOGGER, level)(message)
+
+
+def _require_admin(
+    credentials: HTTPBasicCredentials = Depends(ADMIN_SECURITY),
+) -> str:
+    expected_user = os.getenv("ARIANE_ADMIN_USER", "")
+    expected_password = os.getenv("ARIANE_ADMIN_PASSWORD", "")
+    supplied_user = credentials.username.encode("utf-8")
+    supplied_password = credentials.password.encode("utf-8")
+    user_matches = secrets.compare_digest(supplied_user, expected_user.encode("utf-8"))
+    password_matches = secrets.compare_digest(
+        supplied_password,
+        expected_password.encode("utf-8"),
+    )
+    valid = bool(expected_user and expected_password and user_matches and password_matches)
+    if not valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid administrator credentials",
+            headers={"WWW-Authenticate": 'Basic realm="ARIANE audit"'},
+        )
+    return credentials.username
 
 
 @app.middleware("http")
@@ -87,7 +125,11 @@ async def audit_request(request: Request, call_next):
         )
         raise
     response.headers["X-Request-ID"] = request.state.request_id
-    if request.url.path.startswith("/api/") and request.url.path != "/api/health":
+    log_completion = (
+        request.url.path.startswith("/admin/")
+        or request.url.path.startswith("/api/") and request.url.path != "/api/health"
+    )
+    if log_completion:
         _audit(
             request,
             "request_completed",
@@ -112,6 +154,80 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         content={"detail": jsonable_encoder(exc.errors())},
     )
 
+
+@app.get("/admin/audit", response_class=HTMLResponse, include_in_schema=False)
+async def admin_audit(
+    request: Request,
+    mode: str = "all",
+    limit: int = 200,
+    admin_user: str = Depends(_require_admin),
+):
+    mode = mode if mode in {"all", "errors", "requests"} else "all"
+    limit = max(1, min(limit, 1000))
+    records = []
+    try:
+        with AUDIT_LOG_PATH.open("r", encoding="utf-8") as audit_file:
+            lines = deque(audit_file, maxlen=max(limit * 5, 1000))
+    except FileNotFoundError:
+        lines = []
+    except OSError as exc:
+        raise HTTPException(status_code=503, detail="Audit log is unavailable") from exc
+
+    for line in reversed(lines):
+        try:
+            record = json.loads(line)
+        except (TypeError, json.JSONDecodeError):
+            continue
+        event = str(record.get("event", ""))
+        if mode == "errors" and not any(value in event for value in ("error", "exception")):
+            continue
+        if mode == "requests" and event not in {
+            "classification_completed",
+            "batch_item_completed",
+            "manual_evidence_completed",
+        }:
+            continue
+        records.append(record)
+        if len(records) >= limit:
+            break
+
+    rows = []
+    for record in records:
+        cells = [
+            record.get("timestamp", ""),
+            record.get("request_id", ""),
+            record.get("source_ip", ""),
+            record.get("event", ""),
+            json.dumps(record.get("input", {}), ensure_ascii=False),
+            json.dumps(record.get("result", {}), ensure_ascii=False),
+            record.get("error", ""),
+        ]
+        rows.append("<tr>" + "".join(f"<td>{html.escape(str(cell))}</td>" for cell in cells) + "</tr>")
+
+    _audit(request, "admin_audit_viewed", admin_user=admin_user, mode=mode, limit=limit)
+    page = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARIANE audit</title>
+<style>
+body{{font-family:system-ui,sans-serif;margin:24px;background:#f5f7fa;color:#17202a}}
+nav a{{margin-right:12px}} table{{border-collapse:collapse;width:100%;margin-top:18px;background:white}}
+th,td{{border:1px solid #ccd3da;padding:8px;text-align:left;vertical-align:top;font-size:13px}}
+th{{background:#e9eef3;position:sticky;top:0}} td{{max-width:420px;overflow-wrap:anywhere}}
+</style></head><body><h1>ARIANE audit</h1>
+<nav><a href="?mode=all&limit={limit}">All</a><a href="?mode=requests&limit={limit}">Requests</a><a href="?mode=errors&limit={limit}">Errors</a></nav>
+<p>Showing {len(records)} records. Newest records are first.</p>
+<table><thead><tr><th>Time UTC</th><th>Request ID</th><th>Source IP</th><th>Event</th><th>Input</th><th>Result</th><th>Error</th></tr></thead>
+<tbody>{''.join(rows)}</tbody></table></body></html>"""
+    return HTMLResponse(
+        content=page,
+        headers={
+            "Cache-Control": "no-store, max-age=0",
+            "Pragma": "no-cache",
+            "X-Robots-Tag": "noindex, nofollow",
+            "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'",
+        },
+    )
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
