@@ -1,9 +1,0 @@
-gene,category,count,denominator,denominator_label,percent_within_gene,per_1000
-BRCA1,tier1_urgent,65,1625,VUS in gene,4.00,40.00
-BRCA2,tier1_urgent,34,6529,VUS in gene,0.52,5.21
-BRCA1,tier2_high,259,1625,VUS in gene,15.94,159.38
-BRCA2,tier2_high,501,6529,VUS in gene,7.67,76.73
-BRCA1,tier3_medium,431,1625,VUS in gene,26.52,265.23
-BRCA2,tier3_medium,302,6529,VUS in gene,4.63,46.26
-BRCA1,tier4_low,870,1625,VUS in gene,53.54,535.38
-BRCA2,tier4_low,5692,6529,VUS in gene,87.18,871.80

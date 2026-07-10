@@ -1,6 +1,0 @@
-predicted_class,label,count,percent
-1,Benign,802,1.69
-2,Likely Benign,36150,76.03
-3,VUS,8154,17.15
-4,Likely Pathogenic,141,0.30
-5,Pathogenic,2300,4.84
