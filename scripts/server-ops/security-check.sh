@@ -201,6 +201,15 @@ else
     ((WARNINGS++))
 fi
 
+if nginx -T 2>/dev/null | grep -q 'listen 80 default_server' && \
+   nginx -T 2>/dev/null | grep -q 'listen 443 ssl default_server'; then
+    echo -e "   ${GREEN}OK Unknown hostnames are rejected${NC}"
+    ((PASSED++))
+else
+    echo -e "   ${RED}ERROR Unknown hostnames are not rejected${NC}"
+    ((WARNINGS++))
+fi
+
 # 9. Log Monitoring
 echo -e "\n${YELLOW}[9] Log Monitoring${NC}"
 

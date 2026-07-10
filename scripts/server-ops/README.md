@@ -6,12 +6,16 @@ Production scripts for an Ubuntu server with systemd and Nginx.
 
 ```bash
 sudo bash deploy-ariane.sh <git-repository-url>
-sudo bash setup-tls.sh ariane.example.org admin@example.org
+sudo bash setup-tls.sh ariane-app.duckdns.org admin@example.org
 sudo bash setup-backup-cron.sh 03:00
 sudo bash security-check.sh
 ```
 
-`deploy-ariane.sh` binds Uvicorn to `127.0.0.1`, configures Nginx, enables UFW, creates a protected admin token, and installs a hardened systemd service. TLS requires a DNS name that resolves to the server.
+`deploy-ariane.sh` uses `ariane-app.duckdns.org` by default. Set `ARIANE_SERVER_NAME` to override it. The DNS A record must resolve to `195.113.167.59` before running the TLS setup.
+
+The deploy script binds Uvicorn to `127.0.0.1`, configures Nginx, enables UFW, creates a protected admin token, and installs a hardened systemd service.
+
+Nginx serves the application only for `ariane-app.duckdns.org`. Direct IP access and unknown hostnames are rejected on HTTP and HTTPS.
 
 ## Service operations
 
@@ -36,7 +40,7 @@ sudo /usr/local/sbin/ariane-restore --list
 sudo /usr/local/sbin/ariane-restore --data /backup/ariane-full-YYYYMMDD_HHMMSS.tar.gz
 ```
 
-The local `/backup` directory is root-only. Copy backups and checksum files to encrypted storage outside the VM. Test restore procedures regularly.
+The local `/backup` directory is root-only. Off-site backup is optional and is not configured by these scripts. Local backups do not protect against loss of the VM or its disk. Test restore procedures regularly.
 
 ## Configuration
 

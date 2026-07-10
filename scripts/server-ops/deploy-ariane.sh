@@ -33,7 +33,13 @@ fi
 # Configuration
 ARIANE_HOME="/home/ubuntu/ariane"
 ARIANE_USER="ubuntu"
+ARIANE_SERVER_NAME="${ARIANE_SERVER_NAME:-ariane-app.duckdns.org}"
 DEPLOY_LOG="/var/log/ariane-deploy.log"
+
+if ! [[ "$ARIANE_SERVER_NAME" =~ ^[A-Za-z0-9.-]+$ ]] || [[ "$ARIANE_SERVER_NAME" == *..* ]]; then
+    echo "Invalid ARIANE_SERVER_NAME" >&2
+    exit 2
+fi
 
 # Initialize log
 echo "ARIANE Deployment started at $(date)" > "$DEPLOY_LOG"
@@ -140,11 +146,19 @@ echo -e "\n${YELLOW}[7] Configuring Nginx...${NC}"
 cat > /etc/nginx/sites-available/ariane << 'EOF'
 limit_req_zone $binary_remote_addr zone=ariane_api:10m rate=5r/s;
 
+# Reject direct IP access and unknown hostnames.
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-
     server_name _;
+    return 444;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name ARIANE_SERVER_NAME_PLACEHOLDER;
     server_tokens off;
 
     # Limit request size
@@ -192,6 +206,8 @@ server {
     }
 }
 EOF
+
+sed -i "s/ARIANE_SERVER_NAME_PLACEHOLDER/$ARIANE_SERVER_NAME/" /etc/nginx/sites-available/ariane
 
 rm -f /etc/nginx/sites-enabled/default
 ln -sf /etc/nginx/sites-available/ariane /etc/nginx/sites-enabled/ariane
@@ -252,8 +268,8 @@ fi
 # Summary
 echo -e "\n${BLUE}========================================${NC}"
 echo -e "${GREEN}OK Deployment completed successfully!${NC}\n"
-echo -e "Application URL: ${BLUE}http://localhost${NC}"
-echo -e "API URL: ${BLUE}http://localhost/api${NC}"
+echo -e "Application URL: ${BLUE}http://$ARIANE_SERVER_NAME${NC}"
+echo -e "API URL: ${BLUE}http://$ARIANE_SERVER_NAME/api${NC}"
 echo -e "Installation directory: ${BLUE}$ARIANE_HOME${NC}"
 echo -e "Deployment log: ${BLUE}$DEPLOY_LOG${NC}\n"
 echo -e "Useful commands:"
@@ -261,7 +277,7 @@ echo -e "  Status: ${BLUE}systemctl status ariane${NC}"
 echo -e "  Logs: ${BLUE}journalctl -u ariane -f${NC}"
 echo -e "  Restart: ${BLUE}systemctl restart ariane${NC}"
 echo -e "\nNext steps:"
-echo -e "  1. Configure SSL certificate (Let's Encrypt)"
+echo -e "  1. Configure TLS: sudo bash scripts/server-ops/setup-tls.sh $ARIANE_SERVER_NAME <email>"
 echo -e "  2. Set up automated backups"
 echo -e "  3. Install monitoring tools"
 echo -e "  4. Configure security settings"
