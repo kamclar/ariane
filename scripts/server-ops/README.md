@@ -48,7 +48,9 @@ Configure a generated password and open the page over HTTPS:
 sudo bash setup-admin.sh admin
 ```
 
-The script prints the password once. Store it in a password manager. The page is available at `https://ariane-app.duckdns.org/admin/audit` and uses browser Basic Auth. Audit files are stored in `/var/log/ariane/audit.jsonl`, readable only by the service account and administrators, and rotated daily for 30 days.
+The script prints a new password once and keeps it on later runs. Store it in a password manager. Run `sudo bash setup-admin.sh admin --rotate` over SSH to generate a replacement. The page is available at `https://ariane-app.duckdns.org/admin/audit` and uses browser Basic Auth. Audit files are stored in `/var/log/ariane/audit.jsonl`, readable only by the service account and administrators, and rotated daily for 30 days.
+
+The dashboard is read-only. It provides time, text, gene, and event filters; request and error statistics; class counts; common variants; performance data; request details; pagination; CSV and JSON export; login history; and service, certificate, disk, and backup status. It does not provide restart, deploy, restore, cache, or password actions.
 
 ## Backups
 
