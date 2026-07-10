@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, Response
 from pathlib import Path
 from datetime import datetime, timezone
 import json
@@ -32,7 +32,7 @@ from backend.models import (
     AlphaMissenseResult, VusExplanation,
     RnaReviewRecommendation,
     ManualEvidenceRequest, ManualEvidenceResult,
-    ManualCriterionResult,
+    ManualCriterionResult, ClientValidationRequest,
 )
 
 # ── App setup ──────────────────────────────────────────────────────────────
@@ -163,6 +163,22 @@ async def resources():
         "links": RESOURCE_LINKS,
         "splice_ps1_reference_candidates": load_splice_ps1_reference_candidates(),
     }
+
+
+@app.post("/api/audit/client-validation", status_code=204)
+async def client_validation_error(
+    req: ClientValidationRequest,
+    request: Request,
+):
+    _audit(
+        request,
+        "client_validation_error",
+        level="warning",
+        form=req.form,
+        input=req.input,
+        error=req.error,
+    )
+    return Response(status_code=204)
 
 
 @app.post("/api/manual-evidence/evaluate")

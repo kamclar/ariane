@@ -316,6 +316,25 @@ function ariane() {
             URL.revokeObjectURL(url);
         },
 
+        logClientValidation(error, form = "single", input = null) {
+            const submittedInput = input || {
+                gene: this.gene,
+                c_notation: this.c_notation.trim(),
+                p_notation: this.p_notation.trim() || null,
+                dup_type: this.dup_type,
+            };
+            fetch("/api/audit/client-validation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                keepalive: true,
+                body: JSON.stringify({
+                    form,
+                    input: submittedInput,
+                    error,
+                }),
+            }).catch(() => {});
+        },
+
         async classify() {
             this.error = "";
             this.result = null;
@@ -323,10 +342,12 @@ function ariane() {
 
             if (!this.c_notation.trim()) {
                 this.error = "Please enter a c. notation.";
+                this.logClientValidation(this.error);
                 return;
             }
             if (!this.c_notation.trim().startsWith("c.")) {
                 this.error = "Notation must start with 'c.' - e.g. c.4185G>A";
+                this.logClientValidation(this.error);
                 return;
             }
 
@@ -453,6 +474,13 @@ function ariane() {
         // ── Batch: classify all parsed variants ───────────────────────────
         async classifyBatch() {
             this.parseBatch();
+            if (this.batchParseError) {
+                this.logClientValidation(
+                    this.batchParseError,
+                    "batch",
+                    { batch_text: this.batchText.slice(0, 4000) },
+                );
+            }
             if (this.batchParsed.length === 0) return;
 
             this.batchRunning = true;

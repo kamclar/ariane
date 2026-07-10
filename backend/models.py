@@ -2,7 +2,7 @@
 # ARIANE data models
 # ============================================================
 from pydantic import BaseModel, Field, field_validator, model_validator
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Literal
 import re
 
 from backend.modules.hgvs import split_combined_hgvs
@@ -233,3 +233,17 @@ class BatchResponse(BaseModel):
     success_count: int
     error_count: int
     results: List[BatchItemResult]
+
+
+class ClientValidationRequest(BaseModel):
+    form: Literal["single", "batch"]
+    input: Dict[str, Any]
+    error: str = Field(min_length=1, max_length=500)
+
+    @model_validator(mode="after")
+    def limit_input_size(self):
+        import json
+
+        if len(json.dumps(self.input, ensure_ascii=False)) > 5000:
+            raise ValueError("Client validation input is too large")
+        return self
