@@ -1,0 +1,5 @@
+priority_tier,count,median_function_score,mean_function_score,lof_count,int_count,func_count,missing_func_class_count
+tier1_urgent,9,-1.951,-1.893,6,3,0,0
+tier2_high,46,-1.647,-1.595,30,15,1,0
+tier3_medium,365,-1.891,-1.796,303,15,47,0
+tier4_low,253,-0.828,-0.721,14,139,100,0

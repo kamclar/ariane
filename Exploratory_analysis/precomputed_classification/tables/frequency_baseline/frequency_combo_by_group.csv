@@ -1,0 +1,10 @@
+frequency_combo,group,count
+PM2_Supporting,benign_group,33306
+PM2_Supporting,vus,7545
+PM2_Supporting,pathogenic_group,2315
+BS1_Supporting,benign_group,129
+BS1_Strong,benign_group,99
+BA1,benign_group,48
+BS1_Supporting,vus,11
+BS1_Strong,vus,2
+BS1_Supporting,pathogenic_group,1

@@ -1,0 +1,2 @@
+gene,c_notation,p_notation,variant_type,criteria_combo,total_points,predicted_class,spliceai_score,interpretation_bucket
+BRCA2,c.9925G>T,p.(Glu3309Ter),nonsense,BS3+PM2_Supporting+PVS1,5,3,0.01,manual_review_single_pvs1_case

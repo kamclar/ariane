@@ -1,0 +1,5 @@
+variant_type,total_count,benign_count,vus_count,pathogenic_count,pathogenic_fraction,truncation_driver_count,splice_driver_count,functional_pathogenic_driver_count,functional_benign_driver_count
+missense,35241,28762,6376,103,0.0029,0,845,546,1970
+synonymous,9891,8189,1693,9,0.0009,0,215,11,557
+nonsense,2397,1,70,2326,0.9704,2397,146,147,1
+initiation_codon,18,0,15,3,0.1667,0,1,10,0

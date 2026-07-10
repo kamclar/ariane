@@ -1,0 +1,271 @@
+{
+  "version": "ENIGMA_VCEP_v1.2_Appendix_Tables_3_4",
+  "description": "Clinically important functional domains and known pathogenic residues for BRCA1/2",
+  "source": "Appendices_V1_2_2024-11-18.docx, Tables 3 and 4",
+  "domains": {
+    "BRCA1": {
+      "RING": {
+        "range": [
+          2,
+          101
+        ],
+        "pathogenic_residues": [
+          {
+            "aa": "Met18Thr",
+            "pos": 18,
+            "c": "c.53T>C"
+          },
+          {
+            "aa": "Leu22Ser",
+            "pos": 22,
+            "c": "c.65T>C"
+          },
+          {
+            "aa": "Thr37Lys",
+            "pos": 37,
+            "c": "c.110C>A"
+          },
+          {
+            "aa": "Cys39Arg",
+            "pos": 39,
+            "c": "c.115T>C"
+          },
+          {
+            "aa": "Cys39Tyr",
+            "pos": 39,
+            "c": "c.116G>A"
+          },
+          {
+            "aa": "His41Arg",
+            "pos": 41,
+            "c": "c.122A>G"
+          },
+          {
+            "aa": "Cys44Ser",
+            "pos": 44,
+            "c": "c.130T>A"
+          },
+          {
+            "aa": "Cys44Tyr",
+            "pos": 44,
+            "c": "c.131G>A"
+          },
+          {
+            "aa": "Cys44Phe",
+            "pos": 44,
+            "c": "c.131G>T"
+          },
+          {
+            "aa": "Cys47Tyr",
+            "pos": 47,
+            "c": "c.140G>A"
+          },
+          {
+            "aa": "Cys61Gly",
+            "pos": 61,
+            "c": "c.181T>G"
+          },
+          {
+            "aa": "Cys61Ser",
+            "pos": 61,
+            "c": "c.181T>A"
+          },
+          {
+            "aa": "Cys64Tyr",
+            "pos": 64,
+            "c": "c.191G>A"
+          }
+        ]
+      },
+      "coiled_coil": {
+        "range": [
+          1391,
+          1424
+        ],
+        "pathogenic_residues": [],
+        "note": "No formally classified pathogenic missense, but M1411T and L1407P show partial functional impact"
+      },
+      "BRCT": {
+        "range": [
+          1650,
+          1857
+        ],
+        "pathogenic_residues": [
+          {
+            "aa": "Thr1685Ala",
+            "pos": 1685,
+            "c": "c.5053A>G"
+          },
+          {
+            "aa": "Thr1685Ile",
+            "pos": 1685,
+            "c": "c.5054C>T"
+          },
+          {
+            "aa": "Cys1697Arg",
+            "pos": 1697,
+            "c": "c.5089T>C"
+          },
+          {
+            "aa": "Arg1699Trp",
+            "pos": 1699,
+            "c": "c.5095C>T"
+          },
+          {
+            "aa": "Gly1706Glu",
+            "pos": 1706,
+            "c": "c.5117G>A"
+          },
+          {
+            "aa": "Ser1715Arg",
+            "pos": 1715,
+            "c": "c.5143A>C"
+          },
+          {
+            "aa": "Ser1715Asn",
+            "pos": 1715,
+            "c": "c.5144G>A"
+          },
+          {
+            "aa": "Val1736Ala",
+            "pos": 1736,
+            "c": "c.5207T>C"
+          },
+          {
+            "aa": "Val1736Gly",
+            "pos": 1736,
+            "c": "c.5207T>G"
+          },
+          {
+            "aa": "Gly1738Arg",
+            "pos": 1738,
+            "c": "c.5212G>A"
+          },
+          {
+            "aa": "Gly1738Glu",
+            "pos": 1738,
+            "c": "c.5213G>A"
+          },
+          {
+            "aa": "Asp1739Val",
+            "pos": 1739,
+            "c": "c.5216A>T"
+          },
+          {
+            "aa": "Gly1748Asp",
+            "pos": 1748,
+            "c": "c.5243G>A"
+          },
+          {
+            "aa": "Leu1764Pro",
+            "pos": 1764,
+            "c": "c.5291T>C"
+          },
+          {
+            "aa": "Ile1766Ser",
+            "pos": 1766,
+            "c": "c.5297T>G"
+          },
+          {
+            "aa": "Gly1770Val",
+            "pos": 1770,
+            "c": "c.5309G>T"
+          },
+          {
+            "aa": "Met1775Lys",
+            "pos": 1775,
+            "c": "c.5324T>A"
+          },
+          {
+            "aa": "Met1775Arg",
+            "pos": 1775,
+            "c": "c.5324T>G"
+          },
+          {
+            "aa": "Leu1786Pro",
+            "pos": 1786,
+            "c": "c.5357T>C"
+          },
+          {
+            "aa": "Trp1837Arg",
+            "pos": 1837,
+            "c": "c.5509T>C"
+          },
+          {
+            "aa": "Val1838Glu",
+            "pos": 1838,
+            "c": "c.5513T>A"
+          },
+          {
+            "aa": "Leu1839Ser",
+            "pos": 1839,
+            "c": "c.5516T>C"
+          },
+          {
+            "aa": "Tyr1853Cys",
+            "pos": 1853,
+            "c": "c.5558A>G"
+          }
+        ]
+      }
+    },
+    "BRCA2": {
+      "PALB2_binding": {
+        "range": [
+          10,
+          40
+        ],
+        "pathogenic_residues": [],
+        "note": "Deletion of complete exon 3 (AA23-105) shown pathogenic by co-segregation"
+      },
+      "DBD": {
+        "range": [
+          2481,
+          3186
+        ],
+        "pathogenic_residues": [
+          {
+            "aa": "Thr2607Pro",
+            "pos": 2607,
+            "c": "c.7819A>C"
+          },
+          {
+            "aa": "Trp2626Cys",
+            "pos": 2626,
+            "c": "c.7878G>C"
+          },
+          {
+            "aa": "Ile2627Phe",
+            "pos": 2627,
+            "c": "c.7879A>T"
+          },
+          {
+            "aa": "Glu2663Val",
+            "pos": 2663,
+            "c": "c.7988A>T"
+          },
+          {
+            "aa": "Asp2723His",
+            "pos": 2723,
+            "c": "c.8167G>C"
+          },
+          {
+            "aa": "Gly2748Asp",
+            "pos": 2748,
+            "c": "c.8243G>A"
+          },
+          {
+            "aa": "Arg3052Trp",
+            "pos": 3052,
+            "c": "c.9154C>T"
+          },
+          {
+            "aa": "Asn3124Ile",
+            "pos": 3124,
+            "c": "c.9371A>T"
+          }
+        ]
+      }
+    }
+  }
+}

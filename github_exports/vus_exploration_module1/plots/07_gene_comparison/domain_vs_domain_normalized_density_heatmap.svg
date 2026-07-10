@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1151" height="481" viewBox="0 0 1151 481">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1151" height="481" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1 domains vs BRCA2 domains, normalized density</text>
+<text x="28" y="56" class="small">Cells show generated Module 1 signal counts per 100 amino acids in each mapped domain or broad region.</text>
+<text x="28" y="74" class="small">This complements within-domain percentages and reduces the effect of different domain lengths.</text>
+<text x="274" y="102" class="small">benign 1/2</text>
+<text x="366" y="102" class="small">VUS 3</text>
+<text x="458" y="102" class="small">pathogenic 4/5</text>
+<text x="550" y="102" class="small">SpAI &gt;=0.20</text>
+<text x="642" y="102" class="small">PVS1</text>
+<text x="734" y="102" class="small">PP3</text>
+<text x="826" y="102" class="small">PS3</text>
+<text x="918" y="102" class="small">BS3</text>
+<text x="20" y="136" class="small">BRCA1 RING zinc-binding/E3 ligase</text>
+<rect x="270" y="116" width="92" height="30" fill="#3d965f" class="tile"/>
+<text x="275" y="135" class="small">576</text>
+<rect x="362" y="116" width="92" height="30" fill="#7eb996" class="tile"/>
+<text x="367" y="135" class="small">244</text>
+<rect x="454" y="116" width="92" height="30" fill="#b2d5c2" class="tile"/>
+<text x="459" y="135" class="small">80</text>
+<rect x="546" y="116" width="92" height="30" fill="#96c6aa" class="tile"/>
+<text x="551" y="135" class="small">157</text>
+<rect x="638" y="116" width="92" height="30" fill="#c1ddcf" class="tile"/>
+<text x="643" y="135" class="small">48</text>
+<rect x="730" y="116" width="92" height="30" fill="#9dc9b0" class="tile"/>
+<text x="735" y="135" class="small">137</text>
+<rect x="822" y="116" width="92" height="30" fill="#90c2a5" class="tile"/>
+<text x="827" y="135" class="small">177</text>
+<rect x="914" y="116" width="92" height="30" fill="#39935b" class="tile"/>
+<text x="919" y="135" class="small">605</text>
+<text x="20" y="166" class="small">BRCA1 coiled-coil PALB2 interaction</text>
+<rect x="270" y="146" width="92" height="30" fill="#b9d8c7" class="tile"/>
+<text x="275" y="165" class="small">65</text>
+<rect x="362" y="146" width="92" height="30" fill="#1e8545" class="tile"/>
+<text x="367" y="165" class="small">785</text>
+<rect x="454" y="146" width="92" height="30" fill="#c0dcce" class="tile"/>
+<text x="459" y="165" class="small">50</text>
+<rect x="546" y="146" width="92" height="30" fill="#c2ddcf" class="tile"/>
+<text x="551" y="165" class="small">47</text>
+<rect x="638" y="146" width="92" height="30" fill="#c2ddcf" class="tile"/>
+<text x="643" y="165" class="small">47</text>
+<rect x="730" y="146" width="92" height="30" fill="#c4ded1" class="tile"/>
+<text x="735" y="165" class="small">44</text>
+<rect x="822" y="146" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="914" y="146" width="92" height="30" fill="#c5dfd2" class="tile"/>
+<text x="919" y="165" class="small">41</text>
+<text x="20" y="196" class="small">BRCA1 BRCT phosphopeptide-binding</text>
+<rect x="270" y="176" width="92" height="30" fill="#3f9761" class="tile"/>
+<text x="275" y="195" class="small">566</text>
+<rect x="362" y="176" width="92" height="30" fill="#79b691" class="tile"/>
+<text x="367" y="195" class="small">266</text>
+<rect x="454" y="176" width="92" height="30" fill="#b8d8c6" class="tile"/>
+<text x="459" y="195" class="small">67</text>
+<rect x="546" y="176" width="92" height="30" fill="#c4ded1" class="tile"/>
+<text x="551" y="195" class="small">44</text>
+<rect x="638" y="176" width="92" height="30" fill="#c6dfd2" class="tile"/>
+<text x="643" y="195" class="small">40</text>
+<rect x="730" y="176" width="92" height="30" fill="#c7e0d3" class="tile"/>
+<text x="735" y="195" class="small">39</text>
+<rect x="822" y="176" width="92" height="30" fill="#90c2a5" class="tile"/>
+<text x="827" y="195" class="small">179</text>
+<rect x="914" y="176" width="92" height="30" fill="#39935b" class="tile"/>
+<text x="919" y="195" class="small">606</text>
+<text x="20" y="226" class="small">BRCA1 outside mapped domains</text>
+<rect x="270" y="206" width="92" height="30" fill="#1a8241" class="tile"/>
+<text x="275" y="225" class="small">821</text>
+<rect x="362" y="206" width="92" height="30" fill="#c8e1d4" class="tile"/>
+<text x="367" y="225" class="small">37</text>
+<rect x="454" y="206" width="92" height="30" fill="#c5dfd2" class="tile"/>
+<text x="459" y="225" class="small">42</text>
+<rect x="546" y="206" width="92" height="30" fill="#d5e8df" class="tile"/>
+<text x="551" y="225" class="small">19</text>
+<rect x="638" y="206" width="92" height="30" fill="#c5dfd2" class="tile"/>
+<text x="643" y="225" class="small">42</text>
+<rect x="730" y="206" width="92" height="30" fill="#d8e9e2" class="tile"/>
+<text x="735" y="225" class="small">16</text>
+<rect x="822" y="206" width="92" height="30" fill="#eef5f5" class="tile"/>
+<rect x="914" y="206" width="92" height="30" fill="#d1e5dc" class="tile"/>
+<text x="919" y="225" class="small">25</text>
+<text x="20" y="256" class="small">BRCA2 PALB2 binding N-terminal</text>
+<rect x="270" y="236" width="92" height="30" fill="#d0e5db" class="tile"/>
+<text x="275" y="255" class="small">26</text>
+<rect x="362" y="236" width="92" height="30" fill="#188240" class="tile"/>
+<text x="367" y="255" class="small">829</text>
+<rect x="454" y="236" width="92" height="30" fill="#c3ded0" class="tile"/>
+<text x="459" y="255" class="small">45</text>
+<rect x="546" y="236" width="92" height="30" fill="#bcdaca" class="tile"/>
+<text x="551" y="255" class="small">58</text>
+<rect x="638" y="236" width="92" height="30" fill="#c3ded0" class="tile"/>
+<text x="643" y="255" class="small">45</text>
+<rect x="730" y="236" width="92" height="30" fill="#c1ddcf" class="tile"/>
+<text x="735" y="255" class="small">48</text>
+<rect x="822" y="236" width="92" height="30" fill="#dfede8" class="tile"/>
+<text x="827" y="255" class="small">10</text>
+<rect x="914" y="236" width="92" height="30" fill="#d8e9e2" class="tile"/>
+<text x="919" y="255" class="small">16</text>
+<text x="20" y="286" class="small">BRCA2 BRC repeats / RAD51-binding</text>
+<rect x="270" y="266" width="92" height="30" fill="#15803d" class="tile"/>
+<text x="275" y="285" class="small">855</text>
+<rect x="362" y="266" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="454" y="266" width="92" height="30" fill="#c3ded0" class="tile"/>
+<text x="459" y="285" class="small">45</text>
+<rect x="546" y="266" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="638" y="266" width="92" height="30" fill="#c3ded0" class="tile"/>
+<text x="643" y="285" class="small">45</text>
+<rect x="730" y="266" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="822" y="266" width="92" height="30" fill="#f2f7f8" class="tile"/>
+<rect x="914" y="266" width="92" height="30" fill="#eaf3f1" class="tile"/>
+<text x="20" y="316" class="small">BRCA2 DNA-binding domain / helical-OB-DS</text>
+<rect x="270" y="296" width="92" height="30" fill="#c8e1d5" class="tile"/>
+<text x="275" y="315" class="small">36</text>
+<rect x="362" y="296" width="92" height="30" fill="#1b8342" class="tile"/>
+<text x="367" y="315" class="small">812</text>
+<rect x="454" y="296" width="92" height="30" fill="#c0dccd" class="tile"/>
+<text x="459" y="315" class="small">51</text>
+<rect x="546" y="296" width="92" height="30" fill="#bfdccc" class="tile"/>
+<text x="551" y="315" class="small">53</text>
+<rect x="638" y="296" width="92" height="30" fill="#c1ddce" class="tile"/>
+<text x="643" y="315" class="small">49</text>
+<rect x="730" y="296" width="92" height="30" fill="#c2ddcf" class="tile"/>
+<text x="735" y="315" class="small">47</text>
+<rect x="822" y="296" width="92" height="30" fill="#d7e9e1" class="tile"/>
+<text x="827" y="315" class="small">17</text>
+<rect x="914" y="296" width="92" height="30" fill="#d1e5dc" class="tile"/>
+<text x="919" y="315" class="small">24</text>
+<text x="20" y="346" class="small">BRCA2 C-terminal RAD51/NLS context</text>
+<rect x="270" y="326" width="92" height="30" fill="#1e8544" class="tile"/>
+<text x="275" y="345" class="small">791</text>
+<rect x="362" y="326" width="92" height="30" fill="#b0d4c0" class="tile"/>
+<text x="367" y="345" class="small">85</text>
+<rect x="454" y="326" width="92" height="30" fill="#d1e5dc" class="tile"/>
+<text x="459" y="345" class="small">25</text>
+<rect x="546" y="326" width="92" height="30" fill="#cbe2d7" class="tile"/>
+<text x="551" y="345" class="small">32</text>
+<rect x="638" y="326" width="92" height="30" fill="#d0e5db" class="tile"/>
+<text x="643" y="345" class="small">25</text>
+<rect x="730" y="326" width="92" height="30" fill="#cde3d8" class="tile"/>
+<text x="735" y="345" class="small">30</text>
+<rect x="822" y="326" width="92" height="30" fill="#f2f7f8" class="tile"/>
+<rect x="914" y="326" width="92" height="30" fill="#e3efeb" class="tile"/>
+<text x="919" y="345" class="small">6</text>
+<text x="20" y="376" class="small">BRCA2 outside mapped domains</text>
+<rect x="270" y="356" width="92" height="30" fill="#198240" class="tile"/>
+<text x="275" y="375" class="small">828</text>
+<rect x="362" y="356" width="92" height="30" fill="#d1e5db" class="tile"/>
+<text x="367" y="375" class="small">25</text>
+<rect x="454" y="356" width="92" height="30" fill="#c2ddcf" class="tile"/>
+<text x="459" y="375" class="small">47</text>
+<rect x="546" y="356" width="92" height="30" fill="#dbebe4" class="tile"/>
+<text x="551" y="375" class="small">13</text>
+<rect x="638" y="356" width="92" height="30" fill="#c2ddcf" class="tile"/>
+<text x="643" y="375" class="small">47</text>
+<rect x="730" y="356" width="92" height="30" fill="#ddece6" class="tile"/>
+<text x="735" y="375" class="small">12</text>
+<rect x="822" y="356" width="92" height="30" fill="#f2f7f8" class="tile"/>
+<rect x="914" y="356" width="92" height="30" fill="#e8f2f0" class="tile"/>
+<text x="1038" y="106" class="legend-title">per 100 aa</text>
+<rect x="1038" y="116" width="18" height="18" fill="#15803d" class="tile"/>
+<rect x="1038" y="134" width="18" height="18" fill="#2d8d51" class="tile"/>
+<rect x="1038" y="152" width="18" height="18" fill="#489b68" class="tile"/>
+<rect x="1038" y="170" width="18" height="18" fill="#68ad83" class="tile"/>
+<rect x="1038" y="188" width="18" height="18" fill="#92c3a7" class="tile"/>
+<rect x="1038" y="206" width="18" height="18" fill="#f7fafc" class="tile"/>
+<text x="1062" y="128" class="small">855</text>
+<text x="1062" y="218" class="small">0</text>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="276" viewBox="0 0 980 276">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="980" height="276" fill="#ffffff"/>
+<text x="28" y="30" class="title">Grouped class patterns per codon</text>
+<text x="28" y="67" class="small">benign_only</text>
+<rect x="250" y="50" width="600.0" height="22" fill="#16a34a" opacity="0.85"/>
+<text x="858.0" y="67" class="small">2401</text>
+<text x="28" y="101" class="small">benign_and_pathogenic</text>
+<rect x="250" y="84" width="348.4" height="22" fill="#b91c1c" opacity="0.85"/>
+<text x="606.4" y="101" class="small">1394</text>
+<text x="28" y="135" class="small">benign_and_vus</text>
+<rect x="250" y="118" width="145.2" height="22" fill="#2563eb" opacity="0.85"/>
+<text x="403.2" y="135" class="small">581</text>
+<text x="28" y="169" class="small">all_three_groups</text>
+<rect x="250" y="152" width="85.7" height="22" fill="#7c3aed" opacity="0.85"/>
+<text x="343.7" y="169" class="small">343</text>
+<text x="28" y="203" class="small">vus_only</text>
+<rect x="250" y="186" width="79.2" height="22" fill="#2563eb" opacity="0.85"/>
+<text x="337.2" y="203" class="small">317</text>
+<text x="28" y="237" class="small">pathogenic_and_vus</text>
+<rect x="250" y="220" width="61.7" height="22" fill="#b91c1c" opacity="0.85"/>
+<text x="319.7" y="237" class="small">247</text>
+</svg>

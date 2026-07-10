@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="992" height="460" viewBox="0 0 992 460">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="992" height="460" fill="#ffffff"/>
+<text x="30" y="28" class="title">SpliceAI high-rate by gene and group</text>
+<text x="30" y="52" class="small">Cells show percent of variants with SpliceAI &gt;=0.20 within each gene, group, and boundary-distance bin.</text>
+<text x="190" y="74" class="small">Gene and grouped class</text>
+<rect x="188" y="108" width="674" height="274" class="panel"/>
+<text x="196" y="94" class="small">BRCA1 benign</text>
+<text x="308" y="94" class="small">BRCA1 vus</text>
+<text x="420" y="94" class="small">BRCA1 pathogenic</text>
+<text x="532" y="94" class="small">BRCA2 benign</text>
+<text x="644" y="94" class="small">BRCA2 vus</text>
+<text x="756" y="94" class="small">BRCA2 pathogenic</text>
+<text x="20" y="132" class="small">0</text>
+<rect x="190" y="110" width="112" height="34" fill="#abc4f6" class="tile"/>
+<text x="196" y="131" class="small">10.87%</text>
+<rect x="302" y="110" width="112" height="34" fill="#497dee" class="tile"/>
+<text x="308" y="131" class="small">57.38%</text>
+<rect x="414" y="110" width="112" height="34" fill="#2563eb" class="tile"/>
+<text x="420" y="131" class="small">84.00%</text>
+<rect x="526" y="110" width="112" height="34" fill="#d1dff9" class="tile"/>
+<text x="532" y="131" class="small">2.70%</text>
+<rect x="638" y="110" width="112" height="34" fill="#477bee" class="tile"/>
+<text x="644" y="131" class="small">59.09%</text>
+<rect x="750" y="110" width="112" height="34" fill="#2d69ec" class="tile"/>
+<text x="756" y="131" class="small">77.78%</text>
+<text x="20" y="166" class="small">1-2</text>
+<rect x="190" y="144" width="112" height="34" fill="#c2d4f8" class="tile"/>
+<text x="196" y="165" class="small">5.41%</text>
+<rect x="302" y="144" width="112" height="34" fill="#5c8aef" class="tile"/>
+<text x="308" y="165" class="small">45.88%</text>
+<rect x="414" y="144" width="112" height="34" fill="#5284ef" class="tile"/>
+<text x="420" y="165" class="small">51.61%</text>
+<rect x="526" y="144" width="112" height="34" fill="#e2ebfa" class="tile"/>
+<text x="532" y="165" class="small">0.88%</text>
+<rect x="638" y="144" width="112" height="34" fill="#80a4f2" class="tile"/>
+<text x="644" y="165" class="small">27.06%</text>
+<rect x="750" y="144" width="112" height="34" fill="#7fa3f2" class="tile"/>
+<text x="756" y="165" class="small">27.59%</text>
+<text x="20" y="200" class="small">3-5</text>
+<rect x="190" y="178" width="112" height="34" fill="#dbe6fa" class="tile"/>
+<text x="196" y="199" class="small">1.49%</text>
+<rect x="302" y="178" width="112" height="34" fill="#8cadf3" class="tile"/>
+<text x="308" y="199" class="small">21.82%</text>
+<rect x="414" y="178" width="112" height="34" fill="#6f98f1" class="tile"/>
+<text x="420" y="199" class="small">35.29%</text>
+<rect x="526" y="178" width="112" height="34" fill="#f7fafc" class="tile"/>
+<rect x="638" y="178" width="112" height="34" fill="#a4bef5" class="tile"/>
+<text x="644" y="199" class="small">13.22%</text>
+<rect x="750" y="178" width="112" height="34" fill="#b3c9f7" class="tile"/>
+<text x="756" y="199" class="small">8.70%</text>
+<text x="20" y="234" class="small">6-10</text>
+<rect x="190" y="212" width="112" height="34" fill="#d0def9" class="tile"/>
+<text x="196" y="233" class="small">2.90%</text>
+<rect x="302" y="212" width="112" height="34" fill="#9fbbf5" class="tile"/>
+<text x="308" y="233" class="small">14.69%</text>
+<rect x="414" y="212" width="112" height="34" fill="#89abf3" class="tile"/>
+<text x="420" y="233" class="small">22.86%</text>
+<rect x="526" y="212" width="112" height="34" fill="#f7fafc" class="tile"/>
+<rect x="638" y="212" width="112" height="34" fill="#c6d7f8" class="tile"/>
+<text x="644" y="233" class="small">4.64%</text>
+<rect x="750" y="212" width="112" height="34" fill="#b4caf7" class="tile"/>
+<text x="756" y="233" class="small">8.57%</text>
+<text x="20" y="268" class="small">11-20</text>
+<rect x="190" y="246" width="112" height="34" fill="#cbdaf8" class="tile"/>
+<text x="196" y="267" class="small">3.70%</text>
+<rect x="302" y="246" width="112" height="34" fill="#92b1f4" class="tile"/>
+<text x="308" y="267" class="small">19.44%</text>
+<rect x="414" y="246" width="112" height="34" fill="#7fa4f2" class="tile"/>
+<text x="420" y="267" class="small">27.50%</text>
+<rect x="526" y="246" width="112" height="34" fill="#ebf2fb" class="tile"/>
+<text x="532" y="267" class="small">0.26%</text>
+<rect x="638" y="246" width="112" height="34" fill="#b9cdf7" class="tile"/>
+<text x="644" y="267" class="small">7.34%</text>
+<rect x="750" y="246" width="112" height="34" fill="#9fbbf5" class="tile"/>
+<text x="756" y="267" class="small">14.81%</text>
+<text x="20" y="302" class="small">21-50</text>
+<rect x="190" y="280" width="112" height="34" fill="#d0def9" class="tile"/>
+<text x="196" y="301" class="small">2.86%</text>
+<rect x="302" y="280" width="112" height="34" fill="#b3c9f7" class="tile"/>
+<text x="308" y="301" class="small">8.78%</text>
+<rect x="414" y="280" width="112" height="34" fill="#749cf1" class="tile"/>
+<text x="420" y="301" class="small">32.65%</text>
+<rect x="526" y="280" width="112" height="34" fill="#f7fafc" class="tile"/>
+<rect x="638" y="280" width="112" height="34" fill="#bacef7" class="tile"/>
+<text x="644" y="301" class="small">7.12%</text>
+<rect x="750" y="280" width="112" height="34" fill="#a2bdf5" class="tile"/>
+<text x="756" y="301" class="small">13.68%</text>
+<text x="20" y="336" class="small">51-100</text>
+<rect x="190" y="314" width="112" height="34" fill="#ebf2fb" class="tile"/>
+<text x="196" y="335" class="small">0.26%</text>
+<rect x="302" y="314" width="112" height="34" fill="#b8cdf7" class="tile"/>
+<text x="308" y="335" class="small">7.48%</text>
+<rect x="414" y="314" width="112" height="34" fill="#cedcf9" class="tile"/>
+<text x="420" y="335" class="small">3.28%</text>
+<rect x="526" y="314" width="112" height="34" fill="#f1f6fc" class="tile"/>
+<text x="532" y="335" class="small">0.06%</text>
+<rect x="638" y="314" width="112" height="34" fill="#bbcff7" class="tile"/>
+<text x="644" y="335" class="small">6.82%</text>
+<rect x="750" y="314" width="112" height="34" fill="#b4caf7" class="tile"/>
+<text x="756" y="335" class="small">8.47%</text>
+<text x="20" y="370" class="small">&gt;100</text>
+<rect x="190" y="348" width="112" height="34" fill="#f7fafc" class="tile"/>
+<rect x="302" y="348" width="112" height="34" fill="#6f98f1" class="tile"/>
+<text x="308" y="369" class="small">35.12%</text>
+<rect x="414" y="348" width="112" height="34" fill="#dbe6fa" class="tile"/>
+<text x="420" y="369" class="small">1.46%</text>
+<rect x="526" y="348" width="112" height="34" fill="#f7fafc" class="tile"/>
+<rect x="638" y="348" width="112" height="34" fill="#b5cbf7" class="tile"/>
+<text x="644" y="369" class="small">8.19%</text>
+<rect x="750" y="348" width="112" height="34" fill="#e8effb" class="tile"/>
+<text x="756" y="369" class="small">0.41%</text>
+<text x="896" y="104" class="legend-title">percent</text>
+<rect x="896" y="114" width="18" height="18" fill="#2563eb" class="tile"/>
+<rect x="896" y="132" width="18" height="18" fill="#3b73ed" class="tile"/>
+<rect x="896" y="150" width="18" height="18" fill="#5485ef" class="tile"/>
+<rect x="896" y="168" width="18" height="18" fill="#729af1" class="tile"/>
+<rect x="896" y="186" width="18" height="18" fill="#99b6f4" class="tile"/>
+<rect x="896" y="204" width="18" height="18" fill="#f7fafc" class="tile"/>
+<text x="922" y="126" class="small">84.0%</text>
+<text x="922" y="216" class="small">0</text>
+</svg>

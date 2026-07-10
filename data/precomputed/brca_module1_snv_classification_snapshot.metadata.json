@@ -1,0 +1,129 @@
+{
+  "dataset": "BRCA1/BRCA2 coding SNV ARIANE Module 1 classification snapshot",
+  "created": "2026-06-19",
+  "status": "snapshot_not_authoritative",
+  "application": "ARIANE",
+  "application_version": "1.8.0",
+  "scope": "BRCA1/BRCA2 coding SNVs from variant_space_scan manifest",
+  "input_csv": "F:\\UOCHB\\Enigma\\ARIANE_app\\ariane\\variant_space_scan\\outputs\\brca_module1_full_snv_classification.csv",
+  "input_csv_sha256": "DFB27CB799023D337BEF12A7B24F9A702531EE8AABF451625A2D36E17A70A2F7",
+  "source_summary": "F:\\UOCHB\\Enigma\\ARIANE_app\\ariane\\variant_space_scan\\outputs\\brca_module1_full_snv_classification.summary.json",
+  "source_summary_sha256": "A3DC5BC8B51684C3B844F399901524A21018805C645A053B1A3DB874F9ADA194",
+  "index": "F:\\UOCHB\\Enigma\\ARIANE_app\\ariane\\data\\precomputed\\brca_module1_snv_classification_snapshot.index.json",
+  "index_sha256": "667DB8EDF680A54B96E53A5F76A52BC0BF78B7F5E448A03648B34048E4F93CA9",
+  "n_records": 47547,
+  "duplicate_keys_count": 0,
+  "duplicate_keys_first_20": [],
+  "classes": {
+    "3": 8154,
+    "5": 2300,
+    "2": 36150,
+    "1": 802,
+    "4": 141
+  },
+  "variant_types": {
+    "initiation_codon": 18,
+    "missense": 35241,
+    "synonymous": 9891,
+    "nonsense": 2397
+  },
+  "criteria": {
+    "PM2_Supporting": 43166,
+    "PS3": 699,
+    "PP4": 58,
+    "BS3": 2528,
+    "PM5_PTC": 2241,
+    "PVS1": 2327,
+    "BP5": 514,
+    "BS1_Supporting": 141,
+    "BS1_Strong": 101,
+    "PP3": 1060,
+    "BP4": 1404,
+    "BP7": 1404,
+    "BA1": 48,
+    "PS1": 7,
+    "BP1": 34855
+  },
+  "with_spliceai_score": 47547,
+  "coordinate_status": {
+    "ok": 47547
+  },
+  "source_summary_counts": {
+    "n_variants": 47547,
+    "classes": {
+      "3": 8154,
+      "5": 2300,
+      "2": 36150,
+      "1": 802,
+      "4": 141
+    },
+    "variant_types": {
+      "initiation_codon": 18,
+      "missense": 35241,
+      "synonymous": 9891,
+      "nonsense": 2397
+    },
+    "criteria": {
+      "PM2_Supporting": 43166,
+      "PS3": 699,
+      "PP4": 58,
+      "BS3": 2528,
+      "PM5_PTC": 2241,
+      "PVS1": 2327,
+      "BP5": 514,
+      "BS1_Supporting": 141,
+      "BS1_Strong": 101,
+      "PP3": 1060,
+      "BP4": 1404,
+      "BP7": 1404,
+      "BA1": 48,
+      "PS1": 7,
+      "BP1": 34855
+    },
+    "with_spliceai_score": 47547,
+    "coordinate_status": {
+      "ok": 47547
+    },
+    "gnomad_status": {
+      "status=absent_v2_only": 43641,
+      "status=found": 3906
+    },
+    "output": "variant_space_scan\\outputs\\brca_module1_full_snv_classification.csv"
+  },
+  "dependencies": {
+    "spliceai_cache": {
+      "dataset": "BRCA1/BRCA2 coding SNV reference-transcript SpliceAI cache",
+      "created": "2026-06-18",
+      "report": "variant_space_scan/docs/final_spliceai_precompute_report.md",
+      "source_cache": "variant_space_scan/data/spliceai_cache.json",
+      "application_cache": "data/spliceai/spliceai_brca_snv_reference_cache.json",
+      "sha256": "F897EF687924DD031F665CFBBEC12FA7A1B4AF0169C71F0744ED87D10B684C60",
+      "manifest_variants": 47547,
+      "manifest_spliceai_ok": 47547,
+      "cache_entries": 47571,
+      "transcript_policy": "reference_transcript",
+      "reference_transcripts": {
+        "BRCA1": {
+          "ensembl": "ENST00000357654.9",
+          "refseq": "NM_007294.4"
+        },
+        "BRCA2": {
+          "ensembl": "ENST00000380152.8",
+          "refseq": "NM_000059.4"
+        }
+      },
+      "validation_summary": {
+        "broad_api_comparisons_interpreted_as_matched": 240,
+        "numeric_mismatches_among_successful_broad_api_responses": 0,
+        "note": "The initial 100_slow JSON counted 4 public API failures as mismatches; all four matched after manual retry."
+      },
+      "maintenance": {
+        "recommendation": "Periodically sample this cache against the public Broad SpliceAI API to detect model or annotation changes.",
+        "suggested_interval": "Quarterly or before clinical release updates"
+      }
+    },
+    "classification_overlay_report": "variant_space_scan/docs/full_snv_classification_overlay_report.md",
+    "spliceai_precompute_report": "variant_space_scan/docs/final_spliceai_precompute_report.md"
+  },
+  "intended_use": "Fast lookup and landscape analysis snapshot. Do not use as the sole authoritative classification without checking that rule and data versions match."
+}

@@ -1,0 +1,5 @@
+gene,gnomad_status,count,percent_within_gene,per_1000_gene_variants
+BRCA1,absent_v2_only,15462,92.17,921.67
+BRCA1,found,1314,7.83,78.33
+BRCA2,absent_v2_only,28179,91.58,915.76
+BRCA2,found,2592,8.42,84.24

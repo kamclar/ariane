@@ -1,0 +1,244 @@
+conflict_reasons,gene,c_notation,p_notation,cds_pos,cds_exon,boundary_distance,variant_type,spliceai_score,criteria,total_points,predicted_class,predicted_label
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.192T>C,p.(Cys64=),192,3,20,synonymous,0.870,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.193A>C,p.(Lys65Gln),193,3,19,missense,0.870,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.195G>C,p.(Lys65Asn),195,3,17,missense,0.870,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.195G>A,p.(Lys65=),195,3,17,synonymous,0.860,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.195G>T,p.(Lys65Asn),195,3,17,missense,0.860,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.194A>G,p.(Lys65Arg),194,3,18,missense,0.840,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.194A>T,p.(Lys65Met),194,3,18,missense,0.800,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.162G>T,p.(Gln54His),162,3,27,missense,0.700,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.187T>G,p.(Leu63Val),187,3,25,missense,0.700,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5270A>T,p.(Asp1757Val),5270,18,7,missense,0.690,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.194A>C,p.(Lys65Thr),194,3,18,missense,0.670,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.256C>G,p.(Leu86Val),256,4,43,missense,0.670,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.84G>A,p.(Leu28=),84,2,3,synonymous,0.650,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.165G>T,p.(Lys55Asn),165,3,30,missense,0.550,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.231G>T,p.(Thr77=),231,4,18,synonymous,0.540,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.4931A>T,p.(Glu1644Val),4931,14,55,missense,0.530,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.147G>T,p.(Leu49=),147,3,12,synonymous,0.510,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA2,c.7447A>G,p.(Ser2483Gly),7447,14,11,missense,0.510,BS1_Supporting:Supporting:-1;BS3:Strong:-4;PP3:Supporting:1,-4,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.162G>A,p.(Gln54=),162,3,27,synonymous,0.490,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.193A>G,p.(Lys65Glu),193,3,19,missense,0.490,BS3:Strong:-4;PP3:Supporting:1,-3,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.250G>A,p.(Glu84Lys),250,4,37,missense,0.490,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.226A>G,p.(Ser76Gly),226,4,13,missense,0.460,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.4899C>T,p.(Ser1633=),4899,14,87,synonymous,0.450,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.254A>G,p.(Glu85Gly),254,4,41,missense,0.440,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.4893T>G,p.(Ser1631Arg),4893,14,93,missense,0.420,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.4947A>T,p.(Arg1649Ser),4947,14,39,missense,0.410,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.50C>G,p.(Ala17Gly),50,1,30,missense,0.380,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.147G>A,p.(Leu49=),147,3,12,synonymous,0.380,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.165G>A,p.(Lys55=),165,3,30,synonymous,0.380,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5042C>G,p.(Thr1681Ser),5042,15,32,missense,0.380,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.254A>T,p.(Glu85Val),254,4,41,missense,0.370,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.252A>T,p.(Glu84Asp),252,4,39,missense,0.360,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.264A>G,p.(Lys88=),264,4,37,synonymous,0.350,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA2,c.7448G>A,p.(Ser2483Asn),7448,14,12,missense,0.350,BP5:Moderate:-2;BS3:Strong:-4;PP3:Supporting:1,-5,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.260T>G,p.(Leu87Trp),260,4,41,missense,0.340,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5140G>A,p.(Val1714Ile),5140,16,12,missense,0.340,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.167A>T,p.(Lys56Ile),167,3,32,missense,0.330,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.251A>C,p.(Glu84Ala),251,4,38,missense,0.330,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.271T>C,p.(Cys91Arg),271,4,30,missense,0.330,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.282G>T,p.(Gln94His),282,4,19,missense,0.330,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5450A>G,p.(Glu1817Gly),5450,21,17,missense,0.330,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.189A>T,p.(Leu63Phe),189,3,23,missense,0.320,BS3:Strong:-4;PP3:Supporting:1,-3,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.253G>C,p.(Glu85Gln),253,4,40,missense,0.320,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.261G>A,p.(Leu87=),261,4,40,synonymous,0.320,BS3:Strong:-4;PP3:Supporting:1,-3,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.147G>C,p.(Leu49=),147,3,12,synonymous,0.310,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.198T>G,p.(Asn66Lys),198,3,14,missense,0.310,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.230C>T,p.(Thr77Met),230,4,17,missense,0.310,BS3:Strong:-4;PP3:Supporting:1,-3,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.156C>T,p.(Leu52=),156,3,21,synonymous,0.300,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.244C>T,p.(Leu82Phe),244,4,31,missense,0.300,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5000A>G,p.(Lys1667Arg),5000,15,13,missense,0.290,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5337A>G,p.(Gln1779=),5337,20,4,synonymous,0.290,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.162G>C,p.(Gln54His),162,3,27,missense,0.280,BS3:Strong:-4;PP3:Supporting:1,-3,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.165G>C,p.(Lys55Asn),165,3,30,missense,0.280,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.270T>C,p.(Ile90=),270,4,31,synonymous,0.280,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.277T>G,p.(Phe93Val),277,4,24,missense,0.280,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5453A>T,p.(Asp1818Val),5453,21,14,missense,0.280,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.163A>C,p.(Lys55Gln),163,3,28,missense,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.164A>T,p.(Lys55Met),164,3,29,missense,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.196A>C,p.(Asn66His),196,3,16,missense,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.198T>C,p.(Asn66=),198,3,14,synonymous,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.291A>C,p.(Thr97=),291,4,10,synonymous,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.163A>G,p.(Lys55Glu),163,3,28,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.260T>C,p.(Leu87Ser),260,4,41,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.262A>G,p.(Lys88Glu),262,4,39,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.281A>G,p.(Gln94Arg),281,4,20,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.293G>C,p.(Gly98Ala),293,4,8,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5035C>G,p.(Leu1679Val),5035,15,39,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5045A>C,p.(Glu1682Ala),5045,15,29,missense,0.260,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.223G>A,p.(Glu75Lys),223,4,10,missense,0.250,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.271T>G,p.(Cys91Gly),271,4,30,missense,0.250,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.285T>A,p.(Leu95=),285,4,16,synonymous,0.250,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5471T>G,p.(Ile1824Ser),5471,22,3,missense,0.250,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.203T>C,p.(Ile68Thr),203,3,9,missense,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.204A>C,p.(Ile68=),204,3,8,synonymous,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.230C>A,p.(Thr77Lys),230,4,17,missense,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.241C>A,p.(Gln81Lys),241,4,28,missense,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.294T>A,p.(Gly98=),294,4,7,synonymous,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.199G>A,p.(Asp67Asn),199,3,13,missense,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.244C>A,p.(Leu82Ile),244,4,31,missense,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.261G>T,p.(Leu87Phe),261,4,40,missense,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.264A>C,p.(Lys88Asn),264,4,37,missense,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.273T>C,p.(Cys91=),273,4,28,synonymous,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.277T>A,p.(Phe93Ile),277,4,24,missense,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.285T>G,p.(Leu95=),285,4,16,synonymous,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5472T>A,p.(Ile1824=),5472,22,4,synonymous,0.230,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.176C>T,p.(Ser59Leu),176,3,36,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.291A>G,p.(Thr97=),291,4,10,synonymous,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.291A>T,p.(Thr97=),291,4,10,synonymous,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.292G>A,p.(Gly98Ser),292,4,9,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.292G>C,p.(Gly98Arg),292,4,9,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.293G>A,p.(Gly98Asp),293,4,8,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.294T>C,p.(Gly98=),294,4,7,synonymous,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.294T>G,p.(Gly98=),294,4,7,synonymous,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5036T>G,p.(Leu1679Arg),5036,15,38,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5046A>C,p.(Glu1682Asp),5046,15,28,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5438A>G,p.(Asp1813Gly),5438,21,29,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5453A>C,p.(Asp1818Ala),5453,21,14,missense,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA2,c.9038C>T,p.(Thr3013Ile),9038,22,79,missense,0.220,BP5:Very Strong:-8;BS1_Supporting:Supporting:-1;BS3:Strong:-4;PP3:Supporting:1,-12,1,Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.173C>T,p.(Pro58Leu),173,3,38,missense,0.210,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.267C>A,p.(Ile89=),267,4,34,synonymous,0.210,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.267C>T,p.(Ile89=),267,4,34,synonymous,0.210,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5061T>A,p.(Val1687=),5061,15,13,synonymous,0.210,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5452G>T,p.(Asp1818Tyr),5452,21,15,missense,0.210,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.26A>C,p.(Glu9Ala),26,1,25,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.164A>G,p.(Lys55Arg),164,3,29,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.169G>C,p.(Gly57Arg),169,3,34,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.230C>G,p.(Thr77Arg),230,4,17,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.237T>C,p.(Phe79=),237,4,24,synonymous,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.284T>G,p.(Leu95Arg),284,4,17,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.285T>C,p.(Leu95=),285,4,16,synonymous,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5009G>T,p.(Arg1670Ile),5009,15,22,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5031T>G,p.(Thr1677=),5031,15,43,synonymous,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence,BRCA1,c.5032A>G,p.(Asn1678Asp),5032,15,42,missense,0.200,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5196T>G,p.(His1732Gln),5196,18,2,missense,0.990,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5470A>G,p.(Ile1824Val),5470,22,2,missense,0.930,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA2,c.6842G>T,p.(Gly2281Val),6842,11,0,missense,0.920,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5073A>G,p.(Thr1691=),5073,15,1,synonymous,0.710,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5196T>A,p.(His1732Gln),5196,18,2,missense,0.710,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.83T>A,p.(Leu28Gln),83,2,2,missense,0.570,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.213G>C,p.(Arg71Ser),213,4,0,missense,0.390,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.135A>T,p.(Lys45Asn),135,3,0,missense,0.370,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.301T>G,p.(Tyr101Asp),301,4,0,missense,0.320,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5277G>T,p.(Lys1759Asn),5277,18,0,missense,0.280,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.4985T>G,p.(Phe1662Cys),4985,14,1,missense,0.270,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.210A>G,p.(Lys70=),210,3,2,synonymous,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.5277G>C,p.(Lys1759Asn),5277,18,0,missense,0.240,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA1,c.300G>A,p.(Glu100=),300,4,1,synonymous,0.220,BS3:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1,-2,2,Likely Benign
+benign_with_high_spliceai;benign_with_pathogenic_evidence;benign_high_spliceai_at_boundary,BRCA2,c.6935A>T,p.(Asp2312Val),6935,11,2,missense,0.220,BP5:Very Strong:-8;BS3:Strong:-4;PP3:Supporting:1,-11,1,Benign
+benign_with_pathogenic_evidence,BRCA2,c.8351G>A,p.(Arg2784Gln),8351,18,19,missense,0.010,BP5:Very Strong:-8;PS3:Strong:4,-4,2,Likely Benign
+vus_high_spliceai_far_from_boundary,BRCA1,c.3515A>T,p.(Glu1172Val),3515,9,581,missense,0.990,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.788G>T,p.(Gly263Val),788,9,117,missense,0.980,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.779A>G,p.(Lys260Arg),779,9,108,missense,0.880,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2733A>T,p.(Gly911=),2733,9,1363,synonymous,0.860,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1763A>G,p.(Asn588Ser),1763,9,146,missense,0.830,BS1_Supporting:Supporting:-1;PP3:Supporting:1,0,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6480A>G,p.(Gln2160=),6480,10,361,synonymous,0.770,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7200C>T,p.(Gly2400=),7200,13,192,synonymous,0.760,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2807A>G,p.(Asp936Gly),2807,9,1289,missense,0.710,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3881G>T,p.(Ser1294Ile),3881,9,215,missense,0.670,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.792T>G,p.(Ser264Arg),792,9,121,missense,0.660,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3880A>T,p.(Ser1294Cys),3880,9,216,missense,0.660,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.917A>G,p.(Asp306Gly),917,9,123,missense,0.650,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2254T>G,p.(Leu752Val),2254,9,1583,missense,0.630,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3878C>A,p.(Ala1293Asp),3878,9,218,missense,0.620,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1735T>A,p.(Leu579Ile),1735,9,174,missense,0.620,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6650A>C,p.(Lys2217Thr),6650,10,191,missense,0.620,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3881G>A,p.(Ser1294Asn),3881,9,215,missense,0.590,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3880A>C,p.(Ser1294Arg),3880,9,216,missense,0.580,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.9875C>A,p.(Pro3292Gln),9875,26,226,missense,0.580,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3881G>C,p.(Ser1294Thr),3881,9,215,missense,0.570,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3969A>G,p.(Gln1323=),3969,9,127,synonymous,0.570,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10064G>T,p.(Gly3355Val),10064,26,193,missense,0.560,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.786G>A,p.(Gln262=),786,9,115,synonymous,0.550,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10046C>A,p.(Thr3349Asn),10046,26,211,missense,0.550,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3552A>T,p.(Gly1184=),3552,9,544,synonymous,0.530,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7212A>G,p.(Lys2404=),7212,13,204,synonymous,0.530,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6477A>G,p.(Gln2159=),6477,10,364,synonymous,0.520,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10063G>T,p.(Gly3355Cys),10063,26,194,missense,0.500,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3897G>T,p.(Gln1299His),3897,9,199,missense,0.490,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3965A>G,p.(Lys1322Arg),3965,9,131,missense,0.490,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2768T>G,p.(Val923Gly),2768,9,1328,missense,0.480,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3954T>A,p.(Ile1318=),3954,9,142,synonymous,0.480,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10051G>T,p.(Ala3351Ser),10051,26,206,missense,0.470,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7177A>G,p.(Met2393Val),7177,13,169,missense,0.460,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.791G>A,p.(Ser264Asn),791,9,120,missense,0.440,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1460C>T,p.(Ala487Val),1460,9,449,missense,0.440,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3658G>T,p.(Asp1220Tyr),3658,9,438,missense,0.430,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.4844C>G,p.(Ala1615Gly),4844,14,142,missense,0.420,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.9876G>A,p.(Pro3292=),9876,26,227,synonymous,0.410,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10063G>C,p.(Gly3355Arg),10063,26,194,missense,0.400,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3880A>G,p.(Ser1294Gly),3880,9,216,missense,0.390,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10097G>T,p.(Ser3366Ile),10097,26,160,missense,0.390,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3399A>C,p.(Leu1133Phe),3399,9,697,missense,0.370,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3898T>G,p.(Cys1300Gly),3898,9,198,missense,0.370,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6650A>T,p.(Lys2217Ile),6650,10,191,missense,0.370,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3876T>A,p.(Ser1292=),3876,9,220,synonymous,0.350,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3515A>C,p.(Glu1172Ala),3515,9,581,missense,0.340,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3875C>A,p.(Ser1292Tyr),3875,9,221,missense,0.340,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.966A>G,p.(Lys322=),966,9,172,synonymous,0.340,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10050A>T,p.(Gln3350His),10050,26,207,missense,0.330,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10043A>T,p.(Asn3348Ile),10043,26,214,missense,0.320,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2213T>G,p.(Val738Gly),2213,9,1542,missense,0.310,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3399A>G,p.(Leu1133=),3399,9,697,synonymous,0.310,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10047C>T,p.(Thr3349=),10047,26,210,synonymous,0.310,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10048C>T,p.(Gln3350Ter),10048,26,209,nonsense,0.310,PM2_Supporting:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10096A>T,p.(Ser3366Cys),10096,26,161,missense,0.310,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.787G>A,p.(Gly263Ser),787,9,116,missense,0.300,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.787G>C,p.(Gly263Arg),787,9,116,missense,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.787G>T,p.(Gly263Cys),787,9,116,missense,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.788G>A,p.(Gly263Asp),788,9,117,missense,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.788G>C,p.(Gly263Ala),788,9,117,missense,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.789T>A,p.(Gly263=),789,9,118,synonymous,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.789T>C,p.(Gly263=),789,9,118,synonymous,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.789T>G,p.(Gly263=),789,9,118,synonymous,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2980T>G,p.(Cys994Gly),2980,9,1116,missense,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1806A>T,p.(Gly602=),1806,9,103,synonymous,0.300,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.790A>C,p.(Ser264Arg),790,9,119,missense,0.290,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.790A>G,p.(Ser264Gly),790,9,119,missense,0.290,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.790A>T,p.(Ser264Cys),790,9,119,missense,0.290,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3877G>A,p.(Ala1293Thr),3877,9,219,missense,0.290,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7235C>G,p.(Thr2412Ser),7235,13,200,missense,0.280,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10051G>A,p.(Ala3351Thr),10051,26,206,missense,0.280,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10051G>C,p.(Ala3351Pro),10051,26,206,missense,0.280,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10059G>T,p.(Leu3353Phe),10059,26,198,missense,0.280,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2342A>T,p.(Glu781Val),2342,9,1671,missense,0.270,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.9879T>A,p.(Ala3293=),9879,26,230,synonymous,0.270,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3418A>C,p.(Ser1140Arg),3418,9,678,missense,0.260,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6628G>A,p.(Glu2210Lys),6628,10,213,missense,0.260,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7152A>G,p.(Gln2384=),7152,13,144,synonymous,0.260,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3693T>A,p.(Phe1231Leu),3693,9,403,missense,0.250,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6644A>T,p.(Tyr2215Phe),6644,10,197,missense,0.250,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.8212G>T,p.(Ala2738Ser),8212,17,119,missense,0.250,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10061C>T,p.(Ser3354Phe),10061,26,196,missense,0.250,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10068A>C,p.(Ser3356=),10068,26,189,synonymous,0.250,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3384G>C,p.(Leu1128=),3384,9,712,synonymous,0.240,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6627A>T,p.(Ile2209=),6627,10,214,synonymous,0.240,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.9851G>A,p.(Ser3284Asn),9851,26,202,missense,0.240,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.9854C>A,p.(Pro3285His),9854,26,205,missense,0.240,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10059G>C,p.(Leu3353Phe),10059,26,198,missense,0.240,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3380A>T,p.(Tyr1127Phe),3380,9,716,missense,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.972A>T,p.(Arg324Ser),972,9,178,missense,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6471A>G,p.(Gln2157=),6471,10,370,synonymous,0.230,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6621A>T,p.(Thr2207=),6621,10,220,synonymous,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6622A>G,p.(Asn2208Asp),6622,10,219,missense,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6653A>G,p.(Asp2218Gly),6653,10,188,missense,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10041A>T,p.(Ile3347=),10041,26,216,synonymous,0.230,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.792T>C,p.(Ser264=),792,9,121,synonymous,0.220,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3417T>A,p.(Ser1139Arg),3417,9,679,missense,0.220,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3893C>T,p.(Ser1298Leu),3893,9,203,missense,0.220,PP3:Supporting:1,1,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1497G>A,p.(Gln499=),1497,9,412,synonymous,0.220,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.6612T>A,p.(Pro2204=),6612,10,229,synonymous,0.220,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.2104T>G,p.(Leu702Val),2104,9,1433,missense,0.210,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.4876A>G,p.(Asn1626Asp),4876,14,110,missense,0.210,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.7137A>T,p.(Gly2379=),7137,13,129,synonymous,0.210,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10050A>C,p.(Gln3350His),10050,26,207,missense,0.210,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.785A>T,p.(Gln262Leu),785,9,114,missense,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.810T>G,p.(His270Gln),810,9,139,missense,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3378A>T,p.(Pro1126=),3378,9,718,synonymous,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3384G>T,p.(Leu1128=),3384,9,712,synonymous,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA1,c.3431A>C,p.(Gln1144Pro),3431,9,665,missense,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1207C>A,p.(Leu403Ile),1207,9,413,missense,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.1737A>G,p.(Leu579=),1737,9,172,synonymous,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_high_spliceai_far_from_boundary,BRCA2,c.10064G>C,p.(Gly3355Ala),10064,26,193,missense,0.200,PM2_Supporting:Supporting:1;PP3:Supporting:1,2,3,VUS
+vus_with_pvs1,BRCA2,c.9925G>T,p.(Glu3309Ter),9925,26,276,nonsense,0.010,BS3:Strong:-4;PM2_Supporting:Supporting:1;PVS1:Very Strong:8,5,3,VUS

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="762" viewBox="0 0 1040 762">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,sans-serif;fill:#172033}.small{font-size:12px;fill:#43506a}.label{font-size:13px}</style>
+<text x="30" y="30" font-size="20" font-weight="700">Evidence action groups by gene</text>
+<text x="30" y="50" class="small">Rate per 1000 VUS in each gene.</text>
+<text x="220" y="94" text-anchor="end" class="label">background_absence_only BRCA1</text>
+<rect x="230" y="70" width="472.4" height="30" rx="4" fill="#5578c2"/>
+<text x="710.4" y="91" class="label">446.77</text>
+<text x="220" y="142" text-anchor="end" class="label">background_absence_only BRCA2</text>
+<rect x="230" y="118" width="700.0" height="30" rx="4" fill="#c26a55"/>
+<text x="938.0" y="139" class="label">661.97</text>
+<text x="220" y="190" text-anchor="end" class="label">computational_signal_needs_noncomputational_support BRCA1</text>
+<rect x="230" y="166" width="186.1" height="30" rx="4" fill="#5578c2"/>
+<text x="424.1" y="187" class="label">176.00</text>
+<text x="220" y="238" text-anchor="end" class="label">computational_signal_needs_noncomputational_support BRCA2</text>
+<rect x="230" y="214" width="90.1" height="30" rx="4" fill="#c26a55"/>
+<text x="328.1" y="235" class="label">85.16</text>
+<text x="220" y="286" text-anchor="end" class="label">conflicting_computational_splice_context BRCA1</text>
+<rect x="230" y="262" width="58.6" height="30" rx="4" fill="#5578c2"/>
+<text x="296.6" y="283" class="label">55.38</text>
+<text x="220" y="334" text-anchor="end" class="label">conflicting_computational_splice_context BRCA2</text>
+<rect x="230" y="310" width="192.1" height="30" rx="4" fill="#c26a55"/>
+<text x="430.1" y="331" class="label">181.65</text>
+<text x="220" y="382" text-anchor="end" class="label">manual_conflict_adjudication BRCA1</text>
+<rect x="230" y="358" width="2.6" height="30" rx="4" fill="#5578c2"/>
+<text x="240.6" y="379" class="label">2.46</text>
+<text x="220" y="430" text-anchor="end" class="label">manual_conflict_adjudication BRCA2</text>
+<rect x="230" y="406" width="2.6" height="30" rx="4" fill="#c26a55"/>
+<text x="240.6" y="427" class="label">2.45</text>
+<text x="220" y="478" text-anchor="end" class="label">module1_no_signal BRCA1</text>
+<rect x="230" y="454" width="33.2" height="30" rx="4" fill="#5578c2"/>
+<text x="271.2" y="475" class="label">31.38</text>
+<text x="220" y="526" text-anchor="end" class="label">module1_no_signal BRCA2</text>
+<rect x="230" y="502" width="45.4" height="30" rx="4" fill="#c26a55"/>
+<text x="283.4" y="523" class="label">42.89</text>
+<text x="220" y="574" text-anchor="end" class="label">near_benign_threshold BRCA1</text>
+<rect x="230" y="550" width="82.0" height="30" rx="4" fill="#5578c2"/>
+<text x="320.0" y="571" class="label">77.54</text>
+<text x="220" y="622" text-anchor="end" class="label">near_benign_threshold BRCA2</text>
+<rect x="230" y="598" width="10.5" height="30" rx="4" fill="#c26a55"/>
+<text x="248.5" y="619" class="label">9.96</text>
+<text x="220" y="670" text-anchor="end" class="label">near_pathogenic_threshold BRCA1</text>
+<rect x="230" y="646" width="222.6" height="30" rx="4" fill="#5578c2"/>
+<text x="460.6" y="667" class="label">210.46</text>
+<text x="220" y="718" text-anchor="end" class="label">near_pathogenic_threshold BRCA2</text>
+<rect x="230" y="694" width="16.8" height="30" rx="4" fill="#c26a55"/>
+<text x="254.8" y="715" class="label">15.93</text>
+</svg>

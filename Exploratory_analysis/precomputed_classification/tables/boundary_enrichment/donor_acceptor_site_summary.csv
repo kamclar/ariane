@@ -1,0 +1,5 @@
+gene,site_type,total_variants,spliceai_ge_0_20,percent,benign_total,benign_high_spliceai,benign_percent,vus_total,vus_high_spliceai,vus_percent,pathogenic_total,pathogenic_high_spliceai,pathogenic_percent
+BRCA1,acceptor_like,8469,250,2.95,7123,46,0.65,930,157,16.88,416,47,11.30
+BRCA1,donor_like,8307,306,3.68,7151,77,1.08,695,146,21.01,461,83,18.00
+BRCA2,acceptor_like,16215,424,2.61,11975,3,0.03,3445,369,10.71,795,52,6.54
+BRCA2,donor_like,14556,225,1.55,10703,2,0.02,3084,194,6.29,769,29,3.77

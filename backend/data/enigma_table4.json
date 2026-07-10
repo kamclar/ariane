@@ -1,0 +1,4061 @@
+{
+  "version": "V1.2_2024-11-18",
+  "source": "ENIGMA VCEP Specifications Table 4",
+  "exon_ranges": {
+    "BRCA1": {
+      "E1": [
+        -113,
+        -20
+      ],
+      "E2": [
+        -19,
+        80
+      ],
+      "E3": [
+        81,
+        134
+      ],
+      "E4(5)": [
+        135,
+        212
+      ],
+      "E5(6)": [
+        213,
+        301
+      ],
+      "E6(7)": [
+        302,
+        441
+      ],
+      "E7(8)": [
+        442,
+        547
+      ],
+      "E8(9)": [
+        548,
+        593
+      ],
+      "E9(10)": [
+        594,
+        670
+      ],
+      "E11(12)": [
+        4097,
+        4185
+      ],
+      "E12(13)": [
+        4186,
+        4357
+      ],
+      "E13(14)": [
+        4358,
+        4484
+      ],
+      "E14(15)": [
+        4485,
+        4675
+      ],
+      "E15(16)": [
+        4676,
+        4986
+      ],
+      "E16(17)": [
+        4987,
+        5074
+      ],
+      "E17(18)": [
+        5075,
+        5152
+      ],
+      "E18(19)": [
+        5153,
+        5193
+      ],
+      "E19(20)": [
+        5194,
+        5277
+      ],
+      "E20(21)": [
+        5278,
+        5332
+      ],
+      "E21(22)": [
+        5333,
+        5406
+      ],
+      "E22(23)": [
+        5407,
+        5467
+      ],
+      "E23(24)": [
+        5468,
+        5571
+      ],
+      "E10(11)": [
+        671,
+        4096
+      ]
+    },
+    "BRCA2": {
+      "E1": [
+        -227,
+        -40
+      ],
+      "E2": [
+        -39,
+        67
+      ],
+      "E3": [
+        68,
+        316
+      ],
+      "E4": [
+        317,
+        425
+      ],
+      "E5": [
+        426,
+        475
+      ],
+      "E6": [
+        476,
+        516
+      ],
+      "E7": [
+        517,
+        631
+      ],
+      "E8": [
+        632,
+        681
+      ],
+      "E9": [
+        682,
+        793
+      ],
+      "E12": [
+        6842,
+        6937
+      ],
+      "E13": [
+        6938,
+        7007
+      ],
+      "E14": [
+        7008,
+        7435
+      ],
+      "E15": [
+        7436,
+        7617
+      ],
+      "E16": [
+        7618,
+        7805
+      ],
+      "E17": [
+        7806,
+        7976
+      ],
+      "E18": [
+        7977,
+        8331
+      ],
+      "E19": [
+        8332,
+        8487
+      ],
+      "E20": [
+        8488,
+        8632
+      ],
+      "E21": [
+        8633,
+        8754
+      ],
+      "E22": [
+        8755,
+        8953
+      ],
+      "E23": [
+        8954,
+        9117
+      ],
+      "E24": [
+        9118,
+        9256
+      ],
+      "E25": [
+        9257,
+        9501
+      ],
+      "E26": [
+        9502,
+        9648
+      ],
+      "E27": [
+        9649,
+        10254
+      ],
+      "E10": [
+        794,
+        1909
+      ],
+      "E11": [
+        1910,
+        6841
+      ]
+    }
+  },
+  "ptc_rules": {
+    "BRCA1": {
+      "E2": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E3": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E4(5)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E5(6)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E6(7)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E7(8)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Supporting (PTC)",
+        "condition": null
+      },
+      "E8(9)": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A",
+        "condition": null
+      },
+      "E9(10)": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A",
+        "condition": null
+      },
+      "E10(11)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E11(12)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E12(13)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E13(14)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E14(15)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E15(16)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E16(17)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E17(18)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E18(19)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E19(20)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E20(21)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E21(22)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E22(23)": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E23(24)": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A",
+        "condition": "PTC>p.L1854"
+      }
+    },
+    "BRCA2": {
+      "E2": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E3": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E4": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5 (PTC)",
+        "condition": null
+      },
+      "E5": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E6": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_N/A",
+        "condition": null
+      },
+      "E7": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E8": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E9": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E10": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E11": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E12": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_N/A",
+        "condition": null
+      },
+      "E13": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E14": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E15": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E16": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E17": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E18": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E19": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E20": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E21": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Supporting (PTC)",
+        "condition": null
+      },
+      "E22": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E23": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E24": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E25": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)",
+        "condition": null
+      },
+      "E26": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Supporting (PTC)",
+        "condition": null
+      },
+      "E27": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A",
+        "condition": "PTC>p.E3309"
+      }
+    }
+  },
+  "splice_rules": {
+    "BRCA1": {
+      "c.-20+1GA": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-20+1GC": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-20+1GT": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-20+2TA": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-20+2TC": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-20+2TG": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.80+1GA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.-19-2AC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-19-2AG": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-19-2AT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.80+1GC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.80+1GT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-19-1GA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-19-1GC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-19-1GT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.80+2TA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.80+2TC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.80+2TG": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.134+1GA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "In-frame \u0394(E3) observed and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.81-2AC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.81-2AG": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.81-2AT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.134+1GC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": "In-frame \u0394(E3) predicted and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.134+1GT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": "In-frame \u0394(E3) predicted and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.81-1GA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.81-1GC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.81-1GT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.134+2TA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": "In-frame \u0394(E3) predicted and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.134+2TC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": "In-frame \u0394(E3) predicted and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.134+2TG": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": "In-frame \u0394(E3) predicted and exon2-exon 4(5) junction creates a de novo TGA (stop codon)"
+      },
+      "c.135-2AG": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.135-2AC": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.135-2AT": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.212+1GA": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.212+1GC": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.212+1GT": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.135-1GA": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.212+2TA": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.212+2TG": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.135-1GC": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.135-1GT": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.212+2TC": {
+        "exon": "E4(5)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.213-2AC": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.213-2AG": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.301+1GC": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.213-2AT": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.301+1GA": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.301+1GT": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.213-1GC": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.213-1GT": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.301+2TA": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.301+2TC": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.301+2TG": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.213-1GA": {
+        "exon": "E5(6)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.302-2AC": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.441+1GA": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.302-2AG": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.302-2AT": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.441+1GC": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.441+1GT": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.302-1GC": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.302-1GT": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.441+2TC": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.302-1GA": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.441+2TA": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.441+2TG": {
+        "exon": "E6(7)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.547+1GA": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.442-2AG": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.442-2AC": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.442-2AT": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.547+1GC": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.547+1GT": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.442-1GA": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.442-1GC": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.442-1GT": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.547+2TG": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.547+2TA": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.547+2TC": {
+        "exon": "E7(8)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.548-2AG": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.548-2AC": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.548-2AT": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+1GA": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+1GT": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+1GC": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.548-1GA": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.548-1GC": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.548-1GT": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+2TC": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+2TG": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.593+2TA": {
+        "exon": "E8(9)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.594-2AC": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A (RNA)",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescues"
+      },
+      "c.594-2AG": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.594-2AT": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+1GA": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+1GT": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+1GC": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.594-1GA": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.594-1GC": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.594-1GT": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+2TC": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+2TG": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.670+2TA": {
+        "exon": "E9(10)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "\u0394(E8,9)[\u0394(E9,10)] rescue expected"
+      },
+      "c.671-2AG": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.671-2AT": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.4096+1GA": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate (RNA)",
+        "notes": "Observed in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.671-2AC": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate (RNA)",
+        "notes": "Observed in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.4096+1GT": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.4096+1GC": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.671-1GA": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.671-1GC": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.671-1GT": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E8_E10)[\u0394(E9_E11)] suspected (partially) functional"
+      },
+      "c.4096+2TC": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.4096+2TG": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.4096+2TA": {
+        "exon": "E10(11)",
+        "pvs1_code": "PVS1_Moderate",
+        "notes": "Expected in-frame \u0394(E10q3309) [\u0394(E11q3309)] suspected (partially) functional"
+      },
+      "c.4097-2AC": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4097-2AT": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4185+1GA": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4097-2AG": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD observed"
+      },
+      "c.4185+1GC": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4185+1GT": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4097-1GA": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.4185+2TA": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4185+2TC": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4185+2TG": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4097-1GC": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4097-1GT": {
+        "exon": "E11(12)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4186-2AC": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4186-2AT": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4357+1GA": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4357+1GT": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4186-2AG": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.4357+1GC": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4186-1GA": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.4357+2TA": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4357+2TG": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4186-1GC": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4186-1GT": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4357+2TC": {
+        "exon": "E12(13)",
+        "pvs1_code": "PVS1",
+        "notes": "Creates a GC splice site (but not AG|GCAAGT), SpliceAI score <0.8. Recommend investigate for leaky splicing."
+      },
+      "c.4358-2AG": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.4484+1GA": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4484+1GT": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4358-2AC": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4358-2AT": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4484+1GC": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4358-1GA": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4358-1GC": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4358-1GT": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.4484+2TA": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4484+2TC": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4484+2TG": {
+        "exon": "E13(14)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4675+1GA": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4675+1GC": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4485-2AC": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4485-2AG": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4485-2AT": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4675+1GT": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4485-1GA": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4485-1GT": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4675+2TA": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4675+2TC": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4675+2TG": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4485-1GC": {
+        "exon": "E14(15)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4986+1GC": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4986+1GT": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4676-2AC": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4676-2AG": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4676-2AT": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4986+1GA": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4676-1GA": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4676-1GC": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4676-1GT": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4986+2TA": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4986+2TC": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4986+2TG": {
+        "exon": "E15(16)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4987-2AG": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5074+1GA": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5074+1GT": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.4987-2AC": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4987-2AT": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5074+1GC": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4987-1GC": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4987-1GT": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5074+2TA": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5074+2TC": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5074+2TG": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.4987-1GA": {
+        "exon": "E16(17)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5075-2AG": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5152+1GC": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5075-2AC": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5075-2AT": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5152+1GA": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5152+1GT": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5075-1GA": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5075-1GT": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5152+2TC": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5152+2TG": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5152+2TA": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5075-1GC": {
+        "exon": "E17(18)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5193+1GA": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5193+1GC": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5193+1GT": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5153-2AC": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5153-2AG": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5153-2AT": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5193+2TA": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5153-1GC": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5153-1GT": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5193+2TG": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5153-1GA": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5193+2TC": {
+        "exon": "E18(19)",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Functional GC splice site predicted based on functional data, perfect match with the consensus (AG|GCAAGT), and SpliceAI score <0.8"
+      },
+      "c.5194-2AG": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5277+1GA": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5194-2AC": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5194-2AT": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5277+1GT": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5277+1GC": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5194-1GA": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5194-1GC": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5277+2TC": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5277+2TG": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5277+2TA": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5194-1GT": {
+        "exon": "E19(20)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5332+1GA": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5278-2AC": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5278-2AG": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5278-2AT": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5332+1GC": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5332+1GT": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5278-1GA": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5278-1GC": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5278-1GT": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5332+2TA": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5332+2TC": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5332+2TG": {
+        "exon": "E20(21)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+1GA": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5333-2AG": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5333-2AC": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5333-2AT": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+1GT": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+1GC": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5333-1GA": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5333-1GC": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+2TC": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+2TG": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5406+2TA": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5333-1GT": {
+        "exon": "E21(22)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5407-2AG": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5467+1GA": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5407-2AC": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5407-2AT": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5467+1GT": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5467+1GC": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5407-1GA": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5407-1GC": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5407-1GT": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5467+2TG": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5467+2TA": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5467+2TC": {
+        "exon": "E22(23)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5468-2AG": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.5468-2AC": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5468-2AT": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5468-1GC": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5468-1GT": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.5468-1GA": {
+        "exon": "E23(24)",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      }
+    },
+    "BRCA2": {
+      "c.-40+1GA": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-40+1GC": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-40+1GT": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-40+2TA": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-40+2TC": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.-40+2TG": {
+        "exon": "E1",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted alteration does not affect the coding sequence"
+      },
+      "c.67+1GA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.67+1GT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.-39-2AC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-39-2AT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-39-2AG": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.67+1GC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-39-1GC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-39-1GT": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.67+2TA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.67+2TG": {
+        "exon": "E2",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.-39-1GA": {
+        "exon": "E2",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.67+2TC": {
+        "exon": "E2",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.316+1GT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.68-2AC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.68-2AG": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.68-2AT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.316+1GA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.316+1GC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.68-1GA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.68-1GC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.68-1GT": {
+        "exon": "E3",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.316+2TA": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.316+2TG": {
+        "exon": "E3",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.316+2TC": {
+        "exon": "E3",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.317-2AG": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) observed"
+      },
+      "c.317-2AC": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) expected"
+      },
+      "c.317-2AT": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) expected"
+      },
+      "c.425+1GA": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.425+1GC": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.425+1GT": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.317-1GA": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) expected"
+      },
+      "c.317-1GC": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) expected"
+      },
+      "c.317-1GT": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. \u0394(E4) and in-frame \u0394(E4,5) (suspected functional) expected"
+      },
+      "c.425+2TA": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.425+2TC": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.425+2TG": {
+        "exon": "E4",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E4) predicted. In-frame \u0394(E4,5) expected (c.425G>T data) and suspected functional"
+      },
+      "c.426-2AT": {
+        "exon": "E5",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.475+1GA": {
+        "exon": "E5",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.475+1GT": {
+        "exon": "E5",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.426-2AC": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.426-2AG": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.475+1GC": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.426-1GA": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.426-1GC": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.426-1GT": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.475+2TA": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.475+2TC": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.475+2TG": {
+        "exon": "E5",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.476-2AG": {
+        "exon": "E6",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.516+1GA": {
+        "exon": "E6",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.516+1GT": {
+        "exon": "E6",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.476-2AC": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.476-2AT": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.516+1GC": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.476-1GA": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.476-1GC": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.476-1GT": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.516+2TG": {
+        "exon": "E6",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.516+2TA": {
+        "exon": "E6",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.516+2TC": {
+        "exon": "E6",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.517-1GA": {
+        "exon": "E7",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E7p1) predicted. PTC_NMD observed"
+      },
+      "c.631+1GA": {
+        "exon": "E7",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E7) predicted. PTC_NMD \u0394(E7) observed"
+      },
+      "c.517-1GC": {
+        "exon": "E7",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E7) predicted. \u0394(E7) and in-frame \u0394(E4_E7) (suspected functional) expected"
+      },
+      "c.517-1GT": {
+        "exon": "E7",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E7) predicted. \u0394(E7) and in-frame \u0394(E4_E7) (suspected functional) expected"
+      },
+      "c.631+1GC": {
+        "exon": "E7",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E7) predicted"
+      },
+      "c.631+1GT": {
+        "exon": "E7",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E7) predicted"
+      },
+      "c.517-2AC": {
+        "exon": "E7",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E7) predicted. \u0394(E7) and in-frame \u0394(E4_E7) (suspected functional) expected"
+      },
+      "c.517-2AT": {
+        "exon": "E7",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E7) predicted. \u0394(E7) and in-frame \u0394(E4_E7) (suspected functional) expected"
+      },
+      "c.631+2TA": {
+        "exon": "E7",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E7) predicted"
+      },
+      "c.631+2TC": {
+        "exon": "E7",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E7) predicted"
+      },
+      "c.517-2AG": {
+        "exon": "E7",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E7) predicted. \u0394(E7) and in-frame \u0394(E4_E7) (suspected functional) observed"
+      },
+      "c.631+2TG": {
+        "exon": "E7",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E7) predicted. Main transcript \u0394(E7), in-frame \u0394(E4_E7) also observed at low levels. Clinical data supports pathogenicity."
+      },
+      "c.632-2AG": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD \u0394(E4_8) , \u0394(6q39_E7) and in-frame \u0394(6q39_E8) (suspected functional) observed"
+      },
+      "c.681+1GA": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) observed"
+      },
+      "c.632-2AC": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD \u0394(E4_8) , \u0394(6q39_E7) and in-frame \u0394(6q39_E8) (suspected functional) expected"
+      },
+      "c.632-2AT": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD \u0394(E4_8) , \u0394(6q39_E7) and in-frame \u0394(6q39_E8) (suspected functional) expected"
+      },
+      "c.681+1GC": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) expected"
+      },
+      "c.681+1GT": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) expected"
+      },
+      "c.632-1GT": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD \u0394(E4_8) , \u0394(6q39_E7) and in-frame \u0394(6q39_E8) (suspected functional) expected"
+      },
+      "c.681+2TA": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) expected"
+      },
+      "c.681+2TC": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) expected"
+      },
+      "c.681+2TG": {
+        "exon": "E8",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "PTC_NMD \u0394(E8)/\u25bc(E8q4) predicted. In-frame \u0394(E8_E10) (suspected functional) expected"
+      },
+      "c.632-1GA": {
+        "exon": "E8",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD  \u0394(E8p4), \u0394(E8), \u0394(6q39_E8p4) observed"
+      },
+      "c.632-1GC": {
+        "exon": "E8",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E8p4) predicted. PTC_NMD  \u0394(E8p4), \u0394(E8), \u0394(6q39_E8p4) observed"
+      },
+      "c.682-2AC": {
+        "exon": "E9",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.682-2AG": {
+        "exon": "E9",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.793+1GC": {
+        "exon": "E9",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.793+1GT": {
+        "exon": "E9",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.682-2AT": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.793+1GA": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.682-1GA": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.682-1GT": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.793+2TA": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.793+2TG": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.682-1GC": {
+        "exon": "E9",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.793+2TC": {
+        "exon": "E9",
+        "pvs1_code": "PVS1",
+        "notes": "Creates a GC splice site (but not AG|GCAAGT), SpliceAI score <0.8. Recommend investigate for leaky splicing."
+      },
+      "c.794-2AG": {
+        "exon": "E10",
+        "pvs1_code": "PVS1_N/A (RNA)",
+        "notes": "in-frame \u0394(E10) (suspected functional) observed"
+      },
+      "c.1909+1GA": {
+        "exon": "E10",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E9_E10) observed"
+      },
+      "c.1909+1GC": {
+        "exon": "E10",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD \u0394(E9_E10) observed"
+      },
+      "c.794-2AC": {
+        "exon": "E10",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "in-frame \u0394(E10) and small in-frame suspected functional predicted"
+      },
+      "c.794-2AT": {
+        "exon": "E10",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "in-frame \u0394(E10) and small in-frame suspected functional predicted"
+      },
+      "c.1909+1GT": {
+        "exon": "E10",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E9_E10) predicted"
+      },
+      "c.794-1GC": {
+        "exon": "E10",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "in-frame \u0394(E10) and small in-frame suspected functional predicted"
+      },
+      "c.794-1GT": {
+        "exon": "E10",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "in-frame \u0394(E10) and small in-frame suspected functional predicted"
+      },
+      "c.1909+2TA": {
+        "exon": "E10",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E9_E10) predicted"
+      },
+      "c.1909+2TC": {
+        "exon": "E10",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E9_E10) predicted"
+      },
+      "c.1909+2TG": {
+        "exon": "E10",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD \u0394(E9_E10) predicted"
+      },
+      "c.794-1GA": {
+        "exon": "E10",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.6841+1GA": {
+        "exon": "E11",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.6841+1GC": {
+        "exon": "E11",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.1910-2AC": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.1910-2AG": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.1910-2AT": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6841+1GT": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.1910-1GA": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.1910-1GC": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.1910-1GT": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6841+2TA": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6841+2TG": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6841+2TC": {
+        "exon": "E11",
+        "pvs1_code": "PVS1",
+        "notes": "Creates a GC splice site (but not AG|GCAAGT), SpliceAI score <0.8. Recommend investigate for leaky splicing."
+      },
+      "c.6842-2AG": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Observed in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1GA": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Observed in-frame \u0394(12) suspected functional"
+      },
+      "c.6842-2AC": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6842-2AT": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1GC": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1GT": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6842-1GA": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6842-1GC": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6842-1GT": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1TA": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1TC": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.6937+1TG": {
+        "exon": "E12",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Predicted in-frame \u0394(12) suspected functional"
+      },
+      "c.7007+1GC": {
+        "exon": "E13",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.6938-2AC": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6938-2AG": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6938-2AT": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7007+1GA": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7007+1GT": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6938-1GA": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6938-1GC": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.6938-1GT": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7007+2TA": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7007+2TC": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7007+2TG": {
+        "exon": "E13",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7008-2AG": {
+        "exon": "E14",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7008-2AT": {
+        "exon": "E14",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7435+1GC": {
+        "exon": "E14",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7008-2AC": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7435+1GA": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7435+1GT": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7008-1GC": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7008-1GT": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7435+2TA": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7435+2TC": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7435+2TG": {
+        "exon": "E14",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7008-1GA": {
+        "exon": "E14",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7436-2AG": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7436-2AT": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7617+1GA": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7617+1GT": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7436-2AC": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7617+1GC": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7436-1GC": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7436-1GT": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7617+2TA": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7436-1GA": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7617+2TG": {
+        "exon": "E15",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7617+2TC": {
+        "exon": "E15",
+        "pvs1_code": "PVS1",
+        "notes": "Creates a GC splice site (but not AG|GCAAGT), SpliceAI score <0.8. Recommend investigate for leaky splicing."
+      },
+      "c.7618-2AG": {
+        "exon": "E16",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7618-2AT": {
+        "exon": "E16",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7805+1GA": {
+        "exon": "E16",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7618-2AC": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7805+1GC": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7805+1GT": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7618-1GT": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7805+2TA": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7805+2TC": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7805+2TG": {
+        "exon": "E16",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7618-1GA": {
+        "exon": "E16",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7618-1GC": {
+        "exon": "E16",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7806-2AG": {
+        "exon": "E17",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7976+1GA": {
+        "exon": "E17",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7806-2AC": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7806-2AT": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7976+1GC": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7976+1GT": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7806-1GC": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7976+2CA": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7976+2CG": {
+        "exon": "E17",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7806-1GA": {
+        "exon": "E17",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7806-1GT": {
+        "exon": "E17",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7976+2CT": {
+        "exon": "E17",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "GC site improved to GT site"
+      },
+      "c.7977-2AT": {
+        "exon": "E18",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8331+1GA": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong (RNA)",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.8331+1GT": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong (RNA)",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.7977-2AC": {
+        "exon": "E18",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.7977-2AG": {
+        "exon": "E18",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8331+1GC": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.7977-1GA": {
+        "exon": "E18",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8331+2TA": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.8331+2TG": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.7977-1GC": {
+        "exon": "E18",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.7977-1GT": {
+        "exon": "E18",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8331+2TC": {
+        "exon": "E18",
+        "pvs1_code": "PVS1_Strong (RNA)",
+        "notes": "Variants at this splice site are reported to result in leaky splicing, evidence strength reduced to strong."
+      },
+      "c.8332-2AG": {
+        "exon": "E19",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8487+1GA": {
+        "exon": "E19",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8332-2AC": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8332-2AT": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8487+1GC": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8487+1GT": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8332-1GC": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8332-1GT": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8487+2TC": {
+        "exon": "E19",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8487+2TG": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8332-1GA": {
+        "exon": "E19",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8488-2AG": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.8632+1GA": {
+        "exon": "E20",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8488-2AC": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.8488-2AT": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.8632+1GC": {
+        "exon": "E20",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8632+1GT": {
+        "exon": "E20",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8488-1GC": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.8488-1GT": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.8632+2TA": {
+        "exon": "E20",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8632+2TC": {
+        "exon": "E20",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8488-1GA": {
+        "exon": "E20",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.8632+2TG": {
+        "exon": "E20",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8633-2AG": {
+        "exon": "E21",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8754+1GA": {
+        "exon": "E21",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8633-2AC": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8633-2AT": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8754+1GC": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8754+1GT": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8633-1GA": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8633-1GC": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8633-1GT": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8754+2TA": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8754+2TC": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8754+2TG": {
+        "exon": "E21",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8953+1GT": {
+        "exon": "E22",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8755-2AC": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8755-2AG": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8755-2AT": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8953+1GA": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8953+1GC": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8755-1GC": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8755-1GT": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8953+2TA": {
+        "exon": "E22",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8755-1GA": {
+        "exon": "E22",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8953+2TG": {
+        "exon": "E22",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8953+2TC": {
+        "exon": "E22",
+        "pvs1_code": "PVS1_N/A",
+        "notes": "Functional GC splice site predicted based on functional data, perfect match with the consensus (AG|GCAAGT), and SpliceAI score <0.8"
+      },
+      "c.8954-2AT": {
+        "exon": "E23",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9117+1GA": {
+        "exon": "E23",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9117+1GT": {
+        "exon": "E23",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.8954-2AC": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8954-2AG": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9117+1GC": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8954-1GA": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8954-1GC": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.8954-1GT": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9117+2TG": {
+        "exon": "E23",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9117+2TA": {
+        "exon": "E23",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9117+2TC": {
+        "exon": "E23",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9118-2AG": {
+        "exon": "E24",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": "PTC_NMD observed"
+      },
+      "c.9256+1GA": {
+        "exon": "E24",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9118-2AC": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.9118-2AT": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.9256+1GC": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9256+1GT": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9118-1GC": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.9118-1GT": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.9256+2TA": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9256+2TC": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9256+2TG": {
+        "exon": "E24",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9118-1GA": {
+        "exon": "E24",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.9257-2AC": {
+        "exon": "E25",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.9257-2AG": {
+        "exon": "E25",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.9257-2AT": {
+        "exon": "E25",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.9501+1GA": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9501+1GC": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9501+1GT": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9257-1GT": {
+        "exon": "E25",
+        "pvs1_code": "PVS1_Supporting",
+        "notes": "Small in-frame predicted"
+      },
+      "c.9501+2TA": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9501+2TG": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9257-1GC": {
+        "exon": "E25",
+        "pvs1_code": "PVS1_Supporting (RNA)",
+        "notes": "Small in-frame observed"
+      },
+      "c.9501+2TC": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": "Creates a GC splice site (but not AG|GCAAGT), SpliceAI score <0.8. Recommend investigate for leaky splicing."
+      },
+      "c.9257-1GA": {
+        "exon": "E25",
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "c.9502-2AC": {
+        "exon": "E26",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9648+1GA": {
+        "exon": "E26",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9502-2AG": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9502-2AT": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9648+1GC": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9648+1GT": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9502-1GA": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9502-1GC": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9502-1GT": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9648+2TA": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9648+2TC": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9648+2TG": {
+        "exon": "E26",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9649-2AG": {
+        "exon": "E27",
+        "pvs1_code": "PVS1 (RNA)",
+        "notes": ""
+      },
+      "c.9649-2AC": {
+        "exon": "E27",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9649-2AT": {
+        "exon": "E27",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9649-1GA": {
+        "exon": "E27",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9649-1GC": {
+        "exon": "E27",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "c.9649-1GT": {
+        "exon": "E27",
+        "pvs1_code": "PVS1",
+        "notes": ""
+      }
+    }
+  },
+  "deletion_rules": {
+    "BRCA1": {
+      "E1": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E2": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E3": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E4(5)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E5(6)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E6(7)": {
+        "pvs1_code": "PVS1",
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
+      },
+      "E7(8)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E8(9)": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E9(10)": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E10(11)": {
+        "pvs1_code": "PVS1_Moderate",
+        "notes": ""
+      },
+      "E11(12)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E12(13)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E13(14)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E14(15)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E15(16)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E16(17)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E17(18)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E18(19)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E19(20)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E20(21)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E21(22)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E22(23)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E23(24)": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      }
+    },
+    "BRCA2": {
+      "E1": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E2": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E3": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E4": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E5": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E6": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E7": {
+        "pvs1_code": "PVS1",
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
+      },
+      "E8": {
+        "pvs1_code": "PVS1",
+        "notes": "Conflicting Splicing data for variants with similar SpliceAI scores"
+      },
+      "E9": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E10": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E11": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E12": {
+        "pvs1_code": "PVS1_N/A",
+        "notes": ""
+      },
+      "E13": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E14": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E15": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E16": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E17": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E18": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E19": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E20": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E21": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E22": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E23": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E24": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E25": {
+        "pvs1_code": "PVS1",
+        "notes": "PTC_NMD predicted"
+      },
+      "E26": {
+        "pvs1_code": "PVS1",
+        "notes": ""
+      },
+      "E27": {
+        "pvs1_code": "PVS1_Strong",
+        "notes": ""
+      }
+    }
+  },
+  "duplication_rules": {
+    "BRCA1": {
+      "E1": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E2": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E3": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E4(5)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E5(6)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E6(7)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E7(8)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E8(9)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E9(10)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E10(11)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        }
+      },
+      "E11(12)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E12(13)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E13(14)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E14(15)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E15(16)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E16(17)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E17(18)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E18(19)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E19(20)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E20(21)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E21(22)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E22(23)": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E23(24)": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      }
+    },
+    "BRCA2": {
+      "E1": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E2": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E3": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E4": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E5": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E6": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E7": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E8": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E9": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E10": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E11": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E12": {
+        "Tandem": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E13": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E14": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E15": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E16": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E17": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E18": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E19": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Moderate",
+          "notes": ""
+        }
+      },
+      "E20": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E21": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E22": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E23": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E24": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E25": {
+        "Tandem": {
+          "pvs1_code": "PVS1",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_Strong",
+          "notes": ""
+        }
+      },
+      "E26": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      },
+      "E27": {
+        "Tandem": {
+          "pvs1_code": "PVS1_Supporting",
+          "notes": ""
+        },
+        "Unknown": {
+          "pvs1_code": "PVS1_N/A",
+          "notes": ""
+        }
+      }
+    }
+  },
+  "critical_boundaries": {
+    "BRCA1": {
+      "exon": "E23(24)",
+      "boundary_aa": 1854,
+      "rule": "PTC < p.Ile1855 -> PVS1, PTC > p.Leu1854 -> PVS1_N/A"
+    },
+    "BRCA2": {
+      "exon": "E27",
+      "boundary_aa": 3309,
+      "rule": "PTC < p.Thr3310 -> PVS1, PTC > p.Glu3309 -> PVS1_N/A"
+    }
+  }
+}

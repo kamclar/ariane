@@ -1,0 +1,6 @@
+filter,variant_count,positions_total,positions_mixed,positions_with_benign_and_pathogenic,codons_total,codons_mixed,codons_with_benign_and_pathogenic
+all_variants,47547,15849,3104,1654,5283,2565,1737
+no_truncation,45150,15849,1186,36,5283,906,56
+no_splice,46340,15716,2762,1572,5273,2420,1636
+no_truncation_no_splice,44089,15699,933,11,5270,755,20
+no_truncation_no_splice_no_functional,41209,14966,462,0,5117,414,0

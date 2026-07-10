@@ -1,0 +1,587 @@
+sanity_reason,gene,c_notation,p_notation,variant_type,criteria_combo,total_points,predicted_class,predicted_label,spliceai_score
+PS3_but_VUS,BRCA1,c.1A>C,p.(Met1Leu),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.1A>T,p.(Met1Leu),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.2T>A,p.(Met1Lys),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.2T>C,p.(Met1Thr),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.2T>G,p.(Met1Arg),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.3G>A,p.(Met1Ile),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.23
+PS3_but_VUS,BRCA1,c.3G>C,p.(Met1Ile),initiation_codon,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.4G>C,p.(Asp2His),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.26A>C,p.(Glu9Ala),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+PS3_but_VUS,BRCA1,c.32T>A,p.(Val11Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.32T>G,p.(Val11Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.35A>C,p.(Gln12Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.40G>T,p.(Val14Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.41T>G,p.(Val14Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.44T>A,p.(Ile15Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.44T>C,p.(Ile15Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.44T>G,p.(Ile15Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.49G>C,p.(Ala17Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.50C>G,p.(Ala17Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.38
+PS3_but_VUS,BRCA1,c.53T>A,p.(Met18Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.53T>G,p.(Met18Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.19
+PS3_but_VUS,BRCA1,c.56A>C,p.(Gln19Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.63C>T,p.(Ile21=),synonymous,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.65T>C,p.(Leu22Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.70T>A,p.(Cys24Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.70T>C,p.(Cys24Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.70T>G,p.(Cys24Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.71G>A,p.(Cys24Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.71G>C,p.(Cys24Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.72T>G,p.(Cys24Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.74C>T,p.(Pro25Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.77T>A,p.(Ile26Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.77T>C,p.(Ile26Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.79T>A,p.(Cys27Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.79T>C,p.(Cys27Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.79T>G,p.(Cys27Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.81T>G,p.(Cys27Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.83T>A,p.(Leu28Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.57
+PS3_but_VUS,BRCA1,c.83T>C,p.(Leu28Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.84G>A,p.(Leu28=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.65
+PS3_but_VUS,BRCA1,c.100C>T,p.(Pro34Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.101C>A,p.(Pro34His),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.101C>G,p.(Pro34Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.101C>T,p.(Pro34Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.104T>A,p.(Val35Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.104T>C,p.(Val35Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.104T>G,p.(Val35Gly),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.110C>A,p.(Thr37Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.110C>G,p.(Thr37Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.115T>A,p.(Cys39Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.115T>C,p.(Cys39Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.115T>G,p.(Cys39Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.116G>A,p.(Cys39Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.116G>C,p.(Cys39Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.116G>T,p.(Cys39Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.117T>G,p.(Cys39Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.121C>A,p.(His41Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.121C>G,p.(His41Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.121C>T,p.(His41Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.122A>C,p.(His41Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.122A>T,p.(His41Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.123C>A,p.(His41Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.123C>G,p.(His41Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.129T>A,p.(Phe43Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.130T>C,p.(Cys44Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.130T>G,p.(Cys44Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.131G>A,p.(Cys44Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.131G>C,p.(Cys44Ser),missense,PM2_Supporting+PS1+PS3,9,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.132C>G,p.(Cys44Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.134A>T,p.(Lys45Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.135A>T,p.(Lys45Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.37
+PS3_but_VUS,BRCA1,c.139T>C,p.(Cys47Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.139T>G,p.(Cys47Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.140G>C,p.(Cys47Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.140G>T,p.(Cys47Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.141C>G,p.(Cys47Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.143T>A,p.(Met48Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.143T>G,p.(Met48Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.146T>C,p.(Leu49Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.147G>A,p.(Leu49=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.38
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.147G>C,p.(Leu49=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.31
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.147G>T,p.(Leu49=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.51
+PS3_but_VUS,BRCA1,c.152T>C,p.(Leu51Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.156C>T,p.(Leu52=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.3
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.162G>A,p.(Gln54=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.49
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.162G>C,p.(Gln54His),missense,BS3+PP3,-3,2,Likely Benign,0.28
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.162G>T,p.(Gln54His),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.7
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.163A>C,p.(Lys55Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.163A>G,p.(Lys55Glu),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.164A>G,p.(Lys55Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.164A>T,p.(Lys55Met),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.165G>A,p.(Lys55=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.38
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.165G>C,p.(Lys55Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.28
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.165G>T,p.(Lys55Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.55
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.167A>T,p.(Lys56Ile),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.33
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.169G>C,p.(Gly57Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+PS3_but_VUS,BRCA1,c.173C>A,p.(Pro58His),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.173C>T,p.(Pro58Leu),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.21
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.176C>T,p.(Ser59Leu),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+PS3_but_VUS,BRCA1,c.181T>A,p.(Cys61Ser),missense,PM2_Supporting+PP4+PS3,9,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.182G>T,p.(Cys61Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.183T>G,p.(Cys61Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.1
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.187T>G,p.(Leu63Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.7
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.189A>T,p.(Leu63Phe),missense,BS3+PP3,-3,2,Likely Benign,0.32
+PS3_but_VUS,BRCA1,c.190T>A,p.(Cys64Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.190T>C,p.(Cys64Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.19
+PS3_but_VUS,BRCA1,c.190T>G,p.(Cys64Gly),missense,PP3+PS3,5,3,VUS,0.65
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.192T>C,p.(Cys64=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.87
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.193A>C,p.(Lys65Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.87
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.193A>G,p.(Lys65Glu),missense,BS3+PP3,-3,2,Likely Benign,0.49
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.194A>C,p.(Lys65Thr),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.67
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.194A>G,p.(Lys65Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.84
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.194A>T,p.(Lys65Met),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.8
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.195G>A,p.(Lys65=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.86
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.195G>C,p.(Lys65Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.87
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.195G>T,p.(Lys65Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.86
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.196A>C,p.(Asn66His),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.198T>C,p.(Asn66=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.198T>G,p.(Asn66Lys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.31
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.199G>A,p.(Asp67Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+PS3_but_VUS,BRCA1,c.203T>A,p.(Ile68Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.203T>C,p.(Ile68Thr),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+PS3_but_VUS,BRCA1,c.203T>G,p.(Ile68Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.204A>C,p.(Ile68=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.210A>G,p.(Lys70=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.213G>C,p.(Arg71Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.39
+PS3_but_VUS,BRCA1,c.218T>A,p.(Leu73Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.218T>G,p.(Leu73Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.223G>A,p.(Glu75Lys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.25
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.226A>G,p.(Ser76Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.46
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.230C>A,p.(Thr77Lys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.230C>G,p.(Thr77Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.230C>T,p.(Thr77Met),missense,BS3+PP3,-3,2,Likely Benign,0.31
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.231G>T,p.(Thr77=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.54
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.237T>C,p.(Phe79=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+PS3_but_VUS,BRCA1,c.239G>T,p.(Ser80Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.241C>A,p.(Gln81Lys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.244C>A,p.(Leu82Ile),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.244C>T,p.(Leu82Phe),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.3
+PS3_but_VUS,BRCA1,c.245T>A,p.(Leu82His),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.245T>C,p.(Leu82Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.245T>G,p.(Leu82Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.247G>T,p.(Val83Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+PS3_but_VUS,BRCA1,c.248T>A,p.(Val83Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.250G>A,p.(Glu84Lys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.49
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.251A>C,p.(Glu84Ala),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.33
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.252A>T,p.(Glu84Asp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.36
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.253G>C,p.(Glu85Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.32
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.254A>G,p.(Glu85Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.44
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.254A>T,p.(Glu85Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.37
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.256C>G,p.(Leu86Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.67
+PS3_but_VUS,BRCA1,c.257T>C,p.(Leu86Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.260T>C,p.(Leu87Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.260T>G,p.(Leu87Trp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.34
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.261G>A,p.(Leu87=),synonymous,BS3+PP3,-3,2,Likely Benign,0.32
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.261G>T,p.(Leu87Phe),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.262A>G,p.(Lys88Glu),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.264A>C,p.(Lys88Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.264A>G,p.(Lys88=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.35
+PS3_but_VUS,BRCA1,c.266T>A,p.(Ile89Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.267C>A,p.(Ile89=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.21
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.267C>T,p.(Ile89=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.21
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.270T>C,p.(Ile90=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.28
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.271T>C,p.(Cys91Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.33
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.271T>G,p.(Cys91Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.25
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.273T>C,p.(Cys91=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+PS3_but_VUS,BRCA1,c.274G>A,p.(Ala92Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.274G>C,p.(Ala92Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.275C>A,p.(Ala92Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.277T>A,p.(Phe93Ile),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.277T>G,p.(Phe93Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.28
+PS3_but_VUS,BRCA1,c.279T>G,p.(Phe93Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.1
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.281A>G,p.(Gln94Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.282G>T,p.(Gln94His),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.33
+PS3_but_VUS,BRCA1,c.284T>C,p.(Leu95Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.284T>G,p.(Leu95Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.285T>A,p.(Leu95=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.25
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.285T>C,p.(Leu95=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.285T>G,p.(Leu95=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+PS3_but_VUS,BRCA1,c.286G>A,p.(Asp96Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.14
+PS3_but_VUS,BRCA1,c.286G>C,p.(Asp96His),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.286G>T,p.(Asp96Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+PS3_but_VUS,BRCA1,c.287A>C,p.(Asp96Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.287A>G,p.(Asp96Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.287A>T,p.(Asp96Val),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.288C>A,p.(Asp96Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.288C>G,p.(Asp96Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.289A>C,p.(Thr97Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.291A>C,p.(Thr97=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.291A>G,p.(Thr97=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.291A>T,p.(Thr97=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.292G>A,p.(Gly98Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.292G>C,p.(Gly98Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.293G>A,p.(Gly98Asp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.293G>C,p.(Gly98Ala),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.294T>A,p.(Gly98=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.294T>C,p.(Gly98=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.294T>G,p.(Gly98=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.300G>A,p.(Glu100=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.301T>G,p.(Tyr101Asp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.32
+pathogenic_and_benign_evidence,BRCA1,c.4184A>G,p.(Gln1395Arg),missense,BP5+PM2_Supporting+PP3,0,3,VUS,0.36
+pathogenic_and_benign_evidence,BRCA1,c.4327C>T,p.(Arg1443Ter),nonsense,BS1_Supporting+PM5_PTC+PVS1,11,5,Pathogenic,0.01
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.4893T>G,p.(Ser1631Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.42
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.4899C>T,p.(Ser1633=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.45
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.4931A>T,p.(Glu1644Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.53
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.4947A>T,p.(Arg1649Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.41
+PS3_but_VUS,BRCA1,c.4951T>C,p.(Ser1651Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.4955T>A,p.(Met1652Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+PS3_but_VUS,BRCA1,c.4955T>G,p.(Met1652Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.4957G>A,p.(Val1653Met),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4957G>C,p.(Val1653Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4957G>T,p.(Val1653Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.4958T>A,p.(Val1653Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4963T>C,p.(Ser1655Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4964C>A,p.(Ser1655Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4964C>G,p.(Ser1655Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.4964C>T,p.(Ser1655Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.4970T>A,p.(Leu1657Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.4970T>C,p.(Leu1657Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.4970T>G,p.(Leu1657Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.4985T>G,p.(Phe1662Cys),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.27
+PS3_but_VUS,BRCA1,c.4994T>A,p.(Val1665Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5000A>G,p.(Lys1667Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.29
+PS3_but_VUS,BRCA1,c.5003T>C,p.(Phe1668Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5005G>C,p.(Ala1669Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5009G>A,p.(Arg1670Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5009G>T,p.(Arg1670Ile),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+PS3_but_VUS,BRCA1,c.5015A>C,p.(His1672Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5031T>G,p.(Thr1677=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5032A>G,p.(Asn1678Asp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.2
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5035C>G,p.(Leu1679Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5036T>G,p.(Leu1679Arg),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+PS3_but_VUS,BRCA1,c.5041A>C,p.(Thr1681Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5042C>G,p.(Thr1681Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.38
+pathogenic_and_benign_evidence;PS3_but_VUS,BRCA1,c.5044G>A,p.(Glu1682Lys),missense,BP5+PM2_Supporting+PP3+PS3,2,3,VUS,0.57
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5045A>C,p.(Glu1682Ala),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.26
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5046A>C,p.(Glu1682Asp),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+PS3_but_VUS,BRCA1,c.5050A>C,p.(Thr1684Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5053A>C,p.(Thr1685Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.5056C>A,p.(His1686Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.19
+PS3_but_VUS,BRCA1,c.5056C>G,p.(His1686Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.5057A>C,p.(His1686Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.18
+PS3_but_VUS,BRCA1,c.5057A>G,p.(His1686Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5057A>T,p.(His1686Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.5058T>A,p.(His1686Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5058T>G,p.(His1686Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5059G>T,p.(Val1687Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.5060T>A,p.(Val1687Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.17
+PS3_but_VUS,BRCA1,c.5060T>G,p.(Val1687Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5061T>A,p.(Val1687=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.21
+PS3_but_VUS,BRCA1,c.5062G>T,p.(Val1688Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.5063T>A,p.(Val1688Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5066T>A,p.(Met1689Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5071A>C,p.(Thr1691Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5072C>A,p.(Thr1691Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5073A>G,p.(Thr1691=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.71
+PS3_but_VUS,BRCA1,c.5077G>T,p.(Ala1693Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.1
+PS3_but_VUS,BRCA1,c.5078C>A,p.(Ala1693Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.5087T>A,p.(Val1696Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5087T>G,p.(Val1696Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5090G>A,p.(Cys1697Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5090G>T,p.(Cys1697Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5091T>G,p.(Cys1697Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.5095C>T,p.(Arg1699Trp),missense,PS3,4,3,VUS,0.14
+PS3_but_VUS,BRCA1,c.5096G>A,p.(Arg1699Gln),missense,PS3,4,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5096G>T,p.(Arg1699Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.19
+PS3_but_VUS,BRCA1,c.5098A>C,p.(Thr1700Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5098A>G,p.(Thr1700Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.14
+PS3_but_VUS,BRCA1,c.5099C>A,p.(Thr1700Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5099C>G,p.(Thr1700Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5099C>T,p.(Thr1700Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5104A>C,p.(Lys1702Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5104A>G,p.(Lys1702Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+PS3_but_VUS,BRCA1,c.5105A>C,p.(Lys1702Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5105A>G,p.(Lys1702Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5105A>T,p.(Lys1702Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5106A>C,p.(Lys1702Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5106A>T,p.(Lys1702Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5107T>A,p.(Tyr1703Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5107T>C,p.(Tyr1703His),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5107T>G,p.(Tyr1703Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5108A>C,p.(Tyr1703Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5108A>G,p.(Tyr1703Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5110T>A,p.(Phe1704Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5110T>C,p.(Phe1704Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.13
+PS3_but_VUS,BRCA1,c.5110T>G,p.(Phe1704Val),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5111T>A,p.(Phe1704Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5111T>C,p.(Phe1704Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5111T>G,p.(Phe1704Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5112T>A,p.(Phe1704Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5112T>G,p.(Phe1704Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5114T>C,p.(Leu1705Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.15
+PS3_but_VUS,BRCA1,c.5116G>A,p.(Gly1706Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5116G>C,p.(Gly1706Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.5117G>T,p.(Gly1706Val),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5119A>T,p.(Ile1707Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5120T>G,p.(Ile1707Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5122G>A,p.(Ala1708Thr),missense,PS3,4,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5122G>C,p.(Ala1708Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.5123C>A,p.(Ala1708Glu),missense,PP3+PS3,5,3,VUS,0.22
+PS3_but_VUS,BRCA1,c.5123C>G,p.(Ala1708Gly),missense,PP3+PS3,5,3,VUS,0.4
+PS3_but_VUS,BRCA1,c.5126G>T,p.(Gly1709Val),missense,PM2_Supporting+PS3,5,3,VUS,0.1
+PS3_but_VUS,BRCA1,c.5131A>G,p.(Lys1711Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5134T>G,p.(Trp1712Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5138T>A,p.(Val1713Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.5138T>C,p.(Val1713Ala),missense,PS3,4,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.5138T>G,p.(Val1713Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5140G>A,p.(Val1714Ile),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.34
+PS3_but_VUS,BRCA1,c.5140G>T,p.(Val1714Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA1,c.5141T>A,p.(Val1714Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5143A>T,p.(Ser1715Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5144G>T,p.(Ser1715Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA1,c.5145C>A,p.(Ser1715Arg),missense,PM2_Supporting+PS1+PS3,9,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5145C>G,p.(Ser1715Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA1,c.5152T>A,p.(Trp1718Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5152T>C,p.(Trp1718Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5152T>G,p.(Trp1718Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.5153G>T,p.(Trp1718Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5154G>C,p.(Trp1718Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5154G>T,p.(Trp1718Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5156T>A,p.(Val1719Glu),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5156T>G,p.(Val1719Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5162A>C,p.(Gln1721Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5164T>C,p.(Ser1722Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5191G>A,p.(Glu1731Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5196T>A,p.(His1732Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.71
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5196T>G,p.(His1732Gln),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.99
+PS3_but_VUS,BRCA1,c.5200T>A,p.(Phe1734Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5200T>C,p.(Phe1734Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5200T>G,p.(Phe1734Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5201T>G,p.(Phe1734Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5202T>A,p.(Phe1734Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5202T>G,p.(Phe1734Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5204A>G,p.(Glu1735Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5205A>T,p.(Glu1735Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5206G>C,p.(Val1736Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5206G>T,p.(Val1736Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5207T>A,p.(Val1736Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5207T>G,p.(Val1736Gly),missense,PM2_Supporting+PP4+PS3,9,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5212G>C,p.(Gly1738Arg),missense,PM2_Supporting+PS1+PS3,9,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5213G>C,p.(Gly1738Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5213G>T,p.(Gly1738Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5215G>C,p.(Asp1739His),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5215G>T,p.(Asp1739Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5216A>C,p.(Asp1739Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5217T>G,p.(Asp1739Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5222T>G,p.(Val1741Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5228G>A,p.(Gly1743Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5228G>T,p.(Gly1743Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5236C>G,p.(His1746Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5236C>T,p.(His1746Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5237A>C,p.(His1746Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5240A>C,p.(Gln1747Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5242G>C,p.(Gly1748Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5242G>T,p.(Gly1748Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5245C>T,p.(Pro1749Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5246C>A,p.(Pro1749Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5246C>G,p.(Pro1749Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5246C>T,p.(Pro1749Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5251C>G,p.(Arg1751Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5252G>C,p.(Arg1751Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5254G>A,p.(Ala1752Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5254G>C,p.(Ala1752Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5255C>T,p.(Ala1752Val),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA1,c.5257A>G,p.(Arg1753Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5258G>A,p.(Arg1753Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5258G>T,p.(Arg1753Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5259A>C,p.(Arg1753Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5259A>T,p.(Arg1753Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5270A>T,p.(Asp1757Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.69
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5277G>C,p.(Lys1759Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.24
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5277G>T,p.(Lys1759Asn),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.28
+PS3_but_VUS,BRCA1,c.5279T>A,p.(Ile1760Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5279T>C,p.(Ile1760Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5279T>G,p.(Ile1760Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5281T>A,p.(Phe1761Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5281T>G,p.(Phe1761Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5282T>C,p.(Phe1761Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5282T>G,p.(Phe1761Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5288G>T,p.(Gly1763Val),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5291T>A,p.(Leu1764Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5297T>A,p.(Ile1766Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5297T>C,p.(Ile1766Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5303G>T,p.(Cys1768Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5304C>G,p.(Cys1768Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5305T>G,p.(Tyr1769Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5308G>C,p.(Gly1770Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5308G>T,p.(Gly1770Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5323A>G,p.(Met1775Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5337A>G,p.(Gln1779=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.29
+PS3_but_VUS,BRCA1,c.5339T>C,p.(Leu1780Pro),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5339T>G,p.(Leu1780Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5348T>A,p.(Met1783Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5348T>G,p.(Met1783Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5351T>A,p.(Val1784Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5354A>C,p.(Gln1785Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5357T>C,p.(Leu1786Pro),missense,PP4+PS3,8,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5359T>C,p.(Cys1787Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5360G>A,p.(Cys1787Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+pathogenic_and_benign_evidence,BRCA1,c.5360G>C,p.(Cys1787Ser),missense,BS3+PM2_Supporting+PS1,1,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5361T>G,p.(Cys1787Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5362G>A,p.(Gly1788Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5362G>C,p.(Gly1788Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5362G>T,p.(Gly1788Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5363G>C,p.(Gly1788Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5363G>T,p.(Gly1788Val),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5365G>A,p.(Ala1789Thr),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5365G>C,p.(Ala1789Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5366C>A,p.(Ala1789Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5366C>T,p.(Ala1789Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5420T>A,p.(Ile1807Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5420T>G,p.(Ile1807Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5423T>G,p.(Val1808Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+PS3_but_VUS,BRCA1,c.5425G>T,p.(Val1809Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.14
+PS3_but_VUS,BRCA1,c.5426T>A,p.(Val1809Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA1,c.5426T>C,p.(Val1809Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5426T>G,p.(Val1809Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5429T>A,p.(Val1810Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5430G>C,p.(Val1810=),synonymous,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5431C>A,p.(Gln1811Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA1,c.5432A>C,p.(Gln1811Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA1,c.5432A>G,p.(Gln1811Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5432A>T,p.(Gln1811Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5434C>G,p.(Pro1812Ala),missense,PS3,4,3,VUS,0.18
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5438A>G,p.(Asp1813Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+PS3_but_VUS,BRCA1,c.5441C>G,p.(Ala1814Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5444G>C,p.(Trp1815Ser),missense,PS3,4,3,VUS,0.03
+PS3_but_VUS,BRCA1,c.5445G>C,p.(Trp1815Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA1,c.5445G>T,p.(Trp1815Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5450A>G,p.(Glu1817Gly),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.33
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5452G>T,p.(Asp1818Tyr),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.21
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5453A>C,p.(Asp1818Ala),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.22
+pathogenic_and_benign_evidence;PS3_but_VUS,BRCA1,c.5453A>G,p.(Asp1818Gly),missense,BP5+PM2_Supporting+PP3+PS3,4,3,VUS,0.35
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5453A>T,p.(Asp1818Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.28
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5470A>G,p.(Ile1824Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.93
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5471T>G,p.(Ile1824Ser),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.25
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA1,c.5472T>A,p.(Ile1824=),synonymous,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.23
+PS3_but_VUS,BRCA1,c.5472T>G,p.(Ile1824Met),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5495T>G,p.(Val1832Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5498T>A,p.(Val1833Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5498T>G,p.(Val1833Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5503C>G,p.(Arg1835Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5507A>T,p.(Glu1836Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5509T>A,p.(Trp1837Arg),missense,PM2_Supporting+PS1+PS3,9,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5510G>C,p.(Trp1837Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5510G>T,p.(Trp1837Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5511G>C,p.(Trp1837Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5511G>T,p.(Trp1837Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5513T>G,p.(Val1838Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA1,c.5515T>G,p.(Leu1839Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5519A>G,p.(Asp1840Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5519A>T,p.(Asp1840Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5520C>G,p.(Asp1840Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5521A>C,p.(Ser1841Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5522G>C,p.(Ser1841Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5522G>T,p.(Ser1841Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5523T>A,p.(Ser1841Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5523T>G,p.(Ser1841Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5525T>A,p.(Val1842Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5525T>C,p.(Val1842Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5525T>G,p.(Val1842Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5527G>C,p.(Ala1843Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5528C>A,p.(Ala1843Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5537A>C,p.(Gln1846Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5543A>C,p.(Gln1848Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5557T>A,p.(Tyr1853Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5557T>C,p.(Tyr1853His),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5557T>G,p.(Tyr1853Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5558A>C,p.(Tyr1853Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA1,c.5561T>C,p.(Leu1854Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.91T>G,p.(Trp31Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.92G>T,p.(Trp31Leu),missense,PS3,4,3,VUS,0.04
+PS3_but_VUS,BRCA2,c.93G>T,p.(Trp31Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+pathogenic_and_benign_evidence,BRCA2,c.1763A>G,p.(Asn588Ser),missense,BS1_Supporting+PP3,0,3,VUS,0.83
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA2,c.6842G>T,p.(Gly2281Val),missense,BS3+PM2_Supporting+PP3,-2,2,Likely Benign,0.92
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA2,c.6935A>T,p.(Asp2312Val),missense,BS3+BP5+PP3,-11,1,Benign,0.22
+PS3_but_VUS,BRCA2,c.7007G>C,p.(Arg2336Pro),missense,PS3,4,3,VUS,0.18
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA2,c.7447A>G,p.(Ser2483Gly),missense,BS1_Supporting+BS3+PP3,-4,2,Likely Benign,0.51
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA2,c.7448G>A,p.(Ser2483Asn),missense,BS3+BP5+PP3,-5,2,Likely Benign,0.35
+PS3_but_VUS,BRCA2,c.7466A>G,p.(Asp2489Gly),missense,PS3,4,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7492A>G,p.(Lys2498Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+pathogenic_and_benign_evidence,BRCA2,c.7499G>C,p.(Arg2500Thr),missense,BP5+PP3,-1,3,VUS,0.28
+pathogenic_and_benign_evidence,BRCA2,c.7512T>G,p.(Phe2504Leu),missense,BP5+PM2_Supporting+PP3,0,3,VUS,0.21
+PS3_but_VUS,BRCA2,c.7522G>C,p.(Gly2508Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.17
+PS3_but_VUS,BRCA2,c.7529T>C,p.(Leu2510Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+PS3_but_VUS,BRCA2,c.7682A>C,p.(Gln2561Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA2,c.7685T>G,p.(Phe2562Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7753G>A,p.(Gly2585Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.16
+PS3_but_VUS,BRCA2,c.7786G>A,p.(Gly2596Arg),missense,PS3,4,3,VUS,0.05
+PS3_but_VUS,BRCA2,c.7786G>C,p.(Gly2596Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.7787G>A,p.(Gly2596Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.7796A>G,p.(Glu2599Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7807G>C,p.(Ala2603Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7811T>C,p.(Leu2604Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7826G>A,p.(Gly2609Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA2,c.7826G>T,p.(Gly2609Val),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7832A>G,p.(Asp2611Gly),missense,PS3,4,3,VUS,0.1
+PS3_but_VUS,BRCA2,c.7847C>T,p.(Ser2616Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+PS3_but_VUS,BRCA2,c.7855T>G,p.(Trp2619Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.07
+PS3_but_VUS,BRCA2,c.7856G>C,p.(Trp2619Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA2,c.7857G>C,p.(Trp2619Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.17
+PS3_but_VUS,BRCA2,c.7864A>G,p.(Asn2622Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7867C>T,p.(His2623Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7868A>G,p.(His2623Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA2,c.7870T>A,p.(Tyr2624Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.09
+PS3_but_VUS,BRCA2,c.7870T>C,p.(Tyr2624His),missense,PM2_Supporting+PS3,5,3,VUS,0.06
+PS3_but_VUS,BRCA2,c.7870T>G,p.(Tyr2624Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.1
+PS3_but_VUS,BRCA2,c.7871A>G,p.(Tyr2624Cys),missense,PS3,4,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7874G>T,p.(Arg2625Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.12
+PS3_but_VUS,BRCA2,c.7875A>T,p.(Arg2625Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.11
+PS3_but_VUS,BRCA2,c.7876T>C,p.(Trp2626Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA2,c.7878G>C,p.(Trp2626Cys),missense,PS3,4,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7880T>A,p.(Ile2627Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7888A>C,p.(Lys2630Gln),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA2,c.7925T>C,p.(Phe2642Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA2,c.7940T>C,p.(Leu2647Pro),missense,PM2_Supporting+PP4+PS3,9,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7955T>G,p.(Val2652Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.7964A>G,p.(Gln2655Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.7967T>C,p.(Leu2656Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA2,c.7970A>C,p.(Lys2657Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.7978T>G,p.(Tyr2660Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA2,c.8057T>C,p.(Leu2686Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8059G>T,p.(Val2687Phe),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8063T>C,p.(Leu2688Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8072C>A,p.(Ser2691Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8072C>T,p.(Ser2691Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8162T>A,p.(Leu2721His),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8164A>G,p.(Thr2722Ala),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8165C>A,p.(Thr2722Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8165C>T,p.(Thr2722Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8167G>A,p.(Asp2723Asn),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8167G>C,p.(Asp2723His),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8167G>T,p.(Asp2723Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8168A>C,p.(Asp2723Ala),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8168A>T,p.(Asp2723Val),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8169T>A,p.(Asp2723Glu),missense,PS3,4,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8170G>T,p.(Gly2724Trp),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.8171G>T,p.(Gly2724Val),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8174G>T,p.(Trp2725Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8177A>G,p.(Tyr2726Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8188G>C,p.(Ala2730Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8242G>A,p.(Gly2748Ser),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8243G>A,p.(Gly2748Asp),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8252T>G,p.(Ile2751Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8258T>C,p.(Leu2753Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8339C>A,p.(Ala2780Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8342A>T,p.(Asn2781Ile),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8350C>T,p.(Arg2784Trp),missense,PS3,4,3,VUS,0.02
+pathogenic_and_benign_evidence,BRCA2,c.8351G>A,p.(Arg2784Gln),missense,BP5+PS3,-4,2,Likely Benign,0.01
+PS3_but_VUS,BRCA2,c.8356G>C,p.(Ala2786Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.8362T>C,p.(Trp2788Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8375T>C,p.(Leu2792Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.8375T>G,p.(Leu2792Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.8377G>A,p.(Gly2793Arg),missense,PS3,4,3,VUS,0.09
+pathogenic_and_benign_evidence,BRCA2,c.8420C>T,p.(Ser2807Leu),missense,BS1_Supporting+PP3,0,3,VUS,0.33
+PS3_but_VUS,BRCA2,c.8455G>C,p.(Asp2819His),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.8456A>T,p.(Asp2819Val),missense,PM2_Supporting+PS3,5,3,VUS,0.03
+PS3_but_VUS,BRCA2,c.8470A>G,p.(Arg2824Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.08
+PS3_but_VUS,BRCA2,c.8471G>C,p.(Arg2824Thr),missense,PM2_Supporting+PS3,5,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.8477A>G,p.(Tyr2826Cys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.8525G>C,p.(Arg2842Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.04
+PS3_but_VUS,BRCA2,c.8773C>A,p.(Gln2925Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.9008G>A,p.(Gly3003Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.13
+PS3_but_VUS,BRCA2,c.9016T>G,p.(Tyr3006Asp),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+pathogenic_and_benign_evidence;PP3_with_BS3,BRCA2,c.9038C>T,p.(Thr3013Ile),missense,BS1_Supporting+BS3+BP5+PP3,-12,1,Benign,0.22
+PS3_but_VUS,BRCA2,c.9082G>C,p.(Ala3028Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.05
+pathogenic_and_benign_evidence,BRCA2,c.9086C>T,p.(Ala3029Val),missense,BS1_Supporting+PP3,0,3,VUS,0.3
+PS3_but_VUS,BRCA2,c.9154C>T,p.(Arg3052Trp),missense,PS3,4,3,VUS,0.02
+PS3_but_VUS,BRCA2,c.9155G>T,p.(Arg3052Leu),missense,PM2_Supporting+PS3,5,3,VUS,0.01
+PS3_but_VUS,BRCA2,c.9215T>A,p.(Val3072Glu),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9217G>T,p.(Asp3073Tyr),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9218A>G,p.(Asp3073Gly),missense,PP3+PS3,5,3,VUS,0.22
+PS3_but_VUS,BRCA2,c.9226G>C,p.(Gly3076Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9227G>A,p.(Gly3076Glu),missense,PS3,4,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9227G>T,p.(Gly3076Val),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9284A>G,p.(Asp3095Gly),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9302T>C,p.(Leu3101Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9302T>G,p.(Leu3101Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9364G>C,p.(Ala3122Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9372C>A,p.(Asn3124Lys),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9373C>T,p.(Leu3125Phe),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9374T>A,p.(Leu3125His),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9374T>G,p.(Leu3125Arg),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9437T>C,p.(Phe3146Ser),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+PS3_but_VUS,BRCA2,c.9539T>C,p.(Leu3180Pro),missense,PM2_Supporting+PS3,5,3,VUS,0.0
+pathogenic_and_benign_evidence;PVS1_but_VUS,BRCA2,c.9925G>T,p.(Glu3309Ter),nonsense,BS3+PM2_Supporting+PVS1,5,3,VUS,0.01

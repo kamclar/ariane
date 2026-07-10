@@ -1,0 +1,8 @@
+tier,tier_label,count,top_source_bucket,max_spliceai
+A,PS3+PP3 one-step-short pathogenic VUS,4,PS3_PP3_splice_or_functional_followup,0.65
+B,Strong pathogenic evidence one step short,442,PS3_PM2_needs_one_more_pathogenic_support,0.23
+C,Mixed benign and pathogenic evidence,11,pathogenic_and_benign_evidence,0.83
+C,PP3 plus BS3 conflict,128,pathogenic_and_benign_evidence;PP3_with_BS3,0.99
+C,PVS1 plus benign functional conflict,1,pathogenic_and_benign_evidence;PVS1_but_VUS,0.01
+D,Benign-leaning BP4/BP7 plus PM2 VUS,1276,BP4_BP7_PM2_near_pathogenic_density,0.10
+E,PM2-only background VUS,5046,PM2_only_pathogenic_neighborhood,0.68

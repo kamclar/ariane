@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="920" height="360" fill="#ffffff"/>
+<text x="28" y="32" class="title">Grouped classes by variant type</text>
+<text x="28" y="81" class="label">missense</text>
+<rect x="190.0" y="58" width="457.0" height="36" fill="#16a34a" opacity="0.84"/>
+<text x="196.0" y="81" class="small" fill="#ffffff">28762</text>
+<rect x="647.0" y="58" width="101.3" height="36" fill="#64748b" opacity="0.84"/>
+<text x="653.0" y="81" class="small" fill="#ffffff">6376</text>
+<rect x="748.4" y="58" width="1.6" height="36" fill="#b91c1c" opacity="0.84"/>
+<text x="762" y="81" class="small">path frac 0.0029</text>
+<text x="28" y="147" class="label">synonymous</text>
+<rect x="190.0" y="124" width="463.6" height="36" fill="#16a34a" opacity="0.84"/>
+<text x="196.0" y="147" class="small" fill="#ffffff">8189</text>
+<rect x="653.6" y="124" width="95.9" height="36" fill="#64748b" opacity="0.84"/>
+<text x="659.6" y="147" class="small" fill="#ffffff">1693</text>
+<rect x="749.5" y="124" width="0.5" height="36" fill="#b91c1c" opacity="0.84"/>
+<text x="762" y="147" class="small">path frac 0.0009</text>
+<text x="28" y="213" class="label">nonsense</text>
+<rect x="190.0" y="190" width="0.2" height="36" fill="#16a34a" opacity="0.84"/>
+<rect x="190.2" y="190" width="16.4" height="36" fill="#64748b" opacity="0.84"/>
+<rect x="206.6" y="190" width="543.4" height="36" fill="#b91c1c" opacity="0.84"/>
+<text x="212.6" y="213" class="small" fill="#ffffff">2326</text>
+<text x="762" y="213" class="small">path frac 0.9704</text>
+<text x="28" y="279" class="label">initiation_codon</text>
+<rect x="190.0" y="256" width="0.0" height="36" fill="#16a34a" opacity="0.84"/>
+<rect x="190.0" y="256" width="466.7" height="36" fill="#64748b" opacity="0.84"/>
+<text x="196.0" y="279" class="small" fill="#ffffff">15</text>
+<rect x="656.7" y="256" width="93.3" height="36" fill="#b91c1c" opacity="0.84"/>
+<text x="662.7" y="279" class="small" fill="#ffffff">3</text>
+<text x="762" y="279" class="small">path frac 0.1667</text>
+<rect x="190" y="314" width="14" height="14" fill="#16a34a"/>
+<text x="210" y="326" class="small">benign</text>
+<rect x="320" y="314" width="14" height="14" fill="#64748b"/>
+<text x="340" y="326" class="small">vus</text>
+<rect x="450" y="314" width="14" height="14" fill="#b91c1c"/>
+<text x="470" y="326" class="small">pathogenic</text>
+</svg>

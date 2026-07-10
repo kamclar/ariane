@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="370" viewBox="0 0 980 370">
+<style>
+text{font-family:Arial,sans-serif;font-size:13px;fill:#222}
+.title{font-size:20px;font-weight:bold}
+.small{font-size:11px;fill:#555}
+.bar{fill:#3f7f5f}
+</style>
+<text x="24" y="30" class="title">PM2 Loss Simulation Transitions</text>
+<text x="24" y="73">2 Likely Benign -&gt; 2 Likely Benign</text>
+<rect x="330" y="60" width="560" height="18" class="bar"/>
+<text x="898" y="74" class="small">31270</text>
+<text x="24" y="103">3 VUS -&gt; 3 VUS</text>
+<rect x="330" y="90" width="112" height="18" class="bar"/>
+<text x="450" y="104" class="small">6269</text>
+<text x="24" y="133">5 Pathogenic -&gt; 5 Pathogenic</text>
+<rect x="330" y="120" width="38" height="18" class="bar"/>
+<text x="376" y="134" class="small">2126</text>
+<text x="24" y="163">2 Likely Benign -&gt; 3 VUS</text>
+<rect x="330" y="150" width="30" height="18" class="bar"/>
+<text x="368" y="164" class="small">1708</text>
+<text x="24" y="193">3 VUS -&gt; 2 Likely Benign</text>
+<rect x="330" y="180" width="22" height="18" class="bar"/>
+<text x="360" y="194" class="small">1276</text>
+<text x="24" y="223">1 Benign -&gt; 1 Benign</text>
+<rect x="330" y="210" width="5" height="18" class="bar"/>
+<text x="343" y="224" class="small">328</text>
+<text x="24" y="253">4 Likely Pathogenic -&gt; 3 VUS</text>
+<rect x="330" y="240" width="2" height="18" class="bar"/>
+<text x="340" y="254" class="small">134</text>
+<text x="24" y="283">5 Pathogenic -&gt; 4 Likely Pathogenic</text>
+<rect x="330" y="270" width="0" height="18" class="bar"/>
+<text x="338" y="284" class="small">53</text>
+<text x="24" y="313">4 Likely Pathogenic -&gt; 4 Likely Pathogenic</text>
+<rect x="330" y="300" width="0" height="18" class="bar"/>
+<text x="338" y="314" class="small">2</text>
+</svg>

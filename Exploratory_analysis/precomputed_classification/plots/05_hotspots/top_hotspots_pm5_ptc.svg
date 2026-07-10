@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="160" viewBox="0 0 980 160">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="980" height="160" fill="#ffffff"/>
+<text x="28" y="34" class="title">Top PM5_PTC hotspots</text>
+<text x="26" y="83" class="small">BRCA2 bin 106 c.8975-9060</text>
+<rect x="220" y="66" width="650" height="24" fill="#f59e0b"/>
+<text x="878" y="83" class="small">2.06x, n=25, 9.7%</text>
+</svg>

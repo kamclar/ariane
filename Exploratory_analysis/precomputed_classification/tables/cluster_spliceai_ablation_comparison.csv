@@ -1,0 +1,3 @@
+gene,n_bins,same_cluster_bins,changed_cluster_bins,same_percent
+BRCA1,120,120,0,100.00
+BRCA2,120,120,0,100.00

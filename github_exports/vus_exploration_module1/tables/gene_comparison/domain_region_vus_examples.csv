@@ -1,0 +1,1061 @@
+gene,domain_context,score,reasons,c_notation,p_notation,spliceai_score,criteria
+BRCA1,BRCT phosphopeptide-binding,70,SpliceAI>=0.20;PS3;PP3,c.5044G>A,p.(Glu1682Lys),0.57,BP5:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,70,SpliceAI>=0.20;PS3;PP3,c.5123C>A,p.(Ala1708Glu),0.22,PP3:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,70,SpliceAI>=0.20;PS3;PP3,c.5123C>G,p.(Ala1708Gly),0.4,PP3:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,70,SpliceAI>=0.20;PS3;PP3,c.5453A>G,p.(Asp1818Gly),0.35,BP5:Moderate:-2;PM2_Supporting:Supporting:1;PP3:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,70,SpliceAI>=0.20;PS3;PP3,c.190T>G,p.(Cys64Gly),0.65,PP3:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,70,SpliceAI>=0.20;PS3;PP3,c.9218A>G,p.(Asp3073Gly),0.22,PP3:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.4987A>C,p.(Met1663Leu),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.4992C>A,p.(Leu1664=),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.4998C>T,p.(Tyr1666=),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5007C>T,p.(Ala1669=),0.21,PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5027T>C,p.(Leu1676Ser),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5044G>C,p.(Glu1682Gln),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5046A>T,p.(Glu1682Asp),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5048A>G,p.(Glu1683Gly),0.38,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5051C>G,p.(Thr1684Ser),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5074G>T,p.(Asp1692Tyr),0.74,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5078C>G,p.(Ala1693Gly),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5332G>C,p.(Asp1778His),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5332G>T,p.(Asp1778Tyr),0.58,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,BRCT phosphopeptide-binding,45,SpliceAI>=0.20;PP3,c.5339T>A,p.(Leu1780Gln),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.139T>A,p.(Cys47Ser),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.220C>A,p.(Gln74Lys),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.221A>T,p.(Gln74Leu),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.224A>T,p.(Glu75Val),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.238A>C,p.(Ser80Arg),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.251A>T,p.(Glu84Val),0.63,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.263A>T,p.(Lys88Ile),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.283C>G,p.(Leu95Val),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.28G>A,p.(Glu10Lys),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.290C>T,p.(Thr97Ile),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.292G>T,p.(Gly98Cys),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.295T>A,p.(Leu99Met),0.75,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.296T>G,p.(Leu99Trp),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.297G>A,p.(Leu99=),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.297G>C,p.(Leu99Phe),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.297G>T,p.(Leu99Phe),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.299A>G,p.(Glu100Gly),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,RING zinc-binding/E3 ligase,45,SpliceAI>=0.20;PP3,c.299A>T,p.(Glu100Val),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4184A>C,p.(Gln1395Pro),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4184A>G,p.(Gln1395Arg),0.36,BP5:Moderate:-2;PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4184A>T,p.(Gln1395Leu),0.46,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4185G>C,p.(Gln1395His),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4185G>T,p.(Gln1395His),0.96,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4186C>A,p.(Gln1396Lys),0.48,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4186C>G,p.(Gln1396Glu),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4187A>C,p.(Gln1396Pro),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4187A>G,p.(Gln1396Arg),0.87,PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4187A>T,p.(Gln1396Leu),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4188G>A,p.(Gln1396=),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4188G>C,p.(Gln1396His),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4188G>T,p.(Gln1396His),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA1,coiled-coil PALB2 interaction,45,SpliceAI>=0.20;PP3,c.4218G>T,p.(Lys1406Asn),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10041A>T,p.(Ile3347=),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10043A>T,p.(Asn3348Ile),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10046C>A,p.(Thr3349Asn),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10047C>T,p.(Thr3349=),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10050A>C,p.(Gln3350His),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10050A>T,p.(Gln3350His),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10051G>A,p.(Ala3351Thr),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10051G>C,p.(Ala3351Pro),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10051G>T,p.(Ala3351Ser),0.47,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10059G>C,p.(Leu3353Phe),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10059G>T,p.(Leu3353Phe),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10061C>T,p.(Ser3354Phe),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10063G>C,p.(Gly3355Arg),0.4,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10063G>T,p.(Gly3355Cys),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10064G>C,p.(Gly3355Ala),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10064G>T,p.(Gly3355Val),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10068A>C,p.(Ser3356=),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10096A>T,p.(Ser3366Cys),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.10097G>T,p.(Ser3366Ile),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9627T>A,p.(Pro3209=),0.77,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9636A>T,p.(Gly3212=),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9650T>A,p.(Met3217Lys),0.56,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9650T>G,p.(Met3217Arg),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9662A>G,p.(Asn3221Ser),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9664T>A,p.(Cys3222Ser),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9667G>C,p.(Glu3223Gln),0.7,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9676T>A,p.(Tyr3226Asn),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9682A>G,p.(Ser3228Gly),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9682A>T,p.(Ser3228Cys),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9683G>T,p.(Ser3228Ile),0.35,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9686C>T,p.(Pro3229Leu),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9690A>C,p.(Leu3230Phe),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9690A>T,p.(Leu3230Phe),0.36,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9693A>C,p.(Ser3231=),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9693A>T,p.(Ser3231=),0.59,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9694C>T,p.(Leu3232Phe),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9697T>A,p.(Cys3233Ser),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9698G>C,p.(Cys3233Ser),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9698G>T,p.(Cys3233Phe),0.36,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9700A>T,p.(Met3234Leu),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9701T>A,p.(Met3234Lys),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9701T>G,p.(Met3234Arg),0.99,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9702G>A,p.(Met3234Ile),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9702G>T,p.(Met3234Ile),0.38,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9703G>C,p.(Ala3235Pro),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9703G>T,p.(Ala3235Ser),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9705C>T,p.(Ala3235=),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9707A>G,p.(Lys3236Arg),0.58,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9708A>C,p.(Lys3236Asn),0.75,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9708A>T,p.(Lys3236Asn),0.65,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9709A>G,p.(Arg3237Gly),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9710G>C,p.(Arg3237Thr),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9710G>T,p.(Arg3237Met),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9711G>T,p.(Arg3237Ser),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9714G>T,p.(Lys3238Asn),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9718G>T,p.(Val3240Phe),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9727C>G,p.(Pro3243Ala),0.65,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9730G>C,p.(Val3244Leu),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9730G>T,p.(Val3244Phe),0.37,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9732C>T,p.(Val3244=),0.49,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9735A>T,p.(Ser3245=),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9736G>C,p.(Ala3246Pro),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9736G>T,p.(Ala3246Ser),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9742A>G,p.(Met3248Val),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9851G>A,p.(Ser3284Asn),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9854C>A,p.(Pro3285His),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9875C>A,p.(Pro3292Gln),0.58,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9876G>A,p.(Pro3292=),0.41,PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,45,SpliceAI>=0.20;PP3,c.9879T>A,p.(Ala3293=),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7447A>C,p.(Ser2483Arg),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7447A>T,p.(Ser2483Cys),0.7,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7448G>C,p.(Ser2483Thr),0.4,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7448G>T,p.(Ser2483Ile),0.65,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7454A>T,p.(Gln2485Leu),0.4,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7455G>T,p.(Gln2485His),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7469T>G,p.(Ile2490Arg),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7491G>T,p.(Lys2497Asn),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7496A>T,p.(Gln2499Leu),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7499G>C,p.(Arg2500Thr),0.28,BP5:Moderate:-2;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7499G>T,p.(Arg2500Met),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7504C>G,p.(Arg2502Gly),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7505G>T,p.(Arg2502Leu),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7506C>T,p.(Arg2502=),0.27,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7507G>T,p.(Val2503Phe),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7508T>A,p.(Val2503Asp),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7508T>G,p.(Val2503Gly),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7510T>G,p.(Phe2504Val),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7512T>A,p.(Phe2504Leu),0.21,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7512T>G,p.(Phe2504Leu),0.21,BP5:Moderate:-2;PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7513C>A,p.(Pro2505Thr),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7513C>G,p.(Pro2505Ala),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7514C>G,p.(Pro2505Arg),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7516C>A,p.(Gln2506Lys),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7516C>G,p.(Gln2506Glu),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7517A>C,p.(Gln2506Pro),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7517A>G,p.(Gln2506Arg),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7517A>T,p.(Gln2506Leu),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7518G>A,p.(Gln2506=),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7518G>C,p.(Gln2506His),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7518G>T,p.(Gln2506His),0.26,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7519C>G,p.(Pro2507Ala),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7525A>C,p.(Ser2509Arg),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7531T>G,p.(Tyr2511Asp),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7535T>C,p.(Leu2512Pro),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7617G>A,p.(Gln2539=),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7617G>C,p.(Gln2539His),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7617G>T,p.(Gln2539His),0.6,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7619T>A,p.(Leu2540Gln),0.72,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7648A>T,p.(Ile2550Leu),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7650A>T,p.(Ile2550=),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7657A>T,p.(Asn2553Tyr),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7662C>G,p.(Ser2554Arg),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7665A>T,p.(Lys2555Asn),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7673A>T,p.(Glu2558Val),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7684T>G,p.(Phe2562Val),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7689C>G,p.(His2563Gln),0.52,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7694A>T,p.(Glu2565Val),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7696G>T,p.(Asp2566Tyr),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7704T>A,p.(Phe2568Leu),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7705G>A,p.(Gly2569Ser),0.42,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7705G>C,p.(Gly2569Arg),0.42,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7705G>T,p.(Gly2569Cys),0.42,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7706G>A,p.(Gly2569Asp),0.43,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7706G>C,p.(Gly2569Ala),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7706G>T,p.(Gly2569Val),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7707T>A,p.(Gly2569=),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7707T>C,p.(Gly2569=),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7707T>G,p.(Gly2569=),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7708A>C,p.(Lys2570Gln),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7708A>G,p.(Lys2570Glu),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7709A>C,p.(Lys2570Thr),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7709A>G,p.(Lys2570Arg),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7709A>T,p.(Lys2570Met),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7710G>A,p.(Lys2570=),0.4,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7710G>C,p.(Lys2570Asn),0.42,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7710G>T,p.(Lys2570Asn),0.4,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7712A>T,p.(Glu2571Val),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7723A>G,p.(Thr2575Ala),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7728A>G,p.(Gly2576=),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7731A>G,p.(Lys2577=),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7733G>T,p.(Gly2578Val),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7745C>G,p.(Ala2582Gly),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7749T>G,p.(Asp2583Glu),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7752T>G,p.(Gly2584=),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7755A>G,p.(Gly2585=),0.32,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7779A>T,p.(Gly2593=),0.99,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7784C>T,p.(Ala2595Val),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7788A>T,p.(Gly2596=),0.58,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7793A>T,p.(Glu2598Val),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7802A>G,p.(Tyr2601Cys),0.93,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7805G>A,p.(Arg2602Lys),0.73,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7805G>C,p.(Arg2602Thr),0.92,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7805G>T,p.(Arg2602Met),0.93,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7828G>A,p.(Val2610Met),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7829T>A,p.(Val2610Glu),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7850G>A,p.(Arg2617Lys),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7850G>T,p.(Arg2617Ile),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7856G>T,p.(Trp2619Leu),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7857G>T,p.(Trp2619Cys),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7858G>T,p.(Val2620Phe),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7862A>C,p.(Tyr2621Ser),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7862A>T,p.(Tyr2621Phe),0.41,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7864A>T,p.(Asn2622Tyr),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7865A>T,p.(Asn2622Ile),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7868A>C,p.(His2623Pro),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7868A>T,p.(His2623Leu),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7875A>G,p.(Arg2625=),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7898C>G,p.(Ala2633Gly),0.84,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7904A>T,p.(Glu2635Val),0.66,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7922A>T,p.(Glu2641Val),0.61,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7963C>A,p.(Gln2655Lys),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7974C>T,p.(Tyr2658=),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7975A>C,p.(Arg2659=),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7976G>T,p.(Arg2659Ile),0.89,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.7985C>G,p.(Thr2662Arg),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8030A>T,p.(Glu2677Val),0.97,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8045C>G,p.(Ala2682Gly),0.83,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8212G>T,p.(Ala2738Ser),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8326T>G,p.(Leu2776Val),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8330A>G,p.(Lys2777Arg),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8330A>T,p.(Lys2777Met),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8331G>A,p.(Lys2777=),0.78,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8331G>C,p.(Lys2777Asn),0.85,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8331G>T,p.(Lys2777Asn),0.86,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8332A>T,p.(Ile2778Phe),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8362T>A,p.(Trp2788Arg),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8370C>T,p.(Thr2790=),0.46,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8378G>T,p.(Gly2793Val),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8379A>T,p.(Gly2793=),0.22,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8389G>T,p.(Asp2797Tyr),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8390A>C,p.(Asp2797Ala),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8390A>T,p.(Asp2797Val),0.38,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8396G>A,p.(Arg2799Lys),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8397A>G,p.(Arg2799=),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8416T>G,p.(Ser2806Ala),0.47,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8418A>T,p.(Ser2806=),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8419T>G,p.(Ser2807Ala),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8420C>T,p.(Ser2807Leu),0.33,BS1_Supporting:Supporting:-1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8421G>C,p.(Ser2807=),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8421G>T,p.(Ser2807=),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8439A>T,p.(Gly2813=),0.94,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8442T>G,p.(Asn2814Lys),0.73,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8445T>A,p.(Val2815=),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8457T>G,p.(Asp2819Glu),0.82,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8462T>G,p.(Ile2821Ser),0.97,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8486A>C,p.(Gln2829Pro),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8487G>A,p.(Gln2829=),0.91,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8487G>C,p.(Gln2829His),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8487G>T,p.(Gln2829His),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8528A>G,p.(Asn2843Ser),0.57,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8615A>T,p.(Glu2872Val),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8630A>T,p.(Glu2877Val),0.85,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8631A>G,p.(Glu2877=),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8632G>A,p.(Glu2878Lys),0.72,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8632G>C,p.(Glu2878Gln),0.89,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8634A>G,p.(Glu2878=),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8635A>G,p.(Asn2879Asp),0.78,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8636A>G,p.(Asn2879Ser),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8637C>G,p.(Asn2879Lys),0.34,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8662C>G,p.(Arg2888Gly),0.61,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8674A>G,p.(Arg2892Gly),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8697A>G,p.(Gln2899=),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8751T>C,p.(Leu2917=),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8751T>G,p.(Leu2917=),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8753A>C,p.(Glu2918Ala),0.76,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8753A>G,p.(Glu2918Gly),0.74,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8753A>T,p.(Glu2918Val),0.76,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8754G>A,p.(Glu2918=),0.98,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8754G>C,p.(Glu2918Asp),0.99,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8754G>T,p.(Glu2918Asp),0.95,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8755G>T,p.(Gly2919Cys),0.42,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8780G>C,p.(Arg2927Thr),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8780G>T,p.(Arg2927Ile),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8787G>T,p.(Leu2929Phe),0.38,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8788A>T,p.(Asn2930Tyr),0.48,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8789A>T,p.(Asn2930Ile),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8792A>T,p.(Asn2931Ile),0.58,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8794C>T,p.(His2932Tyr),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8816A>G,p.(Lys2939Arg),0.43,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8893G>T,p.(Asp2965Tyr),0.9,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8914T>G,p.(Leu2972Val),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8922T>G,p.(Ile2974Met),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8957T>G,p.(Ile2986Arg),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8961G>T,p.(Leu2987=),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8964T>G,p.(Ser2988Arg),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8968T>A,p.(Trp2990Arg),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8969G>T,p.(Trp2990Leu),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8971C>G,p.(Arg2991Gly),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8976A>C,p.(Pro2992=),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8978C>T,p.(Ser2993Leu),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8981C>T,p.(Ser2994Leu),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8982A>G,p.(Ser2994=),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8982A>T,p.(Ser2994=),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8983G>A,p.(Asp2995Asn),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8983G>C,p.(Asp2995His),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8983G>T,p.(Asp2995Tyr),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8988A>T,p.(Leu2996Phe),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8989T>A,p.(Tyr2997Asn),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8989T>C,p.(Tyr2997His),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8989T>G,p.(Tyr2997Asp),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8990A>T,p.(Tyr2997Phe),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8991T>C,p.(Tyr2997=),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8992T>A,p.(Ser2998Thr),0.47,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8992T>C,p.(Ser2998Pro),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8992T>G,p.(Ser2998Ala),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8993C>A,p.(Ser2998Tyr),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8993C>G,p.(Ser2998Cys),0.27,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8993C>T,p.(Ser2998Phe),0.2,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8994T>A,p.(Ser2998=),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8994T>C,p.(Ser2998=),0.48,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8994T>G,p.(Ser2998=),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8995C>A,p.(Leu2999Met),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8995C>G,p.(Leu2999Val),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8996T>A,p.(Leu2999Gln),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8996T>C,p.(Leu2999Pro),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8996T>G,p.(Leu2999Arg),0.54,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8997G>C,p.(Leu2999=),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8997G>T,p.(Leu2999=),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8998T>A,p.(Leu3000Ile),0.53,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8998T>C,p.(Leu3000=),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.8998T>G,p.(Leu3000Val),0.55,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9000A>C,p.(Leu3000Phe),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9000A>T,p.(Leu3000Phe),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9001A>C,p.(Thr3001Pro),0.46,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9001A>G,p.(Thr3001Ala),0.5,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9001A>T,p.(Thr3001Ser),0.47,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9002C>A,p.(Thr3001Lys),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9002C>G,p.(Thr3001Arg),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9002C>T,p.(Thr3001Ile),0.48,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9003A>C,p.(Thr3001=),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9003A>G,p.(Thr3001=),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9003A>T,p.(Thr3001=),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9004G>C,p.(Glu3002Gln),0.56,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9005A>C,p.(Glu3002Ala),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9005A>G,p.(Glu3002Gly),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9005A>T,p.(Glu3002Val),0.31,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9006A>C,p.(Glu3002Asp),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9006A>T,p.(Glu3002Asp),0.35,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9007G>A,p.(Gly3003Arg),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9007G>C,p.(Gly3003Arg),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9008G>T,p.(Gly3003Val),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9009A>T,p.(Gly3003=),0.76,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9012G>T,p.(Lys3004Asn),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9015A>G,p.(Arg3005=),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9018C>T,p.(Tyr3006=),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9020G>T,p.(Arg3007Ile),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9028C>A,p.(His3010Asn),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9028C>T,p.(His3010Tyr),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9031C>A,p.(Leu3011Ile),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9031C>T,p.(Leu3011Phe),0.23,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9035C>T,p.(Ala3012Val),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9038C>A,p.(Thr3013Asn),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9041C>T,p.(Ser3014Leu),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9044A>G,p.(Lys3015Arg),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9052A>G,p.(Ser3018Gly),0.83,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9057A>G,p.(Lys3019=),0.9,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9068C>G,p.(Ala3023Gly),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9083C>T,p.(Ala3028Val),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9086C>A,p.(Ala3029Glu),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9086C>G,p.(Ala3029Gly),0.35,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9086C>T,p.(Ala3029Val),0.3,BS1_Supporting:Supporting:-1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9087G>C,p.(Ala3029=),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9098C>G,p.(Thr3033Ser),0.87,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9100C>A,p.(Gln3034Lys),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9101A>G,p.(Gln3034Arg),0.24,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9106C>A,p.(Gln3036Lys),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9109C>A,p.(Gln3037Lys),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9117G>C,p.(Pro3039=),0.91,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9117G>T,p.(Pro3039=),0.92,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9118G>A,p.(Val3040Ile),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9118G>C,p.(Val3040Leu),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9118G>T,p.(Val3040Phe),0.45,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9119T>A,p.(Val3040Asp),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9121T>A,p.(Ser3041Thr),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9121T>C,p.(Ser3041Pro),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9121T>G,p.(Ser3041Ala),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9123A>G,p.(Ser3041=),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9123A>T,p.(Ser3041=),0.41,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9124G>A,p.(Asp3042Asn),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9124G>C,p.(Asp3042His),0.49,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9124G>T,p.(Asp3042Tyr),0.52,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9125A>T,p.(Asp3042Val),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9126T>A,p.(Asp3042Glu),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9126T>G,p.(Asp3042Glu),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9127G>A,p.(Glu3043Lys),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9128A>G,p.(Glu3043Gly),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9128A>T,p.(Glu3043Val),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9129A>G,p.(Glu3043=),0.21,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9130A>G,p.(Ile3044Val),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9130A>T,p.(Ile3044Phe),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9131T>A,p.(Ile3044Asn),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9131T>C,p.(Ile3044Thr),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9131T>G,p.(Ile3044Ser),0.41,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9132T>A,p.(Ile3044=),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9132T>C,p.(Ile3044=),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9132T>G,p.(Ile3044Met),0.35,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9133T>A,p.(Leu3045Ile),0.32,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9133T>G,p.(Leu3045Val),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9135A>T,p.(Leu3045Phe),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9136T>A,p.(Phe3046Ile),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9136T>C,p.(Phe3046Leu),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9136T>G,p.(Phe3046Val),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9137T>A,p.(Phe3046Tyr),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9137T>C,p.(Phe3046Ser),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9137T>G,p.(Phe3046Cys),0.43,PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9138T>A,p.(Phe3046Leu),0.2,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9138T>C,p.(Phe3046=),0.35,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9138T>G,p.(Phe3046Leu),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9139C>A,p.(Gln3047Lys),0.43,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9139C>G,p.(Gln3047Glu),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9140A>C,p.(Gln3047Pro),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9140A>G,p.(Gln3047Arg),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9140A>T,p.(Gln3047Leu),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9141G>A,p.(Gln3047=),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9141G>C,p.(Gln3047His),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9141G>T,p.(Gln3047His),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9142A>C,p.(Ile3048Leu),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9142A>G,p.(Ile3048Val),0.29,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9142A>T,p.(Ile3048Phe),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9143T>A,p.(Ile3048Asn),0.28,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9143T>C,p.(Ile3048Thr),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9143T>G,p.(Ile3048Ser),0.3,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9256G>C,p.(Gly3086Arg),0.52,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9420T>A,p.(Ala3140=),0.24,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9497T>G,p.(Val3166Gly),0.39,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9501G>C,p.(Glu3167Asp),0.26,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9504T>G,p.(Asn3168Lys),0.94,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9506T>G,p.(Ile3169Ser),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9521A>G,p.(Asn3174Ser),0.34,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,DNA-binding domain / helical-OB-DSS1,45,SpliceAI>=0.20;PP3,c.9525A>T,p.(Glu3175Asp),0.25,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.100G>A,p.(Glu34Lys),0.44,PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.100G>C,p.(Glu34Gln),0.36,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.63A>G,p.(Lys21=),0.57,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.65C>T,p.(Ala22Val),0.96,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.66A>C,p.(Ala22=),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.66A>G,p.(Ala22=),0.33,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.66A>T,p.(Ala22=),0.44,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.67G>A,p.(Asp23Asn),0.59,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.67G>C,p.(Asp23His),0.93,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.67G>T,p.(Asp23Tyr),0.93,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.69T>G,p.(Asp23Glu),0.22,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.98A>C,p.(Glu33Ala),0.88,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.98A>T,p.(Glu33Val),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.99A>C,p.(Glu33Asp),0.27,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,PALB2 binding N-terminal,45,SpliceAI>=0.20;PP3,c.99A>T,p.(Glu33Asp),0.37,PM2_Supporting:Supporting:1;PP3:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,30,SpliceAI>=0.20,c.10048C>T,p.(Gln3350Ter),0.31,PM2_Supporting:Supporting:1
+BRCA2,C-terminal RAD51/NLS context,28,PVS1;BS3,c.9925G>T,p.(Glu3309Ter),0.01,BS3:Strong:-4;PM2_Supporting:Supporting:1;PVS1:Very Strong:8
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4951T>C,p.(Ser1651Pro),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4955T>A,p.(Met1652Lys),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4955T>G,p.(Met1652Arg),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4957G>A,p.(Val1653Met),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4957G>C,p.(Val1653Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4957G>T,p.(Val1653Leu),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4958T>A,p.(Val1653Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4963T>C,p.(Ser1655Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4964C>A,p.(Ser1655Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4964C>G,p.(Ser1655Cys),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4964C>T,p.(Ser1655Phe),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4970T>A,p.(Leu1657Gln),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4970T>C,p.(Leu1657Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4970T>G,p.(Leu1657Arg),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.4994T>A,p.(Val1665Glu),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5003T>C,p.(Phe1668Ser),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5005G>C,p.(Ala1669Pro),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5009G>A,p.(Arg1670Lys),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5015A>C,p.(His1672Pro),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5041A>C,p.(Thr1681Pro),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5050A>C,p.(Thr1684Pro),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5053A>C,p.(Thr1685Pro),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5056C>A,p.(His1686Asn),0.19,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5056C>G,p.(His1686Asp),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5057A>C,p.(His1686Pro),0.18,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5057A>G,p.(His1686Arg),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5057A>T,p.(His1686Leu),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5058T>A,p.(His1686Gln),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5058T>G,p.(His1686Gln),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5059G>T,p.(Val1687Phe),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5060T>A,p.(Val1687Asp),0.17,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5060T>G,p.(Val1687Gly),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5062G>T,p.(Val1688Phe),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5063T>A,p.(Val1688Asp),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5066T>A,p.(Met1689Lys),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5071A>C,p.(Thr1691Pro),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5072C>A,p.(Thr1691Lys),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5077G>T,p.(Ala1693Ser),0.1,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5078C>A,p.(Ala1693Asp),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5087T>A,p.(Val1696Glu),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5087T>G,p.(Val1696Gly),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5090G>A,p.(Cys1697Tyr),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5090G>T,p.(Cys1697Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5091T>G,p.(Cys1697Trp),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5095C>T,p.(Arg1699Trp),0.14,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5096G>A,p.(Arg1699Gln),0.15,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5096G>T,p.(Arg1699Leu),0.19,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5098A>C,p.(Thr1700Pro),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5098A>G,p.(Thr1700Ala),0.14,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5099C>A,p.(Thr1700Lys),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5099C>G,p.(Thr1700Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5099C>T,p.(Thr1700Ile),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5104A>C,p.(Lys1702Gln),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5104A>G,p.(Lys1702Glu),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5105A>C,p.(Lys1702Thr),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5105A>G,p.(Lys1702Arg),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5105A>T,p.(Lys1702Ile),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5106A>C,p.(Lys1702Asn),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5106A>T,p.(Lys1702Asn),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5107T>A,p.(Tyr1703Asn),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5107T>C,p.(Tyr1703His),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5107T>G,p.(Tyr1703Asp),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5108A>C,p.(Tyr1703Ser),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5108A>G,p.(Tyr1703Cys),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5110T>A,p.(Phe1704Ile),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5110T>C,p.(Phe1704Leu),0.13,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5110T>G,p.(Phe1704Val),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5111T>A,p.(Phe1704Tyr),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5111T>C,p.(Phe1704Ser),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5111T>G,p.(Phe1704Cys),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5112T>A,p.(Phe1704Leu),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5112T>G,p.(Phe1704Leu),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5114T>C,p.(Leu1705Pro),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5116G>A,p.(Gly1706Arg),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5116G>C,p.(Gly1706Arg),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5117G>T,p.(Gly1706Val),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5119A>T,p.(Ile1707Phe),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5120T>G,p.(Ile1707Ser),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5122G>A,p.(Ala1708Thr),0.01,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5122G>C,p.(Ala1708Pro),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5126G>T,p.(Gly1709Val),0.1,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5131A>G,p.(Lys1711Glu),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5134T>G,p.(Trp1712Gly),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5138T>A,p.(Val1713Glu),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5138T>C,p.(Val1713Ala),0.09,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5138T>G,p.(Val1713Gly),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5140G>T,p.(Val1714Phe),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5141T>A,p.(Val1714Asp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5143A>T,p.(Ser1715Cys),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5144G>T,p.(Ser1715Ile),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5145C>A,p.(Ser1715Arg),0.03,PM2_Supporting:Supporting:1;PS1:Strong:4;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5145C>G,p.(Ser1715Arg),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5152T>A,p.(Trp1718Arg),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5152T>C,p.(Trp1718Arg),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5152T>G,p.(Trp1718Gly),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5153G>T,p.(Trp1718Leu),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5154G>C,p.(Trp1718Cys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5154G>T,p.(Trp1718Cys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5156T>A,p.(Val1719Glu),0.0,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5156T>G,p.(Val1719Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5162A>C,p.(Gln1721Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5164T>C,p.(Ser1722Pro),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5191G>A,p.(Glu1731Lys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5200T>A,p.(Phe1734Ile),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5200T>C,p.(Phe1734Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5200T>G,p.(Phe1734Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5201T>G,p.(Phe1734Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5202T>A,p.(Phe1734Leu),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5202T>G,p.(Phe1734Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5204A>G,p.(Glu1735Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5205A>T,p.(Glu1735Asp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5206G>C,p.(Val1736Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5206G>T,p.(Val1736Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5207T>A,p.(Val1736Asp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5207T>G,p.(Val1736Gly),0.0,PM2_Supporting:Supporting:1;PP4:Strong:4;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5212G>C,p.(Gly1738Arg),0.0,PM2_Supporting:Supporting:1;PS1:Strong:4;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5213G>C,p.(Gly1738Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5213G>T,p.(Gly1738Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5215G>C,p.(Asp1739His),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5215G>T,p.(Asp1739Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5216A>C,p.(Asp1739Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5217T>G,p.(Asp1739Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5222T>G,p.(Val1741Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5228G>A,p.(Gly1743Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5228G>T,p.(Gly1743Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5236C>G,p.(His1746Asp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5236C>T,p.(His1746Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5237A>C,p.(His1746Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5240A>C,p.(Gln1747Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5242G>C,p.(Gly1748Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5242G>T,p.(Gly1748Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5245C>T,p.(Pro1749Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5246C>A,p.(Pro1749Gln),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5246C>G,p.(Pro1749Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5246C>T,p.(Pro1749Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5251C>G,p.(Arg1751Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5252G>C,p.(Arg1751Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5254G>A,p.(Ala1752Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5254G>C,p.(Ala1752Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5255C>T,p.(Ala1752Val),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5257A>G,p.(Arg1753Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5258G>A,p.(Arg1753Lys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5258G>T,p.(Arg1753Ile),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5259A>C,p.(Arg1753Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5259A>T,p.(Arg1753Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5279T>A,p.(Ile1760Asn),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5279T>C,p.(Ile1760Thr),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5279T>G,p.(Ile1760Ser),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5281T>A,p.(Phe1761Ile),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5281T>G,p.(Phe1761Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5282T>C,p.(Phe1761Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5282T>G,p.(Phe1761Cys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5288G>T,p.(Gly1763Val),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5291T>A,p.(Leu1764Gln),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5297T>A,p.(Ile1766Asn),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5297T>C,p.(Ile1766Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5303G>T,p.(Cys1768Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5304C>G,p.(Cys1768Trp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5305T>G,p.(Tyr1769Asp),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5308G>C,p.(Gly1770Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5308G>T,p.(Gly1770Trp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5323A>G,p.(Met1775Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5339T>C,p.(Leu1780Pro),0.0,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5339T>G,p.(Leu1780Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5348T>A,p.(Met1783Lys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5348T>G,p.(Met1783Arg),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5351T>A,p.(Val1784Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5354A>C,p.(Gln1785Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5357T>C,p.(Leu1786Pro),0.0,PP4:Strong:4;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5359T>C,p.(Cys1787Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5360G>A,p.(Cys1787Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5361T>G,p.(Cys1787Trp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5362G>A,p.(Gly1788Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5362G>C,p.(Gly1788Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5362G>T,p.(Gly1788Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5363G>C,p.(Gly1788Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5363G>T,p.(Gly1788Val),0.0,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5365G>A,p.(Ala1789Thr),0.0,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5365G>C,p.(Ala1789Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5366C>A,p.(Ala1789Asp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5366C>T,p.(Ala1789Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5420T>A,p.(Ile1807Asn),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5420T>G,p.(Ile1807Ser),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5423T>G,p.(Val1808Gly),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5425G>T,p.(Val1809Phe),0.14,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5426T>A,p.(Val1809Asp),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5426T>C,p.(Val1809Ala),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5426T>G,p.(Val1809Gly),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5429T>A,p.(Val1810Glu),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5430G>C,p.(Val1810=),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5431C>A,p.(Gln1811Lys),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5432A>C,p.(Gln1811Pro),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5432A>G,p.(Gln1811Arg),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5432A>T,p.(Gln1811Leu),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5434C>G,p.(Pro1812Ala),0.18,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5441C>G,p.(Ala1814Gly),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5444G>C,p.(Trp1815Ser),0.03,PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5445G>C,p.(Trp1815Cys),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5445G>T,p.(Trp1815Cys),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5472T>G,p.(Ile1824Met),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5495T>G,p.(Val1832Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5498T>A,p.(Val1833Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5498T>G,p.(Val1833Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5503C>G,p.(Arg1835Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5507A>T,p.(Glu1836Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5509T>A,p.(Trp1837Arg),0.0,PM2_Supporting:Supporting:1;PS1:Strong:4;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5510G>C,p.(Trp1837Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5510G>T,p.(Trp1837Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5511G>C,p.(Trp1837Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5511G>T,p.(Trp1837Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5513T>G,p.(Val1838Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5515T>G,p.(Leu1839Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5519A>G,p.(Asp1840Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5519A>T,p.(Asp1840Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5520C>G,p.(Asp1840Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5521A>C,p.(Ser1841Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5522G>C,p.(Ser1841Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5522G>T,p.(Ser1841Ile),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5523T>A,p.(Ser1841Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5523T>G,p.(Ser1841Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5525T>A,p.(Val1842Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5525T>C,p.(Val1842Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5525T>G,p.(Val1842Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5527G>C,p.(Ala1843Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5528C>A,p.(Ala1843Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5537A>C,p.(Gln1846Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5543A>C,p.(Gln1848Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5557T>A,p.(Tyr1853Asn),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5557T>C,p.(Tyr1853His),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5557T>G,p.(Tyr1853Asp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5558A>C,p.(Tyr1853Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,25,PS3,c.5561T>C,p.(Leu1854Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.100C>T,p.(Pro34Ser),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.101C>A,p.(Pro34His),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.101C>G,p.(Pro34Arg),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.101C>T,p.(Pro34Leu),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.104T>A,p.(Val35Asp),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.104T>C,p.(Val35Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.104T>G,p.(Val35Gly),0.0,PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.110C>A,p.(Thr37Lys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.110C>G,p.(Thr37Arg),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.115T>A,p.(Cys39Ser),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.115T>C,p.(Cys39Arg),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.115T>G,p.(Cys39Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.116G>A,p.(Cys39Tyr),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.116G>C,p.(Cys39Ser),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.116G>T,p.(Cys39Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.117T>G,p.(Cys39Trp),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.121C>A,p.(His41Asn),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.121C>G,p.(His41Asp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.121C>T,p.(His41Tyr),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.122A>C,p.(His41Pro),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.122A>T,p.(His41Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.123C>A,p.(His41Gln),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.123C>G,p.(His41Gln),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.129T>A,p.(Phe43Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.130T>C,p.(Cys44Arg),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.130T>G,p.(Cys44Gly),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.131G>A,p.(Cys44Tyr),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.131G>C,p.(Cys44Ser),0.0,PM2_Supporting:Supporting:1;PS1:Strong:4;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.132C>G,p.(Cys44Trp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.134A>T,p.(Lys45Ile),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.139T>C,p.(Cys47Arg),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.139T>G,p.(Cys47Gly),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.140G>C,p.(Cys47Ser),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.140G>T,p.(Cys47Phe),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.141C>G,p.(Cys47Trp),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.143T>A,p.(Met48Lys),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.143T>G,p.(Met48Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.146T>C,p.(Leu49Pro),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.152T>C,p.(Leu51Pro),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.173C>A,p.(Pro58His),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.181T>A,p.(Cys61Ser),0.08,PM2_Supporting:Supporting:1;PP4:Strong:4;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.182G>T,p.(Cys61Phe),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.183T>G,p.(Cys61Trp),0.1,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.190T>A,p.(Cys64Ser),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.190T>C,p.(Cys64Arg),0.19,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.203T>A,p.(Ile68Lys),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.203T>G,p.(Ile68Arg),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.218T>A,p.(Leu73Gln),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.218T>G,p.(Leu73Arg),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.239G>T,p.(Ser80Ile),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.245T>A,p.(Leu82His),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.245T>C,p.(Leu82Pro),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.245T>G,p.(Leu82Arg),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.247G>T,p.(Val83Phe),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.248T>A,p.(Val83Asp),0.15,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.257T>C,p.(Leu86Pro),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.266T>A,p.(Ile89Asn),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.274G>A,p.(Ala92Thr),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.274G>C,p.(Ala92Pro),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.275C>A,p.(Ala92Asp),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.279T>G,p.(Phe93Leu),0.1,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.284T>C,p.(Leu95Pro),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.286G>A,p.(Asp96Asn),0.14,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.286G>C,p.(Asp96His),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.286G>T,p.(Asp96Tyr),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.287A>C,p.(Asp96Ala),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.287A>G,p.(Asp96Gly),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.287A>T,p.(Asp96Val),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.288C>A,p.(Asp96Glu),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.288C>G,p.(Asp96Glu),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.289A>C,p.(Thr97Pro),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.32T>A,p.(Val11Glu),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.32T>G,p.(Val11Gly),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.35A>C,p.(Gln12Pro),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.40G>T,p.(Val14Phe),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.41T>G,p.(Val14Gly),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.44T>A,p.(Ile15Asn),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.44T>C,p.(Ile15Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.44T>G,p.(Ile15Ser),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.49G>C,p.(Ala17Pro),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.4G>C,p.(Asp2His),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.53T>A,p.(Met18Lys),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.53T>G,p.(Met18Arg),0.19,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.56A>C,p.(Gln19Pro),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.63C>T,p.(Ile21=),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.65T>C,p.(Leu22Ser),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.70T>A,p.(Cys24Ser),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.70T>C,p.(Cys24Arg),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.70T>G,p.(Cys24Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.71G>A,p.(Cys24Tyr),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.71G>C,p.(Cys24Ser),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.72T>G,p.(Cys24Trp),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.74C>T,p.(Pro25Leu),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.77T>A,p.(Ile26Asn),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.77T>C,p.(Ile26Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.79T>A,p.(Cys27Ser),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.79T>C,p.(Cys27Arg),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.79T>G,p.(Cys27Gly),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.81T>G,p.(Cys27Trp),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,RING zinc-binding/E3 ligase,25,PS3,c.83T>C,p.(Leu28Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7466A>G,p.(Asp2489Gly),0.02,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7492A>G,p.(Lys2498Glu),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7522G>C,p.(Gly2508Arg),0.17,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7529T>C,p.(Leu2510Pro),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7682A>C,p.(Gln2561Pro),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7685T>G,p.(Phe2562Cys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7753G>A,p.(Gly2585Arg),0.16,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7786G>A,p.(Gly2596Arg),0.05,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7786G>C,p.(Gly2596Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7787G>A,p.(Gly2596Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7796A>G,p.(Glu2599Gly),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7807G>C,p.(Ala2603Pro),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7811T>C,p.(Leu2604Pro),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7826G>A,p.(Gly2609Asp),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7826G>T,p.(Gly2609Val),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7832A>G,p.(Asp2611Gly),0.1,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7847C>T,p.(Ser2616Phe),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7855T>G,p.(Trp2619Gly),0.07,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7856G>C,p.(Trp2619Ser),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7857G>C,p.(Trp2619Cys),0.17,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7864A>G,p.(Asn2622Asp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7867C>T,p.(His2623Tyr),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7868A>G,p.(His2623Arg),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7870T>A,p.(Tyr2624Asn),0.09,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7870T>C,p.(Tyr2624His),0.06,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7870T>G,p.(Tyr2624Asp),0.1,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7871A>G,p.(Tyr2624Cys),0.01,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7874G>T,p.(Arg2625Ile),0.12,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7875A>T,p.(Arg2625Ser),0.11,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7876T>C,p.(Trp2626Arg),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7878G>C,p.(Trp2626Cys),0.01,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7880T>A,p.(Ile2627Asn),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7888A>C,p.(Lys2630Gln),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7925T>C,p.(Phe2642Ser),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7940T>C,p.(Leu2647Pro),0.02,PM2_Supporting:Supporting:1;PP4:Strong:4;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7955T>G,p.(Val2652Gly),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7964A>G,p.(Gln2655Arg),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7967T>C,p.(Leu2656Pro),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7970A>C,p.(Lys2657Thr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.7978T>G,p.(Tyr2660Asp),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8057T>C,p.(Leu2686Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8059G>T,p.(Val2687Phe),0.0,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8063T>C,p.(Leu2688Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8072C>A,p.(Ser2691Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8072C>T,p.(Ser2691Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8162T>A,p.(Leu2721His),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8164A>G,p.(Thr2722Ala),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8165C>A,p.(Thr2722Lys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8165C>T,p.(Thr2722Ile),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8167G>A,p.(Asp2723Asn),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8167G>C,p.(Asp2723His),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8167G>T,p.(Asp2723Tyr),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8168A>C,p.(Asp2723Ala),0.0,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8168A>T,p.(Asp2723Val),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8169T>A,p.(Asp2723Glu),0.01,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8170G>T,p.(Gly2724Trp),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8171G>T,p.(Gly2724Val),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8174G>T,p.(Trp2725Leu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8177A>G,p.(Tyr2726Cys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8188G>C,p.(Ala2730Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8242G>A,p.(Gly2748Ser),0.0,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8243G>A,p.(Gly2748Asp),0.0,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8252T>G,p.(Ile2751Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8258T>C,p.(Leu2753Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8339C>A,p.(Ala2780Asp),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8342A>T,p.(Asn2781Ile),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8350C>T,p.(Arg2784Trp),0.02,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8356G>C,p.(Ala2786Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8362T>C,p.(Trp2788Arg),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8375T>C,p.(Leu2792Pro),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8375T>G,p.(Leu2792Arg),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8377G>A,p.(Gly2793Arg),0.09,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8455G>C,p.(Asp2819His),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8456A>T,p.(Asp2819Val),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8470A>G,p.(Arg2824Gly),0.08,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8471G>C,p.(Arg2824Thr),0.02,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8477A>G,p.(Tyr2826Cys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8525G>C,p.(Arg2842Pro),0.04,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.8773C>A,p.(Gln2925Lys),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9008G>A,p.(Gly3003Glu),0.13,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9016T>G,p.(Tyr3006Asp),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9082G>C,p.(Ala3028Pro),0.05,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9154C>T,p.(Arg3052Trp),0.02,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9155G>T,p.(Arg3052Leu),0.01,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9215T>A,p.(Val3072Glu),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9217G>T,p.(Asp3073Tyr),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9226G>C,p.(Gly3076Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9227G>A,p.(Gly3076Glu),0.0,PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9227G>T,p.(Gly3076Val),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9284A>G,p.(Asp3095Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9302T>C,p.(Leu3101Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9302T>G,p.(Leu3101Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9364G>C,p.(Ala3122Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9372C>A,p.(Asn3124Lys),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9373C>T,p.(Leu3125Phe),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9374T>A,p.(Leu3125His),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9374T>G,p.(Leu3125Arg),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9437T>C,p.(Phe3146Ser),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,DNA-binding domain / helical-OB-DSS1,25,PS3,c.9539T>C,p.(Leu3180Pro),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,PALB2 binding N-terminal,25,PS3,c.91T>G,p.(Trp31Gly),0.0,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA2,PALB2 binding N-terminal,25,PS3,c.92G>T,p.(Trp31Leu),0.04,PS3:Strong:4
+BRCA2,PALB2 binding N-terminal,25,PS3,c.93G>T,p.(Trp31Cys),0.03,PM2_Supporting:Supporting:1;PS3:Strong:4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4949T>C,p.(Met1650Thr),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4961T>C,p.(Val1654Ala),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4962G>A,p.(Val1654=),0.03,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4989G>T,p.(Met1663Ile),0.03,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4990C>T,p.(Leu1664Phe),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4993G>A,p.(Val1665Met),0.15,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.4999A>G,p.(Lys1667Glu),0.05,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5001G>A,p.(Lys1667=),0.15,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5005G>A,p.(Ala1669Thr),0.03,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5010A>G,p.(Arg1670=),0.03,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5017C>T,p.(His1673Tyr),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5020A>G,p.(Ile1674Val),0.04,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5023A>G,p.(Thr1675Ala),0.08,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5031T>A,p.(Thr1677=),0.06,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5037A>G,p.(Leu1679=),0.16,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5039T>C,p.(Ile1680Thr),0.14,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5052T>C,p.(Thr1684=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5052T>G,p.(Thr1684=),0.18,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5058T>C,p.(His1686=),0.12,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5085T>A,p.(Phe1695Leu),0.15,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5090G>C,p.(Cys1697Ser),0.06,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5094A>G,p.(Glu1698=),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5100A>G,p.(Thr1700=),0.09,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5115A>C,p.(Leu1705=),0.15,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5115A>G,p.(Leu1705=),0.05,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5124G>A,p.(Ala1708=),0.1,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5125G>A,p.(Gly1709Arg),0.09,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5142T>G,p.(Val1714=),0.08,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5155G>T,p.(Val1719Leu),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5157G>T,p.(Val1719=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5163G>A,p.(Gln1721=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5198A>T,p.(Asp1733Val),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5221G>A,p.(Val1741Ile),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5245C>G,p.(Pro1749Ala),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5259A>G,p.(Arg1753=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5260G>C,p.(Glu1754Gln),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5268G>A,p.(Gln1756=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5274A>G,p.(Arg1758=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5277G>A,p.(Lys1759=),0.14,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5280C>T,p.(Ile1760=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5285G>C,p.(Arg1762Thr),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5304C>T,p.(Cys1768=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5310G>A,p.(Gly1770=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5310G>C,p.(Gly1770=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5311C>G,p.(Pro1771Ala),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5317A>T,p.(Thr1773Ser),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5327C>T,p.(Pro1776Leu),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5331A>G,p.(Thr1777=),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5331A>T,p.(Thr1777=),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5334T>C,p.(Asp1778=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5335C>G,p.(Gln1779Glu),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5347A>C,p.(Met1783Leu),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5347A>G,p.(Met1783Val),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5351T>G,p.(Val1784Gly),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5352A>G,p.(Val1784=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5360G>C,p.(Cys1787Ser),0.0,BS3:Strong:-4;PM2_Supporting:Supporting:1;PS1:Strong:4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5371G>T,p.(Val1791Leu),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5372T>C,p.(Val1791Ala),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5380G>A,p.(Glu1794Lys),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5382G>C,p.(Glu1794Asp),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5383C>T,p.(Leu1795Phe),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5388A>G,p.(Ser1796=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5394C>T,p.(Phe1798=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5396C>T,p.(Thr1799Ile),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5402G>A,p.(Gly1801Asp),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5412C>T,p.(Val1804=),0.05,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5419A>G,p.(Ile1807Val),0.04,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5429T>C,p.(Val1810Ala),0.02,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5430G>A,p.(Val1810=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5437G>A,p.(Asp1813Asn),0.09,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5439T>C,p.(Asp1813=),0.05,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5468C>T,p.(Ala1823Val),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5478G>T,p.(Gln1826His),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5479A>G,p.(Met1827Val),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5481G>A,p.(Met1827Ile),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5488G>A,p.(Ala1830Thr),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5491C>A,p.(Pro1831Thr),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5501C>T,p.(Thr1834Ile),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5514G>T,p.(Val1838=),0.01,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5528C>T,p.(Ala1843Val),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5531T>C,p.(Leu1844Pro),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5538G>C,p.(Gln1846His),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5541C>G,p.(Cys1847Trp),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5547G>A,p.(Glu1849=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5550G>C,p.(Leu1850=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5565A>C,p.(Ile1855=),0.0,BS3:Strong:-4
+BRCA1,BRCT phosphopeptide-binding,8,BS3,c.5566C>T,p.(Pro1856Ser),0.0,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.107C>A,p.(Ser36Tyr),0.01,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.111A>T,p.(Thr37=),0.02,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.118G>A,p.(Asp40Asn),0.06,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.141C>T,p.(Cys47=),0.1,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.146T>G,p.(Leu49Arg),0.08,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.148A>G,p.(Lys50Glu),0.06,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.14C>T,p.(Ala5Val),0.04,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.154C>T,p.(Leu52Phe),0.13,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.158A>G,p.(Asn53Ser),0.07,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.16C>T,p.(Leu6Phe),0.07,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.179A>C,p.(Gln60Pro),0.19,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.179A>G,p.(Gln60Arg),0.14,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.183T>C,p.(Cys61=),0.05,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.22G>A,p.(Val8Ile),0.02,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.249T>C,p.(Val83=),0.1,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.255G>T,p.(Glu85Asp),0.04,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.258A>G,p.(Leu86=),0.13,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.258A>T,p.(Leu86=),0.03,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.259T>G,p.(Leu87Val),0.15,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.266T>C,p.(Ile89Thr),0.12,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.288C>T,p.(Asp96=),0.1,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.36A>G,p.(Gln12=),0.04,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.42C>T,p.(Val14=),0.04,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.4G>A,p.(Asp2Asn),0.06,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.60A>C,p.(Lys20Asn),0.05,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.61A>G,p.(Ile21Val),0.02,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.67G>C,p.(Glu23Gln),0.04,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.69G>A,p.(Glu23=),0.01,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.6T>C,p.(Asp2=),0.01,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.81T>C,p.(Cys27=),0.01,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.82C>T,p.(Leu28=),0.01,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.86A>G,p.(Glu29Gly),0.16,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.93C>G,p.(Ile31Met),0.0,BS3:Strong:-4
+BRCA1,RING zinc-binding/E3 ligase,8,BS3,c.9A>G,p.(Leu3=),0.02,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7463G>A,p.(Arg2488Lys),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7464A>C,p.(Arg2488Ser),0.03,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7472A>G,p.(Gln2491Arg),0.03,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7481G>A,p.(Arg2494Gln),0.06,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7484T>C,p.(Ile2495Thr),0.03,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7565C>T,p.(Ser2522Phe),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7598C>G,p.(Ser2533Cys),0.02,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7712A>G,p.(Glu2571Gly),0.14,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7751G>A,p.(Gly2584Asp),0.09,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7759C>T,p.(Leu2587Phe),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7766C>A,p.(Pro2589His),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7874G>A,p.(Arg2625Lys),0.12,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7928C>G,p.(Ala2643Gly),0.03,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.7985C>T,p.(Thr2662Met),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8014A>G,p.(Ile2672Val),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8027T>C,p.(Met2676Thr),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8045C>T,p.(Ala2682Val),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8084C>T,p.(Ser2695Leu),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8111C>T,p.(Ser2704Phe),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8134G>A,p.(Asp2712Asn),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8345G>A,p.(Ser2782Asn),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8359C>T,p.(Arg2787Cys),0.02,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8360G>A,p.(Arg2787His),0.04,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8417C>T,p.(Ser2806Leu),0.12,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8450G>T,p.(Cys2817Phe),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8464A>T,p.(Ile2822Phe),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8479C>G,p.(Pro2827Ala),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8545A>G,p.(Lys2849Glu),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8686C>T,p.(Arg2896Cys),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8702G>A,p.(Gly2901Asp),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8739C>G,p.(Asp2913Glu),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8798G>C,p.(Arg2933Thr),0.04,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.8971C>T,p.(Arg2991Cys),0.17,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9076C>G,p.(Gln3026Glu),0.07,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9104A>G,p.(Tyr3035Cys),0.01,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9116C>G,p.(Pro3039Arg),0.06,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9190G>A,p.(Asp3064Asn),0.05,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9205T>C,p.(Cys3069Arg),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9213G>T,p.(Glu3071Asp),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9271G>A,p.(Val3091Ile),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9320T>C,p.(Ile3107Thr),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9334G>A,p.(Asp3112Asn),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9367A>G,p.(Ser3123Gly),0.19,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9383G>A,p.(Arg3128Gln),0.0,BS3:Strong:-4
+BRCA2,DNA-binding domain / helical-OB-DSS1,8,BS3,c.9547A>G,p.(Ile3183Val),0.0,BS3:Strong:-4
+BRCA2,PALB2 binding N-terminal,8,BS3,c.62A>G,p.(Lys21Arg),0.02,BS3:Strong:-4

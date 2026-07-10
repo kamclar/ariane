@@ -1,0 +1,9 @@
+gene,variant_type,count,percent_within_gene,per_1000_gene_variants
+BRCA1,initiation_codon,9,0.05,0.54
+BRCA1,missense,12471,74.34,743.38
+BRCA1,nonsense,803,4.79,47.87
+BRCA1,synonymous,3493,20.82,208.21
+BRCA2,initiation_codon,9,0.03,0.29
+BRCA2,missense,22770,74.00,739.98
+BRCA2,nonsense,1594,5.18,51.80
+BRCA2,synonymous,6398,20.79,207.92

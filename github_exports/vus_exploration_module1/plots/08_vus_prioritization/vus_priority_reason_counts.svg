@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="950" height="470" viewBox="0 0 950 470">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="950" height="470" fill="#ffffff"/>
+<text x="28" y="34" class="title">Most common VUS priority reasons</text>
+<text x="28" y="77" class="small">near_pathogenic_dense</text>
+<rect x="250" y="60" width="590.0" height="24" fill="#2563eb"/>
+<text x="848.0" y="77" class="small">6080</text>
+<text x="28" y="110" class="small">SpliceAI&gt;=0.10</text>
+<rect x="250" y="93" width="98.68914473684211" height="24" fill="#2563eb"/>
+<text x="356.6891447368421" y="110" class="small">1017</text>
+<text x="28" y="143" class="small">SpliceAI&gt;=0.20</text>
+<rect x="250" y="126" width="84.03618421052632" height="24" fill="#2563eb"/>
+<text x="342.0361842105263" y="143" class="small">866</text>
+<text x="28" y="176" class="small">PP3</text>
+<rect x="250" y="159" width="82.8717105263158" height="24" fill="#2563eb"/>
+<text x="340.8717105263158" y="176" class="small">854</text>
+<text x="28" y="209" class="small">within_10bp_boundary</text>
+<rect x="250" y="192" width="82.09539473684211" height="24" fill="#2563eb"/>
+<text x="340.0953947368421" y="209" class="small">846</text>
+<text x="28" y="242" class="small">high_spliceai_in_benign_dense_region</text>
+<rect x="250" y="225" width="51.81907894736842" height="24" fill="#2563eb"/>
+<text x="309.81907894736844" y="242" class="small">534</text>
+<text x="28" y="275" class="small">PS3</text>
+<rect x="250" y="258" width="43.473684210526315" height="24" fill="#2563eb"/>
+<text x="301.4736842105263" y="275" class="small">448</text>
+<text x="28" y="308" class="small">within_2bp_boundary</text>
+<rect x="250" y="291" width="41.338815789473685" height="24" fill="#2563eb"/>
+<text x="299.3388157894737" y="308" class="small">426</text>
+<text x="28" y="341" class="small">BS3</text>
+<rect x="250" y="324" width="16.69078947368421" height="24" fill="#2563eb"/>
+<text x="274.6907894736842" y="341" class="small">172</text>
+<text x="28" y="374" class="small">PP4</text>
+<rect x="250" y="357" width="0.5822368421052632" height="24" fill="#2563eb"/>
+<text x="258.58223684210526" y="374" class="small">6</text>
+<text x="28" y="407" class="small">PS1</text>
+<rect x="250" y="390" width="0.48519736842105265" height="24" fill="#2563eb"/>
+<text x="258.48519736842104" y="407" class="small">5</text>
+<text x="28" y="440" class="small">PVS1</text>
+<rect x="250" y="423" width="0.09703947368421052" height="24" fill="#2563eb"/>
+<text x="258.0970394736842" y="440" class="small">1</text>
+</svg>

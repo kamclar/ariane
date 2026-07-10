@@ -1,0 +1,21 @@
+{
+  "generated": "2026-06-20T16:18:57",
+  "sources": [
+    {
+      "gene": "BRCA1",
+      "accession": "P38398",
+      "url": "https://rest.uniprot.org/uniprotkb/P38398.json",
+      "snapshot": "Exploratory_analysis\\precomputed_classification\\data\\structure_function_sources\\uniprot_BRCA1_P38398.json",
+      "entry_version": 284,
+      "sequence_version": 2
+    },
+    {
+      "gene": "BRCA2",
+      "accession": "P51587",
+      "url": "https://rest.uniprot.org/uniprotkb/P51587.json",
+      "snapshot": "Exploratory_analysis\\precomputed_classification\\data\\structure_function_sources\\uniprot_BRCA2_P51587.json",
+      "entry_version": 251,
+      "sequence_version": 4
+    }
+  ]
+}

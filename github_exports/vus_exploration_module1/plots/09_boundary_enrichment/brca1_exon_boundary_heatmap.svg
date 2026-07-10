@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="874" height="220" viewBox="0 0 874 220">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="874" height="220" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1 exon boundary high SpliceAI rate</text>
+<text x="28" y="55" class="small">Near-boundary variants within 10 bp, rate uses SpliceAI >=0.20</text>
+<text x="129" y="65" class="small">E1</text>
+<text x="161" y="65" class="small">E2</text>
+<text x="193" y="65" class="small">E3</text>
+<text x="225" y="65" class="small">E4</text>
+<text x="257" y="65" class="small">E5</text>
+<text x="289" y="65" class="small">E6</text>
+<text x="321" y="65" class="small">E7</text>
+<text x="353" y="65" class="small">E8</text>
+<text x="385" y="65" class="small">E9</text>
+<text x="417" y="65" class="small">E10</text>
+<text x="449" y="65" class="small">E11</text>
+<text x="481" y="65" class="small">E12</text>
+<text x="513" y="65" class="small">E13</text>
+<text x="545" y="65" class="small">E14</text>
+<text x="577" y="65" class="small">E15</text>
+<text x="609" y="65" class="small">E16</text>
+<text x="641" y="65" class="small">E17</text>
+<text x="673" y="65" class="small">E18</text>
+<text x="705" y="65" class="small">E19</text>
+<text x="737" y="65" class="small">E20</text>
+<text x="769" y="65" class="small">E21</text>
+<text x="801" y="65" class="small">E22</text>
+<text x="22" y="95" class="small">acceptor_like</text>
+<rect x="125" y="75" width="30" height="28" fill="#f7fafc"/>
+<rect x="157" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="189" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="221" y="75" width="30" height="28" fill="#bea2f5"/>
+<rect x="253" y="75" width="30" height="28" fill="#e2d9f9"/>
+<rect x="285" y="75" width="30" height="28" fill="#b08bf3"/>
+<rect x="317" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="349" y="75" width="30" height="28" fill="#ba9bf5"/>
+<rect x="381" y="75" width="30" height="28" fill="#e2d9f9"/>
+<rect x="413" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="445" y="75" width="30" height="28" fill="#ba9bf5"/>
+<rect x="477" y="75" width="30" height="28" fill="#8243ee"/>
+<rect x="509" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="541" y="75" width="30" height="28" fill="#e2d9f9"/>
+<rect x="573" y="75" width="30" height="28" fill="#c7aff6"/>
+<rect x="605" y="75" width="30" height="28" fill="#ba9bf5"/>
+<rect x="637" y="75" width="30" height="28" fill="#f7fafc"/>
+<rect x="669" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="701" y="75" width="30" height="28" fill="#f7fafc"/>
+<rect x="733" y="75" width="30" height="28" fill="#d9cbf8"/>
+<rect x="765" y="75" width="30" height="28" fill="#f7fafc"/>
+<rect x="797" y="75" width="30" height="28" fill="#d2c0f7"/>
+<text x="22" y="125" class="small">donor_like</text>
+<rect x="125" y="105" width="30" height="28" fill="#d2c0f7"/>
+<rect x="157" y="105" width="30" height="28" fill="#e2d9f9"/>
+<rect x="189" y="105" width="30" height="28" fill="#b390f4"/>
+<rect x="221" y="105" width="30" height="28" fill="#905aef"/>
+<rect x="253" y="105" width="30" height="28" fill="#f7fafc"/>
+<rect x="285" y="105" width="30" height="28" fill="#ccb7f7"/>
+<rect x="317" y="105" width="30" height="28" fill="#d2c0f7"/>
+<rect x="349" y="105" width="30" height="28" fill="#ba9bf5"/>
+<rect x="381" y="105" width="30" height="28" fill="#b390f4"/>
+<rect x="413" y="105" width="30" height="28" fill="#bea2f5"/>
+<rect x="445" y="105" width="30" height="28" fill="#d9cbf8"/>
+<rect x="477" y="105" width="30" height="28" fill="#ccb7f7"/>
+<rect x="509" y="105" width="30" height="28" fill="#b796f4"/>
+<rect x="541" y="105" width="30" height="28" fill="#e2d9f9"/>
+<rect x="573" y="105" width="30" height="28" fill="#b390f4"/>
+<rect x="605" y="105" width="30" height="28" fill="#f7fafc"/>
+<rect x="637" y="105" width="30" height="28" fill="#f7fafc"/>
+<rect x="669" y="105" width="30" height="28" fill="#d2c0f7"/>
+<rect x="701" y="105" width="30" height="28" fill="#d9cbf8"/>
+<rect x="733" y="105" width="30" height="28" fill="#f7fafc"/>
+<rect x="765" y="105" width="30" height="28" fill="#d2c0f7"/>
+<rect x="797" y="105" width="30" height="28" fill="#f7fafc"/>
+</svg>

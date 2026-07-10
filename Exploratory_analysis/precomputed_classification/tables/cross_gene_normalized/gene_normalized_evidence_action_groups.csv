@@ -1,0 +1,15 @@
+gene,category,count,denominator,denominator_label,percent_within_gene,per_1000
+BRCA1,background_absence_only,726,1625,VUS in gene,44.68,446.77
+BRCA2,background_absence_only,4322,6529,VUS in gene,66.20,661.97
+BRCA1,computational_signal_needs_noncomputational_support,286,1625,VUS in gene,17.60,176.00
+BRCA2,computational_signal_needs_noncomputational_support,556,6529,VUS in gene,8.52,85.16
+BRCA1,conflicting_computational_splice_context,90,1625,VUS in gene,5.54,55.38
+BRCA2,conflicting_computational_splice_context,1186,6529,VUS in gene,18.17,181.65
+BRCA1,manual_conflict_adjudication,4,1625,VUS in gene,0.25,2.46
+BRCA2,manual_conflict_adjudication,16,6529,VUS in gene,0.25,2.45
+BRCA1,module1_no_signal,51,1625,VUS in gene,3.14,31.38
+BRCA2,module1_no_signal,280,6529,VUS in gene,4.29,42.89
+BRCA1,near_benign_threshold,126,1625,VUS in gene,7.75,77.54
+BRCA2,near_benign_threshold,65,6529,VUS in gene,1.00,9.96
+BRCA1,near_pathogenic_threshold,342,1625,VUS in gene,21.05,210.46
+BRCA2,near_pathogenic_threshold,104,6529,VUS in gene,1.59,15.93

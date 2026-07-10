@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+venv/
+.env
+.env.*
+
+# Jupyter
+notebooks/
+*.ipynb
+.ipynb_checkpoints/
+
+# Top-level text files (exclude root .txt files)
+/*.txt
+
+# Data directories (do not commit large data or caches)
+# Keep top-level `data/` tracked (application needs it)
+# Ignore heavy variant_space_scan sources and outputs
+/variant_space_scan/
+/variant_space_scan/outputs/
+/variant_space_scan/precomputed/
+/variant_space_scan/docker_spliceai/
+
+# Keep small reference files in backend/data (e.g. enigma tables), but ignore caches
+# Cache files and large caches
+/backend/data/bayesdel_cache.json
+/backend/data/coordinates_cache.json
+/backend/data/gnomad/
+/backend/data/spliceai_api_cache.json
+
+# Build, packaging
+dist/
+build/
+*.egg-info/
+
+# Logs and temp
+*.log
+*.sqlite3
+/tmp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+
+# Railway/Nixpacks / deployment
+.railway/
+.nix/
+
+# Node / other
+node_modules/
+
+# Ignore credentials and secrets
+*.pem
+*.key
+secrets.yml
+
+# Coverage
+.coverage
+htmlcov/
+
+# Pytest
+.pytest_cache/
+
+# Optional: keep requirements.txt and scripts
+!requirements.txt
+scripts/server-ops/
+
+# Allow README and docs
+!README.md
+/docs/

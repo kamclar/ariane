@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="420" viewBox="0 0 980 420">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="980" height="420" fill="#ffffff"/>
+<text x="28" y="32" class="title">Mixed position/codon contexts after driver exclusions</text>
+<rect x="90" y="70" width="760" height="250" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect x="94.0" y="70.0" width="35.0" height="250.0" fill="#64748b" opacity="0.82"/>
+<rect x="132.0" y="186.8" width="35.0" height="133.2" fill="#b91c1c" opacity="0.82"/>
+<rect x="170.0" y="113.4" width="35.0" height="206.6" fill="#7c3aed" opacity="0.82"/>
+<rect x="208.0" y="180.1" width="35.0" height="139.9" fill="#f97316" opacity="0.82"/>
+<text x="94.0" y="342" class="small">all variants</text>
+<rect x="246.0" y="224.5" width="35.0" height="95.5" fill="#64748b" opacity="0.82"/>
+<rect x="284.0" y="317.1" width="35.0" height="2.9" fill="#b91c1c" opacity="0.82"/>
+<rect x="322.0" y="247.0" width="35.0" height="73.0" fill="#7c3aed" opacity="0.82"/>
+<rect x="360.0" y="315.5" width="35.0" height="4.5" fill="#f97316" opacity="0.82"/>
+<text x="246.0" y="342" class="small">no truncation</text>
+<rect x="398.0" y="97.5" width="35.0" height="222.5" fill="#64748b" opacity="0.82"/>
+<rect x="436.0" y="193.4" width="35.0" height="126.6" fill="#b91c1c" opacity="0.82"/>
+<rect x="474.0" y="125.1" width="35.0" height="194.9" fill="#7c3aed" opacity="0.82"/>
+<rect x="512.0" y="188.2" width="35.0" height="131.8" fill="#f97316" opacity="0.82"/>
+<text x="398.0" y="342" class="small">no splice</text>
+<rect x="550.0" y="244.9" width="35.0" height="75.1" fill="#64748b" opacity="0.82"/>
+<rect x="588.0" y="319.1" width="35.0" height="0.9" fill="#b91c1c" opacity="0.82"/>
+<rect x="626.0" y="259.2" width="35.0" height="60.8" fill="#7c3aed" opacity="0.82"/>
+<rect x="664.0" y="318.4" width="35.0" height="1.6" fill="#f97316" opacity="0.82"/>
+<text x="550.0" y="342" class="small">no truncation no splice</text>
+<rect x="702.0" y="282.8" width="35.0" height="37.2" fill="#64748b" opacity="0.82"/>
+<rect x="740.0" y="320.0" width="35.0" height="0.0" fill="#b91c1c" opacity="0.82"/>
+<rect x="778.0" y="286.7" width="35.0" height="33.3" fill="#7c3aed" opacity="0.82"/>
+<rect x="816.0" y="320.0" width="35.0" height="0.0" fill="#f97316" opacity="0.82"/>
+<text x="702.0" y="342" class="small">no truncation no splice no functional</text>
+<rect x="540" y="80" width="12" height="12" fill="#64748b"/>
+<text x="558" y="90" class="small">positions_mixed</text>
+<rect x="540" y="100" width="12" height="12" fill="#b91c1c"/>
+<text x="558" y="110" class="small">positions_with_benign_and_pathogenic</text>
+<rect x="540" y="120" width="12" height="12" fill="#7c3aed"/>
+<text x="558" y="130" class="small">codons_mixed</text>
+<rect x="540" y="140" width="12" height="12" fill="#f97316"/>
+<text x="558" y="150" class="small">codons_with_benign_and_pathogenic</text>
+</svg>

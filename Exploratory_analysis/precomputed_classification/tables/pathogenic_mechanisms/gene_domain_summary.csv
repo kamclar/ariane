@@ -1,0 +1,8 @@
+gene,enigma_domain,count
+BRCA2,outside_enigma_functional_domain,1188
+BRCA1,outside_enigma_functional_domain,640
+BRCA2,DBD,362
+BRCA1,BRCT,140
+BRCA1,RING,80
+BRCA1,coiled_coil,17
+BRCA2,PALB2_binding,14

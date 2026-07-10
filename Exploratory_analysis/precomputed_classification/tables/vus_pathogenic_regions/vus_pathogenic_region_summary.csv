@@ -1,0 +1,9 @@
+summary_type,label,count
+closer_to_group,closer_to_benign,3853
+closer_to_group,closer_to_pathogenic,3480
+closer_to_group,equal_distance,821
+broad_pathogenic_context,broad_pathogenic_context,7938
+broad_pathogenic_context,no_broad_pathogenic_context,216
+strong_pathogenic_region,not_strong_pathogenic_region,5853
+strong_pathogenic_region,strong_pathogenic_region,2301
+intersection,strong_pathogenic_region_and_closer_to_pathogenic,1451

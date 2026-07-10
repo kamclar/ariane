@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="220" viewBox="0 0 1050 220">
+<style>
+text{font-family:Arial,sans-serif;font-size:13px;fill:#222}
+.title{font-size:20px;font-weight:bold}
+.small{font-size:11px;fill:#555}
+.bar{fill:#b24a3a}
+</style>
+<text x="24" y="30" class="title">Class 4/5 Aberrant Protein Buckets</text>
+<text x="24" y="73">premature_stop_or_truncating_protein</text>
+<rect x="390" y="60" width="560" height="18" class="bar"/>
+<text x="958" y="74" class="small">2326</text>
+<text x="24" y="103">missense_protein_function_or_domain</text>
+<rect x="390" y="90" width="24" height="18" class="bar"/>
+<text x="422" y="104" class="small">103</text>
+<text x="24" y="133">synonymous_splice_or_functional_evidence</text>
+<rect x="390" y="120" width="2" height="18" class="bar"/>
+<text x="400" y="134" class="small">9</text>
+<text x="24" y="163">translation_initiation_effect</text>
+<rect x="390" y="150" width="0" height="18" class="bar"/>
+<text x="398" y="164" class="small">3</text>
+</svg>

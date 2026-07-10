@@ -1,0 +1,9 @@
+review_category,count
+pathogenic_neighborhood,5740
+other_vus,1805
+splice_far_from_boundary,269
+splice_boundary,185
+splice_other,92
+functional_or_same_aa,56
+functional_plus_splice_prediction,6
+vus_with_pvs1,1

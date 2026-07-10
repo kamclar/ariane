@@ -1,0 +1,24 @@
+bottleneck_category,criteria_combo,count,brca1_count,brca2_count,median_points,high_spliceai_count,suggested_next_evidence
+PM2_only,PM2_Supporting,5046,725,4321,1.0,10,Absent population frequency alone is insufficient; needs independent pathogenic or benign evidence.
+mixed_splice_benign_and_pathogenic,BP4+BP7+PM2_Supporting,1276,90,1186,-1.0,0,Review whether benign splice/RNA branch and pathogenic evidence should both stand for this variant.
+computational_pathogenic_evidence_not_enough,PM2_Supporting+PP3,791,273,518,2,791,"Computational evidence alone is insufficient; needs functional, segregation, case-control, trans, or curated clinical evidence."
+strong_pathogenic_combo_one_step_short,PM2_Supporting+PS3,407,321,86,5,1,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+no_automated_evidence,none,331,51,280,0,1,"Needs external evidence not in Module 1, such as case-control, segregation, curated clinical assertions, or functional data."
+benign_functional_evidence_not_enough,BS3,170,123,47,-4.0,0,"Additional benign evidence such as BS2, BS4, population evidence, or curated functional strength could resolve toward benign."
+computational_pathogenic_evidence_not_enough,PP3,51,13,38,1,51,"Computational evidence alone is insufficient; needs functional, segregation, case-control, trans, or curated clinical evidence."
+strong_pathogenic_combo_one_step_short,PS3,27,11,16,4,0,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+benign_evidence_not_enough,BP5,11,2,9,-2,0,Needs an additional benign criterion or stronger benign evidence.
+other_conflicting_evidence,BP5+PM2_Supporting,10,0,10,-1.0,0,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+benign_evidence_not_enough,BS1_Supporting,8,0,8,-1.0,0,Needs an additional benign criterion or stronger benign evidence.
+strong_pathogenic_combo_one_step_short,PM2_Supporting+PS1+PS3,4,4,0,9.0,0,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+strong_pathogenic_combo_one_step_short,PP3+PS3,4,3,1,5.0,4,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+strong_pathogenic_combo_one_step_short,PM2_Supporting+PP4+PS3,3,2,1,9,0,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+other_conflicting_evidence,BS1_Supporting+PP3,3,0,3,0,3,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+benign_evidence_not_enough,BS1_Strong,2,1,1,-4.0,0,Needs an additional benign criterion or stronger benign evidence.
+other_conflicting_evidence,BP5+PM2_Supporting+PP3,2,1,1,0.0,2,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+other_conflicting_evidence,BP5+PM2_Supporting+PP3+PS3,2,2,0,3.0,2,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+PM2_plus_weak_context,PM2_Supporting+PP4,2,1,1,5.0,0,"Needs stronger independent evidence; PM2 is background support, not a decision driver."
+strong_pathogenic_combo_one_step_short,PP4+PS3,1,1,0,8,0,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+other_conflicting_evidence,BS3+PM2_Supporting+PS1,1,1,0,1,0,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+other_conflicting_evidence,BP5+PP3,1,0,1,-1,1,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+conflicting_PVS1_BS3,BS3+PM2_Supporting+PVS1,1,0,1,5,0,Expert adjudication of functional BS3 versus PVS1 boundary; consider curated ENIGMA interpretation.

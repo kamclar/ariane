@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="534" viewBox="0 0 980 534">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="980" height="534" fill="#ffffff"/>
+<text x="28" y="34" class="title">Top BS3 hotspots</text>
+<text x="26" y="83" class="small">BRCA1 bin 106 c.4894-4939</text>
+<rect x="220" y="66" width="650" height="24" fill="#2b8cbe"/>
+<text x="878" y="83" class="small">16.27x, n=122, 86.5%</text>
+<text x="26" y="117" class="small">BRCA1 bin 116 c.5360-5405</text>
+<rect x="220" y="100" width="623" height="24" fill="#2f8ebf"/>
+<text x="851" y="117" class="small">15.61x, n=117, 83.0%</text>
+<text x="26" y="151" class="small">BRCA1 bin 118 c.5453-5498</text>
+<rect x="220" y="134" width="604" height="24" fill="#3290c0"/>
+<text x="832" y="151" class="small">15.13x, n=111, 80.4%</text>
+<text x="26" y="185" class="small">BRCA1 bin 107 c.4940-4986</text>
+<rect x="220" y="168" width="570" height="24" fill="#3893c2"/>
+<text x="798" y="185" class="small">14.27x, n=107, 75.9%</text>
+<text x="26" y="219" class="small">BRCA1 bin 115 c.5313-5359</text>
+<rect x="220" y="202" width="566" height="24" fill="#3993c2"/>
+<text x="794" y="219" class="small">14.17x, n=104, 75.4%</text>
+<text x="26" y="253" class="small">BRCA1 bin 1 c.1-46</text>
+<rect x="220" y="236" width="559" height="24" fill="#3a94c2"/>
+<text x="787" y="253" class="small">14.01x, n=105, 74.5%</text>
+<text x="26" y="287" class="small">BRCA1 bin 4 c.140-186</text>
+<rect x="220" y="270" width="554" height="24" fill="#3b94c3"/>
+<text x="782" y="287" class="small">13.87x, n=104, 73.8%</text>
+<text x="26" y="321" class="small">BRCA1 bin 5 c.187-233</text>
+<rect x="220" y="304" width="544" height="24" fill="#3c95c3"/>
+<text x="772" y="321" class="small">13.63x, n=100, 72.5%</text>
+<text x="26" y="355" class="small">BRCA1 bin 6 c.234-279</text>
+<rect x="220" y="338" width="527" height="24" fill="#3f97c4"/>
+<text x="755" y="355" class="small">13.21x, n=99, 70.2%</text>
+<text x="26" y="389" class="small">BRCA1 bin 112 c.5173-5219</text>
+<rect x="220" y="372" width="527" height="24" fill="#3f97c4"/>
+<text x="755" y="389" class="small">13.21x, n=99, 70.2%</text>
+<text x="26" y="423" class="small">BRCA1 bin 117 c.5406-5452</text>
+<rect x="220" y="406" width="527" height="24" fill="#3f97c4"/>
+<text x="755" y="423" class="small">13.21x, n=99, 70.2%</text>
+<text x="26" y="457" class="small">BRCA1 bin 108 c.4987-5032</text>
+<rect x="220" y="440" width="517" height="24" fill="#4198c5"/>
+<text x="745" y="457" class="small">12.95x, n=95, 68.8%</text>
+</svg>

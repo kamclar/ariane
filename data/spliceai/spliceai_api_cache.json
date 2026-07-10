@@ -1,0 +1,182 @@
+{
+  "BRCA1:c.509G>A": {
+    "score": 0.02,
+    "chrom": "17",
+    "pos": 43099813,
+    "ref": "C",
+    "alt": "T",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.4185G>A": {
+    "score": 0.93,
+    "chrom": "17",
+    "pos": 43090944,
+    "ref": "C",
+    "alt": "T",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.5217T>A": {
+    "score": 0.0,
+    "chrom": "17",
+    "pos": 43057112,
+    "ref": "A",
+    "alt": "T",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.181T>G": {
+    "score": 0.16,
+    "chrom": "17",
+    "pos": 43106487,
+    "ref": "A",
+    "alt": "C",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.182G>C": {
+    "score": 0.09,
+    "chrom": "17",
+    "pos": 43106486,
+    "ref": "C",
+    "alt": "G",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.6147_6149del": {
+    "score": 0.0,
+    "chrom": "13",
+    "pos": 32340499,
+    "ref": "TGTG",
+    "alt": "T",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.8953+2T>C": {
+    "score": 0.66,
+    "chrom": "13",
+    "pos": 32379517,
+    "ref": "T",
+    "alt": "C",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.3247A>C": {
+    "score": 0.0,
+    "chrom": "13",
+    "pos": 32337602,
+    "ref": "A",
+    "alt": "C",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.5217T>A": {
+    "score": 0.0,
+    "chrom": "13",
+    "pos": 32339572,
+    "ref": "T",
+    "alt": "A",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.3247A>C": {
+    "score": 0.0,
+    "chrom": "17",
+    "pos": 43092284,
+    "ref": "T",
+    "alt": "G",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.5551_5552insT": {
+    "score": 0.0,
+    "chrom": "17",
+    "pos": 43045718,
+    "ref": "T",
+    "alt": "TA",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.1534C>T": {
+    "score": 0.0,
+    "chrom": "17",
+    "pos": 43093997,
+    "ref": "G",
+    "alt": "A",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.3668_3671dup": {
+    "score": 0.03,
+    "chrom": "17",
+    "pos": 43091859,
+    "ref": "G",
+    "alt": "GGGAA",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.9097del": {
+    "score": 0.03,
+    "chrom": "13",
+    "pos": 32379885,
+    "ref": "CA",
+    "alt": "C",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.628C>T": {
+    "score": 0.51,
+    "chrom": "17",
+    "pos": 43095888,
+    "ref": "G",
+    "alt": "A",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA1:c.3891_3893del": {
+    "score": 0.15,
+    "chrom": "17",
+    "pos": 43091637,
+    "ref": "TGAA",
+    "alt": "T",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.3891_3893del": {
+    "score": 0.0,
+    "chrom": "13",
+    "pos": 32338245,
+    "ref": "ATAT",
+    "alt": "A",
+    "source": "Broad SpliceAI API"
+  },
+  "BRCA2:c.5551_5552insT": {
+    "score": 0.0,
+    "chrom": "13",
+    "pos": 32339906,
+    "ref": "A",
+    "alt": "AT",
+    "source": "Broad SpliceAI API"
+  },
+  "reference_transcript:BRCA1:c.80+1G>A": {
+    "score": 0.93,
+    "chrom": "17",
+    "pos": 43124016,
+    "ref": "C",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model:cache",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DL",
+    "reference_transcript_score": 0.93,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.93,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26
+  },
+  "reference_transcript:BRCA2:c.8953+1G>T": {
+    "score": 0.99,
+    "chrom": "13",
+    "pos": 32379516,
+    "ref": "G",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000380152.8",
+    "max_delta_field": "DS_DL",
+    "reference_transcript_score": 0.99,
+    "reference_transcript": "ENST00000380152.8",
+    "max_any_transcript_score": 0.99,
+    "max_any_transcript": "ENST00000380152.8",
+    "n_transcript_scores": 5
+  }
+}

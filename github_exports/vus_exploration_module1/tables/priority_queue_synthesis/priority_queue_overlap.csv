@@ -1,0 +1,50 @@
+queue_a,queue_b,queue_a_label,queue_b_label,count
+near_threshold_queue,near_threshold_queue,near threshold,near threshold,637
+near_threshold_queue,splice_rna_queue,near threshold,splice/RNA,126
+near_threshold_queue,functional_queue,near threshold,functional,618
+near_threshold_queue,evidence_conflict_queue,near threshold,evidence conflict,1
+near_threshold_queue,public_assertion_queue,near threshold,public assertion,3
+near_threshold_queue,neighborhood_context_queue,near threshold,neighborhood context,595
+near_threshold_queue,low_information_queue,near threshold,low information,0
+splice_rna_queue,near_threshold_queue,splice/RNA,near threshold,126
+splice_rna_queue,splice_rna_queue,splice/RNA,splice/RNA,3291
+splice_rna_queue,functional_queue,splice/RNA,functional,197
+splice_rna_queue,evidence_conflict_queue,splice/RNA,evidence conflict,20
+splice_rna_queue,public_assertion_queue,splice/RNA,public assertion,72
+splice_rna_queue,neighborhood_context_queue,splice/RNA,neighborhood context,2838
+splice_rna_queue,low_information_queue,splice/RNA,low information,1037
+functional_queue,near_threshold_queue,functional,near threshold,618
+functional_queue,splice_rna_queue,functional,splice/RNA,197
+functional_queue,functional_queue,functional,functional,836
+functional_queue,evidence_conflict_queue,functional,evidence conflict,5
+functional_queue,public_assertion_queue,functional,public assertion,7
+functional_queue,neighborhood_context_queue,functional,neighborhood context,798
+functional_queue,low_information_queue,functional,low information,190
+evidence_conflict_queue,near_threshold_queue,evidence conflict,near threshold,1
+evidence_conflict_queue,splice_rna_queue,evidence conflict,splice/RNA,20
+evidence_conflict_queue,functional_queue,evidence conflict,functional,5
+evidence_conflict_queue,evidence_conflict_queue,evidence conflict,evidence conflict,30
+evidence_conflict_queue,public_assertion_queue,evidence conflict,public assertion,13
+evidence_conflict_queue,neighborhood_context_queue,evidence conflict,neighborhood context,25
+evidence_conflict_queue,low_information_queue,evidence conflict,low information,0
+public_assertion_queue,near_threshold_queue,public assertion,near threshold,3
+public_assertion_queue,splice_rna_queue,public assertion,splice/RNA,72
+public_assertion_queue,functional_queue,public assertion,functional,7
+public_assertion_queue,evidence_conflict_queue,public assertion,evidence conflict,13
+public_assertion_queue,public_assertion_queue,public assertion,public assertion,72
+public_assertion_queue,neighborhood_context_queue,public assertion,neighborhood context,72
+public_assertion_queue,low_information_queue,public assertion,low information,0
+neighborhood_context_queue,near_threshold_queue,neighborhood context,near threshold,595
+neighborhood_context_queue,splice_rna_queue,neighborhood context,splice/RNA,2838
+neighborhood_context_queue,functional_queue,neighborhood context,functional,798
+neighborhood_context_queue,evidence_conflict_queue,neighborhood context,evidence conflict,25
+neighborhood_context_queue,public_assertion_queue,neighborhood context,public assertion,72
+neighborhood_context_queue,neighborhood_context_queue,neighborhood context,neighborhood context,6649
+neighborhood_context_queue,low_information_queue,neighborhood context,low information,4288
+low_information_queue,near_threshold_queue,low information,near threshold,0
+low_information_queue,splice_rna_queue,low information,splice/RNA,1037
+low_information_queue,functional_queue,low information,functional,190
+low_information_queue,evidence_conflict_queue,low information,evidence conflict,0
+low_information_queue,public_assertion_queue,low information,public assertion,0
+low_information_queue,neighborhood_context_queue,low information,neighborhood context,4288
+low_information_queue,low_information_queue,low information,low information,5379

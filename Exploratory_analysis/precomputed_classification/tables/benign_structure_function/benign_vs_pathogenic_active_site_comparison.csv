@@ -1,0 +1,49 @@
+curated_active_site_status,benign_count,pathogenic_count,benign_percent,pathogenic_percent,pathogenic_to_benign_rate_ratio
+not_curated_in_current_dataset,21399,1305,57.910,53.462,0.923
+region_level:UniProt:Region:Interaction with RAD51 (1003-2082) [source_extracted_region],5450,274,14.749,11.225,0.761
+region_level:UniProt:Region:Interaction with RAD51 (1003-2082) [source_extracted_region];region_level:UniProt:Region:Interaction with POLH (1338-1781) [source_extracted_region],3783,213,10.238,8.726,0.852
+region_level:UniProt:Region:Interaction with NPM1 (639-1000) [source_extracted_region],3076,180,8.324,7.374,0.886
+region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],98,127,0.265,5.203,19.618
+region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],498,71,1.348,2.909,2.158
+region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],1037,54,2.806,2.212,0.788
+region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],595,50,1.610,2.048,1.272
+region_level:UniProt:Region:Interaction with HSF2BP (2270-2337) [source_extracted_region],527,38,1.426,1.557,1.092
+region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],38,24,0.103,0.983,9.561
+region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],214,16,0.579,0.655,1.132
+region_level:UniProt:Region:Interaction with PALB2 (1-40) [source_extracted_region],76,15,0.206,0.615,2.988
+region_level:UniProt:Region:Interaction with PALB2 (1397-1424) [source_extracted_region],19,12,0.051,0.492,9.561
+UniProt:Mutagenesis:No effect on interaction with BAP1. [source_extracted],2,7,0.005,0.287,52.983
+UniProt:Natural variant:in BC; no interaction with BAP1; dbSNP:rs80357064 [source_extracted];zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys64 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1,5,0.003,0.205,75.690
+region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region];region_level:UniProt:Motif:Nuclear export signal; masked by interaction with SEM1 (2682-2698) [source_extracted_region],4,5,0.011,0.205,18.923
+UniProt:Natural variant:in BC and OC; pathogenic; no interaction with BAP1; dbSNP:rs28897672 [source_extracted];zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys61 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],0,4,0.000,0.164,NA
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys27 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],0,4,0.000,0.164,NA
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys44 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],0,4,0.000,0.164,NA
+UniProt:Mutagenesis:Abolishes interaction with BRIP1. [source_extracted],3,3,0.008,0.123,15.138
+"UniProt:Mutagenesis:Does not abolish ABRAXAS1 binding, but abolishes formation of a heterotetramer with ABRAXAS1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region]",11,3,0.030,0.123,4.129
+UniProt:Mutagenesis:Decreased interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],15,2,0.041,0.082,2.018
+UniProt:Mutagenesis:Disrupts interaction with SEM1. [source_extracted];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],0,2,0.000,0.082,NA
+"UniProt:Mutagenesis:Does not abolish ABRAXAS1 binding, but impairs formation of a heterotetramer with ABRAXAS1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region]",6,2,0.016,0.082,5.046
+UniProt:Mutagenesis:Does not affect interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],16,2,0.043,0.082,1.892
+UniProt:Natural variant:in BC; abolishes interaction with PALB2; dbSNP:rs80359214 [source_extracted];UniProt:Natural variant:in BC; abolishes interaction with PALB2; dbSNP:rs80359182 [source_extracted];region_level:UniProt:Region:Interaction with PALB2 (1-40) [source_extracted_region],0,2,0.000,0.082,NA
+UniProt:Natural variant:in BC; pathogenic; strongly reduced transcription transactivation; abolishes interaction with BRIP1 and RBBP8; dbSNP:rs41293463 [source_extracted];UniProt:Natural variant:in BC; pathogenic; alters protein stability and abolishes ACACA and BRIP1 binding; dbSNP:rs41293463 [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],4,2,0.011,0.082,7.569
+UniProt:Natural variant:in FANCD1; hypersensitive to DNA damage; reduced homology-directed repair activity; no effect on interaction with SEM1; dbSNP:rs80359013 [source_extracted];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],0,2,0.000,0.082,NA
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys47 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],0,2,0.000,0.082,NA
+UniProt:Mutagenesis:Abolishes interaction with BRIP1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],5,1,0.014,0.041,3.028
+UniProt:Mutagenesis:Mildly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],4,1,0.011,0.041,3.785
+UniProt:Mutagenesis:Slightly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],6,1,0.016,0.041,2.523
+UniProt:Natural variant:in BC and FANCS; pathogenic; decreased localization to DNA damage sites and reduced interaction with UIMC1/RAP80; dbSNP:rs45553935 [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],4,1,0.011,0.041,3.785
+UniProt:Natural variant:in BC; abolishes interaction with PALB2; dbSNP:rs80358961 [source_extracted];region_level:UniProt:Region:Interaction with PALB2 (1-40) [source_extracted_region],0,1,0.000,0.041,NA
+UniProt:Natural variant:in BC; benign; no effect on homologous recombination-mediated DNA repair; no effect on interaction with SEM1; dbSNP:rs80359065 [source_extracted];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],1,1,0.003,0.041,15.138
+UniProt:Natural variant:in BC; pathogenic; disrupts interaction with SEM1 promoting interaction with XPO1 and BRCA2 cytoplasmic localization; in heterozygous state promotes RAD51 cytoplasmic localization; reduced homology-directed repair activity; dbSNP:rs41293511 [source_extracted];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],0,1,0.000,0.041,NA
+UniProt:Natural variant:in BC; pathogenic; strongly reduces affinity for a BRIP1 phosphopeptide; functionally impaired in vitro; dbSNP:rs41293459 [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],0,1,0.000,0.041,NA
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys24 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1,1,0.003,0.041,15.138
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys39 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1,1,0.003,0.041,15.138
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue His41 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1,1,0.003,0.041,15.138
+UniProt:Mutagenesis:Abolished interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],27,0,0.073,0.000,0.000
+"UniProt:Mutagenesis:Disrupts the interaction with E2 enzymes, thereby abolishing the E3 ubiquitin-protein ligase activity. [source_extracted];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region]",4,0,0.011,0.000,0.000
+UniProt:Mutagenesis:Impaired interaction with RAD51. [source_extracted],9,0,0.024,0.000,0.000
+UniProt:Mutagenesis:No effect on affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],8,0,0.022,0.000,0.000
+UniProt:Mutagenesis:Strongly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],2,0,0.005,0.000,0.000
+UniProt:Natural variant:in BC; abolishes ACACA binding; dbSNP:rs28897696 [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],3,0,0.008,0.000,0.000
+UniProt:Natural variant:in ovarian cancer; uncertain significance; abolishes ACACA binding and strongly reduces BRIP1 binding; dbSNP:rs80357462 [source_extracted],3,0,0.008,0.000,0.000
+UniProt:Natural variant:no effect on homologous recombination-mediated DNA repair; no effect on interaction with SEM1; dbSNP:rs11571707 [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],1,0,0.003,0.000,0.000

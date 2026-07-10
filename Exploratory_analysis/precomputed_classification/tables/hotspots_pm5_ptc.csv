@@ -1,0 +1,2 @@
+gene,bin,cds_start,cds_end,n_variants,signal,count,rate,expected,enrichment,poisson_tail
+BRCA2,106,8975,9060,258,pm5_ptc,25,9.69,12.16,2.06,0.0008223

@@ -1,0 +1,163 @@
+gene,group,label,spliceai_bin,boundary_distance_bin,count,group_total,percent_within_group
+BRCA2,benign,Benign/Likely Benign,0-0.049,0,29,22678,0.13
+BRCA2,benign,Benign/Likely Benign,0-0.049,1-2,98,22678,0.43
+BRCA2,benign,Benign/Likely Benign,0-0.049,3-5,197,22678,0.87
+BRCA2,benign,Benign/Likely Benign,0-0.049,6-10,339,22678,1.49
+BRCA2,benign,Benign/Likely Benign,0-0.049,11-20,679,22678,2.99
+BRCA2,benign,Benign/Likely Benign,0-0.049,21-50,1414,22678,6.24
+BRCA2,benign,Benign/Likely Benign,0-0.049,51-100,1560,22678,6.88
+BRCA2,benign,Benign/Likely Benign,0-0.049,101-250,3100,22678,13.67
+BRCA2,benign,Benign/Likely Benign,0-0.049,>250,14614,22678,64.44
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,0,6,22678,0.03
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,1-2,14,22678,0.06
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,3-5,18,22678,0.08
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,6-10,37,22678,0.16
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,11-20,77,22678,0.34
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,21-50,157,22678,0.69
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,51-100,82,22678,0.36
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,101-250,166,22678,0.73
+BRCA2,benign,Benign/Likely Benign,0.05-0.099,>250,19,22678,0.08
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,0,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,1-2,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,3-5,3,22678,0.01
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,6-10,3,22678,0.01
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,11-20,10,22678,0.04
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,21-50,23,22678,0.10
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,51-100,11,22678,0.05
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,101-250,16,22678,0.07
+BRCA2,benign,Benign/Likely Benign,0.10-0.199,>250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,0,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,1-2,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,3-5,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,6-10,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,11-20,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,21-50,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,51-100,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,101-250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.20-0.499,>250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,0,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,1-2,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,3-5,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,6-10,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,11-20,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,21-50,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,51-100,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,101-250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.50-0.799,>250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,0,1,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,1-2,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,3-5,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,6-10,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,11-20,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,21-50,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,51-100,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,101-250,0,22678,0.00
+BRCA2,benign,Benign/Likely Benign,0.80-1.00,>250,0,22678,0.00
+BRCA2,vus,VUS,0-0.049,0,24,6529,0.37
+BRCA2,vus,VUS,0-0.049,1-2,83,6529,1.27
+BRCA2,vus,VUS,0-0.049,3-5,168,6529,2.57
+BRCA2,vus,VUS,0-0.049,6-10,295,6529,4.52
+BRCA2,vus,VUS,0-0.049,11-20,558,6529,8.55
+BRCA2,vus,VUS,0-0.049,21-50,1643,6529,25.16
+BRCA2,vus,VUS,0-0.049,51-100,1463,6529,22.41
+BRCA2,vus,VUS,0-0.049,101-250,532,6529,8.15
+BRCA2,vus,VUS,0-0.049,>250,10,6529,0.15
+BRCA2,vus,VUS,0.05-0.099,0,8,6529,0.12
+BRCA2,vus,VUS,0.05-0.099,1-2,10,6529,0.15
+BRCA2,vus,VUS,0.05-0.099,3-5,11,6529,0.17
+BRCA2,vus,VUS,0.05-0.099,6-10,24,6529,0.37
+BRCA2,vus,VUS,0.05-0.099,11-20,43,6529,0.66
+BRCA2,vus,VUS,0.05-0.099,21-50,191,6529,2.93
+BRCA2,vus,VUS,0.05-0.099,51-100,293,6529,4.49
+BRCA2,vus,VUS,0.05-0.099,101-250,12,6529,0.18
+BRCA2,vus,VUS,0.05-0.099,>250,0,6529,0.00
+BRCA2,vus,VUS,0.10-0.199,0,13,6529,0.20
+BRCA2,vus,VUS,0.10-0.199,1-2,31,6529,0.47
+BRCA2,vus,VUS,0.10-0.199,3-5,18,6529,0.28
+BRCA2,vus,VUS,0.10-0.199,6-10,30,6529,0.46
+BRCA2,vus,VUS,0.10-0.199,11-20,55,6529,0.84
+BRCA2,vus,VUS,0.10-0.199,21-50,175,6529,2.68
+BRCA2,vus,VUS,0.10-0.199,51-100,225,6529,3.45
+BRCA2,vus,VUS,0.10-0.199,101-250,44,6529,0.67
+BRCA2,vus,VUS,0.10-0.199,>250,7,6529,0.11
+BRCA2,vus,VUS,0.20-0.499,0,18,6529,0.28
+BRCA2,vus,VUS,0.20-0.499,1-2,33,6529,0.51
+BRCA2,vus,VUS,0.20-0.499,3-5,22,6529,0.34
+BRCA2,vus,VUS,0.20-0.499,6-10,15,6529,0.23
+BRCA2,vus,VUS,0.20-0.499,11-20,45,6529,0.69
+BRCA2,vus,VUS,0.20-0.499,21-50,122,6529,1.87
+BRCA2,vus,VUS,0.20-0.499,51-100,116,6529,1.78
+BRCA2,vus,VUS,0.20-0.499,101-250,38,6529,0.58
+BRCA2,vus,VUS,0.20-0.499,>250,4,6529,0.06
+BRCA2,vus,VUS,0.50-0.799,0,11,6529,0.17
+BRCA2,vus,VUS,0.50-0.799,1-2,9,6529,0.14
+BRCA2,vus,VUS,0.50-0.799,3-5,6,6529,0.09
+BRCA2,vus,VUS,0.50-0.799,6-10,1,6529,0.02
+BRCA2,vus,VUS,0.50-0.799,11-20,5,6529,0.08
+BRCA2,vus,VUS,0.50-0.799,21-50,25,6529,0.38
+BRCA2,vus,VUS,0.50-0.799,51-100,18,6529,0.28
+BRCA2,vus,VUS,0.50-0.799,101-250,9,6529,0.14
+BRCA2,vus,VUS,0.50-0.799,>250,2,6529,0.03
+BRCA2,vus,VUS,0.80-1.00,0,36,6529,0.55
+BRCA2,vus,VUS,0.80-1.00,1-2,4,6529,0.06
+BRCA2,vus,VUS,0.80-1.00,3-5,2,6529,0.03
+BRCA2,vus,VUS,0.80-1.00,6-10,1,6529,0.02
+BRCA2,vus,VUS,0.80-1.00,11-20,2,6529,0.03
+BRCA2,vus,VUS,0.80-1.00,21-50,7,6529,0.11
+BRCA2,vus,VUS,0.80-1.00,51-100,11,6529,0.17
+BRCA2,vus,VUS,0.80-1.00,101-250,1,6529,0.02
+BRCA2,vus,VUS,0.80-1.00,>250,0,6529,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,0,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,1-2,14,1564,0.90
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,3-5,18,1564,1.15
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,6-10,23,1564,1.47
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,11-20,45,1564,2.88
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,21-50,127,1564,8.12
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,51-100,119,1564,7.61
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,101-250,176,1564,11.25
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0-0.049,>250,796,1564,50.90
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,0,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,1-2,2,1564,0.13
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,3-5,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,6-10,5,1564,0.32
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,11-20,13,1564,0.83
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,21-50,29,1564,1.85
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,51-100,33,1564,2.11
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,101-250,9,1564,0.58
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.05-0.099,>250,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,0,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,1-2,5,1564,0.32
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,3-5,2,1564,0.13
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,6-10,4,1564,0.26
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,11-20,11,1564,0.70
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,21-50,27,1564,1.73
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,51-100,21,1564,1.34
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,101-250,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.10-0.199,>250,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,0,2,1564,0.13
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,1-2,5,1564,0.32
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,3-5,2,1564,0.13
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,6-10,3,1564,0.19
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,11-20,11,1564,0.70
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,21-50,16,1564,1.02
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,51-100,12,1564,0.77
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,101-250,2,1564,0.13
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.20-0.499,>250,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,0,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,1-2,3,1564,0.19
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,3-5,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,6-10,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,11-20,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,21-50,12,1564,0.77
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,51-100,3,1564,0.19
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,101-250,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.50-0.799,>250,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,0,4,1564,0.26
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,1-2,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,3-5,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,6-10,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,11-20,0,1564,0.00
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,21-50,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,51-100,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,101-250,1,1564,0.06
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,0.80-1.00,>250,0,1564,0.00

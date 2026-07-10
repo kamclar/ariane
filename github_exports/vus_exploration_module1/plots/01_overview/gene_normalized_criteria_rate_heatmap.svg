@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="544" height="698" viewBox="0 0 544 698">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="544" height="698" fill="#ffffff"/>
+<text x="30" y="28" class="title">Criteria rates by gene</text>
+<text x="30" y="52" class="small">Cells show percent of generated coding SNVs with each criterion.</text>
+<text x="190" y="74" class="small">Gene</text>
+<rect x="188" y="108" width="226" height="512" class="panel"/>
+<text x="196" y="94" class="small">BRCA1</text>
+<text x="308" y="94" class="small">BRCA2</text>
+<text x="20" y="132" class="small">BA1</text>
+<rect x="190" y="110" width="112" height="34" fill="#eff4fb" class="tile"/>
+<text x="196" y="131" class="small">0.13%</text>
+<rect x="302" y="110" width="112" height="34" fill="#f1f5fb" class="tile"/>
+<text x="308" y="131" class="small">0.09%</text>
+<text x="20" y="166" class="small">BS1_Strong</text>
+<rect x="190" y="144" width="112" height="34" fill="#ecf2fb" class="tile"/>
+<text x="196" y="165" class="small">0.24%</text>
+<rect x="302" y="144" width="112" height="34" fill="#edf3fb" class="tile"/>
+<text x="308" y="165" class="small">0.20%</text>
+<text x="20" y="200" class="small">BS1_Supporting</text>
+<rect x="190" y="178" width="112" height="34" fill="#ecf2fb" class="tile"/>
+<text x="196" y="199" class="small">0.24%</text>
+<rect x="302" y="178" width="112" height="34" fill="#eaf1fb" class="tile"/>
+<text x="308" y="199" class="small">0.33%</text>
+<text x="20" y="234" class="small">BS3</text>
+<rect x="190" y="212" width="112" height="34" fill="#a7c0f6" class="tile"/>
+<text x="196" y="233" class="small">13.44%</text>
+<rect x="302" y="212" width="112" height="34" fill="#e2ebfa" class="tile"/>
+<text x="308" y="233" class="small">0.89%</text>
+<text x="20" y="268" class="small">BP1</text>
+<rect x="190" y="246" width="112" height="34" fill="#3a72ed" class="tile"/>
+<text x="196" y="267" class="small">74.31%</text>
+<rect x="302" y="246" width="112" height="34" fill="#3c74ed" class="tile"/>
+<text x="308" y="267" class="small">72.76%</text>
+<text x="20" y="302" class="small">BP4</text>
+<rect x="190" y="280" width="112" height="34" fill="#e6eefb" class="tile"/>
+<text x="196" y="301" class="small">0.61%</text>
+<rect x="302" y="280" width="112" height="34" fill="#cadaf8" class="tile"/>
+<text x="308" y="301" class="small">4.23%</text>
+<text x="20" y="336" class="small">BP5</text>
+<rect x="190" y="314" width="112" height="34" fill="#dde7fa" class="tile"/>
+<text x="196" y="335" class="small">1.45%</text>
+<rect x="302" y="314" width="112" height="34" fill="#e2ebfa" class="tile"/>
+<text x="308" y="335" class="small">0.88%</text>
+<text x="20" y="370" class="small">BP7</text>
+<rect x="190" y="348" width="112" height="34" fill="#e6eefb" class="tile"/>
+<text x="196" y="369" class="small">0.61%</text>
+<rect x="302" y="348" width="112" height="34" fill="#cadaf8" class="tile"/>
+<text x="308" y="369" class="small">4.23%</text>
+<text x="20" y="404" class="small">PM2_Supporting</text>
+<rect x="190" y="382" width="112" height="34" fill="#2563eb" class="tile"/>
+<text x="196" y="403" class="small">92.17%</text>
+<rect x="302" y="382" width="112" height="34" fill="#2765eb" class="tile"/>
+<text x="308" y="403" class="small">90.03%</text>
+<text x="20" y="438" class="small">PM5_PTC</text>
+<rect x="190" y="416" width="112" height="34" fill="#c8d8f8" class="tile"/>
+<text x="196" y="437" class="small">4.57%</text>
+<rect x="302" y="416" width="112" height="34" fill="#c7d8f8" class="tile"/>
+<text x="308" y="437" class="small">4.79%</text>
+<text x="20" y="472" class="small">PP3</text>
+<rect x="190" y="450" width="112" height="34" fill="#d2dff9" class="tile"/>
+<text x="196" y="471" class="small">2.87%</text>
+<rect x="302" y="450" width="112" height="34" fill="#d9e4fa" class="tile"/>
+<text x="308" y="471" class="small">1.88%</text>
+<text x="20" y="506" class="small">PP4</text>
+<rect x="190" y="484" width="112" height="34" fill="#ecf2fb" class="tile"/>
+<text x="196" y="505" class="small">0.24%</text>
+<rect x="302" y="484" width="112" height="34" fill="#f2f6fc" class="tile"/>
+<text x="308" y="505" class="small">0.06%</text>
+<text x="20" y="540" class="small">PS1</text>
+<rect x="190" y="518" width="112" height="34" fill="#f3f7fc" class="tile"/>
+<text x="196" y="539" class="small">0.04%</text>
+<rect x="302" y="518" width="112" height="34" fill="#f6f9fc" class="tile"/>
+<text x="308" y="539" class="small">0.00%</text>
+<text x="20" y="574" class="small">PS3</text>
+<rect x="190" y="552" width="112" height="34" fill="#cfddf9" class="tile"/>
+<text x="196" y="573" class="small">3.39%</text>
+<rect x="302" y="552" width="112" height="34" fill="#e9f0fb" class="tile"/>
+<text x="308" y="573" class="small">0.43%</text>
+<text x="20" y="608" class="small">PVS1</text>
+<rect x="190" y="586" width="112" height="34" fill="#c8d8f8" class="tile"/>
+<text x="196" y="607" class="small">4.66%</text>
+<rect x="302" y="586" width="112" height="34" fill="#c6d7f8" class="tile"/>
+<text x="308" y="607" class="small">5.02%</text>
+<text x="448" y="104" class="legend-title">percent</text>
+<rect x="448" y="114" width="18" height="18" fill="#2563eb" class="tile"/>
+<rect x="448" y="132" width="18" height="18" fill="#3b73ed" class="tile"/>
+<rect x="448" y="150" width="18" height="18" fill="#5485ef" class="tile"/>
+<rect x="448" y="168" width="18" height="18" fill="#729af1" class="tile"/>
+<rect x="448" y="186" width="18" height="18" fill="#99b6f4" class="tile"/>
+<rect x="448" y="204" width="18" height="18" fill="#f7fafc" class="tile"/>
+<text x="474" y="126" class="small">92.2%</text>
+<text x="474" y="216" class="small">0</text>
+</svg>

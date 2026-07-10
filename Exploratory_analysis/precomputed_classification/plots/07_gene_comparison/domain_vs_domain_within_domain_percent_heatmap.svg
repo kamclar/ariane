@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1135" height="483" viewBox="0 0 1135 483">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1135" height="483" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1 domains vs BRCA2 domains, within-domain percent</text>
+<text x="28" y="56" class="small">Cells show percent of generated SNVs within each domain or region. This is normalized within that domain.</text>
+<text x="28" y="74" class="small">Rows are descriptive contexts, not homologous regions and not independent ACMG/ENIGMA evidence.</text>
+<text x="284" y="104" class="small">benign 1/2</text>
+<text x="374" y="104" class="small">VUS 3</text>
+<text x="464" y="104" class="small">pathogenic 4/5</text>
+<text x="554" y="104" class="small">SpAI &gt;=0.20</text>
+<text x="644" y="104" class="small">PP3</text>
+<text x="734" y="104" class="small">PS3</text>
+<text x="824" y="104" class="small">BS3</text>
+<text x="914" y="104" class="small">BP1</text>
+<text x="20" y="114" class="legend-title">BRCA1</text>
+<text x="58" y="138" class="small">BRCT phosphopeptide-binding (1650-1857</text>
+<rect x="280" y="118" width="90" height="30" fill="#9575cd" class="tile"/>
+<text x="285" y="137" class="small">63</text>
+<rect x="370" y="118" width="90" height="30" fill="#b39fdc" class="tile"/>
+<text x="375" y="137" class="small">30</text>
+<rect x="460" y="118" width="90" height="30" fill="#d5ccec" class="tile"/>
+<rect x="550" y="118" width="90" height="30" fill="#dbd5ef" class="tile"/>
+<rect x="640" y="118" width="90" height="30" fill="#ddd7f0" class="tile"/>
+<rect x="730" y="118" width="90" height="30" fill="#c0afe1" class="tile"/>
+<text x="735" y="137" class="small">20</text>
+<rect x="820" y="118" width="90" height="30" fill="#9171cb" class="tile"/>
+<text x="825" y="137" class="small">67</text>
+<rect x="910" y="118" width="90" height="30" fill="#f7fafc" class="tile"/>
+<text x="58" y="168" class="small">RING zinc-binding/E3 ligase (2-101)</text>
+<rect x="280" y="148" width="90" height="30" fill="#9474cc" class="tile"/>
+<text x="285" y="167" class="small">64</text>
+<rect x="370" y="148" width="90" height="30" fill="#b6a3dd" class="tile"/>
+<text x="375" y="167" class="small">27</text>
+<rect x="460" y="148" width="90" height="30" fill="#d2c8ea" class="tile"/>
+<rect x="550" y="148" width="90" height="30" fill="#c3b4e3" class="tile"/>
+<text x="555" y="167" class="small">17</text>
+<rect x="640" y="148" width="90" height="30" fill="#c7b9e5" class="tile"/>
+<text x="645" y="167" class="small">15</text>
+<rect x="730" y="148" width="90" height="30" fill="#c0b0e2" class="tile"/>
+<text x="735" y="167" class="small">20</text>
+<rect x="820" y="148" width="90" height="30" fill="#9171cb" class="tile"/>
+<text x="825" y="167" class="small">67</text>
+<rect x="910" y="148" width="90" height="30" fill="#f7fafc" class="tile"/>
+<text x="58" y="198" class="small">coiled-coil PALB2 interaction (1391-14</text>
+<rect x="280" y="178" width="90" height="30" fill="#d6cdec" class="tile"/>
+<rect x="370" y="178" width="90" height="30" fill="#835ec4" class="tile"/>
+<text x="375" y="197" class="small">87</text>
+<rect x="460" y="178" width="90" height="30" fill="#dad3ee" class="tile"/>
+<rect x="550" y="178" width="90" height="30" fill="#dbd4ee" class="tile"/>
+<rect x="640" y="178" width="90" height="30" fill="#dcd5ef" class="tile"/>
+<rect x="730" y="178" width="90" height="30" fill="#f7fafc" class="tile"/>
+<rect x="820" y="178" width="90" height="30" fill="#dcd6ef" class="tile"/>
+<rect x="910" y="178" width="90" height="30" fill="#f7fafc" class="tile"/>
+<text x="58" y="228" class="small">outside mapped domains (outside)</text>
+<rect x="280" y="208" width="90" height="30" fill="#805ac3" class="tile"/>
+<text x="285" y="227" class="small">91</text>
+<rect x="370" y="208" width="90" height="30" fill="#ded8f0" class="tile"/>
+<rect x="460" y="208" width="90" height="30" fill="#dcd6ef" class="tile"/>
+<rect x="550" y="208" width="90" height="30" fill="#e5e2f3" class="tile"/>
+<rect x="640" y="208" width="90" height="30" fill="#e6e3f4" class="tile"/>
+<rect x="730" y="208" width="90" height="30" fill="#f2f4fa" class="tile"/>
+<rect x="820" y="208" width="90" height="30" fill="#e2def2" class="tile"/>
+<rect x="910" y="208" width="90" height="30" fill="#815ac3" class="tile"/>
+<text x="915" y="227" class="small">91</text>
+<text x="20" y="234" class="legend-title">BRCA2</text>
+<text x="58" y="258" class="small">BRC repeats / RAD51-binding (1000-2080</text>
+<rect x="280" y="238" width="90" height="30" fill="#7e57c2" class="tile"/>
+<text x="285" y="257" class="small">95</text>
+<rect x="370" y="238" width="90" height="30" fill="#f7fafc" class="tile"/>
+<rect x="460" y="238" width="90" height="30" fill="#dbd5ef" class="tile"/>
+<rect x="550" y="238" width="90" height="30" fill="#f7fafc" class="tile"/>
+<rect x="640" y="238" width="90" height="30" fill="#f7fafc" class="tile"/>
+<rect x="730" y="238" width="90" height="30" fill="#f5f7fb" class="tile"/>
+<rect x="820" y="238" width="90" height="30" fill="#f0f0f9" class="tile"/>
+<rect x="910" y="238" width="90" height="30" fill="#7e57c2" class="tile"/>
+<text x="915" y="257" class="small">95</text>
+<text x="58" y="288" class="small">C-terminal RAD51/NLS context (3187-341</text>
+<rect x="280" y="268" width="90" height="30" fill="#835dc4" class="tile"/>
+<text x="285" y="287" class="small">88</text>
+<rect x="370" y="268" width="90" height="30" fill="#d1c7ea" class="tile"/>
+<rect x="460" y="268" width="90" height="30" fill="#e2def2" class="tile"/>
+<rect x="550" y="268" width="90" height="30" fill="#e0dbf1" class="tile"/>
+<rect x="640" y="268" width="90" height="30" fill="#e0dcf1" class="tile"/>
+<rect x="730" y="268" width="90" height="30" fill="#f4f6fb" class="tile"/>
+<rect x="820" y="268" width="90" height="30" fill="#ececf7" class="tile"/>
+<rect x="910" y="268" width="90" height="30" fill="#835dc4" class="tile"/>
+<text x="915" y="287" class="small">88</text>
+<text x="58" y="318" class="small">DNA-binding domain / helical-OB-DSS1 (</text>
+<rect x="280" y="298" width="90" height="30" fill="#ded8f0" class="tile"/>
+<rect x="370" y="298" width="90" height="30" fill="#815bc3" class="tile"/>
+<text x="375" y="317" class="small">90</text>
+<rect x="460" y="298" width="90" height="30" fill="#d9d2ee" class="tile"/>
+<rect x="550" y="298" width="90" height="30" fill="#d9d1ee" class="tile"/>
+<rect x="640" y="298" width="90" height="30" fill="#dad4ee" class="tile"/>
+<rect x="730" y="298" width="90" height="30" fill="#e6e3f4" class="tile"/>
+<rect x="820" y="298" width="90" height="30" fill="#e3def2" class="tile"/>
+<rect x="910" y="298" width="90" height="30" fill="#f7fafc" class="tile"/>
+<text x="58" y="348" class="small">PALB2 binding N-terminal (10-40)</text>
+<rect x="280" y="328" width="90" height="30" fill="#e2def2" class="tile"/>
+<rect x="370" y="328" width="90" height="30" fill="#8059c3" class="tile"/>
+<text x="375" y="347" class="small">92</text>
+<rect x="460" y="328" width="90" height="30" fill="#dbd5ef" class="tile"/>
+<rect x="550" y="328" width="90" height="30" fill="#d7d0ed" class="tile"/>
+<rect x="640" y="328" width="90" height="30" fill="#dad3ee" class="tile"/>
+<rect x="730" y="328" width="90" height="30" fill="#eae9f6" class="tile"/>
+<rect x="820" y="328" width="90" height="30" fill="#e6e4f4" class="tile"/>
+<rect x="910" y="328" width="90" height="30" fill="#f7fafc" class="tile"/>
+<text x="58" y="378" class="small">outside mapped domains (outside)</text>
+<rect x="280" y="358" width="90" height="30" fill="#805ac3" class="tile"/>
+<text x="285" y="377" class="small">92</text>
+<rect x="370" y="358" width="90" height="30" fill="#e2def2" class="tile"/>
+<rect x="460" y="358" width="90" height="30" fill="#dbd4ee" class="tile"/>
+<rect x="550" y="358" width="90" height="30" fill="#e8e6f5" class="tile"/>
+<rect x="640" y="358" width="90" height="30" fill="#e9e7f5" class="tile"/>
+<rect x="730" y="358" width="90" height="30" fill="#f5f7fb" class="tile"/>
+<rect x="820" y="358" width="90" height="30" fill="#efeff8" class="tile"/>
+<rect x="910" y="358" width="90" height="30" fill="#805ac3" class="tile"/>
+<text x="915" y="377" class="small">92</text>
+<text x="1032" y="108" class="legend-title">percent</text>
+<rect x="1032" y="118" width="18" height="18" fill="#7e57c2" class="tile"/>
+<rect x="1032" y="136" width="18" height="18" fill="#8b68c8" class="tile"/>
+<rect x="1032" y="154" width="18" height="18" fill="#997ccf" class="tile"/>
+<rect x="1032" y="172" width="18" height="18" fill="#aa93d7" class="tile"/>
+<rect x="1032" y="190" width="18" height="18" fill="#c1b1e2" class="tile"/>
+<rect x="1032" y="208" width="18" height="18" fill="#f7fafc" class="tile"/>
+<text x="1056" y="130" class="small">95</text>
+<text x="1056" y="220" class="small">0</text>
+</svg>

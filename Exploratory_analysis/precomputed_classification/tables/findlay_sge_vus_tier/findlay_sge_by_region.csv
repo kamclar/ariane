@@ -1,0 +1,4 @@
+findlay_region,count,median_function_score,mean_function_score,lof_count,int_count,func_count,missing_func_class_count
+BRCT_region,461,-1.412,-1.329,244,105,112,0
+N_terminal_RING_region,211,-1.442,-1.494,109,67,35,0
+outside_Findlay_Ring_BRCT_core,1,-0.610,-0.610,0,0,1,0

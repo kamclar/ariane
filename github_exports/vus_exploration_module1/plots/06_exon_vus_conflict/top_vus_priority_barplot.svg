@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="848" viewBox="0 0 1100 848">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1100" height="848" fill="#ffffff"/>
+<text x="28" y="34" class="title">Highest heuristic VUS scores</text>
+<text x="28" y="56" class="small">Heuristic score examples only. Not a validated manual-review priority criterion.</text>
+<text x="24" y="103" class="small">BRCA1 c.190T&gt;G exon 3</text>
+<rect x="310" y="88" width="680.0" height="20" fill="#7c3aed"/>
+<text x="998.0" y="103" class="small">90: SpliceAI&gt;=0.20;PS3;PP3;near_pathogenic_dense;high_spliceai_in_benign_dense_regio</text>
+<text x="24" y="131" class="small">BRCA1 c.5044G&gt;A exon 15</text>
+<rect x="310" y="116" width="680.0" height="20" fill="#7c3aed"/>
+<text x="998.0" y="131" class="small">90: SpliceAI&gt;=0.20;PS3;PP3;near_pathogenic_dense;high_spliceai_in_benign_dense_regio</text>
+<text x="24" y="159" class="small">BRCA1 c.5123C&gt;G exon 16</text>
+<rect x="310" y="144" width="680.0" height="20" fill="#7c3aed"/>
+<text x="998.0" y="159" class="small">90: SpliceAI&gt;=0.20;PS3;PP3;near_pathogenic_dense;high_spliceai_in_benign_dense_regio</text>
+<text x="24" y="187" class="small">BRCA1 c.5453A&gt;G exon 21</text>
+<rect x="310" y="172" width="680.0" height="20" fill="#7c3aed"/>
+<text x="998.0" y="187" class="small">90: SpliceAI&gt;=0.20;PS3;PP3;near_pathogenic_dense;high_spliceai_in_benign_dense_regio</text>
+<text x="24" y="215" class="small">BRCA1 c.5123C&gt;A exon 16</text>
+<rect x="310" y="200" width="680.0" height="20" fill="#7c3aed"/>
+<text x="998.0" y="215" class="small">90: SpliceAI&gt;=0.20;PS3;PP3;near_pathogenic_dense;high_spliceai_in_benign_dense_regio</text>
+<text x="24" y="243" class="small">BRCA2 c.1909G&gt;T exon 9</text>
+<rect x="310" y="228" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="243" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="271" class="small">BRCA1 c.4185G&gt;T exon 10</text>
+<rect x="310" y="256" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="271" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="299" class="small">BRCA1 c.4185G&gt;C exon 10</text>
+<rect x="310" y="284" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="299" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="327" class="small">BRCA2 c.1909G&gt;C exon 9</text>
+<rect x="310" y="312" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="327" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="355" class="small">BRCA2 c.6937G&gt;T exon 11</text>
+<rect x="310" y="340" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="355" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="383" class="small">BRCA2 c.7435G&gt;T exon 13</text>
+<rect x="310" y="368" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="383" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="411" class="small">BRCA2 c.475G&gt;T exon 4</text>
+<rect x="310" y="396" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="411" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="439" class="small">BRCA2 c.477G&gt;A exon 5</text>
+<rect x="310" y="424" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="439" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="467" class="small">BRCA2 c.6937G&gt;A exon 11</text>
+<rect x="310" y="452" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="467" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="495" class="small">BRCA2 c.6937G&gt;C exon 11</text>
+<rect x="310" y="480" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="495" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="523" class="small">BRCA2 c.7435G&gt;C exon 13</text>
+<rect x="310" y="508" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="523" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="551" class="small">BRCA1 c.443A&gt;C exon 6</text>
+<rect x="310" y="536" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="551" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="579" class="small">BRCA1 c.443A&gt;G exon 6</text>
+<rect x="310" y="564" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="579" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="607" class="small">BRCA1 c.443A&gt;T exon 6</text>
+<rect x="310" y="592" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="607" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="635" class="small">BRCA1 c.444G&gt;A exon 6</text>
+<rect x="310" y="620" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="635" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="663" class="small">BRCA1 c.444G&gt;C exon 6</text>
+<rect x="310" y="648" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="663" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="691" class="small">BRCA1 c.444G&gt;T exon 6</text>
+<rect x="310" y="676" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="691" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="719" class="small">BRCA2 c.475G&gt;C exon 4</text>
+<rect x="310" y="704" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="719" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="747" class="small">BRCA1 c.4675G&gt;C exon 13</text>
+<rect x="310" y="732" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="747" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+<text x="24" y="775" class="small">BRCA1 c.4186C&gt;G exon 11</text>
+<rect x="310" y="760" width="642.2222222222222" height="20" fill="#7c3aed"/>
+<text x="960.2222222222222" y="775" class="small">85: SpliceAI&gt;=0.20;within_2bp_boundary;PP3;near_pathogenic_dense;high_spliceai_in_be</text>
+</svg>

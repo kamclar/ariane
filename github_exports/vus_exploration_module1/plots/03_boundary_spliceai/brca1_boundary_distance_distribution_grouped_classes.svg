@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="470" viewBox="0 0 1080 470">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1080" height="470" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1: Boundary-distance distribution</text>
+<text x="28" y="54" class="small">Percent of all variants in each group that fall into each distance bin</text>
+<rect x="90" y="70" width="870" height="300" fill="#f8fafc" stroke="#cbd5e1"/>
+<line x1="90" y1="370.0" x2="960" y2="370.0" class="grid"/>
+<text x="42" y="374.0" class="small">0%</text>
+<line x1="90" y1="310.0" x2="960" y2="310.0" class="grid"/>
+<text x="42" y="314.0" class="small">20%</text>
+<line x1="90" y1="250.0" x2="960" y2="250.0" class="grid"/>
+<text x="42" y="254.0" class="small">40%</text>
+<line x1="90" y1="190.0" x2="960" y2="190.0" class="grid"/>
+<text x="42" y="194.0" class="small">60%</text>
+<line x1="90" y1="130.0" x2="960" y2="130.0" class="grid"/>
+<text x="42" y="134.0" class="small">80%</text>
+<line x1="90" y1="70.0" x2="960" y2="70.0" class="grid"/>
+<text x="42" y="74.0" class="small">100%</text>
+<text x="94.0" y="390" class="small">0</text>
+<rect x="94.0" y="368.524064171123" width="30.916666666666664" height="1.4759358288770055" fill="#2b8cbe" opacity="0.85"/>
+<rect x="126.91666666666666" y="352.8077860962567" width="30.916666666666664" height="17.19221390374332" fill="#8a8f9c" opacity="0.85"/>
+<rect x="159.83333333333331" y="356.94443258800356" width="30.916666666666664" height="13.055567411996414" fill="#d7301f" opacity="0.85"/>
+<text x="202.75" y="390" class="small">1-2</text>
+<rect x="202.75" y="365.2513368983957" width="30.916666666666664" height="4.7486631016042775" fill="#2b8cbe" opacity="0.85"/>
+<rect x="235.66666666666666" y="346.0436363636364" width="30.916666666666664" height="23.956363636363637" fill="#8a8f9c" opacity="0.85"/>
+<rect x="268.5833333333333" y="353.81109640912445" width="30.916666666666664" height="16.18890359087555" fill="#d7301f" opacity="0.85"/>
+<text x="311.5" y="390" class="small">3-5</text>
+<rect x="311.5" y="361.36898395721926" width="30.916666666666664" height="8.631016042780749" fill="#2b8cbe" opacity="0.85"/>
+<rect x="344.4166666666667" y="338.99764705882353" width="30.916666666666664" height="31.00235294117647" fill="#8a8f9c" opacity="0.85"/>
+<rect x="377.3333333333333" y="361.12221415984243" width="30.916666666666664" height="8.877785840157562" fill="#d7301f" opacity="0.85"/>
+<text x="420.25" y="390" class="small">6-10</text>
+<rect x="420.25" y="354.5347593582888" width="30.916666666666664" height="15.46524064171123" fill="#2b8cbe" opacity="0.85"/>
+<rect x="453.1666666666667" y="329.6969411764706" width="30.916666666666664" height="40.30305882352941" fill="#8a8f9c" opacity="0.85"/>
+<rect x="486.0833333333333" y="351.722205623205" width="30.916666666666664" height="18.27779437679498" fill="#d7301f" opacity="0.85"/>
+<text x="529.0" y="390" class="small">11-20</text>
+<rect x="529.0" y="340.54545454545456" width="30.916666666666664" height="29.45454545454545" fill="#2b8cbe" opacity="0.85"/>
+<rect x="561.9166666666666" y="280.0931764705883" width="30.916666666666664" height="89.90682352941174" fill="#8a8f9c" opacity="0.85"/>
+<rect x="594.8333333333334" y="328.2221842816115" width="30.916666666666664" height="41.77781571838853" fill="#d7301f" opacity="0.85"/>
+<text x="637.75" y="390" class="small">21-50</text>
+<rect x="637.75" y="308.331550802139" width="30.916666666666664" height="61.668449197860966" fill="#2b8cbe" opacity="0.85"/>
+<rect x="670.6666666666666" y="203.15097326203207" width="30.916666666666664" height="166.84902673796793" fill="#8a8f9c" opacity="0.85"/>
+<rect x="703.5833333333334" y="293.2332636174611" width="30.916666666666664" height="76.76673638253891" fill="#d7301f" opacity="0.85"/>
+<text x="746.5" y="390" class="small">51-100</text>
+<rect x="746.5" y="333.45454545454544" width="30.916666666666664" height="36.54545454545455" fill="#2b8cbe" opacity="0.85"/>
+<rect x="779.4166666666666" y="328.56958288770056" width="30.916666666666664" height="41.430417112299466" fill="#8a8f9c" opacity="0.85"/>
+<rect x="812.3333333333334" y="338.14441551472873" width="30.916666666666664" height="31.85558448527125" fill="#d7301f" opacity="0.85"/>
+<text x="855.25" y="390" class="small">&gt;100</text>
+<rect x="855.25" y="70.0" width="30.916666666666664" height="300.0" fill="#2b8cbe" opacity="0.85"/>
+<rect x="888.1666666666666" y="322.65095187165775" width="30.916666666666664" height="47.34904812834223" fill="#8a8f9c" opacity="0.85"/>
+<rect x="921.0833333333334" y="118.81088299318901" width="30.916666666666664" height="251.189117006811" fill="#d7301f" opacity="0.85"/>
+<rect x="715" y="78" width="12" height="12" fill="#2b8cbe"/>
+<text x="733" y="88" class="small">Benign/Likely Benign</text>
+<rect x="715" y="98" width="12" height="12" fill="#8a8f9c"/>
+<text x="733" y="108" class="small">VUS</text>
+<rect x="715" y="118" width="12" height="12" fill="#d7301f"/>
+<text x="733" y="128" class="small">Likely Pathogenic/Pathogenic</text>
+<text x="405" y="448" class="label">Distance to nearest CDS exon boundary, bp</text>
+</svg>

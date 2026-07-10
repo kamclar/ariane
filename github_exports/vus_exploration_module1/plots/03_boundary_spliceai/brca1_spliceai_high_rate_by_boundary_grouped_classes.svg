@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="470" viewBox="0 0 1080 470">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1080" height="470" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1: SpliceAI >=0.20 rate by distance</text>
+<text x="28" y="54" class="small">This is normalized within each distance bin and group, so it is more informative than the scatter</text>
+<rect x="90" y="70" width="870" height="300" fill="#f8fafc" stroke="#cbd5e1"/>
+<line x1="90" y1="370.0" x2="960" y2="370.0" class="grid"/>
+<text x="42" y="374.0" class="small">0%</text>
+<line x1="90" y1="310.0" x2="960" y2="310.0" class="grid"/>
+<text x="42" y="314.0" class="small">20%</text>
+<line x1="90" y1="250.0" x2="960" y2="250.0" class="grid"/>
+<text x="42" y="254.0" class="small">40%</text>
+<line x1="90" y1="190.0" x2="960" y2="190.0" class="grid"/>
+<text x="42" y="194.0" class="small">60%</text>
+<line x1="90" y1="130.0" x2="960" y2="130.0" class="grid"/>
+<text x="42" y="134.0" class="small">80%</text>
+<line x1="90" y1="70.0" x2="960" y2="70.0" class="grid"/>
+<text x="42" y="74.0" class="small">100%</text>
+<text x="94.0" y="390" class="small">0</text>
+<rect x="94.0" y="331.17857142857144" width="30.916666666666664" height="38.82142857142856" fill="#2b8cbe" opacity="0.85"/>
+<rect x="126.91666666666666" y="165.07142857142858" width="30.916666666666664" height="204.92857142857142" fill="#8a8f9c" opacity="0.85"/>
+<rect x="159.83333333333331" y="70.0" width="30.916666666666664" height="300.0" fill="#d7301f" opacity="0.85"/>
+<text x="202.75" y="390" class="small">1-2</text>
+<rect x="202.75" y="350.67857142857144" width="30.916666666666664" height="19.321428571428573" fill="#2b8cbe" opacity="0.85"/>
+<rect x="235.66666666666666" y="206.14285714285714" width="30.916666666666664" height="163.85714285714286" fill="#8a8f9c" opacity="0.85"/>
+<rect x="268.5833333333333" y="185.67857142857144" width="30.916666666666664" height="184.32142857142856" fill="#d7301f" opacity="0.85"/>
+<text x="311.5" y="390" class="small">3-5</text>
+<rect x="311.5" y="364.67857142857144" width="30.916666666666664" height="5.321428571428571" fill="#2b8cbe" opacity="0.85"/>
+<rect x="344.4166666666667" y="292.07142857142856" width="30.916666666666664" height="77.92857142857143" fill="#8a8f9c" opacity="0.85"/>
+<rect x="377.3333333333333" y="243.96428571428572" width="30.916666666666664" height="126.03571428571428" fill="#d7301f" opacity="0.85"/>
+<text x="420.25" y="390" class="small">6-10</text>
+<rect x="420.25" y="359.64285714285717" width="30.916666666666664" height="10.357142857142858" fill="#2b8cbe" opacity="0.85"/>
+<rect x="453.1666666666667" y="317.5357142857143" width="30.916666666666664" height="52.464285714285715" fill="#8a8f9c" opacity="0.85"/>
+<rect x="486.0833333333333" y="288.3571428571429" width="30.916666666666664" height="81.64285714285714" fill="#d7301f" opacity="0.85"/>
+<text x="529.0" y="390" class="small">11-20</text>
+<rect x="529.0" y="356.7857142857143" width="30.916666666666664" height="13.214285714285715" fill="#2b8cbe" opacity="0.85"/>
+<rect x="561.9166666666666" y="300.57142857142856" width="30.916666666666664" height="69.42857142857143" fill="#8a8f9c" opacity="0.85"/>
+<rect x="594.8333333333334" y="271.7857142857143" width="30.916666666666664" height="98.21428571428571" fill="#d7301f" opacity="0.85"/>
+<text x="637.75" y="390" class="small">21-50</text>
+<rect x="637.75" y="359.7857142857143" width="30.916666666666664" height="10.214285714285715" fill="#2b8cbe" opacity="0.85"/>
+<rect x="670.6666666666666" y="338.64285714285717" width="30.916666666666664" height="31.357142857142854" fill="#8a8f9c" opacity="0.85"/>
+<rect x="703.5833333333334" y="253.39285714285714" width="30.916666666666664" height="116.60714285714286" fill="#d7301f" opacity="0.85"/>
+<text x="746.5" y="390" class="small">51-100</text>
+<rect x="746.5" y="369.07142857142856" width="30.916666666666664" height="0.9285714285714286" fill="#2b8cbe" opacity="0.85"/>
+<rect x="779.4166666666666" y="343.2857142857143" width="30.916666666666664" height="26.714285714285715" fill="#8a8f9c" opacity="0.85"/>
+<rect x="812.3333333333334" y="358.2857142857143" width="30.916666666666664" height="11.714285714285714" fill="#d7301f" opacity="0.85"/>
+<text x="855.25" y="390" class="small">&gt;100</text>
+<rect x="855.25" y="370.0" width="30.916666666666664" height="0.0" fill="#2b8cbe" opacity="0.85"/>
+<rect x="888.1666666666666" y="244.57142857142858" width="30.916666666666664" height="125.42857142857142" fill="#8a8f9c" opacity="0.85"/>
+<rect x="921.0833333333334" y="364.7857142857143" width="30.916666666666664" height="5.2142857142857135" fill="#d7301f" opacity="0.85"/>
+<rect x="715" y="78" width="12" height="12" fill="#2b8cbe"/>
+<text x="733" y="88" class="small">Benign/Likely Benign</text>
+<rect x="715" y="98" width="12" height="12" fill="#8a8f9c"/>
+<text x="733" y="108" class="small">VUS</text>
+<rect x="715" y="118" width="12" height="12" fill="#d7301f"/>
+<text x="733" y="128" class="small">Likely Pathogenic/Pathogenic</text>
+<text x="405" y="448" class="label">Distance to nearest CDS exon boundary, bp</text>
+</svg>

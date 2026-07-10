@@ -1,0 +1,6 @@
+gene,enigma_domain,count
+BRCA1,BRCT,52
+BRCA1,RING,30
+BRCA2,DBD,17
+BRCA1,outside_enigma_functional_domain,3
+BRCA2,outside_enigma_functional_domain,1

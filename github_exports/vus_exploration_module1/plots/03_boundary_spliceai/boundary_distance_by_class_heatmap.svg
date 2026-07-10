@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="738" height="436" viewBox="0 0 738 436">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="738" height="436" fill="#ffffff"/>
+<text x="30" y="32" class="title">Boundary distance by class</text>
+<text x="150" y="58" class="small">Class</text>
+<rect x="148" y="94" width="462" height="272" class="panel"/>
+<text x="154" y="80" class="small">1</text>
+<text x="246" y="80" class="small">2</text>
+<text x="338" y="80" class="small">3</text>
+<text x="430" y="80" class="small">4</text>
+<text x="522" y="80" class="small">5</text>
+<text x="20" y="116" class="small">0</text>
+<rect x="150" y="96" width="92" height="30" fill="#f6f9fc" class="tile"/>
+<text x="156" y="115" class="small">1</text>
+<rect x="242" y="96" width="92" height="30" fill="#ebf2fb" class="tile"/>
+<text x="248" y="115" class="small">82</text>
+<rect x="334" y="96" width="92" height="30" fill="#e6eefb" class="tile"/>
+<text x="340" y="115" class="small">171</text>
+<rect x="426" y="96" width="92" height="30" fill="#f2f6fc" class="tile"/>
+<text x="432" y="115" class="small">16</text>
+<rect x="518" y="96" width="92" height="30" fill="#f2f6fc" class="tile"/>
+<text x="524" y="115" class="small">18</text>
+<text x="20" y="146" class="small">1-2</text>
+<rect x="150" y="126" width="92" height="30" fill="#f3f7fc" class="tile"/>
+<text x="156" y="145" class="small">10</text>
+<rect x="242" y="126" width="92" height="30" fill="#e3ebfa" class="tile"/>
+<text x="248" y="145" class="small">251</text>
+<rect x="334" y="126" width="92" height="30" fill="#e3ebfa" class="tile"/>
+<text x="340" y="145" class="small">255</text>
+<rect x="426" y="126" width="92" height="30" fill="#f2f6fc" class="tile"/>
+<text x="432" y="145" class="small">16</text>
+<rect x="518" y="126" width="92" height="30" fill="#eef4fb" class="tile"/>
+<text x="524" y="145" class="small">44</text>
+<text x="20" y="176" class="small">3-5</text>
+<rect x="150" y="156" width="92" height="30" fill="#f3f7fc" class="tile"/>
+<text x="156" y="175" class="small">9</text>
+<rect x="242" y="156" width="92" height="30" fill="#dbe6fa" class="tile"/>
+<text x="248" y="175" class="small">478</text>
+<rect x="334" y="156" width="92" height="30" fill="#dfe9fa" class="tile"/>
+<text x="340" y="175" class="small">337</text>
+<rect x="426" y="156" width="92" height="30" fill="#f5f9fc" class="tile"/>
+<text x="432" y="175" class="small">2</text>
+<rect x="518" y="156" width="92" height="30" fill="#eff4fb" class="tile"/>
+<text x="524" y="175" class="small">38</text>
+<text x="20" y="206" class="small">6-10</text>
+<rect x="150" y="186" width="92" height="30" fill="#f3f7fc" class="tile"/>
+<text x="156" y="205" class="small">10</text>
+<rect x="242" y="186" width="92" height="30" fill="#d2dff9" class="tile"/>
+<text x="248" y="205" class="small">851</text>
+<rect x="334" y="186" width="92" height="30" fill="#dae5fa" class="tile"/>
+<text x="340" y="205" class="small">509</text>
+<rect x="426" y="186" width="92" height="30" fill="#f4f8fc" class="tile"/>
+<text x="432" y="205" class="small">4</text>
+<rect x="518" y="186" width="92" height="30" fill="#edf3fb" class="tile"/>
+<text x="524" y="205" class="small">66</text>
+<text x="20" y="236" class="small">11-20</text>
+<rect x="150" y="216" width="92" height="30" fill="#eef4fb" class="tile"/>
+<text x="156" y="235" class="small">46</text>
+<rect x="242" y="216" width="92" height="30" fill="#c3d5f8" class="tile"/>
+<text x="248" y="235" class="small">1640</text>
+<rect x="334" y="216" width="92" height="30" fill="#cedcf9" class="tile"/>
+<text x="340" y="235" class="small">1027</text>
+<rect x="426" y="216" width="92" height="30" fill="#f1f6fc" class="tile"/>
+<text x="432" y="235" class="small">23</text>
+<rect x="518" y="216" width="92" height="30" fill="#e8effb" class="tile"/>
+<text x="524" y="235" class="small">138</text>
+<text x="20" y="266" class="small">21-50</text>
+<rect x="150" y="246" width="92" height="30" fill="#ebf1fb" class="tile"/>
+<text x="156" y="265" class="small">94</text>
+<rect x="242" y="246" width="92" height="30" fill="#acc4f6" class="tile"/>
+<text x="248" y="265" class="small">3422</text>
+<rect x="334" y="246" width="92" height="30" fill="#b4caf7" class="tile"/>
+<text x="340" y="265" class="small">2755</text>
+<rect x="426" y="246" width="92" height="30" fill="#eef4fb" class="tile"/>
+<text x="432" y="265" class="small">46</text>
+<rect x="518" y="246" width="92" height="30" fill="#e0eafa" class="tile"/>
+<text x="524" y="265" class="small">313</text>
+<text x="20" y="296" class="small">51-100</text>
+<rect x="150" y="276" width="92" height="30" fill="#e6eefb" class="tile"/>
+<text x="156" y="295" class="small">182</text>
+<rect x="242" y="276" width="92" height="30" fill="#b5cbf7" class="tile"/>
+<text x="248" y="295" class="small">2611</text>
+<rect x="334" y="276" width="92" height="30" fill="#bacef7" class="tile"/>
+<text x="340" y="295" class="small">2273</text>
+<rect x="426" y="276" width="92" height="30" fill="#f3f7fc" class="tile"/>
+<text x="432" y="295" class="small">8</text>
+<rect x="518" y="276" width="92" height="30" fill="#e3ecfa" class="tile"/>
+<text x="524" y="295" class="small">242</text>
+<text x="20" y="326" class="small">&gt;100</text>
+<rect x="150" y="306" width="92" height="30" fill="#dce6fa" class="tile"/>
+<text x="156" y="325" class="small">450</text>
+<rect x="242" y="306" width="92" height="30" fill="#2563eb" class="tile"/>
+<text x="248" y="325" class="small">26815</text>
+<rect x="334" y="306" width="92" height="30" fill="#d2dff9" class="tile"/>
+<text x="340" y="325" class="small">827</text>
+<rect x="426" y="306" width="92" height="30" fill="#f0f5fb" class="tile"/>
+<text x="432" y="325" class="small">26</text>
+<rect x="518" y="306" width="92" height="30" fill="#c6d7f8" class="tile"/>
+<text x="524" y="325" class="small">1441</text>
+<text x="20" y="356" class="small">missing</text>
+<rect x="150" y="336" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="242" y="336" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="334" y="336" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="426" y="336" width="92" height="30" fill="#f7fafc" class="tile"/>
+<rect x="518" y="336" width="92" height="30" fill="#f7fafc" class="tile"/>
+<text x="642" y="90" class="legend-title">count</text>
+<rect x="642" y="100" width="18" height="18" fill="#2563eb" class="tile"/>
+<rect x="642" y="118" width="18" height="18" fill="#3b73ed" class="tile"/>
+<rect x="642" y="136" width="18" height="18" fill="#5485ef" class="tile"/>
+<rect x="642" y="154" width="18" height="18" fill="#729af1" class="tile"/>
+<rect x="642" y="172" width="18" height="18" fill="#99b6f4" class="tile"/>
+<rect x="642" y="190" width="18" height="18" fill="#f7fafc" class="tile"/>
+<text x="668" y="112" class="small">26815</text>
+<text x="668" y="202" class="small">0</text>
+</svg>

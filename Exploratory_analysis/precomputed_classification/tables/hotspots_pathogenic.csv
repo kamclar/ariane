@@ -1,0 +1,4 @@
+gene,bin,cds_start,cds_end,n_variants,signal,count,rate,expected,enrichment,poisson_tail
+BRCA1,109,5033,5079,141,pathogenic,28,19.86,7.24,3.87,3.68e-09
+BRCA1,5,187,233,138,pathogenic,21,15.22,7.08,2.96,1.724e-05
+BRCA1,111,5127,5172,141,pathogenic,17,12.06,7.24,2.35,0.001362

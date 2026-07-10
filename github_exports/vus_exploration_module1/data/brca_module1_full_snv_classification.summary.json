@@ -1,0 +1,42 @@
+{
+  "n_variants": 47547,
+  "classes": {
+    "3": 8154,
+    "5": 2300,
+    "2": 36150,
+    "1": 802,
+    "4": 141
+  },
+  "variant_types": {
+    "initiation_codon": 18,
+    "missense": 35241,
+    "synonymous": 9891,
+    "nonsense": 2397
+  },
+  "criteria": {
+    "PM2_Supporting": 43166,
+    "PS3": 699,
+    "PP4": 58,
+    "BS3": 2528,
+    "PM5_PTC": 2241,
+    "PVS1": 2327,
+    "BP5": 514,
+    "BS1_Supporting": 141,
+    "BS1_Strong": 101,
+    "PP3": 1060,
+    "BP4": 1404,
+    "BP7": 1404,
+    "BA1": 48,
+    "PS1": 7,
+    "BP1": 34855
+  },
+  "with_spliceai_score": 47547,
+  "coordinate_status": {
+    "ok": 47547
+  },
+  "gnomad_status": {
+    "status=absent_v2_only": 43641,
+    "status=found": 3906
+  },
+  "output": "variant_space_scan\\outputs\\brca_module1_full_snv_classification.csv"
+}

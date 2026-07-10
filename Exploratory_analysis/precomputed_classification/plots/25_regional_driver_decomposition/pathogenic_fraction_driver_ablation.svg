@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="410" viewBox="0 0 900 410">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="900" height="410" fill="#ffffff"/>
+<text x="28" y="32" class="title">Mean regional pathogenic fraction after driver exclusions</text>
+<text x="80" y="56" class="label">BRCA1</text>
+<rect x="80" y="70" width="340" height="250" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect x="88.0" y="70.0" width="56.0" height="250.0" fill="#b91c1c" opacity="0.78"/>
+<text x="88.0" y="338" class="small">all</text>
+<text x="88.0" y="65.0" class="tiny">0.05</text>
+<rect x="156.0" y="291.6" width="56.0" height="28.4" fill="#b91c1c" opacity="0.78"/>
+<text x="156.0" y="338" class="small">no PTC</text>
+<text x="156.0" y="286.6" class="tiny">0.01</text>
+<rect x="224.0" y="101.8" width="56.0" height="218.2" fill="#b91c1c" opacity="0.78"/>
+<text x="224.0" y="338" class="small">no PP3/SpAI</text>
+<text x="224.0" y="96.8" class="tiny">0.05</text>
+<rect x="292.0" y="127.5" width="56.0" height="192.5" fill="#b91c1c" opacity="0.78"/>
+<text x="292.0" y="338" class="small">no PS3/BS3</text>
+<text x="292.0" y="122.5" class="tiny">0.04</text>
+<rect x="360.0" y="320.0" width="56.0" height="0.0" fill="#b91c1c" opacity="0.78"/>
+<text x="360.0" y="338" class="small">residual</text>
+<text x="360.0" y="315.0" class="tiny">0.00</text>
+<text x="490" y="56" class="label">BRCA2</text>
+<rect x="490" y="70" width="340" height="250" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect x="498.0" y="70.0" width="56.0" height="250.0" fill="#b91c1c" opacity="0.78"/>
+<text x="498.0" y="338" class="small">all</text>
+<text x="498.0" y="65.0" class="tiny">0.05</text>
+<rect x="566.0" y="316.6" width="56.0" height="3.4" fill="#b91c1c" opacity="0.78"/>
+<text x="566.0" y="338" class="small">no PTC</text>
+<text x="566.0" y="311.6" class="tiny">0.00</text>
+<rect x="634.0" y="77.8" width="56.0" height="242.2" fill="#b91c1c" opacity="0.78"/>
+<text x="634.0" y="338" class="small">no PP3/SpAI</text>
+<text x="634.0" y="72.8" class="tiny">0.05</text>
+<rect x="702.0" y="71.5" width="56.0" height="248.5" fill="#b91c1c" opacity="0.78"/>
+<text x="702.0" y="338" class="small">no PS3/BS3</text>
+<text x="702.0" y="66.5" class="tiny">0.05</text>
+<rect x="770.0" y="320.0" width="56.0" height="0.0" fill="#b91c1c" opacity="0.78"/>
+<text x="770.0" y="338" class="small">residual</text>
+<text x="770.0" y="315.0" class="tiny">0.00</text>
+</svg>

@@ -1,0 +1,8 @@
+feature,benign_domain_count,bs3_count,bs3_percent,bs3_pp3_count,bs3_high_spliceai_count,bs3_missense_count,bs3_synonymous_count
+BRCT phosphopeptide-binding region,1178,1174,99.66,27,27,849,325
+RING zinc-binding/E3 ligase region,576,571,99.13,92,92,423,148
+DNA-binding domain / helical-OB-DSS1 region,256,127,49.61,3,3,127,0
+BRC repeats / RAD51-binding region,9242,32,0.35,0,0,32,0
+C-terminal RAD51-binding/nuclear localization context,1834,14,0.76,0,0,14,0
+coiled-coil PALB2 interaction region,22,14,63.64,0,0,14,0
+PALB2 binding N-terminal region,8,4,50.00,0,0,4,0

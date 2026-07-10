@@ -1,0 +1,8 @@
+queue,queue_label,count
+neighborhood_context_queue,neighborhood context,6649
+low_information_queue,low information,5379
+splice_rna_queue,splice/RNA,3291
+functional_queue,functional,836
+near_threshold_queue,near threshold,637
+public_assertion_queue,public assertion,72
+evidence_conflict_queue,evidence conflict,30

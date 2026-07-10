@@ -1,0 +1,7 @@
+original_tier,tier_without_neighborhood,count
+tier1_urgent,tier2_high,99
+tier2_high,tier2_high,187
+tier2_high,tier3_medium,573
+tier3_medium,tier3_medium,529
+tier3_medium,tier4_low,204
+tier4_low,tier4_low,6562

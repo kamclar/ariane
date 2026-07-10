@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="360" viewBox="0 0 860 360">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="860" height="360" fill="#ffffff"/>
+<text x="28" y="34" class="title">BRCA1 vs BRCA2 variant type composition</text>
+<text x="28" y="92" class="label">BRCA1</text>
+<rect x="120" y="68" width="0.29" height="38" fill="#f59e0b"/>
+<rect x="120.29" y="68" width="431.172" height="38" fill="#2563eb"/>
+<text x="124.29" y="92" class="small">74.3%</text>
+<rect x="551.462" y="68" width="27.781999999999996" height="38" fill="#dc2626"/>
+<rect x="579.244" y="68" width="120.756" height="38" fill="#16a34a"/>
+<text x="583.244" y="92" class="small">20.8%</text>
+<text x="28" y="158" class="label">BRCA2</text>
+<rect x="120" y="134" width="0.174" height="38" fill="#f59e0b"/>
+<rect x="120.174" y="134" width="429.2" height="38" fill="#2563eb"/>
+<text x="124.174" y="158" class="small">74.0%</text>
+<rect x="549.374" y="134" width="30.043999999999997" height="38" fill="#dc2626"/>
+<rect x="579.418" y="134" width="120.582" height="38" fill="#16a34a"/>
+<text x="583.418" y="158" class="small">20.8%</text>
+<rect x="120" y="222" width="14" height="14" fill="#f59e0b"/>
+<text x="140" y="234" class="small">initiation_codon</text>
+<rect x="275" y="222" width="14" height="14" fill="#2563eb"/>
+<text x="295" y="234" class="small">missense</text>
+<rect x="430" y="222" width="14" height="14" fill="#dc2626"/>
+<text x="450" y="234" class="small">nonsense</text>
+<rect x="585" y="222" width="14" height="14" fill="#16a34a"/>
+<text x="605" y="234" class="small">synonymous</text>
+</svg>

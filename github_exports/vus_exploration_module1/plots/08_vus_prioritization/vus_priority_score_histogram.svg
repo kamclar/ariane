@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+</style>
+<rect x="0" y="0" width="760" height="360" fill="#ffffff"/>
+<text x="28" y="34" class="title">VUS priority score distribution</text>
+<rect x="80" y="58" width="590" height="230" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect x="89.0" y="58.0" width="100.0" height="230.0" fill="#94a3b8"/>
+<text x="93.0" y="52.0" class="small">6562</text>
+<text x="91.0" y="308" class="small">0-24</text>
+<rect x="207.0" y="262.30813776287715" width="100.0" height="25.691862237122827" fill="#94a3b8"/>
+<text x="211.0" y="256.30813776287715" class="small">733</text>
+<text x="209.0" y="308" class="small">25-49</text>
+<rect x="325.0" y="274.8911917098446" width="100.0" height="13.10880829015544" fill="#7c3aed"/>
+<text x="329.0" y="268.8911917098446" class="small">374</text>
+<text x="327.0" y="308" class="small">50-64</text>
+<rect x="443.0" y="274.47058823529414" width="100.0" height="13.529411764705882" fill="#7c3aed"/>
+<text x="447.0" y="268.47058823529414" class="small">386</text>
+<text x="445.0" y="308" class="small">65-79</text>
+<rect x="561.0" y="284.53002133495886" width="100.0" height="3.469978665041146" fill="#7c3aed"/>
+<text x="565.0" y="278.53002133495886" class="small">99</text>
+<text x="563.0" y="308" class="small">80-100</text>
+</svg>

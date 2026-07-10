@@ -1,0 +1,7 @@
+gene,grouped_class,label,count,percent_within_gene,per_1000_gene_variants
+BRCA1,benign,Benign/Likely Benign,14274,85.09,850.86
+BRCA1,vus,VUS,1625,9.69,96.86
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,877,5.23,52.28
+BRCA2,benign,Benign/Likely Benign,22678,73.70,736.99
+BRCA2,vus,VUS,6529,21.22,212.18
+BRCA2,pathogenic,Likely Pathogenic/Pathogenic,1564,5.08,50.83

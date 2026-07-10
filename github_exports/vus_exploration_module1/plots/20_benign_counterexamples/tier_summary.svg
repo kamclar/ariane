@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="236" viewBox="0 0 1120 236">
+<style>
+text{font-family:Arial,sans-serif;font-size:13px;fill:#222}
+.title{font-size:20px;font-weight:bold}
+.small{font-size:11px;fill:#555}
+.bar{fill:#2f7d62}
+</style>
+<text x="24" y="30" class="title">Benign Counterexample Tiers</text>
+<text x="24" y="74">C_region_level_interface_context</text>
+<rect x="500" y="60" width="520" height="19" class="bar"/>
+<text x="1028" y="75" class="small">15199</text>
+<text x="24" y="105">D_broad_domain_context</text>
+<rect x="500" y="91" width="77" height="19" class="bar"/>
+<text x="585" y="106" class="small">2267</text>
+<text x="24" y="136">B_pathogenic_enriched_domain</text>
+<rect x="500" y="122" width="9" height="19" class="bar"/>
+<text x="517" y="137" class="small">283</text>
+<text x="24" y="167">A_exact_or_known_residue_context</text>
+<rect x="500" y="153" width="7" height="19" class="bar"/>
+<text x="515" y="168" class="small">206</text>
+</svg>

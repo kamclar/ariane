@@ -1,0 +1,201 @@
+queue_count,queue_labels,priority_score,priority_tier,action_group,public_snapshot_category,discordance_label,findlay_func_class,gene,c_notation,p_notation,criteria,spliceai_score,boundary_distance,near_pathogenic_20bp,near_benign_20bp
+6,near threshold;splice/RNA;functional;evidence conflict;public assertion;neighborhood context,90,tier1_urgent,near_pathogenic_threshold,conflicting public assertions,public_conflict,LOF,BRCA1,c.5123C>G,p.(Ala1708Gly),PP3:Supporting:1;PS3:Strong:4,0.400,29,15,59
+5,near threshold;splice/RNA;functional;public assertion;neighborhood context,90,tier1_urgent,near_pathogenic_threshold,multi-submitter assertion,module1_vus_public_pathogenic_direction,LOF,BRCA1,c.190T>G,p.(Cys64Gly),PP3:Supporting:1;PS3:Strong:4,0.650,22,18,85
+5,splice/RNA;functional;evidence conflict;public assertion;neighborhood context,90,tier1_urgent,manual_conflict_adjudication,panel-level public assertion,module1_vus_public_benign_direction,LOF,BRCA1,c.5044G>A,p.(Glu1682Lys),BP5:Strong:-4;PM2_Supporting:Supporting:1;PP3:Supporting:1;PS3:Strong:4,0.570,30,15,73
+5,near threshold;splice/RNA;functional;public assertion;neighborhood context,90,tier1_urgent,near_pathogenic_threshold,panel-level public assertion,module1_vus_public_pathogenic_direction,LOF,BRCA1,c.5123C>A,p.(Ala1708Glu),PP3:Supporting:1;PS3:Strong:4,0.220,29,15,59
+5,splice/RNA;functional;evidence conflict;public assertion;neighborhood context,90,tier1_urgent,manual_conflict_adjudication,multi-submitter assertion,module1_vus_public_pathogenic_direction,LOF,BRCA1,c.5453A>G,p.(Asp1818Gly),BP5:Moderate:-2;PM2_Supporting:Supporting:1;PP3:Supporting:1;PS3:Strong:4,0.350,14,7,97
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.4184A>C,p.(Gln1395Pro),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.280,1,6,31
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,manual_conflict_adjudication,conflicting public assertions,public_conflict,,BRCA1,c.4184A>G,p.(Gln1395Arg),BP5:Moderate:-2;PM2_Supporting:Supporting:1;PP3:Supporting:1,0.360,1,6,31
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.4359A>C,p.(Ala1453=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.850,1,11,54
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.4359A>G,p.(Ala1453=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.850,1,11,54
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.4674A>C,p.(Leu1558=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.320,1,10,76
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.4674A>G,p.(Leu1558=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.520,1,10,76
+4,splice/RNA;functional;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,other_or_unclear,INT,BRCA1,c.4987A>C,p.(Met1663Leu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.230,0,9,79
+4,splice/RNA;functional;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_pathogenic_direction,INT,BRCA1,c.5074G>T,p.(Asp1692Tyr),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.740,0,23,61
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA1,c.548G>T,p.(Gly183Val),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.610,0,5,103
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA2,c.1908A>G,p.(Ser636=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.280,1,5,110
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA2,c.473C>T,p.(Ser158Leu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.370,2,7,101
+4,splice/RNA;evidence conflict;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,conflicting public assertions,public_conflict,,BRCA2,c.475G>C,p.(Val159Leu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.910,0,7,101
+4,near threshold;splice/RNA;functional;neighborhood context,83,tier1_urgent,near_pathogenic_threshold,,,LOF,BRCA1,c.3G>A,p.(Met1Ile),PM2_Supporting:Supporting:1;PS3:Strong:4,0.230,2,4,45
+4,near threshold;splice/RNA;functional;neighborhood context,69,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5077G>T,p.(Ala1693Ser),PM2_Supporting:Supporting:1;PS3:Strong:4,0.100,2,20,58
+4,near threshold;splice/RNA;functional;neighborhood context,69,tier2_high,near_pathogenic_threshold,,,,BRCA2,c.7007G>C,p.(Arg2336Pro),PS3:Strong:4,0.180,0,6,113
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.132C>G,p.(Cys44Trp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,2,11,70
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.134A>T,p.(Lys45Ile),PM2_Supporting:Supporting:1;PS3:Strong:4,0.030,0,10,70
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.218T>G,p.(Leu73Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,5,12,96
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.2T>G,p.(Met1Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,1,4,43
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5072C>A,p.(Thr1691Lys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.050,2,24,58
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5145C>G,p.(Ser1715Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,7,16,67
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5152T>A,p.(Trp1718Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,0,12,75
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5152T>C,p.(Trp1718Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.040,0,12,75
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5152T>G,p.(Trp1718Gly),PM2_Supporting:Supporting:1;PS3:Strong:4,0.090,0,12,75
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5153G>T,p.(Trp1718Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.070,0,13,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5154G>C,p.(Trp1718Cys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,1,13,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5154G>T,p.(Trp1718Cys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,1,13,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5191G>A,p.(Glu1731Lys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,2,7,95
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5279T>A,p.(Ile1760Asn),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,1,7,82
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5279T>C,p.(Ile1760Thr),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,1,7,82
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.5279T>G,p.(Ile1760Ser),PM2_Supporting:Supporting:1;PS3:Strong:4,0.030,1,7,82
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.79T>A,p.(Cys27Ser),PM2_Supporting:Supporting:1;PS3:Strong:4,0.040,1,12,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.79T>C,p.(Cys27Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.030,1,12,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.79T>G,p.(Cys27Gly),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,1,12,74
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.81T>G,p.(Cys27Trp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.030,0,12,70
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,LOF,BRCA1,c.83T>C,p.(Leu28Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.000,2,12,69
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,,BRCA2,c.7807G>C,p.(Ala2603Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,1,6,8
+4,near threshold;splice/RNA;functional;neighborhood context,57,tier2_high,near_pathogenic_threshold,,,,BRCA2,c.7978T>G,p.(Tyr2660Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.030,1,14,9
+4,near threshold;splice/RNA;functional;neighborhood context,52,tier2_high,near_benign_threshold,,,,BRCA1,c.441G>C,p.(Leu147Phe),BS3:Strong:-4,0.180,0,5,105
+4,near threshold;splice/RNA;functional;neighborhood context,52,tier2_high,near_benign_threshold,,,FUNC,BRCA1,c.5277G>A,p.(Lys1759=),BS3:Strong:-4,0.140,0,8,79
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.173C>A,p.(Pro58His),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,38,18,78
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.183T>G,p.(Cys61Trp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.100,29,18,83
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.190T>C,p.(Cys64Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.190,22,18,85
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.239G>T,p.(Ser80Ile),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,26,8,87
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.245T>G,p.(Leu82Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,32,8,90
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.247G>T,p.(Val83Phe),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,34,8,87
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.248T>A,p.(Val83Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,35,8,88
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.257T>C,p.(Leu86Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,44,10,81
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.275C>A,p.(Ala92Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,26,10,74
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.279T>G,p.(Phe93Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.100,22,11,68
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.284T>C,p.(Leu95Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,17,11,66
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.286G>A,p.(Asp96Asn),PM2_Supporting:Supporting:1;PS3:Strong:4,0.140,15,11,67
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.286G>T,p.(Asp96Tyr),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,15,11,67
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5009G>A,p.(Arg1670Lys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,22,8,74
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5056C>A,p.(His1686Asn),PM2_Supporting:Supporting:1;PS3:Strong:4,0.190,18,25,60
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5056C>G,p.(His1686Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,18,25,60
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5057A>C,p.(His1686Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.180,17,25,59
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5057A>G,p.(His1686Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,17,25,59
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5058T>A,p.(His1686Gln),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,16,26,57
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5058T>G,p.(His1686Gln),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,16,26,57
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5059G>T,p.(Val1687Phe),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,15,26,56
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5060T>A,p.(Val1687Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.170,14,28,55
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5060T>G,p.(Val1687Gly),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,14,28,55
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5062G>T,p.(Val1688Phe),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,12,28,56
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5063T>A,p.(Val1688Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,11,28,55
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA1,c.5095C>T,p.(Arg1699Trp),PS3:Strong:4,0.140,20,14,53
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA1,c.5096G>A,p.(Arg1699Gln),PS3:Strong:4,0.150,21,13,53
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5096G>T,p.(Arg1699Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.190,21,13,53
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5098A>G,p.(Thr1700Ala),PM2_Supporting:Supporting:1;PS3:Strong:4,0.140,23,12,54
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5104A>G,p.(Lys1702Glu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,29,9,54
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5110T>C,p.(Phe1704Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.130,35,12,52
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5114T>C,p.(Leu1705Pro),PM2_Supporting:Supporting:1;PS3:Strong:4,0.150,38,11,55
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5116G>C,p.(Gly1706Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,36,12,57
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5126G>T,p.(Gly1709Val),PM2_Supporting:Supporting:1;PS3:Strong:4,0.100,26,15,60
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.53T>G,p.(Met18Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.190,27,8,82
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5434C>G,p.(Pro1812Ala),PS3:Strong:4,0.180,27,5,77
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.7753G>A,p.(Gly2585Arg),PM2_Supporting:Supporting:1;PS3:Strong:4,0.160,52,5,2
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.7857G>C,p.(Trp2619Cys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.170,51,10,0
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.7870T>G,p.(Tyr2624Asp),PM2_Supporting:Supporting:1;PS3:Strong:4,0.100,64,13,1
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.7874G>T,p.(Arg2625Ile),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,68,13,3
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.7875A>T,p.(Arg2625Ser),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,69,13,4
+4,near threshold;splice/RNA;functional;neighborhood context,49,tier3_medium,near_pathogenic_threshold,,,,BRCA2,c.9008G>A,p.(Gly3003Glu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.130,54,14,3
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.1A>C,p.(Met1Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,0,4,41
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.1A>T,p.(Met1Leu),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,0,4,41
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.2T>A,p.(Met1Lys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,1,4,43
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.2T>C,p.(Met1Thr),PM2_Supporting:Supporting:1;PS3:Strong:4,0.020,1,4,43
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.3G>C,p.(Met1Ile),PM2_Supporting:Supporting:1;PS3:Strong:4,0.010,2,4,45
+4,near threshold;splice/RNA;functional;neighborhood context,45,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.4G>C,p.(Asp2His),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,3,4,48
+4,splice/RNA;functional;neighborhood context;low information,44,tier3_medium,background_absence_only,,,INT,BRCA1,c.5075A>G,p.(Asp1692Gly),PM2_Supporting:Supporting:1,0.100,0,21,61
+4,splice/RNA;functional;neighborhood context;low information,44,tier3_medium,background_absence_only,,,INT,BRCA1,c.5332G>A,p.(Asp1778Asn),PM2_Supporting:Supporting:1,0.120,0,6,86
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.141C>T,p.(Cys47=),BS3:Strong:-4,0.100,6,10,72
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.4989G>T,p.(Met1663Ile),BS3:Strong:-4,0.030,2,10,77
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.4993G>A,p.(Val1665Met),BS3:Strong:-4,0.150,6,11,78
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5085T>A,p.(Phe1695Leu),BS3:Strong:-4,0.150,10,20,57
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5155G>T,p.(Val1719Leu),BS3:Strong:-4,0.000,2,13,75
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5280C>T,p.(Ile1760=),BS3:Strong:-4,0.010,2,7,84
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5331A>G,p.(Thr1777=),BS3:Strong:-4,0.020,1,6,86
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5331A>T,p.(Thr1777=),BS3:Strong:-4,0.020,1,6,86
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5334T>C,p.(Asp1778=),BS3:Strong:-4,0.000,1,7,84
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5335C>G,p.(Gln1779Glu),BS3:Strong:-4,0.000,2,7,85
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5468C>T,p.(Ala1823Val),BS3:Strong:-4,0.000,0,8,103
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.81T>C,p.(Cys27=),BS3:Strong:-4,0.010,0,12,70
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.82C>T,p.(Leu28=),BS3:Strong:-4,0.010,1,12,71
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.86A>G,p.(Glu29Gly),BS3:Strong:-4,0.160,5,10,69
+4,near threshold;splice/RNA;functional;neighborhood context,40,tier3_medium,near_benign_threshold,,,,BRCA2,c.9116C>G,p.(Pro3039Arg),BS3:Strong:-4,0.060,1,11,2
+4,near threshold;splice/RNA;functional;neighborhood context,37,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.4955T>A,p.(Met1652Lys),PM2_Supporting:Supporting:1;PS3:Strong:4,0.110,31,3,91
+4,near threshold;splice/RNA;functional;neighborhood context,37,tier3_medium,near_pathogenic_threshold,,,LOF,BRCA1,c.5423T>G,p.(Val1808Gly),PM2_Supporting:Supporting:1;PS3:Strong:4,0.120,16,1,83
+4,near threshold;splice/RNA;functional;neighborhood context,37,tier3_medium,near_pathogenic_threshold,,,,BRCA1,c.5425G>T,p.(Val1809Phe),PM2_Supporting:Supporting:1;PS3:Strong:4,0.140,18,3,78
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.154C>T,p.(Leu52Phe),BS3:Strong:-4,0.130,19,6,87
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.179A>C,p.(Gln60Pro),BS3:Strong:-4,0.190,33,19,83
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.179A>G,p.(Gln60Arg),BS3:Strong:-4,0.140,33,19,83
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.215G>T,p.(Ser72Ile),PM2_Supporting:Supporting:1,0.040,2,13,96
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.249T>C,p.(Val83=),BS3:Strong:-4,0.100,36,8,88
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.258A>G,p.(Leu86=),BS3:Strong:-4,0.130,43,11,79
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.259T>G,p.(Leu87Val),BS3:Strong:-4,0.150,42,11,78
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.266T>C,p.(Ile89Thr),BS3:Strong:-4,0.120,35,12,79
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.288C>T,p.(Asp96=),BS3:Strong:-4,0.100,13,11,70
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA1,c.4054G>A,p.(Glu1352Lys),BS3:Strong:-4,0.110,42,9,87
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.4892G>A,p.(Ser1631Asn),BS3:Strong:-4,0.110,94,7,113
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.4988T>C,p.(Met1663Thr),PM2_Supporting:Supporting:1,0.090,1,10,79
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.4989G>A,p.(Met1663Ile),PM2_Supporting:Supporting:1,0.050,2,10,77
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,module1_no_signal,,,INT,BRCA1,c.4992C>T,p.(Leu1664=),,0.160,5,11,77
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.4993G>T,p.(Val1665Leu),PM2_Supporting:Supporting:1,0.140,6,11,78
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.4995G>A,p.(Val1665=),PM2_Supporting:Supporting:1,0.130,8,11,82
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5001G>A,p.(Lys1667=),BS3:Strong:-4,0.150,14,10,78
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5037A>G,p.(Leu1679=),BS3:Strong:-4,0.160,37,14,74
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5039T>C,p.(Ile1680Thr),BS3:Strong:-4,0.140,35,14,71
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5052T>G,p.(Thr1684=),BS3:Strong:-4,0.180,22,17,70
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5058T>C,p.(His1686=),BS3:Strong:-4,0.120,16,26,57
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,FUNC,BRCA1,c.5066T>C,p.(Met1689Thr),PM2_Supporting:Supporting:1,0.160,8,26,57
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,FUNC,BRCA1,c.5068A>G,p.(Lys1690Glu),PM2_Supporting:Supporting:1,0.100,6,23,59
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5069A>T,p.(Lys1690Ile),PM2_Supporting:Supporting:1,0.100,5,23,60
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5115A>C,p.(Leu1705=),BS3:Strong:-4,0.150,37,12,55
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,FUNC,BRCA1,c.5124G>A,p.(Ala1708=),BS3:Strong:-4,0.100,28,16,57
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,FUNC,BRCA1,c.5150T>A,p.(Phe1717Tyr),PM2_Supporting:Supporting:1,0.020,2,14,72
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5153G>C,p.(Trp1718Ser),PM2_Supporting:Supporting:1,0.040,0,13,74
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5191G>C,p.(Glu1731Gln),PM2_Supporting:Supporting:1,0.010,2,7,95
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5278A>T,p.(Ile1760Phe),PM2_Supporting:Supporting:1,0.050,0,7,81
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5468C>G,p.(Ala1823Gly),PM2_Supporting:Supporting:1,0.010,0,8,103
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5A>G,p.(Asp2Gly),PM2_Supporting:Supporting:1,0.170,4,5,50
+4,splice/RNA;functional;neighborhood context;low information,32,tier3_medium,background_absence_only,,,INT,BRCA1,c.5A>T,p.(Asp2Val),PM2_Supporting:Supporting:1,0.130,4,5,50
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.599C>T,p.(Thr200Ile),BS3:Strong:-4,0.150,32,6,89
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.7712A>G,p.(Glu2571Gly),BS3:Strong:-4,0.140,93,12,3
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.7874G>A,p.(Arg2625Lys),BS3:Strong:-4,0.120,68,13,3
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.8417C>T,p.(Ser2806Leu),BS3:Strong:-4,0.120,70,7,7
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.8971C>T,p.(Arg2991Cys),BS3:Strong:-4,0.170,17,12,3
+4,near threshold;splice/RNA;functional;neighborhood context,32,tier3_medium,near_benign_threshold,,,,BRCA2,c.9367A>G,p.(Ser3123Gly),BS3:Strong:-4,0.190,110,7,4
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.158A>C,p.(Asn53Thr),PM2_Supporting:Supporting:1,0.100,23,9,85
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.159C>A,p.(Asn53Lys),PM2_Supporting:Supporting:1,0.180,24,9,83
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.181T>C,p.(Cys61Arg),PM2_Supporting:Supporting:1,0.160,31,18,85
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.184C>A,p.(Pro62Thr),PM2_Supporting:Supporting:1,0.110,28,17,84
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.185C>A,p.(Pro62His),PM2_Supporting:Supporting:1,0.120,27,17,84
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,module1_no_signal,,,INT,BRCA1,c.19C>A,p.(Arg7Ser),,0.160,18,7,82
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,module1_no_signal,,,FUNC,BRCA1,c.19C>T,p.(Arg7Cys),,0.170,18,7,82
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.266T>G,p.(Ile89Ser),PM2_Supporting:Supporting:1,0.120,35,12,79
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.273T>G,p.(Cys91Trp),PM2_Supporting:Supporting:1,0.190,28,12,73
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.275C>G,p.(Ala92Gly),PM2_Supporting:Supporting:1,0.120,26,10,74
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.276T>G,p.(Ala92=),PM2_Supporting:Supporting:1,0.140,25,11,73
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.278T>G,p.(Phe93Cys),PM2_Supporting:Supporting:1,0.150,23,11,69
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.281A>C,p.(Gln94Pro),PM2_Supporting:Supporting:1,0.180,20,10,69
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.290C>G,p.(Thr97Arg),PM2_Supporting:Supporting:1,0.120,11,11,71
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5001G>T,p.(Lys1667Asn),PM2_Supporting:Supporting:1,0.150,14,10,78
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5009G>C,p.(Arg1670Thr),PM2_Supporting:Supporting:1,0.100,22,8,74
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5030C>T,p.(Thr1677Ile),PM2_Supporting:Supporting:1,0.120,43,9,85
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,module1_no_signal,,,INT,BRCA1,c.5042C>T,p.(Thr1681Ile),,0.110,32,14,71
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5051C>A,p.(Thr1684Asn),PM2_Supporting:Supporting:1,0.140,23,15,72
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5102T>C,p.(Leu1701Pro),PM2_Supporting:Supporting:1,0.100,27,9,56
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5114T>G,p.(Leu1705Arg),PM2_Supporting:Supporting:1,0.160,38,11,55
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,module1_no_signal,,,FUNC,BRCA1,c.5123C>T,p.(Ala1708Val),,0.130,29,15,59
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,FUNC,BRCA1,c.5245C>A,p.(Pro1749Thr),PM2_Supporting:Supporting:1,0.100,32,8,76
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5437G>C,p.(Asp1813His),PM2_Supporting:Supporting:1,0.160,30,5,77
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.5437G>T,p.(Asp1813Tyr),PM2_Supporting:Supporting:1,0.130,30,5,77
+4,splice/RNA;functional;neighborhood context;low information,24,tier4_low,background_absence_only,,,INT,BRCA1,c.68A>G,p.(Glu23Gly),PM2_Supporting:Supporting:1,0.110,12,12,72
+4,splice/RNA;functional;neighborhood context;low information,20,tier4_low,background_absence_only,,,INT,BRCA1,c.5408G>A,p.(Gly1803Asp),PM2_Supporting:Supporting:1,0.070,1,2,98
+4,splice/RNA;functional;neighborhood context;low information,12,tier4_low,background_absence_only,,,INT,BRCA1,c.29A>T,p.(Glu10Val),PM2_Supporting:Supporting:1,0.180,28,3,94
+4,splice/RNA;functional;neighborhood context;low information,12,tier4_low,background_absence_only,,,LOF,BRCA1,c.5429T>G,p.(Val1810Gly),PM2_Supporting:Supporting:1,0.100,22,4,78
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.299A>G,p.(Glu100Gly),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.560,2,9,80
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.299A>T,p.(Glu100Val),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.280,2,9,80
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,panel-level public assertion,module1_vus_public_pathogenic_direction,,BRCA1,c.4094T>C,p.(Leu1365Ser),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.270,2,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4095A>C,p.(Leu1365Phe),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.220,1,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_benign_direction,,BRCA1,c.4095A>G,p.(Leu1365=),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.370,1,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4095A>T,p.(Leu1365Phe),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.300,1,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.4096G>A,p.(Gly1366Ser),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.600,0,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.4096G>C,p.(Gly1366Arg),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.690,0,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4096G>T,p.(Gly1366Cys),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.680,0,6,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,panel-level public assertion,module1_vus_public_pathogenic_direction,,BRCA1,c.4097G>C,p.(Gly1366Ala),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.210,0,7,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_pathogenic_direction,,BRCA1,c.4097G>T,p.(Gly1366Val),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.360,0,7,93
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4184A>T,p.(Gln1395Leu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.460,1,6,31
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,ClinGen/ENIGMA assertion,module1_vus_public_pathogenic_direction,,BRCA1,c.4185G>C,p.(Gln1395His),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.950,0,6,29
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4185G>T,p.(Gln1395His),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.960,0,6,29
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.4186C>A,p.(Gln1396Lys),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.480,0,6,26
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4186C>G,p.(Gln1396Glu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.870,0,6,26
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,multi-submitter assertion,module1_vus_public_vus,,BRCA1,c.4187A>C,p.(Gln1396Pro),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.870,1,6,23
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4187A>G,p.(Gln1396Arg),PP3:Supporting:1,0.870,1,6,23
+3,splice/RNA;public assertion;neighborhood context,85,tier1_urgent,computational_signal_needs_noncomputational_support,single-submitter assertion,module1_vus_public_vus,,BRCA1,c.4187A>T,p.(Gln1396Leu),PM2_Supporting:Supporting:1;PP3:Supporting:1,0.870,1,6,23

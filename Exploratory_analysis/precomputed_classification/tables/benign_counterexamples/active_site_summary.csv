@@ -1,0 +1,39 @@
+curated_active_site_status,count
+region_level:UniProt:Region:Interaction with RAD51 (1003-2082) [source_extracted_region],5450
+region_level:UniProt:Region:Interaction with RAD51 (1003-2082) [source_extracted_region];region_level:UniProt:Region:Interaction with POLH (1338-1781) [source_extracted_region],3783
+region_level:UniProt:Region:Interaction with NPM1 (639-1000) [source_extracted_region],3076
+not_curated_in_current_dataset,2402
+region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],1037
+region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],595
+region_level:UniProt:Region:Interaction with HSF2BP (2270-2337) [source_extracted_region],527
+region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],498
+region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],214
+region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],98
+region_level:UniProt:Region:Interaction with PALB2 (1-40) [source_extracted_region],76
+region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],38
+UniProt:Mutagenesis:Abolished interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],27
+region_level:UniProt:Region:Interaction with PALB2 (1397-1424) [source_extracted_region],19
+UniProt:Mutagenesis:Does not affect interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],16
+UniProt:Mutagenesis:Decreased interaction with DMC1. [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region],15
+"UniProt:Mutagenesis:Does not abolish ABRAXAS1 binding, but abolishes formation of a heterotetramer with ABRAXAS1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region]",11
+UniProt:Mutagenesis:Impaired interaction with RAD51. [source_extracted],9
+UniProt:Mutagenesis:No effect on affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],8
+"UniProt:Mutagenesis:Does not abolish ABRAXAS1 binding, but impairs formation of a heterotetramer with ABRAXAS1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region]",6
+UniProt:Mutagenesis:Slightly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],6
+UniProt:Mutagenesis:Abolishes interaction with BRIP1. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],5
+UniProt:Natural variant:in BC and FANCS; pathogenic; decreased localization to DNA damage sites and reduced interaction with UIMC1/RAP80; dbSNP:rs45553935 [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],4
+UniProt:Natural variant:in BC; pathogenic; strongly reduced transcription transactivation; abolishes interaction with BRIP1 and RBBP8; dbSNP:rs41293463 [source_extracted];UniProt:Natural variant:in BC; pathogenic; alters protein stability and abolishes ACACA and BRIP1 binding; dbSNP:rs41293463 [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],4
+"UniProt:Mutagenesis:Disrupts the interaction with E2 enzymes, thereby abolishing the E3 ubiquitin-protein ligase activity. [source_extracted];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region]",4
+UniProt:Mutagenesis:Mildly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 2 (1756-1855) [source_extracted_region],4
+region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region];region_level:UniProt:Motif:Nuclear export signal; masked by interaction with SEM1 (2682-2698) [source_extracted_region],4
+UniProt:Mutagenesis:Abolishes interaction with BRIP1. [source_extracted],3
+UniProt:Natural variant:in BC; abolishes ACACA binding; dbSNP:rs28897696 [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],3
+UniProt:Natural variant:in ovarian cancer; uncertain significance; abolishes ACACA binding and strongly reduces BRIP1 binding; dbSNP:rs80357462 [source_extracted],3
+UniProt:Mutagenesis:No effect on interaction with BAP1. [source_extracted],2
+UniProt:Mutagenesis:Strongly reduces affinity for a BRIP1 phosphopeptide. [source_extracted];region_level:UniProt:Domain:BRCT 1 (1642-1736) [source_extracted_region],2
+UniProt:Natural variant:in BC; benign; no effect on homologous recombination-mediated DNA repair; no effect on interaction with SEM1; dbSNP:rs80359065 [source_extracted];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],1
+UniProt:Natural variant:no effect on homologous recombination-mediated DNA repair; no effect on interaction with SEM1; dbSNP:rs11571707 [source_extracted];region_level:UniProt:Region:Interaction with FANCD2 (2350-2545) [source_extracted_region];region_level:UniProt:Region:Interaction with SEM1 (2481-2832) [source_extracted_region],1
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys39 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue His41 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1
+UniProt:Natural variant:in BC; no interaction with BAP1; dbSNP:rs80357064 [source_extracted];zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys64 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1
+zinc_coordination_core:BRCA1 RING C3HC4 zinc-coordinating residue Cys24 [seed_needs_source_line_review];region_level:UniProt:Zinc finger:RING-type (24-65) [source_extracted_region],1

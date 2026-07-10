@@ -1,0 +1,31 @@
+{
+  "dataset": "BRCA1/BRCA2 coding SNV reference-transcript SpliceAI cache",
+  "created": "2026-06-18",
+  "report": "variant_space_scan/docs/final_spliceai_precompute_report.md",
+  "source_cache": "variant_space_scan/data/spliceai_cache.json",
+  "application_cache": "data/spliceai/spliceai_brca_snv_reference_cache.json",
+  "sha256": "F897EF687924DD031F665CFBBEC12FA7A1B4AF0169C71F0744ED87D10B684C60",
+  "manifest_variants": 47547,
+  "manifest_spliceai_ok": 47547,
+  "cache_entries": 47571,
+  "transcript_policy": "reference_transcript",
+  "reference_transcripts": {
+    "BRCA1": {
+      "ensembl": "ENST00000357654.9",
+      "refseq": "NM_007294.4"
+    },
+    "BRCA2": {
+      "ensembl": "ENST00000380152.8",
+      "refseq": "NM_000059.4"
+    }
+  },
+  "validation_summary": {
+    "broad_api_comparisons_interpreted_as_matched": 240,
+    "numeric_mismatches_among_successful_broad_api_responses": 0,
+    "note": "The initial 100_slow JSON counted 4 public API failures as mismatches; all four matched after manual retry."
+  },
+  "maintenance": {
+    "recommendation": "Periodically sample this cache against the public Broad SpliceAI API to detect model or annotation changes.",
+    "suggested_interval": "Quarterly or before clinical release updates"
+  }
+}

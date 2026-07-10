@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="490" viewBox="0 0 1100 490">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+.grid { stroke: #e2e8f0; stroke-width: 1; }
+.axis { stroke: #9aa4b2; stroke-width: 1; }
+.panel { fill: #f3f4f6; }
+.tile { stroke: #ffffff; stroke-width: 1; }
+.legend-title { font-size: 11px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1100" height="490" fill="#ffffff"/>
+<text x="28" y="34" class="title">Generated class mix by mapped domain or region</text>
+<text x="28" y="56" class="small">Stacked percent within region. Domains are not ACMG/ENIGMA evidence by themselves.</text>
+<text x="24" y="101" class="small">BRCA1 RING zinc-binding/E3 ligase</text>
+<rect x="300" y="84" width="396.8" height="24" fill="#2b8cbe"/>
+<rect x="696.8" y="84" width="168.1" height="24" fill="#8a8f9c"/>
+<rect x="864.882" y="84" width="55.1" height="24" fill="#d7301f"/>
+<text x="24" y="137" class="small">BRCA1 coiled-coil PALB2 interaction</text>
+<rect x="300" y="120" width="44.6" height="24" fill="#2b8cbe"/>
+<rect x="344.578" y="120" width="541.0" height="24" fill="#8a8f9c"/>
+<rect x="885.528" y="120" width="34.5" height="24" fill="#d7301f"/>
+<text x="24" y="173" class="small">BRCA1 BRCT phosphopeptide-binding</text>
+<rect x="300" y="156" width="390.2" height="24" fill="#2b8cbe"/>
+<rect x="690.1659999999999" y="156" width="183.5" height="24" fill="#8a8f9c"/>
+<rect x="873.6239999999999" y="156" width="46.4" height="24" fill="#d7301f"/>
+<text x="24" y="209" class="small">BRCA1 outside mapped domains</text>
+<rect x="300" y="192" width="565.7" height="24" fill="#2b8cbe"/>
+<rect x="865.688" y="192" width="25.4" height="24" fill="#8a8f9c"/>
+<rect x="891.0459999999999" y="192" width="29.0" height="24" fill="#d7301f"/>
+<text x="24" y="245" class="small">BRCA2 PALB2 binding N-terminal</text>
+<rect x="300" y="228" width="17.8" height="24" fill="#2b8cbe"/>
+<rect x="317.794" y="228" width="571.1" height="24" fill="#8a8f9c"/>
+<rect x="888.876" y="228" width="31.1" height="24" fill="#d7301f"/>
+<text x="24" y="281" class="small">BRCA2 BRC repeats / RAD51-binding</text>
+<rect x="300" y="264" width="588.9" height="24" fill="#2b8cbe"/>
+<rect x="888.938" y="264" width="0.0" height="24" fill="#8a8f9c"/>
+<rect x="888.938" y="264" width="31.1" height="24" fill="#d7301f"/>
+<text x="24" y="317" class="small">BRCA2 DNA-binding domain / helical-OB-DSS1</text>
+<rect x="300" y="300" width="25.0" height="24" fill="#2b8cbe"/>
+<rect x="324.986" y="300" width="559.7" height="24" fill="#8a8f9c"/>
+<rect x="884.66" y="300" width="35.3" height="24" fill="#d7301f"/>
+<text x="24" y="353" class="small">BRCA2 C-terminal RAD51/NLS context</text>
+<rect x="300" y="336" width="544.6" height="24" fill="#2b8cbe"/>
+<rect x="844.6080000000001" y="336" width="58.5" height="24" fill="#8a8f9c"/>
+<rect x="903.0740000000001" y="336" width="16.9" height="24" fill="#d7301f"/>
+<text x="24" y="389" class="small">BRCA2 outside mapped domains</text>
+<rect x="300" y="372" width="570.5" height="24" fill="#2b8cbe"/>
+<rect x="870.5239999999999" y="372" width="17.1" height="24" fill="#8a8f9c"/>
+<rect x="887.5739999999998" y="372" width="32.4" height="24" fill="#d7301f"/>
+<rect x="300" y="448" width="14" height="14" fill="#2b8cbe"/>
+<text x="320" y="460" class="small">Benign/Likely Benign</text>
+<rect x="485" y="448" width="14" height="14" fill="#8a8f9c"/>
+<text x="505" y="460" class="small">VUS</text>
+<rect x="670" y="448" width="14" height="14" fill="#d7301f"/>
+<text x="690" y="460" class="small">Likely Pathogenic/Pathogenic</text>
+</svg>

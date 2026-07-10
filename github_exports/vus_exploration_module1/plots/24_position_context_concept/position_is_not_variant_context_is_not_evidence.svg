@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="860" viewBox="0 0 1220 860">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.title { font-size: 24px; font-weight: 700; }
+.subtitle { font-size: 13px; fill: #475569; }
+.panel-title { font-size: 16px; font-weight: 700; }
+.label { font-size: 13px; }
+.small { font-size: 11px; fill: #475569; }
+.tiny { font-size: 10px; fill: #475569; }
+.box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.2; }
+.note { fill: #f8fafc; stroke: #cbd5e1; }
+.benign { fill: #16a34a; }
+.vus { fill: #64748b; }
+.pathogenic { fill: #b91c1c; }
+.context { fill: #7c3aed; }
+.axis { stroke: #334155; stroke-width: 2; }
+.thin { stroke: #64748b; stroke-width: 1.2; }
+</style>
+<rect x="0" y="0" width="1220" height="860" fill="#ffffff"/>
+<text x="34" y="38" class="title">Position is not variant: local context is not evidence</text>
+<text x="34" y="62" class="subtitle">A precomputed Module 1 map can prioritize review, but local enrichment is not an ACMG/ENIGMA criterion.</text>
+<rect x="34" y="92" width="560" height="310" rx="14" class="box"/>
+<circle cx="60" cy="120" r="14" fill="#e0e7ff" stroke="#818cf8"/>
+<text x="55" y="125" class="panel-title">A</text>
+<text x="84" y="126" class="panel-title">One position can produce different variants</text>
+<line x1="104" y1="256" x2="524" y2="256" class="axis"/>
+<line x1="254" y1="178" x2="254" y2="334" stroke="#7c3aed" stroke-width="3"/>
+<text x="212" y="164" class="label">same CDS position</text>
+<line x1="254" y1="256" x2="162" y2="314" class="thin"/>
+<circle cx="162" cy="314" r="8" fill="#16a34a" stroke="#172033"/>
+<text x="145" y="342" class="small">A>G</text>
+<text x="127" y="360" class="small">synonymous</text>
+<rect x="124" y="370" width="86" height="24" rx="12" fill="#16a34a" opacity="0.88"/><text x="134" y="386" class="tiny" fill="#ffffff">class 1/2</text>
+<line x1="254" y1="256" x2="254" y2="314" class="thin"/>
+<circle cx="254" cy="314" r="8" fill="#64748b" stroke="#172033"/>
+<text x="237" y="342" class="small">A>C</text>
+<text x="219" y="360" class="small">missense</text>
+<rect x="216" y="370" width="86" height="24" rx="12" fill="#64748b" opacity="0.88"/><text x="226" y="386" class="tiny" fill="#ffffff">class 3</text>
+<line x1="254" y1="256" x2="346" y2="314" class="thin"/>
+<circle cx="346" cy="314" r="8" fill="#b91c1c" stroke="#172033"/>
+<text x="329" y="342" class="small">A>T</text>
+<text x="311" y="360" class="small">PTC</text>
+<rect x="308" y="370" width="86" height="24" rx="12" fill="#b91c1c" opacity="0.88"/><text x="318" y="386" class="tiny" fill="#ffffff">class 4/5</text>
+<rect x="382" y="248" width="172" height="48" rx="8" class="note"/>
+<text x="394" y="268" class="small">Exact substitution</text>
+<text x="394" y="286" class="small">matters.</text>
+<rect x="626" y="92" width="560" height="310" rx="14" class="box"/>
+<circle cx="652" cy="120" r="14" fill="#e0e7ff" stroke="#818cf8"/>
+<text x="647" y="125" class="panel-title">B</text>
+<text x="676" y="126" class="panel-title">One codon can contain a mixed class pattern</text>
+<rect x="718" y="210" width="70" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+<text x="738" y="240" class="label">c.1</text>
+<rect x="810" y="210" width="70" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+<text x="830" y="240" class="label">c.2</text>
+<rect x="902" y="210" width="70" height="48" rx="8" fill="#f1f5f9" stroke="#94a3b8"/>
+<text x="922" y="240" class="label">c.3</text>
+<circle cx="728" cy="298" r="8" fill="#16a34a" opacity="0.85" stroke="#172033"/>
+<text x="740" y="302" class="tiny">benign</text>
+<circle cx="774" cy="326" r="8" fill="#64748b" opacity="0.85" stroke="#172033"/>
+<text x="786" y="330" class="tiny">VUS</text>
+<circle cx="836" cy="296" r="8" fill="#b91c1c" opacity="0.85" stroke="#172033"/>
+<text x="848" y="300" class="tiny">pathogenic</text>
+<circle cx="868" cy="334" r="8" fill="#16a34a" opacity="0.85" stroke="#172033"/>
+<text x="880" y="338" class="tiny">benign</text>
+<circle cx="936" cy="300" r="8" fill="#64748b" opacity="0.85" stroke="#172033"/>
+<text x="948" y="304" class="tiny">VUS</text>
+<circle cx="962" cy="330" r="8" fill="#b91c1c" opacity="0.85" stroke="#172033"/>
+<text x="974" y="334" class="tiny">pathogenic</text>
+<rect x="660" y="362" width="492" height="24" rx="8" class="note"/>
+<text x="674" y="378" class="small">Different SNVs can activate different rules.</text>
+<rect x="34" y="436" width="560" height="310" rx="14" class="box"/>
+<circle cx="60" cy="464" r="14" fill="#e0e7ff" stroke="#818cf8"/>
+<text x="55" y="469" class="panel-title">C</text>
+<text x="84" y="470" class="panel-title">Local neighborhood is a context signal</text>
+<line x1="104" y1="602" x2="524" y2="602" class="axis"/>
+<line x1="314.0" y1="532" x2="314.0" y2="672" stroke="#64748b" stroke-width="3"/>
+<circle cx="314.0" cy="602" r="13" fill="#64748b" stroke="#172033"/>
+<text x="299.0" y="640" class="label">VUS</text>
+<line x1="164.0" y1="568" x2="164.0" y2="636" stroke="#334155"/>
+<line x1="464.0" y1="568" x2="464.0" y2="636" stroke="#334155"/>
+<text x="144.0" y="664" class="small">-20 bp</text>
+<text x="444.0" y="664" class="small">+20 bp</text>
+<circle cx="186.0" cy="574" r="8" fill="#16a34a" opacity="0.82" stroke="#172033"/>
+<circle cx="216.0" cy="626" r="8" fill="#16a34a" opacity="0.82" stroke="#172033"/>
+<circle cx="256.0" cy="580" r="8" fill="#b91c1c" opacity="0.82" stroke="#172033"/>
+<circle cx="376.0" cy="630" r="8" fill="#16a34a" opacity="0.82" stroke="#172033"/>
+<circle cx="410.0" cy="578" r="8" fill="#b91c1c" opacity="0.82" stroke="#172033"/>
+<circle cx="440.0" cy="624" r="8" fill="#16a34a" opacity="0.82" stroke="#172033"/>
+<rect x="126" y="674" width="112" height="24" rx="12" fill="#7c3aed" opacity="0.88"/><text x="136" y="690" class="tiny" fill="#ffffff">context signal</text>
+<text x="254" y="690" class="small">Prompt manual review; do not add points.</text>
+<rect x="68" y="710" width="492" height="26" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+<text x="82" y="728" class="small" fill="#7f1d1d">Not a standalone ACMG/ENIGMA evidence criterion.</text>
+<rect x="626" y="436" width="560" height="310" rx="14" class="box"/>
+<circle cx="652" cy="464" r="14" fill="#e0e7ff" stroke="#818cf8"/>
+<text x="647" y="469" class="panel-title">D</text>
+<text x="676" y="470" class="panel-title">Example: BRCA1 BRCT1 mixed cluster</text>
+<rect x="678" y="522" width="410" height="140" fill="#f8fafc" stroke="#cbd5e1"/>
+<rect x="720" y="532.2666666666667" width="64" height="129.73333333333332" fill="#16a34a" opacity="0.82"/>
+<text x="737" y="524.2666666666667" class="small">139</text>
+<text x="722" y="682" class="small">benign</text>
+<rect x="840" y="555.6" width="64" height="106.4" fill="#64748b" opacity="0.82"/>
+<text x="857" y="547.6" class="small">114</text>
+<text x="842" y="682" class="small">VUS</text>
+<rect x="960" y="618.1333333333333" width="64" height="43.86666666666667" fill="#b91c1c" opacity="0.82"/>
+<text x="977" y="610.1333333333333" class="small">47</text>
+<text x="962" y="682" class="small">pathogenic</text>
+<text x="678" y="506" class="small">BRCA1 c.5044-c.5143 / p.1682-p.1715</text>
+<rect x="660" y="688" width="492" height="46" rx="8" class="note"/>
+<text x="678" y="707" class="small">Benign-enriched but mixed: exact variant mechanism still matters.</text>
+<text x="678" y="725" class="small">Drivers include BRCT evidence, BS3/PS3, PP3/SpliceAI, and nearby PTCs.</text>
+<rect x="34" y="788" width="1152" height="42" rx="12" fill="#eef2ff" stroke="#c7d2fe"/>
+<text x="54" y="814" class="label" fill="#312e81">Take-home: positional context can prioritize review, but classification still belongs to accepted variant-level ACMG/ENIGMA evidence.</text>
+</svg>

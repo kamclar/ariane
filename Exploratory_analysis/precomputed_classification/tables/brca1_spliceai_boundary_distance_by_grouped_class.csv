@@ -1,0 +1,25 @@
+gene,group,label,boundary_distance_bin,total_variants,spliceai_ge_0_20,percent
+BRCA1,benign,Benign/Likely Benign,0,46,5,10.87
+BRCA1,benign,Benign/Likely Benign,1-2,148,8,5.41
+BRCA1,benign,Benign/Likely Benign,3-5,269,4,1.49
+BRCA1,benign,Benign/Likely Benign,6-10,482,14,2.90
+BRCA1,benign,Benign/Likely Benign,11-20,918,34,3.70
+BRCA1,benign,Benign/Likely Benign,21-50,1922,55,2.86
+BRCA1,benign,Benign/Likely Benign,51-100,1139,3,0.26
+BRCA1,benign,Benign/Likely Benign,>100,9350,0,0.00
+BRCA1,vus,VUS,0,61,35,57.38
+BRCA1,vus,VUS,1-2,85,39,45.88
+BRCA1,vus,VUS,3-5,110,24,21.82
+BRCA1,vus,VUS,6-10,143,21,14.69
+BRCA1,vus,VUS,11-20,319,62,19.44
+BRCA1,vus,VUS,21-50,592,52,8.78
+BRCA1,vus,VUS,51-100,147,11,7.48
+BRCA1,vus,VUS,>100,168,59,35.12
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,0,25,21,84.00
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,1-2,31,16,51.61
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,3-5,17,6,35.29
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,6-10,35,8,22.86
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,11-20,80,22,27.50
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,21-50,147,48,32.65
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,51-100,61,2,3.28
+BRCA1,pathogenic,Likely Pathogenic/Pathogenic,>100,481,7,1.46

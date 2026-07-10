@@ -1,0 +1,3 @@
+action_group,bottleneck_category,count,top_criteria_combo,top_priority_reasons
+near_pathogenic_threshold,strong_pathogenic_combo_one_step_short,302,PM2_Supporting:Supporting:1;PS3:Strong:4,PS3;near_pathogenic_dense
+background_absence_only,PM2_plus_weak_context,1,PM2_Supporting:Supporting:1;PP4:Strong:4,PP4;near_pathogenic_dense

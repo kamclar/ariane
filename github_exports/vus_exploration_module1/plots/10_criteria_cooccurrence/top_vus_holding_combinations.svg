@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="650" viewBox="0 0 1180 650">
+<style>
+text { font-family: Arial, Helvetica, sans-serif; fill: #172033; }
+.small { font-size: 11px; }
+.label { font-size: 12px; }
+.title { font-size: 18px; font-weight: 700; }
+</style>
+<rect x="0" y="0" width="1180" height="650" fill="#ffffff"/>
+<text x="28" y="34" class="title">Top VUS-holding criterion combinations</text>
+<text x="24" y="76" class="small">PM2_Supporting</text>
+<rect x="430" y="60" width="620.0" height="22" fill="#7c3aed"/>
+<text x="1058.0" y="76" class="small">n=5046, VUS=100.00%, P=0.00%</text>
+<text x="24" y="107" class="small">BP4+BP7+PM2_Supporting</text>
+<rect x="430" y="91" width="156.7816091954023" height="22" fill="#7c3aed"/>
+<text x="594.7816091954023" y="107" class="small">n=1276, VUS=100.00%, P=0.00%</text>
+<text x="24" y="138" class="small">PM2_Supporting+PP3</text>
+<rect x="430" y="122" width="97.18985334918747" height="22" fill="#7c3aed"/>
+<text x="535.1898533491875" y="138" class="small">n=791, VUS=100.00%, P=0.00%</text>
+<text x="24" y="169" class="small">PM2_Supporting+PS3</text>
+<rect x="430" y="153" width="50.00792707094728" height="22" fill="#7c3aed"/>
+<text x="488.0079270709473" y="169" class="small">n=407, VUS=100.00%, P=0.00%</text>
+<text x="24" y="200" class="small">none</text>
+<rect x="430" y="184" width="40.66983749504558" height="22" fill="#7c3aed"/>
+<text x="478.66983749504556" y="200" class="small">n=331, VUS=100.00%, P=0.00%</text>
+<text x="24" y="231" class="small">BS3</text>
+<rect x="430" y="215" width="20.88783194609592" height="22" fill="#7c3aed"/>
+<text x="458.8878319460959" y="231" class="small">n=170, VUS=100.00%, P=0.00%</text>
+<text x="24" y="262" class="small">PP3</text>
+<rect x="430" y="246" width="6.2663495838287755" height="22" fill="#7c3aed"/>
+<text x="444.2663495838288" y="262" class="small">n=51, VUS=100.00%, P=0.00%</text>
+<text x="24" y="293" class="small">PS3</text>
+<rect x="430" y="277" width="3.3174791914387636" height="22" fill="#7c3aed"/>
+<text x="441.31747919143874" y="293" class="small">n=27, VUS=100.00%, P=0.00%</text>
+<text x="24" y="324" class="small">BS1_Supporting</text>
+<rect x="430" y="308" width="0.9829567974633373" height="22" fill="#7c3aed"/>
+<text x="438.9829567974633" y="324" class="small">n=8, VUS=100.00%, P=0.00%</text>
+</svg>

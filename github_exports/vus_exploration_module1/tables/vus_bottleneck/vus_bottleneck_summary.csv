@@ -1,0 +1,11 @@
+bottleneck_category,count,percent_of_vus,brca1_count,brca2_count,high_spliceai_count,high_spliceai_percent,top_combo,suggested_next_evidence
+PM2_only,5046,61.88,725,4321,10,0.20,PM2_Supporting,Absent population frequency alone is insufficient; needs independent pathogenic or benign evidence.
+mixed_splice_benign_and_pathogenic,1276,15.65,90,1186,0,0.00,BP4+BP7+PM2_Supporting,Review whether benign splice/RNA branch and pathogenic evidence should both stand for this variant.
+computational_pathogenic_evidence_not_enough,842,10.33,286,556,842,100.00,PM2_Supporting+PP3,"Computational evidence alone is insufficient; needs functional, segregation, case-control, trans, or curated clinical evidence."
+strong_pathogenic_combo_one_step_short,446,5.47,342,104,5,1.12,PM2_Supporting+PS3,"One additional supporting pathogenic criterion, or one moderate criterion, could move many cases toward likely pathogenic."
+no_automated_evidence,331,4.06,51,280,1,0.30,none,"Needs external evidence not in Module 1, such as case-control, segregation, curated clinical assertions, or functional data."
+benign_functional_evidence_not_enough,170,2.08,123,47,0,0.00,BS3,"Additional benign evidence such as BS2, BS4, population evidence, or curated functional strength could resolve toward benign."
+benign_evidence_not_enough,21,0.26,3,18,0,0.00,BP5,Needs an additional benign criterion or stronger benign evidence.
+other_conflicting_evidence,19,0.23,4,15,8,42.11,BP5+PM2_Supporting,Expert review of mixed benign and pathogenic evidence before any automatic class change.
+PM2_plus_weak_context,2,0.02,1,1,0,0.00,PM2_Supporting+PP4,"Needs stronger independent evidence; PM2 is background support, not a decision driver."
+conflicting_PVS1_BS3,1,0.01,0,1,0,0.00,BS3+PM2_Supporting+PVS1,Expert adjudication of functional BS3 versus PVS1 boundary; consider curated ENIGMA interpretation.

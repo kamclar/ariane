@@ -1,0 +1,5 @@
+sanity_reason,count,brca1_count,brca2_count,benign_count,vus_count,pathogenic_count,top_variant_type,median_spliceai,max_spliceai
+PS3_but_VUS,448,344,104,0,448,0,missense,0.01,0.65
+pathogenic_and_benign_evidence,140,128,12,129,10,1,missense,0.28,0.99
+PP3_with_BS3,128,123,5,128,0,0,missense,0.28,0.99
+PVS1_but_VUS,1,0,1,0,1,0,nonsense,0.01,0.01

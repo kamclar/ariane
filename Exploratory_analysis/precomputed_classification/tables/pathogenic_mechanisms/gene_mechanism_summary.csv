@@ -1,0 +1,13 @@
+gene,mechanism_bucket,count
+BRCA2,truncating_pvs1_pm5_ptc,1475
+BRCA1,truncating_pvs1_pm5_ptc,766
+BRCA2,truncating_pvs1_only,69
+BRCA1,functional_plus_splice_or_computational,58
+BRCA1,functional_multifactorial_pathogenic,29
+BRCA1,truncating_pvs1_only,16
+BRCA2,functional_multifactorial_pathogenic,11
+BRCA1,multifactorial_pp4,7
+BRCA2,multifactorial_pp4,5
+BRCA2,functional_plus_splice_or_computational,3
+BRCA1,functional_ps3_only_or_with_pm2,1
+BRCA2,functional_ps3_only_or_with_pm2,1

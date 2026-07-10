@@ -1,0 +1,13 @@
+gene,c_notation,p_notation,variant_type,criteria_combo,total_points,predicted_class,spliceai_score,interpretation_bucket
+BRCA1,c.5196T>G,p.(His1732Gln),missense,BS3+PM2_Supporting+PP3,-2,2,0.99,benign_functional_overrides_pp3_signal
+BRCA1,c.5470A>G,p.(Ile1824Val),missense,BS3+PM2_Supporting+PP3,-2,2,0.93,benign_functional_overrides_pp3_signal
+BRCA2,c.6842G>T,p.(Gly2281Val),missense,BS3+PM2_Supporting+PP3,-2,2,0.92,benign_functional_overrides_pp3_signal
+BRCA1,c.192T>C,p.(Cys64=),synonymous,BS3+PM2_Supporting+PP3,-2,2,0.87,benign_functional_overrides_pp3_signal
+BRCA1,c.193A>C,p.(Lys65Gln),missense,BS3+PM2_Supporting+PP3,-2,2,0.87,benign_functional_overrides_pp3_signal
+BRCA1,c.195G>C,p.(Lys65Asn),missense,BS3+PM2_Supporting+PP3,-2,2,0.87,benign_functional_overrides_pp3_signal
+BRCA1,c.195G>A,p.(Lys65=),synonymous,BS3+PM2_Supporting+PP3,-2,2,0.86,benign_functional_overrides_pp3_signal
+BRCA1,c.195G>T,p.(Lys65Asn),missense,BS3+PM2_Supporting+PP3,-2,2,0.86,benign_functional_overrides_pp3_signal
+BRCA1,c.194A>G,p.(Lys65Arg),missense,BS3+PM2_Supporting+PP3,-2,2,0.84,benign_functional_overrides_pp3_signal
+BRCA1,c.194A>T,p.(Lys65Met),missense,BS3+PM2_Supporting+PP3,-2,2,0.8,benign_functional_overrides_pp3_signal
+BRCA1,c.5073A>G,p.(Thr1691=),synonymous,BS3+PM2_Supporting+PP3,-2,2,0.71,benign_functional_overrides_pp3_signal
+BRCA1,c.5196T>A,p.(His1732Gln),missense,BS3+PM2_Supporting+PP3,-2,2,0.71,benign_functional_overrides_pp3_signal

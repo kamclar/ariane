@@ -1,0 +1,21 @@
+variant_type,predicted_class,label,count,percent_within_type
+initiation_codon,1,Benign,0,0.00
+initiation_codon,2,Likely Benign,0,0.00
+initiation_codon,3,VUS,15,83.33
+initiation_codon,4,Likely Pathogenic,0,0.00
+initiation_codon,5,Pathogenic,3,16.67
+missense,1,Benign,722,2.05
+missense,2,Likely Benign,28040,79.57
+missense,3,VUS,6376,18.09
+missense,4,Likely Pathogenic,64,0.18
+missense,5,Pathogenic,39,0.11
+nonsense,1,Benign,1,0.04
+nonsense,2,Likely Benign,0,0.00
+nonsense,3,VUS,70,2.92
+nonsense,4,Likely Pathogenic,69,2.88
+nonsense,5,Pathogenic,2257,94.16
+synonymous,1,Benign,79,0.80
+synonymous,2,Likely Benign,8110,81.99
+synonymous,3,VUS,1693,17.12
+synonymous,4,Likely Pathogenic,8,0.08
+synonymous,5,Pathogenic,1,0.01

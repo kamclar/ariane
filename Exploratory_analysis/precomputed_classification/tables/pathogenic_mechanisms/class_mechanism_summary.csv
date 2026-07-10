@@ -1,0 +1,10 @@
+predicted_class,mechanism_bucket,count
+5,truncating_pvs1_pm5_ptc,2240
+4,truncating_pvs1_only,68
+4,functional_plus_splice_or_computational,61
+5,functional_multifactorial_pathogenic,40
+5,truncating_pvs1_only,17
+4,multifactorial_pp4,9
+5,multifactorial_pp4,3
+4,functional_ps3_only_or_with_pm2,2
+4,truncating_pvs1_pm5_ptc,1

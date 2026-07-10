@@ -1,0 +1,2 @@
+gene,c_notation,p_notation,variant_type,grch37,grch38,spliceai_score,table9_code,table9_strength,table9_points,pvs1_strength,pvs1_points,pm2_points,total_points,predicted_class,interpretation
+BRCA2,c.9925G>T,p.(Glu3309Ter),nonsense,13:32972575:G>T,13:32398438:G>T,0.01,BS3,Strong,-4,Very Strong,8,1,5,3,Expected VUS due to contradictory BS3 and PVS1 evidence under point-based handling

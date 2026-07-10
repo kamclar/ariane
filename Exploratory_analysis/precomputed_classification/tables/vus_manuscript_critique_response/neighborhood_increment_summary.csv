@@ -1,0 +1,7 @@
+metric,count,percent_of_vus
+total_vus,8154,100.00
+vus_with_any_neighborhood_reason,6249,76.64
+vus_with_only_neighborhood_reasons,5018,61.54
+tier1_or_tier2_original,859,10.53
+tier1_or_tier2_without_neighborhood_points,286,3.51
+lost_tier1_or_tier2_without_neighborhood_points,573,7.03
