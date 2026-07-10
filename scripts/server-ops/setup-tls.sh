@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Configure a Let's Encrypt certificate for the ARIANE Nginx site.
+
+set -euo pipefail
+
+SERVER_NAME="${1:-}"
+EMAIL="${2:-}"
+
+if [ "$EUID" -ne 0 ]; then
+    echo "Run this script as root" >&2
+    exit 1
+fi
+if [ -z "$SERVER_NAME" ] || [ -z "$EMAIL" ]; then
+    echo "Usage: $0 <server-name> <email>" >&2
+    exit 2
+fi
+if ! [[ "$SERVER_NAME" =~ ^[A-Za-z0-9.-]+$ ]] || [[ "$SERVER_NAME" == *..* ]]; then
+    echo "Invalid server name" >&2
+    exit 2
+fi
+
+apt-get update -qq
+apt-get install -y -qq certbot python3-certbot-nginx
+sed -i "s/server_name _;/server_name $SERVER_NAME;/" /etc/nginx/sites-available/ariane
+nginx -t
+systemctl reload nginx
+certbot --nginx --non-interactive --agree-tos --redirect --hsts --staple-ocsp \
+    --email "$EMAIL" -d "$SERVER_NAME"
+systemctl enable --now certbot.timer
+certbot renew --dry-run

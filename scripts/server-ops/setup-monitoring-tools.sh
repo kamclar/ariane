@@ -12,9 +12,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}   Monitoring Tools Setup${NC}"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
@@ -25,7 +25,7 @@ fi
 # Update package lists
 echo -e "${YELLOW}[1] Updating package lists...${NC}"
 apt-get update -qq
-echo -e "${GREEN}✓ Package lists updated${NC}"
+echo -e "${GREEN}OK Package lists updated${NC}"
 
 # Tools to install
 TOOLS=(
@@ -52,10 +52,10 @@ FAILED=0
 for tool in "${TOOLS[@]}"; do
     echo -ne "   Installing $tool... "
     if apt-get install -y -qq "$tool" 2>/dev/null; then
-        echo -e "${GREEN}✓${NC}"
+        echo -e "${GREEN}OK${NC}"
         ((INSTALLED++))
     else
-        echo -e "${RED}✗${NC}"
+        echo -e "${RED}ERROR${NC}"
         ((FAILED++))
     fi
 done
@@ -71,13 +71,13 @@ echo -e "\n${YELLOW}[3] Installing additional utilities...${NC}"
 # tmux (for persistent sessions)
 echo -ne "   Installing tmux... "
 if apt-get install -y -qq tmux 2>/dev/null; then
-    echo -e "${GREEN}✓${NC}"
+    echo -e "${GREEN}OK${NC}"
 fi
 
 # ranger (file manager)
 echo -ne "   Installing ranger... "
 if apt-get install -y -qq ranger 2>/dev/null; then
-    echo -e "${GREEN}✓${NC}"
+    echo -e "${GREEN}OK${NC}"
 fi
 
 # Install Docker (optional)
@@ -86,7 +86,7 @@ echo "   Install Docker CLI? (y/n)"
 read -r response
 if [[ "$response" == "y" || "$response" == "Y" ]]; then
     apt-get install -y -qq docker.io 2>/dev/null || true
-    echo -e "${GREEN}✓ Docker installed${NC}"
+    echo -e "${GREEN}OK Docker installed${NC}"
 fi
 
 # Install ctop (Docker container monitoring)
@@ -94,7 +94,7 @@ echo -e "\n${YELLOW}[5] Container monitoring tools${NC}"
 if command -v docker &> /dev/null; then
     echo "   Installing ctop..."
     if command -v ctop &> /dev/null; then
-        echo -e "   ${GREEN}✓ ctop already installed${NC}"
+        echo -e "   ${GREEN}OK ctop already installed${NC}"
     else
         echo -e "   ${YELLOW}Note: Install ctop manually with: docker run --rm -ti --name=ctop --volume /var/run/docker.sock:/var/run/docker.sock:ro quay.io/vektorlab/ctop:latest${NC}"
     fi
@@ -131,7 +131,7 @@ if [ -f /home/ubuntu/.bashrc ]; then
     if ! grep -q "ARIANE Monitoring Aliases" /home/ubuntu/.bashrc; then
         cat /tmp/ariane-aliases.sh >> /home/ubuntu/.bashrc
         chown ubuntu:ubuntu /home/ubuntu/.bashrc
-        echo -e "   ${GREEN}✓ Aliases added${NC}"
+        echo -e "   ${GREEN}OK Aliases added${NC}"
     fi
 fi
 
@@ -143,9 +143,9 @@ cat > /usr/local/bin/ariane-dashboard << 'EOF'
 
 while true; do
     clear
-    echo "═══════════════════════════════════════════"
+    echo "==========================================="
     echo "     ARIANE Monitoring Dashboard"
-    echo "═══════════════════════════════════════════"
+    echo "==========================================="
     echo ""
     echo "SERVICE STATUS:"
     systemctl status ariane --no-pager | grep "Active" | awk '{print "  " $0}'
@@ -159,23 +159,23 @@ while true; do
     ps aux | grep "[n]ginx: worker" | wc -l | awk '{print "  Nginx workers: " $1}'
     echo ""
     echo "API STATUS:"
-    curl -s http://localhost:8000/api/health | jq -r '"  Status: " + .status' 2>/dev/null || echo "  (API not responding)"
+    curl --fail --silent --max-time 5 http://127.0.0.1:8000/api/health | jq -r '"  Status: " + .status' 2>/dev/null || echo "  (API not responding)"
     echo ""
-    echo "═══════════════════════════════════════════"
+    echo "==========================================="
     echo "Updated: $(date)"
     echo "Press Ctrl+C to exit, refreshes every 5s"
-    echo "═══════════════════════════════════════════"
+    echo "==========================================="
     sleep 5
 done
 EOF
 
 chmod +x /usr/local/bin/ariane-dashboard
-echo -e "   ${GREEN}✓ Dashboard script created${NC}"
+echo -e "   ${GREEN}OK Dashboard script created${NC}"
 echo -e "   Run with: ${BLUE}ariane-dashboard${NC}"
 
 # Summary
-echo -e "\n${BLUE}════════════════════════════════════════${NC}"
-echo -e "${GREEN}✓ Monitoring tools setup completed!${NC}\n"
+echo -e "\n${BLUE}========================================${NC}"
+echo -e "${GREEN}OK Monitoring tools setup completed!${NC}\n"
 echo -e "Useful commands:"
 echo -e "  ${BLUE}htop${NC} - Interactive process monitor"
 echo -e "  ${BLUE}iotop${NC} - I/O monitoring (requires sudo)"
@@ -188,4 +188,4 @@ echo -e "  ${BLUE}ariane-status${NC} - Check service status"
 echo -e "  ${BLUE}mem-top${NC} - Show memory usage"
 echo -e "  ${BLUE}disk-usage${NC} - Show disk usage"
 echo -e "\nSource updated aliases with: ${BLUE}source ~/.bashrc${NC}"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"

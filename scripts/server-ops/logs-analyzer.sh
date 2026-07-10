@@ -13,10 +13,10 @@ BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 NC='\033[0m'
 
-echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}   ARIANE Logs Analyzer${NC}"
 echo -e "${BLUE}   Analysis of last $LINES lines${NC}"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"
 
 # 1. Get raw logs
 echo -e "${YELLOW}[1] Fetching logs from journalctl...${NC}\n"
@@ -108,12 +108,12 @@ echo -e "\n${YELLOW}[11] Raw Logs (last $LINES entries)${NC}"
 echo "$LOGS" | tail -20 | sed 's/^/   /'
 
 # Summary
-echo -e "\n${BLUE}════════════════════════════════════════${NC}"
+echo -e "\n${BLUE}========================================${NC}"
 TOTAL_ISSUES=$((ERROR_COUNT + WARNING_COUNT + EXCEPTION_COUNT + CRITICAL_COUNT))
 if [ $TOTAL_ISSUES -eq 0 ]; then
-    echo -e "${GREEN}✓ No issues detected${NC}"
+    echo -e "${GREEN}OK No issues detected${NC}"
 else
-    echo -e "${YELLOW}⚠ Found $TOTAL_ISSUES total issues${NC}"
+    echo -e "${YELLOW}WARN Found $TOTAL_ISSUES total issues${NC}"
 fi
 echo -e "Analysis completed at $(date)"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"

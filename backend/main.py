@@ -7,9 +7,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pathlib import Path
 import json
+import os
+import secrets
 import time
 import asyncio
 from typing import Optional
+from fastapi import Header
 
 from backend.config import (
     DATA_DIR, TABLE4_PATH, TABLE9_PATH, ST7_PATH,
@@ -324,7 +327,14 @@ async def classify_batch(req: BatchRequest) -> BatchResponse:
 
 
 @app.post("/api/clear-cache")
-async def clear_cache():
+async def clear_cache(x_ariane_admin_token: Optional[str] = Header(default=None)):
+    admin_token = os.getenv("ARIANE_ADMIN_TOKEN", "")
+    if not admin_token:
+        raise HTTPException(status_code=503, detail="Administrative API is disabled")
+    if not x_ariane_admin_token or not secrets.compare_digest(
+        x_ariane_admin_token, admin_token
+    ):
+        raise HTTPException(status_code=403, detail="Invalid administrative token")
     from backend.lookups.spliceai import SPLICEAI_CACHE, SPLICEAI_STATUS_CACHE
     from backend.lookups.bayesdel import BAYESDEL_CACHE
     from backend.lookups.clinvar import CLINVAR_CACHE

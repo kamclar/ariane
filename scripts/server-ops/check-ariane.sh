@@ -12,44 +12,44 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}════════════════════════════════════════${NC}"
+echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}   ARIANE Status Check${NC}"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"
 
 # 1. Service Status
 echo -e "${YELLOW}[1] Service Status${NC}"
 if systemctl is-active --quiet ariane; then
-    echo -e "   ${GREEN}✓ ARIANE service: RUNNING${NC}"
+    echo -e "   ${GREEN}OK ARIANE service: RUNNING${NC}"
 else
-    echo -e "   ${RED}✗ ARIANE service: STOPPED${NC}"
+    echo -e "   ${RED}ERROR ARIANE service: STOPPED${NC}"
 fi
 
 if systemctl is-active --quiet nginx; then
-    echo -e "   ${GREEN}✓ Nginx: RUNNING${NC}"
+    echo -e "   ${GREEN}OK Nginx: RUNNING${NC}"
 else
-    echo -e "   ${RED}✗ Nginx: STOPPED${NC}"
+    echo -e "   ${RED}ERROR Nginx: STOPPED${NC}"
 fi
 
 # 2. Health Check
 echo -e "\n${YELLOW}[2] API Health Check${NC}"
 if command -v curl &> /dev/null; then
-    HEALTH=$(curl -s http://localhost:8000/api/health 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "UNKNOWN")
+    HEALTH=$(curl --fail --silent --max-time 5 http://127.0.0.1:8000/api/health 2>/dev/null | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "UNKNOWN")
     if [ "$HEALTH" = "ok" ]; then
-        echo -e "   ${GREEN}✓ API Health: OK${NC}"
+        echo -e "   ${GREEN}OK API Health: OK${NC}"
     else
-        echo -e "   ${RED}✗ API Health: $HEALTH${NC}"
+        echo -e "   ${RED}ERROR API Health: $HEALTH${NC}"
     fi
 else
-    echo -e "   ${YELLOW}⚠ curl not available, skipping${NC}"
+    echo -e "   ${YELLOW}WARN curl not available, skipping${NC}"
 fi
 
 # 3. Process Status
 echo -e "\n${YELLOW}[3] Process Status${NC}"
 if pgrep -f "uvicorn" > /dev/null; then
     PID=$(pgrep -f "uvicorn" | head -1)
-    echo -e "   ${GREEN}✓ FastAPI process running (PID: $PID)${NC}"
+    echo -e "   ${GREEN}OK FastAPI process running (PID: $PID)${NC}"
 else
-    echo -e "   ${RED}✗ FastAPI process not found${NC}"
+    echo -e "   ${RED}ERROR FastAPI process not found${NC}"
 fi
 
 # 4. Memory & CPU
@@ -102,6 +102,6 @@ if systemctl is-active --quiet ariane; then
     echo -e "   Started: ${UPTIME}"
 fi
 
-echo -e "\n${BLUE}════════════════════════════════════════${NC}"
+echo -e "\n${BLUE}========================================${NC}"
 echo -e "${GREEN}Check completed at $(date)${NC}"
-echo -e "${BLUE}════════════════════════════════════════${NC}\n"
+echo -e "${BLUE}========================================${NC}\n"
