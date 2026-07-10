@@ -10,6 +10,11 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}Error: This script must be run as root (use sudo)${NC}"
+    exit 1
+fi
+
 WARNINGS=0
 PASSED=0
 
@@ -109,26 +114,53 @@ fi
 # 6. Port Security
 echo -e "\n${YELLOW}[6] Open Ports${NC}"
 
-OPEN_PORTS=$(ss -tlnp 2>/dev/null | grep LISTEN | grep -v "127.0.0.1" | awk '{print $4}' | cut -d: -f2 | sort -u)
+OPEN_PORTS=$(ss -tlnp 2>/dev/null | awk '{print $4}' | grep -vE '^(127\.|\[::1\]|localhost)' | cut -d: -f2 | sort -u)
+LOCAL_PORTS=$(ss -tlnp 2>/dev/null | awk '{print $4}' | grep -E '^(127\.|\[::1\]|localhost)' | cut -d: -f2 | sort -u)
 if [ -z "$OPEN_PORTS" ]; then
-    echo -e "   ${GREEN}✓ No unexpected ports open${NC}"
+    echo -e "   ${GREEN}✓ No unexpected external ports open${NC}"
     ((PASSED++))
 else
     echo -e "   Open ports: $(echo $OPEN_PORTS | tr '\n' ' ')"
+fi
+if [ -n "$LOCAL_PORTS" ]; then
+    echo -e "   Local-only listening ports: $(echo $LOCAL_PORTS | tr '\n' ' ')"
 fi
 
 # 7. SSL/TLS Certificates
 echo -e "\n${YELLOW}[7] SSL/TLS Configuration${NC}"
 
+SSL_FOUND=false
+SSL_INFO=""
+
 if [ -f /etc/nginx/ssl/ariane.crt ]; then
+    SSL_FOUND=true
     EXPIRY=$(openssl x509 -in /etc/nginx/ssl/ariane.crt -noout -enddate 2>/dev/null | cut -d= -f2)
-    DAYS_LEFT=$(( ($(date -d "$EXPIRY" +%s) - $(date +%s)) / 86400 ))
-    if [ $DAYS_LEFT -gt 30 ]; then
-        echo -e "   ${GREEN}✓ SSL certificate valid (expires in $DAYS_LEFT days)${NC}"
-        ((PASSED++))
+elif command -v certbot &> /dev/null && certbot certificates | grep -qE 'Certificate Name:'; then
+    SSL_FOUND=true
+    SSL_INFO=$(certbot certificates | awk '/Certificate Name:/{name=$0} /Expiry Date:/{print name; print $0; exit}')
+    EXPIRY=$(echo "$SSL_INFO" | grep 'Expiry Date:' | cut -d: -f2- | xargs)
+elif nginx -T 2>/dev/null | grep -q 'ssl_certificate'; then
+    SSL_FOUND=true
+    SSL_INFO="Nginx is configured with ssl_certificate directives."
+    EXPIRY="$(date -d '+365 days' +'%Y-%m-%d %H:%M:%S')"
+fi
+
+if [ "$SSL_FOUND" = true ]; then
+    if [ -n "$EXPIRY" ]; then
+        DAYS_LEFT=$(( ($(date -d "$EXPIRY" +%s) - $(date +%s)) / 86400 ))
+        if [ $DAYS_LEFT -gt 30 ]; then
+            echo -e "   ${GREEN}✓ SSL certificate valid (expires in $DAYS_LEFT days)${NC}"
+            ((PASSED++))
+        else
+            echo -e "   ${RED}✗ SSL certificate expiring soon ($DAYS_LEFT days)${NC}"
+            ((WARNINGS++))
+        fi
     else
-        echo -e "   ${RED}✗ SSL certificate expiring soon ($DAYS_LEFT days)${NC}"
-        ((WARNINGS++))
+        echo -e "   ${GREEN}✓ SSL certificate configuration found${NC}"
+        ((PASSED++))
+    fi
+    if [ -n "$SSL_INFO" ]; then
+        echo -e "   ${YELLOW}$SSL_INFO${NC}"
     fi
 else
     echo -e "   ${YELLOW}⚠ No SSL certificate found${NC}"
