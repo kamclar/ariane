@@ -12,13 +12,20 @@ bash check-ariane.sh
 Zobrazí: Service status, health check, CPU/RAM, disk space, Nginx status, poslední chyby.
 
 ### 2. **backup-ariane.sh** - Backup Dat
-Zálohuje data adresář a cache soubory.
+Zálohuje `backend/data` a celý aplikaci adresář bez `venv`, `.git` a běhových souborů.
 ```bash
 bash backup-ariane.sh
 ```
-Vytvoří `.tar.gz` soubor v `/backup/` adresáři.
+Vytvoří timestampovaný `.tar.gz` soubor v `/backup/` adresáři.
 
-### 3. **restart-ariane.sh** - Restart Aplikace
+### 3. **restore-ariane.sh** - Restore Backup
+Obnoví zálohu ARIANE z archivu.
+```bash
+bash restore-ariane.sh --list
+bash restore-ariane.sh /backup/ariane-full-20260710_030000.tar.gz
+```
+
+### 4. **restart-ariane.sh** - Restart Aplikace
 Bezpečně restartuje ARIANE a Nginx.
 ```bash
 bash restart-ariane.sh
@@ -51,12 +58,19 @@ sudo bash setup-monitoring-tools.sh
 ```
 
 ### 8. **setup-backup-cron.sh** - Automatic Backups
-Nastaví automatické backupy každý den v 3:00 ráno.
+Nastaví denní automatické backupy pomocí cron a/nebo systemd timeru.
 ```bash
 sudo bash setup-backup-cron.sh
 ```
 
-### 9. **deploy-ariane.sh** - Full Deployment
+### 9. **restore-ariane.sh** - Restore Backup
+Obnoví zálohu z `/backup`.
+```bash
+bash restore-ariane.sh --list
+bash restore-ariane.sh /backup/ariane-full-20260710_030000.tar.gz
+```
+
+### 10. **deploy-ariane.sh** - Full Deployment
 Kompletní nasazení aplikace (klonování, setup, spuštění).
 ```bash
 sudo bash deploy-ariane.sh <git-repository-url>
