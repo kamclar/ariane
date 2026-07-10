@@ -28,7 +28,7 @@ bash health-monitor.sh 30
 
 The application service is `ariane`. Application logs are stored in the systemd journal. Nginx logs are stored under `/var/log/nginx`.
 
-Structured audit events include the request ID, source IP, endpoint, submitted values, result summary, and error details. Tokens and request headers are not logged.
+Structured audit events include the request ID, source IP, endpoint, submitted values, predicted class, class label, total points, and error details. Tokens and request headers are not logged.
 
 ```bash
 sudo bash audit-log.sh all today

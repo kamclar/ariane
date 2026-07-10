@@ -22,5 +22,6 @@ if ! command -v jq >/dev/null; then
     exit 1
 fi
 
+printf 'REQUEST_ID\tSOURCE_IP\tEVENT\tINPUT\tRESULT\tERROR\n'
 journalctl -u ariane --since "$SINCE" -o cat --no-pager | \
-    jq -Rr "fromjson? | select(.log_type == \"ariane_audit\") | $FILTER | [(.request_id // \"\"), (.source_ip // \"\"), (.event // \"\"), ((.input // {}) | tojson), (.error // \"\")] | @tsv"
+    jq -Rr "fromjson? | select(.log_type == \"ariane_audit\") | $FILTER | [(.request_id // \"\"), (.source_ip // \"\"), (.event // \"\"), ((.input // {}) | tojson), ((.result // {}) | tojson), (.error // \"\")] | @tsv"
