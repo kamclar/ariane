@@ -38,11 +38,43 @@ class VariantRequest(BaseModel):
     def validate_c_notation(cls, v):
         v = v.strip()
         if not v.startswith("c."):
-            raise ValueError("c_notation must start with 'c.'")
-        # basic format check - not exhaustive but catches obvious errors
-        pattern = r'^c\.[\-\*]?\d+[\+\-]?\d*[_\(\)]?.*$'
-        if not re.match(pattern, v):
-            raise ValueError(f"c_notation format not recognised: {v}")
+            raise ValueError("c. notation must start with 'c.', for example c.4185G>A")
+        substitution = r"^c\.[-*]?\d+(?:[+-]\d+)?[ACGT]>[ACGT]$"
+        equality = r"^c\.[-*]?\d+(?:[+-]\d+)?[ACGT]?=$"
+        sequence_change = r"^c\.[0-9*+_?()\-]+(?:delins[ACGT]+|del[ACGT]*|dup[ACGT]*|ins[ACGT]+)$"
+        if not any(re.fullmatch(pattern, v, re.IGNORECASE) for pattern in (
+            substitution,
+            equality,
+            sequence_change,
+        )):
+            raise ValueError(
+                "Unrecognised c. notation. Use HGVS format, for example "
+                "c.4185G>A, c.68_69delAG, or c.212+1G>T"
+            )
+        return v
+
+    @field_validator("p_notation")
+    @classmethod
+    def validate_p_notation(cls, v):
+        if v is None:
+            return None
+        v = v.strip()
+        if not v:
+            return None
+        if not v.startswith("p."):
+            raise ValueError("p. notation must start with 'p.', for example p.(Gln1395=)")
+        protein = (
+            r"^p\.\((?:\?|[A-Z][a-z]{2}\d+"
+            r"(?:_[A-Z][a-z]{2}\d+)?"
+            r"(?:=|\?|Ter|[A-Z][a-z]{2}|del|dup|fs(?:Ter)?\d*|"
+            r"[A-Z][a-z]{2}fs(?:Ter)?\d*|delins[A-Z][a-z]{2}|ins[A-Z][a-z]{2})"
+            r")\)$"
+        )
+        if not re.fullmatch(protein, v):
+            raise ValueError(
+                "Unrecognised p. notation. Use HGVS format, for example "
+                "p.(Cys61Gly), p.(Gln1395=), or p.(Glu23ValfsTer17)"
+            )
         return v
 
     @field_validator("dup_type")

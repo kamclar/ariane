@@ -67,7 +67,7 @@
         </section>
 
         <!-- Progress bar -->
-        <div class="progress-container" x-show="loading" x-transition>
+        <div class="progress-container" x-show="mode === 'single' && loading" x-transition>
             <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: progress + '%' }"></div>
             </div>
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Result -->
-        <section class="result-section" x-show="result" x-transition>
+        <section class="result-section" x-show="mode === 'single' && result" x-transition>
 
             <!-- Classification badge -->
             <div class="classification-header" x-show="result">

@@ -262,7 +262,7 @@ function ariane() {
                 });
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
-                    this.manualError = error.detail || `Error ${response.status}`;
+                    this.manualError = this.formatApiError(error, response.status);
                     return;
                 }
                 this.manualResult = await response.json();
@@ -335,6 +335,18 @@ function ariane() {
             }).catch(() => {});
         },
 
+        formatApiError(payload, status) {
+            const detail = payload?.detail;
+            if (Array.isArray(detail)) {
+                const messages = detail
+                    .map(item => String(item?.msg || "").replace(/^Value error,\s*/i, ""))
+                    .filter(Boolean);
+                if (messages.length > 0) return messages.join("; ");
+            }
+            if (typeof detail === "string" && detail.trim()) return detail;
+            return `The input could not be processed. Use HGVS c. and p. notation, for example c.4185G>A and p.(Gln1395=). Error ${status}.`;
+        },
+
         async classify() {
             this.error = "";
             this.result = null;
@@ -391,7 +403,7 @@ function ariane() {
 
                 if (!resp.ok) {
                     const err = await resp.json().catch(() => ({}));
-                    this.error = err.detail || `Error ${resp.status}`;
+                    this.error = this.formatApiError(err, resp.status);
                     this.loading = false;
                     return;
                 }
@@ -524,7 +536,7 @@ function ariane() {
                                 gene: item.gene,
                                 c_notation: item.c_notation,
                                 p_notation: item.p_notation,
-                                error: err.detail || `HTTP ${resp.status}`,
+                                error: this.formatApiError(err, resp.status),
                             };
                         }
                     } catch (e) {
