@@ -85939,6 +85939,54 @@
     "status": "ok",
     "variant": "chr17-43097337-T-C"
   },
+  "BRCA1:c.548-48A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097337:T>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097337-T-A"
+  },
+  "BRCA1:c.548-49T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097338:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097338-A-T"
+  },
+  "BRCA1:c.548-49T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.01,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097338:A>G",
+    "max_delta_field": "DS_AL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097338-A-G"
+  },
   "BRCA1:c.548-49T>G": {
     "delta_scores": {
       "DS_AG": 0.0,
@@ -85955,6 +86003,38 @@
     "status": "ok",
     "variant": "chr17-43097338-A-C"
   },
+  "BRCA1:c.548-4T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.01,
+      "DS_DG": 0.0,
+      "DS_DL": 0.02
+    },
+    "grch38": "17:43097293:A>T",
+    "max_delta_field": "DS_DL",
+    "score": 0.02,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097293-A-T"
+  },
+  "BRCA1:c.548-4T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097293:A>G",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097293-A-G"
+  },
   "BRCA1:c.548-4T>G": {
     "delta_scores": {
       "DS_AG": 0.0,
@@ -85970,5 +86050,1525 @@
     "source": "Broad-compatible SpliceAI API",
     "status": "ok",
     "variant": "chr17-43097293-A-C"
+  },
+  "BRCA1:c.548-50T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097339:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097339-A-T"
+  },
+  "BRCA1:c.548-50T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097339:A>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097339-A-G"
+  },
+  "BRCA1:c.548-50T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097339:A>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097339-A-C"
+  },
+  "BRCA1:c.548-5T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.3,
+      "DS_DG": 0.0,
+      "DS_DL": 0.17
+    },
+    "grch38": "17:43097294:A>T",
+    "max_delta_field": "DS_AL",
+    "score": 0.3,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097294-A-T"
+  },
+  "BRCA1:c.548-5T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.08,
+      "DS_DG": 0.0,
+      "DS_DL": 0.06
+    },
+    "grch38": "17:43097294:A>G",
+    "max_delta_field": "DS_AL",
+    "score": 0.08,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097294-A-G"
+  },
+  "BRCA1:c.548-5T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.38,
+      "DS_DG": 0.0,
+      "DS_DL": 0.2
+    },
+    "grch38": "17:43097294:A>C",
+    "max_delta_field": "DS_AL",
+    "score": 0.38,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097294-A-C"
+  },
+  "BRCA1:c.548-6T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.21,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097295:A>T",
+    "max_delta_field": "DS_AL",
+    "score": 0.21,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097295-A-T"
+  },
+  "BRCA1:c.548-6T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.05,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097295:A>G",
+    "max_delta_field": "DS_AL",
+    "score": 0.05,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097295-A-G"
+  },
+  "BRCA1:c.548-6T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.12,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097295:A>C",
+    "max_delta_field": "DS_AL",
+    "score": 0.12,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097295-A-C"
+  },
+  "BRCA1:c.548-7T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.08,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097296:A>T",
+    "max_delta_field": "DS_AL",
+    "score": 0.08,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097296-A-T"
+  },
+  "BRCA1:c.548-7T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097296:A>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097296-A-G"
+  },
+  "BRCA1:c.548-7T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.02,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097296:A>C",
+    "max_delta_field": "DS_AL",
+    "score": 0.02,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097296-A-C"
+  },
+  "BRCA1:c.548-8T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.04,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097297:A>T",
+    "max_delta_field": "DS_AL",
+    "score": 0.04,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097297-A-T"
+  },
+  "BRCA1:c.548-8T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.03,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097297:A>G",
+    "max_delta_field": "DS_AL",
+    "score": 0.03,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097297-A-G"
+  },
+  "BRCA1:c.548-8T>G": {
+    "delta_scores": {
+      "DS_AG": 0.71,
+      "DS_AL": 0.7,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097297:A>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.71,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097297-A-C"
+  },
+  "BRCA1:c.548-9A>C": {
+    "delta_scores": {
+      "DS_AG": 0.01,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097298:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097298-T-G"
+  },
+  "BRCA1:c.548-9A>G": {
+    "delta_scores": {
+      "DS_AG": 0.86,
+      "DS_AL": 0.54,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097298:T>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.86,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097298-T-C"
+  },
+  "BRCA1:c.548-9A>T": {
+    "delta_scores": {
+      "DS_AG": 0.01,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097298:T>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097298-T-A"
+  },
+  "BRCA1:c.593+10A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097234:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097234-T-G"
+  },
+  "BRCA1:c.593+10A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097234:T>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097234-T-C"
+  },
+  "BRCA1:c.593+10A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097234:T>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097234-T-A"
+  },
+  "BRCA1:c.593+11G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097233:C>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097233-C-T"
+  },
+  "BRCA1:c.593+11G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097233:C>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097233-C-G"
+  },
+  "BRCA1:c.593+11G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097233:C>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097233-C-A"
+  },
+  "BRCA1:c.593+12A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097232:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097232-T-G"
+  },
+  "BRCA1:c.593+12A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097232:T>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097232-T-C"
+  },
+  "BRCA1:c.593+12A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097232:T>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097232-T-A"
+  },
+  "BRCA1:c.593+13G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097231:C>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097231-C-T"
+  },
+  "BRCA1:c.593+13G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097231:C>G",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097231-C-G"
+  },
+  "BRCA1:c.593+13G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097231:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097231-C-A"
+  },
+  "BRCA1:c.593+14A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097230:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097230-T-G"
+  },
+  "BRCA1:c.593+14A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097230:T>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097230-T-C"
+  },
+  "BRCA1:c.593+14A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097230:T>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097230-T-A"
+  },
+  "BRCA1:c.593+15A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097229:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097229-T-G"
+  },
+  "BRCA1:c.593+15A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097229:T>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097229-T-C"
+  },
+  "BRCA1:c.593+15A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097229:T>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097229-T-A"
+  },
+  "BRCA1:c.593+16C>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097228:G>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097228-G-T"
+  },
+  "BRCA1:c.593+16C>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097228:G>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097228-G-C"
+  },
+  "BRCA1:c.593+16C>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097228:G>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097228-G-A"
+  },
+  "BRCA1:c.593+17C>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097227:G>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097227-G-T"
+  },
+  "BRCA1:c.593+17C>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097227:G>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097227-G-C"
+  },
+  "BRCA1:c.593+17C>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097227:G>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097227-G-A"
+  },
+  "BRCA1:c.593+18T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097226:A>T",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097226-A-T"
+  },
+  "BRCA1:c.593+18T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097226:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097226-A-G"
+  },
+  "BRCA1:c.593+18T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097226:A>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097226-A-C"
+  },
+  "BRCA1:c.593+19T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097225:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097225-A-T"
+  },
+  "BRCA1:c.593+19T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097225:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097225-A-G"
+  },
+  "BRCA1:c.593+19T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097225:A>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097225-A-C"
+  },
+  "BRCA1:c.593+1G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.93,
+      "DS_DG": 0.04,
+      "DS_DL": 0.97
+    },
+    "grch38": "17:43097243:C>T",
+    "max_delta_field": "DS_DL",
+    "score": 0.97,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097243-C-T"
+  },
+  "BRCA1:c.593+1G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.92,
+      "DS_DG": 0.1,
+      "DS_DL": 0.97
+    },
+    "grch38": "17:43097243:C>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.97,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097243-C-G"
+  },
+  "BRCA1:c.593+1G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.95,
+      "DS_DG": 0.02,
+      "DS_DL": 0.97
+    },
+    "grch38": "17:43097243:C>A",
+    "max_delta_field": "DS_DL",
+    "score": 0.97,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097243-C-A"
+  },
+  "BRCA1:c.593+20T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097224:A>T",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097224-A-T"
+  },
+  "BRCA1:c.593+20T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097224:A>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097224-A-G"
+  },
+  "BRCA1:c.593+20T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097224:A>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097224-A-C"
+  },
+  "BRCA1:c.593+21G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097223:C>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097223-C-T"
+  },
+  "BRCA1:c.593+21G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097223:C>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097223-C-G"
+  },
+  "BRCA1:c.593+21G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097223:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097223-C-A"
+  },
+  "BRCA1:c.593+22T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097222:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097222-A-T"
+  },
+  "BRCA1:c.593+22T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097222:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097222-A-G"
+  },
+  "BRCA1:c.593+22T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097222:A>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097222-A-C"
+  },
+  "BRCA1:c.593+23C>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097221:G>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097221-G-T"
+  },
+  "BRCA1:c.593+23C>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097221:G>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097221-G-C"
+  },
+  "BRCA1:c.593+23C>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097221:G>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097221-G-A"
+  },
+  "BRCA1:c.593+24T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097220:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097220-A-T"
+  },
+  "BRCA1:c.593+24T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097220:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097220-A-G"
+  },
+  "BRCA1:c.593+24T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097220:A>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097220-A-C"
+  },
+  "BRCA1:c.593+25A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097219:T>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097219-T-G"
+  },
+  "BRCA1:c.593+25A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097219:T>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097219-T-C"
+  },
+  "BRCA1:c.593+25A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097219:T>A",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097219-T-A"
+  },
+  "BRCA1:c.593+26T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097218:A>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097218-A-T"
+  },
+  "BRCA1:c.593+26T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097218:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097218-A-G"
+  },
+  "BRCA1:c.593+26T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097218:A>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097218-A-C"
+  },
+  "BRCA1:c.593+27G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097217:C>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097217-C-T"
+  },
+  "BRCA1:c.593+27G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097217:C>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097217-C-G"
+  },
+  "BRCA1:c.593+27G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097217:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097217-C-A"
+  },
+  "BRCA1:c.593+28A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097216:T>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097216-T-G"
+  },
+  "BRCA1:c.593+28A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.01
+    },
+    "grch38": "17:43097216:T>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097216-T-C"
+  },
+  "BRCA1:c.593+28A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097216:T>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097216-T-A"
+  },
+  "BRCA1:c.593+29A>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097215:T>G",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097215-T-G"
+  },
+  "BRCA1:c.593+29A>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097215:T>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097215-T-C"
+  },
+  "BRCA1:c.593+29A>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097215:T>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097215-T-A"
+  },
+  "BRCA1:c.593+2T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.94,
+      "DS_DG": 0.05,
+      "DS_DL": 0.97
+    },
+    "grch38": "17:43097242:A>T",
+    "max_delta_field": "DS_DL",
+    "score": 0.97,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097242-A-T"
+  },
+  "BRCA1:c.593+2T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.92,
+      "DS_DG": 0.05,
+      "DS_DL": 0.96
+    },
+    "grch38": "17:43097242:A>G",
+    "max_delta_field": "DS_DL",
+    "score": 0.96,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097242-A-G"
+  },
+  "BRCA1:c.593+2T>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.96,
+      "DS_DG": 0.02,
+      "DS_DL": 0.97
+    },
+    "grch38": "17:43097242:A>C",
+    "max_delta_field": "DS_DL",
+    "score": 0.97,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097242-A-C"
+  },
+  "BRCA1:c.593+30G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097214:C>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097214-C-T"
+  },
+  "BRCA1:c.593+30G>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097214:C>G",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097214-C-G"
+  },
+  "BRCA1:c.593+30G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.02,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097214:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.02,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097214-C-A"
+  },
+  "BRCA1:c.593+31C>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097213:G>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097213-G-T"
+  },
+  "BRCA1:c.593+31C>G": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097213:G>C",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097213-G-C"
+  },
+  "BRCA1:c.593+31C>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097213:G>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097213-G-A"
+  },
+  "BRCA1:c.593+32T>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.03,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097212:A>T",
+    "max_delta_field": "DS_DG",
+    "score": 0.03,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097212-A-T"
+  },
+  "BRCA1:c.593+32T>C": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097212:A>G",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097212-A-G"
+  },
+  "BRCA1:c.593+33G>A": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.0,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097211:C>T",
+    "max_delta_field": "DS_AG",
+    "score": 0.0,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097211-C-T"
+  },
+  "BRCA1:c.593+33G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097211:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097211-C-A"
+  },
+  "BRCA1:c.593+34G>T": {
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.0,
+      "DS_DG": 0.01,
+      "DS_DL": 0.0
+    },
+    "grch38": "17:43097210:C>A",
+    "max_delta_field": "DS_DG",
+    "score": 0.01,
+    "selected_transcript": "ENST00000357654.9",
+    "selected_transcript_policy": "reference_transcript",
+    "source": "Broad-compatible SpliceAI API",
+    "status": "ok",
+    "variant": "chr17-43097210-C-A"
   }
 }
