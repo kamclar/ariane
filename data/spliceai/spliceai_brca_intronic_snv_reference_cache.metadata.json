@@ -1,0 +1,31 @@
+{
+  "api_urls": [
+    "http://127.0.0.1:8080/spliceai/",
+    "http://127.0.0.1:8081/spliceai/",
+    "http://127.0.0.1:8082/spliceai/",
+    "http://127.0.0.1:8083/spliceai/",
+    "http://127.0.0.1:8084/spliceai/",
+    "http://127.0.0.1:8085/spliceai/"
+  ],
+  "cache_entries": 13800,
+  "coordinate_cache_sha256": "cf833940d725fca88e93d94155d75d82b68aa67b82e9858cf036815eab5d2308",
+  "coordinate_variants": 13800,
+  "created_utc": "2026-07-22T09:42:11.986169+00:00",
+  "dataset": "BRCA1/BRCA2 intronic SNV reference-transcript SpliceAI cache",
+  "distance": 50,
+  "mask": 0,
+  "reference_transcripts": {
+    "BRCA1": {
+      "ensembl": "ENST00000357654.9",
+      "refseq": "NM_007294.4"
+    },
+    "BRCA2": {
+      "ensembl": "ENST00000380152.8",
+      "refseq": "NM_000059.4"
+    }
+  },
+  "sha256": "fd7c6151e4b00d99c23c64ba909ecfbb8ed01534c9320863716e4525ebeb85e1",
+  "status_error": 43,
+  "status_ok": 13757,
+  "transcript_policy": "reference_transcript"
+}

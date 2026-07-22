@@ -73,6 +73,15 @@ class VariantTypeTests(unittest.TestCase):
                 p_notation="p.Arg170Gln",
             )
 
+    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    def test_nonsense_protein_notation_without_parentheses_is_normalized(self):
+        request = VariantRequest(
+            gene="BRCA1",
+            c_notation="c.5542C>T",
+            p_notation="p.Gln1848Ter",
+        )
+        self.assertEqual(request.p_notation, "p.(Gln1848Ter)")
+
     def test_inframe_variants_use_normalized_types(self):
         self.assertEqual(infer_variant_type("c.123_125del", "p.(Val41del)"), "inframe_deletion")
         self.assertEqual(infer_variant_type("c.123_125insAAA", "p.(Val41_Gly42insLys)"), "inframe_insertion")
@@ -104,6 +113,13 @@ class VariantTypeTests(unittest.TestCase):
         )
         self.assertEqual(c_notation, "c.6147_6149del")
         self.assertEqual(p_notation, "p.(Val2050del)")
+
+    def test_combined_nonsense_hgvs_without_protein_parentheses_is_normalized(self):
+        c_notation, p_notation = split_combined_hgvs(
+            "c.5542C>T p.Gln1848Ter"
+        )
+        self.assertEqual(c_notation, "c.5542C>T")
+        self.assertEqual(p_notation, "p.(Gln1848Ter)")
 
     def test_exon_cnv_boundaries_are_not_misclassified_as_splice_sites(self):
         self.assertEqual(

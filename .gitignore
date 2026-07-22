@@ -62,3 +62,6 @@ htmlcov/
 # Allow README and docs
 !README.md
 /docs/
+!/docs/
+/docs/*
+!/docs/implementation_and_data_sources.md
