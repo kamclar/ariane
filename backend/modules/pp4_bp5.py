@@ -1,184 +1,136 @@
-# ============================================================
-# PP4/BP5 - Multifactorial likelihood clinical evidence
-#
-# Source: ENIGMA VCEP v1.2, Supplementary Table 7 (ST7)
-# 773 reference set variants with posterior probability from
-# multifactorial likelihood analysis.
-#
-# PP4/BP5 thresholds are based on combined clinical LR,
-# converted from posterior probability using prior = 0.10
-# (global prior probability of pathogenicity per ENIGMA).
-#
-# LR = posterior * (1 - prior) / (prior * (1 - posterior))
-#
-# PP4 (towards pathogenicity):
-#   PP4 Supporting:   LR >= 2.08
-#   PP4 Moderate:     LR >= 4.3
-#   PP4 Strong:       LR >= 18.7
-#   PP4 Very Strong:  LR >= 350
-#
-# BP5 (against pathogenicity):
-#   BP5 Supporting:   LR <= 0.48
-#   BP5 Moderate:     LR <= 0.23
-#   BP5 Strong:       LR <= 0.05
-#   BP5 Very Strong:  LR <= 0.00285
-# ============================================================
-from typing import Optional, Dict
-from pathlib import Path
+"""Automatic PP4/BP5 lookup from the validated local clinical-LR snapshot."""
+
+from __future__ import annotations
+
+import hashlib
 import json
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-ST7_PATH = PROJECT_ROOT / "data" / "st7_reference_set.json"
-
-# point values per Tavtigian 2020
-PP4_POINTS = {
-    "Very Strong": 8,
-    "Strong":      4,
-    "Moderate":    2,
-    "Supporting":  1,
-}
-
-BP5_POINTS = {
-    "Very Strong": -8,
-    "Strong":      -4,
-    "Moderate":    -2,
-    "Supporting":  -1,
-}
-
-PRIOR = 0.10  # global prior probability of pathogenicity
-
-# in-memory cache
-_ST7_DATA = {}
-_ST7_LOADED = False
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
-def _load_st7():
-    global _ST7_DATA, _ST7_LOADED
-    if _ST7_LOADED:
-        return
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.index.json"
+METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.metadata.json"
 
-    if not ST7_PATH.exists():
-        print(f"ST7 reference set not found: {ST7_PATH}")
-        _ST7_LOADED = True
-        return
+PP4_POINTS = {"Very Strong": 8, "Strong": 4, "Moderate": 2, "Supporting": 1}
+BP5_POINTS = {"Very Strong": -8, "Strong": -4, "Moderate": -2, "Supporting": -1}
+PRIOR = 0.10  # retained only for backwards-compatible callers; not used by the snapshot
 
-    with open(ST7_PATH) as f:
-        raw = json.load(f)
+_SNAPSHOT: dict[str, dict[str, Any]] | None = None
+_ALIASES: dict[str, str] | None = None
 
-    for v in raw.get("variants", []):
-        key = f"{v['gene']}:{v['c_notation']}"
-        _ST7_DATA[key] = v
 
-    _ST7_LOADED = True
-    print(f"ST7 reference set loaded: {len(_ST7_DATA)} variants")
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def posterior_to_lr(posterior: float) -> Optional[float]:
-    """Convert posterior probability to likelihood ratio using global prior."""
+    """Legacy utility. Automatic PP4/BP5 uses a direct clinical LR instead."""
     if posterior is None or posterior < 0 or posterior > 1:
         return None
     if posterior == 0:
         return 0.0
     if posterior == 1:
         return float("inf")
-    lr = (posterior * (1 - PRIOR)) / (PRIOR * (1 - posterior))
-    return lr
+    return posterior * (1 - PRIOR) / (PRIOR * (1 - posterior))
 
 
 def lr_to_pp4_strength(lr: float) -> Optional[str]:
-    """Map LR to PP4 strength per ENIGMA v1.2."""
     if lr >= 350:
         return "Very Strong"
-    elif lr >= 18.7:
+    if lr >= 18.7:
         return "Strong"
-    elif lr >= 4.3:
+    if lr >= 4.3:
         return "Moderate"
-    elif lr >= 2.08:
+    if lr >= 2.08:
         return "Supporting"
     return None
 
 
 def lr_to_bp5_strength(lr: float) -> Optional[str]:
-    """Map LR to BP5 strength per ENIGMA v1.2."""
     if lr <= 0.00285:
         return "Very Strong"
-    elif lr <= 0.05:
+    if lr <= 0.05:
         return "Strong"
-    elif lr <= 0.23:
+    if lr <= 0.23:
         return "Moderate"
-    elif lr <= 0.48:
+    if lr <= 0.48:
         return "Supporting"
     return None
 
 
+def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+    """Load and validate the snapshot. Missing or corrupted data is fatal."""
+    global _SNAPSHOT, _ALIASES
+    if _SNAPSHOT is not None and _ALIASES is not None:
+        return _SNAPSHOT, _ALIASES
+    if not SNAPSHOT_PATH.is_file() or not METADATA_PATH.is_file():
+        raise RuntimeError("PP4/BP5 clinical LR snapshot or its metadata is missing")
+
+    metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
+    if metadata.get("status") != "validated_derived_snapshot":
+        raise RuntimeError("PP4/BP5 clinical LR snapshot is not validated")
+    if metadata.get("index_sha256") != _sha256(SNAPSHOT_PATH):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot checksum does not match metadata")
+
+    snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+    if metadata.get("records") != len(snapshot):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot record count does not match metadata")
+
+    aliases: dict[str, str] = {}
+    ambiguous: set[str] = set()
+    for canonical_key, record in snapshot.items():
+        for notation in record.get("input_c_notations", []):
+            alias = f"{record['gene']}:{notation}"
+            previous = aliases.get(alias)
+            if previous and previous != canonical_key:
+                ambiguous.add(alias)
+            else:
+                aliases[alias] = canonical_key
+    for alias in ambiguous:
+        aliases.pop(alias, None)
+    if ambiguous:
+        raise RuntimeError(f"PP4/BP5 clinical LR snapshot has ambiguous aliases: {len(ambiguous)}")
+
+    _SNAPSHOT, _ALIASES = snapshot, aliases
+    return snapshot, aliases
+
+
 def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
-    """
-    Look up variant in ST7 reference set and assign PP4 or BP5
-    based on posterior probability from multifactorial likelihood analysis.
-    """
-    _load_st7()
-
-    key = f"{gene}:{c_notation}"
+    snapshot, aliases = load_pp4_bp5_snapshot()
+    query_key = f"{gene}:{c_notation}"
+    canonical_key = query_key if query_key in snapshot else aliases.get(query_key)
+    entry = snapshot.get(canonical_key) if canonical_key else None
     result = {
-        "applies": False,
-        "code": None,
-        "strength": None,
-        "points": 0,
-        "reason": "",
-        "posterior_probability": None,
-        "likelihood_ratio": None,
+        "applies": False, "code": None, "strength": None, "points": 0,
+        "reason": "", "posterior_probability": None, "likelihood_ratio": None,
+        "source_components": [],
     }
-
-    entry = _ST7_DATA.get(key)
     if entry is None:
-        result["reason"] = f"Not in ST7 reference set"
+        result["reason"] = "Variant is not present in the local PP4/BP5 clinical LR snapshot"
         return result
 
-    posterior = entry.get("posterior_probability")
-    if posterior is None:
-        result["reason"] = f"In ST7 but no posterior probability available"
-        return result
-
-    result["posterior_probability"] = posterior
-    lr = posterior_to_lr(posterior)
+    lr = entry["combined_lr"]
     result["likelihood_ratio"] = lr
-
-    if lr is None:
-        result["reason"] = f"Could not compute LR from posterior {posterior}"
+    result["source_components"] = entry.get("source_components", [])
+    code = entry.get("criterion")
+    if not code:
+        result["reason"] = f"Combined clinical LR={lr:.6g} is not informative for PP4 or BP5"
         return result
 
-    # check PP4 (pathogenic direction)
-    pp4_strength = lr_to_pp4_strength(lr)
-    if pp4_strength:
-        result["applies"] = True
-        result["code"] = "PP4"
-        result["strength"] = pp4_strength
-        result["points"] = PP4_POINTS[pp4_strength]
-        result["reason"] = (
-            f"ST7 multifactorial likelihood: posterior={posterior:.6f}, "
-            f"LR={lr:.1f} - PP4_{pp4_strength} "
-            f"(source: {entry.get('source', 'ENIGMA')})"
-        )
-        return result
-
-    # check BP5 (benign direction)
-    bp5_strength = lr_to_bp5_strength(lr)
-    if bp5_strength:
-        result["applies"] = True
-        result["code"] = "BP5"
-        result["strength"] = bp5_strength
-        result["points"] = BP5_POINTS[bp5_strength]
-        result["reason"] = (
-            f"ST7 multifactorial likelihood: posterior={posterior:.6f}, "
-            f"LR={lr:.4f} - BP5_{bp5_strength} "
-            f"(source: {entry.get('source', 'ENIGMA')})"
-        )
-        return result
-
-    # LR is in the uninformative range (0.48 < LR < 2.08)
+    result.update({
+        "applies": True,
+        "code": code,
+        "strength": entry["strength"],
+        "points": entry["points"],
+    })
+    pmids = sorted({component["pmid"] for component in result["source_components"]})
     result["reason"] = (
-        f"ST7 multifactorial likelihood: posterior={posterior:.6f}, "
-        f"LR={lr:.2f} - uninformative range (0.48 < LR < 2.08), "
-        f"neither PP4 nor BP5 applicable"
+        f"Local ENIGMA Appendix B clinical LR snapshot: combined LR={lr:.6g}; "
+        f"{code} {entry['strength']}; PMID {', '.join(pmids)}"
     )
     return result

@@ -1,0 +1,78 @@
+{
+  "conflicting_canonical_keys": [
+    "BRCA1:c.2998_3003del",
+    "BRCA1:c.3327_3329del",
+    "BRCA1:c.3328_3330del",
+    "BRCA1:c.4358-2del",
+    "BRCA1:c.5017_5019del",
+    "BRCA1:c.5213_5215del",
+    "BRCA2:c.3864_3866del",
+    "BRCA2:c.4933_4935del",
+    "BRCA2:c.5632_5634del",
+    "BRCA2:c.6399_6401del",
+    "BRCA2:c.8249_8251del",
+    "BRCA2:c.8464_8466del",
+    "BRCA2:c.9052_9057del"
+  ],
+  "created_utc": "2026-07-22T16:46:59.049338+00:00",
+  "criteria": {
+    "BP5": 1308,
+    "PP4": 955,
+    "not_informative": 2117
+  },
+  "dataset": "BRCA1/2 Appendix B clinical likelihood-ratio snapshot",
+  "excluded": {
+    "conflicting_canonical_record": 13,
+    "no_appendix_b_lr": 30
+  },
+  "included_appendix_b_sources": {
+    "eastonLRs": {
+      "citation": "Easton et al. 2007",
+      "data_types": [
+        "family_history",
+        "cooccurrence",
+        "segregation",
+        "pathology",
+        "case_control"
+      ],
+      "pmid": "17924331"
+    },
+    "liLRs": {
+      "citation": "Li et al. 2020",
+      "data_types": [
+        "personal_and_family_history"
+      ],
+      "pmid": "31853058"
+    },
+    "parsonsLRs": {
+      "citation": "Parsons et al. 2019",
+      "data_types": [
+        "family_history",
+        "cooccurrence",
+        "segregation",
+        "pathology",
+        "case_control"
+      ],
+      "pmid": "31131967"
+    }
+  },
+  "index_sha256": "5c4ad4cf65ad72ad857a4598a1ff7a856a9121d3aa14bb5185cd5873c8f53377",
+  "records": 4380,
+  "records_by_appendix_b_pmid": {
+    "17924331": 151,
+    "31131967": 1390,
+    "31853058": 3380
+  },
+  "reference_transcripts": {
+    "NM_000059.4": "BRCA2",
+    "NM_007294.4": "BRCA1"
+  },
+  "rows_seen": 4436,
+  "source_description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+  "source_file": "BRCAmfa.hg38.v1.1.bed",
+  "source_sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
+  "source_track_version": "ENIGMA specifications 1.1.0",
+  "source_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
+  "status": "validated_derived_snapshot",
+  "target_rule_version": "ENIGMA BRCA1/2 VCEP 1.2 PP4/BP5 thresholds"
+}

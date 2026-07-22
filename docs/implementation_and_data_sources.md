@@ -146,7 +146,16 @@ Kritéria se odvozují z posterior probability a kombinovaného likelihood ratio
 | PP4 | LR >= 2,08 | LR >= 4,3 | LR >= 18,7 | LR >= 350 |
 | BP5 | LR <= 0,48 | LR <= 0,23 | LR <= 0,05 | LR <= 0,00285 |
 
-PP4 je podporováno ve strukturované manuální revizi. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat. Automatická Module 1 klasifikace PP4 nepřidává.
+PP4 a BP5 se automaticky vyhodnocují z lokálního verzovaného snapshotu variantově specifických klinických LR. Manuální revize zůstává dostupná pro varianty nebo zdroje, které snapshot neobsahuje. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat.
+
+Automatický snapshot je uložen v souborech:
+
+- `data/precomputed/brca_pp4_clinical_lr_snapshot.index.json`,
+- `data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json`.
+
+Snapshot je odvozen z veřejného UCSC ENIGMA `BRCAmfa` tracku verze 1.1.0. Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá pouze variantově specifická data ze zdrojů uvedených v ENIGMA Appendix B, která jsou v tracku samostatně dostupná: Easton et al. 2007, PMID 17924331, Parsons et al. 2019, PMID 31131967, a Li et al. 2020, PMID 31853058. Caputo et al. 2021 je z automatického výpočtu vyřazen, protože není v použitém seznamu Appendix B. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
+
+Metadata obsahují URL a checksum zdroje, checksum indexu, verzi pravidel, počty záznamů a seznam konfliktních normalizovaných indelů. Chybějící metadata, nesprávný checksum, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` obsahuje snapshot LR `6,89647 × 10^45` ze studie Li et al. 2020, což odpovídá PP4 Very Strong.
 
 Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané metodické zdroje:
 
@@ -241,7 +250,7 @@ Chybějící SpliceAI znamená, že BP1 nelze použít.
 
 ## 4. Kritéria vyžadující manuální revizi
 
-Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, PP4, BS2 a BS4. Tyto kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
+Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem klinických LR. Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
 
 Strukturovaná manuální část dále podporuje:
 

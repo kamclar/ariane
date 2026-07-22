@@ -47,11 +47,13 @@ from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402
 from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
 from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
 from backend.lookups.indels import load_indel_snapshot  # noqa: E402
+from backend.modules.pp4_bp5 import load_pp4_bp5_snapshot  # noqa: E402
 from backend.modules.residues import initialize_residue_data  # noqa: E402
 
 _spliceai_data_source._load_precomputed_cache()
 _spliceai_data_source._load_api_cache()
 load_indel_snapshot()
+load_pp4_bp5_snapshot()
 initialize_residue_data()
 
 # ── App setup ──────────────────────────────────────────────────────────────

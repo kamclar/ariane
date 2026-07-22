@@ -225,7 +225,7 @@ def build(source: Path, output: Path, metadata_path: Path, release: str, release
     records = dict(sorted(records.items()))
     types.update(record["variant_type"] for record in records.values())
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(records, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    output.write_bytes((json.dumps(records, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     metadata = {
         "dataset": "Normalized BRCA1/2 small-indel reference snapshot",
         "created_utc": datetime.now(timezone.utc).isoformat(),
@@ -245,7 +245,7 @@ def build(source: Path, output: Path, metadata_path: Path, release: str, release
         "ambiguous_alias_examples": dict(list(sorted(ambiguous_aliases.items()))[:20]),
         "index_sha256": sha256(output),
     }
-    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    metadata_path.write_bytes((json.dumps(metadata, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     return metadata
 
 

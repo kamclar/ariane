@@ -1,5 +1,8 @@
 import unittest
 import asyncio
+import json
+import hashlib
+from pathlib import Path
 from unittest.mock import patch
 
 from fastapi import HTTPException
@@ -12,6 +15,42 @@ from backend.modules.reference_validation import validate_reference_allele
 
 
 class PrecomputedSnapshotTests(unittest.TestCase):
+    def test_pp4_snapshot_metadata_matches_index(self):
+        root = Path(__file__).resolve().parents[1]
+        index_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.index.json"
+        metadata_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json"
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+        records = json.loads(index_path.read_text(encoding="utf-8"))
+        self.assertEqual(metadata["status"], "validated_derived_snapshot")
+        self.assertEqual(metadata["records"], len(records))
+        self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
+
+    def test_pp4_snapshot_resolves_c5266_alias_as_very_strong(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        canonical = evaluate_pp4_bp5("BRCA1", "c.5266dup")
+        alias = evaluate_pp4_bp5("BRCA1", "c.5266dupC")
+        self.assertTrue(canonical["applies"])
+        self.assertEqual(canonical["code"], "PP4")
+        self.assertEqual(canonical["strength"], "Very Strong")
+        self.assertEqual(canonical["points"], 8)
+        self.assertAlmostEqual(canonical["likelihood_ratio"], 6.89647e45)
+        self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
+        self.assertEqual({item["pmid"] for item in canonical["source_components"]}, {"31853058"})
+
+    def test_pp4_snapshot_missing_metadata_fails_closed(self):
+        from backend.modules import pp4_bp5
+
+        original_snapshot, original_aliases = pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES
+        try:
+            pp4_bp5._SNAPSHOT = None
+            pp4_bp5._ALIASES = None
+            with patch.object(pp4_bp5, "METADATA_PATH", Path("missing-pp4-metadata.json")):
+                with self.assertRaisesRegex(RuntimeError, "metadata is missing"):
+                    pp4_bp5.load_pp4_bp5_snapshot()
+        finally:
+            pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES = original_snapshot, original_aliases
+
     def test_normalized_indel_snapshot_resolves_alias_and_protein(self):
         from backend.lookups.indels import lookup_indel_snapshot
 
@@ -57,6 +96,23 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_c5266_automatically_receives_pp4_very_strong(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
+        ), patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.5266dup", "p.(Gln1756ProfsTer74)")
+            )
+
+        pp4 = next(criterion for criterion in result.criteria if criterion.name == "PP4")
+        self.assertTrue(pp4.applies)
+        self.assertEqual(pp4.strength, "Very Strong")
+        self.assertEqual(pp4.points, 8)
+
     def test_general_indel_snapshot_rejects_random_protein_notation(self):
         from backend.main import _classify_one
 

@@ -11,13 +11,13 @@
   },
   "ambiguous_aliases": 2,
   "ambiguous_conflicts": 0,
-  "created_utc": "2026-07-22T15:25:10.819211+00:00",
+  "created_utc": "2026-07-22T16:47:13.445945+00:00",
   "dataset": "Normalized BRCA1/2 small-indel reference snapshot",
   "excluded": {
     "ambiguous_alias_removed": 2,
     "not_small_indel": 60768
   },
-  "index_sha256": "1bc596d0983cbd63d094b7784e9793af53d82edcbd0c49589678c1cb39c638c3",
+  "index_sha256": "f9a92f5e416b6b1a7af3e9a6b433d6e96a9e5b54a8e0a14161177eba8f75e256",
   "records": 16511,
   "reference_transcripts": {
     "BRCA1": "NM_007294.4",
