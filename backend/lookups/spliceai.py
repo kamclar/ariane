@@ -27,6 +27,7 @@ import os
 import shutil
 import subprocess
 import hashlib
+import tempfile
 from backend.data_health import clear_issue, register_issue
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
@@ -44,8 +45,24 @@ PROJECT_ROOT  = choose_project_root()
 SPLICEAI_DIR  = PROJECT_ROOT / "data" / "spliceai"
 SPLICEAI_DIR.mkdir(parents=True, exist_ok=True)
 
-# Local JSON cache - persists across Colab sessions via Drive
-SPLICEAI_API_CACHE_PATH = SPLICEAI_DIR / "spliceai_api_cache.json"
+def choose_runtime_cache_dir() -> Path:
+    """Choose writable runtime storage without mixing it with snapshots."""
+    configured = os.environ.get("ARIANE_RUNTIME_CACHE_DIR")
+    if configured:
+        return Path(configured)
+    railway_volume = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    if railway_volume:
+        return Path(railway_volume) / "ariane-runtime-cache"
+    # Local-development compatibility. Production deployments should provide
+    # ARIANE_RUNTIME_CACHE_DIR or attach a Railway volume.
+    return SPLICEAI_DIR
+
+
+RUNTIME_CACHE_DIR = choose_runtime_cache_dir()
+RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+# Mutable API results are separate from immutable, versioned snapshots.
+SPLICEAI_API_CACHE_PATH = RUNTIME_CACHE_DIR / "spliceai_api_cache.json"
 SPLICEAI_PRECOMPUTED_CACHE_PATH = Path(os.environ.get(
     "SPLICEAI_PRECOMPUTED_CACHE_PATH",
     SPLICEAI_DIR / "spliceai_brca_snv_reference_cache.json",
@@ -185,18 +202,40 @@ def _load_precomputed_cache() -> dict:
     return SPLICEAI_PRECOMPUTED_CACHE
 
 
-def _save_api_cache(cache: dict) -> None:
-    """Persist API cache to Drive."""
+def _save_api_cache(cache: dict) -> bool:
+    """Atomically persist the API cache and report whether it succeeded."""
+    temporary_path = None
     try:
-        with open(SPLICEAI_API_CACHE_PATH, "w") as f:
-            _json.dump(cache, f, indent=2)
+        RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=RUNTIME_CACHE_DIR,
+            prefix="spliceai_api_cache.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temporary_path = Path(handle.name)
+            _json.dump(cache, handle, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, SPLICEAI_API_CACHE_PATH)
         clear_issue("SpliceAI API cache")
+        return True
     except Exception as e:
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                pass
         print(f"Warning: could not save SpliceAI cache: {e}")
         register_issue(
             "SpliceAI API cache",
-            f"could not save {SPLICEAI_API_CACHE_PATH}: {type(e).__name__}: {e}",
+            f"score was obtained and used, but the runtime cache could not be saved to "
+            f"{SPLICEAI_API_CACHE_PATH}; this request is unaffected, but the score may need "
+            f"to be fetched again after restart: {type(e).__name__}: {e}",
         )
+        return False
 
 
 def _cache_key(gene: str, c_notation: str) -> str:
@@ -472,12 +511,16 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         "max_any_transcript": selected.get("max_any_transcript"),
         "n_transcript_scores": selected.get("n_transcript_scores"),
     }
-    _save_api_cache(api_cache)
+    cache_saved = _save_api_cache(api_cache)
 
     SPLICEAI_STATUS_CACHE[variant_key] = {
         "status": "ok",
         "score":  score,
-        "reason": f"Queried from {SPLICEAI_API_SOURCE} and cached to Drive",
+        "reason": (
+            f"Queried from {SPLICEAI_API_SOURCE} and persisted to the runtime cache"
+            if cache_saved
+            else f"Queried from {SPLICEAI_API_SOURCE}; available in memory but not persisted"
+        ),
         "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
         "selected_transcript": selected.get("selected_transcript"),
         "reference_transcript_score": selected.get("reference_transcript_score"),

@@ -103,6 +103,53 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
 
 
 class DataHealthTests(unittest.TestCase):
+    def test_spliceai_runtime_cache_prefers_explicit_directory(self):
+        from backend.lookups import spliceai
+
+        with patch.dict(
+            "os.environ",
+            {
+                "ARIANE_RUNTIME_CACHE_DIR": "/persistent/ariane",
+                "RAILWAY_VOLUME_MOUNT_PATH": "/railway-volume",
+            },
+        ):
+            self.assertEqual(
+                spliceai.choose_runtime_cache_dir(), Path("/persistent/ariane")
+            )
+
+    def test_spliceai_runtime_cache_uses_railway_volume(self):
+        from backend.lookups import spliceai
+
+        with patch.dict(
+            "os.environ",
+            {"RAILWAY_VOLUME_MOUNT_PATH": "/railway-volume"},
+            clear=True,
+        ):
+            self.assertEqual(
+                spliceai.choose_runtime_cache_dir(),
+                Path("/railway-volume/ariane-runtime-cache"),
+            )
+
+    def test_spliceai_cache_write_failure_explains_current_score_is_usable(self):
+        from backend.lookups import spliceai
+
+        clear_issue("SpliceAI API cache")
+        with patch.object(
+            spliceai.tempfile,
+            "NamedTemporaryFile",
+            side_effect=OSError(30, "Read-only file system"),
+        ):
+            saved = spliceai._save_api_cache({"example": {"score": 0.1}})
+        self.assertFalse(saved)
+        warning = next(
+            item for item in get_user_warnings() if "SpliceAI API cache" in item
+        )
+        self.assertIn("score was obtained and used", warning)
+        self.assertIn("this request is unaffected", warning)
+        self.assertTrue(warning.startswith("Runtime cache persistence warning:"))
+        self.assertNotIn("Data source degraded", warning)
+        clear_issue("SpliceAI API cache")
+
     def test_registered_degradation_is_visible_to_user(self):
         clear_issue("test cache")
         register_issue("test cache", "checksum mismatch")

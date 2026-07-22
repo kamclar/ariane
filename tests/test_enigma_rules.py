@@ -341,6 +341,17 @@ class SpliceTests(unittest.TestCase):
 
 
 class ClassifierIntegrationTests(unittest.TestCase):
+    def test_frameshift_does_not_warn_about_inapplicable_bayesdel(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="frameshift",
+            p_notation="p.(Gln1756ProfsTer74)",
+            c_notation="c.5266dup",
+            spliceai_score=0.0,
+            bayesdel_score=None,
+        )
+        self.assertFalse(any("BayesDel" in warning for warning in result["warnings"]))
+
     def test_enigma_pathogenic_combinations_use_correct_strength_counts(self):
         very_strong_plus_one_moderate = {
             "PVS1": {"points": 8, "strength": "Very Strong"},

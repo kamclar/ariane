@@ -44,7 +44,11 @@ def get_data_issues() -> list[dict[str, str]]:
 
 
 def get_user_warnings() -> list[str]:
-    return [
-        f"Data source degraded: {issue['component']}: {issue['reason']}"
-        for issue in get_data_issues()
-    ]
+    warnings = []
+    for issue in get_data_issues():
+        if issue["reason"].startswith("score was obtained and used"):
+            prefix = "Runtime cache persistence warning"
+        else:
+            prefix = "Data source degraded"
+        warnings.append(f"{prefix}: {issue['component']}: {issue['reason']}")
+    return warnings

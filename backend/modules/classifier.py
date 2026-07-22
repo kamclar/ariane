@@ -388,7 +388,11 @@ def evaluate_variant(
             f"SpliceAI not available for {gene} {c_notation} - "
             "benign criteria BP1/BP4/BP7 require confirmed low score"
         )
-    if bayesdel_score is None:
+    bayesdel_applicable_types = {
+        "missense",
+        "inframe_deletion", "inframe_insertion", "inframe_delins", "delins",
+    }
+    if bayesdel_score is None and variant_type.lower() in bayesdel_applicable_types:
         results["warnings"].append(
             f"BayesDel_noAF not available for {gene} {c_notation}"
         )

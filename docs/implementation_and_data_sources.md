@@ -409,6 +409,15 @@ Mapa obsahuje 13 800 intronických SNV v okně 50 bp od hranic kódujících exo
 
 SpliceAI výsledky se ukládají do:
 
+- verzované předpočítané snapshoty v `data/spliceai/`, které runtime pouze čte,
+- dynamická API cache v `${ARIANE_RUNTIME_CACHE_DIR}/spliceai_api_cache.json`,
+- na Railway automaticky v `${RAILWAY_VOLUME_MOUNT_PATH}/ariane-runtime-cache/spliceai_api_cache.json`.
+
+Zápis dynamické cache je atomický. Bez nakonfigurovaného runtime adresáře nebo
+Railway volume se při lokálním vývoji používá původní `data/spliceai/`.
+
+Intronický předpočítaný snapshot:
+
 `data/spliceai/spliceai_brca_intronic_snv_reference_cache.json`
 
 Cache je použitelná pouze s kompletními metadaty a úspěšnou kontrolou počtu záznamů a checksumu. Rozpracovaná cache se nenačte jako platný zdroj.

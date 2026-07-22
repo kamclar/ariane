@@ -33,6 +33,12 @@ uvicorn backend.main:app --reload --port 8000
 railway up
 ```
 
+Attach a Railway Volume to the service for persistent runtime lookup caches.
+The application automatically uses `RAILWAY_VOLUME_MOUNT_PATH` and stores its
+mutable files below `ariane-runtime-cache/`. Outside Railway, set
+`ARIANE_RUNTIME_CACHE_DIR` to a writable persistent directory. Precomputed
+snapshots remain in the repository and are never modified at runtime.
+
 ## Project structure
 
 ```
