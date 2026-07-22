@@ -318,20 +318,61 @@
                                 </div>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PP4'">
-                                    <label>Combined clinical LR
-                                        <input type="number" min="0" step="any" x-model="item.evidence.combined_clinical_lr">
+                                    <label>Reported value
+                                        <input type="number" min="0" step="any" x-model="item.evidence.clinical_lr_value"
+                                            placeholder="e.g. 45.84">
                                     </label>
-                                    <label>Primary source or citation
+                                    <label>Reported scale
+                                        <select x-model="item.evidence.clinical_lr_scale">
+                                            <option value="lr">LR</option>
+                                            <option value="log10_lr">log10(LR), e.g. Li LLR in CANVarUK</option>
+                                            <option value="acmg_points">ACMG evidence points</option>
+                                        </select>
+                                    </label>
+                                    <label>Source review status
+                                        <select x-model="item.evidence.source_review_status">
+                                            <option value="appendix_b">ENIGMA Appendix B source</option>
+                                            <option value="other_reviewed">Other reviewed source</option>
+                                            <option value="unreviewed">Unreviewed source, audit only</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status === 'appendix_b'">Appendix B publication
+                                        <select x-model="item.evidence.source_pmid">
+                                            <option value="">Select publication</option>
+                                            <template x-for="source in (manualDefinition('PP4')?.appendix_b_sources || [])" :key="source.pmid">
+                                                <option :value="source.pmid" x-text="`${source.citation}, PMID:${source.pmid}`"></option>
+                                            </template>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status !== 'appendix_b'">Primary source or citation
                                         <input type="text" x-model="item.evidence.source_citation"
-                                            placeholder="e.g. CANVarUK record and PMID(s)">
+                                            placeholder="Publication, PMID or stable dataset identifier">
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status === 'other_reviewed'">Source reviewed by
+                                        <input type="text" x-model="item.evidence.source_reviewed_by"
+                                            placeholder="Reviewer name">
                                     </label>
                                 </div>
+
+                                <p class="field-hint" x-show="item.code === 'PP4'">
+                                    Select the scale exactly as reported. Do not enter a log10 likelihood ratio as an ordinary LR.
+                                </p>
 
                                 <label class="full-width-label" x-show="item.code === 'PP4'">
                                     Included clinical data and independence review
                                     <textarea rows="3" x-model="item.evidence.clinical_data_summary"
                                         placeholder="Describe segregation, co-occurrence, family history, tumour pathology and/or case-control inputs, and whether overlapping observations were checked."></textarea>
                                 </label>
+
+                                <label class="full-width-label" x-show="item.code === 'PP4' && item.evidence.source_review_status === 'other_reviewed'">
+                                    Methodological review rationale
+                                    <textarea rows="3" x-model="item.evidence.source_review_rationale"
+                                        placeholder="Explain why the study provides a variant-specific, clinically calibrated LR compatible with ENIGMA PP4 and how overlap or double counting was assessed."></textarea>
+                                </label>
+
+                                <p class="curation-warning" x-show="item.code === 'PP4' && item.evidence.source_review_status === 'unreviewed'">
+                                    This source will be retained in the audit record but cannot add PP4 evidence points.
+                                </p>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
                                     <label>Assay scope

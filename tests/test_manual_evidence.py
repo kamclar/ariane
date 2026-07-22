@@ -53,7 +53,8 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         def evidence(lr):
             return {
                 "combined_clinical_lr": lr,
-                "source_citation": "CANVarUK; PMID:31853058",
+                "source_review_status": "appendix_b",
+                "source_pmid": "31853058",
                 "clinical_data_summary": "Family history and case-control data; overlap reviewed.",
             }
 
@@ -62,8 +63,51 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         self.assertEqual(suggest_strength("PP4", evidence(18.7)), "Strong")
         self.assertEqual(suggest_strength("PP4", evidence(350)), "Very Strong")
         incomplete = evidence(350)
-        incomplete["source_citation"] = ""
+        incomplete["source_pmid"] = "99999999"
         self.assertIsNone(suggest_strength("PP4", incomplete))
+
+    def test_pp4_accepts_canvar_log10_lr_and_acmg_point_scales(self):
+        common = {
+            "source_review_status": "appendix_b",
+            "source_pmid": "31853058",
+            "clinical_data_summary": "Personal and family history model; one published study.",
+        }
+        self.assertEqual(
+            suggest_strength("PP4", {
+                **common,
+                "clinical_lr_value": 45.84,
+                "clinical_lr_scale": "log10_lr",
+            }),
+            "Very Strong",
+        )
+        self.assertEqual(suggest_strength("PP4", {
+            **common,
+            "clinical_lr_value": 8,
+            "clinical_lr_scale": "acmg_points",
+        }), "Very Strong")
+        self.assertEqual(suggest_strength("PP4", {
+            **common,
+            "clinical_lr_value": 350,
+            "clinical_lr_scale": "lr",
+        }), "Very Strong")
+
+    def test_pp4_other_source_requires_review_and_unreviewed_does_not_score(self):
+        common = {
+            "clinical_lr_value": 350,
+            "clinical_lr_scale": "lr",
+            "source_citation": "PMID:99999999",
+            "clinical_data_summary": "Variant-specific clinical LR; overlap assessed.",
+        }
+        self.assertIsNone(suggest_strength("PP4", {
+            **common,
+            "source_review_status": "unreviewed",
+        }))
+        self.assertEqual(suggest_strength("PP4", {
+            **common,
+            "source_review_status": "other_reviewed",
+            "source_reviewed_by": "Expert reviewer",
+            "source_review_rationale": "Compatible multifactorial model and independent cohort.",
+        }), "Very Strong")
 
     def test_bs4_likelihood_ratio_thresholds(self):
         self.assertEqual(
@@ -139,6 +183,25 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
 
 
 class ManualEvidenceClassificationTests(unittest.TestCase):
+    def test_pp4_unreviewed_source_is_audited_without_points(self):
+        result = evaluate_manual_evidence(
+            [],
+            [{
+                "code": "PP4",
+                "enabled": True,
+                "evidence": {
+                    "clinical_lr_value": 350,
+                    "clinical_lr_scale": "lr",
+                    "source_review_status": "unreviewed",
+                    "source_citation": "PMID:99999999",
+                    "clinical_data_summary": "Candidate clinical LR pending review.",
+                },
+            }],
+        )
+        criterion = result["manual_criteria"][0]
+        self.assertFalse(criterion["applies"])
+        self.assertEqual(criterion["points"], 0)
+
     def test_pp4_adds_strength_from_combined_clinical_lr(self):
         result = evaluate_manual_evidence(
             [],
@@ -147,7 +210,8 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 "enabled": True,
                 "evidence": {
                     "combined_clinical_lr": 350,
-                    "source_citation": "CANVarUK; PMID:31853058",
+                    "source_review_status": "appendix_b",
+                    "source_pmid": "31853058",
                     "clinical_data_summary": "Variant-specific combined clinical evidence; overlap reviewed.",
                 },
                 "references": ["PMID:31853058"],
@@ -159,7 +223,7 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
         self.assertEqual(criterion["points"], 8)
 
     def test_pp4_cannot_be_enabled_without_provenance(self):
-        with self.assertRaisesRegex(ValueError, "source citation"):
+        with self.assertRaisesRegex(ValueError, "recorded source"):
             evaluate_manual_evidence(
                 [],
                 [{

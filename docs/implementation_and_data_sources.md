@@ -146,7 +146,27 @@ Kritéria se odvozují z posterior probability a kombinovaného likelihood ratio
 | PP4 | LR >= 2,08 | LR >= 4,3 | LR >= 18,7 | LR >= 350 |
 | BP5 | LR <= 0,48 | LR <= 0,23 | LR <= 0,05 | LR <= 0,00285 |
 
-PP4 je podporováno ve strukturované manuální revizi. Reviewer zadá variantově specifický combined clinical LR, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. ARIANE určí sílu výhradně podle uvedených prahů. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat. Automatická Module 1 klasifikace PP4 nepřidává.
+PP4 je podporováno ve strukturované manuální revizi. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat. Automatická Module 1 klasifikace PP4 nepřidává.
+
+Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané metodické zdroje:
+
+| Zdroj | PMID |
+| --- | --- |
+| Goldgar et al. | 15290653 |
+| Thompson et al. | 12900794 |
+| Easton et al. | 17924331 |
+| Spurdle et al. | 25857409 |
+| de la Hoya et al. | 27008870 |
+| Parsons et al. | 31131967 |
+| Li et al. | 31853058 |
+
+Status zdroje se zpracovává fail-closed:
+
+- `ENIGMA Appendix B source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
+- `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
+- `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 se neaplikuje a nepřidají se body.
+
+Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sekundární databáze, například CANVarUK, může sloužit k nalezení a zobrazení hodnoty, ale nenahrazuje citaci primárního zdroje. Při použití více klinických datových bodů je nutné zkontrolovat překryv kohort a zabránit dvojímu započtení stejné evidence pod PP4, PP1 nebo PS4.
 
 ### 3.5 PS1 na proteinové úrovni
 

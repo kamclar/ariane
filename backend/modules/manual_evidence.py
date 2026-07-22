@@ -1,11 +1,23 @@
 """Manual ENIGMA evidence review and amended working classification."""
 
+import math
+
 from typing import Any, Dict, List, Optional
 
 from backend.modules.classifier import classify_by_enigma_combination
 
 
 CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
+
+APPENDIX_B_PP4_SOURCES = {
+    "15290653": "Goldgar et al. 2004",
+    "12900794": "Thompson et al. 2005",
+    "17924331": "Easton et al. 2007",
+    "25857409": "Spurdle et al. 2014",
+    "27008870": "de la Hoya et al. 2016",
+    "31131967": "Parsons et al. 2019",
+    "31853058": "Li et al. 2020",
+}
 
 STRENGTH_POINTS = {
     "Very Strong": 8,
@@ -54,6 +66,10 @@ MANUAL_CRITERIA = {
         "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PP4, Specifications Table 7 and Appendix B",
+        "appendix_b_sources": [
+            {"pmid": pmid, "citation": citation}
+            for pmid, citation in APPENDIX_B_PP4_SOURCES.items()
+        ],
     },
     "BS2": {
         "direction": "benign",
@@ -178,22 +194,65 @@ def _number(evidence: Dict[str, Any], key: str) -> Optional[float]:
         return None
 
 
+def _pp4_value_and_scale(evidence: Dict[str, Any]) -> tuple[Optional[float], str]:
+    """Read the current PP4 input while retaining legacy LR audit records."""
+    if evidence.get("clinical_lr_value") not in (None, ""):
+        return _number(evidence, "clinical_lr_value"), str(
+            evidence.get("clinical_lr_scale") or "lr"
+        ).strip().lower()
+    return _number(evidence, "combined_clinical_lr"), "lr"
+
+
+def _pp4_strength(evidence: Dict[str, Any]) -> Optional[str]:
+    value, scale = _pp4_value_and_scale(evidence)
+    if value is None or value < 0 or scale not in {"lr", "log10_lr", "acmg_points"}:
+        return None
+    thresholds = {
+        "lr": (2.08, 4.3, 18.7, 350.0),
+        "log10_lr": tuple(math.log10(value) for value in (2.08, 4.3, 18.7, 350.0)),
+        "acmg_points": (1.0, 2.0, 4.0, 8.0),
+    }[scale]
+    supporting, moderate, strong, very_strong = thresholds
+    if value >= very_strong:
+        return "Very Strong"
+    if value >= strong:
+        return "Strong"
+    if value >= moderate:
+        return "Moderate"
+    if value >= supporting:
+        return "Supporting"
+    return None
+
+
+def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
+    status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
+    if status == "appendix_b":
+        return str(evidence.get("source_pmid") or "").strip() in APPENDIX_B_PP4_SOURCES
+    if status == "other_reviewed":
+        return all(
+            bool((evidence.get(field) or "").strip())
+            for field in ("source_citation", "source_reviewed_by", "source_review_rationale")
+        )
+    return False
+
+
+def _pp4_source_is_recorded(evidence: Dict[str, Any]) -> bool:
+    status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
+    if status == "appendix_b":
+        return str(evidence.get("source_pmid") or "").strip() in APPENDIX_B_PP4_SOURCES
+    if status == "other_reviewed":
+        return _pp4_source_is_reviewed(evidence)
+    if status == "unreviewed":
+        return bool((evidence.get("source_citation") or "").strip())
+    return False
+
+
 def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
     if code == "PP4":
-        likelihood_ratio = _number(evidence, "combined_clinical_lr")
-        source = (evidence.get("source_citation") or "").strip()
         data_summary = (evidence.get("clinical_data_summary") or "").strip()
-        if likelihood_ratio is None or likelihood_ratio < 0 or not source or not data_summary:
+        if not data_summary or not _pp4_source_is_reviewed(evidence):
             return None
-        if likelihood_ratio >= 350:
-            return "Very Strong"
-        if likelihood_ratio >= 18.7:
-            return "Strong"
-        if likelihood_ratio >= 4.3:
-            return "Moderate"
-        if likelihood_ratio >= 2.08:
-            return "Supporting"
-        return None
+        return _pp4_strength(evidence)
 
     if code in {"PVS1_RNA", "BP7_RNA"}:
         assay_scope = evidence.get("assay_scope")
@@ -346,14 +405,21 @@ def evaluate_manual_evidence(
         suggested = suggest_strength(code, item.get("evidence", {}))
         override = item.get("override_strength") or None
         evidence = item.get("evidence", {})
+        pp4_value, pp4_scale = _pp4_value_and_scale(evidence)
+        pp4_source_status = str(
+            evidence.get("source_review_status") or "unreviewed"
+        ).strip().lower()
+        pp4_source_recorded = _pp4_source_is_recorded(evidence)
         pp4_complete = (
-            _number(evidence, "combined_clinical_lr") is not None
-            and _number(evidence, "combined_clinical_lr") >= 0
-            and bool((evidence.get("source_citation") or "").strip())
+            pp4_value is not None
+            and pp4_value >= 0
+            and pp4_scale in {"lr", "log10_lr", "acmg_points"}
+            and pp4_source_status in {"appendix_b", "other_reviewed", "unreviewed"}
+            and pp4_source_recorded
             and bool((evidence.get("clinical_data_summary") or "").strip())
         )
         if code == "PP4" and item.get("enabled") and not pp4_complete:
-            raise ValueError("PP4 requires combined clinical LR, source citation, and clinical data summary")
+            raise ValueError("PP4 requires a clinical LR value and scale, recorded source, and clinical data summary")
         if code in STRUCTURED_CURATED_CODES - {"PP4"} and item.get("enabled") and not suggested:
             raise ValueError(
                 f"{code} requires a complete structured curated evidence record"

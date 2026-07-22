@@ -56,7 +56,10 @@ function ariane() {
             this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"].map(code => ({
                 code,
                 enabled: false,
-                evidence: {},
+                evidence: code === "PP4" ? {
+                    clinical_lr_scale: "lr",
+                    source_review_status: "appendix_b",
+                } : {},
                 override_strength: "",
                 notes: "",
                 references: "",
@@ -146,15 +149,33 @@ function ariane() {
         suggestedManualStrength(item) {
             const evidence = item.evidence || {};
             if (item.code === "PP4") {
-                const lr = this.numberOrNull(evidence.combined_clinical_lr);
-                const complete = lr !== null && lr >= 0
+                const value = this.numberOrNull(evidence.clinical_lr_value);
+                const scale = evidence.clinical_lr_scale || "lr";
+                const status = evidence.source_review_status || "unreviewed";
+                const appendixPmids = (this.manualDefinition("PP4")?.appendix_b_sources || [])
+                    .map(source => source.pmid);
+                const sourceReviewed = (
+                    status === "appendix_b" && appendixPmids.includes(evidence.source_pmid)
+                ) || (
+                    status === "other_reviewed"
                     && Boolean((evidence.source_citation || "").trim())
+                    && Boolean((evidence.source_reviewed_by || "").trim())
+                    && Boolean((evidence.source_review_rationale || "").trim())
+                );
+                const complete = value !== null && value >= 0
+                    && ["lr", "log10_lr", "acmg_points"].includes(scale)
+                    && sourceReviewed
                     && Boolean((evidence.clinical_data_summary || "").trim());
                 if (!complete) return "";
-                if (lr >= 350) return "Very Strong";
-                if (lr >= 18.7) return "Strong";
-                if (lr >= 4.3) return "Moderate";
-                if (lr >= 2.08) return "Supporting";
+                const thresholds = {
+                    lr: [2.08, 4.3, 18.7, 350],
+                    log10_lr: [Math.log10(2.08), Math.log10(4.3), Math.log10(18.7), Math.log10(350)],
+                    acmg_points: [1, 2, 4, 8],
+                }[scale];
+                if (value >= thresholds[3]) return "Very Strong";
+                if (value >= thresholds[2]) return "Strong";
+                if (value >= thresholds[1]) return "Moderate";
+                if (value >= thresholds[0]) return "Supporting";
                 return "";
             }
             if (item.code === "PVS1_RNA") {
