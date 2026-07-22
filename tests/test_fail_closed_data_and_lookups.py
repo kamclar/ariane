@@ -113,6 +113,30 @@ class DataHealthTests(unittest.TestCase):
         self.assertTrue(any("test cache" in warning and "checksum mismatch" in warning for warning in get_user_warnings()))
         clear_issue("test cache")
 
+    def test_degradation_messages_hide_linux_deployment_path(self):
+        clear_issue("test cache")
+        register_issue(
+            "test cache",
+            "metadata is missing: /home/ubuntu/ariane/data/spliceai/cache.metadata.json",
+        )
+        issue = next(item for item in get_data_issues() if item["component"] == "test cache")
+        self.assertEqual(
+            issue["reason"],
+            "metadata is missing: …ariane/data/spliceai/cache.metadata.json",
+        )
+        self.assertNotIn("/home/ubuntu", get_user_warnings()[0])
+        clear_issue("test cache")
+
+    def test_degradation_messages_hide_windows_deployment_path(self):
+        clear_issue("test cache")
+        register_issue(
+            "test cache",
+            r"cache is missing: F:\UOCHB\Enigma\ARIANE_app\ariane\data\cache.json",
+        )
+        issue = next(item for item in get_data_issues() if item["component"] == "test cache")
+        self.assertEqual(issue["reason"], "cache is missing: …ariane/data/cache.json")
+        clear_issue("test cache")
+
     def test_incomplete_intronic_spliceai_cache_is_not_loaded(self):
         from backend.lookups import spliceai
 
