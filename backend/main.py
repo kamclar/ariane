@@ -269,6 +269,33 @@ async def _classify_one(
     from backend.modules.residues import check_important_residue
     from backend.modules.classifier import evaluate_variant as _evaluate
     from backend.modules.external import external_comparison
+    from backend.lookups.precomputed import lookup_classification_snapshot
+    from backend.modules.reference_validation import validate_reference_allele
+
+    # Reject a wrong stated reference before coordinates, external lookups, or
+    # evidence evaluation. This is deliberately fail-closed.
+    try:
+        validate_reference_allele(gene, c_notation)
+    except (ValueError, RuntimeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    # The versioned coding-SNV snapshot carries the reference-transcript
+    # protein consequence. Use it when the optional p. field was omitted and
+    # reject contradictory user input instead of silently choosing one.
+    snapshot = lookup_classification_snapshot(gene, c_notation)
+    snapshot_p = ""
+    if snapshot:
+        snapshot_p = str(snapshot.get("record", {}).get("p_notation") or "")
+    if not p_notation and snapshot_p:
+        p_notation = snapshot_p
+    elif p_notation and snapshot_p and p_notation != snapshot_p:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Protein consequence mismatch for {gene} {c_notation}: "
+                f"the configured reference transcript gives {snapshot_p}, not {p_notation}."
+            ),
+        )
 
     # Step 1: resolve coordinates
     resolved = {}
