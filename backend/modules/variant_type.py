@@ -12,16 +12,20 @@ def infer_variant_type(c_notation: str, p_notation: str) -> str:
     if "*" in c:
         return "3utr"
 
+    # Exon-level CNV HGVS contains intronic boundary markers (+1/-1), but
+    # these markers describe the duplicated/deleted interval. Detect the
+    # complete CNV notation before the generic splice-site check below.
+    if "(" in c and "del" in c:
+        return "exon_deletion"
+    if "(" in c and "dup" in c:
+        return "exon_duplication"
+
     if "+" in c or "-" in c:
         match = re.search(r"[+-](\d+)", c)
         if match and int(match.group(1)) <= 2:
             return "splice_site"
         return "intronic"
 
-    if "(" in c and "del" in c:
-        return "exon_deletion"
-    if "(" in c and "dup" in c:
-        return "exon_duplication"
     if "fs" in p or "fster" in p:
         return "frameshift"
     if "ter" in p and "fs" not in p:

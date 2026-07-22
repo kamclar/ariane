@@ -19,8 +19,19 @@ class VariantRequest(BaseModel):
     def normalize_hgvs_fields(cls, data):
         if not isinstance(data, dict):
             return data
+        gene = str(data.get("gene", "")).strip().upper()
+        raw_c = str(data.get("c_notation", "")).strip()
+        transcript_match = re.match(r"^(NM_\d+\.\d+):(c\..+)$", raw_c, re.IGNORECASE)
+        if transcript_match:
+            transcript = transcript_match.group(1).upper()
+            expected = {"BRCA1": "NM_007294.4", "BRCA2": "NM_000059.4"}.get(gene)
+            if expected and transcript != expected:
+                raise ValueError(
+                    f"Transcript {transcript} does not match {gene}; expected {expected}"
+                )
+            raw_c = transcript_match.group(2)
         c_notation, p_notation = split_combined_hgvs(
-            data.get("c_notation", ""),
+            raw_c,
             data.get("p_notation"),
         )
         return {**data, "c_notation": c_notation, "p_notation": p_notation or None}

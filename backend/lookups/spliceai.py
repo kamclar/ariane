@@ -26,6 +26,8 @@ import json as _json
 import os
 import shutil
 import subprocess
+import hashlib
+from backend.data_health import clear_issue, register_issue
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
 
@@ -34,17 +36,9 @@ def choose_project_root() -> Path:
     env_root = os.environ.get("BRCA_ACMG_PROJECT_ROOT")
     if env_root:
         return Path(env_root)
-    candidates = [
-        Path("/content/drive/MyDrive/Enigma"),
-        Path("/content/drive/MyDrive/BRCA_ACMG"),
-        Path("."),
-    ]
-    for root in candidates:
-        if (root / "data").exists():
-            return root
-    if Path("/content/drive/MyDrive").exists():
-        return Path("/content/drive/MyDrive/Enigma")
-    return Path(".")
+    # The repository root is stable regardless of the process working directory.
+    # Deployments with external data must opt in through BRCA_ACMG_PROJECT_ROOT.
+    return Path(__file__).resolve().parents[2]
 
 PROJECT_ROOT  = choose_project_root()
 SPLICEAI_DIR  = PROJECT_ROOT / "data" / "spliceai"
@@ -56,6 +50,7 @@ SPLICEAI_PRECOMPUTED_CACHE_PATH = Path(os.environ.get(
     "SPLICEAI_PRECOMPUTED_CACHE_PATH",
     SPLICEAI_DIR / "spliceai_brca_snv_reference_cache.json",
 ))
+SPLICEAI_INTRONIC_CACHE_PATH = SPLICEAI_DIR / "spliceai_brca_intronic_snv_reference_cache.json"
 
 # In-memory caches
 SPLICEAI_CACHE:        Dict[str, float] = {}   # policy:gene:c_notation -> score
@@ -125,9 +120,14 @@ def _load_api_cache() -> dict:
     if SPLICEAI_API_CACHE_PATH.exists():
         try:
             with open(SPLICEAI_API_CACHE_PATH) as f:
-                return _json.load(f)
-        except Exception:
-            pass
+                result = _json.load(f)
+            clear_issue("SpliceAI API cache")
+            return result
+        except Exception as exc:
+            register_issue(
+                "SpliceAI API cache",
+                f"could not load {SPLICEAI_API_CACHE_PATH}: {type(exc).__name__}: {exc}",
+            )
     return {}
 
 
@@ -142,18 +142,46 @@ def _load_precomputed_cache() -> dict:
         return SPLICEAI_PRECOMPUTED_CACHE
     if SPLICEAI_TRANSCRIPT_POLICY != "reference_transcript":
         return SPLICEAI_PRECOMPUTED_CACHE
-    if not SPLICEAI_PRECOMPUTED_CACHE_PATH.exists():
-        return SPLICEAI_PRECOMPUTED_CACHE
-
-    try:
-        with open(SPLICEAI_PRECOMPUTED_CACHE_PATH, encoding="utf-8") as handle:
-            raw = _json.load(handle)
-    except Exception as exc:
-        print(f"Warning: could not load precomputed SpliceAI cache: {exc}")
-        return SPLICEAI_PRECOMPUTED_CACHE
-
-    if isinstance(raw, dict):
-        SPLICEAI_PRECOMPUTED_CACHE = raw
+    for path in (SPLICEAI_PRECOMPUTED_CACHE_PATH, SPLICEAI_INTRONIC_CACHE_PATH):
+        if not path.exists():
+            if path == SPLICEAI_INTRONIC_CACHE_PATH:
+                register_issue("SpliceAI intronic cache", f"cache is missing: {path}")
+            continue
+        try:
+            with open(path, encoding="utf-8") as handle:
+                raw = _json.load(handle)
+            if path == SPLICEAI_INTRONIC_CACHE_PATH:
+                metadata_path = path.with_name(path.stem + ".metadata.json")
+                if not metadata_path.is_file():
+                    register_issue(
+                        "SpliceAI intronic cache",
+                        f"cache build is incomplete: metadata is missing: {metadata_path}",
+                    )
+                    continue
+                with metadata_path.open(encoding="utf-8") as handle:
+                    metadata = _json.load(handle)
+                actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
+                expected_count = metadata.get("coordinate_variants")
+                if (
+                    metadata.get("status_ok") != expected_count
+                    or len(raw) != expected_count
+                    or metadata.get("sha256", "").lower() != actual_sha.lower()
+                ):
+                    register_issue(
+                        "SpliceAI intronic cache",
+                        "cache build is incomplete or checksum/count validation failed",
+                    )
+                    continue
+                clear_issue("SpliceAI intronic cache")
+            if isinstance(raw, dict):
+                SPLICEAI_PRECOMPUTED_CACHE.update(raw)
+            clear_issue(f"SpliceAI precomputed cache {path.name}")
+        except Exception as exc:
+            print(f"Warning: could not load precomputed SpliceAI cache {path}: {exc}")
+            register_issue(
+                f"SpliceAI precomputed cache {path.name}",
+                f"could not load {path}: {type(exc).__name__}: {exc}",
+            )
     return SPLICEAI_PRECOMPUTED_CACHE
 
 
@@ -162,8 +190,13 @@ def _save_api_cache(cache: dict) -> None:
     try:
         with open(SPLICEAI_API_CACHE_PATH, "w") as f:
             _json.dump(cache, f, indent=2)
+        clear_issue("SpliceAI API cache")
     except Exception as e:
         print(f"Warning: could not save SpliceAI cache: {e}")
+        register_issue(
+            "SpliceAI API cache",
+            f"could not save {SPLICEAI_API_CACHE_PATH}: {type(e).__name__}: {e}",
+        )
 
 
 def _cache_key(gene: str, c_notation: str) -> str:
@@ -316,7 +349,7 @@ def _query_spliceai_api(gene: str, chrom: str, pos: int, ref: str, alt: str) -> 
 
         scores = data.get("scores", [])
         if not scores:
-            return None  # no scores from API - do not treat as confirmed low
+            return {"score": None, "error": "API response contained no transcript scores"}
 
         selected = _select_spliceai_score(gene, scores)
         selected["api_source"] = data.get("source") or SPLICEAI_API_SOURCE
@@ -324,7 +357,7 @@ def _query_spliceai_api(gene: str, chrom: str, pos: int, ref: str, alt: str) -> 
         return selected
 
     except Exception as e:
-        return None
+        return {"score": None, "error": f"{type(e).__name__}: {e}"}
 
 
 def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
@@ -409,7 +442,10 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         SPLICEAI_STATUS_CACHE[variant_key] = {
             "status": "api_error",
             "score":  None,
-            "reason": "Broad SpliceAI API call failed, returned no scores, or did not include the required transcript",
+            "reason": (
+                selected.get("error") if isinstance(selected, dict) and selected.get("error")
+                else "Broad SpliceAI API returned no score for the required transcript"
+            ),
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
         }
         return None

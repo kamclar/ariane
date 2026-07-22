@@ -1,22 +1,29 @@
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from backend.modules.frequency import (
     GNOMAD_LOCAL_DATASET_CONFIG,
     _aggregate_coverage_from_dataset_results,
     evaluate_frequency_criteria,
+    get_gnomad_frequencies,
 )
-from backend.modules.classifier import evaluate_variant
+from backend.modules.classifier import classify_by_enigma_combination, evaluate_variant
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
+from backend.modules.pp4_bp5 import posterior_to_lr
 from backend.modules.ps1 import evaluate_ps1
 from backend.modules.utils import is_in_functional_domain
 from backend.modules.variant_type import infer_variant_type
 from backend.modules.hgvs import split_combined_hgvs
 from backend.modules.vus_explanation import explain_vus
 from backend.modules.narrative import generate_narrative
+try:
+    from backend.models import VariantRequest
+except ImportError:
+    VariantRequest = None
 
 
 def gnomad_data(
@@ -50,6 +57,22 @@ def gnomad_data(
 
 
 class VariantTypeTests(unittest.TestCase):
+    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    def test_tutorial_transcript_prefix_is_validated_and_removed(self):
+        request = VariantRequest(
+            gene="BRCA1",
+            c_notation="NM_007294.4:c.509G>A",
+            p_notation="p.Arg170Gln",
+        )
+        self.assertEqual(request.c_notation, "c.509G>A")
+        self.assertEqual(request.p_notation, "p.(Arg170Gln)")
+        with self.assertRaises(ValueError):
+            VariantRequest(
+                gene="BRCA1",
+                c_notation="NM_000059.4:c.509G>A",
+                p_notation="p.Arg170Gln",
+            )
+
     def test_inframe_variants_use_normalized_types(self):
         self.assertEqual(infer_variant_type("c.123_125del", "p.(Val41del)"), "inframe_deletion")
         self.assertEqual(infer_variant_type("c.123_125insAAA", "p.(Val41_Gly42insLys)"), "inframe_insertion")
@@ -82,8 +105,65 @@ class VariantTypeTests(unittest.TestCase):
         self.assertEqual(c_notation, "c.6147_6149del")
         self.assertEqual(p_notation, "p.(Val2050del)")
 
+    def test_exon_cnv_boundaries_are_not_misclassified_as_splice_sites(self):
+        self.assertEqual(
+            infer_variant_type("c.(80+1_81-1)_(134+1_135-1)dup", ""),
+            "exon_duplication",
+        )
+        self.assertEqual(
+            infer_variant_type("c.(80+1_81-1)_(134+1_135-1)del", ""),
+            "exon_deletion",
+        )
+
+
+class CoordinateResolverTests(unittest.TestCase):
+    def test_coding_snv_uses_precomputed_coordinates_before_network(self):
+        from backend.lookups import coordinates
+
+        key = "BRCA1:c.5366C>T"
+        coordinates._RESOLVER_CACHE.pop(key, None)
+        with patch.object(
+            coordinates,
+            "_resolve_variantvalidator",
+            side_effect=AssertionError("network resolver must not be called"),
+        ):
+            result = coordinates.resolve_variant("BRCA1", "c.5366C>T")
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual(result.source, "precomputed_snapshot")
+        self.assertEqual(result.grch37.variant_id(), "17-41201178-G-A")
+        self.assertEqual(result.grch38.variant_id(), "17-43049161-G-A")
+
+    def test_reviewed_intronic_variants_use_versioned_coordinate_cache(self):
+        from backend.lookups import coordinates
+
+        expected = {
+            "c.548-9A>G": ("17-41249315-T-C", "17-43097298-T-C"),
+            "c.4987-6T>G": ("17-41219718-A-C", "17-43067701-A-C"),
+        }
+        for c_notation, (grch37, grch38) in expected.items():
+            with self.subTest(c_notation=c_notation):
+                result = coordinates.resolve_variant("BRCA1", c_notation)
+                self.assertEqual(result.status, "ok")
+                self.assertEqual(result.source, "versioned_intronic_coordinate_map")
+                self.assertEqual(result.grch37.variant_id(), grch37)
+                self.assertEqual(result.grch38.variant_id(), grch38)
+
 
 class FrequencyTests(unittest.TestCase):
+    def test_tutorial_snvs_establish_pm2_in_both_gnomad_releases(self):
+        from backend.lookups.coordinates import resolve_variant
+
+        for c_notation in ("c.4185G>A", "c.5217T>A"):
+            with self.subTest(c_notation=c_notation):
+                coords = resolve_variant("BRCA1", c_notation)
+                self.assertEqual(coords.status, "ok")
+                result = get_gnomad_frequencies(coords.grch37, coords.grch38)
+                self.assertEqual(result["datasets"]["v2_1_non_cancer"]["status"], "absent")
+                self.assertEqual(result["datasets"]["v3_1_non_cancer"]["status"], "absent")
+                self.assertTrue(result["pm2_coverage_ok"])
+                self.assertTrue(result["pm2_absence_established"])
+
     def test_pm2_configuration_requires_both_gnomad_versions(self):
         self.assertTrue(GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"]["required_for_pm2"])
         self.assertTrue(GNOMAD_LOCAL_DATASET_CONFIG["v3_1_non_cancer"]["required_for_pm2"])
@@ -116,7 +196,34 @@ class FrequencyTests(unittest.TestCase):
         data["datasets"]["v2_1_non_cancer"]["coverage"]["mean_depth"] = 20.0
         self.assertIn("BA1", evaluate_frequency_criteria(data, "missense"))
 
+
+class MultifactorialLikelihoodTests(unittest.TestCase):
+    def test_rounded_extreme_posteriors_remain_informative(self):
+        self.assertEqual(posterior_to_lr(0.0), 0.0)
+        self.assertEqual(posterior_to_lr(1.0), float("inf"))
+
 class SpliceTests(unittest.TestCase):
+    def test_reviewed_intronic_variants_use_local_spliceai_and_apply_pp3(self):
+        from backend.lookups.spliceai import get_spliceai_score
+
+        expected_scores = {
+            "c.548-9A>G": 0.86,
+            "c.4987-6T>G": 0.73,
+        }
+        for c_notation, expected_score in expected_scores.items():
+            with self.subTest(c_notation=c_notation):
+                score = get_spliceai_score("BRCA1", c_notation)
+                self.assertEqual(score, expected_score)
+                result = evaluate_variant(
+                    gene="BRCA1",
+                    variant_type=infer_variant_type(c_notation, ""),
+                    p_notation="",
+                    c_notation=c_notation,
+                    spliceai_score=score,
+                )
+                self.assertEqual(result["criteria"]["PP3"]["strength"], "Supporting")
+                self.assertEqual(result["criteria"]["PP3"]["points"], 1)
+
     def test_noncanonical_splice_prediction_does_not_create_pvs1(self):
         result = evaluate_pvs1(
             "BRCA1",
@@ -210,6 +317,65 @@ class SpliceTests(unittest.TestCase):
 
 
 class ClassifierIntegrationTests(unittest.TestCase):
+    def test_enigma_pathogenic_combinations_use_correct_strength_counts(self):
+        very_strong_plus_one_moderate = {
+            "PVS1": {"points": 8, "strength": "Very Strong"},
+            "PM5": {"points": 2, "strength": "Moderate"},
+        }
+        self.assertEqual(
+            classify_by_enigma_combination(very_strong_plus_one_moderate, 10)[0], 5
+        )
+        two_strong = {
+            "PS3": {"points": 4, "strength": "Strong"},
+            "PS4": {"points": 4, "strength": "Strong"},
+        }
+        self.assertEqual(classify_by_enigma_combination(two_strong, 8)[0], 4)
+
+    def test_table3_pathogenic_and_benign_edge_combinations(self):
+        two_strong_plus_moderate = {
+            "PS3": {"points": 4, "strength": "Strong"},
+            "PS4": {"points": 4, "strength": "Strong"},
+            "PM3": {"points": 2, "strength": "Moderate"},
+        }
+        self.assertEqual(
+            classify_by_enigma_combination(two_strong_plus_moderate, 10)[:2],
+            (5, "Pathogenic"),
+        )
+
+        benign_strong_plus_two_moderate = {
+            "BS3": {"points": -4, "strength": "Strong"},
+            "BS2": {"points": -2, "strength": "Moderate"},
+            "BS4": {"points": -2, "strength": "Moderate"},
+        }
+        self.assertEqual(
+            classify_by_enigma_combination(benign_strong_plus_two_moderate, -8)[:2],
+            (1, "Benign"),
+        )
+
+        benign_strong_plus_supporting = {
+            "BS3": {"points": -4, "strength": "Strong"},
+            "BP7": {"points": -1, "strength": "Supporting"},
+        }
+        self.assertEqual(
+            classify_by_enigma_combination(benign_strong_plus_supporting, -5)[:2],
+            (2, "Likely Benign"),
+        )
+
+    def test_table9_functional_evidence_does_not_suppress_bp4(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="missense",
+            p_notation="p.(Cys61Gly)",
+            c_notation="c.181T>G",
+            spliceai_score=0.05,
+            bayesdel_score=0.10,
+            table9_result={
+                "applies": True, "code": "PS3", "strength": "Strong",
+                "points": 4, "reason": "calibrated assay",
+            },
+        )
+        self.assertIn("PS3", result["criteria"])
+        self.assertIn("BP4", result["criteria"])
     def test_custom_donor_guard_is_not_part_of_active_scoring(self):
         project_root = Path(__file__).resolve().parents[1]
         self.assertFalse((project_root / "backend/modules/donor_guard.py").exists())
@@ -279,35 +445,42 @@ class ClassifierIntegrationTests(unittest.TestCase):
 
     def test_exon_duplication_uses_confirmed_tandem_input(self):
         notation = "c.(80+1_81-1)_(134+1_135-1)dup"
+        variant_type = infer_variant_type(notation, "")
         unknown = evaluate_variant(
             gene="BRCA1",
-            variant_type="exon_duplication",
+            variant_type=variant_type,
             p_notation="p.(?)",
             c_notation=notation,
         )
         tandem = evaluate_variant(
             gene="BRCA1",
-            variant_type="exon_duplication",
+            variant_type=variant_type,
             p_notation="p.(?)",
             c_notation=notation,
             dup_type="Tandem",
         )
+        self.assertEqual(variant_type, "exon_duplication")
         self.assertEqual(unknown["criteria"]["PVS1"]["strength"], "Moderate")
         self.assertEqual(tandem["criteria"]["PVS1"]["strength"], "Strong")
 
-    def test_bs3_strong_alone_remains_vus(self):
+    def test_table9_splice_snapshot_enables_bp1_for_ser1298del(self):
         table9_result = table9_lookup_ps3_bs3("BRCA1", "c.3891_3893del")
+        self.assertEqual(table9_result["splice_result_published"], "no aberration (PMID: 18273839)")
+        self.assertEqual(table9_result["spliceai_prediction"], 0)
         result = evaluate_variant(
             gene="BRCA1",
             variant_type="inframe_deletion",
             p_notation="p.(Ser1298del)",
             c_notation="c.3891_3893del",
+            spliceai_score=0.15,
             table9_result=table9_result,
         )
         self.assertEqual(result["criteria"]["BS3"]["points"], -4)
-        self.assertEqual(result["total_points"], -4)
-        self.assertEqual(result["predicted_class"], 3)
-        self.assertEqual(result["predicted_label"], "VUS")
+        self.assertEqual(result["criteria"]["BP1"]["points"], -4)
+        self.assertEqual(result["total_points"], -8)
+        self.assertEqual(result["predicted_class"], 1)
+        self.assertEqual(result["predicted_label"], "Benign")
+        self.assertTrue(any("Table 9=0.000" in warning for warning in result["warnings"]))
 
     def test_pvs1_very_strong_alone_remains_vus_with_explanation(self):
         result = evaluate_variant(

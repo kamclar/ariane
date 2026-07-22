@@ -17,15 +17,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Load Table 9 from JSON
 TABLE9_JSON_PATH = PROJECT_ROOT / "data" / "enigma_table9.json"
 
-# Fallback: try current directory
-if not TABLE9_JSON_PATH.exists():
-    TABLE9_JSON_PATH = Path("enigma_table9.json")
-
-if TABLE9_JSON_PATH.exists():
-    with open(TABLE9_JSON_PATH, 'r') as f:
-        TABLE9_DATA = json.load(f)
-else:
-    TABLE9_DATA = {"variants": {}}
+if not TABLE9_JSON_PATH.is_file():
+    raise RuntimeError(f"Required ENIGMA Table 9 dataset is missing: {TABLE9_JSON_PATH}")
+with open(TABLE9_JSON_PATH, encoding="utf-8") as f:
+    TABLE9_DATA = json.load(f)
 
 
 def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
@@ -44,7 +39,11 @@ def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
         "strength": None,
         "points": 0,
         "applies": False,
-        "reason": ""
+        "reason": "",
+        "reviewed": False,
+        "splice_result_published": None,
+        "spliceai_prediction": None,
+        "predicted_or_observed_splicing": None,
     }
 
     key = f"{gene}:{c_notation}"
@@ -55,9 +54,16 @@ def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
         strength = entry["strength"]
         text = entry.get("text", "")
 
+        result["reviewed"] = True
+        result["splice_result_published"] = entry.get("splice_result_published")
+        result["spliceai_prediction"] = entry.get("spliceai_prediction")
+        result["predicted_or_observed_splicing"] = entry.get(
+            "predicted_or_observed_splicing"
+        )
+
         result["code"] = code
         result["strength"] = strength
-        result["applies"] = True
+        result["applies"] = code in {"PS3", "BS3"}
         result["reason"] = f"Table 9: {text[:100]}..." if len(text) > 100 else f"Table 9: {text}"
 
         if code == "PS3":
@@ -99,4 +105,3 @@ if __name__ == "__main__":
             print(f"  {gene} {c_notation}: {result['code']}_{result['strength']} ({result['points']:+d} points)")
         else:
             print(f"  {gene} {c_notation}: No Table 9 entry")
-

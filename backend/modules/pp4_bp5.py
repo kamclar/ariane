@@ -75,8 +75,12 @@ def _load_st7():
 
 def posterior_to_lr(posterior: float) -> Optional[float]:
     """Convert posterior probability to likelihood ratio using global prior."""
-    if posterior is None or posterior <= 0 or posterior >= 1:
+    if posterior is None or posterior < 0 or posterior > 1:
         return None
+    if posterior == 0:
+        return 0.0
+    if posterior == 1:
+        return float("inf")
     lr = (posterior * (1 - PRIOR)) / (PRIOR * (1 - posterior))
     return lr
 

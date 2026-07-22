@@ -7,7 +7,7 @@
 # AlphaMissense is informational only - not used for ENIGMA VCEP scoring.
 #
 # Persistent cache: backend/data/bayesdel_cache.json
-# Cache entry format: {"bayesdel": float|null, "am_score": float|null, "am_class": str|null}
+# Cache entry also preserves the lookup status/reason so absence is explainable.
 # Old float-only entries are migrated automatically on load.
 
 from typing import Optional, Dict, Tuple
@@ -17,11 +17,13 @@ import threading
 import urllib.request
 import urllib.parse
 import urllib.error
+from backend.data_health import clear_issue, register_issue
 
 MYVARIANT_BASE_URL = "https://myvariant.info/v1/variant"
 
 # Cache stores dicts: {"bayesdel": ..., "am_score": ..., "am_class": ...}
 BAYESDEL_CACHE: Dict[str, Optional[dict]] = {}
+BAYESDEL_STATUS_CACHE: Dict[str, dict] = {}
 
 _CACHE_PATH = Path(__file__).resolve().parent.parent / "data" / "bayesdel_cache.json"
 _FILE_LOCK  = threading.Lock()
@@ -30,6 +32,7 @@ _FILE_LOCK  = threading.Lock()
 def _load_cache() -> None:
     global BAYESDEL_CACHE
     if not _CACHE_PATH.exists():
+        register_issue("BayesDel cache", f"cache is missing: {_CACHE_PATH}")
         return
     try:
         with open(_CACHE_PATH, encoding="utf-8") as fh:
@@ -45,8 +48,10 @@ def _load_cache() -> None:
                     "am_class": None,
                 }
         print(f"Loaded BayesDel/AM cache: {len(BAYESDEL_CACHE)} entries")
+        clear_issue("BayesDel cache")
     except Exception as exc:
         print(f"Warning: could not load BayesDel cache: {exc}")
+        register_issue("BayesDel cache", f"could not load {_CACHE_PATH}: {type(exc).__name__}: {exc}")
 
 
 def _save_cache() -> None:
@@ -56,6 +61,7 @@ def _save_cache() -> None:
                 json.dump(BAYESDEL_CACHE, fh)
         except Exception as exc:
             print(f"Warning: could not save BayesDel cache: {exc}")
+            register_issue("BayesDel cache", f"could not save {_CACHE_PATH}: {type(exc).__name__}: {exc}")
 
 
 def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Optional[dict]) -> dict:
@@ -141,6 +147,10 @@ def get_bayesdel_and_alphamissense(
         am_score = entry.get("am_score") if isinstance(entry, dict) else None
         am_class = entry.get("am_class") if isinstance(entry, dict) else None
         am = {"am_score": am_score, "am_class": am_class} if am_score is not None else None
+        BAYESDEL_STATUS_CACHE[variant_key] = {
+            "status": entry.get("status", "ok" if bd is not None or am_score is not None else "no_score"),
+            "reason": entry.get("reason", "Loaded from local MyVariant/BayesDel cache"),
+        }
         return bd, am
 
     from backend.lookups.coordinates import resolve_variant
@@ -151,13 +161,27 @@ def get_bayesdel_and_alphamissense(
                 "ref": rv.grch37.ref, "alt": rv.grch37.alt}
 
     data = fetch_variant_data_myvariant(gene, c_notation, hg37)
-
-    BAYESDEL_CACHE[variant_key] = {
-        "bayesdel": data["bayesdel"],
-        "am_score": data["am_score"],
-        "am_class": data["am_class"],
+    BAYESDEL_STATUS_CACHE[variant_key] = {
+        "status": data["status"],
+        "reason": data.get("error") or {
+            "no_grch37_coords": "No GRCh37 coordinates available for MyVariant",
+            "not_found": "Variant was not found by MyVariant",
+            "no_score": "MyVariant response contained no BayesDel or AlphaMissense score",
+            "ok": "MyVariant response parsed successfully",
+        }.get(data["status"], data["status"]),
     }
-    _save_cache()
+
+    # Only stable responses belong in the persistent cache. Coordinate and API
+    # failures remain retryable instead of being converted to a silent null.
+    if data["status"] in {"ok", "no_score", "not_found"}:
+        BAYESDEL_CACHE[variant_key] = {
+            "bayesdel": data["bayesdel"],
+            "am_score": data["am_score"],
+            "am_class": data["am_class"],
+            "status": data["status"],
+            "reason": BAYESDEL_STATUS_CACHE[variant_key]["reason"],
+        }
+        _save_cache()
 
     am = ({"am_score": data["am_score"], "am_class": data["am_class"]}
           if data["am_score"] is not None else None)

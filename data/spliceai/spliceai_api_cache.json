@@ -178,5 +178,41 @@
     "max_any_transcript_score": 0.99,
     "max_any_transcript": "ENST00000380152.8",
     "n_transcript_scores": 5
+  },
+  "reference_transcript:BRCA1:c.548-9A>G": {
+    "score": 0.86,
+    "chrom": "17",
+    "pos": 43097298,
+    "ref": "T",
+    "alt": "C",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model:cache",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_AG",
+    "reference_transcript_score": 0.86,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.86,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26
+  },
+  "reference_transcript:BRCA1:c.4987-6T>G": {
+    "score": 0.73,
+    "chrom": "17",
+    "pos": 43067701,
+    "ref": "A",
+    "alt": "C",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model:cache",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_AL",
+    "reference_transcript_score": 0.73,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.73,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 25
   }
 }

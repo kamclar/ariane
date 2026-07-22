@@ -61,6 +61,7 @@
                 </div>
             </form>
             <p class="input-hint" x-show="error" x-text="error" style="color: var(--color-error);"></p>
+            <p class="input-hint" x-show="resourceError" x-text="resourceError" style="color: var(--color-warning);"></p>
             <p class="input-hint" x-show="c_notation.toLowerCase().includes('dup')">
                 Select Confirmed tandem only when supported by laboratory data. Otherwise keep Unknown.
             </p>

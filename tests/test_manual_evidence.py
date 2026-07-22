@@ -123,6 +123,21 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
 
 
 class ManualEvidenceClassificationTests(unittest.TestCase):
+    def test_curated_pvs1_rna_removes_predictive_pp3(self):
+        result = evaluate_manual_evidence(
+            [{"name": "PP3", "applies": True, "strength": "Supporting", "points": 1}],
+            [{
+                "code": "PVS1_RNA", "enabled": True,
+                "evidence": {
+                    "assay_scope": "mrna_only", "rna_conclusion": "damaging",
+                    "functional_transcript_remaining": "absent_or_minimal",
+                    "curated_strength": "Very Strong", "transcript_accession": "NM_007294.4",
+                    "tissue_or_cell_type": "blood", "nmd_assessed": "yes",
+                },
+            }],
+        )
+        self.assertEqual(result["total_points"], 8)
+
     def test_manual_evidence_creates_separate_amended_result(self):
         base = [
             {

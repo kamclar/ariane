@@ -1,0 +1,42 @@
+{
+  "created_utc": "2026-07-21T12:53:06.484346+00:00",
+  "dataset": "BRCA1/BRCA2 intronic SNV coordinate map",
+  "genes": {
+    "BRCA1": {
+      "GRCh37": {
+        "coding_exon_blocks": 22,
+        "strand": -1
+      },
+      "GRCh38": {
+        "coding_exon_blocks": 22,
+        "strand": -1
+      }
+    },
+    "BRCA2": {
+      "GRCh37": {
+        "coding_exon_blocks": 26,
+        "strand": 1
+      },
+      "GRCh38": {
+        "coding_exon_blocks": 26,
+        "strand": 1
+      }
+    }
+  },
+  "reference_sequence_source": "UCSC Genome Browser sequence API (hg19/hg38)",
+  "reference_transcripts": {
+    "BRCA1": {
+      "ensembl": "ENST00000357654.9",
+      "refseq": "NM_007294.4"
+    },
+    "BRCA2": {
+      "ensembl": "ENST00000380152.8",
+      "refseq": "NM_000059.4"
+    }
+  },
+  "sha256": "cf833940d725fca88e93d94155d75d82b68aa67b82e9858cf036815eab5d2308",
+  "source_snapshot": "data/precomputed/brca_module1_snv_classification_snapshot.index.json",
+  "source_snapshot_sha256": "667db8edf680a54b96e53a5f76a52bc0bf78b7f5e448a03648b34048e4f93ca9",
+  "variants": 13800,
+  "window_bp_per_exon_boundary": 50
+}

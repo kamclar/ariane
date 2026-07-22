@@ -352,6 +352,8 @@ def evaluate_manual_evidence(
             }
         )
         if applies:
+            if code in {"PVS1_RNA", "PVS1_INIT"}:
+                combined.pop("PP3", None)
             combined[code] = {
                 "applies": True,
                 "strength": selected,

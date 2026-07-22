@@ -10,7 +10,7 @@
       "detail": "PS1 variable-weight splicing rule and Table 5/Table 17 weighting",
       "file": "Specifications_V1.2_2024-11-18.docx",
       "appendix_file": "Appendices_V1.2_2024-11-18.docx",
-      "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
+      "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092"
     },
     {
       "name": "ENIGMA Supplementary Table 2",
@@ -48,7 +48,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 10,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -71,7 +71,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 23,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -94,7 +94,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 24,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -117,7 +117,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 25,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -140,7 +140,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 26,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -163,7 +163,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 42,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -186,7 +186,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 43,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -209,7 +209,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 64,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -232,7 +232,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 65,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -255,7 +255,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 67,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -278,7 +278,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 69,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -301,7 +301,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 70,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -324,7 +324,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 71,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -347,7 +347,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 72,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -370,7 +370,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 73,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -393,7 +393,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 75,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -416,7 +416,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 76,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -439,7 +439,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 77,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -462,7 +462,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 80,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -485,7 +485,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 84,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -508,7 +508,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 86,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -531,7 +531,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 88,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -554,7 +554,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 89,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -577,7 +577,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 91,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -600,7 +600,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 92,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -623,7 +623,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 95,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -646,7 +646,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 97,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -669,7 +669,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 99,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -692,7 +692,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 100,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -715,7 +715,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 101,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -738,7 +738,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 106,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -761,7 +761,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 107,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -784,7 +784,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 119,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -807,7 +807,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 125,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -830,7 +830,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 136,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -853,7 +853,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 138,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -876,7 +876,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 142,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -899,7 +899,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 146,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -922,7 +922,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 150,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -945,7 +945,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 152,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -968,7 +968,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 153,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -991,7 +991,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 154,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1014,7 +1014,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 155,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1037,7 +1037,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 160,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1060,7 +1060,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 161,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1083,7 +1083,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 162,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1106,7 +1106,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 173,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1129,7 +1129,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 174,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1152,7 +1152,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 175,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1175,7 +1175,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 177,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1198,7 +1198,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 179,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1221,7 +1221,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 180,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1244,7 +1244,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 182,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1267,7 +1267,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 183,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1290,7 +1290,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 184,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1313,7 +1313,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 185,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1336,7 +1336,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 186,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1359,7 +1359,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 187,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1382,7 +1382,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 188,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1405,7 +1405,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 190,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1428,7 +1428,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 191,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1451,7 +1451,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 195,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1474,7 +1474,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 196,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1497,7 +1497,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 198,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1520,7 +1520,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 199,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1543,7 +1543,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 201,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1566,7 +1566,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 203,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1589,7 +1589,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 204,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1612,7 +1612,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 207,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1635,7 +1635,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 208,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1658,7 +1658,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 211,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1681,7 +1681,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 212,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1704,7 +1704,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 214,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1727,7 +1727,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 215,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     },
@@ -1750,7 +1750,7 @@
       "source_sheet": "ST2 splicing dataset codes",
       "source_row": 219,
       "rule_source": "ENIGMA BRCA1/2 VCEP v1.2 Specifications PS1; Appendix J Table 17 PS1(splicing) weighting",
-      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092",
       "curation_status": "pilot_from_ST2_requires_review",
       "curation_note": "Seed record only. Before PS1(splicing) use, confirm that the VUA has the same predicted event and similar/higher prediction strength than this reference variant, and apply Appendix J/Table 17 weighting."
     }

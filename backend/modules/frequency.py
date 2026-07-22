@@ -14,6 +14,7 @@ import re
 import time
 import urllib.request
 import urllib.parse
+from backend.data_health import clear_issue, register_issue
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GNOMAD_DIR = PROJECT_ROOT / "data" / "gnomad_brca_cache"
@@ -21,7 +22,7 @@ GNOMAD_DIR = PROJECT_ROOT / "data" / "gnomad_brca_cache"
 
 GNOMAD_DIR = PROJECT_ROOT / "data" / "gnomad"
 GNOMAD_CACHE_WITH_REAL_COVERAGE = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.with_real_coverage.json"
-GNOMAD_CACHE_FALLBACK_FIXTURE = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.json"
+GNOMAD_CACHE_FIXTURE = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.json"
 GNOMAD_COVERAGE_CACHE_JSON = GNOMAD_DIR / "gnomad_brca_coverage_cache.json"
 
 MIN_PM2_MEAN_DEPTH = 25.0
@@ -130,8 +131,6 @@ def _normalize_variant_cache_keys(raw_mapping: Dict[str, Any]) -> Dict[str, Any]
 def choose_gnomad_cache_file() -> Optional[Path]:
     if GNOMAD_CACHE_WITH_REAL_COVERAGE.exists():
         return GNOMAD_CACHE_WITH_REAL_COVERAGE
-    if GNOMAD_CACHE_FALLBACK_FIXTURE.exists():
-        return GNOMAD_CACHE_FALLBACK_FIXTURE
     return None
 
 
@@ -147,11 +146,26 @@ def load_gnomad_local_cache(path: Optional[Path] = None) -> None:
         GNOMAD_CACHE_MODE = "missing"
         print("gnomAD local cache not found.")
         print("Expected preferred file:", GNOMAD_CACHE_WITH_REAL_COVERAGE)
-        print("Fallback file:", GNOMAD_CACHE_FALLBACK_FIXTURE)
+        print("Fixture datasets are never selected automatically:", GNOMAD_CACHE_FIXTURE)
+        register_issue(
+            "gnomAD variant cache",
+            f"approved real-coverage cache is missing: {GNOMAD_CACHE_WITH_REAL_COVERAGE}",
+        )
         return
 
-    with open(selected, "r", encoding="utf-8") as handle:
-        payload = json.load(handle)
+    try:
+        with open(selected, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError) as exc:
+        GNOMAD_CACHE = {}
+        GNOMAD_CACHE_METADATA = {}
+        GNOMAD_CACHE_PATH = None
+        GNOMAD_CACHE_MODE = "load_failed"
+        register_issue(
+            "gnomAD variant cache",
+            f"could not load {selected}: {type(exc).__name__}: {exc}",
+        )
+        return
 
     mapping = payload.get("variants") or payload.get("by_variant") or {}
     GNOMAD_CACHE = _normalize_variant_cache_keys(mapping)
@@ -170,6 +184,12 @@ def load_gnomad_local_cache(path: Optional[Path] = None) -> None:
     print("Variant records:", n_records)
     if GNOMAD_CACHE_MODE != "real_coverage":
         print("WARNING: real coverage cache not found; PM2 coverage may be fixture-based or unavailable.")
+        register_issue(
+            "gnomAD variant cache",
+            f"cache mode {GNOMAD_CACHE_MODE!r} is not approved for classification",
+        )
+    else:
+        clear_issue("gnomAD variant cache")
 
 
 def load_gnomad_coverage_cache(path: Optional[Path] = None) -> None:
@@ -180,14 +200,24 @@ def load_gnomad_coverage_cache(path: Optional[Path] = None) -> None:
     if selected is None or not selected.exists():
         GNOMAD_COVERAGE_BY_POSITION = {}
         print("Standalone gnomAD coverage cache not found:", selected)
+        register_issue("gnomAD coverage cache", f"coverage cache is missing: {selected}")
         return
 
-    with open(selected, "r", encoding="utf-8") as handle:
-        payload = json.load(handle)
+    try:
+        with open(selected, "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError) as exc:
+        GNOMAD_COVERAGE_BY_POSITION = {}
+        register_issue(
+            "gnomAD coverage cache",
+            f"could not load {selected}: {type(exc).__name__}: {exc}",
+        )
+        return
 
     GNOMAD_COVERAGE_BY_POSITION = payload.get("coverage_by_position", {}) or {}
     print("Loaded standalone gnomAD coverage cache:", selected)
     print("Coverage positions:", len(GNOMAD_COVERAGE_BY_POSITION))
+    clear_issue("gnomAD coverage cache")
 
 
 def _coords_in_cached_region(coords: Optional[Any], build: str) -> bool:
@@ -224,15 +254,25 @@ def _dataset_extraction_ok(dataset_names: List[str], coords: Optional[Any], buil
         return False
     chrom_no = _strip_chr(coords["chrom"] if isinstance(coords, dict) else coords.chrom)
     log = GNOMAD_CACHE_METADATA.get("extraction_log", []) or []
-    if not log:
-        # The with_real_coverage cache currently has compact metadata without extraction_log.
-        # In that case, accept region membership + presence of loaded records as enough to use the cache.
-        return bool(GNOMAD_CACHE)
     for item in log:
         if item.get("dataset") in dataset_names and item.get("status") == "ok":
             item_chrom = item.get("chrom")
             if item_chrom is None or _strip_chr(item_chrom) == chrom_no:
                 return True
+
+    # The original v2 cache predates extraction_log, but carries an explicit,
+    # versioned source plus GRCh37 region metadata. Accept only that narrowly
+    # identified legacy snapshot; never infer extraction success merely from a
+    # non-empty cache.
+    source = str(GNOMAD_CACHE_METADATA.get("source") or "").lower()
+    regions = (GNOMAD_CACHE_METADATA.get("regions") or {}).get(build) or {}
+    if (
+        build == "GRCh37"
+        and "gnomad_v2_1_1_exomes_grch37" in dataset_names
+        and "gnomad_v2_1_1_exomes_grch37" in source
+        and regions
+    ):
+        return True
     return False
 
 
@@ -347,6 +387,13 @@ def query_gnomad_dataset_local(variant_id: Optional[str], coords: Optional[Any],
     if not GNOMAD_CACHE:
         result["status"] = "cache_missing"
         result["errors"].append("local gnomAD cache not loaded")
+        return result
+
+    if GNOMAD_CACHE_MODE != "real_coverage":
+        result["status"] = "cache_untrusted"
+        result["errors"].append(
+            f"gnomAD cache mode {GNOMAD_CACHE_MODE!r} is not approved for classification"
+        )
         return result
 
     if not _coords_in_cached_region(coords, config["assembly"]):
@@ -487,7 +534,10 @@ def get_gnomad_frequencies(
 
     any_found = any(result["datasets"].get(k, {}).get("status") == "found" for k in result["datasets"])
     all_absent = all(s == "absent" for s in required_statuses)
-    any_cache_missing = any(s in ("cache_missing", "dataset_not_available") for s in required_statuses)
+    any_cache_missing = any(
+        s in ("cache_missing", "cache_untrusted", "dataset_not_available")
+        for s in required_statuses
+    )
     any_no_coords = any(s == "no_coordinates" for s in required_statuses)
     any_outside = any(s == "outside_cached_region" for s in required_statuses)
 
@@ -507,29 +557,17 @@ def get_gnomad_frequencies(
     result["found"] = any_found
     result["pm2_coverage_ok"] = result["coverage"]["passes_pm2"]
 
-    # v3.1.2 genomes (GRCh38) data may not be present in the local cache.
-    # If v2.1.1 confirms absence with sufficient coverage AND v3.1.2 is simply
-    # not available (outside_cached_region / dataset_not_available), still
-    # establish PM2 absence with a note. This is pragmatic: the local cache was
-    # built from v2.1.1 exomes only; absence from the primary exome callset is
-    # strong evidence.
+    # Both required datasets must establish absence. Missing v3 data is not
+    # evidence of absence and must never be converted into PM2.
     v2_status = result["datasets"].get("v2_1_non_cancer", {}).get("status", "")
     v3_status = result["datasets"].get("v3_1_non_cancer", {}).get("status", "")
     v3_not_in_cache = v3_status in (
         "outside_cached_region", "dataset_not_available", "cache_missing"
     )
 
-    # Compute v2.1.1-specific coverage (used when v3.1.2 is absent from cache)
-    v2_cov = result["datasets"].get("v2_1_non_cancer", {}).get("coverage", {})
-    v2_depth = _as_float(v2_cov.get("mean_depth"))
-    v2_coverage_ok = v2_depth is not None and v2_depth >= MIN_PM2_MEAN_DEPTH
-
     if all_absent and result["pm2_coverage_ok"]:
         result["pm2_absence_established"] = True
         result["pm2_datasets_note"] = "v2.1.1 exomes + v3.1.2 genomes"
-    elif v2_status == "absent" and v3_not_in_cache and v2_coverage_ok:
-        result["pm2_absence_established"] = True
-        result["pm2_datasets_note"] = "v2.1.1 exomes only (v3.1.2 not in local cache)"
     else:
         result["pm2_absence_established"] = False
         result["pm2_datasets_note"] = ""
@@ -653,6 +691,7 @@ def evaluate_frequency_criteria(
 
     reason_by_status = {
         "cache_missing": "local gnomAD cache missing or incomplete - PM2 not applied",
+        "cache_untrusted": "local gnomAD cache is a fixture or unapproved dataset - frequency criteria not applied",
         "partial": "local gnomAD lookup partial - PM2 not applied",
         "no_coordinates": "No genomic coordinates for required gnomAD lookup - PM2 not applied",
         "outside_cached_region": "Variant outside cached BRCA gnomAD regions - PM2 not applied",

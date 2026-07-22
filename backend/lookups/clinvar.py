@@ -36,7 +36,7 @@ def clinvar_review_stars(review_status: str) -> int:
     return 0
 
 
-def clinvar_search_variation_id(gene: str, c_notation: str) -> Optional[str]:
+def clinvar_search_variation_id(gene: str, c_notation: str):
     """
     Search ClinVar by SPDI (preferred) or HGVS fallback.
     SPDI is unambiguous; HGVS esearch can return multiple hits for the same c. notation.
@@ -78,8 +78,8 @@ def clinvar_search_variation_id(gene: str, c_notation: str) -> Optional[str]:
                 ids = data.get("esearchresult", {}).get("idlist", [])
                 if len(ids) == 1:
                     return ids[0]
-            except Exception:
-                pass
+            except Exception as exc:
+                raise RuntimeError(f"ClinVar SPDI search failed: {type(exc).__name__}: {exc}") from exc
 
     # ── HGVS fallback - filter by exact c. notation in title ──────────────
     tx   = "NM_007294.4" if gene == "BRCA1" else "NM_000059.4"
@@ -109,14 +109,24 @@ def clinvar_search_variation_id(gene: str, c_notation: str) -> Optional[str]:
         with urllib.request.urlopen(req2, timeout=20) as resp2:
             sum_data = json.loads(resp2.read())
         result = sum_data.get("result", {})
-        for vid in ids:
-            title = result.get(vid, {}).get("title", "")
-            if c_notation in title:
-                return vid
-        return ids[0]
+        exact_ids = [
+            vid for vid in ids
+            if c_notation in result.get(vid, {}).get("title", "")
+        ]
+        if len(exact_ids) == 1:
+            return exact_ids[0]
+        return {
+            "status": "ambiguous",
+            "candidate_ids": exact_ids or ids,
+            "reason": (
+                "Multiple ClinVar records matched the requested HGVS exactly"
+                if len(exact_ids) > 1 else
+                "Multiple ClinVar records were returned and none matched the requested HGVS exactly"
+            ),
+        }
 
-    except Exception:
-        return None
+    except Exception as exc:
+        raise RuntimeError(f"ClinVar HGVS search failed: {type(exc).__name__}: {exc}") from exc
 
 
 def clinvar_fetch_vcv(variation_id: str) -> Optional[ET.Element]:
@@ -131,8 +141,8 @@ def clinvar_fetch_vcv(variation_id: str) -> Optional[ET.Element]:
         with urllib.request.urlopen(req, timeout=30) as resp:
             root = ET.fromstring(resp.read())
         return root.find("VariationArchive")
-    except Exception:
-        return None
+    except Exception as exc:
+        raise RuntimeError(f"ClinVar VCV fetch failed: {type(exc).__name__}: {exc}") from exc
 
 
 def clinvar_parse_vcv(va: ET.Element) -> dict:
@@ -224,7 +234,12 @@ def clinvar_lookup(gene: str, c_notation: str) -> dict:
     hgvs = f"{tx}:{c_notation}"
 
     time.sleep(CLINVAR_API_SLEEP)
-    variation_id = clinvar_search_variation_id(gene, c_notation)
+    search_result = clinvar_search_variation_id(gene, c_notation)
+    if isinstance(search_result, dict) and search_result.get("status") == "ambiguous":
+        result = {"hgvs": hgvs, **search_result}
+        CLINVAR_CACHE[key] = result
+        return result
+    variation_id = search_result
     if not variation_id:
         result = {"status": "not_found", "hgvs": hgvs}
         CLINVAR_CACHE[key] = result

@@ -25,6 +25,9 @@ from backend.config import (
     DATA_DIR, TABLE4_PATH, TABLE9_PATH, ST7_PATH,
     ALLOWED_GENES, TRANSCRIPTS,
 )
+from backend.data_validation import validate_required_datasets
+from backend.data_health import get_data_issues, get_user_warnings
+from backend.lookup_execution import lookup_or_unavailable
 from backend.models import (
     VariantRequest, ClassificationResult, CriterionResult,
     ExternalComparison, ExternalSubmitter, CLASS_LABELS,
@@ -34,6 +37,20 @@ from backend.models import (
     ManualEvidenceRequest, ManualEvidenceResult,
     ManualCriterionResult, ClientValidationRequest,
 )
+
+validate_required_datasets({"table4": TABLE4_PATH, "table9": TABLE9_PATH, "st7": ST7_PATH})
+
+# Initialize local sources before serving requests so /api/health reports
+# degraded caches even before the first classification.
+from backend.modules import frequency as _frequency_data_source  # noqa: E402,F401
+from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402,F401
+from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
+from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
+from backend.modules.residues import initialize_residue_data  # noqa: E402
+
+_spliceai_data_source._load_precomputed_cache()
+_spliceai_data_source._load_api_cache()
+initialize_residue_data()
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -140,14 +157,16 @@ async def index():
 
 @app.get("/api/health")
 async def health():
+    issues = get_data_issues()
     return {
-        "status": "ok",
+        "status": "degraded" if issues else "ok",
         "version": "1.8.0",
         "data": {
             "table4": TABLE4_PATH.exists(),
             "table9": TABLE9_PATH.exists(),
             "st7":    ST7_PATH.exists(),
-        }
+        },
+        "data_issues": issues,
     }
 
 
@@ -230,19 +249,6 @@ async def evaluate_manual_evidence_endpoint(
 
 # Semaphore limits concurrent external API calls during batch processing
 BATCH_SEMAPHORE = asyncio.Semaphore(3)
-EXTERNAL_LOOKUP_TIMEOUT = 12
-
-
-async def _lookup_or_default(func, default, *args):
-    try:
-        return await asyncio.wait_for(
-            asyncio.to_thread(func, *args),
-            timeout=EXTERNAL_LOOKUP_TIMEOUT,
-        )
-    except Exception:
-        return default
-
-
 async def _classify_one(
     gene: str,
     c_notation: str,
@@ -266,12 +272,19 @@ async def _classify_one(
 
     # Step 1: resolve coordinates
     resolved = {}
+    lookup_diagnostics = []
     try:
         rv = resolve_variant(gene, c_notation)
         if rv:
             resolved[f"{gene}:{c_notation}"] = rv
-    except Exception:
-        pass
+            if rv.status != "ok" or rv.source == "Mutalyzer":
+                lookup_diagnostics.extend(
+                    f"Coordinate resolver: {warning}" for warning in rv.warnings
+                )
+    except Exception as exc:
+        message = f"Coordinate lookup failed: {type(exc).__name__}: {exc}"
+        logging.getLogger(__name__).exception(message)
+        lookup_diagnostics.append(message)
     grch37 = get_grch37(resolved, gene, c_notation)
     grch38 = get_grch38(resolved, gene, c_notation)
 
@@ -282,21 +295,39 @@ async def _classify_one(
     # get_bayesdel_and_alphamissense returns (bayesdel_score, alphamissense_dict)
     # in a single myvariant.info call - no extra API overhead for AlphaMissense.
     spliceai_score, (bayesdel_score, alphamissense), cv, er = await asyncio.gather(
-        _lookup_or_default(get_spliceai_score, None, gene, c_notation),
-        _lookup_or_default(get_bayesdel_and_alphamissense, (None, None), gene, c_notation),
-        _lookup_or_default(
+        lookup_or_unavailable(get_spliceai_score, None, "SpliceAI", lookup_diagnostics, gene, c_notation),
+        lookup_or_unavailable(get_bayesdel_and_alphamissense, (None, None), "MyVariant/BayesDel", lookup_diagnostics, gene, c_notation),
+        lookup_or_unavailable(
             clinvar_lookup,
             {"status": "api_timeout", "error": "ClinVar lookup timed out"},
+            "ClinVar", lookup_diagnostics,
             gene,
             c_notation,
         ),
-        _lookup_or_default(
+        lookup_or_unavailable(
             clingen_erepo_lookup,
             {"status": "api_timeout", "error": "ClinGen ERepo lookup timed out"},
+            "ClinGen ERepo", lookup_diagnostics,
             gene,
             c_notation,
         ),
     )
+
+    from backend.lookups.spliceai import SPLICEAI_STATUS_CACHE
+    from backend.lookups.bayesdel import BAYESDEL_STATUS_CACHE
+    variant_key = f"{gene}:{c_notation}"
+    splice_status = SPLICEAI_STATUS_CACHE.get(variant_key, {})
+    if splice_status.get("status") not in {None, "ok"}:
+        lookup_diagnostics.append(
+            f"SpliceAI unavailable: status={splice_status.get('status')}; "
+            f"{splice_status.get('reason', 'no reason reported')}"
+        )
+    bayesdel_status = BAYESDEL_STATUS_CACHE.get(variant_key, {})
+    if bayesdel_status.get("status") in {"api_error", "no_grch37_coords"}:
+        lookup_diagnostics.append(
+            f"MyVariant/BayesDel unavailable: status={bayesdel_status.get('status')}; "
+            f"{bayesdel_status.get('reason', 'no reason reported')}"
+        )
 
     # Step 4: fast local lookups
     gnomad_data = None
@@ -321,6 +352,24 @@ async def _classify_one(
         pp4_bp5_result=pp4_bp5_result, ps1_result=ps1_result,
         residue_info=residue_info, dup_type=dup_type,
     )
+    for diagnostic in lookup_diagnostics:
+        result["warnings"].append(f"External evidence unavailable: {diagnostic}")
+    for warning in get_user_warnings():
+        if warning not in result["warnings"]:
+            result["warnings"].append(warning)
+    if cv.get("status") == "ambiguous":
+        result["warnings"].append(
+            "ClinVar lookup was ambiguous; no external ClinVar record was selected. "
+            f"Candidate IDs: {', '.join(cv.get('candidate_ids', [])) or 'not reported'}."
+        )
+    elif cv.get("status") not in {"ok", "not_found"}:
+        result["warnings"].append(
+            f"ClinVar evidence unavailable: status={cv.get('status')}; {cv.get('error', '')}".rstrip("; ")
+        )
+    if er.get("status") not in {"ok", "not_found"}:
+        result["warnings"].append(
+            f"ClinGen ERepo evidence unavailable: status={er.get('status')}; {er.get('error', '')}".rstrip("; ")
+        )
 
     # Step 6: external comparison
     ext = external_comparison(gene, c_notation, result["predicted_class"], cv, er)

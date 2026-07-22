@@ -44,7 +44,7 @@ def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:
             data = json.loads(resp.read())
     except Exception as e:
         result = {'status': 'api_error', 'error': str(e)}
-        EREPO_CACHE[key] = result
+        # Network/service failures are transient and must not become sticky.
         return result
 
     items = data.get('variantInterpretations', [])
@@ -53,7 +53,19 @@ def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:
         EREPO_CACHE[key] = result
         return result
 
-    # parse first result
+    if len(items) > 1:
+        result = {
+            'status': 'ambiguous',
+            'error': (
+                f"ClinGen ERepo returned {len(items)} interpretations for the exact HGVS/affiliate query; "
+                "no record was selected"
+            ),
+            'candidate_caids': [item.get('caid', '') for item in items],
+        }
+        EREPO_CACHE[key] = result
+        return result
+
+    # Exactly one interpretation is safe to use.
     item = items[0]
     guidelines = item.get('guidelines', [])
     classification = ''

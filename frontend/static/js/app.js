@@ -17,6 +17,7 @@ function ariane() {
         // reference material and manually reviewed evidence
         manualDefinitions: {},
         resourceLinks: [],
+        resourceError: "",
         splicePs1ReferenceSet: { candidates: [] },
         manualItems: [],
         manualAssessor: "",
@@ -43,9 +44,11 @@ function ariane() {
                     this.manualDefinitions = resources.manual_criteria || {};
                     this.resourceLinks = resources.links || [];
                     this.splicePs1ReferenceSet = resources.splice_ps1_reference_candidates || { candidates: [] };
+                } else {
+                    this.resourceError = `Reference materials could not be loaded (HTTP ${response.status}). Classification remains available, but manual-review guidance is incomplete.`;
                 }
             } catch (e) {
-                // Classification remains usable if reference material is unavailable.
+                this.resourceError = `Reference materials could not be loaded: ${e?.message || e}. Classification remains available, but manual-review guidance is incomplete.`;
             }
         },
 

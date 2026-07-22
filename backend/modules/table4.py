@@ -16,25 +16,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # Load Table 4 from JSON
 TABLE4_JSON_PATH = PROJECT_ROOT / "data" / "enigma_table4.json"
 
-# Fallback: try current directory
-if not TABLE4_JSON_PATH.exists():
-    TABLE4_JSON_PATH = Path("enigma_table4.json")
-
-if TABLE4_JSON_PATH.exists():
-    with open(TABLE4_JSON_PATH, 'r') as f:
-        TABLE4_DATA = json.load(f)
-else:
-    TABLE4_DATA = {
-        "exon_ranges": {"BRCA1": {}, "BRCA2": {}},
-        "ptc_rules": {"BRCA1": {}, "BRCA2": {}},
-        "splice_rules": {"BRCA1": {}, "BRCA2": {}},
-        "deletion_rules": {"BRCA1": {}, "BRCA2": {}},
-        "duplication_rules": {"BRCA1": {}, "BRCA2": {}},
-        "critical_boundaries": {
-            "BRCA1": {"exon": "E23(24)", "boundary_aa": 1854},
-            "BRCA2": {"exon": "E27", "boundary_aa": 3309}
-        }
-    }
+if not TABLE4_JSON_PATH.is_file():
+    raise RuntimeError(f"Required ENIGMA Table 4 dataset is missing: {TABLE4_JSON_PATH}")
+with open(TABLE4_JSON_PATH, encoding="utf-8") as f:
+    TABLE4_DATA = json.load(f)
 
 
 # Validate Table 4 data - check that all exons in rules have ranges
@@ -148,16 +133,8 @@ def parse_pvs1_code_strength(pvs1_code: str) -> tuple:
         return ("Supporting", 1, requires_rna)
     elif code == "PVS1_N/A" or "N/A" in code:
         return (None, 0, requires_rna)
-    else:
-        # Unknown code, default to checking for keywords
-        if "Strong" in code and "Very" not in code:
-            return ("Strong", 4, requires_rna)
-        elif "Moderate" in code:
-            return ("Moderate", 2, requires_rna)
-        elif "Supporting" in code:
-            return ("Supporting", 1, requires_rna)
-        else:
-            return ("Very Strong", 8, requires_rna)
+    # Unknown source codes must never acquire evidence weight implicitly.
+    return (None, 0, requires_rna)
 
 
 def table4_lookup_pvs1_ptc(
@@ -312,16 +289,15 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
 
     exon_rules = TABLE4_DATA["duplication_rules"][gene][exon]
 
-    # Try exact dup_type match, fallback to Unknown
+    # Arrangement is evidence. Never substitute another arrangement rule.
     if dup_type in exon_rules:
         rule = exon_rules[dup_type]
-    elif "Unknown" in exon_rules:
-        rule = exon_rules["Unknown"]
-        dup_type = "Unknown (fallback)"
     else:
-        # Take first available
-        dup_type = list(exon_rules.keys())[0]
-        rule = exon_rules[dup_type]
+        result["reason"] = (
+            f"No exact Table 4 duplication rule for {gene} DUP {exon} "
+            f"with arrangement {dup_type}; available arrangements: {sorted(exon_rules)}"
+        )
+        return result
 
     result["found"] = True
     result["pvs1_code"] = rule["pvs1_code"]
@@ -360,8 +336,6 @@ def parse_exon_from_duplication_notation(c_notation: str, gene: str) -> Optional
             for exon_name, (start, end) in TABLE4_DATA["exon_ranges"][gene].items():
                 if start == exon_start and end == exon_end:
                     return exon_name
-                if abs(start - exon_start) <= 5 and abs(end - exon_end) <= 5:
-                    return exon_name
 
     return None
 def parse_exon_from_deletion_notation(c_notation: str, gene: str) -> Optional[str]:
@@ -390,9 +364,6 @@ def parse_exon_from_deletion_notation(c_notation: str, gene: str) -> Optional[st
         if gene in TABLE4_DATA["exon_ranges"]:
             for exon_name, (start, end) in TABLE4_DATA["exon_ranges"][gene].items():
                 if start == exon_start and end == exon_end:
-                    return exon_name
-                # Also try approximate match (within 5bp)
-                if abs(start - exon_start) <= 5 and abs(end - exon_end) <= 5:
                     return exon_name
 
     return None
@@ -428,9 +399,6 @@ if __name__ == "__main__":
     for var in ["c.8953+2T>C", "c.8953+2T>A", "c.8953+2T>G"]:
         r = table4_lookup_splice("BRCA2", var)
         print(f"  BRCA2 {var}: {r['pvs1_code'] if r['found'] else 'NOT FOUND'}")
-
-
-
 
 
 

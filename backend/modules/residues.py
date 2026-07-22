@@ -11,6 +11,7 @@ from typing import Optional, Dict
 from pathlib import Path
 import json
 import re
+from backend.data_health import clear_issue, register_issue
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESIDUES_PATH = PROJECT_ROOT / "data" / "clinically_important_residues.json"
@@ -25,12 +26,22 @@ def _load_residues():
         return
     if not RESIDUES_PATH.exists():
         print(f"Clinically important residues not found: {RESIDUES_PATH}")
+        register_issue("Clinically important residues", f"required informational dataset is missing: {RESIDUES_PATH}")
         _RESIDUES_LOADED = True
         return
-    with open(RESIDUES_PATH) as f:
-        raw = json.load(f)
+    try:
+        with open(RESIDUES_PATH, encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        register_issue(
+            "Clinically important residues",
+            f"could not load {RESIDUES_PATH}: {type(exc).__name__}: {exc}",
+        )
+        _RESIDUES_LOADED = True
+        return
     _RESIDUES_DATA = raw.get("domains", {})
     _RESIDUES_LOADED = True
+    clear_issue("Clinically important residues")
     print(f"Clinically important residues loaded from {RESIDUES_PATH}")
 
 
@@ -95,3 +106,8 @@ def check_important_residue(gene: str, p_notation: str) -> Dict:
 
     result["message"] = f"Position {pos} is outside all clinically important domains"
     return result
+
+
+def initialize_residue_data() -> None:
+    """Load the informational dataset so health status is available at startup."""
+    _load_residues()

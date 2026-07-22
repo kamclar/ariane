@@ -77,10 +77,10 @@ ariane/
 Classification follows this order (higher level overrides lower):
 
 1. **BA1** - stand-alone benign (gnomAD FAF > 0.1%) → class 1, stop
-2. **Table 9** - PS3/BS3 functional evidence; if present, SpliceAI/BayesDel not applied
+2. **Table 9** - calibrated PS3/BS3 functional evidence
 3. **Table 4** - PVS1/PM5 structural rules
 4. **gnomAD** - BS1, PM2
-5. **SpliceAI/BayesDel** - PP3/BP4/BP7, only when no functional evidence
+5. **SpliceAI/BayesDel** - PP3/BP4/BP7 according to the ENIGMA variant-type decision tree; PP3 is not stacked with PVS1
 6. **BP1** - outside functional domain
 7. **RNA evidence review recommendation** - informational only, no scoring
 8. **External comparison** - ClinVar + ClinGen ERepo, read-only

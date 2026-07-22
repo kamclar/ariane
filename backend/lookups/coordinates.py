@@ -12,11 +12,11 @@
 #      - designed for clinical use, supports BRCA1/2 explicitly
 #      - returns both builds in one call
 #      - best error messages, handles edge cases correctly
-#   2. Mutalyzer normalize API (mutalyzer.nl) as fallback
+#   2. Mutalyzer normalize API (mutalyzer.nl) as a reported secondary resolver
 #      - academic tool, good for most coding variants
 #      - requires separate calls for GRCh37 vs GRCh38
 #      - known issue: intronic notation (+/-) needs careful URL encoding
-#   3. Hardcoded fallback only when USE_COORDINATE_FALLBACK = True
+# There is no hand-maintained coordinate fallback.
 #      - covers current 13 test variants only
 #      - not a production solution
 #
@@ -33,14 +33,15 @@ import time
 import urllib.request
 import urllib.parse
 import urllib.error
+import logging
+from backend.data_health import clear_issue, register_issue
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
+_RESOLVER_FAILURES: Dict[str, list[str]] = {}
 
 VARIANTVALIDATOR_API = "https://rest.variantvalidator.org/VariantValidator/variantvalidator"
 MUTALYZER_API = "https://mutalyzer.nl/api"
-
-# Set True only for running the current 13 test variants when APIs are unavailable.
-# Production code should never rely on this.
-USE_COORDINATE_FALLBACK = True
 
 TRANSCRIPTS = {
     "BRCA1": "NM_007294.4",
@@ -52,30 +53,6 @@ NC_TO_CHROM = {
     "GRCh37": {"NC_000017.10": "17", "NC_000013.10": "13"},
     "GRCh38": {"NC_000017.11": "17", "NC_000013.11": "13"},
 }
-
-# Verified GRCh37 coordinates from ClinVar VCF
-# Only SNVs - indels don't need gnomAD/myvariant lookup
-COORDINATE_FALLBACK_HG37 = {
-    "BRCA1:c.509G>A":    {"chrom": "17", "pos": 41251830, "ref": "C", "alt": "T"},
-    "BRCA1:c.1534C>T":   {"chrom": "17", "pos": 41246014, "ref": "G", "alt": "A"},
-    "BRCA1:c.4185G>A":   {"chrom": "17", "pos": 41242961, "ref": "C", "alt": "T"},
-    "BRCA1:c.628C>T":    {"chrom": "17", "pos": 41247905, "ref": "G", "alt": "A"},
-    "BRCA1:c.3247A>C":   {"chrom": "17", "pos": 41244301, "ref": "T", "alt": "G"},
-    "BRCA1:c.5217T>A":   {"chrom": "17", "pos": 41209129, "ref": "A", "alt": "T"},
-    "BRCA2:c.8953+2T>C": {"chrom": "13", "pos": 32953654, "ref": "T", "alt": "C"},
-}
-
-# Verified GRCh38 coordinates from ClinVar VCF
-COORDINATE_FALLBACK_HG38 = {
-    "BRCA1:c.509G>A":    {"chrom": "17", "pos": 43099813, "ref": "C", "alt": "T"},
-    "BRCA1:c.1534C>T":   {"chrom": "17", "pos": 43093997, "ref": "G", "alt": "A"},
-    "BRCA1:c.4185G>A":   {"chrom": "17", "pos": 43090944, "ref": "C", "alt": "T"},
-    "BRCA1:c.628C>T":    {"chrom": "17", "pos": 43095888, "ref": "G", "alt": "A"},
-    "BRCA1:c.3247A>C":   {"chrom": "17", "pos": 43092284, "ref": "T", "alt": "G"},
-    "BRCA1:c.5217T>A":   {"chrom": "17", "pos": 43057112, "ref": "A", "alt": "T"},
-    "BRCA2:c.8953+2T>C": {"chrom": "13", "pos": 32379517, "ref": "T", "alt": "C"},
-}
-
 
 @dataclass
 class GenomicCoords:
@@ -131,6 +108,56 @@ class ResolvedVariant:
         return self.grch38 is not None and self.grch38.is_valid()
 
 
+def _parse_snapshot_coords(value: object, assembly: str) -> Optional[GenomicCoords]:
+    """Parse snapshot coordinate strings such as ``17:41201178:G>A``."""
+    if not isinstance(value, str):
+        return None
+    match = re.fullmatch(r"(?:chr)?([^:]+):(\d+):([ACGT]+)>([ACGT]+)", value)
+    if not match:
+        return None
+    return GenomicCoords(
+        chrom=match.group(1),
+        pos=int(match.group(2)),
+        ref=match.group(3),
+        alt=match.group(4),
+        assembly=assembly,
+    )
+
+
+def _resolve_precomputed_snapshot(gene: str, c_notation: str) -> Optional[ResolvedVariant]:
+    """Use the versioned coding-SNV snapshot before making network requests."""
+    from backend.lookups.precomputed import lookup_classification_snapshot
+
+    snapshot = lookup_classification_snapshot(gene, c_notation)
+    if not snapshot:
+        return None
+    record = snapshot.get("record", {})
+    grch37 = _parse_snapshot_coords(record.get("grch37"), "GRCh37")
+    grch38 = _parse_snapshot_coords(record.get("grch38"), "GRCh38")
+    if not (grch37 or grch38):
+        logger.warning(
+            "Coordinate snapshot entry has no usable coordinates: key=%s:%s status=%s",
+            gene,
+            c_notation,
+            record.get("coordinate_status"),
+        )
+        return None
+    return ResolvedVariant(
+        gene=gene,
+        transcript=TRANSCRIPTS.get(gene, ""),
+        c_notation=c_notation,
+        status="ok" if grch37 and grch38 else "partial",
+        source="precomputed_snapshot",
+        grch37=grch37,
+        grch38=grch38,
+        warnings=[
+            "Coordinates loaded from versioned precomputed snapshot "
+            f"{snapshot.get('snapshot_created', '')} "
+            f"(ARIANE {snapshot.get('snapshot_version', '')})"
+        ],
+    )
+
+
 # ============================================================
 # Resolver 1: VariantValidator
 # ============================================================
@@ -155,9 +182,24 @@ def _resolve_variantvalidator(transcript: str, c_notation: str) -> Optional[Dict
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:
             return json.loads(resp.read())
-    except urllib.error.HTTPError:
+    except urllib.error.HTTPError as exc:
+        body = exc.read(1000).decode("utf-8", errors="replace")
+        logger.warning(
+            "VariantValidator HTTP error: status=%s reason=%s url=%s body=%r",
+            exc.code, exc.reason, url, body,
+        )
+        _RESOLVER_FAILURES.setdefault(hgvs, []).append(
+            f"VariantValidator HTTP {exc.code} {exc.reason}: {body[:300]}"
+        )
         return None
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            "VariantValidator request failed: error_type=%s error=%s url=%s",
+            type(exc).__name__, exc, url,
+        )
+        _RESOLVER_FAILURES.setdefault(hgvs, []).append(
+            f"VariantValidator {type(exc).__name__}: {exc}"
+        )
         return None
 
 
@@ -219,10 +261,23 @@ def _resolve_mutalyzer(transcript: str, c_notation: str, assembly: str) -> Optio
         with urllib.request.urlopen(req, timeout=15) as resp:
             data = json.loads(resp.read())
     except urllib.error.HTTPError as e:
-        if e.code in (404, 422):
-            return None
+        body = e.read(1000).decode("utf-8", errors="replace")
+        logger.warning(
+            "Mutalyzer HTTP error: status=%s reason=%s assembly=%s url=%s body=%r",
+            e.code, e.reason, assembly, url, body,
+        )
+        _RESOLVER_FAILURES.setdefault(hgvs, []).append(
+            f"Mutalyzer {assembly} HTTP {e.code} {e.reason}: {body[:300]}"
+        )
         return None
-    except Exception:
+    except Exception as exc:
+        logger.warning(
+            "Mutalyzer request failed: error_type=%s error=%s assembly=%s url=%s",
+            type(exc).__name__, exc, assembly, url,
+        )
+        _RESOLVER_FAILURES.setdefault(hgvs, []).append(
+            f"Mutalyzer {assembly} {type(exc).__name__}: {exc}"
+        )
         return None
 
     nc_map = NC_TO_CHROM[assembly]
@@ -249,6 +304,10 @@ def _resolve_mutalyzer(transcript: str, c_notation: str, assembly: str) -> Optio
         if chrom:
             return GenomicCoords(chrom=chrom, pos=pos, ref=ref, alt=alt, assembly=assembly)
 
+    logger.warning(
+        "Mutalyzer response had no usable %s genomic description: url=%s keys=%s",
+        assembly, url, sorted(data.keys()),
+    )
     return None
 
 
@@ -260,6 +319,10 @@ import threading as _threading
 
 _RESOLVER_CACHE: Dict[str, ResolvedVariant] = {}
 _COORDS_CACHE_PATH = Path(__file__).resolve().parent.parent / "data" / "coordinates_cache.json"
+_INTRONIC_COORDS_PATH = (
+    Path(__file__).resolve().parent.parent.parent
+    / "data" / "coordinates" / "brca_intronic_snv_coordinates.json"
+)
 _COORDS_FILE_LOCK  = _threading.Lock()
 
 
@@ -277,24 +340,35 @@ def _dict_to_coords(d: Optional[dict]) -> Optional[GenomicCoords]:
 
 
 def _load_coords_cache() -> None:
-    if not _COORDS_CACHE_PATH.exists():
-        return
-    try:
-        with open(_COORDS_CACHE_PATH, encoding="utf-8") as fh:
-            raw = json.load(fh)
-        for key, entry in raw.items():
-            _RESOLVER_CACHE[key] = ResolvedVariant(
-                gene=entry["gene"],
-                transcript=entry["transcript"],
-                c_notation=entry["c_notation"],
-                status=entry["status"],
-                source=entry.get("source", "cache"),
-                grch37=_dict_to_coords(entry.get("grch37")),
-                grch38=_dict_to_coords(entry.get("grch38")),
+    loaded = 0
+    # The generated, versioned map is loaded first. The small read-through cache
+    # remains useful for variant classes outside the precomputed SNV spaces.
+    for path in (_INTRONIC_COORDS_PATH, _COORDS_CACHE_PATH):
+        if not path.exists():
+            register_issue(f"Coordinate cache {path.name}", f"cache is missing: {path}")
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                raw = json.load(fh)
+            for key, entry in raw.items():
+                if key in _RESOLVER_CACHE:
+                    continue
+                _RESOLVER_CACHE[key] = ResolvedVariant(
+                    gene=entry["gene"], transcript=entry["transcript"],
+                    c_notation=entry["c_notation"], status=entry["status"],
+                    source=entry.get("source", "cache"),
+                    grch37=_dict_to_coords(entry.get("grch37")),
+                    grch38=_dict_to_coords(entry.get("grch38")),
+                )
+                loaded += 1
+            clear_issue(f"Coordinate cache {path.name}")
+        except Exception as exc:
+            print(f"Warning: could not load coordinates cache {path}: {exc}")
+            register_issue(
+                f"Coordinate cache {path.name}",
+                f"could not load {path}: {type(exc).__name__}: {exc}",
             )
-        print(f"Loaded coordinates cache: {len(_RESOLVER_CACHE)} entries")
-    except Exception as exc:
-        print(f"Warning: could not load coordinates cache: {exc}")
+    print(f"Loaded coordinates cache: {loaded} entries")
 
 
 def _save_coords_cache() -> None:
@@ -317,6 +391,10 @@ def _save_coords_cache() -> None:
                 json.dump(serialized, fh)
         except Exception as exc:
             print(f"Warning: could not save coordinates cache: {exc}")
+            register_issue(
+                "Coordinate read-through cache",
+                f"could not save {_COORDS_CACHE_PATH}: {type(exc).__name__}: {exc}",
+            )
 
 
 def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
@@ -342,6 +420,15 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
         result.warnings.append(f"No transcript defined for {gene}")
         _RESOLVER_CACHE[key] = result
         return result
+    resolver_key = f"{transcript}:{c_notation}"
+    _RESOLVER_FAILURES.pop(resolver_key, None)
+
+    # Stable, versioned coordinates for all coding SNVs are available locally.
+    # They are tied to the transcript/build versions recorded in snapshot metadata.
+    snapshot_result = _resolve_precomputed_snapshot(gene, c_notation)
+    if snapshot_result is not None:
+        _RESOLVER_CACHE[key] = snapshot_result
+        return snapshot_result
 
     # --- Attempt 1: VariantValidator ---
     vv_data = _resolve_variantvalidator(transcript, c_notation)
@@ -376,33 +463,17 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
             result.warnings.append("Mutalyzer: GRCh37 not resolved")
         if not grch38:
             result.warnings.append("Mutalyzer: GRCh38 not resolved")
+        result.warnings.extend(_RESOLVER_FAILURES.pop(resolver_key, []))
         _RESOLVER_CACHE[key] = result
         _save_coords_cache()
         return result
 
     result.warnings.append("Mutalyzer: no usable response")
 
-    # --- Attempt 3: hardcoded fallback ---
-    if USE_COORDINATE_FALLBACK:
-        fb37 = COORDINATE_FALLBACK_HG37.get(key)
-        fb38 = COORDINATE_FALLBACK_HG38.get(key)
-
-        if fb37:
-            result.grch37 = GenomicCoords(assembly="GRCh37", **fb37)
-        if fb38:
-            result.grch38 = GenomicCoords(assembly="GRCh38", **fb38)
-
-        if fb37 or fb38:
-            result.source = "hardcoded_fallback"
-            result.status = "ok" if (fb37 and fb38) else "partial"
-            result.warnings.append(
-                "Using hardcoded fallback coordinates - only valid for current 13 test variants"
-            )
-            _RESOLVER_CACHE[key] = result
-            return result
+    result.warnings.extend(_RESOLVER_FAILURES.pop(resolver_key, []))
 
     result.warnings.append("All resolvers failed - no coordinates available")
-    _RESOLVER_CACHE[key] = result
+    # Do not cache transient total failures; a later request may succeed.
     return result
 
 
