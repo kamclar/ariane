@@ -11,7 +11,7 @@ from backend.modules.hgvs import split_combined_hgvs
 class VariantRequest(BaseModel):
     gene: str
     c_notation: str
-    p_notation: Optional[str] = None
+    p_notation: str
     dup_type: str = "Unknown"
 
     @model_validator(mode="before")
@@ -34,7 +34,12 @@ class VariantRequest(BaseModel):
             raw_c,
             data.get("p_notation"),
         )
-        return {**data, "c_notation": c_notation, "p_notation": p_notation or None}
+        if not p_notation:
+            raise ValueError(
+                "p. notation is required, for example p.(Gln1395=); "
+                "use p.(?) when the protein consequence is unknown"
+            )
+        return {**data, "c_notation": c_notation, "p_notation": p_notation}
 
     @field_validator("gene")
     @classmethod
@@ -67,11 +72,12 @@ class VariantRequest(BaseModel):
     @field_validator("p_notation")
     @classmethod
     def validate_p_notation(cls, v):
-        if v is None:
-            return None
         v = v.strip()
         if not v:
-            return None
+            raise ValueError(
+                "p. notation is required, for example p.(Gln1395=); "
+                "use p.(?) when the protein consequence is unknown"
+            )
         if not v.startswith("p."):
             raise ValueError("p. notation must start with 'p.', for example p.(Gln1395=)")
         protein = (

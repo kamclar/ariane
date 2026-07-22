@@ -279,16 +279,23 @@ async def _classify_one(
     except (ValueError, RuntimeError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
+    if not p_notation:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "p. notation is required, for example p.(Tyr101Ter); "
+                "use p.(?) when the protein consequence is unknown"
+            ),
+        )
+
     # The versioned coding-SNV snapshot carries the reference-transcript
-    # protein consequence. Use it when the optional p. field was omitted and
-    # reject contradictory user input instead of silently choosing one.
+    # protein consequence. The request model requires the user to state p.;
+    # use the snapshot only to reject contradictory input.
     snapshot = lookup_classification_snapshot(gene, c_notation)
     snapshot_p = ""
     if snapshot:
         snapshot_p = str(snapshot.get("record", {}).get("p_notation") or "")
-    if not p_notation and snapshot_p:
-        p_notation = snapshot_p
-    elif p_notation and snapshot_p and p_notation != snapshot_p:
+    if snapshot_p and p_notation != snapshot_p:
         raise HTTPException(
             status_code=422,
             detail=(

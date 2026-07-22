@@ -37,7 +37,15 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
-    def test_c_only_nonsense_is_hydrated_before_classification(self):
+    def test_c_only_nonsense_is_rejected(self):
+        from backend.main import _classify_one
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(_classify_one("BRCA1", "c.303T>G", ""))
+        self.assertEqual(raised.exception.status_code, 422)
+        self.assertIn("p. notation is required", raised.exception.detail)
+
+    def test_nonsense_with_protein_notation_is_classified(self):
         from backend.main import _classify_one
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
@@ -45,7 +53,9 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         ), patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
-            result = asyncio.run(_classify_one("BRCA1", "c.303T>G", ""))
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
+            )
 
         self.assertEqual(result.p_notation, "p.(Tyr101Ter)")
         pvs1 = next(criterion for criterion in result.criteria if criterion.name == "PVS1")

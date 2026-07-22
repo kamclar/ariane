@@ -365,6 +365,11 @@ function ariane() {
                 this.logClientValidation(this.error);
                 return;
             }
+            if (!this.p_notation.trim()) {
+                this.error = "Please enter a p. notation. Use p.(?) when the protein consequence is unknown.";
+                this.logClientValidation(this.error);
+                return;
+            }
 
             this.loading = true;
             this.progress = 0;
@@ -470,6 +475,10 @@ function ariane() {
 
                 if (!cRaw.startsWith("c.")) {
                     errors.push(`Line ${i + 1}: c. notation must start with 'c.'`);
+                    continue;
+                }
+                if (!pRaw) {
+                    errors.push(`Line ${i + 1}: p. notation is required; use p.(?) when unknown`);
                     continue;
                 }
                 parsed.push({

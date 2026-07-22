@@ -58,6 +58,14 @@ def gnomad_data(
 
 class VariantTypeTests(unittest.TestCase):
     @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    def test_protein_notation_is_required(self):
+        with self.assertRaisesRegex(ValueError, "p. notation is required"):
+            VariantRequest(gene="BRCA1", c_notation="c.4185G>A")
+
+        with self.assertRaisesRegex(ValueError, "p. notation is required"):
+            VariantRequest(gene="BRCA1", c_notation="c.4185G>A", p_notation="")
+
+    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
     def test_tutorial_transcript_prefix_is_validated_and_removed(self):
         request = VariantRequest(
             gene="BRCA1",

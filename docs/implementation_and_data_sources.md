@@ -43,9 +43,9 @@ Neshoda reference vrací HTTP 422 a klasifikace se nespustí. Pokud nainstalovan
 
 Implementace je v `backend/modules/reference_validation.py`.
 
-### 2.3 Doplnění proteinového následku
+### 2.3 Kontrola proteinového následku
 
-Pokud uživatel zadá podporovanou coding SNV pouze jako `c.`, aplikace vyhledá odpovídající záznam v předpočítaném SNV snapshotu a doplní `p.` notaci.
+Uživatel musí zadat `c.` i `p.` notaci. Pokud proteinový následek není znám, zadá `p.(?)`. U podporované coding SNV aplikace porovná zadanou `p.` notaci s předpočítaným SNV snapshotem a při rozporu vstup odmítne.
 
 Příklad:
 
@@ -366,12 +366,12 @@ Každý záznam obsahuje zejména:
 
 Runtime používá snapshot pro:
 
-1. doplnění `p.` notace, pokud uživatel zadal pouze coding SNV v `c.` notaci,
+1. kontrola zadané `p.` notace proti následku pro referenční transkript,
 2. kontrolu rozporu mezi zadanou a předpočítanou `p.` notací,
 3. kontrolu referenční báze coding SNV,
 4. lokální převod coding SNV na GRCh37 a GRCh38.
 
-Runtime nepřebírá předpočítanou finální třídu ani seznam kritérií jako hotový výsledek dotazu. Po doplnění vstupu se kritéria znovu vyhodnotí aktuální implementací a aktuálně načtenými runtime datasety.
+Runtime nepřebírá předpočítanou finální třídu ani seznam kritérií jako hotový výsledek dotazu. Po kontrole vstupu se kritéria znovu vyhodnotí aktuální implementací a aktuálně načtenými runtime datasety.
 
 Toto oddělení umožňuje použít stabilní transkriptový překlad a souřadnice bez zmrazení celé klasifikace na verzi, ve které byl snapshot vytvořen.
 
