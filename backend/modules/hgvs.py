@@ -10,6 +10,9 @@ def normalize_protein_notation(value: Optional[str]) -> str:
         notation = notation[1:-1]
     if notation.startswith("p.") and not notation.startswith("p.("):
         notation = f"p.({notation[2:]})"
+    # HGVS permits both Ter and * for a termination codon. Keep one canonical
+    # representation so equivalent user and source notations compare equal.
+    notation = re.sub(r"\*(?=\d|\))", "Ter", notation)
     return notation
 
 

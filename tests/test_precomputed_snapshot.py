@@ -37,6 +37,26 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_table9_indel_rejects_random_protein_notation(self):
+        from backend.main import _classify_one
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(
+                _classify_one("BRCA1", "c.5266dup", "p.(Arg100Gly)")
+            )
+        self.assertEqual(raised.exception.status_code, 422)
+        self.assertIn("p.(Gln1756ProfsTer74)", raised.exception.detail)
+
+    def test_table9_asterisk_and_ter_protein_notations_are_equivalent(self):
+        from backend.modules.hgvs import normalize_protein_notation
+        from backend.modules.table9 import table9_protein_notation
+
+        reviewed = table9_protein_notation("BRCA1", "c.5266dup")
+        self.assertEqual(
+            normalize_protein_notation(reviewed),
+            normalize_protein_notation("p.(Gln1756ProfsTer74)"),
+        )
+
     def test_c_only_nonsense_is_rejected(self):
         from backend.main import _classify_one
 

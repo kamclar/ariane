@@ -264,6 +264,8 @@ async def _classify_one(
     from backend.lookups.clingen import clingen_erepo_lookup
     from backend.modules.frequency import get_gnomad_frequencies
     from backend.modules.table9 import table9_lookup_ps3_bs3
+    from backend.modules.table9 import table9_protein_notation
+    from backend.modules.hgvs import normalize_protein_notation
     from backend.modules.pp4_bp5 import evaluate_pp4_bp5
     from backend.modules.ps1 import evaluate_ps1
     from backend.modules.residues import check_important_residue
@@ -295,12 +297,16 @@ async def _classify_one(
     snapshot_p = ""
     if snapshot:
         snapshot_p = str(snapshot.get("record", {}).get("p_notation") or "")
-    if snapshot_p and p_notation != snapshot_p:
+    reviewed_p = snapshot_p or str(table9_protein_notation(gene, c_notation) or "")
+    normalized_reviewed_p = normalize_protein_notation(reviewed_p)
+    normalized_input_p = normalize_protein_notation(p_notation)
+    if normalized_reviewed_p and normalized_input_p != normalized_reviewed_p:
         raise HTTPException(
             status_code=422,
             detail=(
                 f"Protein consequence mismatch for {gene} {c_notation}: "
-                f"the configured reference transcript gives {snapshot_p}, not {p_notation}."
+                f"the configured reference transcript gives {normalized_reviewed_p}, "
+                f"not {normalized_input_p}."
             ),
         )
 

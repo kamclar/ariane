@@ -23,6 +23,15 @@ with open(TABLE9_JSON_PATH, encoding="utf-8") as f:
     TABLE9_DATA = json.load(f)
 
 
+def table9_protein_notation(gene: str, c_notation: str) -> Optional[str]:
+    """Return the reviewed protein consequence for an exact Table 9 variant."""
+    entry = TABLE9_DATA.get("variants", {}).get(f"{gene}:{c_notation}")
+    if not isinstance(entry, dict):
+        return None
+    value = entry.get("p_notation")
+    return str(value) if value else None
+
+
 def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
     """
     Lookup PS3/BS3 functional evidence from Table 9.
