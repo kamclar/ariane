@@ -49,6 +49,22 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             suggest_strength("PP1", {"likelihood_ratio": 350}), "Very Strong"
         )
 
+    def test_pp4_combined_clinical_lr_thresholds_require_provenance(self):
+        def evidence(lr):
+            return {
+                "combined_clinical_lr": lr,
+                "source_citation": "CANVarUK; PMID:31853058",
+                "clinical_data_summary": "Family history and case-control data; overlap reviewed.",
+            }
+
+        self.assertEqual(suggest_strength("PP4", evidence(2.08)), "Supporting")
+        self.assertEqual(suggest_strength("PP4", evidence(4.3)), "Moderate")
+        self.assertEqual(suggest_strength("PP4", evidence(18.7)), "Strong")
+        self.assertEqual(suggest_strength("PP4", evidence(350)), "Very Strong")
+        incomplete = evidence(350)
+        incomplete["source_citation"] = ""
+        self.assertIsNone(suggest_strength("PP4", incomplete))
+
     def test_bs4_likelihood_ratio_thresholds(self):
         self.assertEqual(
             suggest_strength("BS4", {"likelihood_ratio": 0.48}), "Supporting"
@@ -123,6 +139,37 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
 
 
 class ManualEvidenceClassificationTests(unittest.TestCase):
+    def test_pp4_adds_strength_from_combined_clinical_lr(self):
+        result = evaluate_manual_evidence(
+            [],
+            [{
+                "code": "PP4",
+                "enabled": True,
+                "evidence": {
+                    "combined_clinical_lr": 350,
+                    "source_citation": "CANVarUK; PMID:31853058",
+                    "clinical_data_summary": "Variant-specific combined clinical evidence; overlap reviewed.",
+                },
+                "references": ["PMID:31853058"],
+            }],
+        )
+        criterion = result["manual_criteria"][0]
+        self.assertTrue(criterion["applies"])
+        self.assertEqual(criterion["selected_strength"], "Very Strong")
+        self.assertEqual(criterion["points"], 8)
+
+    def test_pp4_cannot_be_enabled_without_provenance(self):
+        with self.assertRaisesRegex(ValueError, "source citation"):
+            evaluate_manual_evidence(
+                [],
+                [{
+                    "code": "PP4",
+                    "enabled": True,
+                    "evidence": {"combined_clinical_lr": 350},
+                    "override_strength": "Very Strong",
+                }],
+            )
+
     def test_curated_pvs1_rna_removes_predictive_pp3(self):
         result = evaluate_manual_evidence(
             [{"name": "PP3", "applies": True, "strength": "Supporting", "points": 1}],

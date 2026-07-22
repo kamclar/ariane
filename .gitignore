@@ -27,6 +27,9 @@ build/
 *.log
 *.sqlite3
 /tmp/
+/data/sources/
+/data/precomputed/brca_exchange_*.tsv
+/data/precomputed/brca_exchange_sample.json
 
 # OS files
 .DS_Store

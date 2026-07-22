@@ -125,8 +125,30 @@ def _parse_snapshot_coords(value: object, assembly: str) -> Optional[GenomicCoor
 
 
 def _resolve_precomputed_snapshot(gene: str, c_notation: str) -> Optional[ResolvedVariant]:
-    """Use the versioned coding-SNV snapshot before making network requests."""
+    """Use versioned coding SNV/indel snapshots before network requests."""
     from backend.lookups.precomputed import lookup_classification_snapshot
+    from backend.lookups.indels import lookup_indel_snapshot
+
+    indel = lookup_indel_snapshot(gene, c_notation)
+    if indel:
+        def convert(value: dict) -> GenomicCoords:
+            return GenomicCoords(
+                chrom=str(value["chrom"]), pos=int(value["pos"]),
+                ref=str(value["ref"]), alt=str(value["alt"]),
+                assembly=str(value["assembly"]),
+            )
+        return ResolvedVariant(
+            gene=gene,
+            transcript=str(indel["reference_transcript"]),
+            c_notation=str(indel["canonical_c_notation"]),
+            status="ok",
+            source="normalized_indel_snapshot",
+            grch37=convert(indel["grch37"]),
+            grch38=convert(indel["grch38"]),
+            warnings=[
+                "Coordinates loaded from the versioned normalized BRCA indel snapshot"
+            ],
+        )
 
     snapshot = lookup_classification_snapshot(gene, c_notation)
     if not snapshot:

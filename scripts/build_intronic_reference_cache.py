@@ -222,16 +222,21 @@ def build_spliceai(api_url: str, workers: int, timeout: int, delay: float, dista
     if not api_urls:
         raise ValueError("At least one SpliceAI API URL is required")
 
-    def task(item: tuple[str, dict]) -> tuple[str, dict]:
+    def task(index: int, item: tuple[str, dict]) -> tuple[str, dict]:
         key, entry = item
         if delay:
             time.sleep(delay)
-        endpoint_index = int(hashlib.sha256(key.encode("utf-8")).hexdigest(), 16) % len(api_urls)
+        # Distribute resume batches evenly. Hash-based assignment repeatedly
+        # sent every timed-out variant back to the same slow instance.
+        endpoint_index = index % len(api_urls)
         return key, _score_variant(api_urls[endpoint_index], entry["gene"], entry, timeout, distance)
 
     completed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-        futures = {executor.submit(task, item): item[0] for item in pending}
+        futures = {
+            executor.submit(task, index, item): item[0]
+            for index, item in enumerate(pending)
+        }
         for future in concurrent.futures.as_completed(futures):
             key = futures[future]
             try:

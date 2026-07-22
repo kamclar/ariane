@@ -1,0 +1,44 @@
+{
+  "ambiguous_alias_examples": {
+    "BRCA2:c.-166_-156dup": [
+      "BRCA2:c.-166_-156dup",
+      "BRCA2:c.-166_156dup"
+    ],
+    "BRCA2:c.3975_3978dup": [
+      "BRCA2:c.3975_3978dup",
+      "BRCA2:c.3975dup"
+    ]
+  },
+  "ambiguous_aliases": 2,
+  "ambiguous_conflicts": 0,
+  "created_utc": "2026-07-22T15:25:10.819211+00:00",
+  "dataset": "Normalized BRCA1/2 small-indel reference snapshot",
+  "excluded": {
+    "ambiguous_alias_removed": 2,
+    "not_small_indel": 60768
+  },
+  "index_sha256": "1bc596d0983cbd63d094b7784e9793af53d82edcbd0c49589678c1cb39c638c3",
+  "records": 16511,
+  "reference_transcripts": {
+    "BRCA1": "NM_007294.4",
+    "BRCA2": "NM_000059.4"
+  },
+  "rows_seen": 77279,
+  "source": "BRCA Exchange official release archive",
+  "source_file": "variants_output.tsv",
+  "source_release": "70",
+  "source_release_date": "2026-03-08",
+  "source_sha256": "0599d8483f6bedc1e2ee1e19a36c7754f9935bb7473e26ae78a9261045b56e07",
+  "status": "validated_reference_snapshot",
+  "variant_types": {
+    "deletion": 4252,
+    "delins": 87,
+    "duplication": 1897,
+    "frameshift": 6898,
+    "inframe_deletion": 810,
+    "inframe_delins": 269,
+    "inframe_duplication": 228,
+    "inframe_insertion": 113,
+    "insertion": 1957
+  }
+}

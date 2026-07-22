@@ -46,10 +46,12 @@ from backend.modules import frequency as _frequency_data_source  # noqa: E402,F4
 from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402,F401
 from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
 from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
+from backend.lookups.indels import load_indel_snapshot  # noqa: E402
 from backend.modules.residues import initialize_residue_data  # noqa: E402
 
 _spliceai_data_source._load_precomputed_cache()
 _spliceai_data_source._load_api_cache()
+load_indel_snapshot()
 initialize_residue_data()
 
 # ── App setup ──────────────────────────────────────────────────────────────
@@ -272,7 +274,12 @@ async def _classify_one(
     from backend.modules.classifier import evaluate_variant as _evaluate
     from backend.modules.external import external_comparison
     from backend.lookups.precomputed import lookup_classification_snapshot
+    from backend.lookups.indels import lookup_indel_snapshot
     from backend.modules.reference_validation import validate_reference_allele
+
+    indel_snapshot = lookup_indel_snapshot(gene, c_notation)
+    if indel_snapshot:
+        c_notation = str(indel_snapshot["canonical_c_notation"])
 
     # Reject a wrong stated reference before coordinates, external lookups, or
     # evidence evaluation. This is deliberately fail-closed.
@@ -297,7 +304,10 @@ async def _classify_one(
     snapshot_p = ""
     if snapshot:
         snapshot_p = str(snapshot.get("record", {}).get("p_notation") or "")
-    reviewed_p = snapshot_p or str(table9_protein_notation(gene, c_notation) or "")
+    indel_p = str(indel_snapshot.get("p_notation") or "") if indel_snapshot else ""
+    if normalize_protein_notation(indel_p) in {"p.?", "p.(?)"}:
+        indel_p = ""
+    reviewed_p = snapshot_p or indel_p or str(table9_protein_notation(gene, c_notation) or "")
     normalized_reviewed_p = normalize_protein_notation(reviewed_p)
     normalized_input_p = normalize_protein_notation(p_notation)
     if normalized_reviewed_p and normalized_input_p != normalized_reviewed_p:

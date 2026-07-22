@@ -53,7 +53,7 @@ function ariane() {
         },
 
         resetManualItems() {
-            this.manualItems = ["PS4", "PM3", "PP1", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"].map(code => ({
+            this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"].map(code => ({
                 code,
                 enabled: false,
                 evidence: {},
@@ -145,6 +145,18 @@ function ariane() {
 
         suggestedManualStrength(item) {
             const evidence = item.evidence || {};
+            if (item.code === "PP4") {
+                const lr = this.numberOrNull(evidence.combined_clinical_lr);
+                const complete = lr !== null && lr >= 0
+                    && Boolean((evidence.source_citation || "").trim())
+                    && Boolean((evidence.clinical_data_summary || "").trim());
+                if (!complete) return "";
+                if (lr >= 350) return "Very Strong";
+                if (lr >= 18.7) return "Strong";
+                if (lr >= 4.3) return "Moderate";
+                if (lr >= 2.08) return "Supporting";
+                return "";
+            }
             if (item.code === "PVS1_RNA") {
                 const hasRequired = evidence.assay_scope === "mrna_only"
                     && evidence.rna_conclusion === "damaging"

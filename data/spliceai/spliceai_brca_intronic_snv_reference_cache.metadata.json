@@ -10,7 +10,7 @@
   "cache_entries": 13800,
   "coordinate_cache_sha256": "cf833940d725fca88e93d94155d75d82b68aa67b82e9858cf036815eab5d2308",
   "coordinate_variants": 13800,
-  "created_utc": "2026-07-22T09:42:11.986169+00:00",
+  "created_utc": "2026-07-22T11:39:11.490029+00:00",
   "dataset": "BRCA1/BRCA2 intronic SNV reference-transcript SpliceAI cache",
   "distance": 50,
   "mask": 0,
@@ -24,8 +24,8 @@
       "refseq": "NM_000059.4"
     }
   },
-  "sha256": "fd7c6151e4b00d99c23c64ba909ecfbb8ed01534c9320863716e4525ebeb85e1",
-  "status_error": 43,
-  "status_ok": 13757,
+  "sha256": "85b0195317d96e04318fb20acd2843b0c846240ba0ef9bcced2bb599d0e9c1b8",
+  "status_error": 0,
+  "status_ok": 13800,
   "transcript_policy": "reference_transcript"
 }

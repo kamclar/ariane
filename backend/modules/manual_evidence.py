@@ -45,6 +45,16 @@ MANUAL_CRITERIA = {
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PP1 and Appendix I",
     },
+    "PP4": {
+        "direction": "pathogenic",
+        "allowed_strengths": ["Supporting", "Moderate", "Strong", "Very Strong"],
+        "title": "Combined clinical likelihood ratio",
+        "threshold": "Supporting at combined LR >= 2.08, Moderate at LR >= 4.3, Strong at LR >= 18.7, Very Strong at LR >= 350.",
+        "check": "Confirm that the value is a variant-specific combined clinical LR, document the included clinical data types, their independence, and the primary publication or curated source.",
+        "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
+        "source_url": CSPEC_URL,
+        "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PP4, Specifications Table 7 and Appendix B",
+    },
     "BS2": {
         "direction": "benign",
         "allowed_strengths": ["Supporting", "Moderate", "Strong"],
@@ -107,7 +117,7 @@ MANUAL_CRITERIA = {
     },
 }
 
-STRUCTURED_CURATED_CODES = {"PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"}
+STRUCTURED_CURATED_CODES = {"PP4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"}
 
 RESOURCE_LINKS = [
     {
@@ -169,6 +179,22 @@ def _number(evidence: Dict[str, Any], key: str) -> Optional[float]:
 
 
 def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
+    if code == "PP4":
+        likelihood_ratio = _number(evidence, "combined_clinical_lr")
+        source = (evidence.get("source_citation") or "").strip()
+        data_summary = (evidence.get("clinical_data_summary") or "").strip()
+        if likelihood_ratio is None or likelihood_ratio < 0 or not source or not data_summary:
+            return None
+        if likelihood_ratio >= 350:
+            return "Very Strong"
+        if likelihood_ratio >= 18.7:
+            return "Strong"
+        if likelihood_ratio >= 4.3:
+            return "Moderate"
+        if likelihood_ratio >= 2.08:
+            return "Supporting"
+        return None
+
     if code in {"PVS1_RNA", "BP7_RNA"}:
         assay_scope = evidence.get("assay_scope")
         transcript_accession = (evidence.get("transcript_accession") or "").strip()
@@ -319,7 +345,16 @@ def evaluate_manual_evidence(
         definition = MANUAL_CRITERIA[code]
         suggested = suggest_strength(code, item.get("evidence", {}))
         override = item.get("override_strength") or None
-        if code in STRUCTURED_CURATED_CODES and item.get("enabled") and not suggested:
+        evidence = item.get("evidence", {})
+        pp4_complete = (
+            _number(evidence, "combined_clinical_lr") is not None
+            and _number(evidence, "combined_clinical_lr") >= 0
+            and bool((evidence.get("source_citation") or "").strip())
+            and bool((evidence.get("clinical_data_summary") or "").strip())
+        )
+        if code == "PP4" and item.get("enabled") and not pp4_complete:
+            raise ValueError("PP4 requires combined clinical LR, source citation, and clinical data summary")
+        if code in STRUCTURED_CURATED_CODES - {"PP4"} and item.get("enabled") and not suggested:
             raise ValueError(
                 f"{code} requires a complete structured curated evidence record"
             )

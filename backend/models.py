@@ -199,6 +199,7 @@ class ManualCriterionInput(BaseModel):
             "PS4",
             "PM3",
             "PP1",
+            "PP4",
             "BS2",
             "BS4",
             "PVS1_RNA",

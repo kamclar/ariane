@@ -317,6 +317,22 @@
                                     </label>
                                 </div>
 
+                                <div class="manual-input-grid" x-show="item.code === 'PP4'">
+                                    <label>Combined clinical LR
+                                        <input type="number" min="0" step="any" x-model="item.evidence.combined_clinical_lr">
+                                    </label>
+                                    <label>Primary source or citation
+                                        <input type="text" x-model="item.evidence.source_citation"
+                                            placeholder="e.g. CANVarUK record and PMID(s)">
+                                    </label>
+                                </div>
+
+                                <label class="full-width-label" x-show="item.code === 'PP4'">
+                                    Included clinical data and independence review
+                                    <textarea rows="3" x-model="item.evidence.clinical_data_summary"
+                                        placeholder="Describe segregation, co-occurrence, family history, tumour pathology and/or case-control inputs, and whether overlapping observations were checked."></textarea>
+                                </label>
+
                                 <div class="manual-input-grid" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
                                     <label>Assay scope
                                         <select x-model="item.evidence.assay_scope">
@@ -525,7 +541,7 @@
                                         ARIANE suggestion:
                                         <strong x-text="suggestedManualStrength(item) || 'threshold not met'"></strong>
                                     </span>
-                                    <label x-show="item.code !== 'PVS1_RNA' && item.code !== 'BP7_RNA' && item.code !== 'PVS1_INIT' && item.code !== 'PS1_SPLICE'">Reviewer-selected strength
+                                    <label x-show="item.code !== 'PP4' && item.code !== 'PVS1_RNA' && item.code !== 'BP7_RNA' && item.code !== 'PVS1_INIT' && item.code !== 'PS1_SPLICE'">Reviewer-selected strength
                                         <select x-model="item.override_strength">
                                             <option value="">Use ARIANE suggestion</option>
                                             <template

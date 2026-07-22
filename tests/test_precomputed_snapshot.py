@@ -12,6 +12,26 @@ from backend.modules.reference_validation import validate_reference_allele
 
 
 class PrecomputedSnapshotTests(unittest.TestCase):
+    def test_normalized_indel_snapshot_resolves_alias_and_protein(self):
+        from backend.lookups.indels import lookup_indel_snapshot
+
+        record = lookup_indel_snapshot("BRCA1", "c.5266dupC")
+        self.assertIsNotNone(record)
+        self.assertEqual(record["canonical_c_notation"], "c.5266dup")
+        self.assertEqual(record["p_notation"], "p.(Gln1756ProfsTer74)")
+        self.assertEqual(record["reference_transcript"], "NM_007294.4")
+        self.assertEqual(record["grch37"]["ref"], "T")
+        self.assertEqual(record["grch38"]["alt"], "TG")
+
+    def test_indel_snapshot_records_and_excludes_ambiguous_aliases(self):
+        from backend.lookups.indels import load_indel_snapshot, lookup_indel_snapshot
+
+        index, aliases = load_indel_snapshot()
+        self.assertEqual(len(index), 16511)
+        self.assertEqual(aliases["BRCA2:c.3975_3978dup"], "BRCA2:c.3975_3978dup")
+        self.assertNotIn("c.3975_3978dup", index["BRCA2:c.3975dup"]["input_c_notations"])
+        self.assertIsNotNone(lookup_indel_snapshot("BRCA2", "c.3975_3978dup"))
+
     def test_metadata_is_available(self):
         metadata = load_classification_snapshot_metadata()
         self.assertEqual(metadata["n_records"], 47547)
@@ -37,6 +57,14 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_general_indel_snapshot_rejects_random_protein_notation(self):
+        from backend.main import _classify_one
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(_classify_one("BRCA1", "c.3668_3671dup", "p.(Arg100Gly)"))
+        self.assertEqual(raised.exception.status_code, 422)
+        self.assertIn("p.(Cys1225SerfsTer10)", raised.exception.detail)
+
     def test_table9_indel_rejects_random_protein_notation(self):
         from backend.main import _classify_one
 

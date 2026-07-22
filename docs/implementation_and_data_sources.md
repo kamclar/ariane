@@ -146,6 +146,8 @@ Kritéria se odvozují z posterior probability a kombinovaného likelihood ratio
 | PP4 | LR >= 2,08 | LR >= 4,3 | LR >= 18,7 | LR >= 350 |
 | BP5 | LR <= 0,48 | LR <= 0,23 | LR <= 0,05 | LR <= 0,00285 |
 
+PP4 je podporováno ve strukturované manuální revizi. Reviewer zadá variantově specifický combined clinical LR, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. ARIANE určí sílu výhradně podle uvedených prahů. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat. Automatická Module 1 klasifikace PP4 nepřidává.
+
 ### 3.5 PS1 na proteinové úrovni
 
 Zdroj referenčních variant: P/LP missense varianty odvozené z ENIGMA Supplementary Table 7.
@@ -219,10 +221,11 @@ Chybějící SpliceAI znamená, že BP1 nelze použít.
 
 ## 4. Kritéria vyžadující manuální revizi
 
-Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. Tyto kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
+Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, PP4, BS2 a BS4. Tyto kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
 
 Strukturovaná manuální část dále podporuje:
 
+- PP4 z variantově specifického combined clinical LR,
 - PVS1 RNA,
 - BP7 RNA,
 - PVS1 pro iniciační kodon,
@@ -239,7 +242,7 @@ Kritéria se vyhodnocují v tomto pořadí:
 3. gnomAD a BA1,
 4. Table 9 pro PS3 a BS3,
 5. Table 4 pro PVS1 a PM5 PTC,
-6. ST7 pro PP4 a BP5,
+6. lokální referenční datasety pro navazující variantově specifická pravidla,
 7. proteinové PS1,
 8. PP3 a BP4,
 9. BP7,
@@ -379,7 +382,39 @@ Toto oddělení umožňuje použít stabilní transkriptový překlad a souřadn
 
 Metadata označují snapshot jako `snapshot_not_authoritative`. Před klinickým označením za autoritativní dataset je nutná samostatná validace proteinových následků, referenčních alel, souřadnic a reprodukovatelnosti generování.
 
-Snapshot pokrývá coding SNV. Není obecným zdrojem proteinových následků pro indely, exonové CNV nebo všechny UTR varianty.
+Tento snapshot pokrývá coding SNV. Coding malé indely pokrývá samostatný snapshot popsaný níže. Exonové CNV a všechny UTR varianty pokryté nejsou.
+
+### 7.4 Normalizovaný snapshot malých indelů
+
+Index:
+
+`data/precomputed/brca_normalized_indel_snapshot.index.json`
+
+Metadata:
+
+`data/precomputed/brca_normalized_indel_snapshot.metadata.json`
+
+Snapshot byl vytvořen z oficiálního BRCA Exchange release 70 ze dne 8. března 2026. Tento release opravil chybná GRCh37 mapování z předchozího release. Zdrojový soubor a výsledný index mají v metadatech SHA-256.
+
+Obsahuje 16 511 jednoznačných malých indelů. Proteinový následek `p.?` zůstává neznámý a nepoužívá se ke kontrole vstupu ani k odvození frameshift nebo in-frame typu:
+
+| Typ | Počet |
+| --- | ---: |
+| frameshift | 6 898 |
+| deletion, proteinový následek neznámý | 4 252 |
+| insertion, proteinový následek neznámý | 1 957 |
+| duplication, proteinový následek neznámý | 1 897 |
+| in-frame deletion | 810 |
+| in-frame delins | 269 |
+| in-frame duplication | 228 |
+| in-frame insertion | 113 |
+| delins, proteinový následek neznámý | 87 |
+
+Každý záznam obsahuje vstupní aliasy a kanonickou `c.` notaci, `p.` následek, typ varianty, REF a ALT alely pro GRCh37 a GRCh38, referenční transkript, BRCA Exchange release, zdrojové databáze, CA ID a VRS ID, pokud byly dostupné.
+
+Builder `scripts/build_brca_indel_snapshot.py` čte zdroj streamovaně. Přijímá pouze BRCA1 a BRCA2 na `NM_007294.4` a `NM_000059.4`, malé indely s uvedeným proteinovým následkem, včetně `p.?`, a oběma genomovými mapováními. Konfliktní záznamy se nevkládají. Alias sdílený více záznamy se z aliasového indexu odstraní a zapíše se do metadat. Přesná kanonická notace zůstává dostupná. Aktuální release obsahuje dva takové aliasy. Runtime při startu kontroluje status, počet záznamů a checksum indexu. Chybějící nebo poškozený snapshot zastaví start aplikace.
+
+Za běhu se alias nejprve převede na kanonickou `c.` notaci. Záznam poskytne očekávanou `p.` notaci a lokální souřadnice. Rozpor v `p.` notaci skončí chybou 422. Snapshot neurčuje výslednou klinickou třídu ani automaticky nepřidává kritéria.
 
 ## 8. Předpočítaná SpliceAI data
 
