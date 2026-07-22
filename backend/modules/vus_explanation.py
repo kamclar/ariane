@@ -92,9 +92,9 @@ def explain_vus(result: Dict) -> Optional[dict]:
         return _base(
             "pvs1_needs_support",
             "B",
-            "VUS: PVS1 needs additional support",
-            "PVS1 is present, but the current evidence does not meet the required ENIGMA combination for likely pathogenic.",
-            "Look for at least one additional accepted supporting pathogenic criterion, or review PVS1 strength manually.",
+            "VUS with PVS1: why this notice is shown",
+            "This notice does not mean that the classification or the PVS1 assignment is incorrect. It is shown because PVS1 is strong pathogenic evidence, but PVS1 alone does not satisfy an ENIGMA combination for Likely Pathogenic. With the currently accepted evidence, VUS is therefore the expected result. High review priority means that the result may be close to a classification threshold, not that an error was detected.",
+            "Verify the assigned PVS1 strength and review whether any independent, already-supported pathogenic or benign evidence is available. Do not add evidence solely to move the variant out of VUS.",
             "high",
         )
 

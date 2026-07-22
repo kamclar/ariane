@@ -569,6 +569,16 @@ class VusExplanationTests(unittest.TestCase):
         self.assertEqual(explanation["category"], "ps3_pp3_one_step_short")
         self.assertEqual(explanation["tier"], "A")
 
+    def test_pvs1_explanation_says_vus_is_expected_not_erroneous(self):
+        explanation = explain_vus(
+            self.result_with({"PVS1": self.criterion("Very Strong", 8)}, total_points=8)
+        )
+        self.assertEqual(explanation["category"], "pvs1_needs_support")
+        self.assertIn("does not mean that the classification", explanation["summary"])
+        self.assertIn("VUS is therefore the expected result", explanation["summary"])
+        self.assertIn("not that an error was detected", explanation["summary"])
+        self.assertIn("Do not add evidence solely", explanation["what_to_check"])
+
     def test_bp4_bp7_pm2_explanation(self):
         explanation = explain_vus(
             self.result_with(

@@ -248,7 +248,7 @@ def _vus_explanation_sentence(result: dict) -> Optional[str]:
         return None
     return (
         f"VUS explanation: {explanation['summary']} "
-        f"Next useful evidence: {explanation['what_to_check']}"
+        f"Suggested review: {explanation['what_to_check']}"
     )
 
 
