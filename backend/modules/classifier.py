@@ -137,8 +137,9 @@ def classify_by_enigma_combination(criteria: Dict, points: int) -> tuple:
         return (
             cls,
             label,
-            "Contradictory benign and pathogenic evidence - classification uses the "
-            "Tavtigian 2020 point system and requires expert review.",
+            "Mixed pathogenic and benign evidence. ENIGMA VCEP v1.2 second "
+            "classification approach applies the Tavtigian 2020 point system; "
+            "expert review is required.",
         )
 
     if has_pathogenic:

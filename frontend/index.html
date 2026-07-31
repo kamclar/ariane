@@ -130,7 +130,8 @@
                      :class="'class-' + result?.predicted_class"
                      x-show="result?.mixed_evidence">
                     <strong>Mixed evidence.</strong>
-                    Pathogenic and benign evidence co-occur. ENIGMA point-based combination applied. Expert review required.
+                    Pathogenic and benign evidence co-occur. ENIGMA v1.2 second classification approach,
+                    using Tavtigian 2020 points, was applied. Expert review required.
                     <a href="https://cspec.genome.network/cspec/File/id/02537f62-66a3-4e67-8aec-cf44b326534d/data"
                        target="_blank" rel="noopener">
                         ENIGMA v1.2, Classification Methods, second approach
@@ -363,13 +364,13 @@
                 <details class="evidence-detail-item" x-show="result?.mixed_evidence">
                     <summary>
                         <span>Mixed evidence combination</span>
-                        <span class="evidence-detail-summary">ENIGMA point-based method</span>
+                        <span class="evidence-detail-summary">ENIGMA v1.2 / Tavtigian 2020 points</span>
                     </summary>
                     <dl class="evidence-detail-grid">
                         <div><dt>Pathogenic points</dt><dd x-text="`+${result?.pathogenic_points || 0}`"></dd></div>
                         <div><dt>Benign points</dt><dd x-text="result?.benign_points || 0"></dd></div>
                         <div><dt>Total</dt><dd x-text="result?.total_points"></dd></div>
-                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA point-based method for variants meeting both pathogenic and benign criteria</dd></div>
+                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA VCEP v1.2 second classification approach for mixed evidence, using the Tavtigian 2020 point system</dd></div>
                     </dl>
                 </details>
             </section>
@@ -1066,6 +1067,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260731-3"></script>
+    <script src="/static/js/app.js?v=20260731-4"></script>
 </body>
 </html>
