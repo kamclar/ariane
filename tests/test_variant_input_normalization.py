@@ -68,6 +68,32 @@ def test_contradictory_protein_description_is_rejected():
         normalize_variant_input("BRCA1", "c.303T>G", p_notation="p.(Arg170Gln)")
 
 
+@pytest.mark.parametrize(
+    ("gene", "c_notation", "abbreviated_p", "canonical_p"),
+    [
+        (
+            "BRCA1", "c.3668_3671dup", "p.(Cys1225fs)",
+            "p.(Cys1225SerfsTer10)",
+        ),
+        (
+            "BRCA2", "c.9097del", "p.(Thr3033fs)",
+            "p.(Thr3033LeufsTer29)",
+        ),
+    ],
+)
+def test_abbreviated_frameshift_is_accepted_but_output_is_canonical(
+    gene, c_notation, abbreviated_p, canonical_p
+):
+    result = normalize_variant_input(gene, c_notation, p_notation=abbreviated_p)
+    assert result.p_notation == canonical_p
+
+
+@pytest.mark.parametrize("wrong_p", ["p.(Arg1225fs)", "p.(Cys1226fs)"])
+def test_abbreviated_frameshift_must_match_reference_amino_acid_and_position(wrong_p):
+    with pytest.raises(ValueError, match="Protein consequence mismatch"):
+        normalize_variant_input("BRCA1", "c.3668_3671dup", p_notation=wrong_p)
+
+
 def test_wrong_transcript_is_rejected():
     with pytest.raises(ValueError, match="does not match BRCA1"):
         normalize_variant_input("BRCA1", "NM_000059.4:c.303T>G")

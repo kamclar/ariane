@@ -96,6 +96,19 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_abbreviated_frameshift_is_classified_with_canonical_output(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.3668_3671dup", "p.(Cys1225fs)")
+            )
+
+        self.assertEqual(result.p_notation, "p.(Cys1225SerfsTer10)")
+        self.assertEqual(result.predicted_class, 5)
+
     def test_exon_cnv_skips_small_variant_lookups_and_hides_provider_errors(self):
         from backend.main import _classify_one
 

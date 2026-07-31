@@ -12,7 +12,11 @@ from backend.lookups.precomputed import (
     load_classification_snapshot_index,
     load_classification_snapshot_metadata,
 )
-from backend.modules.hgvs import normalize_protein_notation, split_combined_hgvs
+from backend.modules.hgvs import (
+    normalize_protein_notation,
+    protein_notations_compatible,
+    split_combined_hgvs,
+)
 
 
 _ASSEMBLIES = {"GRCH37": "GRCh37", "GRCH38": "GRCh38"}
@@ -155,7 +159,11 @@ def _from_c_notation(
             source = "ENIGMA Table 9"
 
     normalized_supplied_p = normalize_protein_notation(supplied_p)
-    if snapshot_p and normalized_supplied_p and normalized_supplied_p != snapshot_p:
+    if (
+        snapshot_p
+        and normalized_supplied_p
+        and not protein_notations_compatible(normalized_supplied_p, snapshot_p)
+    ):
         raise ValueError(
             f"Protein consequence mismatch for {gene} {canonical_c}: "
             f"{TRANSCRIPTS[gene]} gives {snapshot_p}, not {normalized_supplied_p}"

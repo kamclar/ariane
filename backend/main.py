@@ -279,7 +279,7 @@ async def _classify_one(
     from backend.modules.frequency import get_gnomad_frequencies
     from backend.modules.table9 import table9_lookup_ps3_bs3
     from backend.modules.table9 import table9_protein_notation
-    from backend.modules.hgvs import normalize_protein_notation
+    from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
     from backend.modules.pp4_bp5 import evaluate_pp4_bp5
     from backend.modules.ps1 import evaluate_ps1
     from backend.modules.residues import check_important_residue
@@ -322,7 +322,9 @@ async def _classify_one(
     reviewed_p = snapshot_p or indel_p or str(table9_protein_notation(gene, c_notation) or "")
     normalized_reviewed_p = normalize_protein_notation(reviewed_p)
     normalized_input_p = normalize_protein_notation(p_notation)
-    if normalized_reviewed_p and normalized_input_p != normalized_reviewed_p:
+    if normalized_reviewed_p and not protein_notations_compatible(
+        normalized_input_p, normalized_reviewed_p
+    ):
         raise HTTPException(
             status_code=422,
             detail=(
@@ -331,6 +333,8 @@ async def _classify_one(
                 f"not {normalized_input_p}."
             ),
         )
+    if normalized_reviewed_p:
+        p_notation = normalized_reviewed_p
 
     # Determine the variant type before planning external lookups. Exon-level
     # CNVs with uncertain breakpoints cannot be represented by one genomic
