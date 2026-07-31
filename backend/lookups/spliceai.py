@@ -274,6 +274,7 @@ def _lookup_precomputed_score(gene: str, c_notation: str) -> Optional[dict]:
             "selected_transcript": REFERENCE_TRANSCRIPTS.get(gene, {}).get("ensembl", ""),
             "reference_transcript_score": score,
             "max_any_transcript_score": entry.get("max_any_transcript_score"),
+            "max_any_transcript": entry.get("max_any_transcript", ""),
             "source": entry.get("source") or "precomputed BRCA SNV SpliceAI cache",
             "cache_key": key,
             "grch38": entry.get("grch38", ""),
@@ -432,6 +433,8 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "selected_transcript": precomputed.get("selected_transcript"),
             "reference_transcript_score": precomputed.get("reference_transcript_score"),
             "max_any_transcript_score": precomputed.get("max_any_transcript_score"),
+            "max_any_transcript": precomputed.get("max_any_transcript", ""),
+            "max_delta_field": precomputed.get("max_delta_field", ""),
             "cache_key": precomputed.get("cache_key"),
             "source": precomputed.get("source"),
             "grch38": precomputed.get("grch38"),
@@ -448,11 +451,16 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         SPLICEAI_STATUS_CACHE[variant_key] = {
             "status": "ok" if score is not None else "api_no_score",
             "score":  score,
-            "reason": "Loaded from Drive cache (Broad API)",
+            "reason": "Loaded from persistent Broad API runtime cache",
+            "source": entry.get("source") or entry.get("api_source") or "Broad SpliceAI API runtime cache",
             "transcript_policy": entry.get("transcript_policy"),
             "selected_transcript": entry.get("selected_transcript"),
             "reference_transcript_score": entry.get("reference_transcript_score"),
             "max_any_transcript_score": entry.get("max_any_transcript_score"),
+            "max_any_transcript": entry.get("max_any_transcript", ""),
+            "max_delta_field": entry.get("max_delta_field", ""),
+            "grch38": f"{entry.get('chrom')}:{entry.get('pos')}:{entry.get('ref')}>{entry.get('alt')}",
+            "cache_key": cache_key,
         }
         return score
 
@@ -468,6 +476,8 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "status": "no_grch38_coords",
             "score":  None,
             "reason": "No GRCh38 coordinates available",
+            "source": "Broad SpliceAI API",
+            "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
         }
         return None
 
@@ -486,6 +496,8 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
                 else "Broad SpliceAI API returned no score for the required transcript"
             ),
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
+            "source": SPLICEAI_API_SOURCE,
+            "grch38": f"{coords['chrom']}:{coords['pos']}:{coords['ref']}>{coords['alt']}",
         }
         return None
 
@@ -522,9 +534,14 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             else f"Queried from {SPLICEAI_API_SOURCE}; available in memory but not persisted"
         ),
         "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
+        "source": SPLICEAI_API_SOURCE,
         "selected_transcript": selected.get("selected_transcript"),
         "reference_transcript_score": selected.get("reference_transcript_score"),
         "max_any_transcript_score": selected.get("max_any_transcript_score"),
+        "max_any_transcript": selected.get("max_any_transcript", ""),
+        "max_delta_field": selected.get("max_delta_field", ""),
+        "grch38": f"{coords['chrom']}:{coords['pos']}:{coords['ref']}>{coords['alt']}",
+        "cache_key": cache_key,
     }
     return score
 

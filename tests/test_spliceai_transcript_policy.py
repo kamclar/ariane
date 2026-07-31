@@ -98,6 +98,11 @@ class SpliceAITranscriptPolicyTests(unittest.TestCase):
         self.assertEqual(status["status"], "ok")
         self.assertEqual(status["source"], "test precomputed cache")
         self.assertIn("precomputed", status["reason"])
+        self.assertEqual(status["transcript_policy"], "reference_transcript")
+        self.assertEqual(status["selected_transcript"], "ENST00000357654.9")
+        self.assertEqual(status["max_delta_field"], "DS_AG")
+        self.assertEqual(status["grch38"], "17:43124091:A>T")
+        self.assertEqual(status["cache_key"], "BRCA1:c.6T>A")
 
     def test_max_any_policy_skips_reference_precomputed_cache(self):
         spliceai.SPLICEAI_TRANSCRIPT_POLICY = "max_any_transcript"

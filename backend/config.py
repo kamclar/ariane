@@ -44,7 +44,6 @@ BP5_LR_THRESHOLDS = {
     "Moderate":    0.23,
     "Supporting":  0.48,
 }
-MULTIFACTORIAL_PRIOR = 0.10
 
 CLASS_THRESHOLDS = {5: 10, 4: 6, 3: -1, 2: -6}
 

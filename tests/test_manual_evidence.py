@@ -135,6 +135,9 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             "nmd_assessed": "yes",
         }
         self.assertEqual(suggest_strength("PVS1_RNA", evidence), "Strong")
+        evidence["functional_transcript_remaining"] = "uncertain"
+        self.assertIsNone(suggest_strength("PVS1_RNA", evidence))
+        evidence["functional_transcript_remaining"] = "absent_or_minimal"
         evidence["assay_scope"] = "combined_mrna_protein"
         self.assertIsNone(suggest_strength("PVS1_RNA", evidence))
 
@@ -234,6 +237,53 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 }],
             )
 
+    def test_pp1_with_automatic_pp4_requires_independence_review(self):
+        base = [{
+            "name": "PP4", "applies": True, "strength": "Strong", "points": 4,
+            "reason": "Local clinical LR snapshot",
+        }]
+        manual = [{
+            "code": "PP1", "enabled": True,
+            "evidence": {"likelihood_ratio": 4.3},
+        }]
+        with self.assertRaisesRegex(ValueError, "independent observations"):
+            evaluate_manual_evidence(base, manual)
+
+    def test_pp1_with_automatic_pp4_is_allowed_after_independence_review(self):
+        base = [{
+            "name": "PP4", "applies": True, "strength": "Strong", "points": 4,
+            "reason": "Local clinical LR snapshot",
+        }]
+        manual = [{
+            "code": "PP1", "enabled": True,
+            "evidence": {
+                "likelihood_ratio": 4.3,
+                "independent_from_pp4_bp5": True,
+                "independence_rationale": "Pedigree observations are absent from the PP4 source cohorts.",
+            },
+        }]
+        result = evaluate_manual_evidence(base, manual)
+        self.assertEqual(result["total_points"], 6)
+
+    def test_ps4_with_manual_pp4_requires_independence_review(self):
+        manual = [
+            {
+                "code": "PP4", "enabled": True,
+                "evidence": {
+                    "combined_clinical_lr": 350,
+                    "source_review_status": "appendix_b",
+                    "source_pmid": "31853058",
+                    "clinical_data_summary": "Family-history LR; cohort recorded.",
+                },
+            },
+            {
+                "code": "PS4", "enabled": True,
+                "evidence": {"p_value": 0.01, "odds_ratio": 5, "lower_ci": 2.1},
+            },
+        ]
+        with self.assertRaisesRegex(ValueError, "PS4 cannot be combined"):
+            evaluate_manual_evidence([], manual)
+
     def test_curated_pvs1_rna_removes_predictive_pp3(self):
         result = evaluate_manual_evidence(
             [{"name": "PP3", "applies": True, "strength": "Supporting", "points": 1}],
@@ -248,6 +298,83 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
             }],
         )
         self.assertEqual(result["total_points"], 8)
+        self.assertEqual(
+            result["evidence_interactions"][0]["suppressed"],
+            ["PP3"],
+        )
+
+    def test_pvs1_rna_replaces_all_applicable_bioinformatic_codes(self):
+        base = [
+            {"name": "PP3", "applies": True, "strength": "Supporting", "points": 1},
+            {"name": "BP1", "applies": True, "strength": "Strong", "points": -4},
+            {"name": "BP4", "applies": True, "strength": "Supporting", "points": -1},
+            {"name": "BP7", "applies": True, "strength": "Supporting", "points": -1},
+            {"name": "PS1", "applies": True, "strength": "Strong", "points": 4},
+        ]
+        result = evaluate_manual_evidence(
+            base,
+            [{
+                "code": "PVS1_RNA", "enabled": True,
+                "evidence": {
+                    "assay_scope": "mrna_only", "rna_conclusion": "damaging",
+                    "functional_transcript_remaining": "absent_or_minimal",
+                    "curated_strength": "Very Strong",
+                    "transcript_accession": "NM_007294.4",
+                    "tissue_or_cell_type": "blood", "nmd_assessed": "yes",
+                },
+            }],
+        )
+        self.assertEqual(result["total_points"], 8)
+        warning = result["evidence_interactions"][0]
+        self.assertEqual(warning["status"], "deduplicated")
+        self.assertEqual(
+            set(warning["suppressed"]),
+            {"PP3", "BP1", "BP4", "BP7", "PS1"},
+        )
+
+    def test_bp7_rna_upgrades_bp7_but_retains_bp4(self):
+        result = evaluate_manual_evidence(
+            [
+                {"name": "BP4", "applies": True, "strength": "Supporting", "points": -1},
+                {"name": "BP7", "applies": True, "strength": "Supporting", "points": -1},
+            ],
+            [{
+                "code": "BP7_RNA", "enabled": True,
+                "evidence": {
+                    "assay_scope": "mrna_only",
+                    "rna_conclusion": "no_damaging_effect",
+                    "bp7_rna_eligible": True,
+                    "transcript_accession": "NM_007294.4",
+                    "tissue_or_cell_type": "blood",
+                    "nmd_assessed": "not_applicable",
+                },
+            }],
+        )
+        self.assertEqual(result["total_points"], -5)
+        warning = result["evidence_interactions"][0]
+        self.assertEqual(warning["retained"], ["BP7_RNA"])
+        self.assertEqual(warning["suppressed"], ["BP7"])
+
+    def test_bp7_rna_and_splice_pp3_are_retained_as_conflict(self):
+        result = evaluate_manual_evidence(
+            [{"name": "PP3", "applies": True, "strength": "Supporting", "points": 1}],
+            [{
+                "code": "BP7_RNA", "enabled": True,
+                "evidence": {
+                    "assay_scope": "mrna_only",
+                    "rna_conclusion": "no_damaging_effect",
+                    "bp7_rna_eligible": True,
+                    "transcript_accession": "NM_007294.4",
+                    "tissue_or_cell_type": "blood",
+                    "nmd_assessed": "not_applicable",
+                },
+            }],
+        )
+        self.assertEqual(result["total_points"], -3)
+        warning = result["evidence_interactions"][0]
+        self.assertEqual(warning["status"], "conflict")
+        self.assertTrue(warning["review_required"])
+        self.assertEqual(set(warning["retained"]), {"BP7_RNA", "PP3"})
 
     def test_manual_evidence_creates_separate_amended_result(self):
         base = [

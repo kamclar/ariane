@@ -252,7 +252,16 @@ def table4_lookup_deletion(gene: str, exon: str) -> Dict:
         result["found"] = True
         result["pvs1_code"] = rule["pvs1_code"]
         result["notes"] = rule.get("notes", "")
-        result["reason"] = f"Table 4 deletion lookup: {gene} DEL {exon} -> {rule['pvs1_code']}"
+        if rule["pvs1_code"] == "PVS1_N/A":
+            result["reason"] = (
+                f"PVS1 was not applied: ENIGMA Table 4 marks the {gene} "
+                f"{exon} deletion as PVS1 N/A."
+            )
+        else:
+            result["reason"] = (
+                f"ENIGMA Table 4 assigns {rule['pvs1_code']} to the "
+                f"{gene} {exon} deletion."
+            )
 
         # Parse strength
         strength, points, _ = parse_pvs1_code_strength(rule["pvs1_code"])
@@ -399,6 +408,5 @@ if __name__ == "__main__":
     for var in ["c.8953+2T>C", "c.8953+2T>A", "c.8953+2T>G"]:
         r = table4_lookup_splice("BRCA2", var)
         print(f"  BRCA2 {var}: {r['pvs1_code'] if r['found'] else 'NOT FOUND'}")
-
 
 

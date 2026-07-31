@@ -96,6 +96,38 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_exon_cnv_skips_small_variant_lookups_and_hides_provider_errors(self):
+        from backend.main import _classify_one
+
+        notation = "c.(793+1_794-1)_(1909+1_1910-1)del"
+        with patch("backend.lookups.coordinates.resolve_variant") as coordinates, patch(
+            "backend.lookups.spliceai.get_spliceai_score"
+        ) as spliceai, patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense"
+        ) as bayesdel, patch(
+            "backend.lookups.clinvar.clinvar_lookup",
+            return_value={"status": "api_timeout", "error": "raw provider error"},
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup",
+            return_value={"status": "api_timeout", "error": "raw provider error"},
+        ):
+            result = asyncio.run(_classify_one("BRCA2", notation, "p.(?)"))
+
+        coordinates.assert_not_called()
+        spliceai.assert_not_called()
+        bayesdel.assert_not_called()
+        warnings = "\n".join(result.warnings)
+        self.assertIn(
+            "PVS1 was not applied: ENIGMA Table 4 marks the BRCA2 E10 deletion as PVS1 N/A.",
+            warnings,
+        )
+        self.assertIn("uncertain genomic breakpoints", warnings)
+        self.assertIn("ClinVar comparison is temporarily unavailable", warnings)
+        self.assertIn("ClinGen ERepo comparison is temporarily unavailable", warnings)
+        self.assertNotIn("SpliceAI not available", warnings)
+        self.assertNotIn("raw provider error", warnings)
+        self.assertNotIn("HTTP 422", warnings)
+
     def test_c5266_automatically_receives_pp4_very_strong(self):
         from backend.main import _classify_one
 

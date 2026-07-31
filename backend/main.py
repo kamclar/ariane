@@ -33,9 +33,11 @@ from backend.models import (
     ExternalComparison, ExternalSubmitter, CLASS_LABELS,
     BatchRequest, BatchResponse, BatchItemResult,
     AlphaMissenseResult, VusExplanation,
+    SpliceAIAudit,
     RnaReviewRecommendation,
     ManualEvidenceRequest, ManualEvidenceResult,
-    ManualCriterionResult, ClientValidationRequest,
+    ManualCriterionResult, EvidenceInteractionWarning,
+    ClientValidationRequest, VariantNormalizationResponse,
 )
 
 validate_required_datasets({"table4": TABLE4_PATH, "table9": TABLE9_PATH, "st7": ST7_PATH})
@@ -235,6 +237,10 @@ async def evaluate_manual_evidence_endpoint(
             ManualCriterionResult(**criterion)
             for criterion in result["manual_criteria"]
         ],
+        evidence_interactions=[
+            EvidenceInteractionWarning(**warning)
+            for warning in result["evidence_interactions"]
+        ],
         assessor=req.assessor,
         assessed_at=req.assessed_at,
     )
@@ -246,6 +252,10 @@ async def evaluate_manual_evidence_endpoint(
             "predicted_class": response.predicted_class,
             "predicted_label": response.predicted_label,
             "total_points": response.total_points,
+            "evidence_interactions": [
+                warning.model_dump(mode="json")
+                for warning in response.evidence_interactions
+            ],
         },
     )
     return response
@@ -322,33 +332,35 @@ async def _classify_one(
             ),
         )
 
-    # Step 1: resolve coordinates
+    # Determine the variant type before planning external lookups. Exon-level
+    # CNVs with uncertain breakpoints cannot be represented by one genomic
+    # allele, so SNV/small-variant coordinate services are not applicable.
+    variant_type = infer_variant_type(c_notation, p_notation)
+    is_exon_cnv = variant_type.lower() in {"exon_deletion", "exon_duplication"}
+
+    # Step 1: resolve coordinates where the HGVS description has exact bounds.
     resolved = {}
     lookup_diagnostics = []
-    try:
-        rv = resolve_variant(gene, c_notation)
-        if rv:
-            resolved[f"{gene}:{c_notation}"] = rv
-            if rv.status != "ok" or rv.source == "Mutalyzer":
-                lookup_diagnostics.extend(
-                    f"Coordinate resolver: {warning}" for warning in rv.warnings
-                )
-    except Exception as exc:
-        message = f"Coordinate lookup failed: {type(exc).__name__}: {exc}"
-        logging.getLogger(__name__).exception(message)
-        lookup_diagnostics.append(message)
+    if not is_exon_cnv:
+        try:
+            rv = resolve_variant(gene, c_notation)
+            if rv:
+                resolved[f"{gene}:{c_notation}"] = rv
+                if rv.status != "ok" or rv.source == "Mutalyzer":
+                    lookup_diagnostics.extend(
+                        f"Coordinate resolver: {warning}" for warning in rv.warnings
+                    )
+        except Exception as exc:
+            message = f"Coordinate lookup failed: {type(exc).__name__}: {exc}"
+            logging.getLogger(__name__).exception(message)
+            lookup_diagnostics.append(message)
     grch37 = get_grch37(resolved, gene, c_notation)
     grch38 = get_grch38(resolved, gene, c_notation)
 
-    # Step 2: variant type
-    variant_type = infer_variant_type(c_notation, p_notation)
-
-    # Step 3: parallel external lookups
+    # Step 2: parallel external lookups
     # get_bayesdel_and_alphamissense returns (bayesdel_score, alphamissense_dict)
     # in a single myvariant.info call - no extra API overhead for AlphaMissense.
-    spliceai_score, (bayesdel_score, alphamissense), cv, er = await asyncio.gather(
-        lookup_or_unavailable(get_spliceai_score, None, "SpliceAI", lookup_diagnostics, gene, c_notation),
-        lookup_or_unavailable(get_bayesdel_and_alphamissense, (None, None), "MyVariant/BayesDel", lookup_diagnostics, gene, c_notation),
+    external_tasks = [
         lookup_or_unavailable(
             clinvar_lookup,
             {"status": "api_timeout", "error": "ClinVar lookup timed out"},
@@ -363,18 +375,34 @@ async def _classify_one(
             gene,
             c_notation,
         ),
-    )
+    ]
+    if is_exon_cnv:
+        cv, er = await asyncio.gather(*external_tasks)
+        spliceai_score = None
+        bayesdel_score, alphamissense = None, None
+    else:
+        spliceai_score, (bayesdel_score, alphamissense), cv, er = await asyncio.gather(
+            lookup_or_unavailable(
+                get_spliceai_score, None, "SpliceAI", lookup_diagnostics,
+                gene, c_notation,
+            ),
+            lookup_or_unavailable(
+                get_bayesdel_and_alphamissense, (None, None),
+                "MyVariant/BayesDel", lookup_diagnostics, gene, c_notation,
+            ),
+            *external_tasks,
+        )
 
     from backend.lookups.spliceai import SPLICEAI_STATUS_CACHE
     from backend.lookups.bayesdel import BAYESDEL_STATUS_CACHE
     variant_key = f"{gene}:{c_notation}"
-    splice_status = SPLICEAI_STATUS_CACHE.get(variant_key, {})
+    splice_status = {} if is_exon_cnv else SPLICEAI_STATUS_CACHE.get(variant_key, {})
     if splice_status.get("status") not in {None, "ok"}:
         lookup_diagnostics.append(
             f"SpliceAI unavailable: status={splice_status.get('status')}; "
             f"{splice_status.get('reason', 'no reason reported')}"
         )
-    bayesdel_status = BAYESDEL_STATUS_CACHE.get(variant_key, {})
+    bayesdel_status = {} if is_exon_cnv else BAYESDEL_STATUS_CACHE.get(variant_key, {})
     if bayesdel_status.get("status") in {"api_error", "no_grch37_coords"}:
         lookup_diagnostics.append(
             f"MyVariant/BayesDel unavailable: status={bayesdel_status.get('status')}; "
@@ -404,8 +432,20 @@ async def _classify_one(
         pp4_bp5_result=pp4_bp5_result, ps1_result=ps1_result,
         residue_info=residue_info, dup_type=dup_type,
     )
+    # Detailed provider responses belong in the server log, not in the clinical
+    # result. The public result receives one actionable summary per source.
     for diagnostic in lookup_diagnostics:
-        result["warnings"].append(f"External evidence unavailable: {diagnostic}")
+        logging.getLogger(__name__).warning("External lookup diagnostic: %s", diagnostic)
+    if is_exon_cnv:
+        result["warnings"].append(
+            "Coordinate-dependent evidence was not evaluated: this exon-level "
+            "copy-number variant has uncertain genomic breakpoints."
+        )
+    elif not grch37 and not grch38:
+        result["warnings"].append(
+            "Coordinate-dependent evidence was not evaluated because genomic "
+            "coordinates could not be resolved."
+        )
     for warning in get_user_warnings():
         if warning not in result["warnings"]:
             result["warnings"].append(warning)
@@ -416,11 +456,11 @@ async def _classify_one(
         )
     elif cv.get("status") not in {"ok", "not_found"}:
         result["warnings"].append(
-            f"ClinVar evidence unavailable: status={cv.get('status')}; {cv.get('error', '')}".rstrip("; ")
+            "ClinVar comparison is temporarily unavailable."
         )
     if er.get("status") not in {"ok", "not_found"}:
         result["warnings"].append(
-            f"ClinGen ERepo evidence unavailable: status={er.get('status')}; {er.get('error', '')}".rstrip("; ")
+            "ClinGen ERepo comparison is temporarily unavailable."
         )
 
     # Step 6: external comparison
@@ -490,6 +530,7 @@ async def _classify_one(
         gene=gene,
         c_notation=c_notation,
         p_notation=p_notation,
+        reference_transcript=TRANSCRIPTS.get(gene, ""),
         predicted_class=result["predicted_class"],
         predicted_label=CLASS_LABELS.get(result["predicted_class"], ""),
         total_points=result["total_points"],
@@ -498,6 +539,10 @@ async def _classify_one(
         external=ext_model,
         has_functional_evidence=result.get("has_functional_evidence", False),
         classification_note=result.get("classification_note", ""),
+        evidence_direction=result.get("evidence_direction", "none"),
+        mixed_evidence=result.get("mixed_evidence", False),
+        pathogenic_points=result.get("pathogenic_points", 0),
+        benign_points=result.get("benign_points", 0),
         narrative=narrative,
         alphamissense=AlphaMissenseResult(
             am_score=alphamissense.get("am_score") if alphamissense else None,
@@ -510,7 +555,39 @@ async def _classify_one(
         if result.get("splice_ps1_review") else None,
         initiation_review=RnaReviewRecommendation(**result["initiation_review"])
         if result.get("initiation_review") else None,
+        spliceai_audit=SpliceAIAudit(**{
+            field: splice_status.get(field)
+            for field in SpliceAIAudit.model_fields
+            if splice_status.get(field) is not None
+        }) if splice_status else None,
+        evidence_interactions=[
+            EvidenceInteractionWarning(**warning)
+            for warning in result.get("evidence_interactions", [])
+        ],
     )
+
+
+@app.post("/api/normalize")
+async def normalize_variant(
+    req: VariantRequest, request: Request
+) -> VariantNormalizationResponse:
+    response = VariantNormalizationResponse(
+        gene=req.gene,
+        submitted_notation=req.submitted_notation,
+        c_notation=req.c_notation,
+        p_notation=req.p_notation,
+        reference_transcript=req.reference_transcript,
+        normalization_source=req.normalization_source,
+        protein_consequence_explanation=req.protein_consequence_explanation,
+        assembly=req.assembly,
+    )
+    _audit(
+        request,
+        "variant_normalized",
+        input={"gene": req.gene, "notation": req.submitted_notation, "assembly": req.assembly},
+        result=response.model_dump(mode="json"),
+    )
+    return response
 
 
 @app.post("/api/classify")
@@ -520,6 +597,10 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
         response = await _classify_one(
             req.gene, req.c_notation, req.p_notation or "", req.dup_type
         )
+        response.reference_transcript = req.reference_transcript
+        response.submitted_notation = req.submitted_notation
+        response.normalization_source = req.normalization_source
+        response.protein_consequence_explanation = req.protein_consequence_explanation
     except Exception as exc:
         _audit(
             request,
@@ -538,6 +619,16 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
             "predicted_class": response.predicted_class,
             "predicted_label": response.predicted_label,
             "total_points": response.total_points,
+            "evidence_direction": response.evidence_direction,
+            "mixed_evidence": response.mixed_evidence,
+            "pathogenic_points": response.pathogenic_points,
+            "benign_points": response.benign_points,
+            "evidence_interactions": [
+                warning.model_dump(mode="json")
+                for warning in response.evidence_interactions
+            ],
+            "spliceai_audit": response.spliceai_audit.model_dump(mode="json")
+            if response.spliceai_audit else None,
         },
     )
     return response
@@ -556,6 +647,10 @@ async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
                 res = await _classify_one(
                     item.gene, item.c_notation, item.p_notation or "", item.dup_type
                 )
+                res.reference_transcript = item.reference_transcript
+                res.submitted_notation = item.submitted_notation
+                res.normalization_source = item.normalization_source
+                res.protein_consequence_explanation = item.protein_consequence_explanation
                 return BatchItemResult(
                     index=idx, status="ok",
                     variant=f"{item.gene} {item.c_notation}",

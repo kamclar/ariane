@@ -68,3 +68,4 @@ htmlcov/
 !/docs/
 /docs/*
 !/docs/implementation_and_data_sources.md
+!/docs/evidence_interaction_matrix.md

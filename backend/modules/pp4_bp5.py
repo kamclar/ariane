@@ -14,7 +14,6 @@ METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr
 
 PP4_POINTS = {"Very Strong": 8, "Strong": 4, "Moderate": 2, "Supporting": 1}
 BP5_POINTS = {"Very Strong": -8, "Strong": -4, "Moderate": -2, "Supporting": -1}
-PRIOR = 0.10  # retained only for backwards-compatible callers; not used by the snapshot
 
 _SNAPSHOT: dict[str, dict[str, Any]] | None = None
 _ALIASES: dict[str, str] | None = None
@@ -26,17 +25,6 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
-
-
-def posterior_to_lr(posterior: float) -> Optional[float]:
-    """Legacy utility. Automatic PP4/BP5 uses a direct clinical LR instead."""
-    if posterior is None or posterior < 0 or posterior > 1:
-        return None
-    if posterior == 0:
-        return 0.0
-    if posterior == 1:
-        return float("inf")
-    return posterior * (1 - PRIOR) / (PRIOR * (1 - posterior))
 
 
 def lr_to_pp4_strength(lr: float) -> Optional[str]:
@@ -107,7 +95,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     entry = snapshot.get(canonical_key) if canonical_key else None
     result = {
         "applies": False, "code": None, "strength": None, "points": 0,
-        "reason": "", "posterior_probability": None, "likelihood_ratio": None,
+        "reason": "", "likelihood_ratio": None,
         "source_components": [],
     }
     if entry is None:

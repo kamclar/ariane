@@ -13,7 +13,6 @@ from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.pp4_bp5 import posterior_to_lr
 from backend.modules.ps1 import evaluate_ps1
 from backend.modules.utils import is_in_functional_domain
 from backend.modules.variant_type import infer_variant_type
@@ -58,12 +57,14 @@ def gnomad_data(
 
 class VariantTypeTests(unittest.TestCase):
     @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
-    def test_protein_notation_is_required(self):
-        with self.assertRaisesRegex(ValueError, "p. notation is required"):
-            VariantRequest(gene="BRCA1", c_notation="c.4185G>A")
+    def test_protein_notation_is_derived_from_reference_snapshot(self):
+        request = VariantRequest(gene="BRCA1", c_notation="c.4185G>A")
+        self.assertEqual(request.p_notation, "p.(Gln1395=)")
 
-        with self.assertRaisesRegex(ValueError, "p. notation is required"):
-            VariantRequest(gene="BRCA1", c_notation="c.4185G>A", p_notation="")
+        request = VariantRequest(
+            gene="BRCA1", c_notation="c.4185G>A", p_notation=""
+        )
+        self.assertEqual(request.p_notation, "p.(Gln1395=)")
 
     @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
     def test_tutorial_transcript_prefix_is_validated_and_removed(self):
@@ -220,11 +221,6 @@ class FrequencyTests(unittest.TestCase):
         data["datasets"]["v2_1_non_cancer"]["coverage"]["mean_depth"] = 20.0
         self.assertIn("BA1", evaluate_frequency_criteria(data, "missense"))
 
-
-class MultifactorialLikelihoodTests(unittest.TestCase):
-    def test_rounded_extreme_posteriors_remain_informative(self):
-        self.assertEqual(posterior_to_lr(0.0), 0.0)
-        self.assertEqual(posterior_to_lr(1.0), float("inf"))
 
 class SpliceTests(unittest.TestCase):
     def test_reviewed_intronic_variants_use_local_spliceai_and_apply_pp3(self):
@@ -411,6 +407,8 @@ class ClassifierIntegrationTests(unittest.TestCase):
         )
         self.assertIn("PS3", result["criteria"])
         self.assertIn("BP4", result["criteria"])
+        self.assertEqual(result["evidence_interactions"][0]["status"], "conflict")
+        self.assertTrue(result["evidence_interactions"][0]["review_required"])
     def test_custom_donor_guard_is_not_part_of_active_scoring(self):
         project_root = Path(__file__).resolve().parents[1]
         self.assertFalse((project_root / "backend/modules/donor_guard.py").exists())
@@ -792,6 +790,10 @@ class GoldenCaseRegressionTests(unittest.TestCase):
             criteria={"BS3", "PM2_Supporting", "PVS1"},
             vus_category="conflicting_pvs1_bs3",
         )
+        self.assertTrue(result["mixed_evidence"])
+        self.assertEqual(result["evidence_direction"], "mixed")
+        self.assertEqual(result["pathogenic_points"], 9)
+        self.assertEqual(result["benign_points"], -4)
 
     def test_pp3_bs3_conflict_golden_case(self):
         result = evaluate_variant(
@@ -814,6 +816,9 @@ class GoldenCaseRegressionTests(unittest.TestCase):
             total_points=-3,
             criteria={"BS3", "PP3"},
         )
+        self.assertTrue(result["mixed_evidence"])
+        self.assertEqual(result["pathogenic_points"], 1)
+        self.assertEqual(result["benign_points"], -4)
 
     def test_likely_benign_has_no_vus_explanation_golden_case(self):
         result = evaluate_variant(

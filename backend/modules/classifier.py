@@ -6,7 +6,7 @@
 #   2. Table 9 - PS3/BS3 calibrated functional evidence
 #   3. Table 4 - PVS1/PM5 structural rules
 #   4. gnomAD - BS1, PM2
-#   5. ST7 - PP4/BP5 multifactorial likelihood
+#   5. Local clinical-LR snapshot - PP4/BP5
 #   6. ST7 - PS1 same amino acid change as known P/LP
 #   7. SpliceAI/BayesDel - PP3/BP4/BP7 per variant-type decision tree
 #   8. BP1 - domain check
@@ -14,6 +14,11 @@
 #  10. Tavtigian 2020 points only for contradictory evidence
 # ============================================================
 from typing import Optional, Dict, List, Tuple
+
+from backend.modules.evidence_interactions import (
+    automatic_functional_interactions,
+    pvs1_prediction_deduplication,
+)
 
 
 def classify_by_points(points: int, has_ba1: bool = False) -> tuple:
@@ -224,6 +229,11 @@ def evaluate_variant(
         "warnings": [],
         "has_functional_evidence": False,
         "classification_note": "",
+        "evidence_direction": "none",
+        "mixed_evidence": False,
+        "pathogenic_points": 0,
+        "benign_points": 0,
+        "evidence_interactions": [],
         "residue_info": residue_info,
     }
     results["warnings"].append(
@@ -318,7 +328,7 @@ def evaluate_variant(
         }
         results["total_points"] += pvs1["pm5_points"]
 
-    # ── Step 4: ST7 - PP4/BP5 ─────────────────────────────────────────
+    # ── Step 4: local clinical-LR snapshot - PP4/BP5 ───────────────────
     if pp4_bp5_result and pp4_bp5_result.get("applies"):
         code = pp4_bp5_result["code"]
         results["criteria"][code] = {
@@ -351,6 +361,9 @@ def evaluate_variant(
                 results["warnings"].append(
                     "PP3 not applied because PVS1 is met; ENIGMA does not stack predictive PP3 with PVS1."
                 )
+                results["evidence_interactions"].append(
+                    pvs1_prediction_deduplication()
+                )
             else:
                 results["criteria"][crit_name] = crit_data
                 results["total_points"] += crit_data["points"]
@@ -382,8 +395,15 @@ def evaluate_variant(
         results["criteria"]["BP1"] = bp1
         results["total_points"] += bp1["points"]
 
+    results["evidence_interactions"].extend(
+        automatic_functional_interactions(results["criteria"])
+    )
+
     # ── Step 8: Warnings ───────────────────────────────────────────────
-    if effective_spliceai_score is None:
+    if (
+        effective_spliceai_score is None
+        and variant_type.lower() not in {"exon_deletion", "exon_duplication"}
+    ):
         results["warnings"].append(
             f"SpliceAI not available for {gene} {c_notation} - "
             "benign criteria BP1/BP4/BP7 require confirmed low score"
@@ -398,6 +418,23 @@ def evaluate_variant(
         )
 
     # ── Step 9: Classification ─────────────────────────────────────────
+    results["pathogenic_points"] = sum(
+        max(criterion.get("points", 0), 0)
+        for criterion in results["criteria"].values()
+    )
+    results["benign_points"] = sum(
+        min(criterion.get("points", 0), 0)
+        for criterion in results["criteria"].values()
+    )
+    results["mixed_evidence"] = bool(
+        results["pathogenic_points"] > 0 and results["benign_points"] < 0
+    )
+    results["evidence_direction"] = (
+        "mixed" if results["mixed_evidence"]
+        else "pathogenic" if results["pathogenic_points"] > 0
+        else "benign" if results["benign_points"] < 0
+        else "none"
+    )
     cls, label, note = classify_by_enigma_combination(
         results["criteria"], results["total_points"]
     )

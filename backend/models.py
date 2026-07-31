@@ -5,14 +5,19 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, List, Dict, Any, Literal
 import re
 
-from backend.modules.hgvs import split_combined_hgvs
+from backend.modules.variant_input import normalize_variant_input
 
 
 class VariantRequest(BaseModel):
     gene: str
     c_notation: str
-    p_notation: str
+    p_notation: str = ""
     dup_type: str = "Unknown"
+    assembly: Optional[Literal["GRCh37", "GRCh38"]] = None
+    submitted_notation: str = ""
+    reference_transcript: str = ""
+    normalization_source: str = ""
+    protein_consequence_explanation: str = ""
 
     @model_validator(mode="before")
     @classmethod
@@ -20,26 +25,24 @@ class VariantRequest(BaseModel):
         if not isinstance(data, dict):
             return data
         gene = str(data.get("gene", "")).strip().upper()
-        raw_c = str(data.get("c_notation", "")).strip()
-        transcript_match = re.match(r"^(NM_\d+\.\d+):(c\..+)$", raw_c, re.IGNORECASE)
-        if transcript_match:
-            transcript = transcript_match.group(1).upper()
-            expected = {"BRCA1": "NM_007294.4", "BRCA2": "NM_000059.4"}.get(gene)
-            if expected and transcript != expected:
-                raise ValueError(
-                    f"Transcript {transcript} does not match {gene}; expected {expected}"
-                )
-            raw_c = transcript_match.group(2)
-        c_notation, p_notation = split_combined_hgvs(
-            raw_c,
-            data.get("p_notation"),
+        raw_notation = str(data.get("c_notation", "")).strip()
+        normalized = normalize_variant_input(
+            gene,
+            raw_notation,
+            assembly=data.get("assembly"),
+            p_notation=data.get("p_notation"),
         )
-        if not p_notation:
-            raise ValueError(
-                "p. notation is required, for example p.(Gln1395=); "
-                "use p.(?) when the protein consequence is unknown"
-            )
-        return {**data, "c_notation": c_notation, "p_notation": p_notation}
+        return {
+            **data,
+            "gene": gene,
+            "submitted_notation": raw_notation,
+            "c_notation": normalized.c_notation,
+            "p_notation": normalized.p_notation,
+            "assembly": normalized.assembly or None,
+            "reference_transcript": normalized.reference_transcript,
+            "normalization_source": normalized.normalization_source,
+            "protein_consequence_explanation": normalized.protein_consequence_explanation,
+        }
 
     @field_validator("gene")
     @classmethod
@@ -139,6 +142,33 @@ class AlphaMissenseResult(BaseModel):
     am_class: str = ""        # "likely_pathogenic" | "ambiguous" | "likely_benign"
 
 
+class SpliceAIAudit(BaseModel):
+    status: str = ""
+    score: Optional[float] = None
+    source: str = ""
+    transcript_policy: str = ""
+    selected_transcript: str = ""
+    reference_transcript_score: Optional[float] = None
+    max_any_transcript_score: Optional[float] = None
+    max_any_transcript: str = ""
+    max_delta_field: str = ""
+    grch38: str = ""
+    cache_key: str = ""
+    reason: str = ""
+
+
+class EvidenceInteractionWarning(BaseModel):
+    status: Literal["info", "review_required", "deduplicated", "conflict"]
+    mechanism: str
+    criteria: List[str] = []
+    retained: List[str] = []
+    suppressed: List[str] = []
+    reason: str
+    source: str
+    source_url: str
+    review_required: bool = False
+
+
 class VusExplanation(BaseModel):
     category: str = ""
     tier: str = ""
@@ -167,6 +197,10 @@ class ClassificationResult(BaseModel):
     gene: str
     c_notation: str
     p_notation: str = ""
+    reference_transcript: str = ""
+    submitted_notation: str = ""
+    normalization_source: str = ""
+    protein_consequence_explanation: str = ""
     predicted_class: int
     predicted_label: str = ""
     total_points: int = 0
@@ -175,12 +209,29 @@ class ClassificationResult(BaseModel):
     external: Optional[ExternalComparison] = None
     has_functional_evidence: bool = False
     classification_note: str = ""
+    evidence_direction: str = "none"
+    mixed_evidence: bool = False
+    pathogenic_points: int = 0
+    benign_points: int = 0
     narrative: str = ""
     alphamissense: Optional[AlphaMissenseResult] = None
+    spliceai_audit: Optional[SpliceAIAudit] = None
+    evidence_interactions: List[EvidenceInteractionWarning] = []
     vus_explanation: Optional[VusExplanation] = None
     rna_review: Optional[RnaReviewRecommendation] = None
     splice_ps1_review: Optional[RnaReviewRecommendation] = None
     initiation_review: Optional[RnaReviewRecommendation] = None
+
+
+class VariantNormalizationResponse(BaseModel):
+    gene: str
+    submitted_notation: str
+    c_notation: str
+    p_notation: str
+    reference_transcript: str
+    normalization_source: str
+    protein_consequence_explanation: str = ""
+    assembly: Optional[Literal["GRCh37", "GRCh38"]] = None
 
 
 class ManualCriterionInput(BaseModel):
@@ -244,6 +295,7 @@ class ManualEvidenceResult(BaseModel):
     total_points: int
     classification_note: str = ""
     manual_criteria: List[ManualCriterionResult]
+    evidence_interactions: List[EvidenceInteractionWarning] = []
     assessor: str
     assessed_at: str
 

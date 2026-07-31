@@ -17,11 +17,32 @@ Hlavní implementace klasifikace je v `backend/modules/classifier.py`.
 
 ## 2. Zpracování vstupu
 
-### 2.1 Normalizace HGVS
+### 2.1 Normalizace vstupu a HGVS
 
-Vstup obsahuje gen, `c.` notaci, volitelnou `p.` notaci a u exonové duplikace informaci, zda je uspořádání tandemové nebo neznámé.
+Uživatel zadává gen a jednu variantu. Vstupní normalizační vrstva
+`backend/modules/variant_input.py` přijímá:
 
-Povolené transkripty jsou kontrolovány proti zvolenému genu. Pokud je součástí vstupu například `NM_007294.4:c.303T>G`, prefix transkriptu se ověří a pro interní zpracování se oddělí.
+- referenční transkriptovou notaci, například `c.303T>G`,
+- notaci s accession prefixem, například `NM_007294.4:c.303T>G`,
+- kombinovanou starší formu s `p.` následkem,
+- genomickou variantu ve tvaru `chr17:43099813:C>T`, `17:43099813 C>T`
+  nebo `17-43099813-C-T`.
+
+Pro genomickou variantu je povinná sestava `GRCh37` nebo `GRCh38`. Aplikace ji
+neodhaduje. Genomický vstup se hledá v obousměrném indexu vytvořeném z
+verzovaného coding SNV snapshotu a normalizovaného indel snapshotu. Jedna
+jednoznačná shoda vrátí kanonickou `c.` notaci, třípísmennou `p.` notaci,
+referenční transkript a zdroj normalizace. Nulová nebo víceznačná shoda ukončí
+požadavek před klasifikací.
+
+Povolené transkripty jsou kontrolovány proti zvolenému genu. Aktuální registr
+obsahuje `BRCA1: NM_007294.4` a `BRCA2: NM_000059.4`. Přidání dalšího genu
+vyžaduje deklarovaný referenční transkript a validovaný normalizační snapshot,
+nikoli ruční slovník jednotlivých variant.
+
+Samostatné API `POST /api/normalize` používá stejnou vrstvu jako klasifikační
+endpoint. Vrací zadanou notaci, kanonickou `c.` a `p.` notaci, transkript,
+sestavu a zdroj. Klasifikace proto normalizaci nemůže obejít.
 
 ### 2.2 Kontrola referenční alely
 
@@ -43,9 +64,23 @@ Neshoda reference vrací HTTP 422 a klasifikace se nespustí. Pokud nainstalovan
 
 Implementace je v `backend/modules/reference_validation.py`.
 
-### 2.3 Kontrola proteinového následku
+### 2.3 Odvození a kontrola proteinového následku
 
-Uživatel musí zadat `c.` i `p.` notaci. Pokud proteinový následek není znám, zadá `p.(?)`. U podporované coding SNV aplikace porovná zadanou `p.` notaci s předpočítaným SNV snapshotem a při rozporu vstup odmítne.
+U coding SNV a normalizovaných indelů aplikace odvodí `p.` notaci z lokálního
+snapshotu pro referenční transkript. U intronického nebo UTR vstupu bez
+deterministického proteinového následku použije `p.(?)`. Uživatel tedy nemusí
+`p.` notaci opisovat.
+
+Veřejný výsledek u `p.(?)` zobrazuje samostatné vysvětlení. Rozlišuje, že
+varianta leží mimo překládanou kódující sekvenci nebo může ovlivnit splicing a
+že proteinový následek nelze určit pouze z DNA notace. Upozornění uvádí potřebu
+transkriptové, RNA, breakpointové nebo strukturální evidence podle typu
+varianty. Otazník se proto nezobrazuje bez kontextu jako domnělá chyba parseru.
+
+Starší API a batch vstup mohou `p.` notaci stále dodat. V takovém případě se
+porovná s lokálním referenčním následkem. Rozpor vrátí HTTP 422 a klasifikace se
+nespustí. Pokud aplikace pro coding variantu nemá validovaný následek a uživatel
+jej nedodal, postup skončí s vysvětlením místo odhadu.
 
 Příklad:
 
@@ -84,6 +119,7 @@ Síla kritéria se převádí na body:
 | patogenní | Strong | 4 |
 | patogenní | Moderate | 2 |
 | patogenní | Supporting | 1 |
+| benigní | Very Strong | -8 |
 | benigní | Strong | -4 |
 | benigní | Moderate | -2 |
 | benigní | Supporting | -1 |
@@ -137,9 +173,7 @@ Pokud má revidovaný řádek Table 9 vlastní hodnotu SpliceAI, používá se t
 
 ### 3.4 PP4 a BP5
 
-Zdroj: ENIGMA Supplementary Table 7 v1.2.
-
-Kritéria se odvozují z posterior probability a kombinovaného likelihood ratio.
+Zdroj automatických kritérií: lokální verzovaný snapshot variantově specifických combined clinical LR odvozený z UCSC ENIGMA `BRCAmfa` tracku. Supplementary Table 7 ani její posterior probability se pro PP4/BP5 nepoužívají.
 
 | Kritérium | Supporting | Moderate | Strong | Very Strong |
 | --- | ---: | ---: | ---: | ---: |
@@ -156,6 +190,8 @@ Automatický snapshot je uložen v souborech:
 Snapshot je odvozen z veřejného UCSC ENIGMA `BRCAmfa` tracku verze 1.1.0. Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá pouze variantově specifická data ze zdrojů uvedených v ENIGMA Appendix B, která jsou v tracku samostatně dostupná: Easton et al. 2007, PMID 17924331, Parsons et al. 2019, PMID 31131967, a Li et al. 2020, PMID 31853058. Caputo et al. 2021 je z automatického výpočtu vyřazen, protože není v použitém seznamu Appendix B. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
 
 Metadata obsahují URL a checksum zdroje, checksum indexu, verzi pravidel, počty záznamů a seznam konfliktních normalizovaných indelů. Chybějící metadata, nesprávný checksum, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` obsahuje snapshot LR `6,89647 × 10^45` ze studie Li et al. 2020, což odpovídá PP4 Very Strong.
+
+Aktuální snapshot obsahuje 4 380 jednoznačných variantových záznamů.
 
 Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané metodické zdroje:
 
@@ -175,7 +211,7 @@ Status zdroje se zpracovává fail-closed:
 - `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
 - `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 se neaplikuje a nepřidají se body.
 
-Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sekundární databáze, například CANVarUK, může sloužit k nalezení a zobrazení hodnoty, ale nenahrazuje citaci primárního zdroje. Při použití více klinických datových bodů je nutné zkontrolovat překryv kohort a zabránit dvojímu započtení stejné evidence pod PP4, PP1 nebo PS4.
+Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sekundární databáze, například CANVarUK, může sloužit k nalezení a zobrazení hodnoty, ale nenahrazuje citaci primárního zdroje. Pokud amended výsledek kombinuje PP1 nebo PS4 s automatickým či manuálním PP4/BP5, backend vyžaduje explicitní potvrzení nezávislosti pozorování a textové zdůvodnění. Bez nich požadavek odmítne. Samotné zaškrtnutí nenahrazuje kontrolu zdrojových kohort a klinických LR komponent.
 
 ### 3.5 PS1 na proteinové úrovni
 
@@ -271,7 +307,7 @@ Kritéria se vyhodnocují v tomto pořadí:
 3. gnomAD a BA1,
 4. Table 9 pro PS3 a BS3,
 5. Table 4 pro PVS1 a PM5 PTC,
-6. lokální referenční datasety pro navazující variantově specifická pravidla,
+6. lokální snapshot klinických LR pro PP4 nebo BP5,
 7. proteinové PS1,
 8. PP3 a BP4,
 9. BP7,
@@ -280,11 +316,11 @@ Kritéria se vyhodnocují v tomto pořadí:
 
 BA1 ukončí klasifikaci jako Class 1.
 
-Pokud jsou všechna aplikovaná kritéria pouze v jednom směru, používají se kombinace ENIGMA VCEP v1.2 Table 3. Samotný součet bodů v tomto případě neurčuje třídu.
+Pokud jsou všechna aplikovaná kritéria pouze v jednom směru, používají se kombinace ENIGMA VCEP v1.2 Table 3. Samotný součet bodů v tomto případě neurčuje třídu. Tavtigian 2020 je bodový systém a pro evidenci pouze jedním směrem se v ARIANE nepoužívá.
 
 Příklad: PVS1 Very Strong bez dalšího kritéria zůstává Class 3, protože nesplňuje kombinaci pro Likely Pathogenic.
 
-Pokud jsou současně přítomna patogenní i benigní kritéria, používá se bodový systém Tavtigian 2020:
+Pokud jsou současně přítomna patogenní i benigní kritéria, nastává druhý klasifikační postup ENIGMA. V tomto případě se používá bodový systém Tavtigian 2020:
 
 | Součet | Třída |
 | ---: | --- |
@@ -294,13 +330,14 @@ Pokud jsou současně přítomna patogenní i benigní kritéria, používá se 
 | -6 až -2 | Class 2, Likely Benign |
 | méně než -6 | Class 1, Benign |
 
-Výsledek s protichůdnými směry obsahuje upozornění na nutnost expertní revize.
+Výsledek s protichůdnými směry zachovává vypočtenou ENIGMA třídu a obsahuje barevný pruh `Mixed evidence`. Pruh uvádí, že byla použita ENIGMA bodová kombinace a že je nutná expertní revize. Odkazuje přímo na verzovaný dokument [ENIGMA Specifications v1.2](https://cspec.genome.network/cspec/File/id/02537f62-66a3-4e67-8aec-cf44b326534d/data), část `Classification Methods`, druhý postup. Rozbalovací technický detail zvlášť ukazuje součet patogenních bodů, benigních bodů a celkový výsledek.
 
 ## 6. Oficiální ENIGMA tabulky
 
-Oficiální zdroj je ClinGen CSpec GN092, ENIGMA BRCA1/2 VCEP v1.2.0, vydání 2025-01-09:
+Oficiální zdroje jsou genově oddělené záznamy ClinGen CSpec pro ENIGMA BRCA1/2 VCEP v1.2.0, vydání 2025-01-09:
 
-<https://cspec.genome.network/cspec/ui/svi/doc/GN092/versions>
+- BRCA1: [ClinGen CSpec GN092](https://cspec.genome.network/cspec/ui/svi/doc/GN092)
+- BRCA2: [ClinGen CSpec GN097](https://cspec.genome.network/cspec/ui/svi/doc/GN097)
 
 ### 6.1 Table 4
 
@@ -477,6 +514,8 @@ SpliceAI výsledky se ukládají do:
 - dynamická API cache v `${ARIANE_RUNTIME_CACHE_DIR}/spliceai_api_cache.json`,
 - na Railway automaticky v `${RAILWAY_VOLUME_MOUNT_PATH}/ariane-runtime-cache/spliceai_api_cache.json`.
 
+Veřejný výsledek obsahuje oddělený strukturovaný `spliceai_audit`. Hlavní klasifikace zůstává stručná a technické údaje jsou ve webovém rozhraní standardně sbalené pod položkou `Evidence details > SpliceAI`. Po rozkliknutí se zobrazí použité skóre, vybraný transkript, politika `reference_transcript`, skóre a transkript maxima přes všechny dostupné transkripty, delta pole, zdroj, GRCh38 dotaz a identifikátor cache záznamu. Stejná struktura se ukládá do auditní události dokončené klasifikace.
+
 Zápis dynamické cache je atomický. Bez nakonfigurovaného runtime adresáře nebo
 Railway volume se při lokálním vývoji používá původní `data/spliceai/`.
 
@@ -484,7 +523,7 @@ Intronický předpočítaný snapshot:
 
 `data/spliceai/spliceai_brca_intronic_snv_reference_cache.json`
 
-Cache je použitelná pouze s kompletními metadaty a úspěšnou kontrolou počtu záznamů a checksumu. Rozpracovaná cache se nenačte jako platný zdroj.
+Aktuální snapshot je dokončen pro všech 13 800 variant souřadnicové mapy. Cache je použitelná pouze s kompletními metadaty a úspěšnou kontrolou počtu záznamů a checksumu. Rozpracovaná cache se nenačte jako platný zdroj.
 
 ### 8.3 Priorita zdrojů
 
@@ -549,9 +588,28 @@ Každý předpočítaný dataset má být doprovázen metadaty obsahujícími al
 
 Změna oficiální ENIGMA verze, transkriptu, genomového sestavení, predikčního modelu nebo klasifikační logiky vyžaduje nové sestavení dotčených snapshotů a opakování regresních testů.
 
+### 14.1 Regresní matice typů variant
+
+Soubor `tests/test_variant_type_regression_matrix.py` udržuje explicitní regresní matici podporovaných typů variant. První část ověřuje odvození normalizovaného typu pro nonsense, frameshift, missense, synonymous, intronickou SNV, canonical splice-site variantu, in-frame indel, exonovou deleci a duplikaci, iniciační kodon a obě UTR oblasti.
+
+Druhá část pro reprezentativní varianty kontroluje celý deterministický průchod Module 1 od typu varianty přes lokální tabulky a snapshoty po aplikovaná kritéria a výslednou třídu. Každý řádek obsahuje očekávaná i zakázaná kritéria. Tím se kontroluje nejen přítomnost správné větve, ale také nepřípustné přičtení kritéria z jiné větve, například PP3 u nonsense nebo frameshift varianty.
+
+Synonymous varianty mají v matici obě ENIGMA větve. Varianta uvnitř funkční domény s potvrzeným SpliceAI nejvýše 0,1 vyžaduje BP4 a BP7 a nesmí dostat BP1. Varianta mimo funkční domény se stejným limitem SpliceAI vyžaduje BP1 Strong a nesmí současně dostat BP4 ani BP7. Pozitivním regresním případem pro BP1 je `BRCA1 c.306A>C p.(Ala102=)`.
+
+RNA-dependent canonical splice-site a initiation-codon větve samostatně ověřují, že aplikace nevytvoří automatické PVS1 a místo něj vrátí doporučení ke strukturované manuální revizi. Matice nepoužívá živé externí služby. Používá verzované lokální ENIGMA tabulky a snapshoty, takže musí být deterministická.
+
+### 14.2 Interakce funkční, RNA a predikční evidence
+
+ARIANE nepoužívá plošné potlačení podle příznaku `has_functional_evidence`. Interakce se vyhodnocují podle mechanismu a hierarchie důkazů z ENIGMA v1.2 Figure 1A, Figure 1B, Figure 1C a Appendix E.
+
+Přijaté PVS1 (RNA) nahrazuje slabší bioinformatické kódy pro stejný experimentálně potvrzený splice důsledek. Přijaté BP7 Strong (RNA) nahrazuje BP7 Supporting, ale podle Figure 1B obecně zachovává ostatní použitelné bioinformatické kódy. PS3 nebo BS3 bez PVS1 automaticky nepotlačuje PP3, BP4, BP7 ani BP1, protože Figure 1C výslovně požaduje zachování relevantních bioinformatických kódů.
+
+Každé nahrazení, zachovaná potenciální interakce nebo konflikt se vrací ve strukturovaném poli `evidence_interactions`. Ve webovém rozhraní je zobrazeno v rozbalovací části `Evidence interaction warnings`. Přesná matice je v `docs/evidence_interaction_matrix.md`.
+
 Související dokumenty:
 
 - `docs/enigma_source_data_audit.md`,
+- `docs/evidence_interaction_matrix.md`,
 - `docs/manual_evidence_review.md`,
 - `docs/splice_ps1_reference_set.md`,
 - `docs/vus_explanation_and_golden_cases.md`.

@@ -7,6 +7,7 @@ function ariane() {
         gene: "BRCA1",
         c_notation: "",
         p_notation: "",
+        assembly: "",
         dup_type: "Unknown",
         loading: false,
         progress: 0,
@@ -263,6 +264,18 @@ function ariane() {
                 this.manualError = "Select at least one manually reviewed criterion.";
                 return;
             }
+            const clinicalLrUsed = (this.result.criteria || []).some(
+                criterion => criterion.applies && ["PP4", "BP5"].includes(criterion.name)
+            ) || enabled.some(item => item.code === "PP4");
+            if (clinicalLrUsed) {
+                const overlapping = enabled.find(item => ["PP1", "PS4"].includes(item.code)
+                    && (item.evidence?.independent_from_pp4_bp5 !== true
+                        || !(item.evidence?.independence_rationale || "").trim()));
+                if (overlapping) {
+                    this.manualError = `${overlapping.code}: confirm that its observations are independent from PP4/BP5 and record the rationale.`;
+                    return;
+                }
+            }
             for (const item of enabled) {
                 if (!this.suggestedManualStrength(item) && !item.override_strength) {
                     this.manualError = `${item.code}: enter evidence meeting a threshold or select an allowed reviewer strength.`;
@@ -357,6 +370,7 @@ function ariane() {
                 gene: this.gene,
                 c_notation: this.c_notation.trim(),
                 p_notation: this.p_notation.trim() || null,
+                assembly: this.assembly || null,
                 dup_type: this.dup_type,
             };
             fetch("/api/audit/client-validation", {
@@ -380,7 +394,7 @@ function ariane() {
                 if (messages.length > 0) return messages.join("; ");
             }
             if (typeof detail === "string" && detail.trim()) return detail;
-            return `The input could not be processed. Use HGVS c. and p. notation, for example c.4185G>A and p.(Gln1395=). Error ${status}.`;
+            return `The input could not be normalized. Enter c. HGVS or a genomic coordinate with GRCh37/GRCh38. Error ${status}.`;
         },
 
         async classify() {
@@ -389,17 +403,7 @@ function ariane() {
             this.resetManualItems();
 
             if (!this.c_notation.trim()) {
-                this.error = "Please enter a c. notation.";
-                this.logClientValidation(this.error);
-                return;
-            }
-            if (!this.c_notation.trim().startsWith("c.")) {
-                this.error = "Notation must start with 'c.' - e.g. c.4185G>A";
-                this.logClientValidation(this.error);
-                return;
-            }
-            if (!this.p_notation.trim()) {
-                this.error = "Please enter a p. notation. Use p.(?) when the protein consequence is unknown.";
+                this.error = "Please enter a variant.";
                 this.logClientValidation(this.error);
                 return;
             }
@@ -435,7 +439,8 @@ function ariane() {
                     body: JSON.stringify({
                         gene: this.gene,
                         c_notation: this.c_notation.trim(),
-                        p_notation: this.p_notation.trim() || null,
+                        p_notation: null,
+                        assembly: this.assembly || null,
                         dup_type: this.dup_type,
                     }),
                 });
@@ -489,6 +494,13 @@ function ariane() {
 
                 let cRaw = parts[1];
                 let pRaw = parts[2] || "";
+                let assemblyRaw = "";
+                if (/^(?:GRCh3[78]|hg(?:19|38))$/i.test(pRaw)) {
+                    assemblyRaw = /^hg19$/i.test(pRaw) ? "GRCh37"
+                        : /^hg38$/i.test(pRaw) ? "GRCh38"
+                        : pRaw.replace(/^grch/i, "GRCh");
+                    pRaw = "";
+                }
                 const dupRaw = parts[3] || "Unknown";
 
                 // Handle appended protein notation, including "(p.Val2050del)".
@@ -506,18 +518,11 @@ function ariane() {
                     pRaw = `p.(${pRaw.substring(2)})`;
                 }
 
-                if (!cRaw.startsWith("c.")) {
-                    errors.push(`Line ${i + 1}: c. notation must start with 'c.'`);
-                    continue;
-                }
-                if (!pRaw) {
-                    errors.push(`Line ${i + 1}: p. notation is required; use p.(?) when unknown`);
-                    continue;
-                }
                 parsed.push({
                     gene,
                     c_notation: cRaw,
                     p_notation: pRaw,
+                    assembly: assemblyRaw,
                     dup_type: dupRaw,
                 });
             }
@@ -562,6 +567,7 @@ function ariane() {
                                 gene: item.gene,
                                 c_notation: item.c_notation,
                                 p_notation: item.p_notation || null,
+                                assembly: item.assembly || null,
                                 dup_type: item.dup_type || "Unknown",
                             }),
                         });
@@ -570,8 +576,8 @@ function ariane() {
                             this.batchResults[idx] = {
                                 status: "ok",
                                 gene: item.gene,
-                                c_notation: item.c_notation,
-                                p_notation: item.p_notation,
+                                c_notation: data.c_notation,
+                                p_notation: data.p_notation,
                                 result: data,
                             };
                         } else {

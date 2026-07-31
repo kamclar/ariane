@@ -5,6 +5,7 @@ import math
 from typing import Any, Dict, List, Optional
 
 from backend.modules.classifier import classify_by_enigma_combination
+from backend.modules.evidence_interactions import apply_manual_rna_interactions
 
 
 CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
@@ -273,7 +274,6 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
             if evidence.get("functional_transcript_remaining") not in {
                 "absent_or_minimal",
                 "reduced",
-                "uncertain",
             }:
                 return None
             strength = evidence.get("curated_strength")
@@ -399,6 +399,22 @@ def evaluate_manual_evidence(
     }
     results = []
 
+    enabled_manual = [item for item in manual_criteria if item.get("enabled")]
+    clinical_lr_is_used = any(code in combined for code in {"PP4", "BP5"}) or any(
+        item.get("code") == "PP4" for item in enabled_manual
+    )
+    if clinical_lr_is_used:
+        for item in enabled_manual:
+            if item.get("code") not in {"PP1", "PS4"}:
+                continue
+            evidence = item.get("evidence", {})
+            rationale = str(evidence.get("independence_rationale") or "").strip()
+            if evidence.get("independent_from_pp4_bp5") is not True or not rationale:
+                raise ValueError(
+                    f"{item['code']} cannot be combined with PP4/BP5 until the reviewer "
+                    "confirms independent observations and records an independence rationale"
+                )
+
     for item in manual_criteria:
         code = item["code"]
         definition = MANUAL_CRITERIA[code]
@@ -453,7 +469,7 @@ def evaluate_manual_evidence(
             }
         )
         if applies:
-            if code in {"PVS1_RNA", "PVS1_INIT"}:
+            if code == "PVS1_INIT":
                 combined.pop("PP3", None)
             combined[code] = {
                 "applies": True,
@@ -462,6 +478,12 @@ def evaluate_manual_evidence(
                 "reason": reason,
             }
 
+    applied_manual_codes = {
+        result["code"] for result in results if result["applies"]
+    }
+    evidence_interactions = apply_manual_rna_interactions(
+        combined, applied_manual_codes
+    )
     total_points = sum(c.get("points", 0) for c in combined.values())
     predicted_class, label, note = classify_by_enigma_combination(
         combined, total_points
@@ -472,4 +494,5 @@ def evaluate_manual_evidence(
         "total_points": total_points,
         "classification_note": note,
         "manual_criteria": results,
+        "evidence_interactions": evidence_interactions,
     }
