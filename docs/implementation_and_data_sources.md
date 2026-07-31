@@ -200,6 +200,12 @@ Zdroj automatických kritérií: lokální verzovaný snapshot variantově speci
 
 PP4 a BP5 se automaticky vyhodnocují z lokálního verzovaného snapshotu variantově specifických klinických LR. Manuální revize zůstává dostupná pro varianty nebo zdroje, které snapshot neobsahuje. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat.
 
+ENIGMA v1.2 požaduje pro PP4/BP5 combined LR klinických dat. Historická
+multifaktoriální posterior probability ani IARC třída se nepoužívají přímo jako
+PP4/BP5 a nepřevádějí se pomocí pevného obecného prioru. Tutorialový nebo starší
+výsledek založený na posterior probability se proto může lišit od aplikace
+současných v1.2 LR prahů.
+
 Automatický snapshot je uložen v souborech:
 
 - `data/precomputed/brca_pp4_clinical_lr_snapshot.index.json`,

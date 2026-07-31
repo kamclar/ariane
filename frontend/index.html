@@ -148,73 +148,6 @@
                 </div>
             </div>
 
-            <section class="evidence-details"
-                     x-show="result?.spliceai_audit || result?.mixed_evidence || result?.evidence_interactions?.length">
-                <h3>Evidence details</h3>
-                <details class="evidence-detail-item"
-                         x-show="result?.evidence_interactions?.length">
-                    <summary>
-                        <span>Evidence interaction warnings</span>
-                        <span class="evidence-detail-summary"
-                              x-text="`${result?.evidence_interactions?.length || 0} interaction(s)`"></span>
-                    </summary>
-                    <div class="evidence-interaction-list">
-                        <template x-for="(item, index) in (result?.evidence_interactions || [])"
-                                  :key="`${item.status}-${index}`">
-                            <article class="evidence-interaction"
-                                     :class="`interaction-${item.status}`">
-                                <p>
-                                    <strong x-text="item.status.replaceAll('_', ' ')"></strong>
-                                    <span x-text="item.reason"></span>
-                                </p>
-                                <p class="evidence-interaction-meta">
-                                    Mechanism: <span x-text="item.mechanism.replaceAll('_', ' ')"></span>.
-                                    Criteria: <span x-text="item.criteria.join(', ')"></span>.
-                                    <span x-show="item.suppressed?.length">
-                                        Not counted: <span x-text="item.suppressed.join(', ')"></span>.
-                                    </span>
-                                </p>
-                                <a :href="item.source_url" target="_blank" rel="noopener"
-                                   x-text="item.source"></a>
-                            </article>
-                        </template>
-                    </div>
-                </details>
-                <details class="evidence-detail-item" x-show="result?.spliceai_audit">
-                    <summary>
-                        <span>SpliceAI</span>
-                        <span class="evidence-detail-summary"
-                              x-text="result?.spliceai_audit?.score == null ? 'Unavailable' : `Score ${result.spliceai_audit.score}`"></span>
-                    </summary>
-                    <dl class="evidence-detail-grid">
-                        <div><dt>Status</dt><dd x-text="result?.spliceai_audit?.status || 'Unknown'"></dd></div>
-                        <div><dt>Score used</dt><dd x-text="result?.spliceai_audit?.score ?? 'Unavailable'"></dd></div>
-                        <div><dt>Transcript used</dt><dd x-text="result?.spliceai_audit?.selected_transcript || 'Not reported'"></dd></div>
-                        <div><dt>Transcript policy</dt><dd x-text="result?.spliceai_audit?.transcript_policy || 'Not reported'"></dd></div>
-                        <div><dt>Reference transcript score</dt><dd x-text="result?.spliceai_audit?.reference_transcript_score ?? 'Not reported'"></dd></div>
-                        <div><dt>Maximum across all transcripts</dt><dd x-text="result?.spliceai_audit?.max_any_transcript_score ?? 'Not reported'"></dd></div>
-                        <div><dt>Transcript with overall maximum</dt><dd x-text="result?.spliceai_audit?.max_any_transcript || 'Not reported'"></dd></div>
-                        <div><dt>Maximum delta field</dt><dd x-text="result?.spliceai_audit?.max_delta_field || 'Not reported'"></dd></div>
-                        <div><dt>Source</dt><dd x-text="result?.spliceai_audit?.source || 'Not reported'"></dd></div>
-                        <div><dt>GRCh38 query</dt><dd x-text="result?.spliceai_audit?.grch38 || 'Not reported'"></dd></div>
-                        <div><dt>Cache record</dt><dd x-text="result?.spliceai_audit?.cache_key || 'Not reported'"></dd></div>
-                        <div class="evidence-detail-wide"><dt>Lookup information</dt><dd x-text="result?.spliceai_audit?.reason || 'Not reported'"></dd></div>
-                    </dl>
-                </details>
-                <details class="evidence-detail-item" x-show="result?.mixed_evidence">
-                    <summary>
-                        <span>Mixed evidence combination</span>
-                        <span class="evidence-detail-summary">ENIGMA point-based method</span>
-                    </summary>
-                    <dl class="evidence-detail-grid">
-                        <div><dt>Pathogenic points</dt><dd x-text="`+${result?.pathogenic_points || 0}`"></dd></div>
-                        <div><dt>Benign points</dt><dd x-text="result?.benign_points || 0"></dd></div>
-                        <div><dt>Total</dt><dd x-text="result?.total_points"></dd></div>
-                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA point-based method for variants meeting both pathogenic and benign criteria</dd></div>
-                    </dl>
-                </details>
-            </section>
-
             <!-- VUS explanation -->
             <div class="vus-section"
                  :class="'vus-' + (result?.vus_explanation?.category || '').replaceAll('_', '-')"
@@ -369,6 +302,73 @@
                     </tbody>
                 </table>
             </div>
+
+            <section class="evidence-details"
+                     x-show="result?.spliceai_audit || result?.mixed_evidence || result?.evidence_interactions?.length">
+                <h3>Evidence details</h3>
+                <details class="evidence-detail-item"
+                         x-show="result?.evidence_interactions?.length">
+                    <summary>
+                        <span>Evidence interaction warnings</span>
+                        <span class="evidence-detail-summary"
+                              x-text="`${result?.evidence_interactions?.length || 0} interaction(s)`"></span>
+                    </summary>
+                    <div class="evidence-interaction-list">
+                        <template x-for="(item, index) in (result?.evidence_interactions || [])"
+                                  :key="`${item.status}-${index}`">
+                            <article class="evidence-interaction"
+                                     :class="`interaction-${item.status}`">
+                                <p>
+                                    <strong x-text="item.status.replaceAll('_', ' ')"></strong>
+                                    <span x-text="item.reason"></span>
+                                </p>
+                                <p class="evidence-interaction-meta">
+                                    Mechanism: <span x-text="item.mechanism.replaceAll('_', ' ')"></span>.
+                                    Criteria: <span x-text="item.criteria.join(', ')"></span>.
+                                    <span x-show="item.suppressed?.length">
+                                        Not counted: <span x-text="item.suppressed.join(', ')"></span>.
+                                    </span>
+                                </p>
+                                <a :href="item.source_url" target="_blank" rel="noopener"
+                                   x-text="item.source"></a>
+                            </article>
+                        </template>
+                    </div>
+                </details>
+                <details class="evidence-detail-item" x-show="result?.spliceai_audit">
+                    <summary>
+                        <span>SpliceAI</span>
+                        <span class="evidence-detail-summary"
+                              x-text="result?.spliceai_audit?.score == null ? 'Unavailable' : `Score ${result.spliceai_audit.score}`"></span>
+                    </summary>
+                    <dl class="evidence-detail-grid">
+                        <div><dt>Status</dt><dd x-text="result?.spliceai_audit?.status || 'Unknown'"></dd></div>
+                        <div><dt>Score used</dt><dd x-text="result?.spliceai_audit?.score ?? 'Unavailable'"></dd></div>
+                        <div><dt>Transcript used</dt><dd x-text="result?.spliceai_audit?.selected_transcript || 'Not reported'"></dd></div>
+                        <div><dt>Transcript policy</dt><dd x-text="result?.spliceai_audit?.transcript_policy || 'Not reported'"></dd></div>
+                        <div><dt>Reference transcript score</dt><dd x-text="result?.spliceai_audit?.reference_transcript_score ?? 'Not reported'"></dd></div>
+                        <div><dt>Maximum across all transcripts</dt><dd x-text="result?.spliceai_audit?.max_any_transcript_score ?? 'Not reported'"></dd></div>
+                        <div><dt>Transcript with overall maximum</dt><dd x-text="result?.spliceai_audit?.max_any_transcript || 'Not reported'"></dd></div>
+                        <div><dt>Maximum delta field</dt><dd x-text="result?.spliceai_audit?.max_delta_field || 'Not reported'"></dd></div>
+                        <div><dt>Source</dt><dd x-text="result?.spliceai_audit?.source || 'Not reported'"></dd></div>
+                        <div><dt>GRCh38 query</dt><dd x-text="result?.spliceai_audit?.grch38 || 'Not reported'"></dd></div>
+                        <div><dt>Cache record</dt><dd x-text="result?.spliceai_audit?.cache_key || 'Not reported'"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Lookup information</dt><dd x-text="result?.spliceai_audit?.reason || 'Not reported'"></dd></div>
+                    </dl>
+                </details>
+                <details class="evidence-detail-item" x-show="result?.mixed_evidence">
+                    <summary>
+                        <span>Mixed evidence combination</span>
+                        <span class="evidence-detail-summary">ENIGMA point-based method</span>
+                    </summary>
+                    <dl class="evidence-detail-grid">
+                        <div><dt>Pathogenic points</dt><dd x-text="`+${result?.pathogenic_points || 0}`"></dd></div>
+                        <div><dt>Benign points</dt><dd x-text="result?.benign_points || 0"></dd></div>
+                        <div><dt>Total</dt><dd x-text="result?.total_points"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA point-based method for variants meeting both pathogenic and benign criteria</dd></div>
+                    </dl>
+                </details>
+            </section>
 
             <!-- Manual evidence review -->
             <div class="manual-evidence-section" x-data="{ open: false }">

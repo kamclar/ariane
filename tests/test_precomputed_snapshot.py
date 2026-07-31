@@ -38,6 +38,33 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
         self.assertEqual({item["pmid"] for item in canonical["source_components"]}, {"31853058"})
 
+    def test_pp4_uses_combined_clinical_lr_not_historical_posterior_probability(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.3891_3893del")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "PP4")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["points"], 4)
+        self.assertAlmostEqual(result["likelihood_ratio"], 28.554690389559802)
+        self.assertEqual(
+            {item["pmid"] for item in result["source_components"]}, {"31131967"}
+        )
+
+    def test_pp4_combines_available_appendix_b_clinical_lr_components(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.4185G>A")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "PP4")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["points"], 4)
+        self.assertAlmostEqual(result["likelihood_ratio"], 328.183625413548)
+        self.assertEqual(
+            {item["pmid"] for item in result["source_components"]},
+            {"31131967", "31853058"},
+        )
+
     def test_pp4_snapshot_missing_metadata_fails_closed(self):
         from backend.modules import pp4_bp5
 
