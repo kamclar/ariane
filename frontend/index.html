@@ -45,10 +45,12 @@
                         <input type="text" id="c_notation" x-model="c_notation"
                                placeholder="e.g. c.5217T>A or chr17:43070945:A>T" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group assembly-group"
+                         x-show="isGenomicInput()" x-transition>
                         <label for="assembly">Genome assembly</label>
-                        <select id="assembly" x-model="assembly">
-                            <option value="">Not needed for c. HGVS</option>
+                        <select id="assembly" x-model="assembly"
+                                :required="isGenomicInput()">
+                            <option value="">Select assembly</option>
                             <option value="GRCh37">GRCh37 / hg19</option>
                             <option value="GRCh38">GRCh38 / hg38</option>
                         </select>
@@ -61,7 +63,8 @@
                         </select>
                     </div>
                     <div class="form-group form-group-btn">
-                        <button type="submit" :disabled="loading">
+                        <button type="submit"
+                                :disabled="loading || (isGenomicInput() && !assembly)">
                             <span x-show="!loading">Classify</span>
                             <span x-show="loading">Analysing...</span>
                         </button>
@@ -74,7 +77,8 @@
                 Reference transcript:
                 <strong x-text="gene === 'BRCA1' ? 'NM_007294.4' : 'NM_000059.4'"></strong>.
                 ARIANE derives and verifies canonical c. and three-letter p. HGVS locally.
-                GRCh37/GRCh38 is required only for genomic coordinates.
+                <span x-show="!isGenomicInput()">Genome assembly is not needed for c. HGVS.</span>
+                <span x-show="isGenomicInput()">Select GRCh37 or GRCh38 for the genomic coordinate.</span>
             </p>
             <p class="input-hint" x-show="c_notation.toLowerCase().includes('dup')">
                 Select Confirmed tandem only when supported by laboratory data. Otherwise keep Unknown.
@@ -1062,6 +1066,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260731-2"></script>
+    <script src="/static/js/app.js?v=20260731-3"></script>
 </body>
 </html>

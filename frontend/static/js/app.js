@@ -53,6 +53,12 @@ function ariane() {
             }
         },
 
+        isGenomicInput() {
+            const value = this.c_notation.trim();
+            if (!value) return false;
+            return /^(?:chr)?(?:13|17)[:\s-]+\d+/i.test(value);
+        },
+
         resetManualItems() {
             this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"].map(code => ({
                 code,
@@ -407,6 +413,11 @@ function ariane() {
                 this.logClientValidation(this.error);
                 return;
             }
+            if (this.isGenomicInput() && !this.assembly) {
+                this.error = "Select GRCh37 or GRCh38 for the genomic coordinate.";
+                this.logClientValidation(this.error);
+                return;
+            }
 
             this.loading = true;
             this.progress = 0;
@@ -440,7 +451,7 @@ function ariane() {
                         gene: this.gene,
                         c_notation: this.c_notation.trim(),
                         p_notation: null,
-                        assembly: this.assembly || null,
+                        assembly: this.isGenomicInput() ? this.assembly : null,
                         dup_type: this.dup_type,
                     }),
                 });
