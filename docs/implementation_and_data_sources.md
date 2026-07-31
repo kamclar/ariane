@@ -82,6 +82,22 @@ porovná s lokálním referenčním následkem. Rozpor vrátí HTTP 422 a klasif
 nespustí. Pokud aplikace pro coding variantu nemá validovaný následek a uživatel
 jej nedodal, postup skončí s vysvětlením místo odhadu.
 
+Runtime proteinový následek nepřekládá de novo z DNA sekvence. Používá toto
+pořadí validovaných lokálních zdrojů:
+
+1. normalizovaný snapshot malých indelů,
+2. coding SNV snapshot,
+3. ENIGMA Table 9,
+4. uživatelem dodaná `p.` notace pouze tehdy, když žádný z uvedených zdrojů
+   nemá validovaný následek.
+
+Pokud lokální zdroj obsahuje kanonický následek, má tento následek přednost ve
+výstupu. Uživatel může dodat také zkrácený legacy frameshift zápis, například
+`p.(Cys1225fs)`. Zkrácený zápis je přijat pouze tehdy, když původní aminokyselina
+a její pozice přesně souhlasí s validovaným plným následkem, například
+`p.(Cys1225SerfsTer10)`. ARIANE ve výsledku vždy vrátí plný kanonický zápis.
+Zápis `p.(Arg1225fs)` ani `p.(Cys1226fs)` proto pro stejnou variantu neprojde.
+
 Příklad:
 
 ```text
@@ -90,7 +106,9 @@ BRCA1 p.(Tyr101Ter)
 variant_type = nonsense
 ```
 
-Pokud uživatel zadá `p.` notaci, která se liší od následku uloženého pro referenční transkript, aplikace vrátí HTTP 422. Rozpor se neřeší výběrem jedné z hodnot.
+Pokud uživatel zadá `p.` notaci, která není totožná ani povoleným zkráceným
+frameshift ekvivalentem následku uloženého pro referenční transkript, aplikace
+vrátí HTTP 422. Rozpor se neřeší výběrem jedné z hodnot.
 
 ### 2.4 Odvození typu varianty
 
@@ -300,10 +318,11 @@ Manuálně doplněná kritéria vytvářejí oddělený amended working result. 
 
 ## 5. Postup klasifikace
 
-Kritéria se vyhodnocují v tomto pořadí:
+Kritéria a potřebné anotace se vyhodnocují v tomto pořadí:
 
 1. kontrola vstupu, reference a proteinového následku,
-2. souřadnice GRCh37 a GRCh38,
+2. souřadnice GRCh37 a GRCh38, pokud má varianta jednoznačně definovatelnou
+   genomovou alelu,
 3. gnomAD a BA1,
 4. Table 9 pro PS3 a BS3,
 5. Table 4 pro PVS1 a PM5 PTC,
@@ -313,6 +332,11 @@ Kritéria se vyhodnocují v tomto pořadí:
 9. BP7,
 10. BP1,
 11. klasifikační kombinace.
+
+Exonové delece a duplikace s neurčitými breakpointy nepokračují do
+souřadnicového resolveru, SpliceAI ani BayesDel. Tyto služby vyžadují konkrétní
+genomovou alelu a jejich použití na intervalový exonový zápis by nebylo
+interpretovatelné. PVS1 se pro takovou variantu vyhodnotí přímo z ENIGMA Table 4.
 
 BA1 ukončí klasifikaci jako Class 1.
 
@@ -480,7 +504,11 @@ Každý záznam obsahuje vstupní aliasy a kanonickou `c.` notaci, `p.` následe
 
 Builder `scripts/build_brca_indel_snapshot.py` čte zdroj streamovaně. Přijímá pouze BRCA1 a BRCA2 na `NM_007294.4` a `NM_000059.4`, malé indely s uvedeným proteinovým následkem, včetně `p.?`, a oběma genomovými mapováními. Konfliktní záznamy se nevkládají. Alias sdílený více záznamy se z aliasového indexu odstraní a zapíše se do metadat. Přesná kanonická notace zůstává dostupná. Aktuální release obsahuje dva takové aliasy. Runtime při startu kontroluje status, počet záznamů a checksum indexu. Chybějící nebo poškozený snapshot zastaví start aplikace.
 
-Za běhu se alias nejprve převede na kanonickou `c.` notaci. Záznam poskytne očekávanou `p.` notaci a lokální souřadnice. Rozpor v `p.` notaci skončí chybou 422. Snapshot neurčuje výslednou klinickou třídu ani automaticky nepřidává kritéria.
+Za běhu se alias nejprve převede na kanonickou `c.` notaci. Záznam poskytne
+očekávanou `p.` notaci a lokální souřadnice. Rozpor v `p.` notaci skončí chybou
+422; výjimkou je pouze zkrácený frameshift zápis se shodnou původní
+aminokyselinou a pozicí. Snapshot neurčuje výslednou klinickou třídu ani
+automaticky nepřidává kritéria.
 
 ## 8. Předpočítaná SpliceAI data
 
@@ -531,11 +559,56 @@ Pro podporované varianty se používá lokální předpočítaná cache. Stav z
 
 ## 9. Souřadnice
 
-Coding SNV používají přednostně GRCh37 a GRCh38 ze SNV snapshotu. Intronické SNV používají rozšířenou lokální souřadnicovou mapu.
+### 9.1 Co znamená převod souřadnic
 
-Pro varianty mimo tyto mapy existuje resolver VariantValidator a sekundární resolver Mutalyzer. Stav resolveru, neúplná odpověď a použitý zdroj se zapisují do diagnostiky. Nejednoznačný výsledek se nesmí převést na první nalezené ID.
+ARIANE potřebuje pro některé datové zdroje VCF-like alelu `chromosome`, `position`,
+`REF` a `ALT` v GRCh37 nebo GRCh38. gnomAD v2.1.1 a MyVariant/BayesDel používají
+GRCh37, zatímco gnomAD v3.1.2 a lokální SpliceAI data používají GRCh38.
 
-Souřadnice jsou verzovaná vlastnost kombinace referenčního transkriptu a genomového sestavení. Nemění se při každém dotazu, ale musí se znovu validovat při změně transkriptu, sestavení nebo normalizační politiky.
+Převod není prosté přičtení coding pozice ke genomové pozici. Musí respektovat:
+
+- konkrétní verzi referenčního transkriptu,
+- hranice exonů a intronů,
+- orientaci genu; BRCA1 je na minus strand a BRCA2 na plus strand,
+- normalizaci REF a ALT alely u inzercí, delecí a duplikací,
+- rozdíly mezi GRCh37 a GRCh38.
+
+Runtime proto souřadnice ručně nepočítá. Čte již normalizované souřadnice z
+verzovaných dat nebo použije specializovaný HGVS resolver.
+
+### 9.2 Lokální souřadnicové zdroje
+
+Coding SNV mají GRCh37 a GRCh38 ve verzovaném coding SNV snapshotu. Malé indely
+mají obě sestavy, REF a ALT ve verzovaném normalizovaném indel snapshotu.
+Intronické SNV v podporovaném okně používají rozšířenou lokální souřadnicovou
+mapu. Její referenční báze pocházejí z UCSC Genome Browser sequence API pro hg19
+a hg38 a jsou navázány na stejné referenční transkripty jako ostatní snapshoty.
+
+Při startu se intronická mapa a persistentní read-through cache načtou do
+in-memory resolver cache. Aktuální implementace kontroluje tuto cache před
+přímým lookupem coding SNV a indel snapshotu. Intronická mapa je při načítání
+první a read-through cache nepřepisuje již existující klíč. Coding a indel
+snapshot se použijí následně, pokud klíč nebyl nalezen v načtené resolver cache.
+
+### 9.3 Síťové resolvery
+
+Pro variantu, která nemá použitelné lokální souřadnice, je pořadí:
+
+1. VariantValidator s referenčním transkriptem `NM_007294.4` nebo `NM_000059.4`,
+2. Mutalyzer samostatně pro GRCh37 a GRCh38.
+
+Výsledek má stav `ok`, pokud jsou dostupné obě sestavy, `partial`, pokud je
+dostupná pouze jedna, a `failed`, pokud není dostupná žádná. Úspěšný síťový
+výsledek se ukládá do read-through cache. Úplné přechodné selhání se necachuje,
+aby mohl pozdější dotaz resolver zopakovat.
+
+Nejednoznačný výsledek se nesmí převést na první nalezené ID. Exonová CNV s
+neurčitými breakpointy síťové resolvery vůbec nevolá, protože nemá jednu
+konkrétní VCF alelu.
+
+Souřadnice jsou verzovaná vlastnost kombinace referenčního transkriptu,
+genomového sestavení a normalizační politiky. Nemění se při každém dotazu, ale
+musí se znovu validovat při změně kterékoliv z těchto částí.
 
 ## 10. gnomAD data
 
@@ -569,7 +642,16 @@ Pokud vyhledávání vrátí více kandidátů bez jednoznačné přesné shody,
 
 Povinné ENIGMA tabulky zastaví start aplikace, pokud jsou neúplné nebo nečitelné.
 
-U ostatních zdrojů se degradace ukládá do centrálního registru a zobrazuje v klasifikačním výsledku a `/api/health`. Hlášení obsahuje komponentu a konkrétní důvod. Absolutní serverové cesty se pro uživatele zkracují na tvar `…ariane/...`.
+U ostatních zdrojů se degradace ukládá do centrálního registru a zobrazuje v
+klasifikačním výsledku a `/api/health`. Hlášení centrálního registru obsahuje
+komponentu a konkrétní důvod. Absolutní serverové cesty se pro uživatele
+zkracují na tvar `…ariane/...`.
+
+Podrobné odpovědi síťových resolverů, HTTP těla a výjimky se zapisují do
+serverového logu. Veřejný klasifikační výsledek je neopakuje. Uživatel dostane
+jedno stručné a akční shrnutí pro nedostupné souřadnice, ClinVar nebo ClinGen.
+Tím se zachová auditovatelná technická příčina bez zveřejnění interních cest a
+dlouhých odpovědí poskytovatelů.
 
 Bez potvrzeného vstupu nebo bez dat požadovaných konkrétním pravidlem se dané kritérium nepoužije. Aplikace nesmí nahrazovat chybějící data nulou, fixture hodnotou, prvním nalezeným ID nebo ručním fallback slovníkem.
 
