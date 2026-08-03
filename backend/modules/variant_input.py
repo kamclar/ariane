@@ -20,7 +20,9 @@ from backend.modules.hgvs import (
 
 
 _ASSEMBLIES = {"GRCH37": "GRCh37", "GRCH38": "GRCh38"}
-_TRANSCRIPT_C = re.compile(r"^(NM_\d+\.\d+):(c\..+)$", re.IGNORECASE)
+_TRANSCRIPT_C = re.compile(
+    r"^(NM_\d+\.\d+)\s*:\s*(c\..+)$", re.IGNORECASE
+)
 _GENOMIC_PATTERNS = (
     re.compile(
         r"^(?:chr)?(?P<chrom>[0-9XYM]+)[:\s-]+(?P<pos>\d+)"

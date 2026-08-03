@@ -28,6 +28,13 @@ Uživatel zadává gen a jednu variantu. Vstupní normalizační vrstva
 - genomickou variantu ve tvaru `chr17:43099813:C>T`, `17:43099813 C>T`
   nebo `17-43099813-C-T`.
 
+Vstupní parser toleruje rozdíly, které nemění význam varianty. `NM`/`nm`,
+`c.`/`C.`, `p.`/`P.`, nukleotidové symboly a operace `del`, `dup`, `ins`,
+`delins` a `inv` mohou být zadány bez ohledu na velikost písmen. Mezery a
+tabulátory jsou povoleny kolem dvojtečky a mezi `c.` a `p.` částí. Kombinovaná
+notace může oddělit `c.` a `p.` část mezerou nebo lomítkem. Výstup se vždy vrací
+v jednotném kanonickém formátu.
+
 Pro genomickou variantu je povinná sestava `GRCh37` nebo `GRCh38`. Aplikace ji
 neodhaduje. Genomický vstup se hledá v obousměrném indexu vytvořeném z
 verzovaného coding SNV snapshotu a normalizovaného indel snapshotu. Jedna

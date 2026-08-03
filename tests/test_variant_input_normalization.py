@@ -26,6 +26,32 @@ def test_reference_transcript_input_derives_canonical_protein(
 
 
 @pytest.mark.parametrize(
+    ("gene", "notation", "expected_c", "expected_p"),
+    [
+        ("BRCA2", "c.3703c>t", "c.3703C>T", "p.(Gln1235Ter)"),
+        (
+            "BRCA1",
+            "nm_007294.4 : c.3668_3671DUP / p.cys1225FS",
+            "c.3668_3671dup",
+            "p.(Cys1225SerfsTer10)",
+        ),
+        (
+            "BRCA1",
+            "NM_007294.4\t:\tC.3668_3671dup\tP.(Cys1225fs)",
+            "c.3668_3671dup",
+            "p.(Cys1225SerfsTer10)",
+        ),
+    ],
+)
+def test_hgvs_input_accepts_case_slash_and_flexible_separator_whitespace(
+    gene, notation, expected_c, expected_p
+):
+    result = normalize_variant_input(gene, notation)
+    assert result.c_notation == expected_c
+    assert result.p_notation == expected_p
+
+
+@pytest.mark.parametrize(
     ("assembly", "notation"),
     [
         ("GRCh37", "17:41251830:C>T"),
