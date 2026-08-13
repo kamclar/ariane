@@ -164,6 +164,37 @@
                 </table>
             </div>
 
+            <div class="excluded-criteria-section"
+                 x-show="result?.excluded_criteria?.length > 0">
+                <h3>Criteria excluded by an ENIGMA exception</h3>
+                <p class="excluded-criteria-intro">
+                    The numerical threshold was met, but the criterion was not applied and added no points.
+                </p>
+                <table class="criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Threshold strength</th>
+                            <th>Points</th>
+                            <th>Why it was not applied</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="c in result?.excluded_criteria" :key="c.name">
+                            <tr>
+                                <td><span class="criterion-badge criterion-badge-excluded" x-text="c.name"></span></td>
+                                <td x-text="c.strength || '-' "></td>
+                                <td>0 (not counted)</td>
+                                <td class="reason-cell">
+                                    <span x-text="c.reason"></span>
+                                    <a x-show="c.source" :href="c.source" target="_blank" rel="noopener">ENIGMA source</a>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Narrative summary -->
             <div class="narrative-section" x-show="result?.narrative">
                 <p class="narrative-text" x-text="result?.narrative"></p>
@@ -1296,6 +1327,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260813-1"></script>
+    <script src="/static/js/app.js?v=20260813-2"></script>
 </body>
 </html>

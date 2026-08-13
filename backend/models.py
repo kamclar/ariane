@@ -254,6 +254,7 @@ class ClassificationResult(BaseModel):
     predicted_label: str = ""
     total_points: int = 0
     criteria: List[CriterionResult] = []
+    excluded_criteria: List[CriterionResult] = []
     warnings: List[str] = []
     external: Optional[ExternalComparison] = None
     has_functional_evidence: bool = False

@@ -30,6 +30,7 @@ from backend.config import (
 from backend.data_validation import validate_required_datasets
 from backend.data_health import get_data_issues, get_user_warnings
 from backend.lookup_execution import lookup_or_unavailable
+from backend.modules.criterion_order import sorted_criterion_items
 from backend.models import (
     VariantRequest, ClassificationResult, CriterionResult,
     ExternalComparison, ExternalSubmitter, CLASS_LABELS,
@@ -487,8 +488,22 @@ async def _classify_one(
             strength=crit.get("strength"),
             points=crit.get("points", 0),
             reason=crit.get("reason", ""),
+            source=crit.get("source", ""),
         )
-        for name, crit in result["criteria"].items()
+        for name, crit in sorted_criterion_items(result["criteria"])
+    ]
+    excluded_criteria = [
+        CriterionResult(
+            name=name,
+            applies=False,
+            strength=crit.get("strength"),
+            points=0,
+            reason=crit.get("reason", ""),
+            source=crit.get("source", ""),
+        )
+        for name, crit in sorted_criterion_items(
+            result.get("excluded_criteria", {})
+        )
     ]
 
     ext_model = None
@@ -537,6 +552,7 @@ async def _classify_one(
         predicted_label=CLASS_LABELS.get(result["predicted_class"], ""),
         total_points=result["total_points"],
         criteria=criteria,
+        excluded_criteria=excluded_criteria,
         warnings=result["warnings"],
         external=ext_model,
         has_functional_evidence=result.get("has_functional_evidence", False),

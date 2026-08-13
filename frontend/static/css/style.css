@@ -384,7 +384,7 @@ button:disabled {
 .evidence-flag { color: var(--color-success); font-weight: 500; }
 
 /* ── Tables ─────────────────────────────────────────────────── */
-.criteria-section, .warnings-section, .external-section, .vus-section,
+.criteria-section, .excluded-criteria-section, .warnings-section, .external-section, .vus-section,
 .rna-review-section, .splice-ps1-review-section, .protein-ps1-review-section, .initiation-review-section,
 .manual-evidence-section, .sources-section {
     background: var(--color-surface);
@@ -393,6 +393,27 @@ button:disabled {
     padding: 1.2rem 1.5rem;
     margin-top: 1rem;
     box-shadow: var(--shadow);
+}
+
+.excluded-criteria-section {
+    border-left: 4px solid #b7791f;
+    background: #fffaf0;
+}
+
+.excluded-criteria-intro {
+    margin: -0.2rem 0 0.8rem;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.criterion-badge.criterion-badge-excluded {
+    background: #fef3c7;
+    color: #7c4a03;
+}
+
+.excluded-criteria-section .reason-cell a {
+    display: block;
+    margin-top: 0.35rem;
 }
 
 h3 {

@@ -1240,7 +1240,7 @@ def evaluate_frequency_criteria(
             max_af = None
 
     if max_af is not None:
-        af_pct = f"{max_af * 100:.4f}%"
+        af_pct = f"{max_af * 100:.6g}%"
         metric_note = _scored_frequency_label(gnomad_data)
         founder_snapshot_note = ""
         population_policy_note = (
@@ -1280,35 +1280,6 @@ def evaluate_frequency_criteria(
             return criteria
 
         if max_af > bs1_supporting_threshold:
-            from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
-
-            founder = lookup_pathogenic_founder_variant(gene or "", c_notation or "")
-            if founder.get("is_pathogenic_founder") is True:
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: ENIGMA v1.2 excludes well-established "
-                        f"pathogenic founder variants; {founder.get('reason')}"
-                    ),
-                    "founder_exception": founder,
-                }
-                return criteria
-            if founder.get("status") == "unavailable":
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: the pathogenic founder exception "
-                        f"could not be checked; {founder.get('reason')}"
-                    ),
-                    "founder_exception": founder,
-                }
-                return criteria
-            founder_snapshot_note = (
-                f"; pathogenic-founder exception checked against snapshot "
-                f"{founder.get('snapshot_version') or 'unknown'}"
-            )
-
-        if max_af > bs1_supporting_threshold:
             if not _frequency_qc_ok(gnomad_data):
                 criteria["_gnomad_info"] = {
                     "applies": False,
@@ -1327,6 +1298,60 @@ def evaluate_frequency_criteria(
                     ),
                 }
                 return criteria
+
+            from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
+
+            founder = lookup_pathogenic_founder_variant(gene or "", c_notation or "")
+            if founder.get("is_pathogenic_founder") is True:
+                if max_af > ba1_threshold:
+                    excluded_code = "BA1"
+                    excluded_policy = ba1_policy
+                    threshold = ba1_threshold
+                elif max_af > bs1_strong_threshold:
+                    excluded_code = "BS1_Strong"
+                    excluded_policy = bs1_strong_policy
+                    threshold = bs1_strong_threshold
+                else:
+                    excluded_code = "BS1_Supporting"
+                    excluded_policy = bs1_supporting_policy
+                    threshold = bs1_supporting_threshold
+                exclusion_reason = (
+                    f"gnomAD {metric_note} {af_pct} exceeds the "
+                    f"{excluded_code.replace('_', ' ')} threshold "
+                    f"{threshold * 100:g}%, but {excluded_code.split('_')[0]} was "
+                    "not applied and added no points: ENIGMA v1.2 excludes "
+                    "well-established pathogenic founder variants; "
+                    f"{founder.get('reason')}"
+                )
+                criteria["_excluded_criteria"] = {
+                    excluded_code: {
+                        "applies": False,
+                        "strength": excluded_policy.get("strength"),
+                        "points": 0,
+                        "reason": exclusion_reason,
+                        "source": frequency_policy.get("source_url", ""),
+                    }
+                }
+                criteria["_gnomad_info"] = {
+                    "applies": False,
+                    "reason": exclusion_reason,
+                    "founder_exception": founder,
+                }
+                return criteria
+            if founder.get("status") == "unavailable":
+                criteria["_gnomad_info"] = {
+                    "applies": False,
+                    "reason": (
+                        "BA1/BS1 not applied: the pathogenic founder exception "
+                        f"could not be checked; {founder.get('reason')}"
+                    ),
+                    "founder_exception": founder,
+                }
+                return criteria
+            founder_snapshot_note = (
+                f"; pathogenic-founder exception checked against snapshot "
+                f"{founder.get('snapshot_version') or 'unknown'}"
+            )
             if max_af > ba1_threshold:
                 criteria["BA1"] = {
                     "applies": True,

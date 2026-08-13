@@ -227,6 +227,7 @@ def evaluate_variant(
         "c_notation": c_notation,
         "p_notation": p_notation,
         "criteria": {},
+        "excluded_criteria": {},
         "total_points": 0,
         "warnings": [],
         "has_functional_evidence": False,
@@ -288,11 +289,17 @@ def evaluate_variant(
             c_notation=c_notation,
         )
         for crit_name, crit_data in freq_criteria.items():
+            if crit_name.startswith("_"):
+                continue
             if crit_data.get("applies"):
                 results["criteria"][crit_name] = crit_data
                 results["total_points"] += crit_data["points"]
             elif crit_name == "PM2" and not crit_data.get("applies"):
                 results["warnings"].append(crit_data["reason"])
+
+        results["excluded_criteria"].update(
+            freq_criteria.get("_excluded_criteria", {})
+        )
 
         gnomad_info = freq_criteria.get("_gnomad_info")
         if gnomad_info:

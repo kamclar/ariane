@@ -59,8 +59,35 @@ function ariane() {
             return /^(?:chr)?(?:13|17)[:\s-]+\d+/i.test(value);
         },
 
+        criterionSortKey(code) {
+            const groupOrder = { PVS: 0, PS: 1, PM: 2, PP: 3, BA: 4, BS: 5, BP: 6 };
+            const normalized = String(code || "").trim().toUpperCase();
+            const match = normalized.match(/^(PVS|PS|PM|PP|BA|BS|BP)(\d+)/);
+            if (!match) return [99, 99, 1, normalized];
+            const base = `${match[1]}${match[2]}`;
+            return [groupOrder[match[1]], Number(match[2]), normalized === base ? 0 : 1, normalized];
+        },
+
+        sortCriterionList(criteria) {
+            return [...(criteria || [])].sort((left, right) => {
+                const a = this.criterionSortKey(left.name || left.code);
+                const b = this.criterionSortKey(right.name || right.code);
+                for (let i = 0; i < 3; i++) {
+                    if (a[i] !== b[i]) return a[i] - b[i];
+                }
+                return a[3].localeCompare(b[3]);
+            });
+        },
+
+        normalizeCriterionOrder(result) {
+            if (!result) return result;
+            result.criteria = this.sortCriterionList(result.criteria);
+            result.excluded_criteria = this.sortCriterionList(result.excluded_criteria);
+            return result;
+        },
+
         resetManualItems() {
-            this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE", "PS1_PROTEIN"].map(code => ({
+            this.manualItems = ["PVS1_INIT", "PVS1_RNA", "PS1_PROTEIN", "PS1_SPLICE", "PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "BP7_RNA"].map(code => ({
                 code,
                 enabled: false,
                 evidence: code === "PP4" ? {
@@ -544,7 +571,7 @@ function ariane() {
 
                 this.progress = 100;
                 this.progressText = "Done.";
-                this.result = await resp.json();
+                this.result = this.normalizeCriterionOrder(await resp.json());
                 this.prefillManualReviewFromResult();
 
             } catch (e) {
@@ -660,7 +687,7 @@ function ariane() {
                             }),
                         });
                         if (resp.ok) {
-                            const data = await resp.json();
+                            const data = this.normalizeCriterionOrder(await resp.json());
                             this.batchResults[idx] = {
                                 status: "ok",
                                 gene: item.gene,
@@ -714,7 +741,7 @@ function ariane() {
             const header = [
                 "Gene", "c_notation", "p_notation",
                 "Class", "Label", "Points",
-                "Criteria", "ClinVar", "ENIGMA_EP",
+                "Criteria", "Excluded_criteria", "ClinVar", "ENIGMA_EP",
                 "Classification_note", "VUS_category", "VUS_what_to_check",
                 "RNA_review", "RNA_branches",
                 "Splice_PS1_review", "Splice_PS1_branches",
@@ -728,16 +755,18 @@ function ariane() {
                         row ? row.gene : "",
                         row ? row.c_notation : "",
                         row ? (row.p_notation || "") : "",
-                        "ERROR", "", "", "", "", "",
-                        "", "", "",
-                        "", "", "", "", "", "", "", "",
-                        row ? (row.error || "") : ""
+                        "ERROR",
+                        ...Array(header.length - 5).fill(""),
+                        row ? (row.error || "") : "",
                     ];
                 }
                 const r = row.result;
                 const criteria = r.criteria
                     .filter(c => c.applies)
                     .map(c => c.name + (c.strength ? "_" + c.strength.replace(" ", "") : ""))
+                    .join("; ");
+                const excludedCriteria = (r.excluded_criteria || [])
+                    .map(c => `${c.name}${c.strength ? "_" + c.strength.replace(" ", "") : ""}: ${c.reason}`)
                     .join("; ");
                 const warnings = r.warnings.join(" | ");
                 const rnaReview = r.rna_review && r.rna_review.recommended
@@ -772,6 +801,7 @@ function ariane() {
                     r.predicted_label,
                     r.total_points,
                     criteria,
+                    excludedCriteria,
                     r.external ? r.external.clinvar_classification : "",
                     r.external ? r.external.enigma_ep_class : "",
                     r.classification_note,

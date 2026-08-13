@@ -224,6 +224,13 @@ Síla kritéria se převádí na body:
 
 BA1 je samostatné benigní kritérium a vede přímo ke Class 1.
 
+Ve veřejném výsledku jsou kritéria vždy řazena ve stejném pořadí jako v
+ACMG/AMP a ENIGMA přehledu: `PVS1`, `PS`, `PM`, `PP`, `BA`, `BS`, `BP`.
+Číslované kódy se uvnitř skupiny řadí vzestupně. Interní kvalifikátory, například
+`PM5_PTC` nebo `BS1_Supporting`, zůstávají u svého základního kritéria. Stejné
+řazení používá webová tabulka, batch výsledek, CSV export a výsledek manuální
+revize.
+
 ### 3.1 BA1, BS1 a PM2 Supporting
 
 Zdroj: lokální snapshoty gnomAD v2.1.1 exomes non-cancer a gnomAD v3.1.2 genomes non-cancer včetně pokrytí.
@@ -256,6 +263,13 @@ expert panelu pro BRCA1 c.181T>G. Každý záznam má zdroj, kontext, kanonickou
 c. notaci a aliasy. Metadata obsahují checksum záznamů a checksumy zdrojových
 stránek při sestavení. Poškozený nebo chybějící soubor nezpůsobí použití
 BA1/BS1 bez kontroly. Kritérium se nepoužije a důvod se zobrazí uživateli.
+Pokud varianta splní frekvenční práh a současně podléhá founder výjimce, ARIANE
+vrátí splněný kód ve zvláštním poli `excluded_criteria`. Ve webovém výsledku je
+odděleně uvedena dosažená síla, nula započtených bodů a konkrétní důvod
+vyloučení. Taková položka se nikdy nepřenáší do `criteria`, součtu bodů ani
+klasifikace. Například u `BRCA1 c.181T>G` se může zobrazit splněný práh
+`BS1_Supporting`, ale BS1 se podle ENIGMA v1.2 nepoužije, protože jde o dobře
+doloženou patogenní founder variantu.
 Aktuální obsah lze znovu ověřit proti zdrojům příkazem
 `python scripts/build_brca_founder_snapshot.py --check`. Builder vybírá sedm
 řádků podle explicitního označení `Founder variant` v GeneReviews a samostatně

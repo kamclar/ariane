@@ -5,6 +5,7 @@ import math
 from typing import Any, Dict, List, Optional
 
 from backend.modules.classifier import classify_by_enigma_combination
+from backend.modules.criterion_order import criterion_sort_key
 from backend.modules.evidence_interactions import apply_manual_rna_interactions
 from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
 
@@ -568,6 +569,8 @@ def evaluate_manual_evidence(
         "predicted_label": label,
         "total_points": total_points,
         "classification_note": note,
-        "manual_criteria": results,
+        "manual_criteria": sorted(
+            results, key=lambda item: criterion_sort_key(item["code"])
+        ),
         "evidence_interactions": evidence_interactions,
     }

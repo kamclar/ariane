@@ -75,7 +75,11 @@ def gnomad_data(
         "pm2_absence_established": pm2_absence_established,
         "datasets": {
             "v2_1_non_cancer": dataset(v2_status, v2_depth, max_af if v2_status == "found" else None),
-            "v3_1_non_cancer": dataset(v3_status, v3_depth),
+            "v3_1_non_cancer": dataset(
+                v3_status,
+                v3_depth,
+                max_af if v3_status == "found" else None,
+            ),
         },
     }
 
@@ -366,6 +370,26 @@ class FrequencyTests(unittest.TestCase):
         self.assertNotIn("BA1", result)
         self.assertNotIn("BS1_Strong", result)
         self.assertIn("pathogenic founder", result["_gnomad_info"]["reason"])
+        self.assertEqual(result["_excluded_criteria"]["BA1"]["points"], 0)
+        self.assertFalse(result["_excluded_criteria"]["BA1"]["applies"])
+
+    def test_bs1_supporting_threshold_is_reported_but_not_scored_for_c181t_g(self):
+        data = gnomad_data(
+            max_af=0.0000204,
+            found=True,
+            v3_status="found",
+            non_founder_allele_count=4,
+        )
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.181T>G"
+        )
+        self.assertNotIn("BS1_Supporting", result)
+        excluded = result["_excluded_criteria"]["BS1_Supporting"]
+        self.assertFalse(excluded["applies"])
+        self.assertEqual(excluded["strength"], "Supporting")
+        self.assertEqual(excluded["points"], 0)
+        self.assertIn("0.00204%", excluded["reason"])
+        self.assertIn("pathogenic founder", excluded["reason"])
 
     def test_ba1_reason_documents_excluded_founder_populations(self):
         data = gnomad_data(max_af=0.002, found=True, v2_status="found")
@@ -914,6 +938,26 @@ class SpliceTests(unittest.TestCase):
 
 
 class ClassifierIntegrationTests(unittest.TestCase):
+    def test_founder_frequency_exception_is_structured_and_not_scored(self):
+        data = gnomad_data(
+            max_af=0.0000204,
+            found=True,
+            v3_status="found",
+            non_founder_allele_count=4,
+        )
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="missense",
+            p_notation="p.(Cys61Gly)",
+            c_notation="c.181T>G",
+            spliceai_score=0.0,
+            gnomad_data=data,
+        )
+        self.assertNotIn("BS1_Supporting", result["criteria"])
+        self.assertEqual(
+            result["excluded_criteria"]["BS1_Supporting"]["points"], 0
+        )
+
     def test_unapproved_protein_ps1_candidate_is_review_only(self):
         ps1_result = {
             "applies": False,
