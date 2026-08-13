@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "status": "active",
+  "description": "Curated protein-PS1 reference records outside ENIGMA ST7. Records may represent official ENIGMA/ClinGen VCEP assertions or documented local reclassification under ENIGMA VCEP rules. The generated registry remains the runtime source.",
+  "records": []
+}

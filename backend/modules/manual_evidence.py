@@ -6,9 +6,10 @@ from typing import Any, Dict, List, Optional
 
 from backend.modules.classifier import classify_by_enigma_combination
 from backend.modules.evidence_interactions import apply_manual_rna_interactions
+from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
 
 
-CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
+CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
 
 APPENDIX_B_PP4_SOURCES = {
     "15290653": "Goldgar et al. 2004",
@@ -132,9 +133,21 @@ MANUAL_CRITERIA = {
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PS1 splicing branch, Specifications PS1/Table 5 and Appendix J Table 17",
     },
+    "PS1_PROTEIN": {
+        "direction": "pathogenic",
+        "allowed_strengths": ["Moderate", "Strong"],
+        "title": "Same missense substitution as a VCEP-classified P/LP reference",
+        "threshold": "Strong for a Pathogenic reference and Moderate for a Likely Pathogenic reference, after the complete ENIGMA protein-level PS1 reference and splice review.",
+        "check": "Confirm the VCEP classification source, same normalized missense substitution, different nucleotide change, SpliceAI <= 0.1 for both variants, and no damaging splice effect in the defined reviewed sources.",
+        "literature": "ST7 supplies the P/LP reference classification. Automatic protein PS1 additionally requires an eligible registry status after the ENIGMA splice checks. Review ENIGMA BRCA1/2 VCEP v1.2 PS1 and Appendix J.",
+        "source_url": CSPEC_URL,
+        "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, protein-level PS1 and Appendix J",
+    },
 }
 
-STRUCTURED_CURATED_CODES = {"PP4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"}
+STRUCTURED_CURATED_CODES = {
+    "PP4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE", "PS1_PROTEIN"
+}
 
 RESOURCE_LINKS = [
     {
@@ -334,6 +347,63 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
         strength = evidence.get("curated_strength")
         return strength if strength in MANUAL_CRITERIA[code]["allowed_strengths"] else None
 
+    if code == "PS1_PROTEIN":
+        required_text_fields = [
+            "reference_variant",
+            "reference_p_notation",
+            "classification_source",
+            "ps1_protein_rationale",
+        ]
+        if any(not str(evidence.get(field) or "").strip() for field in required_text_fields):
+            return None
+        if evidence.get("reference_classification") not in {
+            "Pathogenic", "Likely Pathogenic"
+        }:
+            return None
+        if evidence.get("classification_verification") not in {
+            "external_vcep_assertion",
+            "locally_recurated_under_enigma_vcep",
+        }:
+            return None
+        if (
+            evidence.get("same_missense_confirmed") is not True
+            or evidence.get("different_nucleotide_change_confirmed") is not True
+            or evidence.get("splice_source_check_completed") is not True
+        ):
+            return None
+        sources_checked = evidence.get("splice_sources_checked")
+        if (
+            not isinstance(sources_checked, list)
+            or not set(PS1_SPLICE_SOURCES).issubset(
+                {str(source).strip() for source in sources_checked}
+            )
+        ):
+            return None
+        if evidence.get("vua_confirmed_splice_status") not in {
+            "none_identified", "normal"
+        } or evidence.get("reference_confirmed_splice_status") not in {
+            "none_identified", "normal"
+        }:
+            return None
+        vua_score = _number(evidence, "vua_spliceai_score")
+        reference_score = _number(evidence, "reference_spliceai_score")
+        if (
+            vua_score is None or reference_score is None
+            or vua_score > 0.1 or reference_score > 0.1
+        ):
+            return None
+        if evidence.get("reference_classification_used_ps1") == "yes":
+            if (
+                not str(evidence.get("reference_ps1_dependency_reference") or "").strip()
+                or evidence.get("direct_reciprocal_dependency_excluded") is not True
+            ):
+                return None
+        return (
+            "Strong"
+            if evidence["reference_classification"] == "Pathogenic"
+            else "Moderate"
+        )
+
     if code == "PS4":
         p_value = _number(evidence, "p_value")
         odds_ratio = _number(evidence, "odds_ratio")
@@ -471,7 +541,12 @@ def evaluate_manual_evidence(
         if applies:
             if code == "PVS1_INIT":
                 combined.pop("PP3", None)
-            combined[code] = {
+            output_code = "PS1" if code == "PS1_PROTEIN" else code
+            if output_code == "PS1" and output_code in combined:
+                raise ValueError(
+                    "Protein PS1 is already present in the automated result and cannot be counted twice"
+                )
+            combined[output_code] = {
                 "applies": True,
                 "strength": selected,
                 "points": points,

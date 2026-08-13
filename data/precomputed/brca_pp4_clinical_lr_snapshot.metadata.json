@@ -1,28 +1,57 @@
 {
   "conflicting_canonical_keys": [
-    "BRCA1:c.2998_3003del",
-    "BRCA1:c.3327_3329del",
-    "BRCA1:c.3328_3330del",
-    "BRCA1:c.4358-2del",
-    "BRCA1:c.5017_5019del",
-    "BRCA1:c.5213_5215del",
-    "BRCA2:c.3864_3866del",
-    "BRCA2:c.4933_4935del",
-    "BRCA2:c.5632_5634del",
-    "BRCA2:c.6399_6401del",
-    "BRCA2:c.8249_8251del",
-    "BRCA2:c.8464_8466del",
-    "BRCA2:c.9052_9057del"
+    "BRCA1:c.815_824dup"
   ],
-  "created_utc": "2026-07-22T16:46:59.049338+00:00",
+  "conflicting_canonical_records": {
+    "BRCA1:c.815_824dup": {
+      "existing_input_c_notations": [
+        "c.815_824dup"
+      ],
+      "existing_source_components": [
+        {
+          "appendix_b_source": true,
+          "citation": "Li et al. 2020",
+          "clinical_data": [
+            {
+              "data_type": "personal_and_family_history",
+              "lr": 1.31324
+            }
+          ],
+          "component_lr": 1.31324,
+          "pmid": "31853058"
+        }
+      ],
+      "incoming_input_c_notations": [
+        "c.815_824dup",
+        "c.815_824dupAGCCATGTGG"
+      ],
+      "incoming_source_components": [
+        {
+          "appendix_b_source": true,
+          "citation": "Li et al. 2020",
+          "clinical_data": [
+            {
+              "data_type": "personal_and_family_history",
+              "lr": 1.91608e+18
+            }
+          ],
+          "component_lr": 1.91608e+18,
+          "pmid": "31853058"
+        }
+      ],
+      "reason": "different clinical LR components under the same PMID"
+    }
+  },
+  "created_utc": "2026-08-12T17:12:17.930086+00:00",
   "criteria": {
-    "BP5": 1308,
-    "PP4": 955,
-    "not_informative": 2117
+    "BP5": 1312,
+    "PP4": 952,
+    "not_informative": 2115
   },
   "dataset": "BRCA1/2 Appendix B clinical likelihood-ratio snapshot",
   "excluded": {
-    "conflicting_canonical_record": 13,
+    "conflicting_canonical_record": 1,
+    "hgvs_normalization_failed:VariantNormalizationError": 1,
     "no_appendix_b_lr": 30
   },
   "included_appendix_b_sources": {
@@ -56,12 +85,46 @@
       "pmid": "31131967"
     }
   },
-  "index_sha256": "5c4ad4cf65ad72ad857a4598a1ff7a856a9121d3aa14bb5185cd5873c8f53377",
-  "records": 4380,
+  "index_sha256": "f413cfdf432f22b292d82e89f7c726248a3c85a10eae8e4581c1876e7350df9b",
+  "normalization": {
+    "counts": {
+      "canonical_source_rows_merged": 24,
+      "duplicate_source_components_deduplicated": 0,
+      "indels_not_in_reference_snapshot": 2,
+      "independent_source_components_merged": 24,
+      "known_indels_cross_checked": 859,
+      "notations_canonicalized": 712,
+      "source_records_normalized": 4435
+    },
+    "failures": [
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_007294.4:c.-676T>A: HGVSInvalidIntervalError: c.-676 coordinate is out of bounds",
+        "variant": "NM_007294.4:c.-676T>A"
+      }
+    ],
+    "method": "biocommons.hgvs with checksum-pinned cdot panel provider",
+    "normalized_indel_dependency": {
+      "index_sha256": "f9a92f5e416b6b1a7af3e9a6b433d6e96a9e5b54a8e0a14161177eba8f75e256",
+      "metadata_sha256": "1975432e48e2ba9bf3fd2b36f510ac8b62cb932cbdefe76279a2dc99f2896cfc",
+      "source_release": "70"
+    },
+    "provenance": {
+      "cdot_data_release": "0.2.32",
+      "cdot_library_version": "0.2.30",
+      "cdot_source_sha256": "70fffc92d3178ae0de66efe97acd8835e5db7ae7d9e703b4b03e873ddf27f0f9",
+      "hgvs_version": "1.5.7",
+      "normalization_engine": "biocommons.hgvs",
+      "provider": "cdot.JSONDataProvider",
+      "reference_bundle": "ariane-brca12-reference-v1",
+      "reference_manifest_sha256": "5d889b264f8494d5163ad91268fd7ec7d0ccfee19777d2716a87cd6caea9a8c6"
+    }
+  },
+  "records": 4379,
   "records_by_appendix_b_pmid": {
     "17924331": 151,
-    "31131967": 1390,
-    "31853058": 3380
+    "31131967": 1389,
+    "31853058": 3378
   },
   "reference_transcripts": {
     "NM_000059.4": "BRCA2",

@@ -13,6 +13,7 @@ import concurrent.futures
 import hashlib
 import json
 import re
+import sys
 import threading
 import time
 import urllib.parse
@@ -21,18 +22,36 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from backend.spliceai_profile import (
+    SPLICEAI_AGGREGATION,
+    SPLICEAI_ALTERNATE_FIELDS,
+    SPLICEAI_ANNOTATION_SUBSET,
+    SPLICEAI_DELTA_FIELDS,
+    SPLICEAI_GENOME_ASSEMBLY,
+    SPLICEAI_MASK,
+    SPLICEAI_MAX_DISTANCE,
+    SPLICEAI_PROFILE,
+    SPLICEAI_PROFILE_ID,
+    SPLICEAI_PROFILE_SHA256,
+    SPLICEAI_REFERENCE_FIELDS,
+    scoring_profile_metadata,
+    validate_scoring_metadata,
+)
+
+
 SNAPSHOT = ROOT / "data/precomputed/brca_module1_snv_classification_snapshot.index.json"
 COORDINATES = ROOT / "data/coordinates/brca_intronic_snv_coordinates.json"
 COORDINATE_METADATA = ROOT / "data/coordinates/brca_intronic_snv_coordinates.metadata.json"
 SPLICEAI = ROOT / "data/spliceai/spliceai_brca_intronic_snv_reference_cache.json"
 SPLICEAI_METADATA = ROOT / "data/spliceai/spliceai_brca_intronic_snv_reference_cache.metadata.json"
-DEFAULT_API = "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/"
-TRANSCRIPTS = {
-    "BRCA1": {"refseq": "NM_007294.4", "ensembl": "ENST00000357654.9"},
-    "BRCA2": {"refseq": "NM_000059.4", "ensembl": "ENST00000380152.8"},
-}
+SPLICEAI_WORK = ROOT / "data/spliceai/build/spliceai_brca_intronic_snv_reference_cache.building.json"
+SPLICEAI_WORK_METADATA = SPLICEAI_WORK.with_name(SPLICEAI_WORK.stem + ".metadata.json")
+DEFAULT_API = "http://127.0.0.1:8080/spliceai/"
+TRANSCRIPTS = SPLICEAI_PROFILE["reference_transcripts"]
 COMPLEMENT = str.maketrans("ACGT", "TGCA")
 
 
@@ -185,13 +204,25 @@ def build_coordinates(window: int) -> tuple[dict, dict]:
     return output, metadata
 
 
-def _score_variant(api_url: str, gene: str, entry: dict, timeout: int, distance: int) -> dict:
+def _score_variant(api_url: str, gene: str, entry: dict, timeout: int) -> dict:
     grch38 = entry["grch38"]
     variant = f"chr{grch38['chrom']}-{grch38['pos']}-{grch38['ref']}-{grch38['alt']}"
-    url = api_url.rstrip("/") + "/?" + urllib.parse.urlencode({"hg": 38, "variant": variant, "distance": distance, "mask": 0})
+    url = api_url.rstrip("/") + "/?" + urllib.parse.urlencode({
+        "hg": 38,
+        "variant": variant,
+        "distance": SPLICEAI_MAX_DISTANCE,
+        "mask": SPLICEAI_MASK,
+        "bc": SPLICEAI_ANNOTATION_SUBSET,
+    })
     request = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "ARIANE-intronic-cache-builder/1.0"})
     with urllib.request.urlopen(request, timeout=timeout) as response:
         payload = json.loads(response.read())
+    if (
+        str(payload.get("genomeVersion") or payload.get("hg") or "") != "38"
+        or payload.get("distance") != SPLICEAI_MAX_DISTANCE
+        or payload.get("mask") != SPLICEAI_MASK
+    ):
+        raise ValueError("SpliceAI response profile does not match ENIGMA Appendix J")
     rows = payload.get("scores") or []
     reference = TRANSCRIPTS[gene]
     matching = []
@@ -199,28 +230,105 @@ def _score_variant(api_url: str, gene: str, entry: dict, timeout: int, distance:
         tid = str(row.get("t_id") or "")
         refseq_ids = [str(value) for value in row.get("t_refseq_ids") or []]
         if tid.split(".")[0] == reference["ensembl"].split(".")[0] or any(value.split(".")[0] == reference["refseq"].split(".")[0] for value in refseq_ids):
-            matching.append(row)
+            rank = 0
+            if tid == reference["ensembl"]:
+                rank = 4
+            elif tid.split(".")[0] == reference["ensembl"].split(".")[0]:
+                rank = 3
+            if reference["refseq"] in refseq_ids:
+                rank = max(rank, 2)
+            elif any(value.split(".")[0] == reference["refseq"].split(".")[0] for value in refseq_ids):
+                rank = max(rank, 1)
+            matching.append((rank, row))
     if not matching:
         raise ValueError("Reference transcript absent from SpliceAI response")
-    row = matching[-1]
-    fields = {name: float(row.get(name, 0) or 0) for name in ("DS_AG", "DS_AL", "DS_DG", "DS_DL")}
+    best_rank = max(rank for rank, _ in matching)
+    best_rows = [row for rank, row in matching if rank == best_rank]
+    if len(best_rows) != 1:
+        raise ValueError("Ambiguous reference-transcript records in SpliceAI response")
+    row = best_rows[0]
+    fields = {name: float(row[name]) for name in SPLICEAI_DELTA_FIELDS}
+    reference_fields = {name: float(row[name]) for name in SPLICEAI_REFERENCE_FIELDS}
+    alternate_fields = {name: float(row[name]) for name in SPLICEAI_ALTERNATE_FIELDS}
     max_field = max(fields, key=fields.get)
     return {
         "status": "ok", "score": fields[max_field], "max_delta_field": max_field,
-        "delta_scores": fields, "selected_transcript": str(row.get("t_id") or ""),
+        "delta_scores": fields, "reference_scores": reference_fields,
+        "alternate_scores": alternate_fields,
+        "selected_transcript": str(row.get("t_id") or ""),
         "selected_transcript_policy": "reference_transcript", "source": "Broad-compatible SpliceAI API",
         "variant": variant, "grch38": f"{grch38['chrom']}:{grch38['pos']}:{grch38['ref']}>{grch38['alt']}",
+        "scoring_profile_id": SPLICEAI_PROFILE_ID,
+        "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
+        "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
+        "distance": SPLICEAI_MAX_DISTANCE,
+        "mask": SPLICEAI_MASK,
+        "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
+        "aggregation": SPLICEAI_AGGREGATION,
     }
 
 
-def build_spliceai(api_url: str, workers: int, timeout: int, delay: float, distance: int) -> tuple[dict, dict]:
+def _checkpoint_metadata(coordinates: dict, cache: dict, api_urls: list[str]) -> dict:
+    ok = sum(value.get("status") == "ok" for value in cache.values())
+    value = {
+        **scoring_profile_metadata(),
+        "build_status": "building",
+        "coordinate_cache_sha256": _sha256(COORDINATES),
+        "expected_variants": len(coordinates),
+        "cache_entries": len(cache),
+        "status_ok": ok,
+        "status_error": len(cache) - ok,
+        "api_urls": api_urls,
+    }
+    if SPLICEAI_WORK.exists():
+        value["sha256"] = _sha256(SPLICEAI_WORK)
+    return value
+
+
+def _load_resumable_work(coordinates: dict, api_urls: list[str]) -> dict:
+    if not SPLICEAI_WORK.exists() and not SPLICEAI_WORK_METADATA.exists():
+        return {}
+    if not SPLICEAI_WORK.exists() or not SPLICEAI_WORK_METADATA.exists():
+        raise RuntimeError(
+            f"Incomplete SpliceAI build checkpoint in {SPLICEAI_WORK.parent}. "
+            "Preserve or move it aside before starting a new build."
+        )
+    metadata = _read_json(SPLICEAI_WORK_METADATA)
+    errors = validate_scoring_metadata(metadata)
+    if metadata.get("coordinate_cache_sha256") != _sha256(COORDINATES):
+        errors.append("coordinate cache checksum differs")
+    if metadata.get("sha256") != _sha256(SPLICEAI_WORK):
+        errors.append("checkpoint checksum differs")
+    if errors:
+        raise RuntimeError(
+            "SpliceAI checkpoint cannot be resumed: " + "; ".join(errors)
+        )
+    return _read_json(SPLICEAI_WORK)
+
+
+def _write_checkpoint(coordinates: dict, cache: dict, api_urls: list[str]) -> None:
+    _atomic_json(SPLICEAI_WORK, cache)
+    _atomic_json(
+        SPLICEAI_WORK_METADATA,
+        _checkpoint_metadata(coordinates, cache, api_urls),
+    )
+
+
+def build_spliceai(api_url: str, workers: int, timeout: int, delay: float) -> tuple[dict, dict]:
     coordinates = _read_json(COORDINATES)
-    cache = _read_json(SPLICEAI) if SPLICEAI.exists() else {}
-    pending = [(key, value) for key, value in coordinates.items() if cache.get(key, {}).get("status") != "ok"]
-    lock = threading.Lock()
     api_urls = [value.strip() for value in api_url.split(",") if value.strip()]
     if not api_urls:
         raise ValueError("At least one SpliceAI API URL is required")
+    for value in api_urls:
+        hostname = urllib.parse.urlparse(value).hostname
+        if hostname not in {"127.0.0.1", "localhost", "::1"}:
+            raise ValueError(
+                "Reference cache builds require local pinned SpliceAI servers; "
+                f"remote endpoint rejected: {value}"
+            )
+    cache = _load_resumable_work(coordinates, api_urls)
+    pending = [(key, value) for key, value in coordinates.items() if cache.get(key, {}).get("status") != "ok"]
+    lock = threading.Lock()
 
     def task(index: int, item: tuple[str, dict]) -> tuple[str, dict]:
         key, entry = item
@@ -229,7 +337,7 @@ def build_spliceai(api_url: str, workers: int, timeout: int, delay: float, dista
         # Distribute resume batches evenly. Hash-based assignment repeatedly
         # sent every timed-out variant back to the same slow instance.
         endpoint_index = index % len(api_urls)
-        return key, _score_variant(api_urls[endpoint_index], entry["gene"], entry, timeout, distance)
+        return key, _score_variant(api_urls[endpoint_index], entry["gene"], entry, timeout)
 
     completed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
@@ -247,18 +355,27 @@ def build_spliceai(api_url: str, workers: int, timeout: int, delay: float, dista
             completed += 1
             if completed % 100 == 0 or completed == len(pending):
                 with lock:
-                    _atomic_json(SPLICEAI, cache)
+                    _write_checkpoint(coordinates, cache, api_urls)
                 print(f"SpliceAI: {completed}/{len(pending)} attempted; {sum(v.get('status') == 'ok' for v in cache.values())}/{len(coordinates)} complete", flush=True)
-    _atomic_json(SPLICEAI, cache)
+    _write_checkpoint(coordinates, cache, api_urls)
     ok = sum(value.get("status") == "ok" for value in cache.values())
     metadata = {
+        **scoring_profile_metadata(),
         "dataset": "BRCA1/BRCA2 intronic SNV reference-transcript SpliceAI cache",
         "created_utc": datetime.now(timezone.utc).isoformat(), "coordinate_cache_sha256": _sha256(COORDINATES),
-        "coordinate_variants": len(coordinates), "cache_entries": len(cache), "status_ok": ok,
-        "status_error": len(cache) - ok, "api_urls": api_urls, "distance": distance,
-        "mask": 0, "transcript_policy": "reference_transcript",
-        "reference_transcripts": TRANSCRIPTS, "sha256": _sha256(SPLICEAI),
+        "expected_variants": len(coordinates), "coordinate_variants": len(coordinates),
+        "cache_entries": len(cache), "status_ok": ok,
+        "status_error": len(cache) - ok, "api_urls": api_urls,
+        "reference_transcripts": TRANSCRIPTS,
+        "approved_engine": SPLICEAI_PROFILE["approved_engine"],
     }
+    if ok != len(coordinates) or len(cache) != len(coordinates):
+        raise RuntimeError(
+            f"SpliceAI build incomplete: {ok}/{len(coordinates)} successful. "
+            "Production cache was not replaced."
+        )
+    _atomic_json(SPLICEAI, cache)
+    metadata["sha256"] = _sha256(SPLICEAI)
     _atomic_json(SPLICEAI_METADATA, metadata)
     return cache, metadata
 
@@ -272,6 +389,16 @@ def validate() -> None:
         raise SystemExit("Coordinate cache count mismatch")
     if SPLICEAI.exists():
         spliceai = _read_json(SPLICEAI)
+        if not SPLICEAI_METADATA.exists():
+            raise SystemExit("SpliceAI cache metadata is missing")
+        spliceai_metadata = _read_json(SPLICEAI_METADATA)
+        profile_errors = validate_scoring_metadata(spliceai_metadata)
+        if profile_errors:
+            raise SystemExit(
+                "SpliceAI cache profile mismatch: " + "; ".join(profile_errors)
+            )
+        if spliceai_metadata.get("sha256") != _sha256(SPLICEAI):
+            raise SystemExit("SpliceAI cache checksum mismatch")
         missing = sorted(set(coordinates) - {key for key, value in spliceai.items() if value.get("status") == "ok"})
         if missing:
             raise SystemExit(f"SpliceAI cache incomplete: {len(missing)} variants missing/error")
@@ -287,14 +414,13 @@ def main() -> None:
     parser.add_argument("--api-url", default=DEFAULT_API)
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--timeout", type=int, default=90)
-    parser.add_argument("--distance", type=int, default=50)
     parser.add_argument("--delay", type=float, default=1.5, help="Per-request delay; use 0 only for a local endpoint")
     args = parser.parse_args()
     if args.command in {"coordinates", "all"}:
         _, metadata = build_coordinates(args.window)
         print(json.dumps(metadata, indent=2))
     if args.command in {"spliceai", "all"}:
-        _, metadata = build_spliceai(args.api_url, args.workers, args.timeout, args.delay, args.distance)
+        _, metadata = build_spliceai(args.api_url, args.workers, args.timeout, args.delay)
         print(json.dumps(metadata, indent=2))
     if args.command == "validate":
         validate()

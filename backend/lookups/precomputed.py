@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, Optional
+import hashlib
 import json
 from backend.data_health import clear_issue, register_issue
 
@@ -10,6 +11,43 @@ CLASSIFICATION_SNAPSHOT_METADATA = PRECOMPUTED_DIR / "brca_module1_snv_classific
 
 _CLASSIFICATION_INDEX: Optional[dict[str, dict[str, Any]]] = None
 _CLASSIFICATION_METADATA: Optional[dict[str, Any]] = None
+
+
+def validate_classification_snapshot() -> None:
+    """Fail startup if the coding-SNV normalization snapshot is inconsistent."""
+    if not CLASSIFICATION_SNAPSHOT_INDEX.is_file():
+        raise RuntimeError(
+            f"Required classification snapshot index is missing: {CLASSIFICATION_SNAPSHOT_INDEX}"
+        )
+    if not CLASSIFICATION_SNAPSHOT_METADATA.is_file():
+        raise RuntimeError(
+            "Required classification snapshot metadata is missing: "
+            f"{CLASSIFICATION_SNAPSHOT_METADATA}"
+        )
+    try:
+        index_bytes = CLASSIFICATION_SNAPSHOT_INDEX.read_bytes()
+        index = json.loads(index_bytes)
+        metadata = json.loads(CLASSIFICATION_SNAPSHOT_METADATA.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Required classification snapshot cannot be loaded: {exc}") from exc
+    if not isinstance(index, dict) or len(index) != 47547:
+        raise RuntimeError(
+            f"Required classification snapshot must contain 47,547 records, found {len(index)}"
+        )
+    actual_sha = hashlib.sha256(index_bytes).hexdigest()
+    if metadata.get("index_sha256") != actual_sha:
+        raise RuntimeError(
+            "Required classification snapshot checksum mismatch: "
+            f"expected {metadata.get('index_sha256')}, found {actual_sha}"
+        )
+    normalization = metadata.get("protein_consequence_normalization", {})
+    if (
+        normalization.get("status") != "complete"
+        or normalization.get("records_checked") != len(index)
+    ):
+        raise RuntimeError(
+            "Required classification snapshot lacks a complete HGVS protein-consequence audit"
+        )
 
 
 def _normal_key(gene: str, c_notation: str) -> str:

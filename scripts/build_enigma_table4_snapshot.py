@@ -109,6 +109,10 @@ def build_snapshot(source: Path) -> dict:
                 "exon": exon,
                 "boundary_aa": first_na_aa - 1,
                 "rule": marker,
+                "at_or_before": {
+                    "pvs1_code": code,
+                    "pm5_code": row[11],
+                },
             }
         elif marker.startswith("PTC>"):
             ptc_rules[gene][exon] = {
@@ -118,6 +122,10 @@ def build_snapshot(source: Path) -> dict:
             }
             if gene in critical_boundaries:
                 critical_boundaries[gene]["rule"] += f"; {marker}"
+                critical_boundaries[gene]["after"] = {
+                    "pvs1_code": code,
+                    "pm5_code": row[11],
+                }
         elif marker.startswith("DEL "):
             deletion_rules[gene][exon] = {
                 "pvs1_code": code,

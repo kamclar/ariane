@@ -40,6 +40,21 @@ journalctl -u ariane --since today -o cat | grep '"log_type":"ariane_audit"'
 
 Audit events can contain variant data, free-text notes, assessor names, and IP addresses. Limit journal access to administrators and define a retention period that matches local privacy requirements.
 
+## Updating Python dependencies on an existing server
+
+After a release changes `requirements.txt`, update the existing virtual
+environment before restarting the service:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libpq-dev python3-dev build-essential
+sudo /home/ubuntu/ariane/venv/bin/pip install -r /home/ubuntu/ariane/requirements.txt
+sudo bash /home/ubuntu/ariane/scripts/server-ops/restart-ariane.sh
+```
+
+The service intentionally refuses to start if the pinned HGVS packages or the
+checksum-verified panel reference bundle are missing or inconsistent.
+
 ## Audit administration page
 
 Configure a generated password and open the page over HTTPS:

@@ -19,11 +19,20 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         index_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.index.json"
         metadata_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json"
+        indel_index_path = root / "data/precomputed/brca_normalized_indel_snapshot.index.json"
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         records = json.loads(index_path.read_text(encoding="utf-8"))
         self.assertEqual(metadata["status"], "validated_derived_snapshot")
         self.assertEqual(metadata["records"], len(records))
         self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
+        self.assertEqual(
+            metadata["normalization"]["normalized_indel_dependency"]["index_sha256"],
+            hashlib.sha256(indel_index_path.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(
+            metadata["normalization"]["provenance"]["normalization_engine"],
+            "biocommons.hgvs",
+        )
 
     def test_pp4_snapshot_resolves_c5266_alias_as_very_strong(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
@@ -37,6 +46,34 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertAlmostEqual(canonical["likelihood_ratio"], 6.89647e45)
         self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
         self.assertEqual({item["pmid"] for item in canonical["source_components"]}, {"31853058"})
+
+    def test_bp5_snapshot_resolves_multibase_duplication_alias(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        canonical = evaluate_pp4_bp5("BRCA2", "c.9891_9894dup")
+        source_spelling = evaluate_pp4_bp5("BRCA2", "c.9891_9894dupATTT")
+        self.assertTrue(canonical["applies"])
+        self.assertEqual(canonical["code"], "BP5")
+        self.assertEqual(canonical["strength"], "Supporting")
+        self.assertEqual(canonical["points"], -1)
+        self.assertAlmostEqual(canonical["likelihood_ratio"], 0.41018)
+        self.assertEqual(source_spelling["likelihood_ratio"], canonical["likelihood_ratio"])
+        self.assertEqual(
+            {item["pmid"] for item in canonical["source_components"]}, {"31853058"}
+        )
+
+    def test_pp4_snapshot_combines_independent_rows_after_hgvs_normalization(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA2", "c.475+4del")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "PP4")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertAlmostEqual(result["likelihood_ratio"], 73.38448758438403)
+        self.assertEqual(
+            {item["pmid"] for item in result["source_components"]},
+            {"31131967", "31853058"},
+        )
 
     def test_pp4_uses_combined_clinical_lr_not_historical_posterior_probability(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
@@ -136,6 +173,22 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.p_notation, "p.(Cys1225SerfsTer10)")
         self.assertEqual(result.predicted_class, 5)
 
+    def test_terminal_frameshift_receives_paired_table4_codes(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.5556_5560del", "p.(Tyr1853AspfsTer25)")
+            )
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(criteria["PVS1"].strength, "Very Strong")
+        self.assertEqual(criteria["PM5_PTC"].strength, "Strong")
+        self.assertEqual(result.total_points, 12)
+        self.assertEqual(result.predicted_class, 5)
+
     def test_exon_cnv_skips_small_variant_lookups_and_hides_provider_errors(self):
         from backend.main import _classify_one
 
@@ -185,6 +238,27 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(pp4.strength, "Very Strong")
         self.assertEqual(pp4.points, 8)
 
+    def test_brca2_multibase_duplication_receives_bp5_supporting(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
+        ), patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA2", "c.9891_9894dup", "p.(Gln3299fs)")
+            )
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(criteria["PVS1"].strength, "Very Strong")
+        self.assertEqual(criteria["PM5_PTC"].strength, "Strong")
+        self.assertEqual(criteria["BP5"].strength, "Supporting")
+        self.assertEqual(criteria["BP5"].points, -1)
+        self.assertEqual(result.total_points, 11)
+        self.assertEqual(result.predicted_class, 5)
+        self.assertTrue(result.mixed_evidence)
+
     def test_general_indel_snapshot_rejects_random_protein_notation(self):
         from backend.main import _classify_one
 
@@ -213,13 +287,21 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             normalize_protein_notation("p.(Gln1756ProfsTer74)"),
         )
 
-    def test_c_only_nonsense_is_rejected(self):
+    def test_c_only_nonsense_derives_protein_consequence(self):
         from backend.main import _classify_one
 
-        with self.assertRaises(HTTPException) as raised:
-            asyncio.run(_classify_one("BRCA1", "c.303T>G", ""))
-        self.assertEqual(raised.exception.status_code, 422)
-        self.assertIn("p. notation is required", raised.exception.detail)
+        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+            "backend.lookups.spliceai.get_spliceai_score", return_value=None
+        ), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
+        ), patch(
+            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(_classify_one("BRCA1", "c.303T>G", ""))
+        self.assertEqual(result.p_notation, "p.(Tyr101Ter)")
+        self.assertEqual(result.consequence_status, "sequence_derived")
 
     def test_nonsense_with_protein_notation_is_classified(self):
         from backend.main import _classify_one

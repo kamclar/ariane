@@ -42,14 +42,71 @@ jednoznačná shoda vrátí kanonickou `c.` notaci, třípísmennou `p.` notaci,
 referenční transkript a zdroj normalizace. Nulová nebo víceznačná shoda ukončí
 požadavek před klasifikací.
 
+Po jednoznačném převodu genomické alely na `c.` notaci se `p.` následek vždy
+znovu odvodí stejným sekvenčním HGVS enginem jako u přímého `c.` vstupu.
+Protein uložený v souřadnicovém snapshotu slouží jen jako nezávislá kontrola.
+
+#### Důležité omezení genomických vstupů
+
+Transkriptové a genomické vstupy zatím nejsou zpracovány stejně obecně.
+Přesný `c.` vstup pro podporovaný transkript může HGVS engine ověřit a převést
+na `p.` přímo z lokální referenční sekvence, i když daná varianta není ve
+snapshotu. Genomický vstup `g.` nebo `chr:pos:REF>ALT` se naproti tomu zatím
+nejprve hledá v lokálním reverse indexu coding SNV a známých indelů. Varianta,
+která v tomto indexu není, se odmítne, přestože by její následné `c. → p.`
+zpracování engine zvládl.
+
+Současný referenční balík proto deklaruje pouze schopnost
+`reference_transcript_c_to_p`. cdot záznamy pro GRCh38 v balíku slouží HGVS
+provideru, ale samy nezapínají obecný převod `g. → c.`. Balík neobsahuje lokální
+genomovou FASTA ani úplnou produkční vrstvu pro obecné mapování GRCh37 a GRCh38.
+Po úspěšném snapshotovém převodu na `c.` už obě vstupní cesty používají stejný
+HGVS engine a stejný výpočet proteinového následku.
+
+Budoucí sjednocení vyžaduje samostatnou vrstvu B s lokální genomovou sekvencí,
+zarovnáními pro obě sestavy, validací gapped alignmentů, HGVS normalizací alely
+a testy jednoznačnosti. Do té doby nelze rozsah podpory genomických vstupů
+prezentovat jako ekvivalentní přímému `c.` vstupu.
+
 Povolené transkripty jsou kontrolovány proti zvolenému genu. Aktuální registr
 obsahuje `BRCA1: NM_007294.4` a `BRCA2: NM_000059.4`. Přidání dalšího genu
-vyžaduje deklarovaný referenční transkript a validovaný normalizační snapshot,
+vyžaduje deklarovaný referenční transkript, protein a validovaný referenční balík,
 nikoli ruční slovník jednotlivých variant.
+
+Pokud uživatel uvede accession, verze je povinná a musí přesně odpovídat
+schválenému transkriptu. `NM_007294` ani `NM_007294.3` se tiše nepřevádějí na
+`NM_007294.4`. U holého `c.` vstupu je schválený transkript doplněn podle genu a
+je vždy viditelně uveden ve výsledku. Tím zůstává implicitní transkript
+auditovatelný a stará souřadnicová soustava nemůže projít jako jiná varianta bez
+upozornění.
 
 Samostatné API `POST /api/normalize` používá stejnou vrstvu jako klasifikační
 endpoint. Vrací zadanou notaci, kanonickou `c.` a `p.` notaci, transkript,
 sestavu a zdroj. Klasifikace proto normalizaci nemůže obejít.
+
+#### Rozsah přijímaných zkrácených a alternativních zápisů
+
+Formátová normalizace `c.` notace je obecná. Odstraňuje nadbytečné mezery,
+sjednocuje `C.` na `c.`, převádí nukleotidy na velká písmena a operace `del`,
+`dup`, `ins`, `delins` a `inv` na malá písmena. Přijme tedy například
+`C. 5266 DUP c` jako `c.5266dupC`. Předpona transkriptu může být zapsána jako
+`NM_...` i `nm_...`; mezery a tabulátory kolem dvojtečky jsou tolerovány.
+
+U indelů engine parsuje zápis s uvedenou sekvencí i bez ní a ověří tvrzení proti
+úplné sekvenci referenčního transkriptu. Například `c.5266dupC` a `c.5266dup`
+kanonizuje na `c.5266dup`; `c.2102delA` a `c.2102del` kanonizuje na
+`c.2102del`. Nesprávný suffix se odmítne jako neshoda reference. Toto chování
+není omezeno na varianty uvedené v indelové mapě.
+
+Podporované vstupy jsou tedy rozděleny takto:
+
+| Vstupní odchylka | Zpracování |
+| --- | --- |
+| velikost písmen, mezery a tabulátory | obecná normalizace |
+| `c.` a `p.` oddělené mezerou nebo `/` | obecná normalizace |
+| indel s uvedenou nebo vynechanou sekvencí | HGVS normalizace a ověření proti sekvenci |
+| nesprávný suffix nebo neplatný indel | odmítnutí s důvodem před klasifikací |
+| samotná `p.` notace bez `c.` nebo genomické souřadnice | nepodporováno, protože nemusí jednoznačně určit DNA variantu |
 
 ### 2.2 Kontrola referenční alely
 
@@ -73,37 +130,53 @@ Implementace je v `backend/modules/reference_validation.py`.
 
 ### 2.3 Odvození a kontrola proteinového následku
 
-U coding SNV a normalizovaných indelů aplikace odvodí `p.` notaci z lokálního
-snapshotu pro referenční transkript. U intronického nebo UTR vstupu bez
-deterministického proteinového následku použije `p.(?)`. Uživatel tedy nemusí
-`p.` notaci opisovat.
+Proteinový následek se za běhu počítá ze sekvence schváleného referenčního
+transkriptu. Primárním enginem je `biocommons.hgvs==1.5.7`, providerem
+`cdot==0.2.30` `JSONDataProvider` a zdrojem sekvencí je lokální
+checksumovaný panelový balík. Kód je v `backend/modules/hgvs_engine.py`,
+`backend/modules/hgvs_provider.py` a `backend/modules/panel_seqfetcher.py`.
 
-Veřejný výsledek u `p.(?)` zobrazuje samostatné vysvětlení. Rozlišuje, že
-varianta leží mimo překládanou kódující sekvenci nebo může ovlivnit splicing a
-že proteinový následek nelze určit pouze z DNA notace. Upozornění uvádí potřebu
-transkriptové, RNA, breakpointové nebo strukturální evidence podle typu
-varianty. Otazník se proto nezobrazuje bez kontextu jako domnělá chyba parseru.
+Pro přesně popsané coding SNV, delece, duplikace, inserce a delins engine:
 
-Starší API a batch vstup mohou `p.` notaci stále dodat. V takovém případě se
-porovná s lokálním referenčním následkem. Rozpor vrátí HTTP 422 a klasifikace se
-nespustí. Pokud aplikace pro coding variantu nemá validovaný následek a uživatel
-jej nedodal, postup skončí s vysvětlením místo odhadu.
+1. parsuje variantu na přesném accession s verzí,
+2. ověří uvedenou referenční sekvenci,
+3. použije HGVS pravidlo posunu k 3' konci, včetně variant přes hranice exonů,
+4. mapuje změněnou transkriptovou sekvenci na schválený RefSeq protein,
+5. vrátí kanonickou `c.` a třípísmennou `p.` notaci.
 
-Runtime proteinový následek nepřekládá de novo z DNA sekvence. Používá toto
-pořadí validovaných lokálních zdrojů:
+Tím se zpracují i varianty, které nejsou ve snapshotu. Například
+`BRCA1 c.2102delA` i `c.2102del` vracejí `c.2102del
+p.(Lys701SerfsTer2)`. Zadaný suffix se přijme pouze tehdy, pokud odpovídá
+referenční sekvenci. Není k tomu ruční slovník variant.
 
-1. normalizovaný snapshot malých indelů,
-2. coding SNV snapshot,
-3. ENIGMA Table 9,
-4. uživatelem dodaná `p.` notace pouze tehdy, když žádný z uvedených zdrojů
-   nemá validovaný následek.
+Čistě intronická varianta, UTR varianta nebo exonová CNV s nejistými breakpointy
+nemá z DNA zápisu jednoznačný proteinový produkt. V takovém případě je kanonický
+výstup `p.?`. Veřejný výsledek vysvětluje, že následek nelze určit z DNA notace
+samotné a že může být nutná RNA, transkriptová nebo breakpointová evidence.
+`p.?` není zaměněno za chybu enginu ani za tvrzení, že protein zůstane beze změny.
 
-Pokud lokální zdroj obsahuje kanonický následek, má tento následek přednost ve
-výstupu. Uživatel může dodat také zkrácený legacy frameshift zápis, například
+Uživatel může `p.` notaci dodat, ale aplikace ji nepoužívá jako zdroj pravdy.
+Porovná ji se sekvenčně odvozeným výsledkem. Rozpor vrátí HTTP 422 a klasifikace
+se nespustí. Pokud je sekvenční následek `p.?`, konkrétní uživatelský proteinový
+následek se bez validovaného RNA nebo breakpointového zdroje nepřijme.
+
+Coding SNV a indel snapshoty jsou nezávislá regresní kontrola, zdroj souřadnic a
+externích identifikátorů. Nejsou skrytým fallbackem pro výpočet proteinového
+následku. Rozpor enginu s konkrétním známým následkem ve snapshotu ukončí
+požadavek jako konflikt validovaných zdrojů. ENIGMA Table 9 zůstává zdrojem
+funkční a RNA evidence, nikoli normalizačním slovníkem.
+
+Uživatel může dodat také zkrácený legacy frameshift zápis, například
 `p.(Cys1225fs)`. Zkrácený zápis je přijat pouze tehdy, když původní aminokyselina
-a její pozice přesně souhlasí s validovaným plným následkem, například
+a její pozice přesně souhlasí se sekvenčně odvozeným plným následkem, například
 `p.(Cys1225SerfsTer10)`. ARIANE ve výsledku vždy vrátí plný kanonický zápis.
 Zápis `p.(Arg1225fs)` ani `p.(Cys1226fs)` proto pro stejnou variantu neprojde.
+
+ARIANE přijímá také běžný starší synonymní zápis, například `p.Val1653Val`
+nebo `p.(Val1653Val)`, a převádí jej na současný kanonický zápis
+`p.(Val1653=)`. Pravidlo je obecné pro všechny třípísmenné aminokyselinové
+kódy a použije se pouze tehdy, když je aminokyselina před a za pozicí stejná.
+Skutečná substituce, například `p.Val1653Ala`, se tímto pravidlem nezmění.
 
 Příklad:
 
@@ -114,7 +187,7 @@ variant_type = nonsense
 ```
 
 Pokud uživatel zadá `p.` notaci, která není totožná ani povoleným zkráceným
-frameshift ekvivalentem následku uloženého pro referenční transkript, aplikace
+frameshift ekvivalentem odvozeného následku pro referenční transkript, aplikace
 vrátí HTTP 422. Rozpor se neřeší výběrem jedné z hodnot.
 
 ### 2.4 Odvození typu varianty
@@ -155,7 +228,42 @@ BA1 je samostatné benigní kritérium a vede přímo ke Class 1.
 
 Zdroj: lokální snapshoty gnomAD v2.1.1 exomes non-cancer a gnomAD v3.1.2 genomes non-cancer včetně pokrytí.
 
-Frekvenční metrika se vybírá v pořadí FAF95, popmax a AF podle dostupnosti.
+Pro BA1 a BS1 se používá výhradně nejvyšší non-cancer FAF95 v populacích AFR,
+AMR, EAS, NFE a SAS. `popmax_AF` a běžné `AF` jsou pouze doplňující údaje.
+Chybějící FAF95 se jimi nenahrazuje a uživatel dostane vysvětlení, proč BA1/BS1
+nebylo možné vyhodnotit.
+
+Těchto pět skupin odpovídá outbred non-founder populacím uvedeným v ENIGMA
+v1.2 Appendix G: Non-Finnish European, African, Latino, East Asian a South
+Asian. V2 skupiny ASJ a FIN a v3 skupiny AMI, ASJ a FIN jsou founder populační
+kontext. MID a OTH nejsou součástí ENIGMA scoring setu, ale ARIANE je
+neoznačuje automaticky za founder populace. AF, AC, AN a FAF95 všech těchto
+vyloučených skupin se uchovávají a zobrazují v rozbalovací části `gnomAD
+population frequency policy`. Nikdy nevstupují do maxima pro BA1/BS1.
+
+Pro PM2 se přítomnost kontroluje pouze v pěti ENIGMA non-founder populacích.
+Záznam přítomný pouze ve founder nebo jiné vyloučené populační skupině není
+považován za přítomnost v outbred populaci. Jeho existence a hodnoty zůstávají
+ve výsledném auditu. Pokud je záznam gnomAD filtrován, nelze z něj naopak
+odvodit nepřítomnost a PM2 se nepoužije.
+
+Před použitím BA1 nebo BS1 se kontroluje také filtr zdrojového záznamu a výjimka
+pro známé patogenní founder varianty. Záznam, který neprošel filtrem gnomAD, se
+pro BA1/BS1 nepoužije. Founder výjimka používá povinný verzovaný soubor
+`backend/data/brca_pathogenic_founder_variants.json`. Obsahuje osm BRCA1/2
+variant doložených v NCBI GeneReviews Table 6 nebo přímo záznamem ENIGMA
+expert panelu pro BRCA1 c.181T>G. Každý záznam má zdroj, kontext, kanonickou
+c. notaci a aliasy. Metadata obsahují checksum záznamů a checksumy zdrojových
+stránek při sestavení. Poškozený nebo chybějící soubor nezpůsobí použití
+BA1/BS1 bez kontroly. Kritérium se nepoužije a důvod se zobrazí uživateli.
+Aktuální obsah lze znovu ověřit proti zdrojům příkazem
+`python scripts/build_brca_founder_snapshot.py --check`. Builder vybírá sedm
+řádků podle explicitního označení `Founder variant` v GeneReviews a samostatně
+ověřuje BRCA1 c.181T>G proti záznamu ClinVar s klasifikací ENIGMA expert panelu.
+ENIGMA v1.2 neposkytuje úplný strojově čitelný seznam všech founder variant na
+světě. Snapshot je proto explicitní provozní seznam doložených výjimek, ne
+odhad podle frekvence nebo původu populace. Novou výjimku lze přidat jen se
+zdrojovým záznamem a novým checksumem.
 
 | Kritérium | Podmínka |
 | --- | --- |
@@ -164,7 +272,25 @@ Frekvenční metrika se vybírá v pořadí FAF95, popmax a AF podle dostupnosti
 | BS1 Supporting | frekvence nad 0,00002 a nejvýše 0,0001, hloubka alespoň 20 |
 | PM2 Supporting | nepřítomnost v požadovaných non-cancer datasetech a průměrná hloubka alespoň 25 |
 
-PM2 se nepoužívá pro indely a exonové CNV. Chybějící záznam bez dostatečného pokrytí není důkazem nepřítomnosti. Fixture nebo neúplná cache nemůže vytvořit frekvenční kritérium.
+Jediné pozorování varianty v outbred populaci není podle ENIGMA informativní.
+ARIANE v takovém případě nepoužije BA1, BS1 ani PM2. Pro BA1 nebo BS1 jsou
+požadována alespoň dvě outbred pozorování v datasetu, který poskytl skórované
+FAF95. Počet pozorování se bere z populačních AC, neodhaduje se z AF.
+
+PM2 se nepoužívá pro indely a exonové CNV. Vyloučení se kontroluje také přímo
+podle operace v `c.` HGVS, nikoliv pouze podle odvozeného proteinového důsledku.
+PTC vytvářející indel, například `BRCA1 c.5533_5534insG p.(Tyr1845Ter)`, proto
+může vstoupit do PVS1/PM5 PTC větve, ale nesmí získat PM2. Chybějící záznam bez
+dostatečného pokrytí není důkazem nepřítomnosti. Fixture nebo neúplná cache
+nemůže vytvořit frekvenční kritérium.
+
+ENIGMA v1.2 požaduje průměrnou hloubku v oblasti varianty, ale neurčuje počet
+okolních bází. ARIANE proto nepoužívá vlastní pevné okno ±N bp. Oblast je
+definována jako úplný genomový rozsah referenční alely varianty. U SNV jde o
+jednu bázi, u vícenukleotidové substituce o všechny báze `REF`. Hloubka je
+aritmetický průměr per-position hodnot. Chybí-li jediná pozice rozsahu, pokrytí
+není prokázáno a PM2 se nepoužije. Ve výsledných datech jsou uloženy hranice
+rozsahu, očekávaný a dostupný počet pozic a použité klíče coverage cache.
 
 ### 3.2 PVS1 a PM5 PTC
 
@@ -184,7 +310,22 @@ U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Variant
 
 U iniciačního kodonu se automatické PVS1 nepoužívá. Aplikace vytvoří doporučení pro strukturovanou revizi podle iniciačního flowchartu.
 
-PM5 PTC se přidává z PTC pravidla stejné Table 4. Síla je určena záznamem pro příslušný exon a typ předčasného terminačního kodonu.
+PVS1 a PM5 PTC se vždy přebírají ze stejného vybraného řádku Table 4. U
+frameshiftu určuje Appendix D sílu PM5 podle exonu, ve kterém leží nukleotidová
+změna, i když se nový terminační kodon nachází v pozdějším exonu. Proteinový
+následek a pozice nového stop kodonu se nadále přesně počítají a zobrazují, ale
+nepoužívají se k nezávislému přepnutí PM5 do jiného řádku Table 4.
+
+Poznámka ke zdroji: stručný Readme v souboru Table 4 popisuje exon terminačního
+kodonu, zatímco podrobný Appendix D na straně 27 výslovně určuje exon
+nukleotidové změny a uvádí frameshift se stop kodonem v následujícím exonu.
+Runtime se řídí podrobným postupem a příkladem z Appendix D. Původní Readme je
+ve zdrojovém snapshotu zachován beze změny pro audit.
+
+V koncové hraniční větvi se řádek vybírá podle začátku změněné nebo zkrácené
+kritické proteinové sekvence v souladu s PVS1 flowchartem. Například `BRCA1
+c.5556_5560del p.(Tyr1853AspfsTer25)` používá řádek PVS1 Very Strong a PM5 PTC
+Strong. Výsledkem je 12 bodů a třída 5.
 
 ### 3.3 PS3 a BS3
 
@@ -220,9 +361,29 @@ Automatický snapshot je uložen v souborech:
 
 Snapshot je odvozen z veřejného UCSC ENIGMA `BRCAmfa` tracku verze 1.1.0. Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá pouze variantově specifická data ze zdrojů uvedených v ENIGMA Appendix B, která jsou v tracku samostatně dostupná: Easton et al. 2007, PMID 17924331, Parsons et al. 2019, PMID 31131967, a Li et al. 2020, PMID 31853058. Caputo et al. 2021 je z automatického výpočtu vyřazen, protože není v použitém seznamu Appendix B. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
 
-Metadata obsahují URL a checksum zdroje, checksum indexu, verzi pravidel, počty záznamů a seznam konfliktních normalizovaných indelů. Chybějící metadata, nesprávný checksum, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` obsahuje snapshot LR `6,89647 × 10^45` ze studie Li et al. 2020, což odpovídá PP4 Very Strong.
+Před uložením snapshotu projde každá zdrojová `c.` notace stejným lokálním
+`biocommons.hgvs` enginem jako uživatelský vstup. Uvedená sekvence delece nebo
+duplikace se ověří proti checksumovanému referenčnímu transkriptu a uloží se
+kanonická notace i ověřené zdrojové aliasy. Známé indely se navíc křížově
+kontrolují proti normalizovanému indelovému snapshotu. Nejde o runtime fallback
+ani o ruční slovník. Nevalidní notace a konflikt normalizovaných zdrojů se
+nezařadí a důvod zůstane v metadatech.
 
-Aktuální snapshot obsahuje 4 380 jednoznačných variantových záznamů.
+Pokud více řádků po normalizaci popisuje stejnou alelu a nese klinické LR z
+různých zdrojů Appendix B, builder je spojí a přepočítá combined LR. Stejný PMID
+se započítá nejvýše jednou. Rozdílné hodnoty pod stejným PMID jsou konflikt a
+celá alela se automaticky nepoužije.
+
+Metadata obsahují URL a checksum zdroje, checksum indexu, verzi pravidel,
+provenance HGVS enginu a referenčního balíku, checksum závislého indelového
+snapshotu, počty záznamů a seznam konfliktů. Chybějící metadata, nesprávný
+checksum, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění
+aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` obsahuje snapshot LR
+`6,89647 × 10^45` ze studie Li et al. 2020, což odpovídá PP4 Very Strong. Pro
+`BRCA2 c.9891_9894dup` a zdrojový zápis `c.9891_9894dupATTT` obsahuje LR
+`0,41018` ze studie Li et al. 2020, což odpovídá BP5 Supporting.
+
+Aktuální snapshot obsahuje 4 379 jednoznačných variantových záznamů.
 
 Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané metodické zdroje:
 
@@ -246,16 +407,47 @@ Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sek
 
 ### 3.5 PS1 na proteinové úrovni
 
-Zdroj referenčních variant: P/LP missense varianty odvozené z ENIGMA Supplementary Table 7.
+Proteinové PS1 používá oficiální ENIGMA Supplementary Table 7 jako referenční
+P/LP klasifikační dataset. Z jeho 146 P/LP variant je 60 normalizovaných
+missense referencí zařazeno do proteinového PS1 registru. Každý záznam má
+samostatný stav `eligible`, `excluded` nebo `review_required`, protože samotná
+P/LP klasifikace ještě nenahrazuje PS1-specifickou splice kontrolu.
 
 PS1 vyžaduje:
 
 - missense variantu,
-- stejnou aminokyselinovou změnu jako známá P/LP varianta,
+- stejnou normalizovanou missense substituci jako známá P/LP varianta,
 - jinou nukleotidovou změnu,
-- potvrzené SpliceAI nejvýše 0,1.
+- P/LP klasifikaci reference v ENIGMA ST7 v1.2, oficiální ENIGMA/ClinGen VCEP
+  assertion nebo úplnou lokální reklasifikaci podle uvedené verze ENIGMA VCEP,
+- SpliceAI nejvýše 0,1 u reference i hodnocené varianty,
+- žádný potvrzený škodlivý splice efekt u obou variant po kontrole definovaných
+  verzovaných ENIGMA zdrojů.
 
 Patogenní referenční varianta dává PS1 Strong. Likely Pathogenic referenční varianta dává PS1 Moderate.
+
+Pokud je hodnocená varianta přímo revidována v ENIGMA Table 9, používá PS1 její
+zmrazenou variantově specifickou hodnotu `spliceai_prediction` z Table 9. Ta má
+přednost před obecnou runtime cache nebo API pro stejnou variantu. Nejde o
+fallback: Table 9 je primární VCEP-revidovaný zdroj. Nedostupnost obecné cache
+proto sama nezablokuje PS1, pokud Table 9 obsahuje platný údaj.
+
+Automatické body lze přidat pouze ze záznamu se stavem `eligible` v
+`backend/data/ps1_protein_reference_registry.json`. Registr nyní obsahuje 60
+ST7 missense referencí: 35 `eligible` a 25 `excluded`. Každý záznam obsahuje
+původ klasifikace, splice stav reference, SpliceAI provenance, kontrolované
+zdroje, datum, checksum podkladu a známé PS1 závislosti. Validátor odmítá přímou
+i delší známou kruhovou závislost.
+
+Záznam `review_required` se zobrazí jako předvyplněný kandidát pro
+strukturovanou manuální revizi `PS1_PROTEIN`, bez bodů. Záznam `excluded` se
+zobrazí s důvodem vyloučení a nelze jej manuálně potvrdit jako proteinové PS1.
+Potvrzený nebo predikovaný splice efekt proteinové PS1 vylučuje. Konfliktní
+nebo neúplná evidence vede k revizi.
+
+Stav `none_identified` neznamená, že splice efekt neexistuje. Znamená pouze, že
+nebyl nalezen při kontrole přesně uvedených verzí ENIGMA Table 9 a
+Supplementary Table 2.
 
 PS1 pro stejný splice efekt se automaticky neboduje. Aplikace pouze označí kandidáta pro strukturovanou manuální revizi.
 
@@ -314,6 +506,11 @@ Použité domény:
 | BRCA2 | DBD | 2481 až 3186 |
 
 Chybějící SpliceAI znamená, že BP1 nelze použít.
+
+Příklad: `BRCA1 c.3247A>G p.(Met1083Val)` leží mimo uvedené domény. Broad
+SpliceAI s profilem Appendix J pro referenční transkript `ENST00000357654.9`,
+který odpovídá `NM_007294.4`, vrací maximum raw delta `0,01`. Varianta proto
+splňuje BP1 Strong.
 
 ## 4. Kritéria vyžadující manuální revizi
 
@@ -421,9 +618,65 @@ Obsah:
 - IARC třída,
 - populační a referenční údaje.
 
+P/LP missense záznamy ST7 se používají jako referenční klasifikační základ
+proteinového PS1. O automatickém použití rozhoduje až explicitní stav v
+proteinovém PS1 registru po kontrole SpliceAI, Table 9 a úplné ST2.
+
+### 6.3.1 Supplementary Table 2 a proteinové PS1
+
+Úplný runtime soubor: `backend/data/enigma_st2_splice_evidence.json`
+
+Generátor: `scripts/build_enigma_st2_splice_evidence_snapshot.py`
+
+Obsahuje všech 220 variant a všech 11 zdrojových sloupců listu
+`ST2 splicing dataset codes`, číslo zdrojového řádku a checksum oficiálního
+Excelu. Používá se pouze ke kontrole známé RNA/splice evidence pro proteinové
+PS1. Oddělený `splice_ps1_reference_set.json` obsahuje 75 P/LP kandidátů pro
+manuální splice PS1 a neslouží k dokazování nepřítomnosti RNA evidence.
+
+Registr proteinových referencí:
+`backend/data/ps1_protein_reference_registry.json`.
+Generátor: `scripts/build_ps1_protein_reference_registry.py`.
+
+Registr obsahuje 60 P/LP missense referencí z ST7. Aktuální sestavení obsahuje
+35 záznamů `eligible` a 25 `excluded`; žádný záznam nyní není
+`review_required`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
+aplikace.
+
+Povolené klasifikační zdroje registru jsou:
+
+- oficiální P/LP reference ENIGMA ST7 v1.2;
+- verzované oficiální ENIGMA/ClinGen VCEP assertions mimo ST7;
+- úplné lokální reklasifikace podle deklarované verze ENIGMA VCEP pravidel,
+  jasně označené jako lokální.
+
+Reference mimo ST7 se udržují v kurátorovaném zdrojovém souboru
+`backend/data/ps1_protein_reference_extensions.json`. Generátor jej sloučí se
+ST7. Validátor u oficiální assertion vyžaduje organizaci, identifikátor
+assertion, verzi pravidel a datum přístupu. U lokální reklasifikace vyžaduje
+posuzovatele, datum, verzi pravidel a identifikátor evidenčního záznamu.
+
+ClinVar bez expert-panel assertion, CANVarUK, BRCA Exchange, jednotlivá studie
+ani predikce samy o sobě nejsou přípustným klasifikačním základem `eligible`
+reference. Mohou sloužit k nalezení kandidáta nebo jako podklady následné úplné
+VCEP reklasifikace.
+
+Identita a klasifikace současných 60 záznamů pochází ze ST7. SpliceAI reference
+pochází z oficiální Table 9 v1.2. Známá RNA evidence se kontroluje proti úplné
+Table 9 a úplné ST2. Transkript a normalizovaný proteinový následek se vážou na
+kanonické ENIGMA RefSeq transkripty. Registry ukládá checksum ST7, Table 9, ST2
+i kurátorovaného extension souboru.
+
+Každý záznam ukládá také podklad proteinového mechanismu. Z 35 současných
+`eligible` referencí má 30 PS3 Strong funkční evidenci v Table 9. U pěti je
+podkladem patogenní missense klasifikace spolu s absencí predikovaného a
+potvrzeného splice efektu. Nový externí nebo lokálně reklasifikovaný záznam musí
+mít odpovídající mechanismus výslovně kurátorovaný.
+
 ### 6.4 Kontrola úplnosti při startu
 
-Table 4, Table 9 a ST7 jsou povinné runtime datasety. `backend/data_validation.py` kontroluje před spuštěním API:
+Table 4, Table 9, ST7, úplný ST2 splice snapshot a PS1 registry jsou povinné
+runtime datasety. `backend/data_validation.py` kontroluje před spuštěním API:
 
 - existenci a čitelnost JSON,
 - verzi schématu,
@@ -434,6 +687,32 @@ Table 4, Table 9 a ST7 jsou povinné runtime datasety. `backend/data_validation.
 - konzistenci exonových odkazů.
 
 Neúplná nebo poškozená povinná tabulka zastaví start aplikace.
+
+### 6.5 Referenční balík pro HGVS normalizaci
+
+Runtime adresář je `data/reference/panel/`. Obsahuje:
+
+- výřez oficiálního `cdot 0.2.32` RefSeq GRCh38 releasu pro přesné transkripty
+  `NM_007294.4` a `NM_000059.4`, uložený beze změny cdot schématu,
+- NCBI transkriptové FASTA `NM_007294.4` a `NM_000059.4`,
+- nezávisle stažené NCBI proteinové FASTA `NP_009225.1` a `NP_000050.3`,
+- panelový manifest, metadata, URL zdrojů a SHA-256 každého souboru.
+
+Builder `scripts/prepare_panel_reference_bundle.py` ověří checksum celého
+zdrojového cdot releasu, přesný accession s verzí, gen, protein accession,
+hranice CDS, iniciační a terminační kodon a nepřítomnost interního stop kodonu.
+Překlad CDS musí být totožný s proteinem uvedeným v NCBI XML i s nezávisle
+staženou proteinovou FASTA. Až potom builder vytvoří malý panelový výřez a znovu
+jej načte přes `cdot.JSONDataProvider`.
+
+Celý cdot RefSeq release není načítán za běhu. Měření ukázalo přibližně 2,57 GB
+RAM na worker, což není přijatelné pro čtyřworkerové nasazení. Panelový výřez má
+stejné schéma a je dohledatelný k přesnému zdrojovému releasu a checksumu.
+
+Při startu aplikace se ověří všechny checksumy, accession, transkriptová politika
+a připnuté verze `hgvs` a `cdot`. Chybějící nebo změněný soubor zastaví start.
+Provenance normalizace je součástí API odpovědi a ve veřejném výsledku je v
+rozbalovací položce `Evidence details > Variant normalization`.
 
 ## 7. Předpočítaný coding SNV prostor
 
@@ -472,18 +751,25 @@ Každý záznam obsahuje zejména:
 
 Runtime používá snapshot pro:
 
-1. kontrola zadané `p.` notace proti následku pro referenční transkript,
-2. kontrolu rozporu mezi zadanou a předpočítanou `p.` notací,
-3. kontrolu referenční báze coding SNV,
-4. lokální převod coding SNV na GRCh37 a GRCh38.
+1. nezávislou kontrolu sekvenčně odvozené `p.` notace,
+2. kontrolu referenční báze coding SNV,
+3. lokální převod coding SNV na GRCh37 a GRCh38,
+4. přístup k předpočítaným pomocným datům bez převzetí staré klasifikace.
 
 Runtime nepřebírá předpočítanou finální třídu ani seznam kritérií jako hotový výsledek dotazu. Po kontrole vstupu se kritéria znovu vyhodnotí aktuální implementací a aktuálně načtenými runtime datasety.
 
-Toto oddělení umožňuje použít stabilní transkriptový překlad a souřadnice bez zmrazení celé klasifikace na verzi, ve které byl snapshot vytvořen.
+Toto oddělení umožňuje použít stabilní souřadnice a nezávislou regresní kontrolu
+bez zmrazení proteinového překladu nebo celé klasifikace na verzi snapshotu.
 
 ### 7.3 Stav a omezení
 
-Metadata označují snapshot jako `snapshot_not_authoritative`. Před klinickým označením za autoritativní dataset je nutná samostatná validace proteinových následků, referenčních alel, souřadnic a reprodukovatelnosti generování.
+Metadata označují snapshot jako `snapshot_not_authoritative`. Všech 47 547
+proteinových následků bylo znovu zkontrolováno připnutým lokálním HGVS enginem.
+Původní zjednodušené následky 18 variant iniciačního kodonu a 15 stop-loss
+variant byly nahrazeny kanonickými tvary, například `p.(Met1?)` a
+`p.(Ter1864ArgextTer39)`. Reprodukovatelnou aktualizaci provádí
+`scripts/refresh_snv_snapshot_protein_consequences.py`; úplný rozdílový audit
+provádí `scripts/audit_hgvs_snapshot_consistency.py`.
 
 Tento snapshot pokrývá coding SNV. Coding malé indely pokrývá samostatný snapshot popsaný níže. Exonové CNV a všechny UTR varianty pokryté nejsou.
 
@@ -517,15 +803,39 @@ Každý záznam obsahuje vstupní aliasy a kanonickou `c.` notaci, `p.` následe
 
 Builder `scripts/build_brca_indel_snapshot.py` čte zdroj streamovaně. Přijímá pouze BRCA1 a BRCA2 na `NM_007294.4` a `NM_000059.4`, malé indely s uvedeným proteinovým následkem, včetně `p.?`, a oběma genomovými mapováními. Konfliktní záznamy se nevkládají. Alias sdílený více záznamy se z aliasového indexu odstraní a zapíše se do metadat. Přesná kanonická notace zůstává dostupná. Aktuální release obsahuje dva takové aliasy. Runtime při startu kontroluje status, počet záznamů a checksum indexu. Chybějící nebo poškozený snapshot zastaví start aplikace.
 
-Za běhu se alias nejprve převede na kanonickou `c.` notaci. Záznam poskytne
-očekávanou `p.` notaci a lokální souřadnice. Rozpor v `p.` notaci skončí chybou
-422; výjimkou je pouze zkrácený frameshift zápis se shodnou původní
-aminokyselinou a pozicí. Snapshot neurčuje výslednou klinickou třídu ani
-automaticky nepřidává kritéria.
+Za běhu standardní HGVS engine ověří a kanonizuje přesný `c.` zápis přímo proti
+sekvenci. Snapshot poskytuje nezávislou kontrolní `p.` notaci, aliasy používané
+pro genomický reverse lookup, externí identifikátory a lokální souřadnice.
+Úplný audit 16 511 indelů nalezl 8 318 záznamů se známým a shodným proteinovým
+následkem a 8 193 zdrojových záznamů s neznámým následkem. Do první skupiny
+patří také 15 validních variant přes hranici exonů nebo UTR, které engine
+zpracuje díky HGVS normalizaci přes anotované hranice. Nebyl nalezen žádný
+konflikt známých následků.
+Snapshot neurčuje výslednou klinickou třídu ani automaticky nepřidává kritéria.
 
 ## 8. Předpočítaná SpliceAI data
 
-### 8.1 Coding SNV cache
+### 8.1 Závazný profil ENIGMA Appendix J
+
+Strojově čitelný profil je v
+`data/spliceai/enigma_v1_2_spliceai_profile.json`. Hodnoty jsou převzaté z
+ENIGMA BRCA1/2 VCEP v1.2 Appendix J:
+
+- GRCh38,
+- maximální vzdálenost 10 000 bází,
+- unmasked režim `mask=0`,
+- anotace `basic`,
+- referenční transkript genu,
+- maximum z `DS_AG`, `DS_AL`, `DS_DG` a `DS_DL`,
+- BP4 při maximu menším nebo rovném 0,10,
+- bez PP3/BP4 při hodnotě větší než 0,10 a menší než 0,20,
+- PP3 při maximu větším nebo rovném 0,20.
+
+Profil zároveň vyžaduje uložení všech čtyř delta skóre a příslušných polí
+`DS_*_REF` a `DS_*_ALT`. Oficiální Appendix v původním formátu, zdrojové URL a
+checksum jsou v `docs/enigma/v1.2/`.
+
+### 8.2 Coding SNV cache
 
 Data:
 
@@ -535,9 +845,12 @@ Metadata:
 
 `data/spliceai/spliceai_brca_snv_reference_cache.metadata.json`
 
-Obsahuje výsledky pro všech 47 547 variant coding SNV manifestu. Transkriptová politika je `reference_transcript`. Metadata uvádějí 240 kontrol proti veřejnému Broad SpliceAI API a žádný numerický rozdíl mezi úspěšnými odpověďmi.
+Platná cache musí obsahovat výsledky pro všech 47 547 variant coding SNV
+manifestu. Metadata musí přesně odpovídat závaznému profilu, uvádět nulový počet
+chyb, přesný počet záznamů, checksum zdrojového manifestu, checksum cache a
+identitu schváleného výpočetního image.
 
-### 8.2 Intronická cache
+### 8.3 Intronická cache
 
 Souřadnicová mapa:
 
@@ -564,11 +877,52 @@ Intronický předpočítaný snapshot:
 
 `data/spliceai/spliceai_brca_intronic_snv_reference_cache.json`
 
-Aktuální snapshot je dokončen pro všech 13 800 variant souřadnicové mapy. Cache je použitelná pouze s kompletními metadaty a úspěšnou kontrolou počtu záznamů a checksumu. Rozpracovaná cache se nenačte jako platný zdroj.
+Platná cache musí obsahovat všech 13 800 variant souřadnicové mapy. Cache je
+použitelná pouze s kompletními metadaty, přesnou shodou závazného profilu,
+úspěšnou kontrolou počtu záznamů a checksumu a kompletními delta, REF a ALT
+hodnotami v každém záznamu.
 
-### 8.3 Priorita zdrojů
+### 8.4 Build, aktivace a runtime
 
-Pro podporované varianty se používá lokální předpočítaná cache. Stav zdroje a důvod selhání se zaznamenávají. Chybějící skóre se nepřevádí na nulu a nemůže vytvořit BP1, BP4 ani BP7.
+Reprodukovatelný build spouští
+`scripts/build_spliceai_reference_caches.py`. Přijímá pouze lokální endpointy
+SpliceAI. Schválený image je připnutý digestem v profilu. Coding a intronický
+build zapisují do oddělených souborů v `data/spliceai/build/`. Checkpoint lze
+obnovit jen při shodě profilu, checksumu zdrojových souřadnic nebo manifestu a
+checksumu checkpointu. Aktivní cache se nahradí až po úspěšném výsledku pro
+všechny očekávané varianty. Stará aktivní cache se nepoužívá jako resume.
+
+Do dokončení nového výpočtu běží runtime v API-primary režimu s
+`SPLICEAI_USE_PRECOMPUTED_CACHE=0`. Starší coding a intronická cache nejsou
+aktivním klasifikačním zdrojem, runtime je nenačítá a jejich nekompatibilita se
+proto nehlásí jako degradace právě používaného zdroje. Po kompletním přepočtu lze
+snapshoty aktivovat explicitně hodnotou `1`. Aktivovaný snapshot s
+`distance=50`, bez REF/ALT hodnot, bez metadat, s jiným profilem nebo s chybným
+checksumem se odmítne a důvod se zveřejní. Taková data se nepřepočítávají ani
+neinterpretují jako kompatibilní.
+
+Dynamická API cache používá klíč obsahující ID závazného profilu. Staré runtime
+záznamy proto nejsou znovu použity. I jednotlivá odpověď API musí výslovně
+potvrdit GRCh38, vzdálenost 10 000 a `mask=0` a musí obsahovat kompletní delta,
+REF a ALT pole. Jinak je skóre nedostupné. Chybějící skóre se nepřevádí na nulu
+a nemůže vytvořit BP1, BP4 ani BP7.
+
+Veřejný `spliceai_audit` je v hlavním výsledku sbalený pod
+`Evidence details > SpliceAI`. Po rozkliknutí zobrazuje profil, vzdálenost,
+maskování, sestavu, transkript, použitou delta hodnotu, všechna delta skóre,
+REF a ALT hodnoty, zdroj, GRCh38 dotaz a cache klíč.
+
+SpliceAI používá samostatný limit 180 sekund pro dosud necachovaný lokální
+výpočet s 10kb vzdáleností. Obecný 12sekundový limit ostatních externích lookupů
+se nemění.
+
+### 8.5 Priorita zdrojů
+
+V současném API-primary režimu se používá paměťová cache, profilově validovaná
+runtime API cache a potom nakonfigurovaný Broad-kompatibilní výpočet. Každá
+odpověď je přijata jen se stejnými parametry a úplnou auditní stopou. Starší
+předpočítané cache jsou vypnuté. Neexistuje fallback na starší parametry, první
+dostupný transkript ani nulové skóre.
 
 ## 9. Souřadnice
 
@@ -627,19 +981,209 @@ musí se znovu validovat při změně kterékoliv z těchto částí.
 
 Runtime soubory jsou v `backend/data/gnomad/`.
 
-Používané datasety:
+Používané datasety a frekvenční data:
 
 - gnomAD v2.1.1 exomes non-cancer na GRCh37,
 - gnomAD v3.1.2 genomes non-cancer na GRCh38,
 - samostatná per-position coverage cache.
 
-V3 snapshot se sestavuje skriptem `scripts/build_gnomad_v3_brca_snapshot.py` z oficiálního regionálního VCF gnomAD v3.1.2 a z gnomAD browser coverage API. Stávající v2.1 záznamy se při sestavení zachovávají.
+Aktivní zdroje, jejich verze, GCS identity, panelové intervaly a genově
+specifické frekvenční politiky jsou v
+`backend/data/gnomad/gnomad_panel_manifest.json`. Intervaly ani prahy BA1, BS1
+a PM2 nejsou zapsané jako globální konstanty v runtime. Samotné přidání
+intervalu nesmí aktivovat nový gen.
 
-PM2 vyžaduje prokázanou nepřítomnost a dostatečné pokrytí. Samotná absence varianty v JSON není dostačující.
+Snapshot se sestavuje skriptem
+`scripts/refresh_gnomad_panel_snapshot.py` přímo z oficiálních gnomAD Hail
+Tables. Hail načte jen intervaly panelu včetně definovaného paddingu. Celý
+genomový balík se nemusí kopírovat na lokální disk. Build používá anonymní
+read-only přístup k veřejnému GCS bucketu a připnutou verzi Hail z
+`requirements-data.txt`.
+
+gnomAD v2.1.1 poskytuje non-cancer FAF95 přímo v poli `faf` oficiální Hail
+Table. Builder načte hodnoty pro `afr`, `amr`, `eas`, `nfe` a `sas` a uloží
+jejich maximum.
+
+gnomAD v3.1.2 poskytuje pro non-cancer subset populační AC a AN, ale neposkytuje
+hotové subsetové FAF95. Builder proto používá přímo
+`hail.experimental.filtering_allele_frequency` nad oficiálními non-cancer AC a
+AN. Výpočet probíhá uvnitř Hail, nikoli vlastní numerickou implementací v
+ARIANE. Použije se jednostranný 95% Poissonův interval a pět ENIGMA
+non-founder populací.
+
+FAF95 vrácené gnomAD Browser API není subsetově specifické. API vrací stejnou
+hodnotu pro hlavní, non-cancer i controls-and-biobanks dataset. Tato hodnota se
+proto nepoužívá jako non-cancer FAF95. API se nepoužívá ani jako frekvenční
+fallback.
+
+Coverage se při stejném buildu obnovuje z oficiálních Hail coverage Tables pro
+obě sestavy. Pro v2 se používá exome coverage release 2.1. Pro v3 se používá
+genome coverage release 3.0.1, který používá také oficiální datová pipeline
+gnomAD Browseru pro dataset gnomAD v3.
+
+Každý záznam obsahuje FAF95 po populacích, maximum, populaci maxima, scope a
+metodu. Obsahuje také AC a AN pěti skórovaných non-founder populací, příznak
+jejich skutečné přítomnosti a oddělený kontext vyloučených skupin. V aktuálním
+panelovém výřezu je 1 644 záznamů pozorovaných pouze ve vyloučených skupinách.
+Metadata obsahují Hail URI, URL metadata objektu, ETag, GCS MD5/CRC32C,
+generation, velikost, datum zdroje, počet záznamů a zákaz fallbacku na raw AF.
+Frekvenční i coverage JSON obsahují SHA-256 kanonického obsahu a SHA-256
+manifestu. Runtime při načtení kontroluje oba datasety, povolenou metodu FAF95,
+scope, identity zdrojů, manifest a checksumy. Při selhání se cache nepoužije a
+degradace se zobrazí uživateli.
+
+Kontrola dostupných release nic sama neaktivuje:
+
+```bash
+python scripts/refresh_gnomad_panel_snapshot.py check-updates
+```
+
+Nový release vyžaduje kontrolu souladu s pravidly ENIGMA, porovnání výsledků a
+schválení regresních testů. Aktivní release se nemění pouze proto, že se v
+bucketu objevil novější adresář.
+Kontrola navíc sestaví cestu ke stejnému small-variant sites Hail Table produktu
+a ověří jeho dostupnost. gnomAD 3.1.3 je například release tandemových repetic,
+nikoli náhrada small-variant dat 3.1.2, a proto se jako použitelná aktualizace
+nehlásí.
+
+Obnova v samostatném datovém prostředí:
+
+```bash
+pip install -r requirements-data.txt
+python scripts/refresh_gnomad_panel_snapshot.py refresh
+python scripts/refresh_gnomad_panel_snapshot.py validate
+```
+
+Obnova pomocí připnutého Docker image:
+
+```bash
+docker run --rm -v "$PWD:/workspace" -w /workspace \
+  hailgenetics/hail:0.2.137 \
+  python3 scripts/refresh_gnomad_panel_snapshot.py refresh
+```
+
+Builder nejprve vytvoří pracovní exporty. Runtime JSON nahradí atomicky až po
+úspěšné validaci obou frekvenčních datasetů, obou coverage datasetů a checksumů.
+Starý `scripts/build_gnomad_v3_brca_snapshot.py` je ponechán jen pro audit
+předchozí numerické implementace a nesmí publikovat runtime data.
+
+BA1 a BS1 vyžadují průměrnou hloubku alespoň 20. PM2 vyžaduje prokázanou
+nepřítomnost v obou požadovaných non-cancer datasetech a průměrnou hloubku
+alespoň 25. Samotná absence varianty v JSON není dostačující. PM2 se podle
+ENIGMA v1.2 nepoužívá pro indely.
+
+Coverage lookup agreguje všechny pozice genomového rozsahu `REF`. ENIGMA v1.2
+neuvádí šířku flanking okna, proto se okolní báze mimo vlastní variantu
+nepřidávají. Tato definice je uvedena v diagnostických polích jako
+`coverage_scope: variant_reference_span`. Pro SNV je výsledek shodný s mean
+depth na lokusu, který zobrazuje gnomAD. Pro vícebázový rozsah musí být v cache
+všechny pozice, jinak se vyhodnocení uzavře bez PM2.
+
+### 10.1 Otevřené implementační body
+
+1. ENIGMA v1.2 pro PM2 požaduje průměrnou hloubku alespoň 25 v oblasti kolem
+   varianty, ale neurčuje šířku této oblasti. Současná reprodukovatelná definice
+   ARIANE používá genomový rozsah alely `REF`. Pro SNV je to jedna pozice.
+   Případná změna na flanking okno se nesmí provést odhadem. Vyžaduje potvrzení
+   ENIGMA, verzovanou změnu politiky a nové regresní testy.
+
+2. ENIGMA zakazuje BA1 a BS1 u dobře doložených patogenních founder variant,
+   ale neposkytuje jejich úplný strojově čitelný seznam. Lokální kurátorovaný
+   soubor proto obsahuje pouze varianty s doloženým zdrojem. Nepřítomnost
+   varianty v tomto souboru sama o sobě nedokazuje, že nejde o founder variantu.
+   Rozšíření seznamu musí obsahovat kanonickou HGVS notaci, používaný transkript,
+   founder populaci, tvrzení o patogenitě, zdroj, datum přístupu a checksum.
+
+### 10.2 Kompatibilita coverage pro gnomAD v3
+
+Frekvenční data ARIANE pocházejí z gnomAD v3.1.2. Oficiálně veřejně dostupná
+genomová coverage tabulka pro GRCh38 je však označena jako gnomAD r3.0.1.
+gnomAD v3.1 následně přidal 4 598 vstupních gVCF a výsledný callset obsahuje
+76 156 genomů.
+Release v3.1.2 opravil některé genotypy a frekvence, ale samostatnou coverage
+tabulku v3.1.2 neuvolnil.
+
+Použitá r3.0.1 coverage je oficiální gnomAD produkt a jediná veřejně
+distribuovaná genome coverage tabulka pro řadu v3. Není však vzorkově totožná s
+variantním callsetem v3.1.2. ENIGMA v1.2 požaduje gnomAD v3.1 a pokrytí oblasti
+kolem varianty, ale neuvádí konkrétní coverage release. Z toho nelze odvodit,
+že ENIGMA rozdíl výslovně schválila.
+
+Do získání potvrzení od ENIGMA je stav veden jako doložený provozní zdroj s
+nepotvrzenou přesnou kompatibilitou. Zdroj a verze se vždy zobrazují v auditu a
+nesmí být přepsány na `v3.1.2 coverage`. Podklady:
+
+- [gnomAD v3.1 release](https://gnomad.broadinstitute.org/news/2020-10-gnomad-v3-1-new-content-methods-annotations-and-data-availability/),
+- [gnomAD v3.1.2 minor release](https://gnomad.broadinstitute.org/news/2021-10-gnomad-v3-1-2-minor-release/),
+- `gs://gcp-public-data--gnomad/release/3.0.1/coverage/genomes/gnomad.genomes.r3.0.1.coverage.ht`.
+
+### 10.3 Přidání dalších genů
+
+Builder gnomAD umí načíst libovolný počet genových intervalů z položky
+`targets` v manifestu. To samo o sobě nestačí k povolení klasifikace dalšího
+genu. Manifest používá schéma 2. Každá položka `targets` musí explicitně
+odkazovat přes `classification_policy_id` na aktivní politiku. Žádná politika
+se nedědí automaticky a samotný interval nestačí. BRCA1 a BRCA2 nyní explicitně
+odkazují na `enigma_brca_v1_2`. Runtime čte z této politiky prahy, síly, body,
+požadované datasety, populační skupiny, pokrytí a vyloučené typy variant.
+Rozsah této politiky je výslovně `gnomad_frequency_criteria_only`: manifest
+definuje BA1, BS1 a PM2, nikoli ostatní VCEP kritéria. Ta musí mít pro nový gen
+samostatnou implementaci a validaci a z BRCA1/2 se nikdy nedědí.
+Politika navíc obsahuje uzavřený seznam `applicable_genes`. Pokus připojit
+například nový gen k `enigma_brca_v1_2` builder i runtime odmítnou.
+
+Politika dalšího genu musí určit:
+
+- VCEP a přesnou verzi pravidel,
+- referenční transkript s verzí,
+- intervaly GRCh37 a GRCh38,
+- povolené gnomAD release, callsety a populační skupiny,
+- prahy BA1, BS1 a PM2 včetně požadavků na pokrytí,
+- pravidla pro founder varianty a zdroj jejich kurátorovaného seznamu,
+- kritéria, která se pro daný gen nesmějí automatizovat.
+
+Builder odmítne cíl bez aktivní politiky, bez referenčního transkriptu nebo bez
+provenance VCEP. Runtime pro neznámý gen nebo neshodnou politiku vrátí stav
+`policy_unavailable` a nepoužije BA1, BS1 ani PM2. BRCA politika se na nový gen
+nikdy nepřenese jako fallback.
+
+Nový gen se nesmí aktivovat pouhým přidáním intervalu. Aktivace vyžaduje nový
+datový build, validační matici pro daný gen, kontrolu všech gene-specific
+tabulek a explicitní povolení genu v API a uživatelském rozhraní. Do té doby
+zůstávají jedinými povolenými geny BRCA1 a BRCA2.
+
+### 10.4 Výsledek auditu gnomAD proti ENIGMA v1.2
+
+| Oblast | Stav |
+| --- | --- |
+| gnomAD v2.1.1 exomes non-cancer | Oficiální Hail data, připnutý zdroj a identita objektu |
+| gnomAD v3.1.2 genomes non-cancer | Oficiální Hail data, připnutý zdroj a identita objektu |
+| FAF95 pro v2 | Oficiální hodnoty z Hail tabulky |
+| FAF95 pro v3 non-cancer | Výpočet oficiální Hail funkcí z oficiálních AC a AN, bez náhradní metriky |
+| Populace pro skórování | AFR, AMR, EAS, NFE a SAS podle Appendix G |
+| Founder a ostatní vyloučené populace | Uloženy odděleně jako auditní kontext, nevstupují do FAF95 maxima |
+| BA1 a BS1 | Prahy, QC, hloubka a founder výjimka jsou v genově specifické politice |
+| PM2 | Oba požadované datasety, hloubka 25, pouze povolené typy variant |
+| Jediné outbred pozorování | Neinformativní, nevytváří BA1, BS1 ani PM2 |
+| Raw AF a popmax AF | Pouze auditní kontext, nikdy fallback pro BA1 nebo BS1 |
+| Runtime síťový fallback | Není implementován |
+| Neúplný nebo starý snapshot | Odmítnut podle manifestu, provenance a checksumu |
+
+Audit neumožňuje tvrdit, že jsou vyřešeny všechny interpretační nejasnosti.
+Zůstávají tři explicitní omezení uvedená také přímo v manifestu: ENIGMA
+neurčuje šířku coverage okna, veřejná v3 coverage je z release 3.0.1 a seznam
+patogenních founder variant není v ENIGMA publikován jako úplný strojově
+čitelný katalog. ARIANE tyto mezery nenahrazuje odhadem ani skrytým fallbackem.
 
 ## 11. BayesDel a AlphaMissense
 
 BayesDel_noAF a AlphaMissense se získávají jedním dotazem nad genomovou variantou přes MyVariant.info a ukládají se do lokální cache.
+
+Do trvalé cache se ukládá pouze úspěšná anotace nebo explicitní odpověď, že
+varianta v MyVariant nebyla nalezena. Odpověď `no_score`, při které služba
+variantu vrátí bez BayesDel i AlphaMissense anotace, se považuje za opakovatelný
+neúplný výsledek. Neukládá se a následující požadavek provede nový dotaz. Při
+načtení cache se ignorují také starší prázdné a `no_score` záznamy.
 
 BayesDel se používá pouze v rozhodovacích větvích PP3 a BP4 popsaných výše. AlphaMissense se vrací jako doplňující anotace a samo o sobě nevytváří samostatné ENIGMA kritérium.
 

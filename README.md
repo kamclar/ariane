@@ -14,16 +14,19 @@ source venv/bin/activate   # or venv\Scripts\activate on Windows
 # install dependencies
 pip install -r requirements.txt
 
-# place data files in backend/data/
-#   enigma_table4.json
-#   enigma_table9.json
-#   gnomad_brca_cache/ (directory with regional cache files)
+# required classification datasets and the checksum-verified HGVS reference
+# bundle are versioned in this repository
 
 # run
 uvicorn backend.main:app --reload --port 8000
 
 # open http://localhost:8000
 ```
+
+The supported production runtime is Linux with Python 3.12. On Ubuntu install
+`python3-dev`, `build-essential`, and `libpq-dev` before Python dependencies.
+The biocommons dependency stack does not currently provide all required wheels
+for native Windows; use WSL for the complete local runtime on Windows.
 
 ## Deploy to Railway
 
@@ -82,7 +85,8 @@ ariane/
 
 Classification follows this order (higher level overrides lower):
 
-1. **BA1** - stand-alone benign (gnomAD FAF > 0.1%) → class 1, stop
+1. **BA1** - stand-alone benign (gnomAD non-cancer FAF95 > 0.1%), pouze po
+   kontrole pokrytí, QC filtru a výjimky pro patogenní founder varianty
 2. **Table 9** - calibrated PS3/BS3 functional evidence
 3. **Table 4** - PVS1/PM5 structural rules
 4. **gnomAD** - BS1, PM2
@@ -95,9 +99,41 @@ Classification follows this order (higher level overrides lower):
 
 - ENIGMA VCEP v1.2 (2024-11-18): Table 4, Table 9
 - gnomAD v2.1.1 exomes non-cancer
+- gnomAD v3.1.2 genomes non-cancer
 - SpliceAI: Broad API (spliceai-38-xwkwwwxdwq-uc.a.run.app)
 - BayesDel: myvariant.info
 - ClinVar: NCBI eutils
+
+The gnomAD releases, official Hail Table identities and panel intervals are
+pinned in `backend/data/gnomad/gnomad_panel_manifest.json`. Check for published
+releases without changing the active classification data:
+
+```bash
+python scripts/refresh_gnomad_panel_snapshot.py check-updates
+```
+
+Refresh and validate the panel snapshots in a separate data-build environment:
+
+```bash
+pip install -r requirements-data.txt
+python scripts/refresh_gnomad_panel_snapshot.py refresh
+python scripts/refresh_gnomad_panel_snapshot.py validate
+```
+
+New releases are never activated automatically. The manifest is gene-extensible,
+but an interval alone cannot activate a gene. Every target must reference an
+explicit active gene-specific policy containing its VCEP provenance, transcript,
+frequency datasets, population groups, thresholds, coverage rules and excluded
+variant types. The BRCA policy is never inherited by another gene.
+The update check also verifies that a newer release contains the equivalent
+small-variant Hail Table. A release directory for another data type is not
+reported as a usable frequency-data update.
+
+Population scoring follows ENIGMA Appendix G. Only AFR, AMR, EAS, NFE and SAS
+contribute to BA1/BS1 and outbred-population presence for PM2. Founder groups
+ASJ, FIN and AMI, plus other non-scoring groups present in a release, are stored
+and displayed as context but cannot change a criterion. Well-established
+pathogenic founder variants are checked separately and cannot receive BA1/BS1.
 - ClinGen: Evidence Repository API
 - RNA evidence review recommendation: ARIANE review aid for RNA-dependent or
   predicted splice-effect situations; not an ACMG/AMP or ENIGMA criterion and
@@ -182,10 +218,12 @@ See `docs/manual_evidence_review.md` for thresholds, sources, and limitations.
 
 ## Tests
 
-Run the offline regression suite without network access:
+Install development dependencies and run the offline regression suite without
+network access:
 
 ```bash
-python -m unittest discover -s tests -v
+pip install -r requirements-dev.txt
+python -m pytest tests -q
 ```
 
 The VUS explanation layer and regression golden cases are documented in

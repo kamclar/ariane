@@ -37,6 +37,8 @@ def normalize_protein_notation(value: Optional[str]) -> str:
     notation = (value or "").strip()
     if not notation:
         return ""
+    if re.fullmatch(r"p\.\(?\?\)?", notation, re.IGNORECASE):
+        return "p.?"
     notation = re.sub(r"^\(p\.", "p.(", notation, flags=re.IGNORECASE)
     notation = re.sub(r"^p\.", "p.", notation, flags=re.IGNORECASE)
     if notation.startswith("p.(") and notation.endswith(")"):
@@ -54,6 +56,15 @@ def normalize_protein_notation(value: Optional[str]) -> str:
     # HGVS permits both Ter and * for a termination codon. Keep one canonical
     # representation so equivalent user and source notations compare equal.
     notation = re.sub(r"\*(?=\d|\))", "Ter", notation)
+
+    # Accept the widely used legacy synonymous form p.Val1653Val and emit the
+    # current HGVS form p.(Val1653=). This is generic for all amino acids and
+    # only applies when the amino acid before and after the position is equal.
+    synonymous = re.fullmatch(
+        r"p\.\(([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2})\)", notation
+    )
+    if synonymous and synonymous.group(1) == synonymous.group(3):
+        notation = f"p.({synonymous.group(1)}{synonymous.group(2)}=)"
     return notation
 
 
@@ -74,7 +85,8 @@ def protein_notations_compatible(supplied: Optional[str], canonical: Optional[st
         r"p\.\(([A-Z][a-z]{2})(\d+)fs\)", supplied_normalized
     )
     full = re.fullmatch(
-        r"p\.\(([A-Z][a-z]{2})(\d+)[A-Z][a-z]{2}fs(?:Ter\d+|\?)?\)",
+        r"p\.\(([A-Z][a-z]{2})(\d+)[A-Z][a-z]{2}fs"
+        r"(?:Ter(?:\d+|\?)|\?)?\)",
         canonical_normalized,
     )
     return bool(abbreviated and full and abbreviated.groups() == full.groups())

@@ -21,6 +21,23 @@ class RequiredDatasetValidationTests(unittest.TestCase):
                     "st7": root / "missing-st7.json",
                 })
 
+    def test_incomplete_coding_snv_snapshot_stops_startup(self):
+        from backend.lookups import precomputed
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            index = root / "index.json"
+            metadata = root / "metadata.json"
+            index.write_text("{}", encoding="utf-8")
+            metadata.write_text(
+                json.dumps({"index_sha256": "not-the-file-checksum"}), encoding="utf-8"
+            )
+            with patch.object(precomputed, "CLASSIFICATION_SNAPSHOT_INDEX", index), patch.object(
+                precomputed, "CLASSIFICATION_SNAPSHOT_METADATA", metadata
+            ):
+                with self.assertRaisesRegex(RuntimeError, "47,547 records"):
+                    precomputed.validate_classification_snapshot()
+
     def test_invalid_required_dataset_stops_startup_with_reason(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -35,15 +52,160 @@ class RequiredDatasetValidationTests(unittest.TestCase):
 
 
 class GnomadFailClosedTests(unittest.TestCase):
-    def test_fixture_is_never_selected_automatically(self):
+    def test_legacy_source_label_cannot_replace_extraction_provenance(self):
+        from backend.modules import frequency
+
+        legacy_metadata = {
+            "source": "gnomad_v2_1_1_exomes_grch37",
+            "regions": {
+                "GRCh37": {
+                    "BRCA1": {"chrom": "17", "start": 1, "end": 100}
+                }
+            },
+        }
+        with patch.object(
+            frequency, "GNOMAD_CACHE_METADATA", legacy_metadata
+        ):
+            self.assertFalse(
+                frequency._dataset_extraction_ok(
+                    ["gnomad_v2_1_1_exomes_grch37"],
+                    {"chrom": "17", "pos": 50},
+                    "GRCh37",
+                )
+            )
+
+    def test_founder_only_database_record_is_absent_for_outbred_presence(self):
+        from backend.modules import frequency
+
+        variant_id = "13-100-A-G"
+        record = {
+            "variant_id": variant_id,
+            "dataset": "gnomad_v2_1_1_exomes_grch37",
+            "build": "GRCh37",
+            "filter": "PASS",
+            "faf95_max": 0.0,
+            "faf95_pop": "afr",
+            "faf95_scope": "non_cancer_non_founder_ancestries",
+            "faf95_method": "official_gnomad_hail_table_non_cancer_faf95",
+            "non_founder_observed": False,
+            "non_founder_ac_by_ancestry": {
+                "afr": 0, "amr": 0, "eas": 0, "nfe": 0, "sas": 0,
+            },
+            "excluded_population_context": {
+                "asj": {
+                    "label": "Ashkenazi Jewish",
+                    "category": "founder_population",
+                    "ac": 2,
+                    "an": 1000,
+                    "af": 0.002,
+                    "faf95": 0.0004,
+                    "used_for_ba1_bs1": False,
+                    "used_for_pm2_presence": False,
+                }
+            },
+        }
+        coverage = {"mean_depth": 30.0, "passes": True}
+        with patch.object(frequency, "GNOMAD_CACHE", {variant_id: [record]}), patch.object(
+            frequency, "GNOMAD_CACHE_MODE", "approved_snapshot"
+        ), patch.object(
+            frequency, "_coords_in_cached_region", return_value=True
+        ), patch.object(
+            frequency, "_dataset_extraction_ok", return_value=True
+        ), patch.object(
+            frequency, "_lookup_coverage_by_position", return_value=coverage
+        ):
+            result = frequency.query_gnomad_dataset_local(
+                variant_id,
+                {"chrom": "13", "pos": 100, "ref": "A", "alt": "G"},
+                frequency.GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
+                25.0,
+                ["afr", "amr", "eas", "nfe", "sas"],
+            )
+
+        self.assertEqual(result["status"], "absent_in_non_founder_populations")
+        self.assertFalse(result["found"])
+        self.assertTrue(result["database_record_found"])
+        self.assertEqual(
+            result["exomes"]["excluded_population_context"]["asj"]["ac"], 2
+        )
+
+    def test_frequency_cache_requires_non_cancer_faf95_provenance(self):
+        from backend.modules.frequency import (
+            _approved_manifest,
+            _approved_manifest_sha256,
+            _canonical_sha256,
+            _validate_gnomad_cache_payload,
+        )
+
+        payload = {
+            "metadata": {
+                "schema_version": 2,
+                "manifest_sha256": _approved_manifest_sha256(),
+                "automatic_release_activation": False,
+                "classification_policies": _approved_manifest()[
+                    "classification_policies"
+                ],
+                "v2_faf95": {"raw_af_fallback_allowed": False},
+                "v3_faf95": {"raw_af_fallback_allowed": False},
+                "extraction_log": [
+                    {
+                        "dataset": dataset,
+                        "status": "ok",
+                        "source_identity": {"etag": "test", "x_goog_hash": "test"},
+                    }
+                    for dataset in (
+                        "gnomad_v2_1_1_exomes_grch37",
+                        "gnomad_v3_1_2_genomes_grch38",
+                    )
+                ],
+            },
+            "variants": {
+                "17-1-A-G": [{
+                    "dataset": "gnomad_v2_1_1_exomes_grch37",
+                    "faf95_max": None,
+                    "popmax_af": 0.001,
+                }],
+                "17-2-A-G": [{
+                    "dataset": "gnomad_v3_1_2_genomes_grch38",
+                    "faf95_max": None,
+                    "popmax_af": 0.001,
+                }],
+            },
+        }
+        payload["metadata"]["records_sha256"] = _canonical_sha256(payload["variants"])
+        reason = _validate_gnomad_cache_payload(payload)
+        self.assertIn("lack ENIGMA-compatible non-cancer FAF95", reason)
+
+    def test_coverage_cache_rejects_manifest_mismatch(self):
+        from backend.modules.frequency import _validate_gnomad_coverage_payload
+
+        payload = {
+            "metadata": {
+                "schema_version": 2,
+                "manifest_sha256": "wrong",
+                "records": 1,
+                "records_sha256": "wrong",
+            },
+            "coverage_by_position": {
+                "gnomad_v2_1_1_exomes_grch37|GRCh37|17|1": {
+                    "dataset_key": "gnomad_v2_1_1_exomes_grch37"
+                }
+            },
+        }
+        self.assertIn(
+            "different panel/source manifest",
+            _validate_gnomad_coverage_payload(payload),
+        )
+
+    def test_missing_approved_snapshot_has_no_alternate_selection(self):
         from backend.modules import frequency
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            fixture = root / "fixture.json"
-            fixture.write_text("{}", encoding="utf-8")
-            with patch.object(frequency, "GNOMAD_CACHE_WITH_REAL_COVERAGE", root / "missing.json"), patch.object(
-                frequency, "GNOMAD_CACHE_FIXTURE", fixture
+            with patch.object(
+                frequency,
+                "GNOMAD_CACHE_WITH_REAL_COVERAGE",
+                root / "missing.json",
             ):
                 self.assertIsNone(frequency.choose_gnomad_cache_file())
 
@@ -54,11 +216,13 @@ class GnomadFailClosedTests(unittest.TestCase):
         old_mode = frequency.GNOMAD_CACHE_MODE
         try:
             frequency.GNOMAD_CACHE = {"17-1-A-G": [{"dataset": "fixture"}]}
-            frequency.GNOMAD_CACHE_MODE = "fixture_or_no_real_coverage"
+            frequency.GNOMAD_CACHE_MODE = "unapproved"
             result = frequency.query_gnomad_dataset_local(
                 "17-1-A-G",
                 {"chrom": "17", "pos": 1, "ref": "A", "alt": "G"},
                 frequency.GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
+                25.0,
+                ["afr", "amr", "eas", "nfe", "sas"],
             )
             self.assertEqual(result["status"], "cache_untrusted")
             self.assertIn("not approved", result["errors"][0])
@@ -68,6 +232,15 @@ class GnomadFailClosedTests(unittest.TestCase):
 
 
 class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
+    def test_only_spliceai_uses_extended_appendix_j_timeout(self):
+        from backend.lookup_execution import (
+            EXTERNAL_LOOKUP_TIMEOUT,
+            SERVICE_LOOKUP_TIMEOUTS,
+        )
+
+        self.assertEqual(EXTERNAL_LOOKUP_TIMEOUT, 12)
+        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 180})
+
     async def test_exception_is_logged_explained_and_returns_unavailable_default(self):
         diagnostics = []
 
@@ -100,6 +273,94 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("No GRCh37", bayesdel.BAYESDEL_STATUS_CACHE[key]["reason"])
         self.assertNotIn(key, bayesdel.BAYESDEL_CACHE)
         bayesdel.BAYESDEL_CACHE.pop(key, None)
+
+    def test_bayesdel_does_not_cache_transient_no_score_response(self):
+        from backend.lookups import bayesdel
+
+        key = "BRCA1:c.5145C>A"
+        bayesdel.BAYESDEL_CACHE.pop(key, None)
+        bayesdel.BAYESDEL_STATUS_CACHE.pop(key, None)
+        resolved = MagicMock()
+        resolved.has_grch37.return_value = True
+        resolved.grch37.chrom = "17"
+        resolved.grch37.pos = 41215898
+        resolved.grch37.ref = "G"
+        resolved.grch37.alt = "T"
+        no_score = {
+            "bayesdel": None,
+            "am_score": None,
+            "am_class": None,
+            "status": "no_score",
+            "error": None,
+        }
+        scored = {
+            "bayesdel": 0.333422,
+            "am_score": None,
+            "am_class": None,
+            "status": "ok",
+            "error": None,
+        }
+
+        with patch(
+            "backend.lookups.coordinates.resolve_variant", return_value=resolved
+        ), patch.object(
+            bayesdel, "fetch_variant_data_myvariant", side_effect=[no_score, scored]
+        ) as fetch, patch.object(bayesdel, "_save_cache") as save:
+            first_score, _ = bayesdel.get_bayesdel_and_alphamissense(
+                "BRCA1", "c.5145C>A"
+            )
+            self.assertIsNone(first_score)
+            self.assertNotIn(key, bayesdel.BAYESDEL_CACHE)
+            save.assert_not_called()
+
+            second_score, _ = bayesdel.get_bayesdel_and_alphamissense(
+                "BRCA1", "c.5145C>A"
+            )
+
+        self.assertEqual(second_score, 0.333422)
+        self.assertEqual(fetch.call_count, 2)
+        self.assertEqual(bayesdel.BAYESDEL_CACHE[key]["status"], "ok")
+        save.assert_called_once()
+        bayesdel.BAYESDEL_CACHE.pop(key, None)
+        bayesdel.BAYESDEL_STATUS_CACHE.pop(key, None)
+
+    def test_bayesdel_loader_ignores_persisted_empty_no_score_entries(self):
+        from backend.lookups import bayesdel
+
+        previous_cache = dict(bayesdel.BAYESDEL_CACHE)
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                cache_path = Path(directory) / "bayesdel_cache.json"
+                cache_path.write_text(
+                    json.dumps({
+                        "BRCA1:c.1A>G": {
+                            "bayesdel": None,
+                            "am_score": None,
+                            "am_class": None,
+                            "status": "no_score",
+                        },
+                        "BRCA1:c.2A>G": None,
+                        "BRCA1:c.3A>G": {
+                            "bayesdel": 0.42,
+                            "am_score": None,
+                            "am_class": None,
+                            "status": "ok",
+                        },
+                    }),
+                    encoding="utf-8",
+                )
+                bayesdel.BAYESDEL_CACHE.clear()
+                with patch.object(bayesdel, "_CACHE_PATH", cache_path):
+                    bayesdel._load_cache()
+
+            self.assertNotIn("BRCA1:c.1A>G", bayesdel.BAYESDEL_CACHE)
+            self.assertNotIn("BRCA1:c.2A>G", bayesdel.BAYESDEL_CACHE)
+            self.assertEqual(
+                bayesdel.BAYESDEL_CACHE["BRCA1:c.3A>G"]["bayesdel"], 0.42
+            )
+        finally:
+            bayesdel.BAYESDEL_CACHE.clear()
+            bayesdel.BAYESDEL_CACHE.update(previous_cache)
 
 
 class DataHealthTests(unittest.TestCase):

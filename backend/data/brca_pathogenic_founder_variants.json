@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "snapshot_version": "2026-08-05",
+    "enigma_version": "1.2",
+    "purpose": "BA1/BS1 pathogenic founder variant exception",
+    "records_sha256": "3072049e33aa8bec1c4f71d3016f2e5f5c1e0faa1b22884e039a82dfabceb34f",
+    "selection_policy": "BRCA1/2 variants explicitly described as founder variants in NCBI GeneReviews Table 6, plus BRCA1 c.181T>G documented as a pathogenic founder variant by ENIGMA/ClinVar",
+    "sources": [
+      {
+        "name": "ENIGMA BRCA1/2 VCEP Criteria Specification v1.2",
+        "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097?version=1.2",
+        "content_sha256_at_access": "ed465d5be16bc10cf09b01561469d2956f1b866b0f54a39be6b2915f2bdf2cc0",
+        "assertion": "BA1 and BS1 must not be applied to well-established pathogenic founder variants"
+      },
+      {
+        "name": "NCBI GeneReviews Table 6: Notable Pathogenic Variants by Gene",
+        "url": "https://www.ncbi.nlm.nih.gov/books/NBK1247/table/brca1.T.brca1_and_brca2associated_heredi/?report=objectonly",
+        "accessed": "2026-08-05",
+        "content_sha256_at_access": "ae29c04b135575c38e88679c2edafb82c1206b6d56adaa17e56f8278e5300df8"
+      },
+      {
+        "name": "ClinVar VCV000017661",
+        "url": "https://www.ncbi.nlm.nih.gov/clinvar/variation/17661/",
+        "content_sha256_at_access": "486205061000a9e0a6f92ef7eb6538157ceac3842876444d931ece208120d236",
+        "assertion": "BRCA1 c.181T>G is pathogenic by the ENIGMA expert panel and a documented founder variant"
+      }
+    ]
+  },
+  "variants": [
+    {
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "canonical_c_notation": "c.68_69del",
+      "input_aliases": ["c.68_69delAG"],
+      "protein_notation": "p.(Glu23ValfsTer17)",
+      "founder_context": "Ashkenazi Jewish founder variant",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "canonical_c_notation": "c.115T>G",
+      "input_aliases": [],
+      "protein_notation": "p.(Cys39Gly)",
+      "founder_context": "Inuit founder variant from Ammassalik",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "canonical_c_notation": "c.181T>G",
+      "input_aliases": [],
+      "protein_notation": "p.(Cys61Gly)",
+      "founder_context": "Polish and Eastern European pathogenic founder variant",
+      "source_assertions": ["ENIGMA expert-panel pathogenic classification in ClinVar VCV000017661", "PMID:19594371"]
+    },
+    {
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "canonical_c_notation": "c.815_824dup",
+      "input_aliases": ["c.815_824dupAGCCATGTGG"],
+      "protein_notation": "p.(Thr276AlafsTer14)",
+      "founder_context": "West African ancestry founder variant",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "canonical_c_notation": "c.5266dup",
+      "input_aliases": ["c.5266dupC"],
+      "protein_notation": "p.(Gln1756ProfsTer74)",
+      "founder_context": "Ashkenazi Jewish founder variant",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "canonical_c_notation": "c.771_775del",
+      "input_aliases": ["c.771_775delTCAAA"],
+      "protein_notation": "p.(Asn257LysfsTer17)",
+      "founder_context": "Icelandic founder variant",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "canonical_c_notation": "c.5073dup",
+      "input_aliases": ["c.5073dupA"],
+      "protein_notation": "p.(Trp1692MetfsTer3)",
+      "founder_context": "Amish founder variant from Somerset County, Pennsylvania",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    },
+    {
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "canonical_c_notation": "c.5946del",
+      "input_aliases": ["c.5946delT"],
+      "protein_notation": "p.(Ser1982ArgfsTer22)",
+      "founder_context": "Ashkenazi Jewish founder variant",
+      "source_assertions": ["NCBI GeneReviews Table 6"]
+    }
+  ]
+}

@@ -139,6 +139,31 @@
                 </div>
             </div>
 
+            <!-- Criteria table -->
+            <div class="criteria-section" x-show="result?.criteria?.length > 0">
+                <h3>Applied criteria</h3>
+                <table class="criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Strength</th>
+                            <th>Points</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="c in result?.criteria" :key="c.name">
+                            <tr>
+                                <td><span class="criterion-badge" x-text="c.name"></span></td>
+                                <td x-text="c.strength || '-'"></td>
+                                <td x-text="c.points"></td>
+                                <td class="reason-cell" x-text="c.reason"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Narrative summary -->
             <div class="narrative-section" x-show="result?.narrative">
                 <p class="narrative-text" x-text="result?.narrative"></p>
@@ -244,6 +269,57 @@
                 </a>
             </div>
 
+            <!-- Protein PS1 review -->
+            <div class="protein-ps1-review-section" x-show="result?.protein_ps1_review?.display">
+                <h3>
+                    <span x-text="result?.protein_ps1_review?.title"></span>
+                    <span class="priority-pill" x-show="result?.protein_ps1_review?.recommended"
+                        x-text="result?.protein_ps1_review?.priority"></span>
+                </h3>
+                <p class="review-summary" x-text="result?.protein_ps1_review?.summary"></p>
+                <div class="review-grid">
+                    <div x-show="result?.protein_ps1_review?.what_to_check?.length">
+                        <h4>Why it was flagged</h4>
+                        <ul>
+                            <template x-for="reason in result?.protein_ps1_review?.reasons" :key="reason">
+                                <li x-text="reason"></li>
+                            </template>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>What to check</h4>
+                        <ul>
+                            <template x-for="item in result?.protein_ps1_review?.what_to_check" :key="item">
+                                <li x-text="item"></li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+                <table class="criteria-table" x-show="result?.protein_ps1_review?.candidates?.length">
+                    <thead>
+                        <tr><th>Reference candidate</th><th>Class</th><th>Status</th><th>Source</th></tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="candidate in (result?.protein_ps1_review?.candidates || [])" :key="candidate.key">
+                            <tr>
+                                <td x-text="`${candidate.gene} ${candidate.c_notation} ${candidate.p_notation}`"></td>
+                                <td x-text="candidate.classification"></td>
+                                <td x-text="candidate.reference_status.replaceAll('_', ' ')"></td>
+                                <td x-text="candidate.classification_source"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <p class="review-source" x-show="result?.protein_ps1_review?.splice_sources_checked?.length">
+                    <strong>RNA/splice sources checked for the assessed variant:</strong>
+                    <span x-text="result?.protein_ps1_review?.splice_sources_checked?.join(', ')"></span>
+                </p>
+                <p class="review-limitations" x-text="result?.protein_ps1_review?.limitations"></p>
+                <a :href="result?.protein_ps1_review?.source_url" target="_blank" rel="noopener">
+                    Open ENIGMA specification
+                </a>
+            </div>
+
             <!-- Initiation PVS1 review -->
             <div class="initiation-review-section" x-show="result?.initiation_review?.recommended">
                 <h3>
@@ -283,34 +359,25 @@
                 </a>
             </div>
 
-            <!-- Criteria table -->
-            <div class="criteria-section" x-show="result?.criteria?.length > 0">
-                <h3>Applied criteria</h3>
-                <table class="criteria-table">
-                    <thead>
-                        <tr>
-                            <th>Criterion</th>
-                            <th>Strength</th>
-                            <th>Points</th>
-                            <th>Reason</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="c in result?.criteria" :key="c.name">
-                            <tr>
-                                <td><span class="criterion-badge" x-text="c.name"></span></td>
-                                <td x-text="c.strength || '-'"></td>
-                                <td x-text="c.points"></td>
-                                <td class="reason-cell" x-text="c.reason"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-
             <section class="evidence-details"
-                     x-show="result?.spliceai_audit || result?.mixed_evidence || result?.evidence_interactions?.length">
+                     x-show="result?.normalization_provenance || result?.spliceai_audit || result?.population_frequency_audit?.datasets?.length || result?.mixed_evidence || result?.evidence_interactions?.length">
                 <h3>Evidence details</h3>
+                <details class="evidence-detail-item" x-show="result?.normalization_provenance">
+                    <summary>
+                        <span>Variant normalization</span>
+                        <span class="evidence-detail-summary"
+                              x-text="result?.consequence_status?.replaceAll('_', ' ') || 'Validated'"></span>
+                    </summary>
+                    <dl class="evidence-detail-grid">
+                        <div><dt>Method</dt><dd x-text="result?.normalization_source || 'Not reported'"></dd></div>
+                        <div><dt>Engine</dt><dd x-text="result?.normalization_provenance?.normalization_engine || 'Not reported'"></dd></div>
+                        <div><dt>Engine version</dt><dd x-text="result?.normalization_provenance?.hgvs_version || 'Not reported'"></dd></div>
+                        <div><dt>Provider</dt><dd x-text="result?.normalization_provenance?.provider || 'Not reported'"></dd></div>
+                        <div><dt>cdot data release</dt><dd x-text="result?.normalization_provenance?.cdot_data_release || 'Not reported'"></dd></div>
+                        <div><dt>Reference bundle</dt><dd x-text="result?.normalization_provenance?.reference_bundle || 'Not reported'"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Reference manifest checksum</dt><dd x-text="result?.normalization_provenance?.reference_manifest_sha256 || 'Not reported'"></dd></div>
+                    </dl>
+                </details>
                 <details class="evidence-detail-item"
                          x-show="result?.evidence_interactions?.length">
                     <summary>
@@ -340,6 +407,67 @@
                         </template>
                     </div>
                 </details>
+                <details class="evidence-detail-item"
+                         x-show="result?.population_frequency_audit?.datasets?.length">
+                    <summary>
+                        <span>gnomAD population frequency policy</span>
+                        <span class="evidence-detail-summary">
+                            Founder populations shown as context only
+                        </span>
+                    </summary>
+                    <p x-text="result?.population_frequency_audit?.scoring_rule"></p>
+                    <p>
+                        Scored ENIGMA non-founder populations:
+                        <strong x-text="(result?.population_frequency_audit?.scored_non_founder_population_codes || []).map(code => code.toUpperCase()).join(', ')"></strong>.
+                        Founder and other excluded groups do not contribute to BA1, BS1 or PM2 presence.
+                    </p>
+                    <template x-for="dataset in (result?.population_frequency_audit?.datasets || [])"
+                              :key="dataset.dataset_key">
+                        <article class="evidence-interaction">
+                            <p>
+                                <strong x-text="dataset.label"></strong>
+                                <span x-text="`Status: ${dataset.status || 'unknown'}`"></span>
+                            </p>
+                            <table class="criteria-table">
+                                <thead>
+                                    <tr><th>Scored population</th><th>AC / AN</th><th>FAF95</th></tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="population in (dataset.scored_non_founder_populations || [])"
+                                              :key="population.code">
+                                        <tr>
+                                            <td x-text="population.code.toUpperCase()"></td>
+                                            <td x-text="population.ac == null ? 'Not reported' : `${population.ac} / ${population.an}`"></td>
+                                            <td x-text="population.faf95 == null ? 'Not reported' : population.faf95"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            <table class="criteria-table"
+                                   x-show="dataset.excluded_population_context?.length">
+                                <thead>
+                                    <tr><th>Excluded context group</th><th>AC / AN</th><th>AF</th><th>FAF95</th><th>Reason</th></tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="population in (dataset.excluded_population_context || [])"
+                                              :key="population.code">
+                                        <tr>
+                                            <td x-text="`${population.label} (${population.code.toUpperCase()})`"></td>
+                                            <td x-text="population.ac == null ? 'Not reported' : `${population.ac} / ${population.an}`"></td>
+                                            <td x-text="population.af == null ? 'Not reported' : population.af"></td>
+                                            <td x-text="population.faf95 == null ? 'Not reported' : population.faf95"></td>
+                                            <td x-text="population.category === 'founder_population' ? 'Founder population, context only' : 'Not an ENIGMA scoring population'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </article>
+                    </template>
+                    <a :href="result?.population_frequency_audit?.policy_source_url"
+                       target="_blank" rel="noopener">
+                        Open ENIGMA Appendix G
+                    </a>
+                </details>
                 <details class="evidence-detail-item" x-show="result?.spliceai_audit">
                     <summary>
                         <span>SpliceAI</span>
@@ -349,12 +477,21 @@
                     <dl class="evidence-detail-grid">
                         <div><dt>Status</dt><dd x-text="result?.spliceai_audit?.status || 'Unknown'"></dd></div>
                         <div><dt>Score used</dt><dd x-text="result?.spliceai_audit?.score ?? 'Unavailable'"></dd></div>
+                        <div><dt>ENIGMA scoring profile</dt><dd x-text="result?.spliceai_audit?.scoring_profile_id || 'Not reported'"></dd></div>
+                        <div><dt>Genome assembly</dt><dd x-text="result?.spliceai_audit?.genome_assembly || 'Not reported'"></dd></div>
+                        <div><dt>Maximum distance</dt><dd x-text="result?.spliceai_audit?.distance == null ? 'Not reported' : `${result.spliceai_audit.distance} bases`"></dd></div>
+                        <div><dt>Masking</dt><dd x-text="result?.spliceai_audit?.mask === 0 ? 'Unmasked' : (result?.spliceai_audit?.mask ?? 'Not reported')"></dd></div>
+                        <div><dt>Annotation subset</dt><dd x-text="result?.spliceai_audit?.annotation_subset || 'Not reported'"></dd></div>
+                        <div><dt>Aggregation</dt><dd x-text="result?.spliceai_audit?.aggregation || 'Not reported'"></dd></div>
                         <div><dt>Transcript used</dt><dd x-text="result?.spliceai_audit?.selected_transcript || 'Not reported'"></dd></div>
                         <div><dt>Transcript policy</dt><dd x-text="result?.spliceai_audit?.transcript_policy || 'Not reported'"></dd></div>
                         <div><dt>Reference transcript score</dt><dd x-text="result?.spliceai_audit?.reference_transcript_score ?? 'Not reported'"></dd></div>
                         <div><dt>Maximum across all transcripts</dt><dd x-text="result?.spliceai_audit?.max_any_transcript_score ?? 'Not reported'"></dd></div>
                         <div><dt>Transcript with overall maximum</dt><dd x-text="result?.spliceai_audit?.max_any_transcript || 'Not reported'"></dd></div>
                         <div><dt>Maximum delta field</dt><dd x-text="result?.spliceai_audit?.max_delta_field || 'Not reported'"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Delta scores</dt><dd x-text="result?.spliceai_audit?.delta_scores && Object.keys(result.spliceai_audit.delta_scores).length ? Object.entries(result.spliceai_audit.delta_scores).map(([key, value]) => `${key}=${value}`).join(', ') : 'Not reported'"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Reference scores</dt><dd x-text="result?.spliceai_audit?.reference_scores && Object.keys(result.spliceai_audit.reference_scores).length ? Object.entries(result.spliceai_audit.reference_scores).map(([key, value]) => `${key}=${value}`).join(', ') : 'Not reported'"></dd></div>
+                        <div class="evidence-detail-wide"><dt>Alternate scores</dt><dd x-text="result?.spliceai_audit?.alternate_scores && Object.keys(result.spliceai_audit.alternate_scores).length ? Object.entries(result.spliceai_audit.alternate_scores).map(([key, value]) => `${key}=${value}`).join(', ') : 'Not reported'"></dd></div>
                         <div><dt>Source</dt><dd x-text="result?.spliceai_audit?.source || 'Not reported'"></dd></div>
                         <div><dt>GRCh38 query</dt><dd x-text="result?.spliceai_audit?.grch38 || 'Not reported'"></dd></div>
                         <div><dt>Cache record</dt><dd x-text="result?.spliceai_audit?.cache_key || 'Not reported'"></dd></div>
@@ -701,12 +838,104 @@
                                         placeholder="Summarise the same-event assessment, prediction strength comparison, reference source, and Appendix J/Table 17 strength decision."></textarea>
                                 </label>
 
+                                <div class="manual-input-grid" x-show="item.code === 'PS1_PROTEIN'">
+                                    <label>Reference P/LP variant
+                                        <input type="text" x-model="item.evidence.reference_variant">
+                                    </label>
+                                    <label>Reference protein consequence
+                                        <input type="text" x-model="item.evidence.reference_p_notation">
+                                    </label>
+                                    <label>Reference classification
+                                        <select x-model="item.evidence.reference_classification">
+                                            <option value="">Select</option>
+                                            <option value="Pathogenic">Pathogenic</option>
+                                            <option value="Likely Pathogenic">Likely Pathogenic</option>
+                                        </select>
+                                    </label>
+                                    <label>Classification verification
+                                        <select x-model="item.evidence.classification_verification">
+                                            <option value="">Select</option>
+                                            <option value="external_vcep_assertion">Official ENIGMA/ClinGen VCEP assertion</option>
+                                            <option value="locally_recurated_under_enigma_vcep">Locally recurated under ENIGMA VCEP</option>
+                                            <option value="historical_classification_only">Historical classification only</option>
+                                            <option value="unresolved">Unresolved</option>
+                                        </select>
+                                    </label>
+                                    <label>Classification source
+                                        <input type="text" x-model="item.evidence.classification_source"
+                                            placeholder="ClinGen assertion ID or documented local review">
+                                    </label>
+                                    <label>Assessed-variant SpliceAI
+                                        <input type="number" min="0" max="1" step="any" x-model="item.evidence.vua_spliceai_score">
+                                    </label>
+                                    <label>Reference-variant SpliceAI
+                                        <input type="number" min="0" max="1" step="any" x-model="item.evidence.reference_spliceai_score">
+                                    </label>
+                                    <label>Assessed-variant confirmed splice status
+                                        <select x-model="item.evidence.vua_confirmed_splice_status">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="none_identified">None identified in defined sources</option>
+                                            <option value="normal">Normal splicing demonstrated</option>
+                                            <option value="abnormal">Abnormal splicing demonstrated</option>
+                                            <option value="conflicting">Conflicting evidence</option>
+                                        </select>
+                                    </label>
+                                    <label>Reference confirmed splice status
+                                        <select x-model="item.evidence.reference_confirmed_splice_status">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="none_identified">None identified in defined sources</option>
+                                            <option value="normal">Normal splicing demonstrated</option>
+                                            <option value="abnormal">Abnormal splicing demonstrated</option>
+                                            <option value="conflicting">Conflicting evidence</option>
+                                        </select>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.same_missense_confirmed">
+                                        Same normalized missense substitution confirmed
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.different_nucleotide_change_confirmed">
+                                        Different nucleotide change confirmed
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.splice_source_check_completed">
+                                        Defined RNA/splice source check completed
+                                    </label>
+                                    <label>Did the reference classification use PS1?
+                                        <select x-model="item.evidence.reference_classification_used_ps1">
+                                            <option value="unknown">Unknown</option>
+                                            <option value="no">No</option>
+                                            <option value="yes">Yes</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <p class="field-hint" x-show="item.code === 'PS1_PROTEIN'">
+                                    Defined sources:
+                                    <span x-text="(item.evidence.splice_sources_checked || []).join(', ') || 'not recorded'"></span>.
+                                    “None identified” means only that these recorded sources were checked; it is not an absolute claim that no splice evidence exists.
+                                </p>
+                                <div x-show="item.code === 'PS1_PROTEIN' && item.evidence.reference_classification_used_ps1 === 'yes'">
+                                    <label class="full-width-label">PS1 reference used in the reference classification
+                                        <input type="text" x-model="item.evidence.reference_ps1_dependency_reference"
+                                            placeholder="Identify the reference variant used by the existing PS1 classification">
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" x-model="item.evidence.direct_reciprocal_dependency_excluded">
+                                        Direct reciprocal dependency with the assessed variant has been excluded
+                                    </label>
+                                </div>
+                                <label class="full-width-label" x-show="item.code === 'PS1_PROTEIN'">
+                                    Protein PS1 review rationale
+                                    <textarea rows="3" x-model="item.evidence.ps1_protein_rationale"
+                                        placeholder="Document the VCEP classification verification, missense match, splice checks, and dependency review."></textarea>
+                                </label>
+
                                 <div class="strength-row">
                                     <span>
                                         ARIANE suggestion:
                                         <strong x-text="suggestedManualStrength(item) || 'threshold not met'"></strong>
                                     </span>
-                                    <label x-show="item.code !== 'PP4' && item.code !== 'PVS1_RNA' && item.code !== 'BP7_RNA' && item.code !== 'PVS1_INIT' && item.code !== 'PS1_SPLICE'">Reviewer-selected strength
+                                    <label x-show="item.code !== 'PP4' && item.code !== 'PVS1_RNA' && item.code !== 'BP7_RNA' && item.code !== 'PVS1_INIT' && item.code !== 'PS1_SPLICE' && item.code !== 'PS1_PROTEIN'">Reviewer-selected strength
                                         <select x-model="item.override_strength">
                                             <option value="">Use ARIANE suggestion</option>
                                             <template

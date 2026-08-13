@@ -23,6 +23,8 @@ from backend.admin import router as admin_router
 
 from backend.config import (
     DATA_DIR, TABLE4_PATH, TABLE9_PATH, ST7_PATH,
+    PS1_PROTEIN_REGISTRY_PATH, PS1_SPLICE_REFERENCE_PATH,
+    ST2_SPLICE_EVIDENCE_PATH,
     ALLOWED_GENES, TRANSCRIPTS,
 )
 from backend.data_validation import validate_required_datasets
@@ -34,13 +36,20 @@ from backend.models import (
     BatchRequest, BatchResponse, BatchItemResult,
     AlphaMissenseResult, VusExplanation,
     SpliceAIAudit,
-    RnaReviewRecommendation,
+    RnaReviewRecommendation, ProteinPs1ReviewRecommendation,
     ManualEvidenceRequest, ManualEvidenceResult,
     ManualCriterionResult, EvidenceInteractionWarning,
     ClientValidationRequest, VariantNormalizationResponse,
 )
 
-validate_required_datasets({"table4": TABLE4_PATH, "table9": TABLE9_PATH, "st7": ST7_PATH})
+validate_required_datasets({
+    "table4": TABLE4_PATH,
+    "table9": TABLE9_PATH,
+    "st7": ST7_PATH,
+    "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH,
+    "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH,
+    "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH,
+})
 
 # Initialize local sources before serving requests so /api/health reports
 # degraded caches even before the first classification.
@@ -49,14 +58,18 @@ from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402
 from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
 from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
 from backend.lookups.indels import load_indel_snapshot  # noqa: E402
+from backend.lookups.precomputed import validate_classification_snapshot  # noqa: E402
 from backend.modules.pp4_bp5 import load_pp4_bp5_snapshot  # noqa: E402
 from backend.modules.residues import initialize_residue_data  # noqa: E402
+from backend.modules.hgvs_engine import validate_hgvs_engine  # noqa: E402
 
 _spliceai_data_source._load_precomputed_cache()
 _spliceai_data_source._load_api_cache()
+validate_classification_snapshot()
 load_indel_snapshot()
 load_pp4_bp5_snapshot()
 initialize_residue_data()
+validate_hgvs_engine()
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -164,6 +177,8 @@ async def index():
 @app.get("/api/health")
 async def health():
     issues = get_data_issues()
+    from backend.modules.hgvs_provider import load_panel_provider
+    panel = load_panel_provider()
     return {
         "status": "degraded" if issues else "ok",
         "version": "1.8.0",
@@ -171,6 +186,11 @@ async def health():
             "table4": TABLE4_PATH.exists(),
             "table9": TABLE9_PATH.exists(),
             "st7":    ST7_PATH.exists(),
+            "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH.exists(),
+            "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH.exists(),
+            "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH.exists(),
+            "reference_bundle": panel.provenance.get("reference_bundle", ""),
+            "normalization_engine": panel.provenance.get("normalization_engine", ""),
         },
         "data_issues": issues,
     }
@@ -278,63 +298,23 @@ async def _classify_one(
     from backend.lookups.clingen import clingen_erepo_lookup
     from backend.modules.frequency import get_gnomad_frequencies
     from backend.modules.table9 import table9_lookup_ps3_bs3
-    from backend.modules.table9 import table9_protein_notation
-    from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
     from backend.modules.pp4_bp5 import evaluate_pp4_bp5
-    from backend.modules.ps1 import evaluate_ps1
+    from backend.modules.ps1 import evaluate_ps1, select_vua_spliceai_for_ps1
     from backend.modules.residues import check_important_residue
     from backend.modules.classifier import evaluate_variant as _evaluate
     from backend.modules.external import external_comparison
-    from backend.lookups.precomputed import lookup_classification_snapshot
-    from backend.lookups.indels import lookup_indel_snapshot
-    from backend.modules.reference_validation import validate_reference_allele
+    from backend.modules.variant_input import normalize_variant_input
 
-    indel_snapshot = lookup_indel_snapshot(gene, c_notation)
-    if indel_snapshot:
-        c_notation = str(indel_snapshot["canonical_c_notation"])
-
-    # Reject a wrong stated reference before coordinates, external lookups, or
-    # evidence evaluation. This is deliberately fail-closed.
+    # Every entry point, including internal/batch calls, uses the same local
+    # reference-transcript normalizer before any evidence or external lookup.
     try:
-        validate_reference_allele(gene, c_notation)
+        normalized_input = normalize_variant_input(
+            gene, c_notation, p_notation=p_notation or None
+        )
     except (ValueError, RuntimeError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-
-    if not p_notation:
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                "p. notation is required, for example p.(Tyr101Ter); "
-                "use p.(?) when the protein consequence is unknown"
-            ),
-        )
-
-    # The versioned coding-SNV snapshot carries the reference-transcript
-    # protein consequence. The request model requires the user to state p.;
-    # use the snapshot only to reject contradictory input.
-    snapshot = lookup_classification_snapshot(gene, c_notation)
-    snapshot_p = ""
-    if snapshot:
-        snapshot_p = str(snapshot.get("record", {}).get("p_notation") or "")
-    indel_p = str(indel_snapshot.get("p_notation") or "") if indel_snapshot else ""
-    if normalize_protein_notation(indel_p) in {"p.?", "p.(?)"}:
-        indel_p = ""
-    reviewed_p = snapshot_p or indel_p or str(table9_protein_notation(gene, c_notation) or "")
-    normalized_reviewed_p = normalize_protein_notation(reviewed_p)
-    normalized_input_p = normalize_protein_notation(p_notation)
-    if normalized_reviewed_p and not protein_notations_compatible(
-        normalized_input_p, normalized_reviewed_p
-    ):
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                f"Protein consequence mismatch for {gene} {c_notation}: "
-                f"the configured reference transcript gives {normalized_reviewed_p}, "
-                f"not {normalized_input_p}."
-            ),
-        )
-    if normalized_reviewed_p:
-        p_notation = normalized_reviewed_p
+    c_notation = normalized_input.c_notation
+    p_notation = normalized_input.p_notation
 
     # Determine the variant type before planning external lookups. Exon-level
     # CNVs with uncertain breakpoints cannot be represented by one genomic
@@ -416,14 +396,28 @@ async def _classify_one(
     # Step 4: fast local lookups
     gnomad_data = None
     if grch37 or grch38:
-        gnomad_data = get_gnomad_frequencies(grch37=grch37, grch38=grch38)
+        gnomad_data = get_gnomad_frequencies(
+            gene=gene,
+            grch37=grch37,
+            grch38=grch38,
+        )
 
     table9_result  = table9_lookup_ps3_bs3(gene, c_notation)
+    from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
+    ps1_vua_splice_evidence = evaluate_defined_splice_sources(
+        gene, c_notation, table9_result
+    )
+    ps1_spliceai_score, ps1_spliceai_source = select_vua_spliceai_for_ps1(
+        spliceai_score, table9_result
+    )
     pp4_bp5_result = evaluate_pp4_bp5(gene, c_notation)
     ps1_result     = evaluate_ps1(
         gene, c_notation, p_notation,
         variant_type=variant_type,
-        spliceai_score=spliceai_score,
+        spliceai_score=ps1_spliceai_score,
+        vua_spliceai_source=ps1_spliceai_source,
+        vua_splice_evidence_status=ps1_vua_splice_evidence["status"],
+        vua_splice_sources_checked=ps1_vua_splice_evidence["sources_checked"],
     )
     residue_info = check_important_residue(gene, p_notation)
 
@@ -535,6 +529,10 @@ async def _classify_one(
         c_notation=c_notation,
         p_notation=p_notation,
         reference_transcript=TRANSCRIPTS.get(gene, ""),
+        normalization_source=normalized_input.normalization_source,
+        consequence_status=normalized_input.consequence_status,
+        normalization_provenance=normalized_input.normalization_provenance or {},
+        protein_consequence_explanation=normalized_input.protein_consequence_explanation,
         predicted_class=result["predicted_class"],
         predicted_label=CLASS_LABELS.get(result["predicted_class"], ""),
         total_points=result["total_points"],
@@ -557,6 +555,8 @@ async def _classify_one(
         if result.get("rna_review") else None,
         splice_ps1_review=RnaReviewRecommendation(**result["splice_ps1_review"])
         if result.get("splice_ps1_review") else None,
+        protein_ps1_review=ProteinPs1ReviewRecommendation(**result["protein_ps1_review"])
+        if result.get("protein_ps1_review") else None,
         initiation_review=RnaReviewRecommendation(**result["initiation_review"])
         if result.get("initiation_review") else None,
         spliceai_audit=SpliceAIAudit(**{
@@ -564,6 +564,10 @@ async def _classify_one(
             for field in SpliceAIAudit.model_fields
             if splice_status.get(field) is not None
         }) if splice_status else None,
+        population_frequency_audit=(
+            gnomad_data.get("population_frequency_audit", {})
+            if gnomad_data else {}
+        ),
         evidence_interactions=[
             EvidenceInteractionWarning(**warning)
             for warning in result.get("evidence_interactions", [])
@@ -582,6 +586,8 @@ async def normalize_variant(
         p_notation=req.p_notation,
         reference_transcript=req.reference_transcript,
         normalization_source=req.normalization_source,
+        consequence_status=req.consequence_status,
+        normalization_provenance=req.normalization_provenance,
         protein_consequence_explanation=req.protein_consequence_explanation,
         assembly=req.assembly,
     )
@@ -604,6 +610,8 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
         response.reference_transcript = req.reference_transcript
         response.submitted_notation = req.submitted_notation
         response.normalization_source = req.normalization_source
+        response.consequence_status = req.consequence_status
+        response.normalization_provenance = req.normalization_provenance
         response.protein_consequence_explanation = req.protein_consequence_explanation
     except Exception as exc:
         _audit(
@@ -654,6 +662,8 @@ async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
                 res.reference_transcript = item.reference_transcript
                 res.submitted_notation = item.submitted_notation
                 res.normalization_source = item.normalization_source
+                res.consequence_status = item.consequence_status
+                res.normalization_provenance = item.normalization_provenance
                 res.protein_consequence_explanation = item.protein_consequence_explanation
                 return BatchItemResult(
                     index=idx, status="ok",

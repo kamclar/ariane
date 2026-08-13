@@ -5,6 +5,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from backend.spliceai_profile import validate_scoring_metadata
+
 
 ROOT = Path(__file__).resolve().parents[1]
 COORDINATES = ROOT / "data/coordinates/brca_intronic_snv_coordinates.json"
@@ -66,6 +68,9 @@ class IntronicSpliceAIDatasetTests(unittest.TestCase):
         self.assertEqual(len(cache), 13800)
         self.assertTrue(all(entry.get("status") == "ok" for entry in cache.values()))
         self.assertEqual(metadata["sha256"], sha256(SPLICEAI))
+        self.assertEqual(validate_scoring_metadata(metadata), [])
+        self.assertTrue(all(entry.get("reference_scores") for entry in cache.values()))
+        self.assertTrue(all(entry.get("alternate_scores") for entry in cache.values()))
 
 
 if __name__ == "__main__":

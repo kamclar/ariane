@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "criteria_specification_id": "GN092",
+  "criteria_specification_version": "1.2.0",
+  "release_date": "2025-01-09",
+  "registry_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
+  "downloaded_utc": "2026-08-11",
+  "files": [
+    {
+      "path": "source/Appendix_V1.2.docx",
+      "source_url": "https://cspec.genome.network/cspec/File/id/9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data",
+      "size_bytes": 2624819,
+      "sha256": "9a9cc9210178e8d947597089ba8edd5ff0633ff7e4fea268b8f202d46e6c8ebb"
+    },
+    {
+      "path": "source/Specifications_Table4_V1.2.xlsx",
+      "source_url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
+      "size_bytes": 245187,
+      "sha256": "85af4043ebf9f8965a5879dbe11674c6e62e3aef7f1b8773b07620ee02f03fd9"
+    },
+    {
+      "path": "source/Specifications_Table9_V1.2.xlsx",
+      "source_url": "https://cspec.genome.network/cspec/File/id/0a35d6a8-5050-44b6-8a9d-babe8cdc06b2/data",
+      "size_bytes": 2029537,
+      "sha256": "b023f69c4d3131d474d90badc08012f130fa9bbdb47a9ece88ea7e3581da6bc8"
+    },
+    {
+      "path": "source/Specifications_V1.2.docx",
+      "source_url": "https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data",
+      "size_bytes": 642168,
+      "sha256": "ff0761c3e052ed916668676d9e92650999804e64d6186ac9cc28488764d327b4"
+    },
+    {
+      "path": "source/Supplementary_Tables_V1.2.xlsx",
+      "source_url": "https://cspec.genome.network/cspec/File/id/cb4a09fe-30f4-4aa8-9d76-d7ea407c9754/data",
+      "size_bytes": 2263266,
+      "sha256": "2cca22c0c0ef4fb17e95ed1c43b4b5b31f12f1659a6516a53e1b4249b3f69957"
+    }
+  ]
+}

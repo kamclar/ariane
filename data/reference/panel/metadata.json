@@ -1,0 +1,23 @@
+{
+  "builder": "scripts/prepare_panel_reference_bundle.py",
+  "bundle_id": "ariane-brca12-reference-v1",
+  "created_utc": "2026-08-04T18:00:26.844184+00:00",
+  "files": {
+    "cdot/cdot-0.2.32.refseq.GRCh38.brca12.json.gz": "c65ab0a3327b28995eba87ec56a8302ef34455555730bede41bfe0728df70dde",
+    "fasta/proteins.fa": "614bc97d3a1857c84b6a651ada33138ce79c4af7dea1f6cb6372f2b6c402af01",
+    "fasta/transcripts.fa": "8dc93330acce0a71050cef9856a49a59355dd2a99eee2387af0dedb02430ab94",
+    "panel_manifest.json": "5d889b264f8494d5163ad91268fd7ec7d0ccfee19777d2716a87cd6caea9a8c6"
+  },
+  "python_packages": {
+    "cdot": "0.2.30",
+    "hgvs": "1.5.7",
+    "msgspec": "0.21.1"
+  },
+  "schema_version": 1,
+  "source": {
+    "cdot_release": "0.2.32",
+    "cdot_sha256": "70fffc92d3178ae0de66efe97acd8835e5db7ae7d9e703b4b03e873ddf27f0f9",
+    "cdot_url": "https://github.com/SACGF/cdot/releases/download/data_v0.2.32/cdot-0.2.32.refseq.GRCh38.json.gz",
+    "ncbi_eutils": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+  }
+}

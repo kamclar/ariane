@@ -68,6 +68,9 @@ fi
 if ! grep -q '^ARIANE_RUNTIME_CACHE_DIR=' /etc/ariane/ariane.env; then
     printf 'ARIANE_RUNTIME_CACHE_DIR=/var/lib/ariane/runtime-cache\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
+fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
 cat > /etc/systemd/system/ariane.service << EOF

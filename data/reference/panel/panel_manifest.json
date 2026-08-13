@@ -1,0 +1,40 @@
+{
+  "bundle_id": "ariane-brca12-reference-v1",
+  "capabilities": [
+    "reference_transcript_c_to_p"
+  ],
+  "genome_build_for_cdot_alignments": "GRCh38",
+  "schema_version": 1,
+  "transcripts": [
+    {
+      "cds_end_1_based_inclusive": 5705,
+      "cds_start_1_based_inclusive": 114,
+      "gene": "BRCA1",
+      "gene_id": "672",
+      "ncbi_protein_fasta_sha256": "e537b173aa00bc220b55808090a3cfe0e1091d26473e43c2902b7a8c9f809ce3",
+      "ncbi_protein_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_009225.1&rettype=fasta&retmode=text",
+      "ncbi_transcript_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NM_007294.4&rettype=gb&retmode=xml",
+      "ncbi_transcript_xml_sha256": "6cb2cbc10f1fc3d07d904a6d021cc8117dc578ce5d619cca627098351f3cfc51",
+      "protein": "NP_009225.1",
+      "protein_length": 1863,
+      "selection_source": "ENIGMA BRCA1/2 VCEP",
+      "transcript": "NM_007294.4",
+      "transcript_length": 7088
+    },
+    {
+      "cds_end_1_based_inclusive": 10456,
+      "cds_start_1_based_inclusive": 200,
+      "gene": "BRCA2",
+      "gene_id": "675",
+      "ncbi_protein_fasta_sha256": "bc5d7e5c7ea36112f56b432620e53d09dd139492b7a8b4e2154db21a4efbaa87",
+      "ncbi_protein_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein&id=NP_000050.3&rettype=fasta&retmode=text",
+      "ncbi_transcript_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NM_000059.4&rettype=gb&retmode=xml",
+      "ncbi_transcript_xml_sha256": "1756ad8f00ab57405dfb2280c43113a02ad6a8bf5f3a698f829a3d5af062e22f",
+      "protein": "NP_000050.3",
+      "protein_length": 3418,
+      "selection_source": "ENIGMA BRCA1/2 VCEP",
+      "transcript": "NM_000059.4",
+      "transcript_length": 11954
+    }
+  ]
+}

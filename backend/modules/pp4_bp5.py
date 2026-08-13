@@ -11,6 +11,8 @@ from typing import Any, Dict, Optional
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.index.json"
 METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.metadata.json"
+INDEL_SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.index.json"
+INDEL_METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.metadata.json"
 
 PP4_POINTS = {"Very Strong": 8, "Strong": 4, "Moderate": 2, "Supporting": 1}
 BP5_POINTS = {"Very Strong": -8, "Strong": -4, "Moderate": -2, "Supporting": -1}
@@ -64,12 +66,24 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         raise RuntimeError("PP4/BP5 clinical LR snapshot is not validated")
     if metadata.get("index_sha256") != _sha256(SNAPSHOT_PATH):
         raise RuntimeError("PP4/BP5 clinical LR snapshot checksum does not match metadata")
+    normalization = metadata.get("normalization")
+    if not isinstance(normalization, dict) or not normalization.get("provenance"):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot normalization provenance is missing")
+    indel_dependency = normalization.get("normalized_indel_dependency")
+    if not isinstance(indel_dependency, dict):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency is missing")
+    if not INDEL_SNAPSHOT_PATH.is_file() or not INDEL_METADATA_PATH.is_file():
+        raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency is unavailable")
+    if indel_dependency.get("index_sha256") != _sha256(INDEL_SNAPSHOT_PATH):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency checksum mismatch")
+    if indel_dependency.get("metadata_sha256") != _sha256(INDEL_METADATA_PATH):
+        raise RuntimeError("PP4/BP5 clinical LR snapshot indel metadata checksum mismatch")
 
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     if metadata.get("records") != len(snapshot):
         raise RuntimeError("PP4/BP5 clinical LR snapshot record count does not match metadata")
 
-    aliases: dict[str, str] = {}
+    aliases: dict[str, str] = {key: key for key in snapshot}
     ambiguous: set[str] = set()
     for canonical_key, record in snapshot.items():
         for notation in record.get("input_c_notations", []):

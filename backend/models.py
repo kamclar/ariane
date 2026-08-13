@@ -17,6 +17,8 @@ class VariantRequest(BaseModel):
     submitted_notation: str = ""
     reference_transcript: str = ""
     normalization_source: str = ""
+    consequence_status: str = ""
+    normalization_provenance: Dict[str, str] = Field(default_factory=dict)
     protein_consequence_explanation: str = ""
 
     @model_validator(mode="before")
@@ -41,6 +43,8 @@ class VariantRequest(BaseModel):
             "assembly": normalized.assembly or None,
             "reference_transcript": normalized.reference_transcript,
             "normalization_source": normalized.normalization_source,
+            "consequence_status": normalized.consequence_status,
+            "normalization_provenance": normalized.normalization_provenance or {},
             "protein_consequence_explanation": normalized.protein_consequence_explanation,
         }
 
@@ -79,17 +83,15 @@ class VariantRequest(BaseModel):
         if not v:
             raise ValueError(
                 "p. notation is required, for example p.(Gln1395=); "
-                "use p.(?) when the protein consequence is unknown"
+                "use p.? when the protein consequence is unknown"
             )
         if not v.startswith("p."):
             raise ValueError("p. notation must start with 'p.', for example p.(Gln1395=)")
-        protein = (
-            r"^p\.\((?:\?|[A-Z][a-z]{2}\d+"
-            r"(?:_[A-Z][a-z]{2}\d+)?"
-            r"(?:=|\?|Ter|[A-Z][a-z]{2}|del|dup|fs(?:Ter)?\d*|"
-            r"[A-Z][a-z]{2}fs(?:Ter)?\d*|delins[A-Z][a-z]{2}|ins[A-Z][a-z]{2})"
-            r")\)$"
-        )
+        # The model receives the canonical result of the HGVS engine. Keep the
+        # lexical guard broad enough for extension and multi-residue delins
+        # forms; biological validation and supplied-vs-derived comparison have
+        # already happened in normalize_variant_input().
+        protein = r"^(?:p\.\?|p\.\([A-Za-z0-9_?=*]+\))$"
         if not re.fullmatch(protein, v):
             raise ValueError(
                 "Unrecognised p. notation. Use HGVS format, for example "
@@ -145,6 +147,13 @@ class AlphaMissenseResult(BaseModel):
 class SpliceAIAudit(BaseModel):
     status: str = ""
     score: Optional[float] = None
+    scoring_profile_id: str = ""
+    scoring_profile_sha256: str = ""
+    genome_assembly: str = ""
+    distance: Optional[int] = None
+    mask: Optional[int] = None
+    annotation_subset: str = ""
+    aggregation: str = ""
     source: str = ""
     transcript_policy: str = ""
     selected_transcript: str = ""
@@ -152,6 +161,9 @@ class SpliceAIAudit(BaseModel):
     max_any_transcript_score: Optional[float] = None
     max_any_transcript: str = ""
     max_delta_field: str = ""
+    delta_scores: Dict[str, float] = Field(default_factory=dict)
+    reference_scores: Dict[str, float] = Field(default_factory=dict)
+    alternate_scores: Dict[str, float] = Field(default_factory=dict)
     grch38: str = ""
     cache_key: str = ""
     reason: str = ""
@@ -192,6 +204,41 @@ class RnaReviewRecommendation(BaseModel):
     is_evidence_criterion: bool = False
 
 
+class ProteinPs1Candidate(BaseModel):
+    key: str = ""
+    reference_id: str = ""
+    gene: str = ""
+    transcript: str = ""
+    c_notation: str = ""
+    p_notation: str = ""
+    classification: str = ""
+    iarc_class: Optional[int] = None
+    classification_basis: str = ""
+    classification_source: str = ""
+    reference_status: str = "review_required"
+    status_reason: str = ""
+    source_dataset: str = ""
+
+
+class ProteinPs1ReviewRecommendation(BaseModel):
+    display: bool = False
+    recommended: bool = False
+    priority: str = "none"
+    title: str = ""
+    summary: str = ""
+    reasons: List[str] = Field(default_factory=list)
+    what_to_check: List[str] = Field(default_factory=list)
+    potential_branches: List[str] = Field(default_factory=list)
+    limitations: str = ""
+    reference_source: str = ""
+    source_url: str = ""
+    is_evidence_criterion: bool = False
+    application_status: str = "not_applied"
+    candidates: List[ProteinPs1Candidate] = Field(default_factory=list)
+    splice_sources_checked: List[str] = Field(default_factory=list)
+    vua_splice_evidence_status: str = "not_assessed"
+
+
 class ClassificationResult(BaseModel):
     variant: str
     gene: str
@@ -200,6 +247,8 @@ class ClassificationResult(BaseModel):
     reference_transcript: str = ""
     submitted_notation: str = ""
     normalization_source: str = ""
+    consequence_status: str = ""
+    normalization_provenance: Dict[str, str] = Field(default_factory=dict)
     protein_consequence_explanation: str = ""
     predicted_class: int
     predicted_label: str = ""
@@ -216,10 +265,12 @@ class ClassificationResult(BaseModel):
     narrative: str = ""
     alphamissense: Optional[AlphaMissenseResult] = None
     spliceai_audit: Optional[SpliceAIAudit] = None
+    population_frequency_audit: Dict[str, Any] = Field(default_factory=dict)
     evidence_interactions: List[EvidenceInteractionWarning] = []
     vus_explanation: Optional[VusExplanation] = None
     rna_review: Optional[RnaReviewRecommendation] = None
     splice_ps1_review: Optional[RnaReviewRecommendation] = None
+    protein_ps1_review: Optional[ProteinPs1ReviewRecommendation] = None
     initiation_review: Optional[RnaReviewRecommendation] = None
 
 
@@ -230,6 +281,8 @@ class VariantNormalizationResponse(BaseModel):
     p_notation: str
     reference_transcript: str
     normalization_source: str
+    consequence_status: str = ""
+    normalization_provenance: Dict[str, str] = Field(default_factory=dict)
     protein_consequence_explanation: str = ""
     assembly: Optional[Literal["GRCh37", "GRCh38"]] = None
 
@@ -257,6 +310,7 @@ class ManualCriterionInput(BaseModel):
             "BP7_RNA",
             "PVS1_INIT",
             "PS1_SPLICE",
+            "PS1_PROTEIN",
         }:
             raise ValueError("Unsupported manually reviewed criterion")
         return code

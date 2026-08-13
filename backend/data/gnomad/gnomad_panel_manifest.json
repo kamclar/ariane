@@ -1,0 +1,180 @@
+{
+  "schema_version": 2,
+  "panel_id": "ariane_brca_v1",
+  "classification_policies": {
+    "enigma_brca_v1_2": {
+      "status": "active",
+      "rule_set": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
+      "version": "1.2.0",
+      "applicable_genes": ["BRCA1", "BRCA2"],
+      "policy_scope": "gnomad_frequency_criteria_only",
+      "automation_scope": {
+        "criteria_defined_here": ["BA1", "BS1", "PM2"],
+        "inherit_other_vcep_criteria": false,
+        "note": "This manifest does not define PVS1, functional, computational, clinical or segregation criteria. A new gene also requires its complete gene-specific runtime implementation and validation outside this gnomAD manifest."
+      },
+      "automatic_release_activation": false,
+      "release_change_requires": [
+        "rule-set compatibility review",
+        "source identity review",
+        "regression test approval"
+      ],
+      "known_limitations": [
+        "ENIGMA v1.2 does not define the width of the coverage region surrounding a variant; ARIANE uses the genomic REF span and records that scope.",
+        "The public GRCh38 genome coverage product is gnomAD r3.0.1 while the frequency callset is v3.1.2; exact sample compatibility is not asserted.",
+        "ENIGMA v1.2 does not publish an exhaustive machine-readable catalog of well-established pathogenic founder variants; the local catalog is provenance-bearing but curated and non-exhaustive."
+      ],
+      "frequency_criteria": {
+        "source": "ClinGen ENIGMA BRCA1/2 VCEP v1.2 Appendix G",
+        "source_url": "https://cspec.genome.network/cspec/File/id/5a75d1a0-1222-46a2-8802-68a4f2251a3a/data",
+        "metric": "faf95",
+        "subset": "non_cancer",
+        "dataset_combination": "assess_exome_and_genome_separately_then_use_highest_qualifying_faf95",
+        "required_dataset_runtime_keys": ["v2_1_non_cancer", "v3_1_non_cancer"],
+        "scored_non_founder_ancestries": ["afr", "amr", "eas", "nfe", "sas"],
+        "scoring_rule": "Use the highest non-cancer FAF95 among ENIGMA non-founder populations, assessing exome and genome data separately.",
+        "outbred_observation_count": {
+          "single_observation": "not_informative",
+          "minimum_observations_for_ba1_bs1": 2,
+          "pm2_requires_zero_observations": true
+        },
+        "ba1": {
+          "operator": ">",
+          "threshold": 0.001,
+          "strength": "Stand-alone",
+          "points": -99,
+          "minimum_mean_depth": 20.0,
+          "requires_pass_record": true,
+          "exclude_well_established_pathogenic_founder_variants": true
+        },
+        "bs1": {
+          "minimum_mean_depth": 20.0,
+          "requires_pass_record": true,
+          "exclude_well_established_pathogenic_founder_variants": true,
+          "strong": {"operator": ">", "threshold": 0.0001, "strength": "Strong", "points": -4},
+          "supporting": {"lower_operator": ">", "lower_threshold": 0.00002, "upper_operator": "<=", "upper_threshold": 0.0001, "strength": "Supporting", "points": -1}
+        },
+        "pm2": {
+          "strength": "Supporting",
+          "points": 1,
+          "required_absence_dataset_runtime_keys": ["v2_1_non_cancer", "v3_1_non_cancer"],
+          "minimum_mean_depth": 25.0,
+          "absence_scope": "scored_non_founder_ancestries",
+          "single_outbred_observation": "not_informative",
+          "excluded_variant_types": ["frameshift", "inframe_deletion", "inframe_insertion", "inframe_delins", "exon_deletion", "exon_duplication", "deletion", "insertion", "delins", "duplication"],
+          "coverage_scope": "variant_reference_span",
+          "coverage_scope_note": "ENIGMA v1.2 requires average read depth in the region surrounding the variant but does not define a flank width. ARIANE averages every genomic position represented by REF and does not invent a flanking window."
+        },
+        "pathogenic_founder_exception": {
+          "rule": "Do not apply BA1 or BS1 to well-established pathogenic founder variants.",
+          "snapshot": "backend/data/brca_pathogenic_founder_variants.json",
+          "catalog_completeness": "curated_not_exhaustive"
+        }
+      }
+    }
+  },
+  "targets": [
+    {
+      "gene": "BRCA1",
+      "activation_status": "active",
+      "reference_transcript": "NM_007294.4",
+      "classification_policy_id": "enigma_brca_v1_2",
+      "vcep_specification": {
+        "id": "GN092",
+        "version": "1.2.0",
+        "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
+      },
+      "intervals": {
+        "GRCh37": {"chrom": "17", "start": 41196312, "end": 41277500},
+        "GRCh38": {"chrom": "17", "start": 43044295, "end": 43125364}
+      }
+    },
+    {
+      "gene": "BRCA2",
+      "activation_status": "active",
+      "reference_transcript": "NM_000059.4",
+      "classification_policy_id": "enigma_brca_v1_2",
+      "vcep_specification": {
+        "id": "GN097",
+        "version": "1.2.0",
+        "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097?version=1.2.0"
+      },
+      "intervals": {
+        "GRCh37": {"chrom": "13", "start": 32889617, "end": 32973809},
+        "GRCh38": {"chrom": "13", "start": 32315474, "end": 32400266}
+      }
+    }
+  ],
+  "future_gene_activation": {
+    "note": "Adding intervals is not sufficient. Each new gene requires an explicit gene-specific policy derived from its applicable VCEP specification. No additional gene is active until that policy and its data are reviewed and implemented.",
+    "inherit_existing_policy_by_default": false,
+    "activate_from_interval_only": false,
+    "required_target_fields": ["gene", "activation_status", "reference_transcript", "classification_policy_id", "vcep_specification", "intervals.GRCh37", "intervals.GRCh38"],
+    "required_policy_fields": ["rule_set", "version", "applicable_genes", "policy_scope", "automation_scope", "frequency_criteria.source", "frequency_criteria.metric", "frequency_criteria.subset", "frequency_criteria.required_dataset_runtime_keys", "frequency_criteria.scored_non_founder_ancestries", "frequency_criteria.ba1", "frequency_criteria.bs1", "frequency_criteria.pm2"],
+    "activation_requires": ["source review", "gene-specific criteria implementation", "reference and coordinate data", "official gnomAD snapshot refresh", "regression matrix", "API allow-list update", "UI allow-list update"]
+  },
+  "region_padding_bp": 1000,
+  "datasets": [
+    {
+      "dataset_key": "gnomad_v2_1_1_exomes_grch37",
+      "runtime_key": "v2_1_non_cancer",
+      "release": "2.1.1",
+      "assembly": "GRCh37",
+      "callset": "exomes",
+      "subset": "non_cancer",
+      "sites_hail_uri": "gs://gcp-public-data--gnomad/release/2.1.1/ht/exomes/gnomad.exomes.r2.1.1.sites.ht",
+      "sites_metadata_url": "https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1.1/ht/exomes/gnomad.exomes.r2.1.1.sites.ht/metadata.json.gz",
+      "sites_metadata_identity": {
+        "etag": "\"f823aeb6d9ee9576f24ee0e735e98de3\"",
+        "x_goog_hash": "crc32c=Kv0kXQ==, md5=+COuttnulXbyTuDnNemN4w=="
+      },
+      "frequency_index_style": "v2_underscore",
+      "faf95_mode": "published_hail_faf",
+      "excluded_population_context": [
+        {"code": "asj", "label": "Ashkenazi Jewish", "category": "founder_population"},
+        {"code": "fin", "label": "European Finnish", "category": "founder_population"},
+        {"code": "oth", "label": "Other/unassigned", "category": "not_enigma_non_founder_population"}
+      ],
+      "coverage_hail_uri": "gs://gcp-public-data--gnomad/release/2.1/coverage/exomes/gnomad.exomes.r2.1.coverage.ht",
+      "coverage_metadata_url": "https://storage.googleapis.com/gcp-public-data--gnomad/release/2.1/coverage/exomes/gnomad.exomes.r2.1.coverage.ht/metadata.json.gz",
+      "coverage_metadata_identity": {
+        "etag": "\"24247f769f565f558a61c01f379e0ee3\"",
+        "x_goog_hash": "crc32c=UNXZKw==, md5=JCR/dp9WX1WKYcAfN54O4w=="
+      }
+    },
+    {
+      "dataset_key": "gnomad_v3_1_2_genomes_grch38",
+      "runtime_key": "v3_1_non_cancer",
+      "release": "3.1.2",
+      "assembly": "GRCh38",
+      "callset": "genomes",
+      "subset": "non_cancer",
+      "sites_hail_uri": "gs://gcp-public-data--gnomad/release/3.1.2/ht/genomes/gnomad.genomes.v3.1.2.sites.ht",
+      "sites_metadata_url": "https://storage.googleapis.com/gcp-public-data--gnomad/release/3.1.2/ht/genomes/gnomad.genomes.v3.1.2.sites.ht/metadata.json.gz",
+      "sites_metadata_identity": {
+        "etag": "\"43f9f517d617f6e848e2c90f6c87fb67\"",
+        "x_goog_hash": "crc32c=IW3z+A==, md5=Q/n1F9YX9uhI4skPbIf7Zw=="
+      },
+      "frequency_index_style": "v3_hyphen_adj",
+      "faf95_mode": "hail_native_from_non_cancer_ac_an",
+      "excluded_population_context": [
+        {"code": "ami", "label": "Amish", "category": "founder_population"},
+        {"code": "asj", "label": "Ashkenazi Jewish", "category": "founder_population"},
+        {"code": "fin", "label": "European Finnish", "category": "founder_population"},
+        {"code": "mid", "label": "Middle Eastern", "category": "not_enigma_non_founder_population"},
+        {"code": "oth", "label": "Other/unassigned", "category": "not_enigma_non_founder_population"}
+      ],
+      "coverage_hail_uri": "gs://gcp-public-data--gnomad/release/3.0.1/coverage/genomes/gnomad.genomes.r3.0.1.coverage.ht",
+      "coverage_metadata_url": "https://storage.googleapis.com/gcp-public-data--gnomad/release/3.0.1/coverage/genomes/gnomad.genomes.r3.0.1.coverage.ht/metadata.json.gz",
+      "coverage_metadata_identity": {
+        "etag": "\"76d600e8646aaf4d7d0a9dfffa68f980\"",
+        "x_goog_hash": "crc32c=hHVbGQ==, md5=dtYA6GRqr019Cp3/+mj5gA=="
+      }
+    }
+  ],
+  "release_discovery": {
+    "gcs_bucket_api": "https://storage.googleapis.com/storage/v1/b/gcp-public-data--gnomad/o",
+    "prefix": "release/",
+    "note": "Detected releases are informational only and are never activated automatically."
+  }
+}

@@ -39,14 +39,28 @@ def _load_cache() -> None:
             raw = json.load(fh)
         for key, val in raw.items():
             if isinstance(val, dict):
+                # A successful response without either annotation can be
+                # transient (for example while the upstream annotation
+                # backend is degraded).  It must not become a permanent
+                # negative result that prevents a later retry.
+                if (
+                    val.get("status") == "no_score"
+                    or (
+                        val.get("status") in {None, ""}
+                        and val.get("bayesdel") is None
+                        and val.get("am_score") is None
+                    )
+                ):
+                    continue
                 BAYESDEL_CACHE[key] = val
             else:
                 # Migrate old format (float or null) - AM score not available
-                BAYESDEL_CACHE[key] = {
-                    "bayesdel": float(val) if isinstance(val, (int, float)) else None,
-                    "am_score": None,
-                    "am_class": None,
-                }
+                if isinstance(val, (int, float)):
+                    BAYESDEL_CACHE[key] = {
+                        "bayesdel": float(val),
+                        "am_score": None,
+                        "am_class": None,
+                    }
         print(f"Loaded BayesDel/AM cache: {len(BAYESDEL_CACHE)} entries")
         clear_issue("BayesDel cache")
     except Exception as exc:
@@ -142,6 +156,12 @@ def get_bayesdel_and_alphamissense(
     variant_key = f"{gene}:{c_notation}"
 
     entry = BAYESDEL_CACHE.get(variant_key)
+    if isinstance(entry, dict) and entry.get("status") == "no_score":
+        # Defensive migration for a process that obtained a transient empty
+        # response before this policy was applied.  Retry instead of treating
+        # it as a durable cache hit.
+        BAYESDEL_CACHE.pop(variant_key, None)
+        entry = None
     if entry is not None:
         bd = entry.get("bayesdel") if isinstance(entry, dict) else entry
         am_score = entry.get("am_score") if isinstance(entry, dict) else None
@@ -173,7 +193,7 @@ def get_bayesdel_and_alphamissense(
 
     # Only stable responses belong in the persistent cache. Coordinate and API
     # failures remain retryable instead of being converted to a silent null.
-    if data["status"] in {"ok", "no_score", "not_found"}:
+    if data["status"] in {"ok", "not_found"}:
         BAYESDEL_CACHE[variant_key] = {
             "bayesdel": data["bayesdel"],
             "am_score": data["am_score"],

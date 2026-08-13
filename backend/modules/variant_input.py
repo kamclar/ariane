@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Optional
 
@@ -21,7 +21,7 @@ from backend.modules.hgvs import (
 
 _ASSEMBLIES = {"GRCH37": "GRCh37", "GRCH38": "GRCh38"}
 _TRANSCRIPT_C = re.compile(
-    r"^(NM_\d+\.\d+)\s*:\s*(c\..+)$", re.IGNORECASE
+    r"^(NM_\d+(?:\.\d+)?)\s*:\s*(c\..+)$", re.IGNORECASE
 )
 _GENOMIC_PATTERNS = (
     re.compile(
@@ -45,6 +45,8 @@ class NormalizedVariantInput:
     p_notation: str
     reference_transcript: str
     normalization_source: str
+    consequence_status: str = ""
+    normalization_provenance: dict[str, str] | None = None
     protein_consequence_explanation: str = ""
     assembly: str = ""
     genomic_notation: str = ""
@@ -132,7 +134,7 @@ def _genomic_reverse_index() -> dict[tuple[str, str, str, int, str, str], tuple[
 def _from_c_notation(
     gene: str, submitted: str, c_notation: str, supplied_p: str
 ) -> NormalizedVariantInput:
-    from backend.modules.table9 import table9_protein_notation
+    from backend.modules.hgvs_engine import derive_protein_consequence
     from backend.modules.reference_validation import validate_reference_allele
 
     # Validate the stated transcript reference before attempting consequence
@@ -140,60 +142,58 @@ def _from_c_notation(
     # a user-supplied protein description.
     validate_reference_allele(gene, c_notation)
 
+    consequence = derive_protein_consequence(gene, c_notation)
+    canonical_c = consequence.canonical_c_notation
+    engine_p = consequence.p_notation
+
+    # Existing snapshots remain independent regression/cross-check sources.
+    # They are not used as a hidden runtime fallback for sequence derivation.
     indel = lookup_indel_snapshot(gene, c_notation)
     if indel:
-        canonical_c = str(indel["canonical_c_notation"])
         snapshot_p = normalize_protein_notation(str(indel.get("p_notation") or ""))
-        source = "Normalized BRCA indel snapshot"
+        snapshot_source = "Normalized BRCA indel snapshot"
     else:
-        record = load_classification_snapshot_index().get(f"{gene}:{c_notation}")
-        canonical_c = c_notation
+        record = load_classification_snapshot_index().get(f"{gene}:{canonical_c}")
         snapshot_p = normalize_protein_notation(
             str(record.get("p_notation") or "") if record else ""
         )
-        source = "BRCA coding SNV snapshot" if record else ""
+        snapshot_source = "BRCA coding SNV snapshot" if record else ""
 
-    if not snapshot_p:
-        snapshot_p = normalize_protein_notation(
-            str(table9_protein_notation(gene, canonical_c) or "")
+    if (
+        snapshot_p
+        and snapshot_p != "p.?"
+        and engine_p != "p.?"
+        and not protein_notations_compatible(snapshot_p, engine_p)
+    ):
+        raise ValueError(
+            f"Validated source conflict for {gene} {canonical_c}: local HGVS engine "
+            f"gives {engine_p}, while {snapshot_source} gives {snapshot_p}. "
+            "The variant was not classified."
         )
-        if snapshot_p:
-            source = "ENIGMA Table 9"
 
     normalized_supplied_p = normalize_protein_notation(supplied_p)
     if (
-        snapshot_p
+        engine_p != "p.?"
         and normalized_supplied_p
-        and not protein_notations_compatible(normalized_supplied_p, snapshot_p)
+        and not protein_notations_compatible(normalized_supplied_p, engine_p)
     ):
         raise ValueError(
             f"Protein consequence mismatch for {gene} {canonical_c}: "
-            f"{TRANSCRIPTS[gene]} gives {snapshot_p}, not {normalized_supplied_p}"
+            f"{TRANSCRIPTS[gene]} gives {engine_p}, not {normalized_supplied_p}"
         )
-    p_notation = snapshot_p or normalized_supplied_p
+    if engine_p == "p.?" and normalized_supplied_p and normalized_supplied_p != "p.?":
+        raise ValueError(
+            f"Protein consequence cannot be verified from {TRANSCRIPTS[gene]} for "
+            f"{canonical_c}; supplied {normalized_supplied_p} was not accepted."
+        )
+    p_notation = engine_p
     protein_explanation = ""
-    if not p_notation:
-        # Intronic and UTR changes have no deterministic protein consequence
-        # without transcript/RNA evidence.
-        if re.search(r"(?:\d[+-]\d|\*|-)", canonical_c):
-            p_notation = "p.(?)"
-            source = source or "Reference-transcript non-coding notation"
-            protein_explanation = (
-                "This variant is outside the translated coding sequence or may affect "
-                "splicing. Its protein consequence cannot be determined from DNA "
-                "notation alone and requires transcript or RNA evidence."
-            )
-        else:
-            raise ValueError(
-                f"No validated protein consequence is available locally for "
-                f"{gene} {canonical_c}. Supply a reference-transcript p. description "
-                "or add the variant to a validated normalization snapshot."
-            )
-    elif p_notation in {"p.?", "p.(?)"}:
+    if p_notation == "p.?":
         protein_explanation = (
-            "The validated source does not define a deterministic protein consequence "
-            "for this variant. Transcript, RNA, breakpoint, or structural evidence may "
-            "be required."
+            "The protein consequence cannot be determined from DNA notation alone. "
+            "The variant is outside the translated coding sequence, may affect splicing, "
+            "or has uncertain breakpoints; transcript, RNA evidence, or breakpoint evidence "
+            "is required."
         )
 
     return NormalizedVariantInput(
@@ -202,7 +202,9 @@ def _from_c_notation(
         c_notation=canonical_c,
         p_notation=p_notation,
         reference_transcript=TRANSCRIPTS[gene],
-        normalization_source=source or "User-supplied reference-transcript HGVS",
+        normalization_source="Local biocommons.hgvs engine with checksum-verified panel reference",
+        consequence_status=consequence.consequence_status,
+        normalization_provenance=consequence.provenance,
         protein_consequence_explanation=protein_explanation,
     )
 
@@ -224,6 +226,11 @@ def normalize_variant_input(
     transcript_match = _TRANSCRIPT_C.fullmatch(submitted)
     if transcript_match:
         transcript = transcript_match.group(1).upper()
+        if "." not in transcript:
+            raise ValueError(
+                f"Transcript accession must include an explicit version; "
+                f"expected {TRANSCRIPTS[gene]} for {gene}"
+            )
         if transcript != TRANSCRIPTS[gene]:
             raise ValueError(
                 f"Transcript {transcript} does not match {gene}; expected {TRANSCRIPTS[gene]}"
@@ -268,19 +275,15 @@ def normalize_variant_input(
             f"match {normalized_assembly} chr{chrom}:{pos}:{ref}>{alt}: {descriptions}"
         )
     item = matches[0]
-    return NormalizedVariantInput(
-        gene=gene,
-        submitted_notation=notation.strip(),
-        c_notation=item["c_notation"],
-        p_notation=item["p_notation"],
-        reference_transcript=item["reference_transcript"],
-        normalization_source=item["source"],
-        protein_consequence_explanation=(
-            "The validated source does not define a deterministic protein consequence "
-            "for this variant. Transcript, RNA, breakpoint, or structural evidence may "
-            "be required."
-            if item["p_notation"] in {"p.?", "p.(?)"} else ""
+    normalized_c = _from_c_notation(gene, notation.strip(), item["c_notation"], "")
+    provenance = dict(normalized_c.normalization_provenance or {})
+    provenance["genomic_mapping_source"] = item["source"]
+    return replace(
+        normalized_c,
+        normalization_source=(
+            f"{normalized_c.normalization_source}; genomic mapping: {item['source']}"
         ),
+        normalization_provenance=provenance,
         assembly=normalized_assembly,
         genomic_notation=f"chr{chrom}:{pos}:{ref}>{alt}",
     )

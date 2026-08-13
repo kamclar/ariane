@@ -14938,12 +14938,28 @@
     "BRCA1": {
       "exon": "E23(24)",
       "boundary_aa": 1854,
-      "rule": "PTC<p.I1855; PTC>p.L1854"
+      "rule": "PTC<p.I1855; PTC>p.L1854",
+      "at_or_before": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)"
+      },
+      "after": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A"
+      }
     },
     "BRCA2": {
       "exon": "E27",
       "boundary_aa": 3309,
-      "rule": "PTC<p.T3310; PTC>p.E3309"
+      "rule": "PTC<p.T3310; PTC>p.E3309",
+      "at_or_before": {
+        "pvs1_code": "PVS1",
+        "pm5_code": "PM5_Strong (PTC)"
+      },
+      "after": {
+        "pvs1_code": "PVS1_N/A",
+        "pm5_code": "PM5_N/A"
+      }
     }
   }
 }

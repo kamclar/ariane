@@ -7,7 +7,7 @@
 #   3. Table 4 - PVS1/PM5 structural rules
 #   4. gnomAD - BS1, PM2
 #   5. Local clinical-LR snapshot - PP4/BP5
-#   6. ST7 - PS1 same amino acid change as known P/LP
+#   6. Approved protein-PS1 registry; ST7 supplies review candidates only
 #   7. SpliceAI/BayesDel - PP3/BP4/BP7 per variant-type decision tree
 #   8. BP1 - domain check
 #   9. Classification from adapted ACMG/AMP combinations
@@ -217,6 +217,7 @@ def evaluate_variant(
     from backend.modules.frequency import evaluate_frequency_criteria
     from backend.modules.rna_review import evaluate_rna_review
     from backend.modules.splice_ps1_review import evaluate_splice_ps1_review
+    from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
     from backend.modules.initiation_review import evaluate_initiation_review
     from backend.modules.utils import get_amino_acid_position, is_in_functional_domain
 
@@ -262,6 +263,12 @@ def evaluate_variant(
                     f"Table 9={table9_spliceai:.3f}. Automated criteria use the frozen "
                     "Table 9 value to remain consistent with the VCEP-reviewed evidence."
                 )
+            elif spliceai_score is None:
+                results["warnings"].append(
+                    "SpliceAI service/cache is unavailable. Automated criteria for this "
+                    f"VCEP-reviewed variant use the frozen ENIGMA Table 9 value "
+                    f"{table9_spliceai:.3f}."
+                )
         splice_result = table9_result.get("splice_result_published")
         if splice_result:
             results["warnings"].append(
@@ -274,7 +281,12 @@ def evaluate_variant(
 
     # ── Step 1: Frequency (BA1 check) ──────────────────────────────────
     if gnomad_data:
-        freq_criteria = evaluate_frequency_criteria(gnomad_data, variant_type)
+        freq_criteria = evaluate_frequency_criteria(
+            gnomad_data,
+            variant_type,
+            gene=gene,
+            c_notation=c_notation,
+        )
         for crit_name, crit_data in freq_criteria.items():
             if crit_data.get("applies"):
                 results["criteria"][crit_name] = crit_data
@@ -325,7 +337,10 @@ def evaluate_variant(
             "applies": True,
             "strength": pvs1["pm5_strength"],
             "points": pvs1["pm5_points"],
-            "reason": f"Table 4: {pvs1['pm5_code']} for PTC in {pvs1.get('exon', 'unknown exon')}",
+            "reason": (
+                f"Table 4: {pvs1['pm5_code']} for PTC in "
+                f"{pvs1.get('pm5_exon') or 'unknown exon'}"
+            ),
         }
         results["total_points"] += pvs1["pm5_points"]
 
@@ -340,7 +355,7 @@ def evaluate_variant(
         }
         results["total_points"] += pp4_bp5_result["points"]
 
-    # ── Step 5: ST7 - PS1 ─────────────────────────────────────────────
+    # ── Step 5: approved protein PS1 references ───────────────────────
     if ps1_result and ps1_result.get("applies"):
         results["criteria"]["PS1"] = {
             "applies": True,
@@ -468,6 +483,7 @@ def evaluate_variant(
         spliceai_score=spliceai_score,
         ps1_result=ps1_result,
     )
+    results["protein_ps1_review"] = evaluate_protein_ps1_review(ps1_result)
     results["initiation_review"] = evaluate_initiation_review(
         variant_type=variant_type,
     )

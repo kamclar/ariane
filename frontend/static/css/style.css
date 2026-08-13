@@ -385,7 +385,7 @@ button:disabled {
 
 /* ── Tables ─────────────────────────────────────────────────── */
 .criteria-section, .warnings-section, .external-section, .vus-section,
-.rna-review-section, .splice-ps1-review-section, .initiation-review-section,
+.rna-review-section, .splice-ps1-review-section, .protein-ps1-review-section, .initiation-review-section,
 .manual-evidence-section, .sources-section {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -915,8 +915,13 @@ footer p {
     border-left: 4px solid var(--color-warning);
 }
 
+.protein-ps1-review-section {
+    border-left: 4px solid #b7791f;
+}
+
 .rna-review-section h3,
-.splice-ps1-review-section h3 {
+.splice-ps1-review-section h3,
+.protein-ps1-review-section h3 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -976,7 +981,8 @@ footer p {
 }
 
 .rna-review-section a,
-.splice-ps1-review-section a {
+.splice-ps1-review-section a,
+.protein-ps1-review-section a {
     color: var(--color-primary);
     font-size: 0.82rem;
     font-weight: 600;

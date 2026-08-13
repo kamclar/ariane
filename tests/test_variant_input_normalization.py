@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from backend.models import VariantRequest
+from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
 from backend.modules.variant_input import normalize_variant_input
 
 
@@ -11,7 +12,7 @@ from backend.modules.variant_input import normalize_variant_input
         ("BRCA1", "c.303T>G", "c.303T>G", "p.(Tyr101Ter)", "NM_007294.4"),
         ("BRCA1", "NM_007294.4:c.509G>A", "c.509G>A", "p.(Arg170Gln)", "NM_007294.4"),
         ("BRCA1", "c.5266dup", "c.5266dup", "p.(Gln1756ProfsTer74)", "NM_007294.4"),
-        ("BRCA1", "c.548-9A>G", "c.548-9A>G", "p.(?)", "NM_007294.4"),
+        ("BRCA1", "c.548-9A>G", "c.548-9A>G", "p.?", "NM_007294.4"),
         ("BRCA2", "c.36dup", "c.36dup", "p.(Glu13Ter)", "NM_000059.4"),
     ],
 )
@@ -73,7 +74,7 @@ def test_genomic_input_requires_assembly():
 
 def test_unknown_intronic_protein_consequence_is_explained():
     result = normalize_variant_input("BRCA1", "c.548-9A>G")
-    assert result.p_notation == "p.(?)"
+    assert result.p_notation == "p.?"
     assert "RNA evidence" in result.protein_consequence_explanation
     assert "DNA notation alone" in result.protein_consequence_explanation
 
@@ -120,9 +121,46 @@ def test_abbreviated_frameshift_must_match_reference_amino_acid_and_position(wro
         normalize_variant_input("BRCA1", "c.3668_3671dup", p_notation=wrong_p)
 
 
+@pytest.mark.parametrize(
+    "legacy_p",
+    ["p.Gln1395Gln", "p.(Gln1395Gln)", "P.gln1395gln"],
+)
+def test_legacy_synonymous_protein_notation_is_accepted_but_output_is_canonical(
+    legacy_p,
+):
+    result = normalize_variant_input("BRCA1", "c.4185G>A", p_notation=legacy_p)
+    assert result.p_notation == "p.(Gln1395=)"
+
+
+def test_legacy_synonymous_normalization_is_generic():
+    assert normalize_protein_notation("p.Val1653Val") == "p.(Val1653=)"
+    assert protein_notations_compatible("p.Val1653Val", "p.(Val1653=)")
+
+
+def test_different_amino_acids_are_not_normalized_as_synonymous():
+    assert normalize_protein_notation("p.Val1653Ala") == "p.(Val1653Ala)"
+    assert not protein_notations_compatible("p.Val1653Ala", "p.(Val1653=)")
+
+
+def test_abbreviated_frameshift_accepts_unknown_new_stop_in_canonical_result():
+    assert protein_notations_compatible(
+        "p.(Arg1443fs)", "p.(Arg1443GlyfsTer?)"
+    )
+
+
 def test_wrong_transcript_is_rejected():
     with pytest.raises(ValueError, match="does not match BRCA1"):
         normalize_variant_input("BRCA1", "NM_000059.4:c.303T>G")
+
+
+def test_transcript_without_version_is_rejected_explicitly():
+    with pytest.raises(ValueError, match="must include an explicit version"):
+        normalize_variant_input("BRCA1", "NM_007294:c.303T>G")
+
+
+def test_older_transcript_version_is_not_silently_upgraded():
+    with pytest.raises(ValueError, match="expected NM_007294.4"):
+        normalize_variant_input("BRCA1", "NM_007294.3:c.303T>G")
 
 
 def test_unmapped_genomic_input_fails_closed():

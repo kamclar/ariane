@@ -60,12 +60,23 @@ function ariane() {
         },
 
         resetManualItems() {
-            this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE"].map(code => ({
+            this.manualItems = ["PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE", "PS1_PROTEIN"].map(code => ({
                 code,
                 enabled: false,
                 evidence: code === "PP4" ? {
                     clinical_lr_scale: "lr",
                     source_review_status: "appendix_b",
+                } : code === "PS1_PROTEIN" ? {
+                    splice_source_check_completed: false,
+                    splice_sources_checked: [
+                        "ENIGMA Specifications Table 9 v1.2",
+                        "ENIGMA Supplementary Table 2 v1.2",
+                    ],
+                    vua_confirmed_splice_status: "not_assessed",
+                    reference_confirmed_splice_status: "not_assessed",
+                    reference_classification_used_ps1: "unknown",
+                    reference_ps1_dependency_reference: "",
+                    direct_reciprocal_dependency_excluded: false,
                 } : {},
                 override_strength: "",
                 notes: "",
@@ -105,6 +116,9 @@ function ariane() {
             if (result.splice_ps1_review && result.splice_ps1_review.recommended) {
                 labels.push(`PS1_SPLICE ${result.splice_ps1_review.priority || ""}`.trim());
             }
+            if (result.protein_ps1_review && result.protein_ps1_review.recommended) {
+                labels.push(`PS1_PROTEIN ${result.protein_ps1_review.priority || ""}`.trim());
+            }
             if (result.initiation_review && result.initiation_review.recommended) {
                 labels.push(`PVS1_INIT ${result.initiation_review.priority || ""}`.trim());
             }
@@ -112,13 +126,46 @@ function ariane() {
         },
 
         prefillManualReviewFromResult() {
-            if (!this.result?.initiation_review?.recommended) return;
-            const item = this.manualItems.find(value => value.code === "PVS1_INIT");
-            if (!item || Object.keys(item.evidence || {}).length > 0) return;
+            if (this.result?.initiation_review?.recommended) {
+                const item = this.manualItems.find(value => value.code === "PVS1_INIT");
+                if (item && !item.evidence?.reference_variant) {
+                    item.evidence.met1_loss_confirmed = true;
+                    item.evidence.initiation_flowchart_rationale =
+                        "Met1/start-loss variant flagged by ARIANE. Complete the ENIGMA initiation-codon flowchart review: alternative start assessment, upstream P/LP evidence, expected N-terminal impact, and curated PVS1_INIT strength.";
+                }
+            }
 
-            item.evidence.met1_loss_confirmed = true;
-            item.evidence.initiation_flowchart_rationale =
-                "Met1/start-loss variant flagged by ARIANE. Complete the ENIGMA initiation-codon flowchart review: alternative start assessment, upstream P/LP evidence, expected N-terminal impact, and curated PVS1_INIT strength.";
+            const review = this.result?.protein_ps1_review;
+            const candidate = review?.candidates?.[0];
+            if (review?.recommended && candidate) {
+                const item = this.manualItems.find(value => value.code === "PS1_PROTEIN");
+                if (item && Object.keys(item.evidence || {}).length === 0) {
+                    item.evidence = {
+                        reference_variant: `${candidate.gene} ${candidate.c_notation}`,
+                        reference_p_notation: candidate.p_notation || "",
+                        reference_classification: candidate.classification || "",
+                        classification_source: candidate.classification_source || "",
+                        classification_verification: "",
+                        same_missense_confirmed: true,
+                        different_nucleotide_change_confirmed: true,
+                        vua_spliceai_score: this.result?.spliceai_audit?.score ?? "",
+                        reference_spliceai_score: "",
+                        splice_source_check_completed: false,
+                        splice_sources_checked: review.splice_sources_checked || [],
+                        vua_confirmed_splice_status: review.vua_splice_evidence_status || "not_assessed",
+                        reference_confirmed_splice_status: "not_assessed",
+                        reference_classification_used_ps1: "unknown",
+                        reference_ps1_dependency_reference: "",
+                        direct_reciprocal_dependency_excluded: false,
+                        ps1_protein_rationale: "",
+                    };
+                    item.references = [
+                        candidate.source_dataset,
+                        candidate.classification_source,
+                        review.source_url,
+                    ].filter(Boolean).join("\n");
+                }
+            }
         },
 
         applySplicePs1Candidate(item) {
@@ -222,6 +269,33 @@ function ariane() {
                     && ["similar", "stronger"].includes(evidence.prediction_strength_comparison)
                     && Boolean((evidence.ps1_splice_rationale || "").trim());
                 return hasRequired ? (evidence.curated_strength || "") : "";
+            }
+            if (item.code === "PS1_PROTEIN") {
+                const sources = Array.isArray(evidence.splice_sources_checked)
+                    ? evidence.splice_sources_checked.filter(value => String(value || "").trim())
+                    : [];
+                const vuaScore = this.numberOrNull(evidence.vua_spliceai_score);
+                const referenceScore = this.numberOrNull(evidence.reference_spliceai_score);
+                const dependencyComplete = evidence.reference_classification_used_ps1 !== "yes"
+                    || (Boolean((evidence.reference_ps1_dependency_reference || "").trim())
+                        && evidence.direct_reciprocal_dependency_excluded === true);
+                const complete = Boolean((evidence.reference_variant || "").trim())
+                    && Boolean((evidence.reference_p_notation || "").trim())
+                    && ["Pathogenic", "Likely Pathogenic"].includes(evidence.reference_classification)
+                    && ["external_vcep_assertion", "locally_recurated_under_enigma_vcep"].includes(evidence.classification_verification)
+                    && Boolean((evidence.classification_source || "").trim())
+                    && evidence.same_missense_confirmed === true
+                    && evidence.different_nucleotide_change_confirmed === true
+                    && evidence.splice_source_check_completed === true
+                    && sources.length > 0
+                    && ["none_identified", "normal"].includes(evidence.vua_confirmed_splice_status)
+                    && ["none_identified", "normal"].includes(evidence.reference_confirmed_splice_status)
+                    && vuaScore !== null && vuaScore <= 0.1
+                    && referenceScore !== null && referenceScore <= 0.1
+                    && dependencyComplete
+                    && Boolean((evidence.ps1_protein_rationale || "").trim());
+                if (!complete) return "";
+                return evidence.reference_classification === "Pathogenic" ? "Strong" : "Moderate";
             }
             if (item.code === "PS4") {
                 const p = this.numberOrNull(evidence.p_value);
@@ -641,6 +715,7 @@ function ariane() {
                 "Classification_note", "VUS_category", "VUS_what_to_check",
                 "RNA_review", "RNA_branches",
                 "Splice_PS1_review", "Splice_PS1_branches",
+                "Protein_PS1_review", "Protein_PS1_branches",
                 "PVS1_INIT_review", "PVS1_INIT_branches",
                 "Warnings"
             ];
@@ -652,7 +727,7 @@ function ariane() {
                         row ? (row.p_notation || "") : "",
                         "ERROR", "", "", "", "", "",
                         "", "", "",
-                        "", "", "", "", "", "",
+                        "", "", "", "", "", "", "", "",
                         row ? (row.error || "") : ""
                     ];
                 }
@@ -673,6 +748,12 @@ function ariane() {
                     : "";
                 const splicePs1Branches = r.splice_ps1_review && r.splice_ps1_review.recommended
                     ? (r.splice_ps1_review.potential_branches || []).join("; ")
+                    : "";
+                const proteinPs1Review = r.protein_ps1_review && r.protein_ps1_review.recommended
+                    ? `yes/${r.protein_ps1_review.priority || ""}`
+                    : "";
+                const proteinPs1Branches = r.protein_ps1_review && r.protein_ps1_review.recommended
+                    ? (r.protein_ps1_review.potential_branches || []).join("; ")
                     : "";
                 const initiationReview = r.initiation_review && r.initiation_review.recommended
                     ? `yes/${r.initiation_review.priority || ""}`
@@ -697,6 +778,8 @@ function ariane() {
                     rnaBranches,
                     splicePs1Review,
                     splicePs1Branches,
+                    proteinPs1Review,
+                    proteinPs1Branches,
                     initiationReview,
                     initiationBranches,
                     warnings,

@@ -7,16 +7,23 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 EXTERNAL_LOOKUP_TIMEOUT = 12
+SERVICE_LOOKUP_TIMEOUTS = {
+    # ENIGMA Appendix J requires SpliceAI max distance 10,000. A correctly
+    # configured local model commonly needs more than the generic network
+    # timeout for an uncached variant.
+    "SpliceAI": 180,
+}
 
 
 async def lookup_or_unavailable(func, default, service, diagnostics, *args):
+    timeout = SERVICE_LOOKUP_TIMEOUTS.get(service, EXTERNAL_LOOKUP_TIMEOUT)
     try:
         return await asyncio.wait_for(
             asyncio.to_thread(func, *args),
-            timeout=EXTERNAL_LOOKUP_TIMEOUT,
+            timeout=timeout,
         )
     except asyncio.TimeoutError:
-        message = f"{service} lookup timed out after {EXTERNAL_LOOKUP_TIMEOUT} seconds"
+        message = f"{service} lookup timed out after {timeout} seconds"
         LOGGER.warning(message, extra={"lookup_service": service})
         diagnostics.append(message)
         return default

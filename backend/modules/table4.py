@@ -140,15 +140,15 @@ def parse_pvs1_code_strength(pvs1_code: str) -> tuple:
 def table4_lookup_pvs1_ptc(
     gene: str,
     cds_pos: int,
-    first_altered_aa: Optional[int] = None
+    first_altered_aa: Optional[int] = None,
+    termination_aa: Optional[int] = None,
 ) -> Dict:
     """
     Lookup PVS1/PM5 codes for PTC (nonsense/frameshift) variants using Table 4.
 
-    CRITICAL FIX v1.6.0:
-    For last exon with critical boundary:
-    - aa <= boundary -> PVS1 (truncation removes critical region)
-    - aa > boundary -> PVS1_N/A (truncation after critical region)
+    PVS1 and PM5 (PTC) are taken from the same Table 4 row.  For frameshifts,
+    Appendix D assigns the PM5 weight by the exon containing the nucleotide
+    change, even when the predicted termination codon lies in a later exon.
     """
     result = {
         "pvs1_code": None,
@@ -159,6 +159,7 @@ def table4_lookup_pvs1_ptc(
         "pm5_strength": None,
         "pm5_points": 0,
         "exon": None,
+        "pm5_exon": None,
         "reason": ""
     }
 
@@ -178,10 +179,10 @@ def table4_lookup_pvs1_ptc(
     rule = TABLE4_DATA["ptc_rules"][gene][exon]
     pvs1_code = rule["pvs1_code"]
     pm5_code = rule.get("pm5_code")
+    result["pm5_exon"] = exon
 
-    # Check critical boundary for last exon
-    # BRCA1 E23(24): PTC <= p.1854 -> PVS1, PTC > p.1854 -> PVS1_N/A
-    # BRCA2 E27: PTC <= p.3309 -> PVS1, PTC > p.3309 -> PVS1_N/A
+    # Check the first altered residue against the last-exon Table 4 boundary.
+    # PVS1 and PM5 must remain paired within the selected branch.
     if gene in TABLE4_DATA.get("critical_boundaries", {}):
         boundary_info = TABLE4_DATA["critical_boundaries"][gene]
         if exon == boundary_info["exon"]:
@@ -197,21 +198,26 @@ def table4_lookup_pvs1_ptc(
             boundary_aa = boundary_info["boundary_aa"]
 
             if first_altered_aa <= boundary_aa:
-                # Truncation AT OR BEFORE boundary = removes critical region = PVS1
-                # PM5 code stays as specified in Table 4 for this exon (PM5_N/A for last exons
-                # with critical boundary - E23(24) BRCA1 and E27 BRCA2)
-                pvs1_code = "PVS1"
+                # PVS1 follows the first altered residue because this marks the
+                # beginning of the disrupted C-terminal protein sequence.
+                branch = boundary_info.get("at_or_before") or {}
+                pvs1_code = branch.get("pvs1_code")
+                pm5_code = branch.get("pm5_code")
                 result["reason"] = (
-                    f"PTC at p.{first_altered_aa} <= p.{boundary_aa} (at/before critical boundary) "
-                    f"in {exon} -> PVS1 (truncation removes critical C-terminal region)"
+                    f"First altered residue p.{first_altered_aa} <= p.{boundary_aa} "
+                    f"(at/before critical boundary) "
+                    f"in {exon} -> {pvs1_code}, {pm5_code} "
+                    f"(altered sequence includes the critical C-terminal region)"
                 )
             else:
-                # Truncation AFTER boundary = critical region preserved = PVS1_N/A
-                pvs1_code = "PVS1_N/A"
-                pm5_code = "PM5_N/A"
+                branch = boundary_info.get("after") or {}
+                pvs1_code = branch.get("pvs1_code")
+                pm5_code = branch.get("pm5_code")
                 result["reason"] = (
-                    f"PTC at p.{first_altered_aa} > p.{boundary_aa} (after critical boundary) "
-                    f"in {exon} -> PVS1_N/A (critical C-terminal region preserved)"
+                    f"First altered residue p.{first_altered_aa} > p.{boundary_aa} "
+                    f"(after critical boundary) "
+                    f"in {exon} -> {pvs1_code}, {pm5_code} "
+                    f"(critical C-terminal region preserved)"
                 )
         else:
             result["reason"] = f"Table 4 lookup: {gene} {exon} PTC -> {pvs1_code}"
@@ -224,6 +230,13 @@ def table4_lookup_pvs1_ptc(
     result["pvs1_strength"] = strength
     result["pvs1_points"] = points
     result["requires_rna"] = requires_rna
+
+    if termination_aa is not None and termination_aa != first_altered_aa:
+        result["reason"] += (
+            f"; predicted termination p.{termination_aa} recorded for the protein "
+            f"consequence, but PM5 follows the selected Table 4 row for the "
+            f"nucleotide-change exon {exon}"
+        )
 
     # Parse PM5 code
     # PM5_Strong (PTC), PM5_Supporting (PTC), PM5 (PTC), PM5_N/A
@@ -408,5 +421,3 @@ if __name__ == "__main__":
     for var in ["c.8953+2T>C", "c.8953+2T>A", "c.8953+2T>G"]:
         r = table4_lookup_splice("BRCA2", var)
         print(f"  BRCA2 {var}: {r['pvs1_code'] if r['found'] else 'NOT FOUND'}")
-
-

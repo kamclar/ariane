@@ -60,6 +60,8 @@ htmlcov/
 
 # Optional: keep requirements.txt and scripts
 !requirements.txt
+!requirements-dev.txt
+!requirements-data.txt
 !scripts/server-ops/
 
 # Allow README and docs
@@ -69,4 +71,14 @@ htmlcov/
 /docs/*
 !/docs/implementation_and_data_sources.md
 !/docs/evidence_interaction_matrix.md
+!/docs/enigma_source_data_audit.md
+!/docs/manual_evidence_review.md
+!/docs/ps1_protein_semiautomation.md
 !/docs/tutorial_variant_comparison.tsv
+!/docs/navrh_mapy_normalizovanych_brca_indelu.txt
+!/docs/coordinate_and_indel_data_flow.md
+!/docs/tutorial_transcript_criteria_audit.md
+!/docs/navrh_doplnovani_proteinove_notace.md
+!/docs/enigma/
+!/docs/enigma/**
+data/spliceai/build/

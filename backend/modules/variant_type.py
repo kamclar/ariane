@@ -28,12 +28,14 @@ def infer_variant_type(c_notation: str, p_notation: str) -> str:
 
     if "fs" in p or "fster" in p:
         return "frameshift"
-    if "ter" in p and "fs" not in p:
+    if re.match(r"p\.\(?ter\d+.+extter", p):
+        return "stop_lost"
+    if re.search(r"[a-z]{3}\d+ter(?:\)|$)", p) and "fs" not in p:
         return "nonsense"
     # Initiation codon: Met at position 1 only.
     # Must match Met1 followed by a letter (amino acid), not a digit.
     # Without this guard, Met1083, Met1121 etc. would be wrongly caught.
-    if re.match(r"p\.\(?met1[a-z]", p):
+    if re.match(r"p\.\(?met1(?:[a-z]|\?)", p):
         return "initiation_codon"
     if p and "=" in p:
         return "synonymous"

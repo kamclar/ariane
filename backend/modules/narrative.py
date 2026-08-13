@@ -129,9 +129,14 @@ def _structural_context(gene: str, variant_type: str, criteria: dict,
         desc = DOMAIN_DESCRIPTIONS.get(gene, {}).get(domain, f"{domain} domain")
         known = (residue_info or {}).get("known_pathogenic_at_position", [])
         if known:
-            names = ", ".join(r["aa"] for r in known[:3])
+            names = ", ".join(
+                " ".join(part for part in (r.get("c"), f"p.({r.get('aa')})" if r.get("aa") else None) if part)
+                for r in known[:3]
+            )
             return (f"The position falls within the {desc}. "
-                    f"Known pathogenic variant(s) exist at the same position: {names}.")
+                    f"The P/LP reference list contains variant(s) affecting the same "
+                    f"amino-acid position: {names}. These are reference variants, not "
+                    f"necessarily the submitted nucleotide variant.")
         return f"The position falls within the {desc}."
 
     pvs1 = criteria.get("PVS1", {})

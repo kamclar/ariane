@@ -21,6 +21,16 @@ from backend.modules.table4 import (
     parse_exon_from_duplication_notation,
 )
 
+
+def _termination_aa_position(p_notation: str) -> Optional[int]:
+    """Return the predicted stop position for consequence provenance."""
+    text = (p_notation or "").replace("*", "Ter")
+    frameshift = re.search(r"[A-Z][a-z]{2}(\d+)[A-Z][a-z]{2}fsTer(\d+)", text)
+    if frameshift:
+        return int(frameshift.group(1)) + int(frameshift.group(2)) - 1
+    nonsense = re.search(r"[A-Z][a-z]{2}(\d+)Ter", text)
+    return int(nonsense.group(1)) if nonsense else None
+
 def evaluate_pvs1(
     gene: str,
     variant_type: str,
@@ -45,7 +55,8 @@ def evaluate_pvs1(
         "pm5_code": None,
         "pm5_strength": None,
         "pm5_points": 0,
-        "exon": None
+        "exon": None,
+        "pm5_exon": None,
     }
 
     lof_types = [
@@ -59,6 +70,7 @@ def evaluate_pvs1(
     # Get CDS position and AA position
     cds_pos = get_cds_position_from_c_notation(c_notation)
     first_altered_aa = get_amino_acid_position(p_notation)
+    termination_aa = _termination_aa_position(p_notation)
 
     if variant_type.lower() == "initiation_codon":
         result["reason"] = (
@@ -141,7 +153,9 @@ def evaluate_pvs1(
             result["reason"] = f"Could not parse CDS position from {c_notation}"
             return result
 
-        table4_result = table4_lookup_pvs1_ptc(gene, cds_pos, first_altered_aa)
+        table4_result = table4_lookup_pvs1_ptc(
+            gene, cds_pos, first_altered_aa, termination_aa
+        )
 
         result["exon"] = table4_result["exon"]
         result["reason"] = table4_result["reason"]
@@ -163,6 +177,7 @@ def evaluate_pvs1(
             result["pm5_code"] = table4_result["pm5_code"]
             result["pm5_strength"] = table4_result["pm5_strength"]
             result["pm5_points"] = table4_result["pm5_points"]
+            result["pm5_exon"] = table4_result.get("pm5_exon")
 
         return result
 
@@ -243,7 +258,4 @@ if __name__ == "__main__":
         print(f"    {r['reason'][:80]}...")
         if r.get('pm5_code'):
             print(f"    PM5: {r['pm5_code']} ({r['pm5_points']} pts)")
-
-
-
 

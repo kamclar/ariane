@@ -184,6 +184,59 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         evidence["prediction_strength_comparison"] = "weaker"
         self.assertIsNone(suggest_strength("PS1_SPLICE", evidence))
 
+    def test_ps1_protein_strength_is_derived_from_verified_reference_class(self):
+        evidence = {
+            "reference_variant": "BRCA1 c.122A>G",
+            "reference_p_notation": "p.(His41Arg)",
+            "reference_classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel assertion",
+            "same_missense_confirmed": True,
+            "different_nucleotide_change_confirmed": True,
+            "vua_spliceai_score": 0.01,
+            "reference_spliceai_score": 0.02,
+            "splice_source_check_completed": True,
+            "splice_sources_checked": [
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+            ],
+            "vua_confirmed_splice_status": "none_identified",
+            "reference_confirmed_splice_status": "normal",
+            "reference_classification_used_ps1": "unknown",
+            "ps1_protein_rationale": "VCEP classification and both splice checks reviewed.",
+        }
+        self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Strong")
+        evidence["reference_classification"] = "Likely Pathogenic"
+        self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Moderate")
+        evidence["classification_verification"] = "historical_classification_only"
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+
+    def test_ps1_protein_known_dependency_requires_reciprocal_check(self):
+        evidence = {
+            "reference_variant": "BRCA1 c.122A>G",
+            "reference_p_notation": "p.(His41Arg)",
+            "reference_classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel assertion",
+            "same_missense_confirmed": True,
+            "different_nucleotide_change_confirmed": True,
+            "vua_spliceai_score": 0.01,
+            "reference_spliceai_score": 0.02,
+            "splice_source_check_completed": True,
+            "splice_sources_checked": [
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+            ],
+            "vua_confirmed_splice_status": "none_identified",
+            "reference_confirmed_splice_status": "none_identified",
+            "reference_classification_used_ps1": "yes",
+            "ps1_protein_rationale": "Reference classification used PS1.",
+        }
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+        evidence["reference_ps1_dependency_reference"] = "BRCA1 c.130T>A"
+        evidence["direct_reciprocal_dependency_excluded"] = True
+        self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Strong")
+
 
 class ManualEvidenceClassificationTests(unittest.TestCase):
     def test_pp4_unreviewed_source_is_audited_without_points(self):
@@ -548,6 +601,68 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
         self.assertTrue(criterion["applies"])
         self.assertEqual(criterion["selected_strength"], "Strong")
         self.assertEqual(criterion["points"], 4)
+
+    def test_ps1_protein_manual_review_adds_ps1_once(self):
+        evidence = {
+            "reference_variant": "BRCA1 c.122A>G",
+            "reference_p_notation": "p.(His41Arg)",
+            "reference_classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel assertion",
+            "same_missense_confirmed": True,
+            "different_nucleotide_change_confirmed": True,
+            "vua_spliceai_score": 0.01,
+            "reference_spliceai_score": 0.02,
+            "splice_source_check_completed": True,
+            "splice_sources_checked": [
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+            ],
+            "vua_confirmed_splice_status": "none_identified",
+            "reference_confirmed_splice_status": "none_identified",
+            "reference_classification_used_ps1": "unknown",
+            "ps1_protein_rationale": "Complete ENIGMA protein PS1 review.",
+        }
+        result = evaluate_manual_evidence(
+            [],
+            [{
+                "code": "PS1_PROTEIN",
+                "enabled": True,
+                "evidence": evidence,
+                "notes": "Reviewed protein PS1 candidate",
+                "references": ["ClinGen assertion"],
+            }],
+        )
+        criterion = result["manual_criteria"][0]
+        self.assertTrue(criterion["applies"])
+        self.assertEqual(criterion["selected_strength"], "Strong")
+        self.assertEqual(result["total_points"], 4)
+
+        with self.assertRaisesRegex(ValueError, "cannot be counted twice"):
+            evaluate_manual_evidence(
+                [{"name": "PS1", "applies": True, "strength": "Strong", "points": 4}],
+                [{"code": "PS1_PROTEIN", "enabled": True, "evidence": evidence}],
+            )
+
+    def test_ps1_protein_manual_review_requires_every_defined_splice_source(self):
+        evidence = {
+            "reference_variant": "BRCA1 c.122A>G",
+            "reference_p_notation": "p.(His41Arg)",
+            "reference_classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel assertion",
+            "same_missense_confirmed": True,
+            "different_nucleotide_change_confirmed": True,
+            "vua_spliceai_score": 0.01,
+            "reference_spliceai_score": 0.02,
+            "splice_source_check_completed": True,
+            "splice_sources_checked": ["ENIGMA Specifications Table 9 v1.2"],
+            "vua_confirmed_splice_status": "none_identified",
+            "reference_confirmed_splice_status": "none_identified",
+            "reference_classification_used_ps1": "unknown",
+            "ps1_protein_rationale": "Incomplete source review.",
+        }
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
 
     def test_rna_override_without_complete_record_is_rejected(self):
         with self.assertRaises(ValueError):

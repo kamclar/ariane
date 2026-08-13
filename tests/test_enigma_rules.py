@@ -1,10 +1,13 @@
 import unittest
+from copy import deepcopy
 from unittest.mock import patch
 from pathlib import Path
 
 from backend.modules.frequency import (
     GNOMAD_LOCAL_DATASET_CONFIG,
+    _classification_policy_for_gene,
     _aggregate_coverage_from_dataset_results,
+    _lookup_coverage_by_position,
     evaluate_frequency_criteria,
     get_gnomad_frequencies,
 )
@@ -13,7 +16,14 @@ from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.ps1 import evaluate_ps1
+from backend.modules.ps1 import (
+    compute_approval_basis_checksum,
+    evaluate_ps1,
+    select_vua_spliceai_for_ps1,
+    validate_ps1_reference_registry,
+)
+import backend.modules.ps1 as ps1_module
+from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
 from backend.modules.utils import is_in_functional_domain
 from backend.modules.variant_type import infer_variant_type
 from backend.modules.hgvs import split_combined_hgvs
@@ -23,6 +33,11 @@ try:
     from backend.models import VariantRequest
 except ImportError:
     VariantRequest = None
+try:
+    import hgvs  # noqa: F401
+    HGVS_RUNTIME_AVAILABLE = True
+except ImportError:
+    HGVS_RUNTIME_AVAILABLE = False
 
 
 def gnomad_data(
@@ -34,19 +49,29 @@ def gnomad_data(
     v2_depth=30.0,
     v3_depth=30.0,
     pm2_absence_established=False,
+    frequency_metric="faf95",
+    gene="BRCA1",
+    non_founder_allele_count=2,
 ):
     def dataset(status, depth, dataset_max_af=None):
         return {
             "status": status,
             "max_af": dataset_max_af,
             "coverage": {"mean_depth": depth},
+            "quality_filter_passed": True if status == "found" else None,
+            "non_founder_allele_count": (
+                non_founder_allele_count if status == "found" else 0
+            ),
         }
 
+    policy = _classification_policy_for_gene(gene)
     return {
+        "policy_id": policy["policy_id"],
+        "frequency_policy": policy["frequency_criteria"],
         "status": "found" if found else "absent_with_coverage",
         "found": found,
         "max_af": max_af,
-        "frequency_metric": "faf95",
+        "frequency_metric": frequency_metric,
         "pm2_absence_established": pm2_absence_established,
         "datasets": {
             "v2_1_non_cancer": dataset(v2_status, v2_depth, max_af if v2_status == "found" else None),
@@ -56,7 +81,10 @@ def gnomad_data(
 
 
 class VariantTypeTests(unittest.TestCase):
-    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    @unittest.skipIf(
+        VariantRequest is None or not HGVS_RUNTIME_AVAILABLE,
+        "pydantic/hgvs runtime is not installed",
+    )
     def test_protein_notation_is_derived_from_reference_snapshot(self):
         request = VariantRequest(gene="BRCA1", c_notation="c.4185G>A")
         self.assertEqual(request.p_notation, "p.(Gln1395=)")
@@ -66,7 +94,10 @@ class VariantTypeTests(unittest.TestCase):
         )
         self.assertEqual(request.p_notation, "p.(Gln1395=)")
 
-    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    @unittest.skipIf(
+        VariantRequest is None or not HGVS_RUNTIME_AVAILABLE,
+        "pydantic/hgvs runtime is not installed",
+    )
     def test_tutorial_transcript_prefix_is_validated_and_removed(self):
         request = VariantRequest(
             gene="BRCA1",
@@ -82,7 +113,10 @@ class VariantTypeTests(unittest.TestCase):
                 p_notation="p.Arg170Gln",
             )
 
-    @unittest.skipIf(VariantRequest is None, "pydantic runtime is not installed")
+    @unittest.skipIf(
+        VariantRequest is None or not HGVS_RUNTIME_AVAILABLE,
+        "pydantic/hgvs runtime is not installed",
+    )
     def test_nonsense_protein_notation_without_parentheses_is_normalized(self):
         request = VariantRequest(
             gene="BRCA1",
@@ -176,6 +210,33 @@ class CoordinateResolverTests(unittest.TestCase):
 
 
 class FrequencyTests(unittest.TestCase):
+    def test_unknown_gene_has_no_inherited_brca_frequency_policy(self):
+        data = get_gnomad_frequencies("TP53")
+        self.assertEqual(data["status"], "policy_unavailable")
+        self.assertIsNone(data["policy_id"])
+
+        result = evaluate_frequency_criteria(
+            {"status": "found", "max_af": 0.01, "policy_id": None},
+            "missense",
+            gene="TP53",
+        )
+        self.assertFalse(result["_gnomad_info"]["applies"])
+        self.assertIn("gene-specific", result["_gnomad_info"]["reason"])
+
+    def test_frequency_thresholds_are_read_from_gene_policy(self):
+        data = gnomad_data(max_af=0.002, found=True, v2_status="found")
+        policy = deepcopy(_classification_policy_for_gene("BRCA1"))
+        policy["frequency_criteria"]["ba1"]["threshold"] = 0.003
+        with patch(
+            "backend.modules.frequency._classification_policy_for_gene",
+            return_value=policy,
+        ):
+            result = evaluate_frequency_criteria(
+                data, "missense", gene="BRCA1", c_notation="c.509G>A"
+            )
+        self.assertNotIn("BA1", result)
+        self.assertIn("BS1_Strong", result)
+
     def test_tutorial_snvs_establish_pm2_in_both_gnomad_releases(self):
         from backend.lookups.coordinates import resolve_variant
 
@@ -183,43 +244,350 @@ class FrequencyTests(unittest.TestCase):
             with self.subTest(c_notation=c_notation):
                 coords = resolve_variant("BRCA1", c_notation)
                 self.assertEqual(coords.status, "ok")
-                result = get_gnomad_frequencies(coords.grch37, coords.grch38)
+                result = get_gnomad_frequencies(
+                    "BRCA1", coords.grch37, coords.grch38
+                )
                 self.assertEqual(result["datasets"]["v2_1_non_cancer"]["status"], "absent")
                 self.assertEqual(result["datasets"]["v3_1_non_cancer"]["status"], "absent")
                 self.assertTrue(result["pm2_coverage_ok"])
                 self.assertTrue(result["pm2_absence_established"])
+                for coverage in result["coverage"]["datasets"].values():
+                    self.assertEqual(coverage["coverage_scope"], "variant_reference_span")
+                    self.assertEqual(coverage["positions_expected"], 1)
+                    self.assertEqual(coverage["positions_available"], 1)
 
     def test_pm2_configuration_requires_both_gnomad_versions(self):
-        self.assertTrue(GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"]["required_for_pm2"])
-        self.assertTrue(GNOMAD_LOCAL_DATASET_CONFIG["v3_1_non_cancer"]["required_for_pm2"])
+        policy = _classification_policy_for_gene("BRCA1")
+        self.assertEqual(
+            policy["frequency_criteria"]["pm2"]
+            ["required_absence_dataset_runtime_keys"],
+            ["v2_1_non_cancer", "v3_1_non_cancer"],
+        )
 
         coverage = _aggregate_coverage_from_dataset_results(
             {
                 "v2_1_non_cancer": {"coverage": {"mean_depth": 30.0}},
                 "v3_1_non_cancer": {"coverage": {"mean_depth": 24.0}},
-            }
+            },
+            ["v2_1_non_cancer", "v3_1_non_cancer"],
+            25.0,
         )
         self.assertFalse(coverage["passes_pm2"])
 
+    def test_coverage_is_averaged_across_complete_reference_span(self):
+        dataset = "gnomad_v2_1_1_exomes_grch37"
+        coverage = {
+            f"{dataset}|GRCh37|17|100": {"mean_depth": 24.0, "source": "test"},
+            f"{dataset}|GRCh37|17|101": {"mean_depth": 28.0, "source": "test"},
+        }
+        with patch("backend.modules.frequency.GNOMAD_COVERAGE_BY_POSITION", coverage):
+            result = _lookup_coverage_by_position(
+                {"chrom": "17", "pos": 100, "ref": "AC", "alt": "GT"},
+                dataset,
+                "GRCh37",
+                25.0,
+            )
+        self.assertEqual(result["coverage_scope"], "variant_reference_span")
+        self.assertEqual(result["positions_expected"], 2)
+        self.assertEqual(result["positions_available"], 2)
+        self.assertEqual(result["mean_depth"], 26.0)
+        self.assertTrue(result["passes"])
+
+    def test_incomplete_reference_span_coverage_fails_closed(self):
+        dataset = "gnomad_v2_1_1_exomes_grch37"
+        coverage = {
+            f"{dataset}|GRCh37|17|100": {"mean_depth": 100.0, "source": "test"},
+        }
+        with patch("backend.modules.frequency.GNOMAD_COVERAGE_BY_POSITION", coverage):
+            result = _lookup_coverage_by_position(
+                {"chrom": "17", "pos": 100, "ref": "AC", "alt": "GT"},
+                dataset,
+                "GRCh37",
+                25.0,
+            )
+        self.assertIsNone(result["mean_depth"])
+        self.assertFalse(result["passes"])
+        self.assertEqual(result["missing_positions"], [101])
+
     def test_pm2_requires_absence_in_both_gnomad_versions(self):
         data = gnomad_data(pm2_absence_established=False)
-        self.assertNotIn("PM2_Supporting", evaluate_frequency_criteria(data, "missense"))
+        self.assertNotIn(
+            "PM2_Supporting",
+            evaluate_frequency_criteria(data, "missense", gene="BRCA1"),
+        )
 
         data["pm2_absence_established"] = True
-        self.assertIn("PM2_Supporting", evaluate_frequency_criteria(data, "missense"))
+        self.assertIn(
+            "PM2_Supporting",
+            evaluate_frequency_criteria(data, "missense", gene="BRCA1"),
+        )
 
     def test_pm2_is_not_used_for_indels(self):
         data = gnomad_data(pm2_absence_established=True)
-        self.assertFalse(evaluate_frequency_criteria(data, "inframe_deletion")["PM2"]["applies"])
+        self.assertFalse(
+            evaluate_frequency_criteria(
+                data, "inframe_deletion", gene="BRCA1"
+            )["PM2"]["applies"]
+        )
+
+    def test_pm2_is_not_used_for_ptc_producing_indel(self):
+        data = gnomad_data(pm2_absence_established=True)
+        result = evaluate_frequency_criteria(
+            data,
+            "nonsense",
+            gene="BRCA1",
+            c_notation="c.5533_5534insG",
+        )
+        self.assertFalse(result["PM2"]["applies"])
+        self.assertNotIn("PM2_Supporting", result)
+        self.assertIn("c. HGVS c.5533_5534insG describes an indel", result["PM2"]["reason"])
 
     def test_ba1_requires_depth_20(self):
         data = gnomad_data(max_af=0.002, found=True, v2_status="found", v2_depth=19.0)
-        result = evaluate_frequency_criteria(data, "missense")
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.509G>A"
+        )
         self.assertNotIn("BA1", result)
         self.assertIn("_gnomad_info", result)
 
         data["datasets"]["v2_1_non_cancer"]["coverage"]["mean_depth"] = 20.0
-        self.assertIn("BA1", evaluate_frequency_criteria(data, "missense"))
+        self.assertIn(
+            "BA1",
+            evaluate_frequency_criteria(
+                data, "missense", gene="BRCA1", c_notation="c.509G>A"
+            ),
+        )
+
+    def test_ba1_bs1_are_suppressed_for_pathogenic_founder_variant(self):
+        data = gnomad_data(max_af=0.002, found=True, v2_status="found")
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.181T>G"
+        )
+        self.assertNotIn("BA1", result)
+        self.assertNotIn("BS1_Strong", result)
+        self.assertIn("pathogenic founder", result["_gnomad_info"]["reason"])
+
+    def test_ba1_reason_documents_excluded_founder_populations(self):
+        data = gnomad_data(max_af=0.002, found=True, v2_status="found")
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.509G>A"
+        )
+        self.assertIn("BA1", result)
+        self.assertIn("founder and other non-scoring", result["BA1"]["reason"])
+        self.assertIn("ENIGMA BRCA1/2 VCEP v1.2 Appendix G", result["BA1"]["reason"])
+
+    def test_pm2_explains_founder_only_observation_policy(self):
+        data = gnomad_data(max_af=0.0, pm2_absence_established=True)
+        data["founder_context_only_observed"] = True
+        result = evaluate_frequency_criteria(data, "missense", gene="BRCA1")
+        self.assertIn("PM2_Supporting", result)
+        self.assertIn(
+            "observations confined to excluded founder/non-scoring populations",
+            result["PM2_Supporting"]["reason"],
+        )
+
+    def test_population_frequency_founder_regression_matrix(self):
+        single_outbred = gnomad_data(
+            max_af=0.00001,
+            found=True,
+            v2_status="found",
+            pm2_absence_established=False,
+            non_founder_allele_count=1,
+        )
+        single_result = evaluate_frequency_criteria(
+            single_outbred,
+            "missense",
+            gene="BRCA1",
+            c_notation="c.509G>A",
+        )
+        self.assertNotIn("PM2_Supporting", single_result)
+        self.assertFalse(any(code.startswith(("BA1", "BS1")) for code in single_result))
+
+        founder_only = gnomad_data(
+            max_af=0.0,
+            found=False,
+            pm2_absence_established=True,
+        )
+        founder_only["founder_context_only_observed"] = True
+        founder_only_result = evaluate_frequency_criteria(
+            founder_only,
+            "missense",
+            gene="BRCA1",
+            c_notation="c.509G>A",
+        )
+        self.assertIn("PM2_Supporting", founder_only_result)
+        self.assertIn(
+            "excluded founder/non-scoring populations",
+            founder_only_result["PM2_Supporting"]["reason"],
+        )
+
+        pathogenic_founder = gnomad_data(
+            max_af=0.002,
+            found=True,
+            v2_status="found",
+        )
+        pathogenic_founder_result = evaluate_frequency_criteria(
+            pathogenic_founder,
+            "missense",
+            gene="BRCA1",
+            c_notation="c.181T>G",
+        )
+        self.assertNotIn("BA1", pathogenic_founder_result)
+        self.assertFalse(
+            any(code.startswith("BS1") for code in pathogenic_founder_result)
+        )
+        self.assertIn(
+            "pathogenic founder",
+            pathogenic_founder_result["_gnomad_info"]["reason"],
+        )
+
+    def test_single_outbred_observation_cannot_create_bs1(self):
+        data = gnomad_data(
+            max_af=0.00006,
+            found=True,
+            v2_status="found",
+            non_founder_allele_count=1,
+        )
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.509G>A"
+        )
+        self.assertNotIn("BS1_Supporting", result)
+        self.assertIn("single observation", result["_gnomad_info"]["reason"])
+
+    def test_real_c5266dup_faf95_does_not_create_bs1(self):
+        from backend.lookups.coordinates import resolve_variant
+
+        coords = resolve_variant("BRCA1", "c.5266dup")
+        data = get_gnomad_frequencies("BRCA1", coords.grch37, coords.grch38)
+        self.assertGreater(data["max_af"], 0.00002)
+        result = evaluate_frequency_criteria(
+            data, "frameshift", gene="BRCA1", c_notation="c.5266dup"
+        )
+        self.assertNotIn("BS1_Supporting", result)
+        self.assertIn("Ashkenazi Jewish founder", result["_gnomad_info"]["reason"])
+
+    def test_ba1_bs1_founder_check_fails_closed_if_snapshot_is_unavailable(self):
+        data = gnomad_data(max_af=0.002, found=True, v2_status="found")
+        with patch(
+            "backend.lookups.founder_variants.FOUNDER_VARIANT_STATUS",
+            "invalid",
+        ):
+            result = evaluate_frequency_criteria(
+                data, "missense", gene="BRCA1", c_notation="c.509G>A"
+            )
+        self.assertNotIn("BA1", result)
+        self.assertIn("could not be checked", result["_gnomad_info"]["reason"])
+
+    def test_ba1_bs1_require_passing_gnomad_record_qc(self):
+        data = gnomad_data(max_af=0.002, found=True, v2_status="found")
+        data["datasets"]["v2_1_non_cancer"]["quality_filter_passed"] = False
+        result = evaluate_frequency_criteria(
+            data, "missense", gene="BRCA1", c_notation="c.509G>A"
+        )
+        self.assertNotIn("BA1", result)
+        self.assertIn("did not pass dataset QC", result["_gnomad_info"]["reason"])
+
+    def test_ba1_bs1_never_use_popmax_or_raw_af_fallback(self):
+        for metric in ("popmax_af", "raw_af", "faf"):
+            with self.subTest(metric=metric):
+                data = gnomad_data(
+                    max_af=0.002,
+                    found=True,
+                    v2_status="found",
+                    frequency_metric=metric,
+                )
+                result = evaluate_frequency_criteria(
+                    data, "missense", gene="BRCA1"
+                )
+                self.assertNotIn("BA1", result)
+                self.assertNotIn("BS1_Strong", result)
+                self.assertNotIn("BS1_Supporting", result)
+                self.assertIn("FAF95", result["_gnomad_info"]["reason"])
+                self.assertIn("cannot be used as a fallback", result["_gnomad_info"]["reason"])
+
+    def test_found_variant_without_faf95_is_reported(self):
+        data = gnomad_data(
+            max_af=None,
+            found=True,
+            v2_status="found",
+            frequency_metric=None,
+        )
+        result = evaluate_frequency_criteria(data, "frameshift", gene="BRCA1")
+        self.assertFalse(result["PM2"]["applies"])
+        self.assertIn("FAF95 is unavailable", result["_gnomad_info"]["reason"])
+
+    def test_popmax_does_not_create_bs1_for_brca2_frameshift(self):
+        from backend.lookups.coordinates import resolve_variant
+
+        coords = resolve_variant("BRCA2", "c.9891_9894dup")
+        data = get_gnomad_frequencies("BRCA2", coords.grch37, coords.grch38)
+        self.assertEqual(data["max_af"], 0.0)
+        self.assertEqual(data["frequency_metric"], "faf95")
+        self.assertGreater(
+            data["datasets"]["v3_1_non_cancer"]["genomes"]["popmax_af"],
+            0.00002,
+        )
+        criteria = evaluate_frequency_criteria(
+            data, "frameshift", gene="BRCA2"
+        )
+        self.assertNotIn("BS1_Supporting", criteria)
+
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="frameshift",
+            c_notation="c.9891_9894dup",
+            p_notation="p.(Gln3299IlefsTer29)",
+            gnomad_data=data,
+        )
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+
+
+class CriticalPtcBoundaryTests(unittest.TestCase):
+    def test_brca1_tyr1845ter_insertion_gets_pvs1_pm5_but_not_pm2(self):
+        c_notation = "c.5533_5534insG"
+        p_notation = "p.(Tyr1845Ter)"
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type=infer_variant_type(c_notation, p_notation),
+            p_notation=p_notation,
+            c_notation=c_notation,
+            gnomad_data=gnomad_data(pm2_absence_established=True),
+        )
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertNotIn("PM2_Supporting", result["criteria"])
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+
+    def test_brca1_gln1848ter_gets_pvs1_and_pm5_strong(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="nonsense",
+            p_notation="p.(Gln1848Ter)",
+            c_notation="c.5542C>T",
+        )
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+
+    def test_brca1_ptc_at_boundary_keeps_pm5_strong(self):
+        result = evaluate_pvs1(
+            "BRCA1", "nonsense", "p.(Leu1854Ter)", "c.5560C>T"
+        )
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["pm5_code"], "PM5_Strong (PTC)")
+        self.assertEqual(result["pm5_points"], 4)
+
+    def test_brca1_ptc_after_boundary_gets_neither_code(self):
+        result = evaluate_pvs1(
+            "BRCA1", "nonsense", "p.(Ile1855Ter)", "c.5563C>T"
+        )
+        self.assertFalse(result["applies"])
+        self.assertIsNone(result["pm5_code"])
+        self.assertEqual(result["pm5_points"], 0)
 
 
 class SpliceTests(unittest.TestCase):
@@ -286,13 +654,222 @@ class SpliceTests(unittest.TestCase):
     def test_ps1_requires_confirmed_low_spliceai(self):
         result = evaluate_ps1(
             gene="BRCA1",
-            c_notation="c.509G>A",
-            p_notation="p.(Arg170Gln)",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
             variant_type="missense",
             spliceai_score=None,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
         )
         self.assertFalse(result["applies"])
-        self.assertIn("SpliceAI score not available", result["reason"])
+        self.assertTrue(result["review_required"])
+        self.assertIn("SpliceAI is unavailable", result["reason"])
+
+    def test_eligible_st7_reference_automatically_scores_ps1(self):
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.01,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+        )
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["points"], 4)
+        self.assertEqual(result["application_status"], "auto_applied")
+        self.assertEqual(result["candidates"][0]["c_notation"], "c.122A>G")
+        self.assertEqual(result["candidates"][0]["reference_status"], "approved")
+
+    def test_table9_score_enables_ps1_when_general_cache_is_unavailable(self):
+        table9 = table9_lookup_ps3_bs3("BRCA1", "c.131G>C")
+        score, source = select_vua_spliceai_for_ps1(None, table9)
+        self.assertEqual(score, 0.0)
+        self.assertEqual(source, "ENIGMA Specifications Table 9 v1.2")
+        splice_evidence = evaluate_defined_splice_sources(
+            "BRCA1", "c.131G>C", table9
+        )
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.131G>C",
+            p_notation="p.(Cys44Ser)",
+            variant_type="missense",
+            spliceai_score=score,
+            vua_spliceai_source=source,
+            vua_splice_evidence_status=splice_evidence["status"],
+            vua_splice_sources_checked=splice_evidence["sources_checked"],
+        )
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["reference_variant"]["c_notation"], "c.130T>A")
+        self.assertIn("Table 9", result["reason"])
+
+    def test_st7_reference_with_splice_effect_is_excluded(self):
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.139G>T",
+            p_notation="p.(Cys47Tyr)",
+            variant_type="missense",
+            spliceai_score=0.01,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=[
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+            ],
+        )
+        self.assertFalse(result["applies"])
+        self.assertFalse(result["review_required"])
+        self.assertEqual(result["application_status"], "reference_ineligible")
+        self.assertEqual(result["candidates"][0]["c_notation"], "c.140G>A")
+        self.assertEqual(result["candidates"][0]["reference_status"], "excluded")
+        from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
+
+        display = evaluate_protein_ps1_review(result)
+        self.assertTrue(display["display"])
+        self.assertFalse(display["recommended"])
+        self.assertEqual(display["title"], "Protein PS1 not applicable")
+        self.assertIn("different reference variant", display["summary"])
+        self.assertIn("does not classify", display["reasons"][0])
+
+    def test_approved_vcep_reference_can_automatically_score_ps1(self):
+        approved = {
+            "reference_id": "TEST_REF",
+            "gene": "BRCA1",
+            "transcript": "NM_007294.4",
+            "c_notation": "c.122A>G",
+            "p_notation": "p.(His41Arg)",
+            "classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel test assertion",
+            "candidate_source": "test",
+        }
+        with patch.object(ps1_module, "_LOADED", True), patch.object(
+            ps1_module, "_ST7_LOOKUP", {}
+        ), patch.object(
+            ps1_module,
+            "_APPROVED_LOOKUP",
+            {"BRCA1": {"His41Arg": [approved]}},
+        ):
+            result = evaluate_ps1(
+                gene="BRCA1",
+                c_notation="c.123A>G",
+                p_notation="p.(His41Arg)",
+                variant_type="missense",
+                spliceai_score=0.1,
+                vua_splice_evidence_status="none_identified",
+                vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+            )
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["points"], 4)
+        self.assertEqual(result["application_status"], "auto_applied")
+
+    def test_confirmed_or_predicted_splice_effect_blocks_protein_ps1(self):
+        predicted = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.101,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+        )
+        confirmed = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.01,
+            vua_splice_evidence_status="abnormal",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+        )
+        self.assertFalse(predicted["applies"])
+        self.assertFalse(predicted["review_required"])
+        self.assertFalse(confirmed["applies"])
+        self.assertFalse(confirmed["review_required"])
+
+    def test_defined_splice_sources_detect_table9_splice_effect(self):
+        table9 = table9_lookup_ps3_bs3("BRCA1", "c.181T>G")
+        result = evaluate_defined_splice_sources("BRCA1", "c.181T>G", table9)
+        self.assertEqual(result["status"], "abnormal")
+        self.assertIn("ENIGMA Specifications Table 9 v1.2", result["sources_checked"])
+
+    def test_defined_splice_sources_accept_published_no_aberration(self):
+        table9 = table9_lookup_ps3_bs3("BRCA1", "c.110C>G")
+        self.assertEqual(
+            table9["predicted_or_observed_splicing"],
+            "N, no aberration",
+        )
+        self.assertIn("no aberration", table9["splice_result_published"].lower())
+        result = evaluate_defined_splice_sources("BRCA1", "c.110C>G", table9)
+        self.assertEqual(result["status"], "normal")
+
+    def test_ps1_registry_rejects_known_circular_dependency(self):
+        def record(reference_id, c_notation, dependency):
+            value = {
+                "reference_id": reference_id,
+                "gene": "BRCA1",
+                "transcript": "NM_007294.4",
+                "c_notation": c_notation,
+                "p_notation": "p.(His41Arg)",
+                "classification": "Pathogenic",
+                "classification_verification": "external_vcep_assertion",
+                "classification_source": "ClinGen ENIGMA test assertion",
+                "classification_assertion": {
+                    "organization": "ENIGMA BRCA1/2 VCEP",
+                    "assertion_id": reference_id,
+                    "ruleset_version": "1.2.0",
+                    "accessed_at": "2026-08-12",
+                },
+                "status": "eligible",
+                "status_reason": "Synthetic eligible test reference.",
+                "protein_branch": "missense_no_splice_effect",
+                "protein_mechanism_evidence": {
+                    "basis": "curated_protein_mechanism_assessment"
+                },
+                "reference_splice_evidence": {
+                    "spliceai_score": 0.01,
+                    "threshold": 0.1,
+                    "confirmed_status": "none_identified",
+                    "sources_checked": ["ENIGMA Table 9", "ENIGMA ST2"],
+                    "checked_at": "2026-08-12",
+                    "provenance": {"snapshot": "test"},
+                },
+                "classification_ps1_dependency": {
+                    "used": True,
+                    "reference_ids": [dependency],
+                },
+            }
+            value["approval_basis_checksum"] = compute_approval_basis_checksum(value)
+            return value
+
+        registry = {
+            "schema_version": 2,
+            "registry_version": "test",
+            "status": "active",
+            "defined_splice_sources": ["ENIGMA Table 9", "ENIGMA ST2"],
+            "reference_source_policy": {
+                "accepted_classification_bases": [
+                    {"id": "enigma_st7_v1_2_reference_set"},
+                    {"id": "external_vcep_assertion"},
+                    {"id": "locally_recurated_under_enigma_vcep"},
+                ]
+            },
+            "source_checksums": {
+                "st7_sha256": "0" * 64,
+                "table9_sha256": "0" * 64,
+                "st2_sha256": "0" * 64,
+                "curated_extensions_sha256": "0" * 64,
+            },
+            "reference_count": 2,
+            "status_counts": {"eligible": 2},
+            "references": [
+                record("A", "c.122A>G", "B"),
+                record("B", "c.123A>G", "A"),
+            ],
+        }
+        with self.assertRaisesRegex(RuntimeError, "circular dependency"):
+            validate_ps1_reference_registry(registry)
 
     def test_splice_ps1_reference_pilot_is_unreviewed_seed_only(self):
         project_root = Path(__file__).resolve().parents[1]
@@ -337,6 +914,42 @@ class SpliceTests(unittest.TestCase):
 
 
 class ClassifierIntegrationTests(unittest.TestCase):
+    def test_unapproved_protein_ps1_candidate_is_review_only(self):
+        ps1_result = {
+            "applies": False,
+            "review_required": True,
+            "application_status": "manual_review_required",
+            "blocking_reasons": ["Reference VCEP verification is incomplete"],
+            "vua_splice_sources_checked": ["ENIGMA Table 9", "ENIGMA ST2"],
+            "vua_splice_evidence_status": "none_identified",
+            "candidates": [{
+                "key": "ST7|BRCA1|c.122A>G",
+                "reference_id": "",
+                "gene": "BRCA1",
+                "transcript": "NM_007294.4",
+                "c_notation": "c.122A>G",
+                "p_notation": "p.(His41Arg)",
+                "classification": "Pathogenic",
+                "iarc_class": 5,
+                "classification_basis": "enigma_multifactorial_likelihood_reference_set",
+                "classification_source": "ST7 test source",
+                "reference_status": "review_required",
+                "status_reason": "VCEP verification absent",
+                "source_dataset": "ENIGMA ST7",
+            }],
+        }
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="missense",
+            p_notation="p.(His41Arg)",
+            c_notation="c.123A>G",
+            spliceai_score=0.01,
+            ps1_result=ps1_result,
+        )
+        self.assertNotIn("PS1", result["criteria"])
+        self.assertTrue(result["protein_ps1_review"]["recommended"])
+        self.assertFalse(result["protein_ps1_review"]["is_evidence_criterion"])
+
     def test_frameshift_does_not_warn_about_inapplicable_bayesdel(self):
         result = evaluate_variant(
             gene="BRCA1",
@@ -517,18 +1130,72 @@ class ClassifierIntegrationTests(unittest.TestCase):
 
     def test_pvs1_very_strong_alone_remains_vus_with_explanation(self):
         result = evaluate_variant(
-            gene="BRCA1",
-            variant_type="frameshift",
-            p_notation="p.(Asp1851ValfsTer29)",
-            c_notation="c.5551_5552insT",
+            gene="BRCA2",
+            variant_type="nonsense",
+            p_notation="p.(Cys161Ter)",
+            c_notation="c.483T>A",
         )
         self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertNotIn("PM5_PTC", result["criteria"])
         self.assertEqual(result["total_points"], 8)
         self.assertEqual(result["predicted_class"], 3)
         self.assertIn(
             "requires at least one additional Supporting",
             result["classification_note"],
         )
+
+    def test_terminal_frameshift_uses_one_table4_row_for_pvs1_and_pm5(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="frameshift",
+            p_notation="p.(Tyr1853AspfsTer25)",
+            c_notation="c.5556_5560del",
+        )
+
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+        reason = result["criteria"]["PVS1"]["reason"]
+        self.assertIn("First altered residue p.1853 <= p.1854", reason)
+        self.assertIn("PVS1, PM5_Strong (PTC)", reason)
+        self.assertIn("PM5 follows the selected Table 4 row", reason)
+
+    def test_brca2_terminal_frameshift_uses_the_same_boundary_policy(self):
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="frameshift",
+            p_notation="p.(Glu3309AlafsTer20)",
+            c_notation="c.9925del",
+        )
+
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+        reason = result["criteria"]["PVS1"]["reason"]
+        self.assertIn("First altered residue p.3309 <= p.3309", reason)
+        self.assertIn("PVS1, PM5_Strong (PTC)", reason)
+        self.assertIn("PM5 follows the selected Table 4 row", reason)
+
+    def test_cross_exon_frameshift_keeps_pm5_from_nucleotide_change_exon(self):
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="frameshift",
+            p_notation="p.(Leu167AlafsTer20)",
+            c_notation="c.500del",
+        )
+
+        # c.500 is in E6, while the predicted stop p.186 is in E7. Appendix D
+        # assigns the paired PM5 code by the exon containing the nucleotide
+        # change. E6 has PM5_N/A, whereas E7 has PM5_Strong.
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertNotIn("PM5_PTC", result["criteria"])
+        self.assertEqual(result["total_points"], 8)
+        self.assertEqual(result["predicted_class"], 3)
+        reason = result["criteria"]["PVS1"]["reason"]
+        self.assertIn("predicted termination p.186", reason)
+        self.assertIn("nucleotide-change exon E6", reason)
 
     def test_bp1_strong_alone_is_likely_benign_exception(self):
         result = evaluate_variant(
@@ -676,6 +1343,27 @@ class VusExplanationTests(unittest.TestCase):
         self.assertIn("VUS explanation", narrative)
         self.assertIn("Strong pathogenic evidence", narrative)
 
+    def test_narrative_distinguishes_same_residue_reference_from_submitted_variant(self):
+        result = self.result_with(
+            {"PS3": self.criterion("Strong", 4)},
+            total_points=4,
+        )
+        result["residue_info"] = {
+            "domain": "BRCT",
+            "known_pathogenic_at_position": [
+                {"c": "c.5143A>C", "aa": "Ser1715Arg"},
+            ],
+        }
+        narrative = generate_narrative(
+            gene="BRCA1",
+            c_notation="c.5145C>A",
+            p_notation="p.(Ser1715Arg)",
+            variant_type="missense",
+            result=result,
+        )
+        self.assertIn("c.5143A>C p.(Ser1715Arg)", narrative)
+        self.assertIn("not necessarily the submitted nucleotide variant", narrative)
+
 
 class GoldenCaseRegressionTests(unittest.TestCase):
     def applied_codes(self, result):
@@ -785,14 +1473,13 @@ class GoldenCaseRegressionTests(unittest.TestCase):
         )
         self.assert_golden_case(
             result,
-            predicted_class=3,
-            total_points=5,
-            criteria={"BS3", "PM2_Supporting", "PVS1"},
-            vus_category="conflicting_pvs1_bs3",
+            predicted_class=4,
+            total_points=9,
+            criteria={"BS3", "PM2_Supporting", "PVS1", "PM5_PTC"},
         )
         self.assertTrue(result["mixed_evidence"])
         self.assertEqual(result["evidence_direction"], "mixed")
-        self.assertEqual(result["pathogenic_points"], 9)
+        self.assertEqual(result["pathogenic_points"], 13)
         self.assertEqual(result["benign_points"], -4)
 
     def test_pp3_bs3_conflict_golden_case(self):

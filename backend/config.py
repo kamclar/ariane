@@ -8,10 +8,15 @@ import os
 # ── Paths ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
+PROJECT_DIR = BASE_DIR.parent
+PANEL_REFERENCE_DIR = PROJECT_DIR / "data" / "reference" / "panel"
 
 TABLE4_PATH      = DATA_DIR / "enigma_table4.json"
 TABLE9_PATH      = DATA_DIR / "enigma_table9.json"
 ST7_PATH         = DATA_DIR / "st7_reference_set.json"
+PS1_PROTEIN_REGISTRY_PATH = DATA_DIR / "ps1_protein_reference_registry.json"
+PS1_SPLICE_REFERENCE_PATH = DATA_DIR / "splice_ps1_reference_set.json"
+ST2_SPLICE_EVIDENCE_PATH = DATA_DIR / "enigma_st2_splice_evidence.json"
 RESIDUES_PATH    = DATA_DIR / "clinically_important_residues.json"
 GNOMAD_CACHE_DIR = DATA_DIR / "gnomad_brca_cache"
 SPLICEAI_CACHE       = DATA_DIR / "spliceai_api_cache.json"

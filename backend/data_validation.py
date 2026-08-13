@@ -28,7 +28,8 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
             "Required ENIGMA Table 4 dataset is not the complete lossless v1.2 snapshot"
         )
     required_table4_sections = {
-        "exon_ranges", "ptc_rules", "splice_rules", "deletion_rules", "duplication_rules"
+        "exon_ranges", "ptc_rules", "splice_rules", "deletion_rules",
+        "duplication_rules", "critical_boundaries",
     }
     missing_sections = sorted(required_table4_sections - set(table4))
     if missing_sections:
@@ -62,6 +63,28 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         None, "PM5_Strong (PTC)", "PM5 (PTC)",
         "PM5_Supporting (PTC)", "PM5_N/A",
     }
+    for gene, boundary in table4.get("critical_boundaries", {}).items():
+        if boundary.get("exon") not in table4["exon_ranges"].get(gene, {}):
+            raise RuntimeError(
+                f"Required ENIGMA Table 4 critical boundary references unknown exon: "
+                f"{gene}/{boundary.get('exon')!r}"
+            )
+        for branch_name in ("at_or_before", "after"):
+            branch = boundary.get(branch_name)
+            if not isinstance(branch, dict):
+                raise RuntimeError(
+                    f"Required ENIGMA Table 4 critical boundary lacks {branch_name}: {gene}"
+                )
+            if branch.get("pvs1_code") not in allowed_pvs1_codes:
+                raise RuntimeError(
+                    f"Required ENIGMA Table 4 critical boundary has unknown PVS1 code at "
+                    f"{gene}/{branch_name}: {branch.get('pvs1_code')!r}"
+                )
+            if branch.get("pm5_code") not in allowed_pm5_codes:
+                raise RuntimeError(
+                    f"Required ENIGMA Table 4 critical boundary has unknown PM5 code at "
+                    f"{gene}/{branch_name}: {branch.get('pm5_code')!r}"
+                )
     for section in ("ptc_rules", "splice_rules", "deletion_rules"):
         for gene in ("BRCA1", "BRCA2"):
             for key, entry in table4[section][gene].items():
@@ -162,3 +185,50 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                 f"Required ENIGMA Supplementary Table 7 has invalid IARC class for {key}: "
                 f"{record.get('iarc_class')!r}"
             )
+
+    ps1_registry = _load_required_json(
+        "protein PS1 reference registry", paths["ps1_protein_registry"]
+    )
+    from backend.modules.ps1 import validate_ps1_reference_registry
+
+    validate_ps1_reference_registry(ps1_registry)
+
+    splice_ps1 = _load_required_json(
+        "ENIGMA Supplementary Table 2 splice evidence snapshot",
+        paths["ps1_splice_reference"],
+    )
+    if (
+        splice_ps1.get("curation_status")
+        != "pilot_unreviewed_not_for_automatic_scoring"
+        or not isinstance(splice_ps1.get("variants"), list)
+        or not splice_ps1["variants"]
+    ):
+        raise RuntimeError(
+            "Required ENIGMA Supplementary Table 2 splice evidence snapshot is unusable"
+        )
+
+    st2 = _load_required_json(
+        "complete ENIGMA Supplementary Table 2 splice evidence",
+        paths["st2_splice_evidence"],
+    )
+    if (
+        st2.get("schema_version") != 1
+        or st2.get("source_columns") != 11
+        or st2.get("total_variants") != 220
+        or len(st2.get("variants", [])) != 220
+    ):
+        raise RuntimeError(
+            "Required complete ENIGMA Supplementary Table 2 splice evidence snapshot is incomplete"
+        )
+    seen_st2 = set()
+    for index, record in enumerate(st2["variants"]):
+        if len(record) != 12:
+            raise RuntimeError(
+                f"Required ENIGMA Supplementary Table 2 is lossy at record #{index}"
+            )
+        key = (record.get("gene"), record.get("c_notation"))
+        if key in seen_st2:
+            raise RuntimeError(
+                f"Required ENIGMA Supplementary Table 2 has duplicate variant: {key}"
+            )
+        seen_st2.add(key)
