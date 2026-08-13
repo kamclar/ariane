@@ -117,7 +117,11 @@ def _normalize_api_url(value: str) -> str:
 
 
 SPLICEAI_API_URL = _normalize_api_url(os.environ.get("SPLICEAI_API_URL", DEFAULT_SPLICEAI_API_URL))
-SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 120)
+# Interactive requests are proxied by nginx with a 60-second read timeout. A
+# non-critical SpliceAI lookup must fail closed early enough for the classifier
+# to return a result with an explicit unavailable-source warning. Offline cache
+# builders do not use this web-request deadline.
+SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 25)
 SPLICEAI_API_RATE_SLEEP = _env_float("SPLICEAI_API_RATE_SLEEP", 1.5)
 SPLICEAI_API_SOURCE = os.environ.get(
     "SPLICEAI_API_SOURCE",

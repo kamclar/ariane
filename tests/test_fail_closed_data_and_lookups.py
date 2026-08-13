@@ -232,14 +232,36 @@ class GnomadFailClosedTests(unittest.TestCase):
 
 
 class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
-    def test_only_spliceai_uses_extended_appendix_j_timeout(self):
+    def test_spliceai_deadline_finishes_before_nginx_timeout(self):
         from backend.lookup_execution import (
             EXTERNAL_LOOKUP_TIMEOUT,
             SERVICE_LOOKUP_TIMEOUTS,
         )
 
         self.assertEqual(EXTERNAL_LOOKUP_TIMEOUT, 12)
-        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 180})
+        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 30})
+        self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 60)
+
+    async def test_spliceai_timeout_returns_unavailable_instead_of_hanging(self):
+        from backend import lookup_execution
+
+        diagnostics = []
+
+        def slow_lookup():
+            import time
+            time.sleep(0.1)
+            return 0.5
+
+        with patch.dict(
+            lookup_execution.SERVICE_LOOKUP_TIMEOUTS,
+            {"SpliceAI": 0.01},
+            clear=False,
+        ):
+            result = await lookup_or_unavailable(
+                slow_lookup, None, "SpliceAI", diagnostics
+            )
+        self.assertIsNone(result)
+        self.assertIn("timed out", diagnostics[0])
 
     async def test_exception_is_logged_explained_and_returns_unavailable_default(self):
         diagnostics = []
@@ -455,7 +477,9 @@ class DataHealthTests(unittest.TestCase):
             intronic = root / "intronic.json"
             intronic.write_text(json.dumps({"BRCA1:c.1+1G>A": {"status": "ok", "score": 1.0}}), encoding="utf-8")
             old_cache = spliceai.SPLICEAI_PRECOMPUTED_CACHE
+            old_enabled = spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE
             try:
+                spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE = True
                 spliceai.SPLICEAI_PRECOMPUTED_CACHE = None
                 with patch.object(spliceai, "SPLICEAI_PRECOMPUTED_CACHE_PATH", coding), patch.object(
                     spliceai, "SPLICEAI_INTRONIC_CACHE_PATH", intronic
@@ -467,6 +491,7 @@ class DataHealthTests(unittest.TestCase):
                     for issue in get_data_issues()
                 ))
             finally:
+                spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE = old_enabled
                 spliceai.SPLICEAI_PRECOMPUTED_CACHE = old_cache
                 clear_issue("SpliceAI intronic cache")
 

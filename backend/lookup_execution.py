@@ -3,15 +3,16 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 
 
 LOGGER = logging.getLogger(__name__)
 EXTERNAL_LOOKUP_TIMEOUT = 12
 SERVICE_LOOKUP_TIMEOUTS = {
-    # ENIGMA Appendix J requires SpliceAI max distance 10,000. A correctly
-    # configured local model commonly needs more than the generic network
-    # timeout for an uncached variant.
-    "SpliceAI": 180,
+    # The lower-level API call defaults to 25 seconds. This margin covers rate
+    # limiting and still keeps the complete request below nginx's 60-second
+    # proxy timeout. Offline cache builders do not use this wrapper.
+    "SpliceAI": int(os.environ.get("SPLICEAI_LOOKUP_TIMEOUT", "30")),
 }
 
 

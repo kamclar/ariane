@@ -474,6 +474,9 @@ function ariane() {
                 if (messages.length > 0) return messages.join("; ");
             }
             if (typeof detail === "string" && detail.trim()) return detail;
+            if ([502, 503, 504].includes(status)) {
+                return "The classification service did not finish because an upstream data source or the server timed out. The input was not rejected as invalid. Please retry; if the problem persists, report the time and variant to the administrator.";
+            }
             return `The input could not be normalized. Enter c. HGVS or a genomic coordinate with GRCh37/GRCh38. Error ${status}.`;
         },
 

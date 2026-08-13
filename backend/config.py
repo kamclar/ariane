@@ -68,7 +68,7 @@ FUNCTIONAL_DOMAINS = {
 
 # ── External API URLs ──────────────────────────────────────────────────────
 SPLICEAI_API_URL     = "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/"
-SPLICEAI_API_TIMEOUT = 60
+SPLICEAI_API_TIMEOUT = 25
 SPLICEAI_API_SLEEP   = 1.5
 
 MYVARIANT_URL    = "https://myvariant.info/v1/variant"

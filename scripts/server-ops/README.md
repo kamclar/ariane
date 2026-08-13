@@ -42,13 +42,17 @@ Audit events can contain variant data, free-text notes, assessor names, and IP a
 
 ## Updating Python dependencies on an existing server
 
-After a release changes `requirements.txt`, update the existing virtual
-environment before restarting the service:
+`restart-ariane.sh` synchronizes the pinned packages in `requirements.txt`
+with the existing virtual environment and performs an import preflight before
+restarting the service. If synchronization fails, the running service is not
+stopped.
+
+The equivalent manual recovery command is:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y libpq-dev python3-dev build-essential
-sudo /home/ubuntu/ariane/venv/bin/pip install -r /home/ubuntu/ariane/requirements.txt
+sudo -u ubuntu /home/ubuntu/ariane/venv/bin/python -m pip install -r /home/ubuntu/ariane/requirements.txt
 sudo bash /home/ubuntu/ariane/scripts/server-ops/restart-ariane.sh
 ```
 

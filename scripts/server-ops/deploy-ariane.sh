@@ -110,6 +110,12 @@ fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^SPLICEAI_API_TIMEOUT=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_TIMEOUT=25\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_LOOKUP_TIMEOUT=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_LOOKUP_TIMEOUT=30\n' >> /etc/ariane/ariane.env
+fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
 cat > /etc/systemd/system/ariane.service << EOF

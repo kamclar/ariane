@@ -912,9 +912,12 @@ Veřejný `spliceai_audit` je v hlavním výsledku sbalený pod
 maskování, sestavu, transkript, použitou delta hodnotu, všechna delta skóre,
 REF a ALT hodnoty, zdroj, GRCh38 dotaz a cache klíč.
 
-SpliceAI používá samostatný limit 180 sekund pro dosud necachovaný lokální
-výpočet s 10kb vzdáleností. Obecný 12sekundový limit ostatních externích lookupů
-se nemění.
+Interaktivní API-primary cesta používá pro Broad SpliceAI vnitřní limit 25
+sekund a vnější limit 30 sekund. Pokud zdroj včas neodpoví, ARIANE dokončí
+klasifikaci, označí SpliceAI jako nedostupný, nepoužije kritéria vyžadující jeho
+skóre a omezení zobrazí uživateli. Požadavek tak skončí před 60sekundovým
+timeoutem nginx. Offline build předpočítaných snapshotů používá vlastní limity.
+Obecný 12sekundový limit ostatních externích lookupů se nemění.
 
 ### 8.5 Priorita zdrojů
 

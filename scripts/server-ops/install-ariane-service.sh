@@ -35,15 +35,29 @@ if [ ! -d "$ARIANE_HOME" ]; then
 fi
 echo -e "${GREEN}OK Found: $ARIANE_HOME${NC}"
 
-# 2. Check if venv exists
+if ! command -v pg_config > /dev/null 2>&1; then
+    echo -e "${RED}Error: pg_config is missing.${NC}" >&2
+    echo "Install it with: apt-get update && apt-get install -y libpq-dev python3-dev build-essential" >&2
+    exit 1
+fi
+
+# 2. Create the virtual environment when needed, then always synchronize the
+# pinned dependencies. An existing venv may predate requirements.txt changes.
 if [ ! -d "$ARIANE_HOME/venv" ]; then
     echo -e "${YELLOW}WARN Virtual environment not found, creating...${NC}"
     cd "$ARIANE_HOME"
     python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    deactivate
+    chown -R "$ARIANE_USER:$ARIANE_USER" "$ARIANE_HOME/venv"
 fi
+echo -e "${YELLOW}Synchronizing Python dependencies...${NC}"
+runuser -u "$ARIANE_USER" -- \
+    "$ARIANE_HOME/venv/bin/python" -m pip install \
+    --disable-pip-version-check \
+    -r "$ARIANE_HOME/requirements.txt"
+runuser -u "$ARIANE_USER" -- \
+    env PYTHONPATH="$ARIANE_HOME" \
+    "$ARIANE_HOME/venv/bin/python" -c \
+    'import cdot, fastapi, hgvs, pydantic, uvicorn; from backend.modules import hgvs_engine, hgvs_provider'
 echo -e "${GREEN}OK Virtual environment ready${NC}"
 
 # 3. Get Python path
@@ -70,6 +84,12 @@ if ! grep -q '^ARIANE_RUNTIME_CACHE_DIR=' /etc/ariane/ariane.env; then
 fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_TIMEOUT=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_TIMEOUT=25\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_LOOKUP_TIMEOUT=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_LOOKUP_TIMEOUT=30\n' >> /etc/ariane/ariane.env
 fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
