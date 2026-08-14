@@ -313,10 +313,113 @@ button:disabled {
 }
 
 .classification-main {
+    position: relative;
     display: flex;
     gap: 1.5rem;
     align-items: center;
-    padding: 1.5rem;
+    min-height: 158px;
+    padding: 1.5rem 1.5rem 1.5rem 3.25rem;
+}
+
+.point-thermometer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    width: 44px;
+    color: var(--color-text-muted);
+    cursor: help;
+}
+
+.point-thermometer-title {
+    display: none;
+}
+
+.point-thermometer-scale {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.point-thermometer-scale::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 7px;
+    background: linear-gradient(
+        to bottom,
+        var(--class-5) 0%,
+        var(--class-5) 18.52%,
+        var(--class-4) 18.52%,
+        var(--class-4) 33.33%,
+        var(--class-3) 33.33%,
+        var(--class-3) 62.96%,
+        var(--class-2) 62.96%,
+        var(--class-2) 81.48%,
+        var(--class-1) 81.48%,
+        var(--class-1) 100%
+    );
+    content: "";
+}
+
+.point-threshold {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+
+.point-threshold i {
+    display: block;
+    order: -1;
+    width: 12px;
+    height: 1px;
+    background: rgba(33, 37, 41, 0.58);
+}
+
+.point-threshold b {
+    font-size: 0.58rem;
+    font-weight: 500;
+    line-height: 1;
+    margin-left: 3px;
+}
+
+.threshold-pathogenic { top: 18.52%; }
+.threshold-likely-pathogenic { top: 33.33%; }
+.threshold-likely-benign { top: 62.96%; }
+.threshold-benign { top: 81.48%; }
+
+.point-position {
+    position: absolute;
+    left: 0;
+    z-index: 1;
+    width: 13px;
+    height: 10px;
+    transform: translateY(-50%);
+    transition: top 0.25s ease;
+}
+
+.point-position::before {
+    display: block;
+    width: 12px;
+    height: 3px;
+    margin-top: 3px;
+    background: #27313d;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
+    content: "";
+}
+
+.point-position b {
+    display: none;
+}
+
+.point-position i {
+    display: none;
 }
 
 .mixed-evidence-strip {
@@ -807,14 +910,21 @@ footer p {
 /* ── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 640px) {
     .form-row { flex-direction: column; }
-    .classification-main { flex-direction: column; text-align: center; }
+    .classification-main {
+        flex-direction: column;
+        padding-left: 3.25rem;
+        text-align: center;
+    }
+    .point-thermometer {
+        width: 44px;
+    }
 }
 
 /* ── Narrative summary ───────────────────────────────────────── */
 .narrative-section {
     background: #f0f7ff;
     border-left: 4px solid var(--color-primary);
-    border-radius: 0 var(--radius) var(--radius) 0;
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
     padding: 1rem 1.25rem;
     margin-bottom: 1.25rem;
 }

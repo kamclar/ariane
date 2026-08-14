@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260731-2">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260814-10">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -99,6 +99,23 @@
             <!-- Classification badge -->
             <div class="classification-header" x-show="result">
                 <div class="classification-main">
+                    <div class="point-thermometer"
+                         :class="result?.mixed_evidence ? 'point-thermometer-mixed' : 'point-thermometer-combination'"
+                         :title="pointMeterSummary(result?.total_points, result?.mixed_evidence)"
+                         :aria-label="pointMeterSummary(result?.total_points, result?.mixed_evidence)"
+                         role="img">
+                        <div class="point-thermometer-title">Points</div>
+                        <div class="point-thermometer-scale" aria-hidden="true">
+                            <span class="point-threshold threshold-pathogenic"><b>+10</b><i></i></span>
+                            <span class="point-threshold threshold-likely-pathogenic"><b>+6</b><i></i></span>
+                            <span class="point-threshold threshold-likely-benign"><b>&minus;2</b><i></i></span>
+                            <span class="point-threshold threshold-benign"><b>&minus;7</b><i></i></span>
+                            <span class="point-position"
+                                  :style="{ top: pointMeterPosition(result?.total_points) + '%' }">
+                                <i></i><b x-text="signedPoints(result?.total_points)"></b>
+                            </span>
+                        </div>
+                    </div>
                     <div class="class-badge" :class="'class-' + result?.predicted_class">
                         <span class="class-number" x-text="result?.predicted_class"></span>
                         <span class="class-label" x-text="result?.predicted_label"></span>
@@ -1327,6 +1344,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260813-2"></script>
+    <script src="/static/js/app.js?v=20260814-10"></script>
 </body>
 </html>

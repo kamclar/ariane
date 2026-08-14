@@ -343,5 +343,134 @@
     "mask": 0,
     "annotation_subset": "basic",
     "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.509G>A": {
+    "score": 0.052,
+    "chrom": "17",
+    "pos": 43099813,
+    "ref": "C",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_AL",
+    "delta_scores": {
+      "DS_AG": 0.002,
+      "DS_AL": 0.052,
+      "DS_DG": 0.001,
+      "DS_DL": 0.021
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.016,
+      "DS_AL_REF": 0.919,
+      "DS_DG_REF": 0.02,
+      "DS_DL_REF": 0.99
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.018,
+      "DS_AL_ALT": 0.868,
+      "DS_DG_ALT": 0.022,
+      "DS_DL_ALT": 0.969
+    },
+    "reference_transcript_score": 0.052,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.052,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.5366C>T": {
+    "score": 0.031,
+    "chrom": "17",
+    "pos": 43049161,
+    "ref": "G",
+    "alt": "A",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model:cache",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DG",
+    "delta_scores": {
+      "DS_AG": 0.001,
+      "DS_AL": 0.001,
+      "DS_DG": 0.031,
+      "DS_DL": 0.004
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.093,
+      "DS_AL_REF": 0.958,
+      "DS_DG_REF": 0.182,
+      "DS_DL_REF": 0.184
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.094,
+      "DS_AL_ALT": 0.957,
+      "DS_DG_ALT": 0.213,
+      "DS_DL_ALT": 0.18
+    },
+    "reference_transcript_score": 0.031,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.031,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 25,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.5145C>A": {
+    "score": 0.036,
+    "chrom": "17",
+    "pos": 43063881,
+    "ref": "G",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_AL",
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.036,
+      "DS_DG": 0.0,
+      "DS_DL": 0.031
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.079,
+      "DS_AL_REF": 0.833,
+      "DS_DG_REF": 0.0,
+      "DS_DL_REF": 0.899
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.079,
+      "DS_AL_ALT": 0.796,
+      "DS_DG_ALT": 0.0,
+      "DS_DL_ALT": 0.868
+    },
+    "reference_transcript_score": 0.036,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.036,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 25,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
   }
 }
