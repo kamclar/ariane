@@ -641,12 +641,12 @@
                                     </label>
                                     <label>Source review status
                                         <select x-model="item.evidence.source_review_status">
-                                            <option value="appendix_b">ENIGMA Appendix B source</option>
+                                            <option value="appendix_b">ENIGMA recognised source</option>
                                             <option value="other_reviewed">Other reviewed source</option>
                                             <option value="unreviewed">Unreviewed source, audit only</option>
                                         </select>
                                     </label>
-                                    <label x-show="item.evidence.source_review_status === 'appendix_b'">Appendix B publication
+                                    <label x-show="item.evidence.source_review_status === 'appendix_b'">ENIGMA publication or dataset
                                         <select x-model="item.evidence.source_pmid">
                                             <option value="">Select publication</option>
                                             <template x-for="source in (manualDefinition('PP4')?.appendix_b_sources || [])" :key="source.pmid">

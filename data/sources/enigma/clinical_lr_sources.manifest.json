@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "status": "validated_source_manifest",
+  "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
+  "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
+  "datasets": {
+    "ucsc_enigma_brcamfa_v1_1": {
+      "file": "BRCAmfa.hg38.v1.1.bed",
+      "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
+      "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
+      "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+      "version": "ENIGMA UCSC track 1.1.0",
+      "role": "variant-specific multifactorial clinical LR components",
+      "admitted_components": [
+        "easton_2007_multifactorial",
+        "parsons_2019_multifactorial",
+        "li_2020_personal_family_history",
+        "caputo_2021_cosegregation"
+      ],
+      "deduplication": "UCSC removed duplicate Parsons/Easton variants before recomputing the track"
+    },
+    "zanti_2025_case_control": {
+      "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
+      "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
+      "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx",
+      "version": "Nature Communications version of record, 2025-05-25",
+      "sheet": "Supplementary Data 5",
+      "pmid": "40413188",
+      "doi": "10.1038/s41467-025-59979-6",
+      "role": "variant-specific combined case-control LR",
+      "cohorts": [
+        "BRIDGES/BCAC",
+        "CARRIERS",
+        "UK Biobank"
+      ],
+      "admission_filters": {
+        "region": "CDS +/-5 bp",
+        "maximum_non_founder_faf": 0.001,
+        "minimum_combined_carriers": 3,
+        "brca2_minimum_datasets": 2
+      },
+      "expected_admitted_records": {
+        "BRCA1": 681,
+        "BRCA2": 1029,
+        "total": 1710
+      }
+    }
+  },
+  "appendix_b_bibliography": [
+    {
+      "pmid": "15290653",
+      "citation": "Goldgar et al. 2004",
+      "role": "multifactorial likelihood methodology and component evidence",
+      "separate_runtime_component": false,
+      "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track"
+    },
+    {
+      "pmid": "12900794",
+      "citation": "Thompson et al. 2003",
+      "role": "quantitative cosegregation methodology",
+      "separate_runtime_component": false,
+      "reason": "methodological source; segregation LRs are represented in the admitted aggregate datasets"
+    },
+    {
+      "pmid": "17924331",
+      "citation": "Easton et al. 2007",
+      "role": "variant-specific multifactorial clinical LR",
+      "separate_runtime_component": true,
+      "component_id": "easton_2007_multifactorial"
+    },
+    {
+      "pmid": "25857409",
+      "citation": "Spurdle et al. 2015",
+      "role": "multifactorial likelihood methodology and calibration",
+      "separate_runtime_component": false,
+      "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track"
+    },
+    {
+      "pmid": "27008870",
+      "citation": "de la Hoya et al. 2016",
+      "role": "tumour pathology likelihood methodology",
+      "separate_runtime_component": false,
+      "reason": "methodological source; pathology LRs are represented in the admitted aggregate datasets"
+    },
+    {
+      "pmid": "31131967",
+      "citation": "Parsons et al. 2019",
+      "role": "variant-specific multifactorial clinical LR",
+      "separate_runtime_component": true,
+      "component_id": "parsons_2019_multifactorial"
+    },
+    {
+      "pmid": "31853058",
+      "citation": "Li et al. 2020",
+      "role": "variant-specific personal and family history LR",
+      "separate_runtime_component": true,
+      "component_id": "li_2020_personal_family_history"
+    },
+    {
+      "pmid": "34597585",
+      "citation": "Caputo et al. 2021",
+      "role": "variant-specific cosegregation and clinical LR",
+      "separate_runtime_component": true,
+      "component_id": "caputo_2021_cosegregation",
+      "basis": "included by the official UCSC ENIGMA BRCAmfa track"
+    },
+    {
+      "pmid": "40413188",
+      "citation": "Zanti et al. 2025",
+      "role": "variant-specific BRIDGES/CARRIERS/UKB case-control LR",
+      "separate_runtime_component": true,
+      "component_id": "zanti_2025_case_control",
+      "basis": "ENIGMA Analytical Working Group dataset implementing the ccLR approach preferred by the VCEP specification"
+    }
+  ],
+  "combination_rules": {
+    "only_independent_components": true,
+    "duplicate_source_id": "fatal",
+    "duplicate_independence_group": "fatal",
+    "component_level_codes": "not scored",
+    "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
+    "posterior_probability_prior": "not used"
+  }
+}

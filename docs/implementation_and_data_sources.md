@@ -353,7 +353,7 @@ Pokud má revidovaný řádek Table 9 vlastní hodnotu SpliceAI, používá se t
 
 ### 3.4 PP4 a BP5
 
-Zdroj automatických kritérií: lokální verzovaný snapshot variantově specifických combined clinical LR odvozený z UCSC ENIGMA `BRCAmfa` tracku. Supplementary Table 7 ani její posterior probability se pro PP4/BP5 nepoužívají.
+Zdroj automatických kritérií: verzovaný snapshot variantově specifických combined clinical LR odvozený ze dvou veřejných ENIGMA zdrojů. Multifaktoriální klinické LR pocházejí z UCSC ENIGMA `BRCAmfa` tracku. Case-control LR pocházejí ze Supplementary Data 5 studie Zanti et al. 2025, která vznikla v ENIGMA Analytical Working Group. Supplementary Table 7 ani její posterior probability se pro PP4/BP5 nepoužívají.
 
 | Kritérium | Supporting | Moderate | Strong | Very Strong |
 | --- | ---: | ---: | ---: | ---: |
@@ -373,7 +373,9 @@ Automatický snapshot je uložen v souborech:
 - `data/precomputed/brca_pp4_clinical_lr_snapshot.index.json`,
 - `data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json`.
 
-Snapshot je odvozen z veřejného UCSC ENIGMA `BRCAmfa` tracku verze 1.1.0. Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá pouze variantově specifická data ze zdrojů uvedených v ENIGMA Appendix B, která jsou v tracku samostatně dostupná: Easton et al. 2007, PMID 17924331, Parsons et al. 2019, PMID 31131967, a Li et al. 2020, PMID 31853058. Caputo et al. 2021 je z automatického výpočtu vyřazen, protože není v použitém seznamu Appendix B. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
+Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá všechny čtyři variantově specifické komponenty, ze kterých oficiální UCSC ENIGMA `BRCAmfa` track verze 1.1.0 přepočítává combined LR: Easton et al. 2007, PMID 17924331; Parsons et al. 2019, PMID 31131967; Li et al. 2020, PMID 31853058; a Caputo et al. 2021, PMID 34597585. K nim přidává case-control LR ze studie Zanti et al. 2025, PMID 40413188, DOI `10.1038/s41467-025-59979-6`.
+
+Ze Zanti Supplementary Data 5 se přijímá publikovaný finální soubor 1 710 variant: 681 BRCA1 a 1 029 BRCA2. Builder vyžaduje oblast CDS ±5 bp, non-founder FAF nejvýše 0,001, alespoň tři nositele v kombinovaných datech a u BRCA2 evidence alespoň ze dvou datasetů. Dvě další BRCA2 varianty mají v publikaci LR `N/A`, protože výpočet nekonvergoval. Nejsou bodovány a zůstávají výslovně uvedené v metadatech. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
 
 Před uložením snapshotu projde každá zdrojová `c.` notace stejným lokálním
 `biocommons.hgvs` enginem jako uživatelský vstup. Uvedená sekvence delece nebo
@@ -383,23 +385,20 @@ kontrolují proti normalizovanému indelovému snapshotu. Nejde o runtime fallba
 ani o ruční slovník. Nevalidní notace a konflikt normalizovaných zdrojů se
 nezařadí a důvod zůstane v metadatech.
 
-Pokud více řádků po normalizaci popisuje stejnou alelu a nese klinické LR z
-různých zdrojů Appendix B, builder je spojí a přepočítá combined LR. Stejný PMID
-se započítá nejvýše jednou. Rozdílné hodnoty pod stejným PMID jsou konflikt a
-celá alela se automaticky nepoužije.
+Pokud více řádků po normalizaci popisuje stejnou alelu, builder spojí její přijaté komponenty a přepočítá jediný combined LR. Kritérium jednotlivé komponenty se samostatně neboduje. Z výsledného LR vznikne právě jedno PP4 nebo BP5. Stejný `source_id` ani stejná skupina nezávislosti se nesmí započítat dvakrát. Duplicita je fatální chyba buildu. Rozdílné hodnoty pod stejným zdrojem jsou konflikt a daná alela se automaticky nepoužije.
 
-Metadata obsahují URL a checksum zdroje, checksum indexu, verzi pravidel,
+Metadata obsahují zdrojový manifest, URL a checksum obou zdrojových datasetů, checksum indexu, verzi pravidel,
 provenance HGVS enginu a referenčního balíku, checksum závislého indelového
 snapshotu, počty záznamů a seznam konfliktů. Chybějící metadata, nesprávný
-checksum, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění
-aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` obsahuje snapshot LR
-`6,89647 × 10^45` ze studie Li et al. 2020, což odpovídá PP4 Very Strong. Pro
+checksum indexu nebo zdrojového manifestu, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` je combined LR z Li et al. 2020 a Zanti et al. 2025 `1,36181 × 10^90`, což odpovídá PP4 Very Strong. Pro
 `BRCA2 c.9891_9894dup` a zdrojový zápis `c.9891_9894dupATTT` obsahuje LR
 `0,41018` ze studie Li et al. 2020, což odpovídá BP5 Supporting.
 
-Aktuální snapshot obsahuje 4 379 jednoznačných variantových záznamů.
+Pro `BRCA1 c.509G>A` se multifaktoriální LR `6,1764` násobí case-control LR `0,00639025`. Výsledný combined LR je `0,0394687`, proto se aplikuje jediné kritérium BP5 Strong. Dílčí PP4 Moderate se samostatně neaplikuje.
 
-Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané metodické zdroje:
+Aktuální snapshot obsahuje 5 147 jednoznačných variantových záznamů. Zanti case-control komponentu obsahuje 1 710 záznamů.
+
+Zdrojový manifest eviduje všechny studie vyjmenované v ENIGMA Appendix B a navíc Caputo 2021 a Zanti 2025, jejichž variantově specifická data používá automatický výpočet:
 
 | Zdroj | PMID |
 | --- | --- |
@@ -410,10 +409,12 @@ Zdroje uvedené v ENIGMA Appendix B jsou v aplikaci vedeny jako předem uznané 
 | de la Hoya et al. | 27008870 |
 | Parsons et al. | 31131967 |
 | Li et al. | 31853058 |
+| Caputo et al. | 34597585 |
+| Zanti et al. | 40413188 |
 
 Status zdroje se zpracovává fail-closed:
 
-- `ENIGMA Appendix B source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
+- `ENIGMA recognised source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
 - `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
 - `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 se neaplikuje a nepřidají se body.
 

@@ -1,4 +1,41 @@
 {
+  "case_control_quantitative_records": 1710,
+  "case_control_quantitative_records_by_gene": {
+    "BRCA1": 681,
+    "BRCA2": 1029
+  },
+  "case_control_records_selected": 1710,
+  "case_control_selected_by_gene": {
+    "BRCA1": 681,
+    "BRCA2": 1029
+  },
+  "case_control_source_rows": 6909,
+  "case_control_unavailable_records": [
+    {
+      "c_notation": "c.10094_10095insGAATTATAT",
+      "carriers": "150",
+      "dataset_direction": "'/NN'",
+      "gene": "BRCA2",
+      "published_evidence_label": "N/A",
+      "published_lr": "N/A"
+    },
+    {
+      "c_notation": "c.10095_10096insT",
+      "carriers": "150",
+      "dataset_direction": "'/NN'",
+      "gene": "BRCA2",
+      "published_evidence_label": "N/A",
+      "published_lr": "N/A"
+    }
+  ],
+  "combination_policy": {
+    "component_codes_scored_separately": false,
+    "duplicate_independence_groups": "fatal",
+    "duplicate_source_ids": "fatal",
+    "method": "multiply admitted variant-specific clinical LR components",
+    "single_final_code": true,
+    "zanti_admission": "Supplementary Data 5; CDS +/-5 bp; non-founder FAF <=0.001; >=3 combined carriers; BRCA2 evidence from >=2 datasets"
+  },
   "conflicting_canonical_keys": [
     "BRCA1:c.815_824dup"
   ],
@@ -9,7 +46,6 @@
       ],
       "existing_source_components": [
         {
-          "appendix_b_source": true,
           "citation": "Li et al. 2020",
           "clinical_data": [
             {
@@ -18,7 +54,12 @@
             }
           ],
           "component_lr": 1.31324,
-          "pmid": "31853058"
+          "doi": "10.1038/s41436-019-0729-3",
+          "evidence_family": "published_multifactorial_clinical_lr",
+          "independence_group": "li_2020_ambry_testing_cohort",
+          "pmid": "31853058",
+          "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
+          "source_id": "li_2020_personal_family_history"
         }
       ],
       "incoming_input_c_notations": [
@@ -27,7 +68,6 @@
       ],
       "incoming_source_components": [
         {
-          "appendix_b_source": true,
           "citation": "Li et al. 2020",
           "clinical_data": [
             {
@@ -36,25 +76,60 @@
             }
           ],
           "component_lr": 1.91608e+18,
-          "pmid": "31853058"
+          "doi": "10.1038/s41436-019-0729-3",
+          "evidence_family": "published_multifactorial_clinical_lr",
+          "independence_group": "li_2020_ambry_testing_cohort",
+          "pmid": "31853058",
+          "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
+          "source_id": "li_2020_personal_family_history"
         }
       ],
-      "reason": "different clinical LR components under the same PMID"
+      "reason": "different clinical LR components under the same source ID"
     }
   },
-  "created_utc": "2026-08-12T17:12:17.930086+00:00",
+  "created_utc": "2026-08-14T11:34:49.920869+00:00",
   "criteria": {
-    "BP5": 1312,
-    "PP4": 952,
-    "not_informative": 2115
+    "BP5": 2117,
+    "PP4": 1017,
+    "not_informative": 2013
   },
-  "dataset": "BRCA1/2 Appendix B clinical likelihood-ratio snapshot",
+  "dataset": "BRCA1/2 combined clinical likelihood-ratio snapshot",
   "excluded": {
     "conflicting_canonical_record": 1,
     "hgvs_normalization_failed:VariantNormalizationError": 1,
-    "no_appendix_b_lr": 30
+    "zanti_below_carrier_or_dataset_requirement": 5050,
+    "zanti_faf_above_0_001": 147,
+    "zanti_lr_not_estimable": 2
   },
-  "included_appendix_b_sources": {
+  "included_case_control_source": {
+    "citation": "Zanti et al. 2025",
+    "cohorts": [
+      "BRIDGES/BCAC",
+      "CARRIERS",
+      "UK Biobank"
+    ],
+    "data_types": [
+      "case_control"
+    ],
+    "doi": "10.1038/s41467-025-59979-6",
+    "independence_group": "zanti_2025_bridges_carriers_ukb",
+    "pmid": "40413188",
+    "source_id": "zanti_2025_case_control"
+  },
+  "included_multifactorial_sources": {
+    "caputoLRs": {
+      "citation": "Caputo et al. 2021",
+      "data_types": [
+        "family_history",
+        "cooccurrence",
+        "segregation",
+        "pathology"
+      ],
+      "doi": "10.1016/j.ajhg.2021.09.003",
+      "independence_group": "caputo_2021_clinical_cohort",
+      "pmid": "34597585",
+      "source_id": "caputo_2021_cosegregation"
+    },
     "eastonLRs": {
       "citation": "Easton et al. 2007",
       "data_types": [
@@ -64,14 +139,20 @@
         "pathology",
         "case_control"
       ],
-      "pmid": "17924331"
+      "doi": "10.1086/521032",
+      "independence_group": "easton_2007_multifactorial_dataset",
+      "pmid": "17924331",
+      "source_id": "easton_2007_multifactorial"
     },
     "liLRs": {
       "citation": "Li et al. 2020",
       "data_types": [
         "personal_and_family_history"
       ],
-      "pmid": "31853058"
+      "doi": "10.1038/s41436-019-0729-3",
+      "independence_group": "li_2020_ambry_testing_cohort",
+      "pmid": "31853058",
+      "source_id": "li_2020_personal_family_history"
     },
     "parsonsLRs": {
       "citation": "Parsons et al. 2019",
@@ -82,19 +163,26 @@
         "pathology",
         "case_control"
       ],
-      "pmid": "31131967"
+      "doi": "10.1002/humu.23818",
+      "independence_group": "parsons_2019_multifactorial_dataset",
+      "pmid": "31131967",
+      "source_id": "parsons_2019_multifactorial"
     }
   },
-  "index_sha256": "f413cfdf432f22b292d82e89f7c726248a3c85a10eae8e4581c1876e7350df9b",
+  "index_sha256": "bee263e46cc6ca878b28f2b634a6647e60af16048a3c33cb9c3c7d137d7f055b",
   "normalization": {
     "counts": {
       "canonical_source_rows_merged": 24,
       "duplicate_source_components_deduplicated": 0,
       "indels_not_in_reference_snapshot": 2,
-      "independent_source_components_merged": 24,
+      "independent_source_components_merged": 26,
       "known_indels_cross_checked": 859,
       "notations_canonicalized": 712,
-      "source_records_normalized": 4435
+      "source_records_normalized": 4435,
+      "zanti_indels_not_in_reference_snapshot": 1,
+      "zanti_known_indels_cross_checked": 162,
+      "zanti_notations_canonicalized": 9,
+      "zanti_records_normalized": 1710
     },
     "failures": [
       {
@@ -120,22 +208,162 @@
       "reference_manifest_sha256": "5d889b264f8494d5163ad91268fd7ec7d0ccfee19777d2716a87cd6caea9a8c6"
     }
   },
-  "records": 4379,
-  "records_by_appendix_b_pmid": {
-    "17924331": 151,
-    "31131967": 1389,
-    "31853058": 3378
+  "records": 5147,
+  "records_by_source_id": {
+    "caputo_2021_cosegregation": 93,
+    "easton_2007_multifactorial": 151,
+    "li_2020_personal_family_history": 3378,
+    "parsons_2019_multifactorial": 1389,
+    "zanti_2025_case_control": 1710
   },
   "reference_transcripts": {
     "NM_000059.4": "BRCA2",
     "NM_007294.4": "BRCA1"
   },
   "rows_seen": 4436,
-  "source_description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-  "source_file": "BRCAmfa.hg38.v1.1.bed",
-  "source_sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
-  "source_track_version": "ENIGMA specifications 1.1.0",
-  "source_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
+  "source_files": {
+    "ucsc_enigma_brcamfa_v1_1": {
+      "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+      "file": "BRCAmfa.hg38.v1.1.bed",
+      "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
+      "track_version": "ENIGMA specifications 1.1.0",
+      "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb"
+    },
+    "zanti_2025_case_control": {
+      "doi": "10.1038/s41467-025-59979-6",
+      "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
+      "pmid": "40413188",
+      "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
+      "sheet": "Supplementary Data 5",
+      "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx"
+    }
+  },
+  "source_manifest": {
+    "appendix_b_bibliography": [
+      {
+        "citation": "Goldgar et al. 2004",
+        "pmid": "15290653",
+        "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track",
+        "role": "multifactorial likelihood methodology and component evidence",
+        "separate_runtime_component": false
+      },
+      {
+        "citation": "Thompson et al. 2003",
+        "pmid": "12900794",
+        "reason": "methodological source; segregation LRs are represented in the admitted aggregate datasets",
+        "role": "quantitative cosegregation methodology",
+        "separate_runtime_component": false
+      },
+      {
+        "citation": "Easton et al. 2007",
+        "component_id": "easton_2007_multifactorial",
+        "pmid": "17924331",
+        "role": "variant-specific multifactorial clinical LR",
+        "separate_runtime_component": true
+      },
+      {
+        "citation": "Spurdle et al. 2015",
+        "pmid": "25857409",
+        "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track",
+        "role": "multifactorial likelihood methodology and calibration",
+        "separate_runtime_component": false
+      },
+      {
+        "citation": "de la Hoya et al. 2016",
+        "pmid": "27008870",
+        "reason": "methodological source; pathology LRs are represented in the admitted aggregate datasets",
+        "role": "tumour pathology likelihood methodology",
+        "separate_runtime_component": false
+      },
+      {
+        "citation": "Parsons et al. 2019",
+        "component_id": "parsons_2019_multifactorial",
+        "pmid": "31131967",
+        "role": "variant-specific multifactorial clinical LR",
+        "separate_runtime_component": true
+      },
+      {
+        "citation": "Li et al. 2020",
+        "component_id": "li_2020_personal_family_history",
+        "pmid": "31853058",
+        "role": "variant-specific personal and family history LR",
+        "separate_runtime_component": true
+      },
+      {
+        "basis": "included by the official UCSC ENIGMA BRCAmfa track",
+        "citation": "Caputo et al. 2021",
+        "component_id": "caputo_2021_cosegregation",
+        "pmid": "34597585",
+        "role": "variant-specific cosegregation and clinical LR",
+        "separate_runtime_component": true
+      },
+      {
+        "basis": "ENIGMA Analytical Working Group dataset implementing the ccLR approach preferred by the VCEP specification",
+        "citation": "Zanti et al. 2025",
+        "component_id": "zanti_2025_case_control",
+        "pmid": "40413188",
+        "role": "variant-specific BRIDGES/CARRIERS/UKB case-control LR",
+        "separate_runtime_component": true
+      }
+    ],
+    "combination_rules": {
+      "component_level_codes": "not scored",
+      "duplicate_independence_group": "fatal",
+      "duplicate_source_id": "fatal",
+      "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
+      "only_independent_components": true,
+      "posterior_probability_prior": "not used"
+    },
+    "datasets": {
+      "ucsc_enigma_brcamfa_v1_1": {
+        "admitted_components": [
+          "easton_2007_multifactorial",
+          "parsons_2019_multifactorial",
+          "li_2020_personal_family_history",
+          "caputo_2021_cosegregation"
+        ],
+        "deduplication": "UCSC removed duplicate Parsons/Easton variants before recomputing the track",
+        "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+        "file": "BRCAmfa.hg38.v1.1.bed",
+        "role": "variant-specific multifactorial clinical LR components",
+        "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
+        "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
+        "version": "ENIGMA UCSC track 1.1.0"
+      },
+      "zanti_2025_case_control": {
+        "admission_filters": {
+          "brca2_minimum_datasets": 2,
+          "maximum_non_founder_faf": 0.001,
+          "minimum_combined_carriers": 3,
+          "region": "CDS +/-5 bp"
+        },
+        "cohorts": [
+          "BRIDGES/BCAC",
+          "CARRIERS",
+          "UK Biobank"
+        ],
+        "doi": "10.1038/s41467-025-59979-6",
+        "expected_admitted_records": {
+          "BRCA1": 681,
+          "BRCA2": 1029,
+          "total": 1710
+        },
+        "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
+        "pmid": "40413188",
+        "role": "variant-specific combined case-control LR",
+        "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
+        "sheet": "Supplementary Data 5",
+        "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx",
+        "version": "Nature Communications version of record, 2025-05-25"
+      }
+    },
+    "schema_version": 1,
+    "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
+    "status": "validated_source_manifest",
+    "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2"
+  },
+  "source_manifest_file": "clinical_lr_sources.manifest.json",
+  "source_manifest_sha256": "2c911d233c30744154fd210f175d6396412a411e90c509b65f733e026f45594a",
   "status": "validated_derived_snapshot",
   "target_rule_version": "ENIGMA BRCA1/2 VCEP 1.2 PP4/BP5 thresholds"
 }

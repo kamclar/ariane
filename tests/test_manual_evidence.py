@@ -66,6 +66,19 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         incomplete["source_pmid"] = "99999999"
         self.assertIsNone(suggest_strength("PP4", incomplete))
 
+    def test_pp4_accepts_zanti_enigma_case_control_source(self):
+        self.assertEqual(
+            suggest_strength("PP4", {
+                "combined_clinical_lr": 18.7,
+                "source_review_status": "appendix_b",
+                "source_pmid": "40413188",
+                "clinical_data_summary": (
+                    "Zanti 2025 BRIDGES, CARRIERS and UK Biobank case-control LR."
+                ),
+            }),
+            "Strong",
+        )
+
     def test_pp4_accepts_canvar_log10_lr_and_acmg_point_scales(self):
         common = {
             "source_review_status": "appendix_b",

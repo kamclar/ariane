@@ -19,12 +19,21 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         index_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.index.json"
         metadata_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json"
+        source_manifest_path = root / "data/sources/enigma/clinical_lr_sources.manifest.json"
         indel_index_path = root / "data/precomputed/brca_normalized_indel_snapshot.index.json"
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         records = json.loads(index_path.read_text(encoding="utf-8"))
         self.assertEqual(metadata["status"], "validated_derived_snapshot")
         self.assertEqual(metadata["records"], len(records))
         self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
+        self.assertEqual(
+            metadata["source_manifest_sha256"],
+            hashlib.sha256(source_manifest_path.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(metadata["case_control_records_selected"], 1710)
+        self.assertEqual(
+            metadata["case_control_selected_by_gene"], {"BRCA1": 681, "BRCA2": 1029}
+        )
         self.assertEqual(
             metadata["normalization"]["normalized_indel_dependency"]["index_sha256"],
             hashlib.sha256(indel_index_path.read_bytes()).hexdigest(),
@@ -43,18 +52,28 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(canonical["code"], "PP4")
         self.assertEqual(canonical["strength"], "Very Strong")
         self.assertEqual(canonical["points"], 8)
-        self.assertAlmostEqual(canonical["likelihood_ratio"], 6.89647e45)
+        self.assertAlmostEqual(canonical["likelihood_ratio"], 1.3618122912956548e90)
         self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
-        self.assertEqual({item["pmid"] for item in canonical["source_components"]}, {"31853058"})
+        self.assertEqual(
+            {item["pmid"] for item in canonical["source_components"]},
+            {"31853058", "40413188"},
+        )
 
     def test_pp4_public_reason_uses_enigma_method_not_storage_terminology(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.509G>A")
         self.assertTrue(result["applies"])
-        self.assertEqual(result["strength"], "Moderate")
-        self.assertIn("ENIGMA v1.2 Appendix B", result["reason"])
-        self.assertIn("combined LR=6.1764", result["reason"])
+        self.assertEqual(result["code"], "BP5")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["points"], -4)
+        self.assertAlmostEqual(result["likelihood_ratio"], 0.03946874736088844)
+        self.assertIn("ENIGMA v1.2 combined clinical evidence", result["reason"])
+        self.assertIn("combined LR=0.0394687", result["reason"])
+        self.assertEqual(
+            {item["pmid"] for item in result["source_components"]},
+            {"31131967", "31853058", "40413188"},
+        )
         self.assertNotIn("local", result["reason"].lower())
         self.assertNotIn("snapshot", result["reason"].lower())
 
@@ -63,7 +82,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
         result = evaluate_pp4_bp5("BRCA1", "c.999999A>G")
         self.assertFalse(result["applies"])
-        self.assertIn("ENIGMA v1.2 Appendix B", result["reason"])
+        self.assertIn("ENIGMA v1.2", result["reason"])
         self.assertNotIn("local", result["reason"].lower())
         self.assertNotIn("snapshot", result["reason"].lower())
 
@@ -95,17 +114,18 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             {"31131967", "31853058"},
         )
 
-    def test_pp4_uses_combined_clinical_lr_not_historical_posterior_probability(self):
+    def test_combined_clinical_lr_includes_caputo_and_case_control_components(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.3891_3893del")
         self.assertTrue(result["applies"])
-        self.assertEqual(result["code"], "PP4")
+        self.assertEqual(result["code"], "BP5")
         self.assertEqual(result["strength"], "Strong")
-        self.assertEqual(result["points"], 4)
-        self.assertAlmostEqual(result["likelihood_ratio"], 28.554690389559802)
+        self.assertEqual(result["points"], -4)
+        self.assertAlmostEqual(result["likelihood_ratio"], 0.02896079544190584)
         self.assertEqual(
-            {item["pmid"] for item in result["source_components"]}, {"31131967"}
+            {item["pmid"] for item in result["source_components"]},
+            {"31131967", "34597585", "40413188"},
         )
 
     def test_pp4_combines_available_appendix_b_clinical_lr_components(self):
@@ -131,6 +151,21 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             pp4_bp5._ALIASES = None
             with patch.object(pp4_bp5, "METADATA_PATH", Path("missing-pp4-metadata.json")):
                 with self.assertRaisesRegex(RuntimeError, "metadata is missing"):
+                    pp4_bp5.load_pp4_bp5_snapshot()
+        finally:
+            pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES = original_snapshot, original_aliases
+
+    def test_pp4_snapshot_missing_source_manifest_fails_closed(self):
+        from backend.modules import pp4_bp5
+
+        original_snapshot, original_aliases = pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES
+        try:
+            pp4_bp5._SNAPSHOT = None
+            pp4_bp5._ALIASES = None
+            with patch.object(
+                pp4_bp5, "SOURCE_MANIFEST_PATH", Path("missing-clinical-lr-manifest.json")
+            ):
+                with self.assertRaisesRegex(RuntimeError, "source manifest is missing"):
                     pp4_bp5.load_pp4_bp5_snapshot()
         finally:
             pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES = original_snapshot, original_aliases
@@ -257,6 +292,29 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertTrue(pp4.applies)
         self.assertEqual(pp4.strength, "Very Strong")
         self.assertEqual(pp4.points, 8)
+
+    def test_c509_full_classification_uses_combined_bp5_not_component_pp4(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+            "backend.lookups.spliceai.get_spliceai_score", return_value=0.02
+        ), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
+            return_value=(None, None),
+        ), patch(
+            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup",
+            return_value={"status": "not_found"},
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.509G>A", "p.(Arg170Gln)")
+            )
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertNotIn("PP4", criteria)
+        self.assertEqual(criteria["BP5"].strength, "Strong")
+        self.assertEqual(criteria["BP5"].points, -4)
 
     def test_brca2_multibase_duplication_receives_bp5_supporting(self):
         from backend.main import _classify_one

@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.index.json"
 METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr_snapshot.metadata.json"
+SOURCE_MANIFEST_PATH = REPOSITORY_ROOT / "data" / "sources" / "enigma" / "clinical_lr_sources.manifest.json"
 INDEL_SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.index.json"
 INDEL_METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.metadata.json"
 
@@ -66,6 +67,10 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         raise RuntimeError("PP4/BP5 clinical LR snapshot is not validated")
     if metadata.get("index_sha256") != _sha256(SNAPSHOT_PATH):
         raise RuntimeError("PP4/BP5 clinical LR snapshot checksum does not match metadata")
+    if not SOURCE_MANIFEST_PATH.is_file():
+        raise RuntimeError("PP4/BP5 clinical LR source manifest is missing")
+    if metadata.get("source_manifest_sha256") != _sha256(SOURCE_MANIFEST_PATH):
+        raise RuntimeError("PP4/BP5 clinical LR source manifest checksum mismatch")
     normalization = metadata.get("normalization")
     if not isinstance(normalization, dict) or not normalization.get("provenance"):
         raise RuntimeError("PP4/BP5 clinical LR snapshot normalization provenance is missing")
@@ -115,7 +120,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     if entry is None:
         result["reason"] = (
             "No informative variant-specific combined clinical LR is available; "
-            "PP4/BP5 is not applied under ENIGMA v1.2 Appendix B"
+            "PP4/BP5 is not applied under ENIGMA v1.2"
         )
         return result
 
@@ -135,7 +140,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     })
     pmids = sorted({component["pmid"] for component in result["source_components"]})
     result["reason"] = (
-        f"ENIGMA v1.2 Appendix B multifactorial clinical evidence: "
+        f"ENIGMA v1.2 combined clinical evidence: "
         f"combined LR={lr:.6g}; {code} {entry['strength']}; "
         f"PMID {', '.join(pmids)}"
     )

@@ -12,14 +12,16 @@ from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SO
 
 CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
 
-APPENDIX_B_PP4_SOURCES = {
+ENIGMA_PP4_SOURCES = {
     "15290653": "Goldgar et al. 2004",
-    "12900794": "Thompson et al. 2005",
+    "12900794": "Thompson et al. 2003",
     "17924331": "Easton et al. 2007",
-    "25857409": "Spurdle et al. 2014",
+    "25857409": "Spurdle et al. 2015",
     "27008870": "de la Hoya et al. 2016",
     "31131967": "Parsons et al. 2019",
     "31853058": "Li et al. 2020",
+    "34597585": "Caputo et al. 2021",
+    "40413188": "Zanti et al. 2025",
 }
 
 STRENGTH_POINTS = {
@@ -71,7 +73,7 @@ MANUAL_CRITERIA = {
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PP4, Specifications Table 7 and Appendix B",
         "appendix_b_sources": [
             {"pmid": pmid, "citation": citation}
-            for pmid, citation in APPENDIX_B_PP4_SOURCES.items()
+            for pmid, citation in ENIGMA_PP4_SOURCES.items()
         ],
     },
     "BS2": {
@@ -242,7 +244,7 @@ def _pp4_strength(evidence: Dict[str, Any]) -> Optional[str]:
 def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
     status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
     if status == "appendix_b":
-        return str(evidence.get("source_pmid") or "").strip() in APPENDIX_B_PP4_SOURCES
+        return str(evidence.get("source_pmid") or "").strip() in ENIGMA_PP4_SOURCES
     if status == "other_reviewed":
         return all(
             bool((evidence.get(field) or "").strip())
@@ -254,7 +256,7 @@ def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
 def _pp4_source_is_recorded(evidence: Dict[str, Any]) -> bool:
     status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
     if status == "appendix_b":
-        return str(evidence.get("source_pmid") or "").strip() in APPENDIX_B_PP4_SOURCES
+        return str(evidence.get("source_pmid") or "").strip() in ENIGMA_PP4_SOURCES
     if status == "other_reviewed":
         return _pp4_source_is_reviewed(evidence)
     if status == "unreviewed":
