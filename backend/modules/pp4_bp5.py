@@ -113,7 +113,10 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "source_components": [],
     }
     if entry is None:
-        result["reason"] = "Variant is not present in the local PP4/BP5 clinical LR snapshot"
+        result["reason"] = (
+            "No informative variant-specific combined clinical LR is available; "
+            "PP4/BP5 is not applied under ENIGMA v1.2 Appendix B"
+        )
         return result
 
     lr = entry["combined_lr"]
@@ -132,7 +135,8 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     })
     pmids = sorted({component["pmid"] for component in result["source_components"]})
     result["reason"] = (
-        f"Local ENIGMA Appendix B clinical LR snapshot: combined LR={lr:.6g}; "
-        f"{code} {entry['strength']}; PMID {', '.join(pmids)}"
+        f"ENIGMA v1.2 Appendix B multifactorial clinical evidence: "
+        f"combined LR={lr:.6g}; {code} {entry['strength']}; "
+        f"PMID {', '.join(pmids)}"
     )
     return result

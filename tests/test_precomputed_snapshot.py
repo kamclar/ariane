@@ -47,6 +47,26 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
         self.assertEqual({item["pmid"] for item in canonical["source_components"]}, {"31853058"})
 
+    def test_pp4_public_reason_uses_enigma_method_not_storage_terminology(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.509G>A")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Moderate")
+        self.assertIn("ENIGMA v1.2 Appendix B", result["reason"])
+        self.assertIn("combined LR=6.1764", result["reason"])
+        self.assertNotIn("local", result["reason"].lower())
+        self.assertNotIn("snapshot", result["reason"].lower())
+
+    def test_pp4_unavailable_reason_does_not_expose_storage_terminology(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.999999A>G")
+        self.assertFalse(result["applies"])
+        self.assertIn("ENIGMA v1.2 Appendix B", result["reason"])
+        self.assertNotIn("local", result["reason"].lower())
+        self.assertNotIn("snapshot", result["reason"].lower())
+
     def test_bp5_snapshot_resolves_multibase_duplication_alias(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
