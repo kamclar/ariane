@@ -148,9 +148,28 @@ def test_abbreviated_frameshift_accepts_unknown_new_stop_in_canonical_result():
     )
 
 
-def test_wrong_transcript_is_rejected():
-    with pytest.raises(ValueError, match="does not match BRCA1"):
-        normalize_variant_input("BRCA1", "NM_000059.4:c.303T>G")
+def test_explicit_transcript_overrides_selected_gene():
+    result = normalize_variant_input("BRCA1", "NM_000059.4:c.3703C>T")
+
+    assert result.gene == "BRCA2"
+    assert result.reference_transcript == "NM_000059.4"
+
+
+def test_explicit_gene_prefix_overrides_selected_gene():
+    result = normalize_variant_input(
+        "BRCA2", "BRCA1 c.3891_3893del p.(Ser1298del)"
+    )
+
+    assert result.gene == "BRCA1"
+    assert result.c_notation == "c.3891_3893del"
+    assert result.p_notation == "p.(Ser1298del)"
+
+
+def test_conflicting_gene_and_transcript_are_rejected():
+    with pytest.raises(ValueError, match="Conflicting gene identifiers"):
+        normalize_variant_input(
+            "BRCA2", "BRCA1 NM_000059.4:c.3703C>T"
+        )
 
 
 def test_transcript_without_version_is_rejected_explicitly():
@@ -179,6 +198,18 @@ def test_variant_request_retains_submitted_and_canonical_descriptions():
     assert request.submitted_notation == "chr17:43099813:C>T"
     assert request.c_notation == "c.509G>A"
     assert request.p_notation == "p.(Arg170Gln)"
+    assert request.reference_transcript == "NM_007294.4"
+
+
+def test_variant_request_uses_explicit_gene_from_notation():
+    request = VariantRequest(
+        gene="BRCA2",
+        c_notation="BRCA1 c.3891_3893del p.(Ser1298del)",
+    )
+
+    assert request.gene == "BRCA1"
+    assert request.submitted_notation == "BRCA1 c.3891_3893del p.(Ser1298del)"
+    assert request.c_notation == "c.3891_3893del"
     assert request.reference_transcript == "NM_007294.4"
 
 

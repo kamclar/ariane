@@ -36,7 +36,7 @@ class VariantRequest(BaseModel):
         )
         return {
             **data,
-            "gene": gene,
+            "gene": normalized.gene,
             "submitted_notation": raw_notation,
             "c_notation": normalized.c_notation,
             "p_notation": normalized.p_notation,

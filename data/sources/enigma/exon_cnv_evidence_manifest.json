@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "manifest_id": "ariane_enigma_brca_exon_cnv_population_v2",
+  "rule_set": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
+  "exon_source": {
+    "path": "backend/data/enigma_table4.json",
+    "sha256": "6fb572dde6b7a50aaa8d5088189768bc12ceb93c2341028a419eefdfb7e9e19a",
+    "section": "exon_ranges"
+  },
+  "coordinate_source": {
+    "path": "data/precomputed/brca_module1_snv_classification_snapshot.index.json",
+    "sha256": "54c772d9ea13948687cca06e5ccddc6ad4900216cffaddfb0731ef458f537bb3",
+    "assembly": "GRCh37"
+  },
+  "population_source": {
+    "dataset": "gnomAD-SV v2.1",
+    "assembly": "GRCh37",
+    "url": "https://storage.googleapis.com/gcp-public-data--gnomad/papers/2019-sv/gnomad_v2.1_sv.sites.bed.gz",
+    "expected_source_identity": {
+      "bytes": 104527888,
+      "sha256": "c843ff53b4bf36c7f733cb08565860065b3b0189375d135e33db0886381598d8",
+      "etag": "\"c891433717752ef81fa7a95ec56ee2a7\""
+    },
+    "match_policy": "For a single-exon deletion, any gnomAD-SV deletion that spans the complete coding interval of that exon is a population match. Exact breakpoint equality is not required. PASS and filtered matches are both retained; a filtered match prevents an absence conclusion.",
+    "quality_policy": "Only an exon with a reproducibly derived GRCh37 interval and no matching PASS or filtered deletion can establish population absence.",
+    "pm2_policy": {
+      "operations": ["deletion"],
+      "minimum_variant_size_bp": 51,
+      "criterion": "PM2_Supporting",
+      "strength": "Supporting",
+      "points": 1,
+      "source": "ClinGen ENIGMA BRCA1/2 VCEP v1.2 Appendix G",
+      "source_url": "https://cspec.genome.network/cspec/File/id/5a75d1a0-1222-46a2-8802-68a4f2251a3a/data"
+    }
+  }
+}

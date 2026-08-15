@@ -472,5 +472,220 @@
     "mask": 0,
     "annotation_subset": "basic",
     "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.3668_3671dup": {
+    "score": 0.087,
+    "chrom": "17",
+    "pos": 43091859,
+    "ref": "G",
+    "alt": "GGGAA",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DL",
+    "delta_scores": {
+      "DS_AG": 0.028,
+      "DS_AL": 0.01,
+      "DS_DG": 0.034,
+      "DS_DL": 0.087
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.022,
+      "DS_AL_REF": 0.049,
+      "DS_DG_REF": 0.058,
+      "DS_DL_REF": 0.688
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.05,
+      "DS_AL_ALT": 0.039,
+      "DS_DG_ALT": 0.092,
+      "DS_DL_ALT": 0.6
+    },
+    "reference_transcript_score": 0.087,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.087,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.5556_5560del": {
+    "score": 0.052,
+    "chrom": "17",
+    "pos": 43045709,
+    "ref": "AGGTAG",
+    "alt": "A",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model:cache",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DG",
+    "delta_scores": {
+      "DS_AG": 0.003,
+      "DS_AL": 0.009,
+      "DS_DG": 0.052,
+      "DS_DL": 0.007
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.013,
+      "DS_AL_REF": 0.995,
+      "DS_DG_REF": 0.01,
+      "DS_DL_REF": 0.126
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.016,
+      "DS_AL_ALT": 0.986,
+      "DS_DG_ALT": 0.062,
+      "DS_DL_ALT": 0.119
+    },
+    "reference_transcript_score": 0.052,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.061,
+    "max_any_transcript": "ENST00000470026.6",
+    "n_transcript_scores": 25,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA2:c.6147_6149del": {
+    "score": 0.01,
+    "chrom": "13",
+    "pos": 32340499,
+    "ref": "TGTG",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000380152.8",
+    "max_delta_field": "DS_DG",
+    "delta_scores": {
+      "DS_AG": 0.008,
+      "DS_AL": 0.002,
+      "DS_DG": 0.01,
+      "DS_DL": 0.001
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.07,
+      "DS_AL_REF": 0.005,
+      "DS_DG_REF": 0.045,
+      "DS_DL_REF": 0.001
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.078,
+      "DS_AL_ALT": 0.004,
+      "DS_DG_ALT": 0.055,
+      "DS_DL_ALT": 0.0
+    },
+    "reference_transcript_score": 0.01,
+    "reference_transcript": "ENST00000380152.8",
+    "max_any_transcript_score": 0.01,
+    "max_any_transcript": "ENST00000380152.8",
+    "n_transcript_scores": 5,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.3891_3893del": {
+    "score": 0.193,
+    "chrom": "17",
+    "pos": 43091637,
+    "ref": "TGAA",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DL",
+    "delta_scores": {
+      "DS_AG": 0.006,
+      "DS_AL": 0.149,
+      "DS_DG": 0.006,
+      "DS_DL": 0.193
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.064,
+      "DS_AL_REF": 0.17,
+      "DS_DG_REF": 0.058,
+      "DS_DL_REF": 0.688
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.07,
+      "DS_AL_ALT": 0.021,
+      "DS_DG_ALT": 0.063,
+      "DS_DL_ALT": 0.495
+    },
+    "reference_transcript_score": 0.193,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.193,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
+  },
+  "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1:reference_transcript:BRCA1:c.4185G>A": {
+    "score": 0.93,
+    "chrom": "17",
+    "pos": 43090944,
+    "ref": "C",
+    "alt": "T",
+    "source": "Broad SpliceAI API",
+    "api_source": "spliceai:model",
+    "api_url": "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/",
+    "transcript_policy": "reference_transcript",
+    "selected_transcript": "ENST00000357654.9",
+    "max_delta_field": "DS_DL",
+    "delta_scores": {
+      "DS_AG": 0.0,
+      "DS_AL": 0.877,
+      "DS_DG": 0.007,
+      "DS_DL": 0.93
+    },
+    "reference_scores": {
+      "DS_AG_REF": 0.003,
+      "DS_AL_REF": 0.981,
+      "DS_DG_REF": 0.001,
+      "DS_DL_REF": 0.987
+    },
+    "alternate_scores": {
+      "DS_AG_ALT": 0.003,
+      "DS_AL_ALT": 0.104,
+      "DS_DG_ALT": 0.008,
+      "DS_DL_ALT": 0.058
+    },
+    "reference_transcript_score": 0.93,
+    "reference_transcript": "ENST00000357654.9",
+    "max_any_transcript_score": 0.93,
+    "max_any_transcript": "ENST00000357654.9",
+    "n_transcript_scores": 26,
+    "scoring_profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "scoring_profile_sha256": "2568a386db449cfad1028d20673545f0b37c9b9e849cb4485a388586f6d4fd7e",
+    "genome_assembly": "GRCh38",
+    "distance": 10000,
+    "mask": 0,
+    "annotation_subset": "basic",
+    "aggregation": "maximum_raw_delta"
   }
 }

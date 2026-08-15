@@ -1,0 +1,1006 @@
+{
+  "schema_version": 2,
+  "snapshot_id": "ariane_enigma_brca_exon_cnv_population_v2",
+  "rule_set": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
+  "created_utc": "2026-08-14T17:07:19.041560+00:00",
+  "builder": "scripts/build_exon_cnv_evidence_snapshot.py",
+  "manifest_sha256": "811293822d781dfab79d8828960e5f97c947edc032acf2550553cd2d07848323",
+  "source_identity": {
+    "url": "https://storage.googleapis.com/gcp-public-data--gnomad/papers/2019-sv/gnomad_v2.1_sv.sites.bed.gz",
+    "retrieval": "downloaded",
+    "etag": "\"c891433717752ef81fa7a95ec56ee2a7\"",
+    "x_goog_hash": "crc32c=XsOSJg==",
+    "last_modified": "Thu, 20 Aug 2020 16:01:08 GMT",
+    "content_length": "104527888",
+    "sha256": "c843ff53b4bf36c7f733cb08565860065b3b0189375d135e33db0886381598d8",
+    "bytes": 104527888
+  },
+  "rows_scanned": 387477,
+  "deletion_rows_scanned": 169635,
+  "pm2_policy": {
+    "operations": [
+      "deletion"
+    ],
+    "minimum_variant_size_bp": 51,
+    "criterion": "PM2_Supporting",
+    "strength": "Supporting",
+    "points": 1,
+    "source": "ClinGen ENIGMA BRCA1/2 VCEP v1.2 Appendix G",
+    "source_url": "https://cspec.genome.network/cspec/File/id/5a75d1a0-1222-46a2-8802-68a4f2251a3a/data"
+  },
+  "exons": {
+    "BRCA1:E1": {
+      "gene": "BRCA1",
+      "exon": "E1",
+      "c_range": [
+        -113,
+        -20
+      ],
+      "coding_length_bp": 0,
+      "coordinate_status": "unavailable",
+      "grch37_coding_interval": null,
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E2": {
+      "gene": "BRCA1",
+      "exon": "E2",
+      "c_range": [
+        -19,
+        80
+      ],
+      "coding_length_bp": 80,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41276034,
+        "end_1_based_inclusive": 41276113
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E3": {
+      "gene": "BRCA1",
+      "exon": "E3",
+      "c_range": [
+        81,
+        134
+      ],
+      "coding_length_bp": 54,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41267743,
+        "end_1_based_inclusive": 41267796
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E4(5)": {
+      "gene": "BRCA1",
+      "exon": "E4(5)",
+      "c_range": [
+        135,
+        212
+      ],
+      "coding_length_bp": 78,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41258473,
+        "end_1_based_inclusive": 41258550
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E5(6)": {
+      "gene": "BRCA1",
+      "exon": "E5(6)",
+      "c_range": [
+        213,
+        301
+      ],
+      "coding_length_bp": 89,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41256885,
+        "end_1_based_inclusive": 41256973
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E6(7)": {
+      "gene": "BRCA1",
+      "exon": "E6(7)",
+      "c_range": [
+        302,
+        441
+      ],
+      "coding_length_bp": 140,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41256139,
+        "end_1_based_inclusive": 41256278
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E7(8)": {
+      "gene": "BRCA1",
+      "exon": "E7(8)",
+      "c_range": [
+        442,
+        547
+      ],
+      "coding_length_bp": 106,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41251792,
+        "end_1_based_inclusive": 41251897
+      },
+      "all_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41249377",
+          "end": "41252718",
+          "name": "gnomAD-SV_v2.1_DEL_17_160436",
+          "svtype": "DEL",
+          "SVLEN": "3340",
+          "AN": "21694",
+          "AC": "1",
+          "AF": "4.600000102072954e-05",
+          "FILTER": "PASS"
+        }
+      ],
+      "pass_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41249377",
+          "end": "41252718",
+          "name": "gnomAD-SV_v2.1_DEL_17_160436",
+          "svtype": "DEL",
+          "SVLEN": "3340",
+          "AN": "21694",
+          "AC": "1",
+          "AF": "4.600000102072954e-05",
+          "FILTER": "PASS"
+        }
+      ]
+    },
+    "BRCA1:E8(9)": {
+      "gene": "BRCA1",
+      "exon": "E8(9)",
+      "c_range": [
+        548,
+        593
+      ],
+      "coding_length_bp": 46,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41249261,
+        "end_1_based_inclusive": 41249306
+      },
+      "all_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ],
+      "pass_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ]
+    },
+    "BRCA1:E9(10)": {
+      "gene": "BRCA1",
+      "exon": "E9(10)",
+      "c_range": [
+        594,
+        670
+      ],
+      "coding_length_bp": 77,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41247863,
+        "end_1_based_inclusive": 41247939
+      },
+      "all_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ],
+      "pass_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ]
+    },
+    "BRCA1:E10(11)": {
+      "gene": "BRCA1",
+      "exon": "E10(11)",
+      "c_range": [
+        671,
+        4096
+      ],
+      "coding_length_bp": 3426,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41243452,
+        "end_1_based_inclusive": 41246877
+      },
+      "all_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ],
+      "pass_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ]
+    },
+    "BRCA1:E11(12)": {
+      "gene": "BRCA1",
+      "exon": "E11(12)",
+      "c_range": [
+        4097,
+        4185
+      ],
+      "coding_length_bp": 89,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41242961,
+        "end_1_based_inclusive": 41243049
+      },
+      "all_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ],
+      "pass_matching_deletions": [
+        {
+          "#chrom": "17",
+          "start": "41236499",
+          "end": "41251000",
+          "name": "gnomAD-SV_v2.1_DEL_17_160435",
+          "svtype": "DEL",
+          "SVLEN": "14500",
+          "AN": "20948",
+          "AC": "1",
+          "AF": "4.8000001697801054e-05",
+          "FILTER": "PASS"
+        }
+      ]
+    },
+    "BRCA1:E12(13)": {
+      "gene": "BRCA1",
+      "exon": "E12(13)",
+      "c_range": [
+        4186,
+        4357
+      ],
+      "coding_length_bp": 172,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41234421,
+        "end_1_based_inclusive": 41234592
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E13(14)": {
+      "gene": "BRCA1",
+      "exon": "E13(14)",
+      "c_range": [
+        4358,
+        4484
+      ],
+      "coding_length_bp": 127,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41228505,
+        "end_1_based_inclusive": 41228631
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E14(15)": {
+      "gene": "BRCA1",
+      "exon": "E14(15)",
+      "c_range": [
+        4485,
+        4675
+      ],
+      "coding_length_bp": 191,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41226348,
+        "end_1_based_inclusive": 41226538
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E15(16)": {
+      "gene": "BRCA1",
+      "exon": "E15(16)",
+      "c_range": [
+        4676,
+        4986
+      ],
+      "coding_length_bp": 311,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41222945,
+        "end_1_based_inclusive": 41223255
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E16(17)": {
+      "gene": "BRCA1",
+      "exon": "E16(17)",
+      "c_range": [
+        4987,
+        5074
+      ],
+      "coding_length_bp": 88,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41219625,
+        "end_1_based_inclusive": 41219712
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E17(18)": {
+      "gene": "BRCA1",
+      "exon": "E17(18)",
+      "c_range": [
+        5075,
+        5152
+      ],
+      "coding_length_bp": 78,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41215891,
+        "end_1_based_inclusive": 41215968
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E18(19)": {
+      "gene": "BRCA1",
+      "exon": "E18(19)",
+      "c_range": [
+        5153,
+        5193
+      ],
+      "coding_length_bp": 41,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41215350,
+        "end_1_based_inclusive": 41215390
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E19(20)": {
+      "gene": "BRCA1",
+      "exon": "E19(20)",
+      "c_range": [
+        5194,
+        5277
+      ],
+      "coding_length_bp": 84,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41209069,
+        "end_1_based_inclusive": 41209152
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E20(21)": {
+      "gene": "BRCA1",
+      "exon": "E20(21)",
+      "c_range": [
+        5278,
+        5332
+      ],
+      "coding_length_bp": 55,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41203080,
+        "end_1_based_inclusive": 41203134
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E21(22)": {
+      "gene": "BRCA1",
+      "exon": "E21(22)",
+      "c_range": [
+        5333,
+        5406
+      ],
+      "coding_length_bp": 74,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41201138,
+        "end_1_based_inclusive": 41201211
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E22(23)": {
+      "gene": "BRCA1",
+      "exon": "E22(23)",
+      "c_range": [
+        5407,
+        5467
+      ],
+      "coding_length_bp": 61,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41199660,
+        "end_1_based_inclusive": 41199720
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA1:E23(24)": {
+      "gene": "BRCA1",
+      "exon": "E23(24)",
+      "c_range": [
+        5468,
+        5571
+      ],
+      "coding_length_bp": 104,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "17",
+        "start_1_based_inclusive": 41197716,
+        "end_1_based_inclusive": 41197819
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E1": {
+      "gene": "BRCA2",
+      "exon": "E1",
+      "c_range": [
+        -227,
+        -40
+      ],
+      "coding_length_bp": 0,
+      "coordinate_status": "unavailable",
+      "grch37_coding_interval": null,
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E2": {
+      "gene": "BRCA2",
+      "exon": "E2",
+      "c_range": [
+        -39,
+        67
+      ],
+      "coding_length_bp": 67,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32890598,
+        "end_1_based_inclusive": 32890664
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E3": {
+      "gene": "BRCA2",
+      "exon": "E3",
+      "c_range": [
+        68,
+        316
+      ],
+      "coding_length_bp": 249,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32893214,
+        "end_1_based_inclusive": 32893462
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E4": {
+      "gene": "BRCA2",
+      "exon": "E4",
+      "c_range": [
+        317,
+        425
+      ],
+      "coding_length_bp": 109,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32899213,
+        "end_1_based_inclusive": 32899321
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E5": {
+      "gene": "BRCA2",
+      "exon": "E5",
+      "c_range": [
+        426,
+        475
+      ],
+      "coding_length_bp": 50,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32900238,
+        "end_1_based_inclusive": 32900287
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E6": {
+      "gene": "BRCA2",
+      "exon": "E6",
+      "c_range": [
+        476,
+        516
+      ],
+      "coding_length_bp": 41,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32900379,
+        "end_1_based_inclusive": 32900419
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E7": {
+      "gene": "BRCA2",
+      "exon": "E7",
+      "c_range": [
+        517,
+        631
+      ],
+      "coding_length_bp": 115,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32900636,
+        "end_1_based_inclusive": 32900750
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E8": {
+      "gene": "BRCA2",
+      "exon": "E8",
+      "c_range": [
+        632,
+        681
+      ],
+      "coding_length_bp": 50,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32903580,
+        "end_1_based_inclusive": 32903629
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E9": {
+      "gene": "BRCA2",
+      "exon": "E9",
+      "c_range": [
+        682,
+        793
+      ],
+      "coding_length_bp": 112,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32905056,
+        "end_1_based_inclusive": 32905167
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E10": {
+      "gene": "BRCA2",
+      "exon": "E10",
+      "c_range": [
+        794,
+        1909
+      ],
+      "coding_length_bp": 1116,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32906409,
+        "end_1_based_inclusive": 32907524
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E11": {
+      "gene": "BRCA2",
+      "exon": "E11",
+      "c_range": [
+        1910,
+        6841
+      ],
+      "coding_length_bp": 4932,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32910402,
+        "end_1_based_inclusive": 32915333
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E12": {
+      "gene": "BRCA2",
+      "exon": "E12",
+      "c_range": [
+        6842,
+        6937
+      ],
+      "coding_length_bp": 96,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32918695,
+        "end_1_based_inclusive": 32918790
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E13": {
+      "gene": "BRCA2",
+      "exon": "E13",
+      "c_range": [
+        6938,
+        7007
+      ],
+      "coding_length_bp": 70,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32920964,
+        "end_1_based_inclusive": 32921033
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E14": {
+      "gene": "BRCA2",
+      "exon": "E14",
+      "c_range": [
+        7008,
+        7435
+      ],
+      "coding_length_bp": 428,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32928998,
+        "end_1_based_inclusive": 32929425
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E15": {
+      "gene": "BRCA2",
+      "exon": "E15",
+      "c_range": [
+        7436,
+        7617
+      ],
+      "coding_length_bp": 182,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32930565,
+        "end_1_based_inclusive": 32930746
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E16": {
+      "gene": "BRCA2",
+      "exon": "E16",
+      "c_range": [
+        7618,
+        7805
+      ],
+      "coding_length_bp": 188,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32931879,
+        "end_1_based_inclusive": 32932066
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E17": {
+      "gene": "BRCA2",
+      "exon": "E17",
+      "c_range": [
+        7806,
+        7976
+      ],
+      "coding_length_bp": 171,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32936660,
+        "end_1_based_inclusive": 32936830
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E18": {
+      "gene": "BRCA2",
+      "exon": "E18",
+      "c_range": [
+        7977,
+        8331
+      ],
+      "coding_length_bp": 355,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32937316,
+        "end_1_based_inclusive": 32937670
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E19": {
+      "gene": "BRCA2",
+      "exon": "E19",
+      "c_range": [
+        8332,
+        8487
+      ],
+      "coding_length_bp": 156,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32944539,
+        "end_1_based_inclusive": 32944694
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E20": {
+      "gene": "BRCA2",
+      "exon": "E20",
+      "c_range": [
+        8488,
+        8632
+      ],
+      "coding_length_bp": 145,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32945093,
+        "end_1_based_inclusive": 32945237
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E21": {
+      "gene": "BRCA2",
+      "exon": "E21",
+      "c_range": [
+        8633,
+        8754
+      ],
+      "coding_length_bp": 122,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32950807,
+        "end_1_based_inclusive": 32950928
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E22": {
+      "gene": "BRCA2",
+      "exon": "E22",
+      "c_range": [
+        8755,
+        8953
+      ],
+      "coding_length_bp": 199,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32953454,
+        "end_1_based_inclusive": 32953652
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E23": {
+      "gene": "BRCA2",
+      "exon": "E23",
+      "c_range": [
+        8954,
+        9117
+      ],
+      "coding_length_bp": 164,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32953887,
+        "end_1_based_inclusive": 32954050
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E24": {
+      "gene": "BRCA2",
+      "exon": "E24",
+      "c_range": [
+        9118,
+        9256
+      ],
+      "coding_length_bp": 139,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32954144,
+        "end_1_based_inclusive": 32954282
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E25": {
+      "gene": "BRCA2",
+      "exon": "E25",
+      "c_range": [
+        9257,
+        9501
+      ],
+      "coding_length_bp": 245,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32968826,
+        "end_1_based_inclusive": 32969070
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E26": {
+      "gene": "BRCA2",
+      "exon": "E26",
+      "c_range": [
+        9502,
+        9648
+      ],
+      "coding_length_bp": 147,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32971035,
+        "end_1_based_inclusive": 32971181
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    },
+    "BRCA2:E27": {
+      "gene": "BRCA2",
+      "exon": "E27",
+      "c_range": [
+        9649,
+        10254
+      ],
+      "coding_length_bp": 606,
+      "coordinate_status": "ok",
+      "grch37_coding_interval": {
+        "chrom": "13",
+        "start_1_based_inclusive": 32972299,
+        "end_1_based_inclusive": 32972904
+      },
+      "all_matching_deletions": [],
+      "pass_matching_deletions": []
+    }
+  },
+  "exons_sha256": "268b288ae0728cb0af7445d40beacb548d30337b729ceb0b0b85b675135cf2f5"
+}

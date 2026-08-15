@@ -9,6 +9,8 @@ function ariane() {
         p_notation: "",
         assembly: "",
         dup_type: "Unknown",
+        geneAutoSwitchNotice: "",
+        geneInputConflict: "",
         loading: false,
         progress: 0,
         progressText: "",
@@ -53,8 +55,65 @@ function ariane() {
             }
         },
 
-        isGenomicInput() {
+        explicitGeneFromVariantInput() {
+            let value = this.c_notation.trim();
+            if (!value) return { gene: "", source: "", error: "" };
+
+            let prefixGene = "";
+            const prefix = value.match(/^(BRCA[12])\s*(?::\s*|\s+)(.+)$/i);
+            if (prefix) {
+                prefixGene = prefix[1].toUpperCase();
+                value = prefix[2].trim();
+            }
+
+            let transcriptGene = "";
+            let transcript = "";
+            const transcriptMatch = value.match(/^(NM_\d+(?:\.\d+)?)\s*:/i);
+            if (transcriptMatch) {
+                transcript = transcriptMatch[1].toUpperCase();
+                const accession = transcript.split(".", 1)[0];
+                if (accession === "NM_007294") transcriptGene = "BRCA1";
+                if (accession === "NM_000059") transcriptGene = "BRCA2";
+            }
+
+            if (prefixGene && transcriptGene && prefixGene !== transcriptGene) {
+                return {
+                    gene: "",
+                    source: "",
+                    error: `Conflicting identifiers: ${prefixGene} does not match ${transcript} (${transcriptGene}).`,
+                };
+            }
+            if (prefixGene) return { gene: prefixGene, source: "gene prefix", error: "" };
+            if (transcriptGene) return { gene: transcriptGene, source: `transcript ${transcript}`, error: "" };
+            return { gene: "", source: "", error: "" };
+        },
+
+        syncGeneFromVariantInput() {
+            const explicit = this.explicitGeneFromVariantInput();
+            this.geneInputConflict = explicit.error;
+            if (explicit.error) {
+                this.geneAutoSwitchNotice = "";
+                return false;
+            }
+            if (!explicit.gene) {
+                this.geneAutoSwitchNotice = "";
+                return true;
+            }
+            if (this.gene !== explicit.gene) {
+                this.gene = explicit.gene;
+                this.geneAutoSwitchNotice = `Gene changed to ${explicit.gene} based on the ${explicit.source} in the variant input.`;
+            }
+            return true;
+        },
+
+        inputWithoutGenePrefix() {
             const value = this.c_notation.trim();
+            const prefix = value.match(/^(BRCA[12])\s*(?::\s*|\s+)(.+)$/i);
+            return prefix ? prefix[2].trim() : value;
+        },
+
+        isGenomicInput() {
+            const value = this.inputWithoutGenePrefix();
             if (!value) return false;
             return /^(?:chr)?(?:13|17)[:\s-]+\d+/i.test(value);
         },
@@ -550,6 +609,11 @@ function ariane() {
                 this.logClientValidation(this.error);
                 return;
             }
+            if (!this.syncGeneFromVariantInput()) {
+                this.error = this.geneInputConflict;
+                this.logClientValidation(this.error);
+                return;
+            }
             if (this.isGenomicInput() && !this.assembly) {
                 this.error = "Select GRCh37 or GRCh38 for the genomic coordinate.";
                 this.logClientValidation(this.error);
@@ -605,6 +669,7 @@ function ariane() {
                 this.progress = 100;
                 this.progressText = "Done.";
                 this.result = this.normalizeCriterionOrder(await resp.json());
+                this.gene = this.result.gene;
                 this.prefillManualReviewFromResult();
 
             } catch (e) {

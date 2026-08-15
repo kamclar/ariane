@@ -24,7 +24,8 @@ from backend.admin import router as admin_router
 from backend.config import (
     DATA_DIR, TABLE4_PATH, TABLE9_PATH, ST7_PATH,
     PS1_PROTEIN_REGISTRY_PATH, PS1_SPLICE_REFERENCE_PATH,
-    ST2_SPLICE_EVIDENCE_PATH,
+    ST2_SPLICE_EVIDENCE_PATH, EXON_CNV_EVIDENCE_PATH,
+    EXON_CNV_EVIDENCE_MANIFEST_PATH,
     ALLOWED_GENES, TRANSCRIPTS,
 )
 from backend.data_validation import validate_required_datasets
@@ -50,6 +51,8 @@ validate_required_datasets({
     "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH,
     "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH,
     "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH,
+    "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH,
+    "exon_cnv_evidence_manifest": EXON_CNV_EVIDENCE_MANIFEST_PATH,
 })
 
 # Initialize local sources before serving requests so /api/health reports
@@ -190,6 +193,7 @@ async def health():
             "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH.exists(),
             "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH.exists(),
             "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH.exists(),
+            "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH.exists(),
             "reference_bundle": panel.provenance.get("reference_bundle", ""),
             "normalization_engine": panel.provenance.get("normalization_engine", ""),
         },
@@ -404,6 +408,10 @@ async def _classify_one(
         )
 
     table9_result  = table9_lookup_ps3_bs3(gene, c_notation)
+    from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
+    exon_cnv_result = (
+        lookup_exon_cnv_evidence(gene, c_notation) if is_exon_cnv else None
+    )
     from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
     ps1_vua_splice_evidence = evaluate_defined_splice_sources(
         gene, c_notation, table9_result
@@ -429,6 +437,7 @@ async def _classify_one(
         spliceai_score=spliceai_score, bayesdel_score=bayesdel_score,
         gnomad_data=gnomad_data, table9_result=table9_result,
         pp4_bp5_result=pp4_bp5_result, ps1_result=ps1_result,
+        exon_cnv_result=exon_cnv_result,
         residue_info=residue_info, dup_type=dup_type,
     )
     # Detailed provider responses belong in the server log, not in the clinical
@@ -437,9 +446,18 @@ async def _classify_one(
         logging.getLogger(__name__).warning("External lookup diagnostic: %s", diagnostic)
     if is_exon_cnv:
         result["warnings"].append(
-            "Coordinate-dependent evidence was not evaluated: this exon-level "
-            "copy-number variant has uncertain genomic breakpoints."
+            "Small-variant coordinate-dependent evidence was not evaluated because "
+            "this exon-level copy-number variant has uncertain genomic breakpoints. "
+            "Population evidence was evaluated through the general ENIGMA Appendix G "
+            "exon-CNV decision path."
         )
+        if exon_cnv_result and exon_cnv_result.get("reason"):
+            result["warnings"].append(exon_cnv_result["reason"])
+        if not table9_result or not table9_result.get("applies"):
+            result["warnings"].append(
+                "PS3/BS3 was not applied because this variant has no applicable "
+                "variant-specific recommendation in ENIGMA Table 9."
+            )
     elif not grch37 and not grch38:
         result["warnings"].append(
             "Coordinate-dependent evidence was not evaluated because genomic "

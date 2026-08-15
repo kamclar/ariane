@@ -43,6 +43,11 @@ def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
     return _ST2_BY_VARIANT
 
 
+def get_st2_splice_record(gene: str, c_notation: str) -> Optional[Dict[str, Any]]:
+    """Return the exact official ST2 row for a normalized BRCA variant."""
+    return _load_st2_evidence().get((gene, c_notation))
+
+
 def evaluate_defined_splice_sources(
     gene: str,
     c_notation: str,
@@ -54,7 +59,7 @@ def evaluate_defined_splice_sources(
     sources were checked for the exact variant and no abnormal result was
     found. It is not an absolute assertion that no splice evidence exists.
     """
-    st2_record = _load_st2_evidence().get((gene, c_notation))
+    st2_record = get_st2_splice_record(gene, c_notation)
     table9_result = table9_result or {}
     table9_reviewed = bool(table9_result.get("reviewed"))
     table9_flag = str(

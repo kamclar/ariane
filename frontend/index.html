@@ -35,7 +35,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="gene">Gene</label>
-                        <select id="gene" x-model="gene" required>
+                        <select id="gene" x-model="gene" @change="syncGeneFromVariantInput()" required>
                             <option value="BRCA1">BRCA1</option>
                             <option value="BRCA2">BRCA2</option>
                         </select>
@@ -43,6 +43,7 @@
                     <div class="form-group form-group-wide">
                         <label for="c_notation">Variant</label>
                         <input type="text" id="c_notation" x-model="c_notation"
+                               @input="syncGeneFromVariantInput()"
                                placeholder="e.g. c.5217T>A or chr17:43070945:A>T" required>
                     </div>
                     <div class="form-group assembly-group"
@@ -72,6 +73,8 @@
                 </div>
             </form>
             <p class="input-hint" x-show="error" x-text="error" style="color: var(--color-error);"></p>
+            <p class="input-hint" x-show="geneInputConflict && !error" x-text="geneInputConflict" style="color: var(--color-error);"></p>
+            <p class="input-hint" x-show="geneAutoSwitchNotice" x-text="geneAutoSwitchNotice" style="color: var(--color-primary);"></p>
             <p class="input-hint" x-show="resourceError" x-text="resourceError" style="color: var(--color-warning);"></p>
             <p class="input-hint">
                 Reference transcript:
@@ -1344,6 +1347,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260814-10"></script>
+    <script src="/static/js/app.js?v=20260814-11"></script>
 </body>
 </html>

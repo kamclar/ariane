@@ -33,6 +33,7 @@ build/
 !/data/sources/enigma/BRCAmfa.hg38.v1.1.bed
 !/data/sources/enigma/Zanti_2025_NatCommun_Supplementary_Data.xlsx
 !/data/sources/enigma/clinical_lr_sources.manifest.json
+!/data/sources/enigma/exon_cnv_evidence_manifest.json
 /data/precomputed/brca_exchange_*.tsv
 /data/precomputed/brca_exchange_sample.json
 

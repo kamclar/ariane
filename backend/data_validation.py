@@ -220,6 +220,15 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         raise RuntimeError(
             "Required complete ENIGMA Supplementary Table 2 splice evidence snapshot is incomplete"
         )
+
+    exon_cnv = _load_required_json(
+        "exon-CNV evidence snapshot", paths["exon_cnv_evidence"]
+    )
+    from backend.modules.exon_cnv_evidence import validate_exon_cnv_evidence_snapshot
+
+    validate_exon_cnv_evidence_snapshot(
+        exon_cnv, paths["exon_cnv_evidence_manifest"]
+    )
     seen_st2 = set()
     for index, record in enumerate(st2["variants"]):
         if len(record) != 12:

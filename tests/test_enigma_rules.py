@@ -16,6 +16,7 @@ from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
+from backend.modules.pvs1_rna import evaluate_pvs1_rna
 from backend.modules.ps1 import (
     compute_approval_basis_checksum,
     evaluate_ps1,
@@ -116,6 +117,29 @@ class VariantTypeTests(unittest.TestCase):
                 c_notation="NM_000059.4:c.509G>A",
                 p_notation="p.Arg170Gln",
             )
+
+    @unittest.skipIf(
+        VariantRequest is None or not HGVS_RUNTIME_AVAILABLE,
+        "pydantic/hgvs runtime is not installed",
+    )
+    def test_common_c_hgvs_copy_paste_prefixes_are_normalized_safely(self):
+        accepted = (
+            ":c.5551_5552insT",
+            ":  c.5551_5552insT",
+            "BRCA1:c.5551_5552insT",
+            "brca1   c.5551_5552insT",
+            "BRCA1 NM_007294.4:c.5551_5552insT",
+        )
+        for notation in accepted:
+            with self.subTest(notation=notation):
+                request = VariantRequest(gene="BRCA1", c_notation=notation)
+                self.assertEqual(request.c_notation, "c.5551_5552insT")
+                self.assertEqual(request.p_notation, "p.(Asp1851ValfsTer29)")
+
+        with self.assertRaisesRegex(ValueError, "does not match the selected gene"):
+            VariantRequest(gene="BRCA1", c_notation="BRCA2:c.5551_5552insT")
+        with self.assertRaisesRegex(ValueError, "Unrecognised variant description"):
+            VariantRequest(gene="BRCA1", c_notation="note:c.5551_5552insT")
 
     @unittest.skipIf(
         VariantRequest is None or not HGVS_RUNTIME_AVAILABLE,
@@ -615,6 +639,53 @@ class CriticalPtcBoundaryTests(unittest.TestCase):
 
 
 class SpliceTests(unittest.TestCase):
+    def test_official_st2_patient_rna_applies_pvs1_rna_by_general_rule(self):
+        tutorial_variant = evaluate_pvs1_rna("BRCA1", "c.4185G>A")
+        another_st2_variant = evaluate_pvs1_rna("BRCA1", "c.80+5G>A")
+
+        self.assertTrue(tutorial_variant["applies"])
+        self.assertEqual(tutorial_variant["strength"], "Strong")
+        self.assertEqual(tutorial_variant["points"], 4)
+        self.assertEqual(tutorial_variant["table4_exon"], "E11(12)")
+        self.assertTrue(another_st2_variant["applies"])
+        self.assertEqual(another_st2_variant["strength"], "Strong")
+
+    def test_complex_st2_transcript_result_is_not_guessed(self):
+        result = evaluate_pvs1_rna("BRCA1", "c.212+1G>T")
+        self.assertIsNotNone(result.get("source_record"))
+        self.assertFalse(result["applies"])
+        self.assertIn("complex or partial", result["reason"])
+
+    def test_c4185_uses_rna_evidence_and_suppresses_splice_prediction(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="synonymous",
+            p_notation="p.(Gln1395=)",
+            c_notation="c.4185G>A",
+            spliceai_score=0.95,
+            gnomad_data=gnomad_data(pm2_absence_established=True),
+            pp4_bp5_result={
+                "applies": True,
+                "code": "PP4",
+                "strength": "Strong",
+                "points": 4,
+                "reason": "Combined clinical LR=328.184; PP4 Strong.",
+            },
+        )
+
+        self.assertEqual(
+            set(result["criteria"]),
+            {"PVS1_RNA", "PM2_Supporting", "PP4"},
+        )
+        self.assertEqual(result["criteria"]["PVS1_RNA"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 9)
+        self.assertEqual(result["predicted_class"], 4)
+        self.assertFalse(result["rna_review"]["recommended"])
+        self.assertTrue(any(
+            "PP3" in item.get("suppressed", [])
+            for item in result["evidence_interactions"]
+        ))
+
     def test_reviewed_intronic_variants_use_local_spliceai_and_apply_pp3(self):
         from backend.lookups.spliceai import get_spliceai_score
 

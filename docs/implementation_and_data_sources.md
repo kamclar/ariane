@@ -24,6 +24,9 @@ Uživatel zadává gen a jednu variantu. Vstupní normalizační vrstva
 
 - referenční transkriptovou notaci, například `c.303T>G`,
 - notaci s accession prefixem, například `NM_007294.4:c.303T>G`,
+- běžné kopírované varianty s oddělovací dvojtečkou nebo genovým prefixem,
+  například `:c.303T>G`, `BRCA1:c.303T>G`, `BRCA1 c.303T>G` nebo
+  `BRCA1 NM_007294.4:c.303T>G`,
 - kombinovanou starší formu s `p.` následkem,
 - genomickou variantu ve tvaru `chr17:43099813:C>T`, `17:43099813 C>T`
   nebo `17-43099813-C-T`.
@@ -103,10 +106,19 @@ Podporované vstupy jsou tedy rozděleny takto:
 | Vstupní odchylka | Zpracování |
 | --- | --- |
 | velikost písmen, mezery a tabulátory | obecná normalizace |
+| úvodní `:` před `c.` | odstranění oddělovače |
+| prefix genu, například `BRCA1:c.` nebo `BRCA1 c.` | prefix je autoritativní a formulář i backend přepnou na uvedený gen |
+| podporovaný transkript `NM_007294.4` nebo `NM_000059.4` | určí BRCA1 nebo BRCA2 a musí mít správnou verzi |
 | `c.` a `p.` oddělené mezerou nebo `/` | obecná normalizace |
 | indel s uvedenou nebo vynechanou sekvencí | HGVS normalizace a ověření proti sekvenci |
 | nesprávný suffix nebo neplatný indel | odmítnutí s důvodem před klasifikací |
 | samotná `p.` notace bez `c.` nebo genomické souřadnice | nepodporováno, protože nemusí jednoznačně určit DNA variantu |
+
+Parser nehledá první výskyt `c.` uvnitř libovolného textu. Pokud vstup výslovně
+obsahuje `BRCA1`, `BRCA2` nebo podporovaný referenční transkript, tato informace
+má přednost před aktuálním výběrem ve formuláři. Holá `c.` notace gen nemění.
+Vzájemně rozporná kombinace, například `BRCA1 NM_000059.4:c.3703C>T`, neznámý
+prefix nebo nesprávná verze transkriptu se odmítne s vysvětlením.
 
 ### 2.2 Kontrola referenční alely
 
@@ -291,12 +303,20 @@ ARIANE v takovém případě nepoužije BA1, BS1 ani PM2. Pro BA1 nebo BS1 jsou
 požadována alespoň dvě outbred pozorování v datasetu, který poskytl skórované
 FAF95. Počet pozorování se bere z populačních AC, neodhaduje se z AF.
 
-PM2 se nepoužívá pro indely a exonové CNV. Vyloučení se kontroluje také přímo
+PM2 se nepoužívá pro malé indely do 50 bp. Vyloučení se kontroluje také přímo
 podle operace v `c.` HGVS, nikoliv pouze podle odvozeného proteinového důsledku.
-PTC vytvářející indel, například `BRCA1 c.5533_5534insG p.(Tyr1845Ter)`, proto
-může vstoupit do PVS1/PM5 PTC větve, ale nesmí získat PM2. Chybějící záznam bez
-dostatečného pokrytí není důkazem nepřítomnosti. Fixture nebo neúplná cache
-nemůže vytvořit frekvenční kritérium.
+PTC vytvářející malý indel, například `BRCA1 c.5533_5534insG p.(Tyr1845Ter)`,
+proto může vstoupit do PVS1/PM5 PTC větve, ale nesmí získat PM2.
+
+Appendix G dovoluje PM2 Supporting pro větší inserce, delece a indely nad 50 bp,
+pokud jsou nepřítomné ve vhodném datasetu, prošly kontrolou kvality a byly
+porovnány zahrnuté exony. Exonové CNV s neurčitými breakpointy se proto
+nehledají jako přesné VCF ID. Obecná větev nejprve určí exon z Table 4, načte
+jeho reprodukovatelně odvozený GRCh37 interval a v úplném verzovaném gnomAD-SV
+datasetu hledá deleci zahrnující celý kódující interval exonu. Manifest
+neobsahuje žádné konkrétní varianty ani předem přidělená kritéria.
+Chybějící záznam bez odpovídajícího detekčního rozsahu nebo QC není důkazem
+nepřítomnosti. Fixture ani neúplná cache nemůže vytvořit frekvenční kritérium.
 
 ENIGMA v1.2 požaduje průměrnou hloubku v oblasti varianty, ale neurčuje počet
 okolních bází. ARIANE proto nepoužívá vlastní pevné okno ±N bp. Oblast je
@@ -320,7 +340,7 @@ PVS1 se vyhodnocuje pro:
 
 Table 4 obsahuje pravidla pro jednotlivé exony, kritické C-terminální hranice, splice varianty a exonové přestavby. Výsledná síla může být Very Strong, Strong, Moderate, Supporting nebo N/A.
 
-U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Větve závislé na RNA jsou označeny k manuální revizi a automatické PVS1 se nepřidá.
+U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Větve závislé na RNA se automaticky použijí jen při přesné shodě s úplnou ENIGMA Supplementary Table 2 a při jednoznačném průchodu pravidly Appendix E. Ostatní RNA větve zůstávají bez bodů a jsou označeny k odborné revizi.
 
 U iniciačního kodonu se automatické PVS1 nepoužívá. Aplikace vytvoří doporučení pro strukturovanou revizi podle iniciačního flowchartu.
 
@@ -341,6 +361,36 @@ kritické proteinové sekvence v souladu s PVS1 flowchartem. Například `BRCA1
 c.5556_5560del p.(Tyr1853AspfsTer25)` používá řádek PVS1 Very Strong a PM5 PTC
 Strong. Výsledkem je 12 bodů a třída 5.
 
+#### 3.2.1 PVS1 z RNA evidence
+
+Automatické `PVS1_RNA` nevychází z ručního seznamu variant. Klasifikátor používá
+úplnou oficiální ENIGMA Supplementary Table 2 a obecnou rozhodovací větev z
+Appendix E Table 9. Kritérium se přidělí pouze tehdy, když jsou současně splněny
+všechny následující podmínky:
+
+- přesná normalizovaná varianta je obsažena v Supplementary Table 2;
+- ENIGMA ji zařadila do kategorie pacientské mRNA bez alelově specifické
+  kvantifikace s aberantními transkripty odpovídajícími ztrátě funkce;
+- výsledek jednoznačně popisuje deleci jednoho celého exonu;
+- uvedený exon se jednoznačně mapuje na deleční řádek Table 4;
+- Table 4 pro tento transkriptový důsledek uvádí aplikovatelnou základní PVS1
+  sílu.
+
+Kvalitativní větev pacientské mRNA bez alelově specifické kvantifikace snižuje
+základní sílu podle Appendix E: Very Strong na Strong, Strong na Moderate a
+Moderate na Supporting. Komplexní nebo částečné transkriptové následky se
+neodhadují. Stejně tak se bez uloženého procenta funkčního transkriptu
+nepoužijí kvantitativní větve Appendixu.
+
+Při přijetí `PVS1_RNA` se podle Figure 1B odstraní slabší predikční evidence pro
+stejný splice mechanismus, například PP3, BP4, BP7, BP1 nebo predikční PS1.
+Proteinová funkční evidence PS3/BS3 se automaticky nemaže, protože může
+popisovat jiný mechanismus; případná kombinace se označí k odborné kontrole.
+
+Například `BRCA1 c.4185G>A` má v oficiální Supplementary Table 2 pacientskou
+mRNA s delecí exonu 12. Table 4 uvádí pro deleci BRCA1 E11(12) základní PVS1.
+Kvalitativní RNA větev proto vrátí `PVS1 Strong (RNA)`.
+
 ### 3.3 PS3 a BS3
 
 Zdroj: ENIGMA Specifications Table 9 v1.2.
@@ -350,6 +400,12 @@ Vyhledávání používá přesný klíč `gene:c_notation`. Automaticky se pou�
 Table 9 obsahuje také řádky, ve kterých PS3 ani BS3 nebylo splněno. Tyto řádky zůstávají součástí lossless snapshotu, ale nevytvářejí kritérium.
 
 Pokud má revidovaný řádek Table 9 vlastní hodnotu SpliceAI, používá se tato zmrazená hodnota pro navazující rozhodnutí BP1, BP4 a BP7. Rozdíl proti aktuální cache nebo službě se zobrazí ve varování.
+
+Funkční evidence se do automatické klasifikace nepřidává z tutorialu ani z
+variantově specifického lokálního záznamu. Varianta získá PS3 nebo BS3 pouze
+tehdy, když přesný řádek úplné ENIGMA Table 9 obsahuje aplikovatelné doporučení.
+Jinak se kritérium nepřidělí a případná další publikovaná evidence patří do
+odborné revize podle Figure 1C a Appendix E.
 
 ### 3.4 PP4 a BP5
 
@@ -529,12 +585,13 @@ splňuje BP1 Strong.
 
 ## 4. Kritéria vyžadující manuální revizi
 
-Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem klinických LR. Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
+Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem klinických LR. PVS1 RNA může přidat z přesného oficiálního ST2 záznamu a obecného rozhodovacího pravidla popsaného výše. Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
 
 Strukturovaná manuální část dále podporuje:
 
 - PP4 z variantově specifického combined clinical LR,
-- PVS1 RNA,
+- PVS1 RNA pro další publikovanou nebo komplexní RNA evidenci, kterou nelze
+  jednoznačně vyhodnotit z úplné ST2 a Table 4,
 - BP7 RNA,
 - PVS1 pro iniciační kodon,
 - PS1 pro stejný splice efekt.
@@ -637,7 +694,7 @@ P/LP missense záznamy ST7 se používají jako referenční klasifikační zák
 proteinového PS1. O automatickém použití rozhoduje až explicitní stav v
 proteinovém PS1 registru po kontrole SpliceAI, Table 9 a úplné ST2.
 
-### 6.3.1 Supplementary Table 2 a proteinové PS1
+### 6.3.1 Supplementary Table 2, PVS1 RNA a proteinové PS1
 
 Úplný runtime soubor: `backend/data/enigma_st2_splice_evidence.json`
 
@@ -645,8 +702,9 @@ Generátor: `scripts/build_enigma_st2_splice_evidence_snapshot.py`
 
 Obsahuje všech 220 variant a všech 11 zdrojových sloupců listu
 `ST2 splicing dataset codes`, číslo zdrojového řádku a checksum oficiálního
-Excelu. Používá se pouze ke kontrole známé RNA/splice evidence pro proteinové
-PS1. Oddělený `splice_ps1_reference_set.json` obsahuje 75 P/LP kandidátů pro
+Excelu. Používá se ke kontrole známé RNA/splice evidence pro proteinové PS1 a
+jako oficiální vstup obecné automatické větve PVS1 RNA popsané v části 3.2.1.
+Oddělený `splice_ps1_reference_set.json` obsahuje 75 P/LP kandidátů pro
 manuální splice PS1 a neslouží k dokazování nepřítomnosti RNA evidence.
 
 Registr proteinových referencí:
@@ -688,9 +746,38 @@ podkladem patogenní missense klasifikace spolu s absencí predikovaného a
 potvrzeného splice efektu. Nový externí nebo lokálně reklasifikovaný záznam musí
 mít odpovídající mechanismus výslovně kurátorovaný.
 
-### 6.4 Kontrola úplnosti při startu
+### 6.4 Velké exonové CNV
 
-Table 4, Table 9, ST7, úplný ST2 splice snapshot a PS1 registry jsou povinné
+Runtime soubor: `backend/data/exon_cnv_evidence.json`
+
+Zdrojový manifest: `data/sources/enigma/exon_cnv_evidence_manifest.json`
+
+Generátor: `scripts/build_exon_cnv_evidence_snapshot.py`
+
+Generátor stáhne celý oficiální `gnomAD-SV v2.1` BED pro GRCh37, ověří jeho
+očekávanou velikost, ETag a SHA-256 a projde všechny záznamy. Seznam všech 50
+exonů BRCA1/2 se generuje z úplné ENIGMA Table 4 a jejich GRCh37 kódující
+intervaly z verzované souřadnicové mapy. Manifest neobsahuje c. notace variant
+ani očekávaná kritéria. U každého exonu se ukládají všechny delece, které
+zahrnují celý jeho kódující interval, zvlášť také shody s `FILTER=PASS`.
+
+Za běhu se použije obecný rozhodovací graf Appendix G: typ exonová delece,
+jednoznačná shoda na exon Table 4, dostupný ověřený interval, velikost nad 50 bp
+a nepřítomnost jak PASS, tak filtrované zahrnující delece. Teprve při splnění
+všech kroků vznikne PM2 Supporting. Přesná shoda breakpointů se nevyžaduje.
+
+Aktuální snapshot prošel 387 477 SV záznamů, z toho 169 635 delecí. Pro BRCA2
+exon 10 nebyla nalezena žádná zahrnující delece, ani filtrovaná. SHA-256
+zdrojového BED je
+`c843ff53b4bf36c7f733cb08565860065b3b0189375d135e33db0886381598d8`.
+
+Soubor neobsahuje funkční kritéria. PS3/BS3 se vyhodnocují odděleně a pouze z
+ENIGMA Table 9.
+
+### 6.5 Kontrola úplnosti při startu
+
+Table 4, Table 9, ST7, úplný ST2 splice snapshot, PS1 registry a exon-CNV
+evidence jsou povinné
 runtime datasety. `backend/data_validation.py` kontroluje před spuštěním API:
 
 - existenci a čitelnost JSON,
@@ -703,7 +790,7 @@ runtime datasety. `backend/data_validation.py` kontroluje před spuštěním API
 
 Neúplná nebo poškozená povinná tabulka zastaví start aplikace.
 
-### 6.5 Referenční balík pro HGVS normalizaci
+### 6.6 Referenční balík pro HGVS normalizaci
 
 Runtime adresář je `data/reference/panel/`. Obsahuje:
 

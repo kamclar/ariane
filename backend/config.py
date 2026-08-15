@@ -17,6 +17,10 @@ ST7_PATH         = DATA_DIR / "st7_reference_set.json"
 PS1_PROTEIN_REGISTRY_PATH = DATA_DIR / "ps1_protein_reference_registry.json"
 PS1_SPLICE_REFERENCE_PATH = DATA_DIR / "splice_ps1_reference_set.json"
 ST2_SPLICE_EVIDENCE_PATH = DATA_DIR / "enigma_st2_splice_evidence.json"
+EXON_CNV_EVIDENCE_PATH = DATA_DIR / "exon_cnv_evidence.json"
+EXON_CNV_EVIDENCE_MANIFEST_PATH = (
+    PROJECT_DIR / "data" / "sources" / "enigma" / "exon_cnv_evidence_manifest.json"
+)
 RESIDUES_PATH    = DATA_DIR / "clinically_important_residues.json"
 GNOMAD_CACHE_DIR = DATA_DIR / "gnomad_brca_cache"
 SPLICEAI_CACHE       = DATA_DIR / "spliceai_api_cache.json"

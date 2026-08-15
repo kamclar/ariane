@@ -142,6 +142,53 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             {"31131967", "31853058"},
         )
 
+    def test_c4185_full_path_applies_official_rna_pvs1_and_pp4_strong(self):
+        from backend.main import _classify_one
+
+        pm2 = {
+            "PM2_Supporting": {
+                "applies": True,
+                "strength": "Supporting",
+                "points": 1,
+                "reason": "Absent with sufficient coverage in both required gnomAD datasets.",
+            }
+        }
+        coordinates = {
+            "chrom": "17", "pos": 43090944, "ref": "C", "alt": "T",
+            "assembly": "GRCh38",
+        }
+        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+            "backend.lookups.coordinates.get_grch37", return_value=coordinates
+        ), patch(
+            "backend.lookups.coordinates.get_grch38", return_value=coordinates
+        ), patch(
+            "backend.modules.frequency.get_gnomad_frequencies", return_value={"available": True}
+        ), patch(
+            "backend.modules.frequency.evaluate_frequency_criteria", return_value=pm2
+        ), patch(
+            "backend.lookups.spliceai.get_spliceai_score", return_value=0.95
+        ), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
+            return_value=(None, None),
+        ), patch(
+            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.4185G>A", "p.(Gln1395=)")
+            )
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(set(criteria), {"PVS1_RNA", "PM2_Supporting", "PP4"})
+        self.assertEqual(criteria["PVS1_RNA"].strength, "Strong")
+        self.assertEqual(criteria["PP4"].strength, "Strong")
+        self.assertEqual(result.total_points, 9)
+        self.assertEqual(result.predicted_class, 4)
+        self.assertTrue(any(
+            "PP3" in item.suppressed for item in result.evidence_interactions
+        ))
+
     def test_pp4_snapshot_missing_metadata_fails_closed(self):
         from backend.modules import pp4_bp5
 
@@ -275,6 +322,19 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertNotIn("SpliceAI not available", warnings)
         self.assertNotIn("raw provider error", warnings)
         self.assertNotIn("HTTP 422", warnings)
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(criteria["PM2_Supporting"].strength, "Supporting")
+        self.assertEqual(criteria["PM2_Supporting"].points, 1)
+        self.assertNotIn("BS3", criteria)
+        excluded = {criterion.name: criterion for criterion in result.excluded_criteria}
+        self.assertEqual(excluded["PVS1"].strength, "N/A")
+        self.assertEqual(result.total_points, 1)
+        self.assertEqual(result.predicted_class, 3)
+        self.assertFalse(result.mixed_evidence)
+        self.assertIn(
+            "no applicable variant-specific recommendation in ENIGMA Table 9",
+            "\n".join(result.warnings),
+        )
 
     def test_c5266_automatically_receives_pp4_very_strong(self):
         from backend.main import _classify_one

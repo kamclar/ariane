@@ -4,7 +4,7 @@
 # Evidence hierarchy (ENIGMA VCEP v1.2):
 #   1. BA1 check - stand-alone benign, if met → class 1, stop
 #   2. Table 9 - PS3/BS3 calibrated functional evidence
-#   3. Table 4 - PVS1/PM5 structural rules
+#   3. Table 4 - PVS1/PM5 structural rules; ST2 + Appendix E - PVS1 RNA
 #   4. gnomAD - BS1, PM2
 #   5. Local clinical-LR snapshot - PP4/BP5
 #   6. Approved protein-PS1 registry; ST7 supplies review candidates only
@@ -16,9 +16,11 @@
 from typing import Optional, Dict, List, Tuple
 
 from backend.modules.evidence_interactions import (
+    apply_automatic_rna_interactions,
     automatic_functional_interactions,
     pvs1_prediction_deduplication,
 )
+from backend.modules.pvs1_rna import evaluate_pvs1_rna
 
 
 def classify_by_points(points: int, has_ba1: bool = False) -> tuple:
@@ -207,6 +209,7 @@ def evaluate_variant(
     table9_result: Optional[Dict] = None,
     pp4_bp5_result: Optional[Dict] = None,
     ps1_result: Optional[Dict] = None,
+    exon_cnv_result: Optional[Dict] = None,
     residue_info: Optional[Dict] = None,
     dup_type: str = "Unknown",
 ) -> Dict:
@@ -312,9 +315,24 @@ def evaluate_variant(
             results["classification_note"] = note
             return results
 
+    # Exon deletions use the generic ENIGMA Appendix G population path.  This
+    # input contains no variant-specific criterion assignments.
+    if exon_cnv_result and exon_cnv_result.get("found"):
+        for criterion in exon_cnv_result.get("criteria", []):
+            code = criterion["code"]
+            results["criteria"][code] = {
+                "applies": True,
+                "strength": criterion["strength"],
+                "points": criterion["points"],
+                "reason": criterion["reason"],
+                "source": criterion["source"],
+            }
+            results["total_points"] += criterion["points"]
+
     # ── Step 2: Table 9 - PS3/BS3 ─────────────────────────────────────
     if table9_result and table9_result.get("applies"):
-        results["criteria"][table9_result["code"]] = {
+        code = table9_result["code"]
+        results["criteria"][code] = {
             "applies": True,
             "strength": table9_result["strength"],
             "points": table9_result["points"],
@@ -330,14 +348,34 @@ def evaluate_variant(
         spliceai_score=effective_spliceai_score,
         dup_type=dup_type,
     )
+    pvs1_rna = evaluate_pvs1_rna(gene, c_notation)
     if pvs1["applies"]:
         results["criteria"]["PVS1"] = pvs1
         results["total_points"] += pvs1["points"]
+    elif pvs1_rna.get("applies"):
+        results["criteria"]["PVS1_RNA"] = pvs1_rna
+        results["total_points"] += pvs1_rna["points"]
+        results["has_functional_evidence"] = True
     elif pvs1.get("requires_rna") or variant_type.lower() in [
         "nonsense", "frameshift", "splice_site", "initiation_codon",
         "exon_deletion", "exon_duplication"
     ]:
         results["warnings"].append(pvs1["reason"])
+        if "N/A" in str(pvs1.get("pvs1_code") or ""):
+            results["excluded_criteria"]["PVS1"] = {
+                "applies": False,
+                "strength": "N/A",
+                "points": 0,
+                "reason": pvs1["reason"],
+                "source": pvs1.get("source", ""),
+            }
+
+    if (
+        not pvs1.get("applies")
+        and pvs1_rna.get("source_record")
+        and not pvs1_rna.get("applies")
+    ):
+        results["warnings"].append(pvs1_rna["reason"])
 
     if pvs1.get("pm5_code") and pvs1.get("pm5_strength"):
         results["criteria"]["PM5_PTC"] = {
@@ -419,6 +457,9 @@ def evaluate_variant(
         results["total_points"] += bp1["points"]
 
     results["evidence_interactions"].extend(
+        apply_automatic_rna_interactions(results["criteria"])
+    )
+    results["evidence_interactions"].extend(
         automatic_functional_interactions(results["criteria"])
     )
 
@@ -441,6 +482,12 @@ def evaluate_variant(
         )
 
     # ── Step 9: Classification ─────────────────────────────────────────
+    # Interaction rules may remove weaker evidence after it was initially
+    # evaluated, so the final score is always recomputed from retained codes.
+    results["total_points"] = sum(
+        criterion.get("points", 0)
+        for criterion in results["criteria"].values()
+    )
     results["pathogenic_points"] = sum(
         max(criterion.get("points", 0), 0)
         for criterion in results["criteria"].values()
@@ -482,7 +529,7 @@ def evaluate_variant(
     results["rna_review"] = evaluate_rna_review(
         variant_type=variant_type,
         spliceai_score=spliceai_score,
-        pvs1_result=pvs1,
+        pvs1_result=pvs1_rna if pvs1_rna.get("applies") else pvs1,
         criteria=results["criteria"],
     )
     results["splice_ps1_review"] = evaluate_splice_ps1_review(

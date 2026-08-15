@@ -207,8 +207,14 @@ def _insilico_sentence(gene: str, variant_type: str, spliceai_score: Optional[fl
 
 
 def _functional_evidence_sentence(criteria: dict) -> Optional[str]:
+    pvs1_rna = criteria.get("PVS1_RNA", {})
     ps3 = criteria.get("PS3", {})
     bs3 = criteria.get("BS3", {})
+    if pvs1_rna.get("applies"):
+        return (
+            "ENIGMA-curated patient mRNA evidence demonstrates a damaging "
+            f"transcript effect (PVS1 (RNA), {pvs1_rna.get('strength', '')})."
+        )
     if ps3.get("applies"):
         return (f"Functional assay data (Table 9) supports pathogenicity "
                 f"at {ps3.get('strength', '')} level.")

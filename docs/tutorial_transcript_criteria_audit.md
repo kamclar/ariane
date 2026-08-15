@@ -33,10 +33,10 @@ jako produkční klasifikační cesta.
 | BRCA1 c.3668_3671dup | PVS1 Very Strong; PM5 PTC Strong | 5 | Třída sedí; tutorial používá také PM2 Supporting. ARIANE PM2 pro malé indely nepoužívá. |
 | BRCA2 c.9097del | PVS1 Very Strong; PM5 PTC Strong | 5 | Třída sedí; tutorial používá také PM2 Supporting. |
 | BRCA1 c.5551_5552insT | PVS1 Very Strong; PM5 PTC Strong | 5 | Neshoda s historickým tutorialem. Současná implementace ENIGMA v1.2 vybírá PVS1 a PM5 ze stejného řádku Table 4 podle exonu nukleotidové změny. |
-| BRCA2 delece exonu 10 | žádné automatické kritérium | 3 | Třída sedí náhodou při 0 bodech; chybí tutorialové PM2 Supporting a BS3 Moderate. |
+| BRCA2 delece exonu 10 | PM2 Supporting; PVS1 N/A zobrazeno jako vyloučené | 3 | Třída se shoduje, kritéria ne. PM2 vzniká obecným Appendix G grafem nad Table 4 exony a úplným gnomAD-SV, nikoli variantovým záznamem. Tutorial používá BS3 Moderate, ale delece není v ENIGMA Table 9, proto ARIANE BS3 nepřidělí. |
 | BRCA2 c.6147_6149del | BS1 Supporting; BP1 Strong | 2 | Třída sedí; BS1 Supporting je v ARIANE navíc. |
 | BRCA1 c.3891_3893del | BS3 Strong; BP5 Strong; BP1 Strong | 1 | Třída i směr klinické evidence sedí; ARIANE používá BP5 Strong místo tutorialového BP5 Supporting. |
-| BRCA1 c.4185G>A | PM2 Supporting; PP4 Strong; PP3 Supporting | 4 | Neshoda. Chybí automatizovaná PVS1 RNA Strong, PP4 má jinou sílu a PP3 je pouze predikční evidence před přijetím RNA evidence. |
+| BRCA1 c.4185G>A | PVS1 RNA Strong; PM2 Supporting; PP4 Strong | 4 | PVS1 RNA se obecně odvodilo z přesného ST2 řádku, delece exonu 12, Table 4 a kvalitativní větve Appendix E. PP3 bylo potlačeno jako slabší evidence stejného splice mechanismu. Proti tutorialu zůstává rozdíl PP4 Strong versus Very Strong. |
 | BRCA1 c.628C>T | PM2 Supporting | 3 | Shoda. Table 4 uvádí PVS1 N/A. |
 | BRCA2 c.8953+2T>C | PM2 Supporting | 3 | Shoda. Table 4 uvádí PVS1 N/A a ENIGMA tutorial PP3 nepoužívá. |
 
@@ -45,10 +45,14 @@ jako produkční klasifikační cesta.
 1. Automatický přepis obsahuje chyby v názvech variant a zkratkách. Například
    u `p.Arg170Gln` řečník podle přepisu říká změnu na glycin. Identita varianty
    byla převzata ze zadání tutorialu, kritéria z navazujícího výkladu.
-2. U `c.4185G>A` přepis uvádí klinický LR „8.6“ a současně PP4 Very Strong.
-   Tyto dvě informace nejsou podle prahů ENIGMA v1.2 vzájemně konzistentní.
-   Z prezentovaného součtu 13 bodů je však zřejmé, že tutorial zamýšlel PP4
-   Very Strong: PVS1 RNA Strong +4, PM2 Supporting +1 a PP4 Very Strong +8.
+2. U `c.4185G>A` tutorial v čase 30:33 výslovně odkazuje na Parsons et al. 2019
+   a automatický přepis zachytil LR jen jako „8.6“. Parsonsovy komponenty
+   segregation `39,31669` a pathology `13,9129` však dávají LR `547,009`, tedy
+   PP4 Very Strong. Přepis proto zřejmě zkomolil nebo vynechal začátek vyslovené
+   hodnoty. Současný oficiální ENIGMA BRCAmfa track přidává nezávislou komponentu
+   personal/family history `0,59996` z Li et al. 2020. Výsledný combined LR je
+   `328,184`, tedy PP4 Strong. To vysvětluje rozdíl mezi tutorialem a současným
+   výstupem ARIANE i HECTORu.
 3. U `c.3891_3893del` tutorial výslovně používá posterior probability 0,368 pro
    BP5 Supporting a odmítá tehdy dostupný LR 28 pro PP4 Strong. ARIANE nyní
    kombinuje Parsons 2019, Caputo 2021 a Zanti 2025. Výsledný LR `0,0289608`

@@ -57,6 +57,8 @@ def evaluate_pvs1(
         "pm5_points": 0,
         "exon": None,
         "pm5_exon": None,
+        "pvs1_code": None,
+        "source": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
     }
 
     lof_types = [
@@ -86,6 +88,7 @@ def evaluate_pvs1(
 
         if table4_splice["found"]:
             pvs1_code = table4_splice["pvs1_code"]
+            result["pvs1_code"] = pvs1_code
             result["exon"] = table4_splice["exon"]
 
             # Parse the code properly
@@ -158,6 +161,7 @@ def evaluate_pvs1(
         )
 
         result["exon"] = table4_result["exon"]
+        result["pvs1_code"] = table4_result.get("pvs1_code")
         result["reason"] = table4_result["reason"]
 
         if table4_result["pvs1_strength"] is None:  # PVS1_N/A
@@ -190,6 +194,7 @@ def evaluate_pvs1(
             del_result = table4_lookup_deletion(gene, exon)
             if del_result["found"]:
                 result["exon"] = exon
+                result["pvs1_code"] = del_result.get("pvs1_code")
                 if del_result["pvs1_strength"]:
                     result["applies"] = True
                     result["strength"] = del_result["pvs1_strength"]
@@ -202,8 +207,8 @@ def evaluate_pvs1(
 
         result["applies"] = False
         result["reason"] = (
-            f"Exon deletion - could not parse exon from {c_notation}. "
-            f"Use table4_lookup_deletion(gene, exon) manually."
+            f"PVS1 was not applied: {c_notation} could not be mapped "
+            "unambiguously to an ENIGMA Table 4 deletion row."
         )
         return result
 
@@ -217,6 +222,7 @@ def evaluate_pvs1(
             dup_result = table4_lookup_duplication(gene, exon, dup_type)
             if dup_result["found"]:
                 result["exon"] = exon
+                result["pvs1_code"] = dup_result.get("pvs1_code")
                 if dup_result["pvs1_strength"]:
                     result["applies"] = True
                     result["strength"] = dup_result["pvs1_strength"]
@@ -229,8 +235,8 @@ def evaluate_pvs1(
 
         result["applies"] = False
         result["reason"] = (
-            f"Exon duplication - could not parse exon from {c_notation}. "
-            f"Use table4_lookup_duplication(gene, exon, dup_type) manually."
+            f"PVS1 was not applied: {c_notation} could not be mapped "
+            "unambiguously to an ENIGMA Table 4 duplication row."
         )
         return result
 
@@ -258,4 +264,3 @@ if __name__ == "__main__":
         print(f"    {r['reason'][:80]}...")
         if r.get('pm5_code'):
             print(f"    PM5: {r['pm5_code']} ({r['pm5_points']} pts)")
-

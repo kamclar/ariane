@@ -23,6 +23,13 @@ _ASSEMBLIES = {"GRCH37": "GRCh37", "GRCH38": "GRCh38"}
 _TRANSCRIPT_C = re.compile(
     r"^(NM_\d+(?:\.\d+)?)\s*:\s*(c\..+)$", re.IGNORECASE
 )
+_LEADING_C_SEPARATOR = re.compile(r"^:\s*(c\..+)$", re.IGNORECASE)
+_GENE_QUALIFIED_INPUT = re.compile(
+    r"^(BRCA[12])\s*(?::\s*|\s+)(.+)$", re.IGNORECASE
+)
+_TRANSCRIPT_ACCESSION_GENE = {
+    transcript.split(".", 1)[0]: gene for gene, transcript in TRANSCRIPTS.items()
+}
 _GENOMIC_PATTERNS = (
     re.compile(
         r"^(?:chr)?(?P<chrom>[0-9XYM]+)[:\s-]+(?P<pos>\d+)"
@@ -61,6 +68,34 @@ def normalize_assembly(value: Optional[str]) -> str:
     if not normalized:
         raise ValueError("Genome assembly must be GRCh37 or GRCh38")
     return normalized
+
+
+def explicit_gene_from_notation(notation: str) -> Optional[str]:
+    """Return an explicitly supplied BRCA gene, rejecting conflicting identifiers."""
+    submitted = (notation or "").strip()
+    gene_from_prefix = None
+    gene_match = _GENE_QUALIFIED_INPUT.fullmatch(submitted)
+    if gene_match:
+        gene_from_prefix = gene_match.group(1).upper()
+        submitted = gene_match.group(2).strip()
+
+    gene_from_transcript = None
+    transcript_match = _TRANSCRIPT_C.fullmatch(submitted)
+    if transcript_match:
+        transcript = transcript_match.group(1).upper()
+        accession = transcript.split(".", 1)[0]
+        gene_from_transcript = _TRANSCRIPT_ACCESSION_GENE.get(accession)
+
+    if (
+        gene_from_prefix
+        and gene_from_transcript
+        and gene_from_prefix != gene_from_transcript
+    ):
+        raise ValueError(
+            f"Conflicting gene identifiers: {gene_from_prefix} does not match "
+            f"transcript {transcript_match.group(1).upper()} ({gene_from_transcript})"
+        )
+    return gene_from_prefix or gene_from_transcript
 
 
 def _parse_genomic(value: str) -> Optional[tuple[str, int, str, str]]:
@@ -222,10 +257,36 @@ def normalize_variant_input(
     submitted = (notation or "").strip()
     if not submitted:
         raise ValueError("Variant description is required")
+    explicit_gene = explicit_gene_from_notation(submitted)
+    if explicit_gene:
+        gene = explicit_gene
+
+    # A gene or canonical transcript explicitly included in the notation is
+    # authoritative. A bare c. description continues to use the separately
+    # selected gene. Never guess a gene from a coordinate number or sequence.
+    leading_separator = _LEADING_C_SEPARATOR.fullmatch(submitted)
+    if leading_separator:
+        submitted = leading_separator.group(1)
+
+    gene_match = _GENE_QUALIFIED_INPUT.fullmatch(submitted)
+    if gene_match:
+        submitted_gene = gene_match.group(1).upper()
+        gene = submitted_gene
+        submitted = gene_match.group(2).strip()
 
     transcript_match = _TRANSCRIPT_C.fullmatch(submitted)
     if transcript_match:
         transcript = transcript_match.group(1).upper()
+        accession = transcript.split(".", 1)[0]
+        transcript_gene = _TRANSCRIPT_ACCESSION_GENE.get(accession)
+        if transcript_gene is None:
+            raise ValueError(f"Unsupported reference transcript {transcript}")
+        if gene_match and transcript_gene != gene:
+            raise ValueError(
+                f"Conflicting gene identifiers: {gene} does not match "
+                f"transcript {transcript} ({transcript_gene})"
+            )
+        gene = transcript_gene
         if "." not in transcript:
             raise ValueError(
                 f"Transcript accession must include an explicit version; "

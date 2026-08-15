@@ -32,6 +32,20 @@ def evaluate_rna_review(
     potential_branches: List[str] = []
     priority = "none"
 
+    if criteria.get("PVS1_RNA", {}).get("applies"):
+        return {
+            "recommended": False,
+            "priority": "none",
+            "title": "",
+            "summary": "",
+            "reasons": [],
+            "what_to_test": [],
+            "potential_branches": [],
+            "limitations": "",
+            "source_url": ENIGMA_CSPEC_URL,
+            "is_evidence_criterion": False,
+        }
+
     if pvs1_result.get("requires_rna"):
         priority = "high"
         reasons.append(

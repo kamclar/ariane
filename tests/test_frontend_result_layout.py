@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 FRONTEND_HTML = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
+FRONTEND_JS = Path(__file__).resolve().parents[1] / "frontend" / "static" / "js" / "app.js"
 
 
 def test_applied_criteria_immediately_follows_classification_header():
@@ -29,3 +30,16 @@ def test_point_thermometer_is_present_for_every_classified_result():
     assert ">+6<" in thermometer_markup
     assert "&minus;2" in thermometer_markup
     assert "&minus;7" in thermometer_markup
+
+
+def test_variant_input_can_synchronise_the_explicit_gene_selector():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+
+    assert '@input="syncGeneFromVariantInput()"' in html
+    assert '@change="syncGeneFromVariantInput()"' in html
+    assert 'x-show="geneAutoSwitchNotice"' in html
+    assert "explicitGeneFromVariantInput()" in javascript
+    assert "syncGeneFromVariantInput()" in javascript
+    assert 'accession === "NM_007294"' in javascript
+    assert 'accession === "NM_000059"' in javascript
