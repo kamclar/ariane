@@ -1,8 +1,8 @@
 {
-  "schema_version": 2,
-  "registry_version": "2026-08-12.1",
+  "schema_version": 3,
+  "registry_version": "2026-08-20.1",
   "status": "active",
-  "description": "ENIGMA ST7 v1.2 P/LP missense references for protein-level PS1, with explicit eligibility derived from the recorded ENIGMA splice checks.",
+  "description": "ENIGMA ST7 v1.2 P/LP missense references for protein-level PS1, with eligibility from defined ENIGMA RNA/splice sources. The reference and assessed-variant SpliceAI scores are computed on demand.",
   "rule_source": {
     "name": "ClinGen ENIGMA BRCA1/2 VCEP PS1 specification",
     "version": "1.2.0",
@@ -58,8 +58,8 @@
   },
   "reference_count": 60,
   "status_counts": {
-    "eligible": 35,
-    "excluded": 25
+    "eligible": 40,
+    "excluded": 20
   },
   "references": [
     {
@@ -74,8 +74,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -83,14 +83,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -106,8 +106,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.122A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -118,7 +119,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e8680d78031a18828b595d444a09cd6d6901870c53b744c0a8817297fcb04c31"
+      "approval_basis_checksum": "ecfc3dc1c25c7d43ae3a92154de8325fba1482a722cfb5252cc56a892267ca42"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.130T>A",
@@ -132,8 +133,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -141,14 +142,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -164,8 +165,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.130T>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -176,7 +178,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "b03f63c977a6541889e5ad1f261c8b64d0f18d466da7b24dcd811e46e9a703f6"
+      "approval_basis_checksum": "4fa4d9d2d858d2b4933747536eaedff4a6e6e486b21a0afffcb1fd10ec48af99"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.131G>T",
@@ -190,8 +192,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -199,14 +201,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -222,8 +224,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.131G>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -234,7 +237,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "267b0715e528a589835ab3a761d7b5c037d6cd0840470aac4ed27cab4cd05ff7"
+      "approval_basis_checksum": "3e0ef368f08e53cfec21665236cf247b6b241e21b4fb4a48cca5037eea095960"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.140G>A",
@@ -257,14 +260,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.06,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -280,8 +283,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.140G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -292,7 +296,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "157695afe1bfde03d99ceb8b31223d60b42a0633c29cf2748e8c0277e93aa3eb"
+      "approval_basis_checksum": "72a34c92d2026dfdb099d21119f7da7907f887265babc8426f33ee31394ca7e2"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.181T>A",
@@ -306,8 +310,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -315,14 +319,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.08,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -338,8 +342,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.181T>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -350,7 +355,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "19445b5c97984a8e04fd89610a35abdd86961b63a769e5fcaabf5bf9e109dacb"
+      "approval_basis_checksum": "da8e5680e2e15ae50656ec769d8d131f38a26c58772adb3579153be9efe50eb9"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.181T>G",
@@ -373,14 +378,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.16,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -396,8 +401,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.181T>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -408,7 +414,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "28639e57da0689fd50b2ce2a616c6d5fa9749ffe3976451faac7541c7dc6a5c4"
+      "approval_basis_checksum": "a7026be803a79b3479644bd318ca9e07868428a46b863912ac06a09ca63e2d29"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.191G>A",
@@ -421,9 +427,9 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "excluded",
-      "status_reason": "Reference-variant SpliceAI 0.870 is greater than 0.1.",
-      "protein_branch": "missense_with_predicted_splice_effect",
+      "status": "eligible",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -431,14 +437,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.87,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -454,8 +460,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.191G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -466,7 +473,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "aa2e98bfd5e937e8f9a623b89f55f715d3c3d33a1c5555cf08e143967479cf75"
+      "approval_basis_checksum": "c707d52ac1814d52fc7c39ea2a36e15747f50610d3a9fab4909cbe86ef7b7b34"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.211A>G",
@@ -489,14 +496,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.64,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -512,8 +519,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.211A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -524,7 +532,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c2c9dcd4fbb4133736854010174e387fb3998d407b8a6f1efcd717c9667fe24c"
+      "approval_basis_checksum": "420a3301251e6bc1f7aac4d7c3b9102d75722a0f4462a2880afccaf073d1f030"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4484G>C",
@@ -547,14 +555,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": null,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -570,8 +578,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.4484G>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -582,7 +591,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "46e3ff08a24bf3fa8fd7387450d422f46d7ebe8b8768a38d3efed3e5b961df7a"
+      "approval_basis_checksum": "79aa5a78020914be3d212f8c9e1b8162f8590f04a741fb0388c07e00ccfe34a2"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4484G>T",
@@ -605,14 +614,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.67,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -628,8 +637,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.4484G>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -640,7 +650,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "75fad8dcb276d7871470d9063bdd2a712f6916d02f725870269fa0ad5f099891"
+      "approval_basis_checksum": "a78034602457a35fb27d5cec9b67fb3c4e019114877fb55d529b02ad3f9d188d"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4675G>A",
@@ -663,14 +673,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.77,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -686,8 +696,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.4675G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -698,7 +709,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f847d3fb535407904bcf9618c361caf5607efced8003611b6c7a8cab82c78b41"
+      "approval_basis_checksum": "28ed8080138d2c853eaa0c3980dbd3839abb15a5a9f63d0831b748cc138ece6e"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4868C>G",
@@ -721,14 +732,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.92,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -744,8 +755,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.4868C>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -756,7 +768,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "8ca1248cfbf9e6d08a4c4ebd186d96441e7845fd828038055f965251f6ad95af"
+      "approval_basis_checksum": "3cac68ab52dd7172eeabab86d4fc06b29fa547f0d63a821080c6d71cf5b49191"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5053A>G",
@@ -770,8 +782,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -779,14 +791,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.09,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -802,8 +814,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5053A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -814,7 +827,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "752b25ac0714f8c58f1f55bb383dac21550060d3c217d8d256ec16a1d6e94857"
+      "approval_basis_checksum": "695cbb27c745a4d6f4184d1f1406ae7f1cc305f2525abc2fa2c90423c1dc33be"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5054C>T",
@@ -827,9 +840,9 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "excluded",
-      "status_reason": "Reference-variant SpliceAI 0.190 is greater than 0.1.",
-      "protein_branch": "missense_with_predicted_splice_effect",
+      "status": "eligible",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -837,14 +850,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.19,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -860,8 +873,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5054C>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -872,7 +886,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "741952e4a654b4ab83a0eaae44becafdfe0c5f9a0d17945ab7504491eecbdf2f"
+      "approval_basis_checksum": "25aadf03a6c420402fda2d7340cd9faa10a5e36874d28ff7dc4f5f0a3badaaf6"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5066T>G",
@@ -895,14 +909,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.27,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -918,8 +932,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5066T>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -930,7 +945,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "ad9c1c0845491bb62eb702dea25297b44a3a2d1ce6d54898499a63ae8b9327a1"
+      "approval_basis_checksum": "bf6d2ea6e8e5f67b276975d21dc2194e553392b3476cb7848f424dce19db5431"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5074G>C",
@@ -953,14 +968,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.74,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -976,8 +991,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5074G>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -988,7 +1004,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "20bc81ecaca66c924bbe5249a2ff42103a9f516b32259111b359af640fa7dfdc"
+      "approval_basis_checksum": "75d47e86e5e4669f9221a9967d55d6c31ec541051407d65432e0c0524a6ee40d"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5089T>C",
@@ -1002,8 +1018,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1011,14 +1027,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.08,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1034,8 +1050,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5089T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1046,7 +1063,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "4b2fe767a8cb861e8b4e0ceb739832d1cc2006254a4794db6aff86919ef869b8"
+      "approval_basis_checksum": "ce5e487cbb2ddc32a35c51bb531bf7055cf57f9fac25a4d23779f161119bdc68"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5095C>T",
@@ -1059,9 +1076,9 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "excluded",
-      "status_reason": "Reference-variant SpliceAI 0.140 is greater than 0.1.",
-      "protein_branch": "missense_with_predicted_splice_effect",
+      "status": "eligible",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1069,14 +1086,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.14,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1092,8 +1109,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5095C>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1104,7 +1122,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "02128a675b001c2fc2ff60e4eb7bd587c794fced18065808b5853d248b4c4de1"
+      "approval_basis_checksum": "934892d6b45c74f4cac4f50729183c0cd485fd977802761fa189fa78c2c77a5b"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5117G>A",
@@ -1118,8 +1136,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1127,14 +1145,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.03,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1150,8 +1168,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5117G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1162,7 +1181,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "a955ccdd5087bc9a6679cb84108d4bf100793c5916d745ccfedd925c6cb5c22c"
+      "approval_basis_checksum": "997891cbbe1bce09ec0e010d57625651d89649255a04ee17d829cc850ba30fa2"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5123C>A",
@@ -1185,14 +1204,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.22,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -1208,8 +1227,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5123C>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1220,7 +1240,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "bf5d9cb9c58c5bbe85a3e6ba063adc6239cf6e4395ed4ee5d51e99db0cdc60bf"
+      "approval_basis_checksum": "702b12bf9d380ae6381760c9488ef031bb36a460f576e2f1483e99d16778da08"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5143A>C",
@@ -1233,9 +1253,9 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "excluded",
-      "status_reason": "Reference-variant SpliceAI 0.150 is greater than 0.1.",
-      "protein_branch": "missense_with_predicted_splice_effect",
+      "status": "eligible",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1243,14 +1263,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.15,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1266,8 +1286,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5143A>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1278,7 +1299,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "be1593ab87d3fa22403d852348ac19226f96d658f278a35da34224eca1787d30"
+      "approval_basis_checksum": "beae154bb0ba77f7bc6a78e96e968b6e7716840b1008a04fa1ce57296721da2e"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5144G>A",
@@ -1291,9 +1312,9 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "excluded",
-      "status_reason": "Reference-variant SpliceAI 0.110 is greater than 0.1.",
-      "protein_branch": "missense_with_predicted_splice_effect",
+      "status": "eligible",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1301,14 +1322,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.11,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1324,8 +1345,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5144G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1336,7 +1358,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "55f61c07ee829735b07ecb6998f745a91fda5ec908bc5eca600560f27679da21"
+      "approval_basis_checksum": "1285a951d7ccc2e1a5dba5625a3795fc89a21069c012306afefab35784c73fc2"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5207T>C",
@@ -1350,8 +1372,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
         "table9_code": "None",
@@ -1359,14 +1381,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1382,8 +1404,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5207T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1394,7 +1417,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "11991281ff8903d0525cd26f1f81e5114cf578478d7027e70ba2cef0ad34dbef"
+      "approval_basis_checksum": "bad49b38c07b817f04de589d8861a855b8e4cfef92ff66e060782a7645b72b11"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5207T>G",
@@ -1408,8 +1431,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1417,14 +1440,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1440,8 +1463,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5207T>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1452,7 +1476,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "4571b12cc7827e457ba7df199ef452a7e68d65041cf0aa50417ffd0b47b63c6f"
+      "approval_basis_checksum": "d6ccfc6d2a0f258bcc3078b0c69f8a78202d4b8d661a46c267840f795386f958"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5212G>A",
@@ -1466,8 +1490,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1475,14 +1499,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1498,8 +1522,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5212G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1510,7 +1535,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "54e3f42a6a43b53c31a4d89e17957ebc21e6bde3b52d9c1f877f2ddb05a7e171"
+      "approval_basis_checksum": "32fd2426f4440f00a5d857f89a791c65d8df21e2c32265b5623365b2c3250318"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5213G>A",
@@ -1524,8 +1549,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1533,14 +1558,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1556,8 +1581,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5213G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1568,7 +1594,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "a41cd682a0b9e30f0012dc9552e3b57de66ce7576619ae9f1d5ff3d160846dbd"
+      "approval_basis_checksum": "17286de54b3ef11190babfb8c08051e2d3af67b309b7dcd38b08a58ebf01f80c"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5216A>T",
@@ -1582,8 +1608,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
         "table9_code": "None",
@@ -1591,14 +1617,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1614,8 +1640,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5216A>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1626,7 +1653,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "4ce10048c62df6b58cbcc0fd48dc2861cf0c81da069dcea8145042d584f895f7"
+      "approval_basis_checksum": "5b28e53a24815cc4eac55a9d9eba166fc1e4d39153d1d2e617deb812d0542207"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5243G>A",
@@ -1640,8 +1667,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1649,14 +1676,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1672,8 +1699,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5243G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1684,7 +1712,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "6f45a59c9b070fa2b176a405a17fde004ed29c766ec8a1ff90fb883e5a39d123"
+      "approval_basis_checksum": "c3c77bc02969f85854dba879f7a19ea9e15b67706ffe1c26c0a0fb9beb9d70c6"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5291T>C",
@@ -1698,8 +1726,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1707,14 +1735,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1730,8 +1758,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5291T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1742,7 +1771,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "9433a73e08e8ee079a6a0368f57fbe6284c15816c92dfb47c224e9d0bf194706"
+      "approval_basis_checksum": "15594ed5b540c9cca447e60541d974952437ee447d233ef96dca0bb037e7cb9c"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5297T>G",
@@ -1756,8 +1785,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1765,14 +1794,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1788,8 +1817,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5297T>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1800,7 +1830,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "21e7989e606b1213f4f644ecc56a26757f99279465da9aedd485809ce8f53ce0"
+      "approval_basis_checksum": "de7d29bafd06d9a195847ecda9f34f31bb574c875fc043b8f741fffb5770bf5e"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5309G>T",
@@ -1814,8 +1844,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
         "table9_code": "None",
@@ -1823,14 +1853,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1846,8 +1876,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5309G>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1858,7 +1889,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "7793ed0bb4551528831b4a7f1cc1fc2e504aaf684eea861299eac1eaffc309b6"
+      "approval_basis_checksum": "2826e6e1fb1c96266f71b863a5c5942ea0a548c70d6880a510082897ee7fc158"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5324T>A",
@@ -1872,8 +1903,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1881,14 +1912,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1904,8 +1935,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5324T>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1916,7 +1948,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e77e0ef162336d30af1b4068cc254ce4abab3547e8d65cd3af12bb23ebc97fbb"
+      "approval_basis_checksum": "3e1bec8acb203e6814c6cabcf9cd70200693ae9180b8c53e3543036a9ee50775"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5324T>G",
@@ -1930,8 +1962,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1939,14 +1971,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1962,8 +1994,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5324T>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -1974,7 +2007,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "a11d479ac22de72f4cc74e94d5d99e1620549b8612c1658a1dc034ac78f01645"
+      "approval_basis_checksum": "50c1889d56113e4d48c081ae604b846431cdaf73933bc1dd7080b23ba906f1ce"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5357T>C",
@@ -1988,8 +2021,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -1997,14 +2030,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2020,8 +2053,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5357T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2032,7 +2066,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "79bf90fd33189e2d9307907c7123193f8dcb82cd33b226875613f8c38c033a08"
+      "approval_basis_checksum": "2fdb65f7ed13394b76b145bf5516a5fff9fbeb86a2922143ae9ce1af0f4a6405"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5359T>A",
@@ -2046,8 +2080,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
         "table9_code": "None",
@@ -2055,14 +2089,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.03,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2078,8 +2112,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5359T>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2090,7 +2125,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e2e46716b7e8442e1dfe906e943503bf8534fa392f75cf09401f96b0f92804b5"
+      "approval_basis_checksum": "381446cf4ff54b7a4199ce5d633cb8877efc43bf15796cf4e5f4b2bf96307f19"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5363G>T",
@@ -2104,8 +2139,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2113,14 +2148,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2136,8 +2171,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5363G>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2148,7 +2184,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "74e739c78ad41b00b15909586f8515e518b000e7fd8e31007fc09ab020923b43"
+      "approval_basis_checksum": "41d40c6e23b5ea1fcf6968b75374b2debc5c1db207dcb647a72aca8dcd279f8a"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.53T>C",
@@ -2162,8 +2198,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2171,14 +2207,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.05,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2194,8 +2230,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.53T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2206,7 +2243,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "cf761a534fc278409c0e65e9f9b359c8ec5a0853b531011ed6e8f0d698f7b771"
+      "approval_basis_checksum": "f22ceb075e11833ed6d63fc999d4e5b6de0724f988bafb1729e342bc855cc900"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5509T>C",
@@ -2220,8 +2257,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2229,14 +2266,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2252,8 +2289,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5509T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2264,7 +2302,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f13fe0c7ad5bf6d2d663ce9a2c4ed47ba7302b15c6bec179583e3de8c5dbd4de"
+      "approval_basis_checksum": "47bb442c77f9d34fc524497103647a61c375d2988622895c6b65b887f1af0fa9"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5513T>A",
@@ -2278,8 +2316,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2287,14 +2325,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2310,8 +2348,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5513T>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2322,7 +2361,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "5dec69ae4376dc2d34bb48338b8403afcb59d09b745a2eca260dd4b9f357630d"
+      "approval_basis_checksum": "c6b458e757d56cad026e387d6fe3ecb8ae1caa7e2485a81b53824d11dcea58a1"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5516T>C",
@@ -2336,8 +2375,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2345,14 +2384,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2368,8 +2407,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5516T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2380,7 +2420,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "1507a85dfd87667c51583ad416a0f920c8e2126e0c9f74ad5d20d6b07bf5cecd"
+      "approval_basis_checksum": "5bed676556ba5e3621dcca7de7c3e50dfd857b0eaf3e023c335de75f1f721e75"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5558A>G",
@@ -2394,8 +2434,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2403,14 +2443,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2426,8 +2466,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA1:c.5558A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2438,7 +2479,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "b62f7fd0d844f7708996d4bf9f3529ec0f416a3a6b9a785e1b879588d9783866"
+      "approval_basis_checksum": "c913fbcccbba4f463d80c2b15aa96cce779d4cca8add717e72e72cc45981cf5c"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7007G>A",
@@ -2461,14 +2502,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": null,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2484,8 +2525,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7007G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2496,7 +2538,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f39e8c8e4247531fe0104576cddf7b7c55af237870b5af1109a099d2ce6fe8cc"
+      "approval_basis_checksum": "db37e3d4a26ef5fd6401bd7093bf048ef024d130d95bf051f36fcfd07a2be83d"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7819A>C",
@@ -2510,8 +2552,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
         "table9_code": "None",
@@ -2519,14 +2561,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2542,8 +2584,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7819A>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2554,7 +2597,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "784b99f44970aead61d4a21f15f30cd6a6f5757beca14f748a12976dd088f58a"
+      "approval_basis_checksum": "66b77f3ec5753bc5d9ab6181a1f2fdb26f472d73834e5ae6401212966ad90482"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7879A>T",
@@ -2568,8 +2611,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2577,14 +2620,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.07,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2600,8 +2643,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7879A>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2612,7 +2656,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e966853ae15bbfd80401fe470e79a4f34329c075594257f9ea19e01b4f8a4346"
+      "approval_basis_checksum": "41c36fb3c812764196e7f9db2edbe73d6fdcc3aa4dc2839fd80923e2b169865a"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7940T>C",
@@ -2626,8 +2670,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2635,14 +2679,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2658,8 +2702,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7940T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2670,7 +2715,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "27ee9da91aae20ac4ba34a94847befe9930c44d5083972208255cd03f14d61a6"
+      "approval_basis_checksum": "57c484e187086288ce0cdeb38ae838f69bb15bfee0e59dfb7a8dc269cf95fa10"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7958T>C",
@@ -2684,8 +2729,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -2693,14 +2738,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2716,8 +2761,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7958T>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2728,7 +2774,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "d64ee3a474012cecb70297766be0aa77e873d1756640bd0c1a0d167254f712c0"
+      "approval_basis_checksum": "e45e06f6ccaaf7ff32e96c50723bd9b91423df7d958143c1f81afb38ba6ce195"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7975A>G",
@@ -2751,14 +2797,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.51,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2774,8 +2820,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7975A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2786,7 +2833,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "37e8d8ba53f570e73bdb8f1dca8456b0fa980704c906e7504cce74b8beafeb6a"
+      "approval_basis_checksum": "8bac2e63625dbed5fdb878d9551ba604cfd9f63e018ab1e002c6ecfaf8bfa7d7"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7976G>A",
@@ -2809,14 +2856,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.82,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2832,8 +2879,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7976G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2844,7 +2892,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e76ac9bc5a95a193207d97b6e1f79f84f36555f8dc4d797c263d4b87df9442bf"
+      "approval_basis_checksum": "bcc2cd6790f4da7f648a30baa68cdc6c8b371783669f92fdee9571278a802f95"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7976G>C",
@@ -2867,14 +2915,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.88,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2890,8 +2938,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7976G>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2902,7 +2951,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "57d1b0c07c2677d2cdc33360cfbcdea41b27ab3233e0edafa039756f48958c45"
+      "approval_basis_checksum": "8e0d0a147d3952dfefe3d0462043e288a7536a265377628e5353b68e71620021"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7988A>T",
@@ -2925,14 +2974,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": null,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2948,8 +2997,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.7988A>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -2960,7 +3010,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e8658fa2c26fdcd33169337cefb0d544e3ce0e599df88f337a4ebf794193ba8e"
+      "approval_basis_checksum": "07fed54cdfb331a160a931baeebfff1194ee8fc398999504651a9a853e15e728"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8009C>T",
@@ -2983,14 +3033,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3006,8 +3056,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8009C>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3018,7 +3069,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "b76a29f39efa91c0666bc1420816111a4622408c24ac3e2555d4b1332781d28f"
+      "approval_basis_checksum": "fbf3ffe594c16d1aad1960f257ce7e61fb8000637028b3a2c5b782d468cff1a3"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8023A>G",
@@ -3041,14 +3092,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": null,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3064,8 +3115,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8023A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3076,7 +3128,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f3698a38eac5d21c88f59819113b75a38c7e74ee55f9a6ba85249d83a901236a"
+      "approval_basis_checksum": "18ae509f10c4ff47858dea9272971d2e297393fe584fb906d4f52a9786857044"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8035G>T",
@@ -3099,14 +3151,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": null,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3122,8 +3174,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8035G>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3134,7 +3187,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "6a3dfb556d8f960bf0fdd7b1215f80cd9b03788a30acf27a04b0fc96c3a9b5c8"
+      "approval_basis_checksum": "4ff0be3e8b59c65bf75a7867d45e99ae5cc3d10115eb34b1f5f87f810a5248be"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8165C>G",
@@ -3157,14 +3210,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3180,8 +3233,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8165C>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3192,7 +3246,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c9622d0708eb5cd9ef44c6afadd660e3d8b7ed2c04255bf78533be63f053d957"
+      "approval_basis_checksum": "59bb297044967c3d63c6986d46a89877df9f2a1d475e5008dd44df59cd81d964"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8167G>C",
@@ -3206,8 +3260,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -3215,14 +3269,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.01,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3238,8 +3292,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8167G>C",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3250,7 +3305,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "873c87619094287b220791380184b23f130e40bd9dcdb43e357700c3b5b6fa7e"
+      "approval_basis_checksum": "070372068ced804657b9554f5a9dcdba1bd02b2f476df709fc04a733abc6eb97"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8168A>G",
@@ -3273,14 +3328,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.23,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "abnormal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3296,8 +3351,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8168A>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3308,7 +3364,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "10ca6e73a048665163e580f77acfe79ee34b8fade77cd3153d2d1f667b76f0e6"
+      "approval_basis_checksum": "b02f23e5f454ade72006fd450f875411816cd607060badbbacf4cc9335ee8212"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8243G>A",
@@ -3322,8 +3378,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -3331,14 +3387,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3354,8 +3410,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.8243G>A",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3366,7 +3423,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "cbbbd515b2edeb7721d1be65df6f0a9dbaf2bce5f8e1239f36cc30ddede01776"
+      "approval_basis_checksum": "1b414a92a73d0e3913f830ac69ed32a11aea3a394afe2ac23fc2144da0a6b0fc"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9154C>T",
@@ -3380,8 +3437,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -3389,14 +3446,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.02,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3412,8 +3469,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.9154C>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3424,7 +3482,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "b7d41abe2a1b861081f2ac6141cffc1b684e45b454becde94796f9a6cc582d36"
+      "approval_basis_checksum": "058fa6e784d30c1002b338e684e9857c0ea28a7d31b5f2287786ddacda9be917"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9285C>G",
@@ -3438,8 +3496,8 @@
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -3447,14 +3505,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3470,8 +3528,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.9285C>G",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3482,7 +3541,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "abf5d79d2bdb09a5b9f7542f4c086b01e51ec3a6de2d6daa0b0884fd116027fb"
+      "approval_basis_checksum": "057972e5c60c1e59c2a9d4d57b58cdc368af0fa51f3fedbe28fdbc1c16c64d5c"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9371A>T",
@@ -3496,8 +3555,8 @@
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
       "status": "eligible",
-      "status_reason": "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
-      "protein_branch": "missense_no_splice_effect",
+      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
         "table9_code": "PS3",
@@ -3505,14 +3564,14 @@
         "table9_summary": null
       },
       "reference_splice_evidence": {
-        "spliceai_score": 0.0,
         "threshold": 0.1,
+        "prediction_policy": "runtime_required",
         "confirmed_status": "normal",
         "sources_checked": [
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-12",
+        "checked_at": "2026-08-20",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3528,8 +3587,9 @@
           "absence_semantics": "No exact record means only that no evidence was identified in these defined source versions, not that no splice evidence exists."
         },
         "provenance": {
-          "provider": "official_enigma_v1_2_snapshots",
+          "provider": "configured_spliceai_service_at_classification_time",
           "input_variant": "BRCA2:c.9371A>T",
+          "transcript_policy": "reference_transcript",
           "st7_sha256": "9ce596114cade7a6119aac77659c1592d35d124018f1bacfb241ae1155ec50fc",
           "table9_sha256": "505295288125456189c5da2562594aa7be3fda8d527a6f0af500e4aef528720e",
           "st2_sha256": "8eb2a746368e8892f7f72211db0ead8f0720699fbad28421c3373dbbb0dd93f9",
@@ -3540,7 +3600,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "fed7fb4d6e91b81d5df9fc3628daecb42adeaa289111222463e7dea5f4353018"
+      "approval_basis_checksum": "f13d2eae3e36d98feaef7575e3f35ed5a6fe87802c10ced8f7266219c5a4c84c"
     }
   ]
 }

@@ -12,6 +12,7 @@ from backend.modules.frequency import (
     get_gnomad_frequencies,
 )
 from backend.modules.classifier import classify_by_enigma_combination, evaluate_variant
+from backend.modules.evidence_interactions import clinical_functional_risk_interactions
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
@@ -25,6 +26,7 @@ from backend.modules.ps1 import (
 )
 import backend.modules.ps1 as ps1_module
 from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
+from backend.modules.spliceai_policy import compare_table9_spliceai
 from backend.modules.utils import is_in_functional_domain
 from backend.modules.variant_type import infer_variant_type
 from backend.modules.hgvs import split_combined_hgvs
@@ -136,9 +138,13 @@ class VariantTypeTests(unittest.TestCase):
                 self.assertEqual(request.c_notation, "c.5551_5552insT")
                 self.assertEqual(request.p_notation, "p.(Asp1851ValfsTer29)")
 
-        with self.assertRaisesRegex(ValueError, "does not match the selected gene"):
-            VariantRequest(gene="BRCA1", c_notation="BRCA2:c.5551_5552insT")
-        with self.assertRaisesRegex(ValueError, "Unrecognised variant description"):
+        explicit_gene = VariantRequest(
+            gene="BRCA1",
+            c_notation="BRCA2:c.5551_5552insT",
+        )
+        self.assertEqual(explicit_gene.gene, "BRCA2")
+        self.assertEqual(explicit_gene.reference_transcript, "NM_000059.4")
+        with self.assertRaisesRegex(ValueError, "No reference transcript is configured"):
             VariantRequest(gene="BRCA1", c_notation="note:c.5551_5552insT")
 
     @unittest.skipIf(
@@ -639,6 +645,27 @@ class CriticalPtcBoundaryTests(unittest.TestCase):
 
 
 class SpliceTests(unittest.TestCase):
+    def test_table9_spliceai_comparison_respects_enigma_band_boundaries(self):
+        table9 = {"reviewed": True, "spliceai_prediction": 0.1}
+
+        score, warnings = compare_table9_spliceai("BRCA1", 0.09, table9)
+        self.assertEqual(score, 0.1)
+        self.assertFalse(any("different ENIGMA prediction bands" in item for item in warnings))
+
+        _, warnings = compare_table9_spliceai("BRCA1", 0.100001, table9)
+        self.assertTrue(any("different ENIGMA prediction bands" in item for item in warnings))
+
+        table9["spliceai_prediction"] = 0.2
+        _, warnings = compare_table9_spliceai("BRCA1", 0.199999, table9)
+        self.assertTrue(any("different ENIGMA prediction bands" in item for item in warnings))
+
+    def test_table9_spliceai_comparison_never_supplies_missing_prediction(self):
+        score, warnings = compare_table9_spliceai(
+            "BRCA1", None, {"reviewed": True, "spliceai_prediction": 0.0}
+        )
+        self.assertEqual(score, 0.0)
+        self.assertTrue(any("does not replace" in item for item in warnings))
+
     def test_official_st2_patient_rna_applies_pvs1_rna_by_general_rule(self):
         tutorial_variant = evaluate_pvs1_rna("BRCA1", "c.4185G>A")
         another_st2_variant = evaluate_pvs1_rna("BRCA1", "c.80+5G>A")
@@ -691,7 +718,9 @@ class SpliceTests(unittest.TestCase):
 
         expected_scores = {
             "c.548-9A>G": 0.86,
-            "c.4987-6T>G": 0.73,
+            # ENIGMA Table 9 and the Appendix J raw-delta profile both use
+            # the maximum component. DS_DL=0.74 is larger than DS_AL=0.73.
+            "c.4987-6T>G": 0.74,
         }
         for c_notation, expected_score in expected_scores.items():
             with self.subTest(c_notation=c_notation):
@@ -733,6 +762,7 @@ class SpliceTests(unittest.TestCase):
             spliceai_score=0.05,
             bp4_met=True,
             c_notation="c.100+7A>G",
+            gene="BRCA1",
         )
         self.assertTrue(result["applies"])
         self.assertEqual(result["points"], -1)
@@ -743,6 +773,7 @@ class SpliceTests(unittest.TestCase):
             spliceai_score=0.05,
             bp4_met=True,
             c_notation="c.100+6A>G",
+            gene="BRCA1",
         )
         self.assertFalse(result["applies"])
 
@@ -769,6 +800,7 @@ class SpliceTests(unittest.TestCase):
             spliceai_score=0.01,
             vua_splice_evidence_status="none_identified",
             vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+            reference_spliceai_scores={"c.122A>G": 0.01},
         )
         self.assertTrue(result["applies"])
         self.assertEqual(result["points"], 4)
@@ -776,11 +808,42 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["candidates"][0]["c_notation"], "c.122A>G")
         self.assertEqual(result["candidates"][0]["reference_status"], "approved")
 
-    def test_table9_score_enables_ps1_when_general_cache_is_unavailable(self):
+    def test_ps1_fails_closed_when_reference_spliceai_is_unavailable(self):
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.01,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+            reference_spliceai_scores={"c.122A>G": None},
+        )
+        self.assertFalse(result["applies"])
+        self.assertTrue(result["review_required"])
+        self.assertIn("reference variant", result["reason"])
+
+    def test_ps1_is_not_applied_when_reference_spliceai_exceeds_threshold(self):
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.01,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+            reference_spliceai_scores={"c.122A>G": 0.101},
+        )
+        self.assertFalse(result["applies"])
+        self.assertFalse(result["review_required"])
+        self.assertEqual(result["application_status"], "not_applicable")
+        self.assertIn("0.101", result["reason"])
+
+    def test_table9_score_does_not_replace_unavailable_ps1_prediction(self):
         table9 = table9_lookup_ps3_bs3("BRCA1", "c.131G>C")
         score, source = select_vua_spliceai_for_ps1(None, table9)
-        self.assertEqual(score, 0.0)
-        self.assertEqual(source, "ENIGMA Specifications Table 9 v1.2")
+        self.assertIsNone(score)
+        self.assertEqual(source, "configured SpliceAI source")
         splice_evidence = evaluate_defined_splice_sources(
             "BRCA1", "c.131G>C", table9
         )
@@ -794,10 +857,9 @@ class SpliceTests(unittest.TestCase):
             vua_splice_evidence_status=splice_evidence["status"],
             vua_splice_sources_checked=splice_evidence["sources_checked"],
         )
-        self.assertTrue(result["applies"])
-        self.assertEqual(result["strength"], "Strong")
-        self.assertEqual(result["reference_variant"]["c_notation"], "c.130T>A")
-        self.assertIn("Table 9", result["reason"])
+        self.assertFalse(result["applies"])
+        self.assertTrue(result["review_required"])
+        self.assertIn("SpliceAI is unavailable", result["reason"])
 
     def test_st7_reference_with_splice_effect_is_excluded(self):
         result = evaluate_ps1(
@@ -823,7 +885,7 @@ class SpliceTests(unittest.TestCase):
         self.assertTrue(display["display"])
         self.assertFalse(display["recommended"])
         self.assertEqual(display["title"], "Protein PS1 not applicable")
-        self.assertIn("different reference variant", display["summary"])
+        self.assertIn("different P/LP reference variant", display["summary"])
         self.assertIn("does not classify", display["reasons"][0])
 
     def test_approved_vcep_reference_can_automatically_score_ps1(self):
@@ -853,6 +915,7 @@ class SpliceTests(unittest.TestCase):
                 spliceai_score=0.1,
                 vua_splice_evidence_status="none_identified",
                 vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+                reference_spliceai_scores={"c.122A>G": 0.01},
             )
         self.assertTrue(result["applies"])
         self.assertEqual(result["strength"], "Strong")
@@ -918,13 +981,13 @@ class SpliceTests(unittest.TestCase):
                 },
                 "status": "eligible",
                 "status_reason": "Synthetic eligible test reference.",
-                "protein_branch": "missense_no_splice_effect",
+                "protein_branch": "missense_runtime_spliceai_check_required",
                 "protein_mechanism_evidence": {
                     "basis": "curated_protein_mechanism_assessment"
                 },
                 "reference_splice_evidence": {
-                    "spliceai_score": 0.01,
                     "threshold": 0.1,
+                    "prediction_policy": "runtime_required",
                     "confirmed_status": "none_identified",
                     "sources_checked": ["ENIGMA Table 9", "ENIGMA ST2"],
                     "checked_at": "2026-08-12",
@@ -939,7 +1002,7 @@ class SpliceTests(unittest.TestCase):
             return value
 
         registry = {
-            "schema_version": 2,
+            "schema_version": 3,
             "registry_version": "test",
             "status": "active",
             "defined_splice_sources": ["ENIGMA Table 9", "ENIGMA ST2"],
@@ -966,46 +1029,28 @@ class SpliceTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "circular dependency"):
             validate_ps1_reference_registry(registry)
 
-    def test_splice_ps1_reference_pilot_is_unreviewed_seed_only(self):
-        project_root = Path(__file__).resolve().parents[1]
-        path = project_root / "backend/data/splice_ps1_reference_set.json"
-        self.assertTrue(path.exists())
-        import json
-        data = json.loads(path.read_text(encoding="utf-8"))
-        self.assertEqual(
-            data["curation_status"],
-            "pilot_unreviewed_not_for_automatic_scoring",
-        )
-        self.assertGreaterEqual(len(data["variants"]), 1)
-        self.assertTrue(
-            any(
-                variant["gene"] == "BRCA1"
-                and variant["reference_variant"] == "c.4185G>A"
-                for variant in data["variants"]
-            )
+    def test_splice_ps1_candidate_discovery_comes_directly_from_complete_st2(self):
+        from backend.modules.ps1_splice_evidence import (
+            list_splice_ps1_candidate_discovery,
         )
 
-    def test_splice_ps1_reference_candidates_are_available_for_ui_prefill(self):
-        from backend.modules.splice_ps1_reference import (
-            load_splice_ps1_reference_candidates,
-        )
-
-        data = load_splice_ps1_reference_candidates("BRCA1")
-        self.assertEqual(
-            data["curation_status"],
-            "pilot_unreviewed_not_for_automatic_scoring",
-        )
-        self.assertGreaterEqual(len(data["candidates"]), 1)
+        data = list_splice_ps1_candidate_discovery()
+        self.assertEqual(data["status"], "candidate_discovery_only")
+        self.assertEqual(data["candidate_count"], 75)
+        self.assertEqual(len(data["candidates"]), 75)
+        self.assertTrue(all(
+            item["eligibility_status"] == "candidate_discovery_only"
+            for item in data["candidates"]
+        ))
+        self.assertTrue(all("suggested_strength" not in item for item in data["candidates"]))
         candidate = next(
             item
             for item in data["candidates"]
-            if item["reference_variant"] == "c.4185G>A"
+            if item["gene"] == "BRCA1" and item["reference_variant"] == "c.4185G>A"
         )
-        self.assertEqual(candidate["gene"], "BRCA1")
         self.assertEqual(candidate["classification"], "Pathogenic")
-        self.assertEqual(candidate["prefill_strength_suggestion"], "Strong")
-        self.assertIn("exon 12", candidate["splice_event_label"])
-        self.assertIn("row", candidate["source_label"])
+        self.assertTrue(candidate["reference_splice_event"])
+        self.assertEqual(len(candidate["source_file_sha256"]), 64)
 
 
 class ClassifierIntegrationTests(unittest.TestCase):
@@ -1084,6 +1129,14 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertEqual(
             classify_by_enigma_combination(very_strong_plus_one_moderate, 10)[0], 5
         )
+        two_very_strong = {
+            "PVS1": {"points": 8, "strength": "Very Strong"},
+            "PP4": {"points": 8, "strength": "Very Strong"},
+        }
+        self.assertEqual(
+            classify_by_enigma_combination(two_very_strong, 16)[:2],
+            (5, "Pathogenic"),
+        )
         two_strong = {
             "PS3": {"points": 4, "strength": "Strong"},
             "PS4": {"points": 4, "strength": "Strong"},
@@ -1137,6 +1190,24 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertIn("BP4", result["criteria"])
         self.assertEqual(result["evidence_interactions"][0]["status"], "conflict")
         self.assertTrue(result["evidence_interactions"][0]["review_required"])
+
+    def test_ps3_bp5_conflict_flags_possible_reduced_penetrance_without_asserting_it(self):
+        interactions = clinical_functional_risk_interactions({
+            "PS3": {"points": 4, "strength": "Strong"},
+            "BP5": {"points": -4, "strength": "Strong"},
+        })
+        self.assertEqual(len(interactions), 1)
+        warning = interactions[0]
+        self.assertEqual(warning["status"], "conflict")
+        self.assertTrue(warning["review_required"])
+        self.assertIn("does not establish reduced penetrance", warning["reason"])
+        self.assertEqual(warning["retained"], ["PS3", "BP5"])
+
+    def test_reduced_penetrance_warning_requires_both_ps3_and_bp5(self):
+        self.assertEqual(
+            clinical_functional_risk_interactions({"PS3": {"points": 4}}),
+            [],
+        )
     def test_custom_donor_guard_is_not_part_of_active_scoring(self):
         project_root = Path(__file__).resolve().parents[1]
         self.assertFalse((project_root / "backend/modules/donor_guard.py").exists())
@@ -1224,7 +1295,7 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertEqual(unknown["criteria"]["PVS1"]["strength"], "Moderate")
         self.assertEqual(tandem["criteria"]["PVS1"]["strength"], "Strong")
 
-    def test_table9_splice_snapshot_enables_bp1_for_ser1298del(self):
+    def test_table9_splice_score_does_not_override_configured_score(self):
         table9_result = table9_lookup_ps3_bs3("BRCA1", "c.3891_3893del")
         self.assertEqual(table9_result["splice_result_published"], "no aberration (PMID: 18273839)")
         self.assertEqual(table9_result["spliceai_prediction"], 0)
@@ -1237,11 +1308,12 @@ class ClassifierIntegrationTests(unittest.TestCase):
             table9_result=table9_result,
         )
         self.assertEqual(result["criteria"]["BS3"]["points"], -4)
-        self.assertEqual(result["criteria"]["BP1"]["points"], -4)
-        self.assertEqual(result["total_points"], -8)
-        self.assertEqual(result["predicted_class"], 1)
-        self.assertEqual(result["predicted_label"], "Benign")
+        self.assertNotIn("BP1", result["criteria"])
+        self.assertEqual(result["total_points"], -4)
+        self.assertEqual(result["predicted_class"], 3)
+        self.assertEqual(result["predicted_label"], "VUS")
         self.assertTrue(any("Table 9=0.000" in warning for warning in result["warnings"]))
+        self.assertTrue(any("different ENIGMA prediction bands" in warning for warning in result["warnings"]))
 
     def test_pvs1_very_strong_alone_remains_vus_with_explanation(self):
         result = evaluate_variant(

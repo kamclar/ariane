@@ -12,28 +12,78 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         self.assertEqual(
             suggest_strength(
                 "PS4",
-                {"p_value": 0.05, "odds_ratio": 4, "lower_ci": 2.01},
+                {
+                    "p_value": 0.05,
+                    "odds_ratio": 4,
+                    "lower_ci": 2.01,
+                    "case_control_country_matched": True,
+                    "case_control_ethnicity_matched": True,
+                },
             ),
             "Strong",
         )
         self.assertIsNone(
             suggest_strength(
                 "PS4",
-                {"p_value": 0.05, "odds_ratio": 4, "lower_ci": 2.0},
+                {
+                    "p_value": 0.05,
+                    "odds_ratio": 4,
+                    "lower_ci": 2.0,
+                    "case_control_country_matched": True,
+                    "case_control_ethnicity_matched": True,
+                },
             )
         )
 
+    def test_ps4_requires_country_and_ethnicity_matching(self):
+        common = {
+            "p_value": 0.01,
+            "odds_ratio": 5,
+            "lower_ci": 2.1,
+            "case_control_country_matched": True,
+            "case_control_ethnicity_matched": True,
+        }
+        for missing_field in (
+            "case_control_country_matched",
+            "case_control_ethnicity_matched",
+        ):
+            evidence = {**common, missing_field: False}
+            self.assertIsNone(suggest_strength("PS4", evidence))
+
     def test_pm3_and_bs2_point_thresholds(self):
         for code in ("PM3", "BS2"):
+            required = {
+                "cooccurring_variant_classification_basis": "vcep_specifications",
+            }
+            if code == "PM3":
+                required["vua_benign_population_review"] = "does_not_meet"
             self.assertEqual(
-                suggest_strength(code, {"evidence_points": 1}), "Supporting"
+                suggest_strength(code, {**required, "evidence_points": 1}), "Supporting"
             )
             self.assertEqual(
-                suggest_strength(code, {"evidence_points": 2}), "Moderate"
+                suggest_strength(code, {**required, "evidence_points": 2}), "Moderate"
             )
             self.assertEqual(
-                suggest_strength(code, {"evidence_points": 4}), "Strong"
+                suggest_strength(code, {**required, "evidence_points": 4}), "Strong"
             )
+
+    def test_pm3_and_bs2_require_vcep_classified_cooccurring_variant(self):
+        for code in ("PM3", "BS2"):
+            evidence = {"evidence_points": 4}
+            if code == "PM3":
+                evidence["vua_benign_population_review"] = "does_not_meet"
+            self.assertIsNone(suggest_strength(code, evidence))
+
+    def test_pm3_requires_no_benign_population_criterion(self):
+        common = {
+            "evidence_points": 4,
+            "cooccurring_variant_classification_basis": "vcep_specifications",
+        }
+        self.assertIsNone(suggest_strength("PM3", common))
+        self.assertIsNone(suggest_strength("PM3", {
+            **common,
+            "vua_benign_population_review": "meets",
+        }))
 
     def test_pp1_likelihood_ratio_thresholds(self):
         self.assertEqual(
@@ -45,9 +95,11 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         self.assertEqual(
             suggest_strength("PP1", {"likelihood_ratio": 18.7}), "Strong"
         )
-        self.assertEqual(
-            suggest_strength("PP1", {"likelihood_ratio": 350}), "Very Strong"
-        )
+        self.assertEqual(suggest_strength("PP1", {"likelihood_ratio": 350}), "Strong")
+        self.assertEqual(suggest_strength("PP1", {
+            "likelihood_ratio": 350,
+            "very_strong_effect_basis": "predicted_protein",
+        }), "Very Strong")
 
     def test_pp4_combined_clinical_lr_thresholds_require_provenance(self):
         def evidence(lr):
@@ -154,18 +206,86 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         evidence["assay_scope"] = "combined_mrna_protein"
         self.assertIsNone(suggest_strength("PVS1_RNA", evidence))
 
-    def test_bp7_rna_is_strong_only_with_eligibility_stipulation(self):
+    def test_bp7_rna_is_strong_only_with_variant_context_eligibility(self):
         evidence = {
             "assay_scope": "mrna_only",
             "rna_conclusion": "no_damaging_effect",
-            "bp7_rna_eligible": True,
             "transcript_accession": "NM_000059.4",
             "tissue_or_cell_type": "blood",
             "nmd_assessed": "not_applicable",
         }
-        self.assertEqual(suggest_strength("BP7_RNA", evidence), "Strong")
-        evidence["bp7_rna_eligible"] = False
+        intronic_context = {
+            "gene": "BRCA2",
+            "c_notation": "c.8953+3T>C",
+            "p_notation": "p.?",
+        }
+        self.assertEqual(
+            suggest_strength(
+                "BP7_RNA", evidence, variant_context=intronic_context
+            ),
+            "Strong",
+        )
         self.assertIsNone(suggest_strength("BP7_RNA", evidence))
+
+    def test_bp7_rna_domain_missense_requires_table9_bs3(self):
+        evidence = {
+            "assay_scope": "mrna_only",
+            "rna_conclusion": "no_damaging_effect",
+            "transcript_accession": "NM_007294.4",
+            "tissue_or_cell_type": "blood",
+            "nmd_assessed": "not_applicable",
+        }
+        context = {
+            "gene": "BRCA1",
+            "c_notation": "c.5123C>T",
+            "p_notation": "p.(Ala1708Val)",
+        }
+        self.assertIsNone(
+            suggest_strength("BP7_RNA", evidence, variant_context=context)
+        )
+        bs3 = [{
+            "name": "BS3",
+            "applies": True,
+            "strength": "Strong",
+            "points": -4,
+            "decision_path": {
+                "sources": [{"source_id": "enigma-v1.2-table9"}],
+            },
+        }]
+        self.assertEqual(
+            suggest_strength(
+                "BP7_RNA",
+                evidence,
+                variant_context=context,
+                base_criteria=bs3,
+            ),
+            "Strong",
+        )
+
+    def test_bp7_rna_does_not_accept_unproven_bs3_for_domain_missense(self):
+        evidence = {
+            "assay_scope": "mrna_only",
+            "rna_conclusion": "no_damaging_effect",
+            "transcript_accession": "NM_007294.4",
+            "tissue_or_cell_type": "blood",
+            "nmd_assessed": "not_applicable",
+        }
+        context = {
+            "gene": "BRCA1",
+            "c_notation": "c.5123C>T",
+            "p_notation": "p.(Ala1708Val)",
+        }
+        self.assertIsNone(suggest_strength(
+            "BP7_RNA",
+            evidence,
+            variant_context=context,
+            base_criteria=[{
+                "name": "BS3",
+                "applies": True,
+                "strength": "Strong",
+                "points": -4,
+            }],
+        ))
 
     def test_pvs1_init_requires_curated_flowchart_record(self):
         evidence = {
@@ -299,7 +419,6 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                     "code": "PP4",
                     "enabled": True,
                     "evidence": {"combined_clinical_lr": 350},
-                    "override_strength": "Very Strong",
                 }],
             )
 
@@ -344,7 +463,13 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
             },
             {
                 "code": "PS4", "enabled": True,
-                "evidence": {"p_value": 0.01, "odds_ratio": 5, "lower_ci": 2.1},
+                "evidence": {
+                    "p_value": 0.01,
+                    "odds_ratio": 5,
+                    "lower_ci": 2.1,
+                    "case_control_country_matched": True,
+                    "case_control_ethnicity_matched": True,
+                },
             },
         ]
         with self.assertRaisesRegex(ValueError, "PS4 cannot be combined"):
@@ -409,12 +534,16 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 "evidence": {
                     "assay_scope": "mrna_only",
                     "rna_conclusion": "no_damaging_effect",
-                    "bp7_rna_eligible": True,
                     "transcript_accession": "NM_007294.4",
                     "tissue_or_cell_type": "blood",
                     "nmd_assessed": "not_applicable",
                 },
             }],
+            variant_context={
+                "gene": "BRCA1",
+                "c_notation": "c.4185G>A",
+                "p_notation": "p.(Gln1395=)",
+            },
         )
         self.assertEqual(result["total_points"], -5)
         warning = result["evidence_interactions"][0]
@@ -429,12 +558,16 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 "evidence": {
                     "assay_scope": "mrna_only",
                     "rna_conclusion": "no_damaging_effect",
-                    "bp7_rna_eligible": True,
                     "transcript_accession": "NM_007294.4",
                     "tissue_or_cell_type": "blood",
                     "nmd_assessed": "not_applicable",
                 },
             }],
+            variant_context={
+                "gene": "BRCA1",
+                "c_notation": "c.4987-6T>G",
+                "p_notation": "p.?",
+            },
         )
         self.assertEqual(result["total_points"], -3)
         warning = result["evidence_interactions"][0]
@@ -456,7 +589,11 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
             {
                 "code": "PM3",
                 "enabled": True,
-                "evidence": {"evidence_points": 1},
+                "evidence": {
+                    "evidence_points": 1,
+                    "cooccurring_variant_classification_basis": "vcep_specifications",
+                    "vua_benign_population_review": "does_not_meet",
+                },
                 "notes": "one PM3 evidence point",
                 "references": ["PMID:1"],
             },
@@ -475,24 +612,21 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
         self.assertEqual(result["total_points"], 6)
         self.assertEqual(base[0]["points"], 4)
 
-    def test_reviewer_can_override_with_an_allowed_strength(self):
-        result = evaluate_manual_evidence(
-            [],
-            [
-                {
-                    "code": "PP1",
-                    "enabled": True,
-                    "evidence": {"likelihood_ratio": 4.3},
-                    "override_strength": "Supporting",
-                    "notes": "conservative reviewer adjustment",
-                    "references": ["PMID:3"],
-                }
-            ],
-        )
-        criterion = result["manual_criteria"][0]
-        self.assertEqual(criterion["suggested_strength"], "Moderate")
-        self.assertEqual(criterion["selected_strength"], "Supporting")
-        self.assertTrue(criterion["overridden"])
+    def test_reviewer_cannot_override_a_rule_derived_strength(self):
+        with self.assertRaisesRegex(ValueError, "overrides are not permitted"):
+            evaluate_manual_evidence(
+                [],
+                [
+                    {
+                        "code": "PP1",
+                        "enabled": True,
+                        "evidence": {"likelihood_ratio": 4.3},
+                        "override_strength": "Supporting",
+                        "notes": "attempted conservative adjustment",
+                        "references": ["PMID:3"],
+                    }
+                ],
+            )
 
     def test_invalid_strength_for_criterion_is_rejected(self):
         with self.assertRaises(ValueError):
@@ -545,7 +679,6 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                     "evidence": {
                         "assay_scope": "mrna_only",
                         "rna_conclusion": "no_damaging_effect",
-                        "bp7_rna_eligible": True,
                         "transcript_accession": "NM_000059.4",
                         "tissue_or_cell_type": "blood",
                         "nmd_assessed": "not_applicable",
@@ -555,6 +688,11 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                     "references": ["PMID:5"],
                 }
             ],
+            variant_context={
+                "gene": "BRCA2",
+                "c_notation": "c.8953+3T>C",
+                "p_notation": "p.?",
+            },
         )
         criterion = result["manual_criteria"][0]
         self.assertTrue(criterion["applies"])

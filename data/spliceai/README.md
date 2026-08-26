@@ -6,16 +6,13 @@ Appendix J with GRCh38, maximum distance 10,000, unmasked output, the reference
 transcript, and the maximum of DS_AG, DS_AL, DS_DG, and DS_DL. Every accepted
 record also retains the four REF and four ALT component scores.
 
-## Current API-primary mode
+## Runtime mode
 
-Until both Appendix J caches have been completely rebuilt, ARIANE keeps
-`SPLICEAI_USE_PRECOMPUTED_CACHE=0`. Runtime uses the profile-pinned Broad API
-cache and then the configured Broad-compatible API. Legacy coding and intronic
-files remain build inputs and audit material, but are not active classification
-sources and do not create degraded-source warnings.
-
-After a complete checksum-validated rebuild, the immutable caches can be
-activated explicitly with `SPLICEAI_USE_PRECOMPUTED_CACHE=1`.
+ARIANE computes SpliceAI on demand. Runtime uses the profile-pinned result cache
+and then the configured Broad-compatible API. Precomputed coding and intronic
+variant spaces are not classification sources and cannot be activated by an
+environment variable. Existing files remain only as historical validation and
+audit material.
 
 Both coding and intronic caches are built with
 `scripts/build_spliceai_reference_caches.py` against local instances of the
@@ -34,11 +31,11 @@ Final report:
 For the current API-primary `reference_transcript` policy:
 
 1. In-memory cache
-2. `spliceai_api_cache.json`
+2. `${ARIANE_RUNTIME_CACHE_DIR}/spliceai_api_cache.json`, or
+   `.runtime-cache/spliceai_api_cache.json` in local development
 3. A configured Broad-compatible API call using exactly the same profile
 
-The immutable precomputed files are skipped while
-`SPLICEAI_USE_PRECOMPUTED_CACHE=0`.
+The lookup does not read a precomputed gene-wide variant space.
 
 There is no classification mode that silently switches to a maximum across
 other transcripts. An environment request for a conflicting transcript policy
@@ -48,13 +45,12 @@ Old runtime records use a different key and are ignored. A response that does
 not echo GRCh38, distance 10,000 and mask 0, or lacks delta/REF/ALT fields, is
 rejected. Missing scores remain unavailable and are never converted to zero.
 
-## Reproducible Build
+## Historical validation datasets
 
-The builder writes resumable checkpoints under `data/spliceai/build/`. A
+The builder can create comparison datasets under `data/spliceai/build/`. A
 checkpoint is accepted only when its scoring profile, source checksum and own
-checksum match. Production JSON and metadata are replaced only after all
-expected records succeed. The existing production cache is never used as a
-resume source.
+checksum match. JSON and metadata are replaced only after all expected records
+succeed. These datasets do not enter the runtime lookup order.
 
 ```powershell
 python scripts\build_spliceai_reference_caches.py all `

@@ -18,8 +18,8 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 GNOMAD_DIR = PROJECT_ROOT / "data" / "gnomad"
 # The historical filename is retained for deployment compatibility. Its
 # contents and accepted regions are governed entirely by the panel manifest.
-GNOMAD_CACHE_WITH_REAL_COVERAGE = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.with_real_coverage.json"
-GNOMAD_COVERAGE_CACHE_JSON = GNOMAD_DIR / "gnomad_brca_coverage_cache.json"
+GNOMAD_FREQUENCY_SNAPSHOT_PATH = GNOMAD_DIR / "gnomad_brca_frequency_snapshot.json"
+GNOMAD_COVERAGE_SNAPSHOT_PATH = GNOMAD_DIR / "gnomad_brca_coverage_snapshot.json"
 GNOMAD_PANEL_MANIFEST_JSON = GNOMAD_DIR / "gnomad_panel_manifest.json"
 
 GNOMAD_LOCAL_DATASET_CONFIG = {
@@ -399,8 +399,8 @@ def _normalize_variant_cache_keys(raw_mapping: Dict[str, Any]) -> Dict[str, Any]
 
 
 def choose_gnomad_cache_file() -> Optional[Path]:
-    if GNOMAD_CACHE_WITH_REAL_COVERAGE.exists():
-        return GNOMAD_CACHE_WITH_REAL_COVERAGE
+    if GNOMAD_FREQUENCY_SNAPSHOT_PATH.exists():
+        return GNOMAD_FREQUENCY_SNAPSHOT_PATH
     return None
 
 
@@ -415,10 +415,10 @@ def load_gnomad_local_cache(path: Optional[Path] = None) -> None:
         GNOMAD_CACHE_PATH = None
         GNOMAD_CACHE_MODE = "missing"
         print("gnomAD local cache not found.")
-        print("Expected approved file:", GNOMAD_CACHE_WITH_REAL_COVERAGE)
+        print("Expected approved file:", GNOMAD_FREQUENCY_SNAPSHOT_PATH)
         register_issue(
             "gnomAD variant cache",
-            f"approved real-coverage cache is missing: {GNOMAD_CACHE_WITH_REAL_COVERAGE}",
+            f"approved frequency snapshot is missing: {GNOMAD_FREQUENCY_SNAPSHOT_PATH}",
         )
         return
 
@@ -456,22 +456,22 @@ def load_gnomad_local_cache(path: Optional[Path] = None) -> None:
     GNOMAD_CACHE_MODE = "approved_snapshot"
 
     n_records = sum(len(v) for v in mapping.values() if isinstance(v, list))
-    print("Loaded local gnomAD cache:", selected)
+    print("Loaded gnomAD frequency snapshot:", selected)
     print("Cache mode:", GNOMAD_CACHE_MODE)
     print("Unique variant IDs:", len(mapping))
     print("Variant records:", n_records)
     clear_issue("gnomAD variant cache")
 
 
-def load_gnomad_coverage_cache(path: Optional[Path] = None) -> None:
+def load_gnomad_coverage_snapshot(path: Optional[Path] = None) -> None:
     """Load standalone coverage-by-position cache, used especially for absent variants."""
     global GNOMAD_COVERAGE_BY_POSITION
 
-    selected = Path(path) if path is not None else GNOMAD_COVERAGE_CACHE_JSON
+    selected = Path(path) if path is not None else GNOMAD_COVERAGE_SNAPSHOT_PATH
     if selected is None or not selected.exists():
         GNOMAD_COVERAGE_BY_POSITION = {}
-        print("Standalone gnomAD coverage cache not found:", selected)
-        register_issue("gnomAD coverage cache", f"coverage cache is missing: {selected}")
+        print("gnomAD coverage snapshot not found:", selected)
+        register_issue("gnomAD coverage snapshot", f"coverage snapshot is missing: {selected}")
         return
 
     try:
@@ -480,7 +480,7 @@ def load_gnomad_coverage_cache(path: Optional[Path] = None) -> None:
     except (OSError, json.JSONDecodeError) as exc:
         GNOMAD_COVERAGE_BY_POSITION = {}
         register_issue(
-            "gnomAD coverage cache",
+            "gnomAD coverage snapshot",
             f"could not load {selected}: {type(exc).__name__}: {exc}",
         )
         return
@@ -489,15 +489,15 @@ def load_gnomad_coverage_cache(path: Optional[Path] = None) -> None:
     if validation_error:
         GNOMAD_COVERAGE_BY_POSITION = {}
         register_issue(
-            "gnomAD coverage cache",
-            f"coverage cache validation failed: {validation_error}",
+            "gnomAD coverage snapshot",
+            f"coverage snapshot validation failed: {validation_error}",
         )
         return
 
     GNOMAD_COVERAGE_BY_POSITION = payload.get("coverage_by_position", {}) or {}
-    print("Loaded standalone gnomAD coverage cache:", selected)
+    print("Loaded gnomAD coverage snapshot:", selected)
     print("Coverage positions:", len(GNOMAD_COVERAGE_BY_POSITION))
-    clear_issue("gnomAD coverage cache")
+    clear_issue("gnomAD coverage snapshot")
 
 
 def _coords_in_cached_region(coords: Optional[Any], build: str) -> bool:
@@ -615,7 +615,7 @@ def _lookup_coverage_by_position(
         "mean_depth": None,
         "threshold": threshold,
         "passes": False,
-        "source": "not_found_in_coverage_cache",
+        "source": "not_found_in_coverage_snapshot",
         "position_key": None,
         "position_keys": [cov.get("position_key") or key for key, cov in found],
         "coverage_scope": "variant_reference_span",
@@ -1472,4 +1472,4 @@ def evaluate_frequency_criteria(
 
 # Load caches at import time
 load_gnomad_local_cache()
-load_gnomad_coverage_cache()
+load_gnomad_coverage_snapshot()

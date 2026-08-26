@@ -8,11 +8,12 @@
 #   SpliceAI local BRCA subset -> GRCh38
 #
 # Resolution order:
-#   1. VariantValidator REST API (rest.variantvalidator.org)
+#   1. Immutable local coordinate snapshots and the persistent runtime cache
+#   2. VariantValidator REST API (rest.variantvalidator.org)
 #      - designed for clinical use, supports BRCA1/2 explicitly
 #      - returns both builds in one call
 #      - best error messages, handles edge cases correctly
-#   2. Mutalyzer normalize API (mutalyzer.nl) as a reported secondary resolver
+#   3. Mutalyzer normalize API (mutalyzer.nl) as a reported secondary resolver
 #      - academic tool, good for most coding variants
 #      - requires separate calls for GRCh37 vs GRCh38
 #      - known issue: intronic notation (+/-) needs careful URL encoding
@@ -28,11 +29,14 @@
 from typing import Optional, Dict, List, Tuple
 from pathlib import Path
 import json
+import os
 import re
+import tempfile
 import time
 import urllib.request
 import urllib.parse
 import urllib.error
+from backend.runtime_cache import runtime_cache_path
 import logging
 from backend.data_health import clear_issue, register_issue
 from dataclasses import dataclass, field
@@ -43,10 +47,7 @@ _RESOLVER_FAILURES: Dict[str, list[str]] = {}
 VARIANTVALIDATOR_API = "https://rest.variantvalidator.org/VariantValidator/variantvalidator"
 MUTALYZER_API = "https://mutalyzer.nl/api"
 
-TRANSCRIPTS = {
-    "BRCA1": "NM_007294.4",
-    "BRCA2": "NM_000059.4",
-}
+from backend.config import TRANSCRIPTS
 
 # NC accessions for parsing Mutalyzer output
 NC_TO_CHROM = {
@@ -340,7 +341,8 @@ def _resolve_mutalyzer(transcript: str, c_notation: str, assembly: str) -> Optio
 import threading as _threading
 
 _RESOLVER_CACHE: Dict[str, ResolvedVariant] = {}
-_COORDS_CACHE_PATH = Path(__file__).resolve().parent.parent / "data" / "coordinates_cache.json"
+_RUNTIME_COORDINATE_KEYS: set[str] = set()
+_COORDS_CACHE_PATH = runtime_cache_path("coordinates_api_cache.json")
 _INTRONIC_COORDS_PATH = (
     Path(__file__).resolve().parent.parent.parent
     / "data" / "coordinates" / "brca_intronic_snv_coordinates.json"
@@ -365,9 +367,15 @@ def _load_coords_cache() -> None:
     loaded = 0
     # The generated, versioned map is loaded first. The small read-through cache
     # remains useful for variant classes outside the precomputed SNV spaces.
-    for path in (_INTRONIC_COORDS_PATH, _COORDS_CACHE_PATH):
+    for path, is_runtime in (
+        (_INTRONIC_COORDS_PATH, False),
+        (_COORDS_CACHE_PATH, True),
+    ):
         if not path.exists():
-            register_issue(f"Coordinate cache {path.name}", f"cache is missing: {path}")
+            if is_runtime:
+                clear_issue("Coordinate read-through cache")
+            else:
+                register_issue(f"Coordinate cache {path.name}", f"cache is missing: {path}")
             continue
         try:
             with open(path, encoding="utf-8") as fh:
@@ -382,6 +390,8 @@ def _load_coords_cache() -> None:
                     grch37=_dict_to_coords(entry.get("grch37")),
                     grch38=_dict_to_coords(entry.get("grch38")),
                 )
+                if is_runtime:
+                    _RUNTIME_COORDINATE_KEYS.add(key)
                 loaded += 1
             clear_issue(f"Coordinate cache {path.name}")
         except Exception as exc:
@@ -395,6 +405,7 @@ def _load_coords_cache() -> None:
 
 def _save_coords_cache() -> None:
     with _COORDS_FILE_LOCK:
+        temporary_path = None
         try:
             serialized = {
                 k: {
@@ -407,15 +418,36 @@ def _save_coords_cache() -> None:
                     "grch38":     _coords_to_dict(v.grch38),
                 }
                 for k, v in _RESOLVER_CACHE.items()
-                if v.status in ("ok", "partial")
+                if k in _RUNTIME_COORDINATE_KEYS and v.status in ("ok", "partial")
             }
-            with open(_COORDS_CACHE_PATH, "w", encoding="utf-8") as fh:
+            _COORDS_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=_COORDS_CACHE_PATH.parent,
+                prefix="coordinates_api_cache.",
+                suffix=".tmp",
+                delete=False,
+            ) as fh:
+                temporary_path = Path(fh.name)
                 json.dump(serialized, fh)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(temporary_path, _COORDS_CACHE_PATH)
+            clear_issue("Coordinate read-through cache")
         except Exception as exc:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
             print(f"Warning: could not save coordinates cache: {exc}")
             register_issue(
                 "Coordinate read-through cache",
-                f"could not save {_COORDS_CACHE_PATH}: {type(exc).__name__}: {exc}",
+                "coordinates were obtained and used, but the runtime cache could "
+                f"not be saved to {_COORDS_CACHE_PATH}; this request is unaffected, "
+                "but the coordinates may need to be fetched again after restart: "
+                f"{type(exc).__name__}: {exc}",
             )
 
 
@@ -466,6 +498,7 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
             if not grch38:
                 result.warnings.append("VariantValidator: GRCh38 coords not returned")
             _RESOLVER_CACHE[key] = result
+            _RUNTIME_COORDINATE_KEYS.add(key)
             _save_coords_cache()
             return result
 
@@ -487,6 +520,7 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
             result.warnings.append("Mutalyzer: GRCh38 not resolved")
         result.warnings.extend(_RESOLVER_FAILURES.pop(resolver_key, []))
         _RESOLVER_CACHE[key] = result
+        _RUNTIME_COORDINATE_KEYS.add(key)
         _save_coords_cache()
         return result
 

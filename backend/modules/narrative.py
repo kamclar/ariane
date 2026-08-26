@@ -7,24 +7,11 @@
 # ============================================================
 from typing import Optional, Dict
 import re
-
-DOMAIN_DESCRIPTIONS: Dict[str, Dict[str, str]] = {
-    "BRCA1": {
-        "RING":        "RING domain (aa 2-101), which mediates E3 ubiquitin ligase activity through interaction with BARD1",
-        "coiled_coil": "coiled-coil domain (aa 1391-1424), which mediates BRCA1 oligomerisation and interaction with PALB2",
-        "BRCT":        "BRCT repeats (aa 1650-1857), which bind phosphopeptides and are essential for DNA damage signalling",
-    },
-    "BRCA2": {
-        "PALB2_binding": "N-terminal PALB2-binding domain (aa 10-40), required for nuclear localisation and RAD51 loading",
-        "DBD":           "DNA-binding domain (aa 2481-3186), containing OB folds that directly contact single-stranded DNA",
-    },
-}
-
-BAYESDEL_THRESHOLDS = {
-    "BRCA1": {"pp3": 0.28, "bp4": 0.15},
-    "BRCA2": {"pp3": 0.30, "bp4": 0.18},
-}
-
+from backend.gene_policy import (
+    bayesdel_thresholds,
+    functional_domain_descriptions,
+    spliceai_thresholds,
+)
 
 def _parse_intron_offset(c_notation: str) -> Optional[tuple]:
     m = re.match(r"c\.(-?\d+)([+-])(\d+)", c_notation)
@@ -126,7 +113,7 @@ def _structural_context(gene: str, variant_type: str, criteria: dict,
                         residue_info: Optional[dict]) -> Optional[str]:
     domain = (residue_info or {}).get("domain")
     if domain:
-        desc = DOMAIN_DESCRIPTIONS.get(gene, {}).get(domain, f"{domain} domain")
+        desc = functional_domain_descriptions(gene).get(domain, f"{domain} domain")
         known = (residue_info or {}).get("known_pathogenic_at_position", [])
         if known:
             names = ", ".join(
@@ -170,7 +157,8 @@ def _insilico_sentence(gene: str, variant_type: str, spliceai_score: Optional[fl
     parts = []
     vt = variant_type.lower()
     protein_types = {"missense", "inframe_deletion", "inframe_insertion", "inframe_delins", "delins"}
-    thr = BAYESDEL_THRESHOLDS.get(gene, {"pp3": 0.28, "bp4": 0.15})
+    thr = bayesdel_thresholds(gene)
+    splice_thr = spliceai_thresholds(gene)
 
     if bayesdel_score is not None and vt in protein_types:
         if bayesdel_score >= thr["pp3"]:
@@ -184,9 +172,9 @@ def _insilico_sentence(gene: str, variant_type: str, spliceai_score: Optional[fl
                          f"({thr['bp4']}-{thr['pp3']}) for {gene}.")
 
     if spliceai_score is not None:
-        if spliceai_score >= 0.2:
+        if spliceai_score >= splice_thr["pp3"]:
             parts.append(f"SpliceAI {spliceai_score:.3f} predicts a significant splicing effect.")
-        elif spliceai_score <= 0.1:
+        elif spliceai_score <= splice_thr["bp4"]:
             parts.append(f"SpliceAI {spliceai_score:.3f} predicts no significant splicing effect.")
         else:
             parts.append(f"SpliceAI {spliceai_score:.3f} is in the intermediate range.")

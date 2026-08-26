@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 from typing import Any, Dict
-
-
-ENIGMA_CSPEC_URL = (
-    "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
+from backend.gene_policy import (
+    resolve_policy_gene,
+    spliceai_thresholds,
+    vcep_specification,
 )
 
 
-def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, Any]:
+def evaluate_protein_ps1_review(
+    ps1_result: Dict[str, Any] | None, *, gene: str | None = None
+) -> Dict[str, Any]:
+    policy_gene = resolve_policy_gene(gene)
+    splice_low = spliceai_thresholds(policy_gene)["bp4"]
     ps1_result = ps1_result or {}
     if ps1_result.get("application_status") in {"reference_ineligible", "not_applicable"}:
         candidates = ps1_result.get("candidates", [])
@@ -31,7 +35,7 @@ def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, 
             if item.get("status_reason")
         )
         return {
-            **_empty(),
+            **_empty(policy_gene),
             "display": True,
             "title": "Protein PS1 not applicable",
             "summary": (
@@ -47,10 +51,12 @@ def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, 
             "vua_splice_evidence_status": ps1_result.get(
                 "vua_splice_evidence_status", "not_assessed"
             ),
+            "vua_spliceai_score": ps1_result.get("vua_spliceai_score"),
+            "reference_spliceai_scores": ps1_result.get("reference_spliceai_scores", {}),
         }
     if not ps1_result.get("review_required"):
         return {
-            **_empty(),
+            **_empty(policy_gene),
             "application_status": ps1_result.get(
                 "application_status", "not_applied"
             ),
@@ -77,7 +83,7 @@ def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, 
         "what_to_check": [
             "Confirm that the reference P/LP classification was assigned using ENIGMA/ClinGen VCEP specifications.",
             "Confirm the same normalized missense substitution and a different nucleotide change.",
-            "Confirm SpliceAI <= 0.1 for both variants.",
+            f"Confirm SpliceAI <= {splice_low} for both variants.",
             "Check the defined RNA/splice evidence sources and confirm that no damaging splice effect is recorded for either variant.",
             "If the reference classification is known to use PS1, exclude a direct reciprocal dependency.",
         ],
@@ -88,7 +94,7 @@ def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, 
             "splice eligibility field. This recommendation adds no points."
         ),
         "reference_source": "ENIGMA Supplementary Table 7 v1.2 candidate reference set",
-        "source_url": ENIGMA_CSPEC_URL,
+        "source_url": vcep_specification(policy_gene)["url"],
         "is_evidence_criterion": False,
         "application_status": ps1_result.get(
             "application_status", "manual_review_required"
@@ -100,10 +106,12 @@ def evaluate_protein_ps1_review(ps1_result: Dict[str, Any] | None) -> Dict[str, 
         "vua_splice_evidence_status": ps1_result.get(
             "vua_splice_evidence_status", "not_assessed"
         ),
+        "vua_spliceai_score": ps1_result.get("vua_spliceai_score"),
+        "reference_spliceai_scores": ps1_result.get("reference_spliceai_scores", {}),
     }
 
 
-def _empty() -> Dict[str, Any]:
+def _empty(gene: str) -> Dict[str, Any]:
     return {
         "display": False,
         "recommended": False,
@@ -115,10 +123,12 @@ def _empty() -> Dict[str, Any]:
         "potential_branches": [],
         "limitations": "",
         "reference_source": "",
-        "source_url": ENIGMA_CSPEC_URL,
+        "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
         "application_status": "not_applied",
         "candidates": [],
         "splice_sources_checked": [],
         "vua_splice_evidence_status": "not_assessed",
+        "vua_spliceai_score": None,
+        "reference_spliceai_scores": {},
     }

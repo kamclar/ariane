@@ -204,7 +204,7 @@ class GnomadFailClosedTests(unittest.TestCase):
             root = Path(directory)
             with patch.object(
                 frequency,
-                "GNOMAD_CACHE_WITH_REAL_COVERAGE",
+                "GNOMAD_FREQUENCY_SNAPSHOT_PATH",
                 root / "missing.json",
             ):
                 self.assertIsNone(frequency.choose_gnomad_cache_file())
@@ -384,6 +384,34 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
             bayesdel.BAYESDEL_CACHE.clear()
             bayesdel.BAYESDEL_CACHE.update(previous_cache)
 
+    def test_bayesdel_cache_hit_does_not_call_api(self):
+        from backend.lookups import bayesdel
+
+        key = "BRCA1:c.999A>G"
+        previous = bayesdel.BAYESDEL_CACHE.get(key)
+        bayesdel.BAYESDEL_CACHE[key] = {
+            "bayesdel": 0.41,
+            "am_score": None,
+            "am_class": None,
+            "status": "ok",
+            "reason": "Loaded from persistent runtime cache",
+        }
+        try:
+            with patch.object(
+                bayesdel,
+                "fetch_variant_data_myvariant",
+                side_effect=AssertionError("API must not be called on a cache hit"),
+            ):
+                score, _ = bayesdel.get_bayesdel_and_alphamissense(
+                    "BRCA1", "c.999A>G"
+                )
+            self.assertEqual(score, 0.41)
+        finally:
+            if previous is None:
+                bayesdel.BAYESDEL_CACHE.pop(key, None)
+            else:
+                bayesdel.BAYESDEL_CACHE[key] = previous
+
 
 class DataHealthTests(unittest.TestCase):
     def test_spliceai_runtime_cache_prefers_explicit_directory(self):
@@ -412,6 +440,26 @@ class DataHealthTests(unittest.TestCase):
                 spliceai.choose_runtime_cache_dir(),
                 Path("/railway-volume/ariane-runtime-cache"),
             )
+
+    def test_local_runtime_cache_is_outside_versioned_data_directories(self):
+        from backend.runtime_cache import PROJECT_ROOT, choose_runtime_cache_dir
+
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(
+                choose_runtime_cache_dir(),
+                PROJECT_ROOT / ".runtime-cache",
+            )
+
+    def test_mutable_cache_files_are_ignored_and_removed_from_data_directories(self):
+        project_root = Path(__file__).resolve().parents[1]
+        ignored = (project_root / ".gitignore").read_text(encoding="utf-8")
+        for relative in (
+            "backend/data/bayesdel_cache.json",
+            "backend/data/coordinates_cache.json",
+            "data/spliceai/spliceai_api_cache.json",
+        ):
+            self.assertFalse((project_root / relative).exists())
+            self.assertIn(f"/{relative}", ignored)
 
     def test_spliceai_cache_write_failure_explains_current_score_is_usable(self):
         from backend.lookups import spliceai
@@ -467,33 +515,12 @@ class DataHealthTests(unittest.TestCase):
         self.assertEqual(issue["reason"], "cache is missing: …ariane/data/cache.json")
         clear_issue("test cache")
 
-    def test_incomplete_intronic_spliceai_cache_is_not_loaded(self):
+    def test_precomputed_spliceai_variant_space_is_not_a_runtime_source(self):
         from backend.lookups import spliceai
 
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            coding = root / "coding.json"
-            coding.write_text("{}", encoding="utf-8")
-            intronic = root / "intronic.json"
-            intronic.write_text(json.dumps({"BRCA1:c.1+1G>A": {"status": "ok", "score": 1.0}}), encoding="utf-8")
-            old_cache = spliceai.SPLICEAI_PRECOMPUTED_CACHE
-            old_enabled = spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE
-            try:
-                spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE = True
-                spliceai.SPLICEAI_PRECOMPUTED_CACHE = None
-                with patch.object(spliceai, "SPLICEAI_PRECOMPUTED_CACHE_PATH", coding), patch.object(
-                    spliceai, "SPLICEAI_INTRONIC_CACHE_PATH", intronic
-                ):
-                    loaded = spliceai._load_precomputed_cache()
-                self.assertNotIn("BRCA1:c.1+1G>A", loaded)
-                self.assertTrue(any(
-                    issue["component"] == "SpliceAI intronic cache" and "metadata is missing" in issue["reason"]
-                    for issue in get_data_issues()
-                ))
-            finally:
-                spliceai.SPLICEAI_USE_PRECOMPUTED_CACHE = old_enabled
-                spliceai.SPLICEAI_PRECOMPUTED_CACHE = old_cache
-                clear_issue("SpliceAI intronic cache")
+        self.assertFalse(hasattr(spliceai, "SPLICEAI_PRECOMPUTED_CACHE"))
+        self.assertFalse(hasattr(spliceai, "SPLICEAI_USE_PRECOMPUTED_CACHE"))
+        self.assertFalse(hasattr(spliceai, "_load_precomputed_cache"))
 
 
 class ClinVarAmbiguityTests(unittest.TestCase):

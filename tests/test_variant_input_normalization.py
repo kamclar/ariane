@@ -1,9 +1,11 @@
 import pytest
 from pydantic import ValidationError
+from unittest.mock import patch
 
 from backend.models import VariantRequest
 from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
 from backend.modules.variant_input import normalize_variant_input
+from backend.modules.variant_input import explicit_gene_from_notation
 
 
 @pytest.mark.parametrize(
@@ -163,6 +165,19 @@ def test_explicit_gene_prefix_overrides_selected_gene():
     assert result.gene == "BRCA1"
     assert result.c_notation == "c.3891_3893del"
     assert result.p_notation == "p.(Ser1298del)"
+
+
+def test_gene_qualified_input_is_driven_by_configured_transcripts():
+    with patch(
+        "backend.modules.variant_input.TRANSCRIPTS",
+        {"BRCA1": "NM_007294.4", "GENE3": "NM_123456.1"},
+    ):
+        assert explicit_gene_from_notation("gene3 c.1A>G") == "GENE3"
+
+
+def test_unknown_gene_prefix_fails_closed():
+    with pytest.raises(ValueError, match="No reference transcript is configured"):
+        explicit_gene_from_notation("NOTCONFIGURED c.1A>G")
 
 
 def test_conflicting_gene_and_transcript_are_rejected():

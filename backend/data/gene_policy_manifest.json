@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "manifest_id": "ariane_gene_policy_registry",
+  "manifest_version": "2026.08.25",
+  "status": "active",
+  "policies": {
+    "enigma_brca_vcep_1_2": {
+      "name": "ClinGen ENIGMA BRCA1/2 VCEP",
+      "version": "1.2.0",
+      "runtime_policy_id": "ENIGMA_BRCA_VCEP_1.2",
+      "implementation_profile": "enigma_brca_vcep_1_2",
+      "external_evidence": {
+        "clingen_erepo_affiliate": "ENIGMA BRCA1 and BRCA2 VCEP"
+      },
+      "classification_method": "ENIGMA Table 3; Tavtigian 2020 points for mixed evidence",
+      "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
+      "thresholds": {
+        "spliceai": {
+          "no_impact_max_inclusive": 0.1,
+          "impact_min_inclusive": 0.2
+        },
+        "clinical_likelihood_ratio": {
+          "pp4": {
+            "supporting_min_inclusive": 2.08,
+            "moderate_min_inclusive": 4.3,
+            "strong_min_inclusive": 18.7,
+            "very_strong_min_inclusive": 350.0
+          },
+          "bp5": {
+            "supporting_max_inclusive": 0.48,
+            "moderate_max_inclusive": 0.23,
+            "strong_max_inclusive": 0.05,
+            "very_strong_max_inclusive": 0.00285
+          }
+        },
+        "population_frequency": {
+          "gnomad_policy_id": "enigma_brca_v1_2",
+          "ba1_faf95_min_exclusive": 0.001,
+          "bs1_strong_faf95_min_exclusive": 0.0001,
+          "bs1_supporting_faf95_min_exclusive": 0.00002,
+          "ba1_bs1_minimum_mean_depth": 20.0,
+          "pm2_minimum_mean_depth": 25.0
+        },
+        "mixed_evidence_points": {
+          "pathogenic_min_inclusive": 10,
+          "likely_pathogenic_min_inclusive": 6,
+          "vus_min_inclusive": -1,
+          "likely_benign_min_inclusive": -6
+        }
+      },
+      "supported_rule_codes": [
+        "BA1", "BS1", "PM2", "PVS1", "PVS1_RNA", "PM5_PTC",
+        "PS1", "PS1_PROTEIN", "PS1_SPLICE", "PS3", "BS3", "PP3", "BP4", "BP1", "BP7",
+        "PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "BP5",
+        "BP7_RNA", "PVS1_INIT"
+      ]
+    }
+  },
+  "genes": {
+    "BRCA1": {
+      "activation_status": "active",
+      "reference_transcript": "NM_007294.4",
+      "reference_protein": "NP_009225.1",
+      "vcep_policy_id": "enigma_brca_vcep_1_2",
+      "vcep_specification": {
+        "id": "GN092",
+        "version": "1.2.0",
+        "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
+      },
+      "normalization_validation": {
+        "c_notation": "c.303T>G",
+        "p_notation": "p.(Tyr101Ter)"
+      },
+      "decision_assets": {
+        "PVS1": {
+          "splice": {
+            "figure_number": "4",
+            "figure_url": "/static/enigma/appendix-figure-4-brca1-splice-pvs1.jpg"
+          },
+          "nonsplice": {
+            "figure_number": "3",
+            "figure_url": "/static/enigma/appendix-figure-3-brca1-pvs1.jpg"
+          }
+        }
+      },
+      "thresholds": {
+        "bayesdel_noaf": {
+          "bp4_max_inclusive": 0.15,
+          "pp3_min_inclusive": 0.28
+        },
+        "pvs1": {
+          "nmd_boundary_c_first_not_predicted": 5419
+        }
+      },
+      "functional_domains": {
+        "RING": {
+          "start": 2,
+          "end": 101,
+          "description": "RING domain (aa 2-101), which mediates E3 ubiquitin ligase activity through interaction with BARD1"
+        },
+        "coiled_coil": {
+          "start": 1391,
+          "end": 1424,
+          "description": "coiled-coil domain (aa 1391-1424), which mediates BRCA1 oligomerisation and interaction with PALB2"
+        },
+        "BRCT": {
+          "start": 1650,
+          "end": 1857,
+          "description": "BRCT repeats (aa 1650-1857), which bind phosphopeptides and are essential for DNA damage signalling"
+        }
+      },
+      "applicable_rules": [
+        "BA1", "BS1", "PM2", "PVS1", "PVS1_RNA", "PM5_PTC",
+        "PS1", "PS1_PROTEIN", "PS1_SPLICE", "PS3", "BS3", "PP3", "BP4", "BP1", "BP7",
+        "PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "BP5",
+        "BP7_RNA", "PVS1_INIT"
+      ],
+      "required_rule_data": {
+        "PVS1": ["enigma_table4"],
+        "PVS1_RNA": ["enigma_table9"],
+        "PS3": ["enigma_table9"],
+        "BS3": ["enigma_table9"],
+        "PS1": ["ps1_reference_registry", "spliceai"],
+        "PP3": ["spliceai", "bayesdel_noaf"],
+        "BP4": ["spliceai", "bayesdel_noaf"],
+        "BA1": ["gnomad"],
+        "BS1": ["gnomad"],
+        "PM2": ["gnomad"]
+      }
+    },
+    "BRCA2": {
+      "activation_status": "active",
+      "reference_transcript": "NM_000059.4",
+      "reference_protein": "NP_000050.3",
+      "vcep_policy_id": "enigma_brca_vcep_1_2",
+      "vcep_specification": {
+        "id": "GN097",
+        "version": "1.2.0",
+        "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN097?version=1.2.0"
+      },
+      "normalization_validation": {
+        "c_notation": "c.36dup",
+        "p_notation": "p.(Glu13Ter)"
+      },
+      "decision_assets": {
+        "PVS1": {
+          "splice": {
+            "figure_number": "6",
+            "figure_url": "/static/enigma/appendix-figure-6-brca2-splice-pvs1.jpg"
+          },
+          "nonsplice": {
+            "figure_number": "5",
+            "figure_url": "/static/enigma/appendix-figure-5-brca2-pvs1.jpg"
+          }
+        }
+      },
+      "thresholds": {
+        "bayesdel_noaf": {
+          "bp4_max_inclusive": 0.18,
+          "pp3_min_inclusive": 0.30
+        },
+        "pvs1": {
+          "nmd_boundary_c_first_not_predicted": 9600
+        }
+      },
+      "functional_domains": {
+        "PALB2_binding": {
+          "start": 10,
+          "end": 40,
+          "description": "N-terminal PALB2-binding domain (aa 10-40), required for nuclear localisation and RAD51 loading"
+        },
+        "DBD": {
+          "start": 2481,
+          "end": 3186,
+          "description": "DNA-binding domain (aa 2481-3186), containing OB folds that directly contact single-stranded DNA"
+        }
+      },
+      "applicable_rules": [
+        "BA1", "BS1", "PM2", "PVS1", "PVS1_RNA", "PM5_PTC",
+        "PS1", "PS1_PROTEIN", "PS1_SPLICE", "PS3", "BS3", "PP3", "BP4", "BP1", "BP7",
+        "PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "BP5",
+        "BP7_RNA", "PVS1_INIT"
+      ],
+      "required_rule_data": {
+        "PVS1": ["enigma_table4"],
+        "PVS1_RNA": ["enigma_table9"],
+        "PS3": ["enigma_table9"],
+        "BS3": ["enigma_table9"],
+        "PS1": ["ps1_reference_registry", "spliceai"],
+        "PP3": ["spliceai", "bayesdel_noaf"],
+        "BP4": ["spliceai", "bayesdel_noaf"],
+        "BA1": ["gnomad"],
+        "BS1": ["gnomad"],
+        "PM2": ["gnomad"]
+      }
+    }
+  },
+  "activation_requirements": {
+    "inherit_policy_by_default": false,
+    "required_gene_fields": [
+      "reference_transcript", "reference_protein", "vcep_policy_id",
+      "vcep_specification", "normalization_validation", "decision_assets",
+      "thresholds", "functional_domains", "applicable_rules", "required_rule_data"
+    ],
+    "note": "A gene is active only after its transcript, VCEP policy, thresholds, rule applicability, required datasets and regression tests have been reviewed."
+  }
+}

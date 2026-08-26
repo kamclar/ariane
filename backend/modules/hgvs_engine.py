@@ -205,11 +205,12 @@ def derive_protein_consequence(gene: str, c_notation: str) -> ProteinConsequence
 
 def validate_hgvs_engine() -> None:
     engine = load_hgvs_engine()
-    smoke_tests = {
-        ("BRCA1", "c.303T>G"): "p.(Tyr101Ter)",
-        ("BRCA2", "c.36dup"): "p.(Glu13Ter)",
-    }
-    for (gene, c_notation), expected_p in smoke_tests.items():
+    from backend.gene_policy import active_genes, normalization_validation_variant
+
+    for gene in active_genes():
+        validation = normalization_validation_variant(gene)
+        c_notation = validation["c_notation"]
+        expected_p = validation["p_notation"]
         result = engine.c_to_p(gene, c_notation)
         if result.p_notation != expected_p:
             raise RuntimeError(

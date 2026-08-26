@@ -8,8 +8,11 @@ from pathlib import Path
 import json
 import re
 import time
-import urllib.request
 import urllib.parse
+import urllib.request
+
+from backend.gene_policy import external_evidence_config, reference_transcript
+from backend.version import ARIANE_VERSION
 
 EREPO_BASE  = 'https://erepo.clinicalgenome.org/evrepo/api'
 EREPO_CACHE: Dict[str, dict] = {}
@@ -20,25 +23,25 @@ def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:
     Look up ENIGMA VCEP classification in ClinGen Evidence Repository.
     Returns classification + evidence codes if found, else status=not_found.
 
-    Coverage is limited - ENIGMA VCEP has ~140 BRCA1/2 submissions in ERepo.
-    Most variants will return not_found; use ClinVar for broader coverage.
+    Coverage depends on the VCEP affiliate configured for the active gene.
     """
     key = f'{gene}:{c_notation}'
     if key in EREPO_CACHE:
         return EREPO_CACHE[key]
 
-    tx = 'NM_007294.4' if gene == 'BRCA1' else 'NM_000059.4'
+    tx = reference_transcript(gene)
     hgvs = f'{tx}:{c_notation}'
+    affiliate = external_evidence_config(gene)["clingen_erepo_affiliate"]
 
     url = (
         f"{EREPO_BASE}/classifications"
         f"?hgvs={urllib.parse.quote(hgvs)}"
-        f"&affiliate={urllib.parse.quote('ENIGMA BRCA1 and BRCA2 VCEP')}"
+        f"&affiliate={urllib.parse.quote(affiliate)}"
     )
     try:
         req = urllib.request.Request(
             url,
-            headers={'Accept': 'application/json', 'User-Agent': 'BRCA-ACMG/1.7.0'}
+            headers={'Accept': 'application/json', 'User-Agent': f'ARIANE/{ARIANE_VERSION}'}
         )
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = json.loads(resp.read())
@@ -90,7 +93,3 @@ def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:
     }
     EREPO_CACHE[key] = result
     return result
-
-
-if __name__ == "__main__":
-    print('ClinGen ERepo lookup functions loaded.')

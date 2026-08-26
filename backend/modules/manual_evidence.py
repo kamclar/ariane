@@ -1,16 +1,30 @@
 """Manual ENIGMA evidence review and amended working classification."""
 
 import math
+from copy import deepcopy
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from backend.modules.classifier import classify_by_enigma_combination
+from backend.classification_dag.policy import classify_by_enigma_combination
 from backend.modules.criterion_order import criterion_sort_key
 from backend.modules.evidence_interactions import apply_manual_rna_interactions
 from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
+from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
+from backend.modules.variant_input import normalize_variant_input
+from backend.modules.variant_type import infer_variant_type
+from backend.gene_policy import (
+    clinical_lr_thresholds,
+    implementation_profile,
+    policy_name,
+    policy_version,
+    resolve_policy_gene,
+    rule_is_applicable,
+    spliceai_thresholds,
+    vcep_specification,
+)
 
 
-CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
+CSPEC_URL = ""
 
 ENIGMA_PP4_SOURCES = {
     "15290653": "Goldgar et al. 2004",
@@ -36,7 +50,7 @@ MANUAL_CRITERIA = {
         "direction": "pathogenic",
         "allowed_strengths": ["Strong"],
         "title": "Case-control enrichment",
-        "threshold": "Strong when p <= 0.05, OR >= 4, and the lower confidence limit excludes 2.0.",
+        "threshold": "Strong when p <= 0.05, OR >= 4, the lower confidence limit excludes 2.0, and case and control datasets are matched by country and ethnicity.",
         "check": "Review the case and control definitions, ancestry matching, independence of observations, odds ratio, confidence interval, and p-value.",
         "literature": "Use peer-reviewed case-control studies and verify that the reported cohort is applicable to BRCA1/2 disease.",
         "source_url": CSPEC_URL,
@@ -46,7 +60,7 @@ MANUAL_CRITERIA = {
         "direction": "pathogenic",
         "allowed_strengths": ["Supporting", "Moderate", "Strong"],
         "title": "Fanconi anemia and variants in trans",
-        "threshold": "Supporting at 1 point, Moderate at 2-3 points, Strong at >= 4 points.",
+        "threshold": "Supporting at 1 point, Moderate at 2-3 points, Strong at >= 4 points, after confirming a co-occurring P/LP variant classified using VCEP specifications and that the assessed variant does not meet benign population evidence.",
         "check": "Confirm a BRCA1/2-related Fanconi anemia phenotype, phase in trans, classification of the co-occurring variant, and per-proband scoring.",
         "literature": "Review clinical reports, segregation or phasing evidence, chromosome breakage testing, and Specifications Table 6.",
         "source_url": CSPEC_URL,
@@ -56,7 +70,7 @@ MANUAL_CRITERIA = {
         "direction": "pathogenic",
         "allowed_strengths": ["Supporting", "Moderate", "Strong", "Very Strong"],
         "title": "Quantitative co-segregation",
-        "threshold": "Supporting at LR >= 2.08, Moderate at LR >= 4.3, Strong at LR >= 18.7, Very Strong at LR >= 350.",
+        "threshold": "Derived from the configured pathogenic likelihood-ratio thresholds. Very Strong also requires a predicted or experimentally proven effect on protein or mRNA splicing.",
         "check": "Use a quantitative co-segregation analysis and verify informative meioses, pedigree structure, phenotype definition, and ascertainment assumptions.",
         "literature": "Review family studies and calculate the likelihood ratio using an accepted co-segregation method.",
         "source_url": CSPEC_URL,
@@ -66,7 +80,7 @@ MANUAL_CRITERIA = {
         "direction": "pathogenic",
         "allowed_strengths": ["Supporting", "Moderate", "Strong", "Very Strong"],
         "title": "Combined clinical likelihood ratio",
-        "threshold": "Supporting at combined LR >= 2.08, Moderate at LR >= 4.3, Strong at LR >= 18.7, Very Strong at LR >= 350.",
+        "threshold": "Derived from the configured pathogenic likelihood-ratio thresholds.",
         "check": "Confirm that the value is a variant-specific combined clinical LR, document the included clinical data types, their independence, and the primary publication or curated source.",
         "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
         "source_url": CSPEC_URL,
@@ -80,7 +94,7 @@ MANUAL_CRITERIA = {
         "direction": "benign",
         "allowed_strengths": ["Supporting", "Moderate", "Strong"],
         "title": "Observation without recessive disease",
-        "threshold": "Supporting at 1 point, Moderate at 2-3 points, Strong at >= 4 points.",
+        "threshold": "Supporting at 1 point, Moderate at 2-3 points, Strong at >= 4 points, after confirming a co-occurring P/LP variant classified using VCEP specifications.",
         "check": "Confirm absence of a BRCA1/2-related Fanconi anemia phenotype and apply the per-proband stipulations.",
         "literature": "Review clinical records and Specifications Table 8; do not treat general adult non-penetrance as sufficient by itself.",
         "source_url": CSPEC_URL,
@@ -90,8 +104,8 @@ MANUAL_CRITERIA = {
         "direction": "benign",
         "allowed_strengths": ["Supporting", "Moderate", "Strong", "Very Strong"],
         "title": "Quantitative lack of segregation",
-        "threshold": "Supporting at LR <= 0.48, Moderate at LR <= 0.23, Strong at LR <= 0.05, Very Strong at LR <= 0.00285.",
-        "check": "Use quantitative co-segregation analysis and exclude phenocopies, pedigree errors, and incorrect phenotype assignments.",
+        "threshold": "Derived from the configured benign likelihood-ratio thresholds.",
+        "check": "Use quantitative co-segregation analysis and exclude phenocopies, pedigree errors, and incorrect phenotype assignments. To use BS4 Strong as the only Strong route to Likely Benign, document at least two independent LR components whose product equals the combined LR.",
         "literature": "Review family studies and calculate the likelihood ratio using an accepted co-segregation method.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BS4 and Appendix I",
@@ -110,9 +124,9 @@ MANUAL_CRITERIA = {
         "direction": "benign",
         "allowed_strengths": ["Strong"],
         "title": "mRNA-only assay showing no damaging transcript effect",
-        "threshold": "Strong only, for well-established mRNA-only assays supportive of no damaging effect on transcript profile and meeting BP7 (RNA) eligibility stipulations.",
-        "check": "Confirm assay sensitivity, relevant tissue or cell type, transcript coverage, NMD sensitivity, quantification, and eligibility for BP7_Strong (RNA).",
-        "literature": "Review RNA assay reports, Appendix E, and Figure 1B. Missense variants in clinically important domains require appropriate functional context before BP7_Strong (RNA).",
+        "threshold": "Strong only, for well-established mRNA-only assays supportive of no damaging effect on transcript profile. Missense variants inside an ENIGMA functional domain must also meet BS3.",
+        "check": "Confirm assay sensitivity, relevant tissue or cell type, transcript coverage, NMD sensitivity and quantification. ARIANE checks the variant type, functional-domain location and applied Table 9 BS3 evidence.",
+        "literature": "Review RNA assay reports, Appendix E, and Figure 1B. Missense variants in clinically important domains must meet BS3 before BP7 Strong (RNA) can be applied.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BP7_Strong (RNA), Figure 1B and Appendix E",
     },
@@ -132,7 +146,7 @@ MANUAL_CRITERIA = {
         "title": "Same splicing impact as known P/LP variant",
         "threshold": "Use only after curated PS1(splicing) review: the VUA must have the same predicted/proven splice event as a known P/LP reference variant, with similar or stronger prediction evidence; select the ENIGMA Appendix J/Table 17 strength manually.",
         "check": "Confirm the reference variant, its P/LP classification source, the exact shared splice event, prediction strength comparison, and Appendix J/Table 17 weight. For exonic variants, consider any predicted or proven protein/missense effect before applying PS1(splicing).",
-        "literature": "Review ENIGMA BRCA1/2 VCEP v1.2 PS1, Appendix J Table 17, and the curated reference source. The pilot splice_ps1_reference_set.json is a seed only and requires expert review before use.",
+        "literature": "Review ENIGMA BRCA1/2 VCEP v1.2 PS1, Appendix J Table 17, and the documented curated reference source. ARIANE does not provide a preapproved splice-PS1 reference registry.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PS1 splicing branch, Specifications PS1/Table 5 and Appendix J Table 17",
     },
@@ -148,16 +162,64 @@ MANUAL_CRITERIA = {
     },
 }
 
+
+def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any]]:
+    """Return policy-bound form definitions for one active gene."""
+    policy_gene = resolve_policy_gene(gene)
+    profile = implementation_profile(policy_gene)
+    if profile != "enigma_brca_vcep_1_2":
+        raise RuntimeError(
+            f"No manual-evidence form profile is implemented for {profile!r}"
+        )
+    values = deepcopy(MANUAL_CRITERIA)
+    specification = vcep_specification(policy_gene)
+    source_prefix = f"{policy_name(policy_gene)} v{policy_version(policy_gene)}"
+    for definition in values.values():
+        definition["source_url"] = specification["url"]
+        detail = str(definition.get("source_detail") or "")
+        _prefix, separator, location = detail.partition(", ")
+        definition["source_detail"] = (
+            f"{source_prefix}, {location}" if separator else source_prefix
+        )
+    lr = clinical_lr_thresholds(policy_gene)
+    pp4 = lr["pp4"]
+    bp5 = lr["bp5"]
+    pathogenic_text = (
+        f"Supporting at LR >= {pp4['supporting_min_inclusive']:g}, "
+        f"Moderate at LR >= {pp4['moderate_min_inclusive']:g}, "
+        f"Strong at LR >= {pp4['strong_min_inclusive']:g}, "
+        f"Very Strong at LR >= {pp4['very_strong_min_inclusive']:g}."
+    )
+    benign_text = (
+        f"Supporting at LR <= {bp5['supporting_max_inclusive']:g}, "
+        f"Moderate at LR <= {bp5['moderate_max_inclusive']:g}, "
+        f"Strong at LR <= {bp5['strong_max_inclusive']:g}, "
+        f"Very Strong at LR <= {bp5['very_strong_max_inclusive']:g}."
+    )
+    values["PP4"]["threshold"] = pathogenic_text
+    values["PP1"]["threshold"] = (
+        pathogenic_text[:-1]
+        + " Very Strong also requires a predicted or experimentally proven effect on protein or mRNA splicing."
+    )
+    values["BS4"]["threshold"] = benign_text
+    splice_low = spliceai_thresholds(policy_gene)["bp4"]
+    values["PS1_PROTEIN"]["check"] = (
+        "Confirm the VCEP classification source, same normalized missense "
+        "substitution, different nucleotide change, "
+        f"SpliceAI <= {splice_low} for both variants, and no damaging splice "
+        "effect in the defined reviewed sources."
+    )
+    return {
+        code: definition
+        for code, definition in values.items()
+        if rule_is_applicable(policy_gene, code)
+    }
+
 STRUCTURED_CURATED_CODES = {
     "PP4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE", "PS1_PROTEIN"
 }
 
-RESOURCE_LINKS = [
-    {
-        "title": "ENIGMA BRCA1/2 VCEP v1.2 criteria registry",
-        "url": CSPEC_URL,
-        "description": "Versioned BRCA1/2 criterion specifications and combination rules used by ARIANE.",
-    },
+_COMMON_RESOURCE_LINKS = [
     {
         "title": "ACMG/AMP sequence variant interpretation guidelines",
         "url": "https://pubmed.ncbi.nlm.nih.gov/25741868/",
@@ -170,7 +232,7 @@ RESOURCE_LINKS = [
     },
     {
         "title": "Specifications v1.2",
-        "url": "https://cspec.genome.network/cspec/File/id/02537f62-66a3-4e67-8aec-cf44b326534d/data",
+        "url": "https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data",
         "description": "Full BRCA1/2 criterion specifications, flowcharts, and supporting tables.",
     },
     {
@@ -201,6 +263,31 @@ RESOURCE_LINKS = [
 ]
 
 
+def resource_links_for_gene(gene: str | None = None) -> List[Dict[str, str]]:
+    """Return VCEP-specific links plus shared interpretation resources."""
+    from backend.gene_policy import active_genes
+
+    genes = (resolve_policy_gene(gene),) if gene else active_genes()
+    policy_links: List[Dict[str, str]] = []
+    seen_urls: set[str] = set()
+    for symbol in genes:
+        specification = vcep_specification(symbol)
+        if specification["url"] in seen_urls:
+            continue
+        seen_urls.add(specification["url"])
+        policy_links.append({
+            "title": (
+                f"{symbol} {policy_name(symbol)} v{policy_version(symbol)} "
+                "criteria registry"
+            ),
+            "url": specification["url"],
+            "description": (
+                f"Versioned criterion specifications and combination rules for {symbol}."
+            ),
+        })
+    return policy_links + deepcopy(_COMMON_RESOURCE_LINKS)
+
+
 def _number(evidence: Dict[str, Any], key: str) -> Optional[float]:
     value = evidence.get(key)
     if value in (None, ""):
@@ -209,6 +296,50 @@ def _number(evidence: Dict[str, Any], key: str) -> Optional[float]:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def evaluate_bs4_likelihood_ratio(
+    evidence: Mapping[str, Any],
+) -> tuple[Optional[float], bool, int]:
+    """Return the BS4 LR and Table 3 single-Strong eligibility provenance."""
+    aggregate = _number(dict(evidence), "likelihood_ratio")
+    components = evidence.get("likelihood_ratio_components")
+    if not components:
+        return aggregate, False, 0
+    if not isinstance(components, list):
+        raise ValueError("BS4 likelihood-ratio components must be a list")
+
+    component_lrs: list[float] = []
+    independence_groups: list[str] = []
+    for index, component in enumerate(components, start=1):
+        if not isinstance(component, Mapping):
+            raise ValueError(f"BS4 LR component {index} must be a structured record")
+        try:
+            lr = float(component.get("likelihood_ratio"))
+        except (TypeError, ValueError):
+            raise ValueError(f"BS4 LR component {index} requires a numeric LR") from None
+        if lr < 0:
+            raise ValueError(f"BS4 LR component {index} cannot be negative")
+        source = str(component.get("source") or "").strip()
+        group = str(component.get("independence_group") or "").strip()
+        if not source or not group:
+            raise ValueError(
+                f"BS4 LR component {index} requires a source and independence group"
+            )
+        component_lrs.append(lr)
+        independence_groups.append(group)
+
+    if len(independence_groups) != len(set(independence_groups)):
+        raise ValueError("BS4 LR components must use distinct independence groups")
+
+    combined = math.prod(component_lrs)
+    if aggregate is not None and not math.isclose(
+        aggregate, combined, rel_tol=1e-6, abs_tol=1e-12
+    ):
+        raise ValueError(
+            "BS4 reported combined LR does not equal the product of its LR components"
+        )
+    return combined, len(component_lrs) >= 2, len(component_lrs)
 
 
 def _pp4_value_and_scale(evidence: Dict[str, Any]) -> tuple[Optional[float], str]:
@@ -220,13 +351,20 @@ def _pp4_value_and_scale(evidence: Dict[str, Any]) -> tuple[Optional[float], str
     return _number(evidence, "combined_clinical_lr"), "lr"
 
 
-def _pp4_strength(evidence: Dict[str, Any]) -> Optional[str]:
+def _pp4_strength(evidence: Dict[str, Any], gene: str) -> Optional[str]:
     value, scale = _pp4_value_and_scale(evidence)
     if value is None or value < 0 or scale not in {"lr", "log10_lr", "acmg_points"}:
         return None
+    pp4 = clinical_lr_thresholds(gene)["pp4"]
+    lr_thresholds = (
+        pp4["supporting_min_inclusive"],
+        pp4["moderate_min_inclusive"],
+        pp4["strong_min_inclusive"],
+        pp4["very_strong_min_inclusive"],
+    )
     thresholds = {
-        "lr": (2.08, 4.3, 18.7, 350.0),
-        "log10_lr": tuple(math.log10(value) for value in (2.08, 4.3, 18.7, 350.0)),
+        "lr": lr_thresholds,
+        "log10_lr": tuple(math.log10(value) for value in lr_thresholds),
         "acmg_points": (1.0, 2.0, 4.0, 8.0),
     }[scale]
     supporting, moderate, strong, very_strong = thresholds
@@ -264,12 +402,25 @@ def _pp4_source_is_recorded(evidence: Dict[str, Any]) -> bool:
     return False
 
 
-def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
+def suggest_strength(
+    code: str,
+    evidence: Dict[str, Any],
+    *,
+    variant_context: Mapping[str, Any] | None = None,
+    base_criteria: Sequence[Mapping[str, Any]] = (),
+) -> Optional[str]:
+    gene = resolve_policy_gene(
+        str((variant_context or {}).get("gene") or "").strip().upper() or None
+    )
+    clinical_thresholds = clinical_lr_thresholds(gene)
+    pp4_thresholds = clinical_thresholds["pp4"]
+    bp5_thresholds = clinical_thresholds["bp5"]
+    splice_low = spliceai_thresholds(gene)["bp4"]
     if code == "PP4":
         data_summary = (evidence.get("clinical_data_summary") or "").strip()
         if not data_summary or not _pp4_source_is_reviewed(evidence):
             return None
-        return _pp4_strength(evidence)
+        return _pp4_strength(evidence, gene)
 
     if code in {"PVS1_RNA", "BP7_RNA"}:
         assay_scope = evidence.get("assay_scope")
@@ -297,7 +448,10 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
 
         if evidence.get("rna_conclusion") != "no_damaging_effect":
             return None
-        if evidence.get("bp7_rna_eligible") is not True:
+        context_result = evaluate_bp7_rna_variant_context(
+            variant_context, base_criteria
+        )
+        if not context_result["eligible"]:
             return None
         return "Strong"
 
@@ -359,6 +513,27 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
         ]
         if any(not str(evidence.get(field) or "").strip() for field in required_text_fields):
             return None
+        if variant_context is not None:
+            try:
+                assessed = normalize_variant_input(
+                    gene,
+                    str(variant_context.get("c_notation") or ""),
+                    p_notation=str(variant_context.get("p_notation") or ""),
+                )
+                reference = normalize_variant_input(
+                    gene,
+                    str(evidence.get("reference_variant") or ""),
+                    p_notation=str(evidence.get("reference_p_notation") or ""),
+                )
+            except ValueError:
+                return None
+            if (
+                infer_variant_type(assessed.c_notation, assessed.p_notation) != "missense"
+                or infer_variant_type(reference.c_notation, reference.p_notation) != "missense"
+                or assessed.p_notation != reference.p_notation
+                or assessed.c_notation == reference.c_notation
+            ):
+                return None
         if evidence.get("reference_classification") not in {
             "Pathogenic", "Likely Pathogenic"
         }:
@@ -392,7 +567,7 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
         reference_score = _number(evidence, "reference_spliceai_score")
         if (
             vua_score is None or reference_score is None
-            or vua_score > 0.1 or reference_score > 0.1
+            or vua_score > splice_low or reference_score > splice_low
         ):
             return None
         if evidence.get("reference_classification_used_ps1") == "yes":
@@ -418,11 +593,20 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
             and p_value <= 0.05
             and odds_ratio >= 4
             and lower_ci > 2
+            and evidence.get("case_control_country_matched") is True
+            and evidence.get("case_control_ethnicity_matched") is True
         ):
             return "Strong"
         return None
 
     if code in {"PM3", "BS2"}:
+        if evidence.get("cooccurring_variant_classification_basis") != "vcep_specifications":
+            return None
+        if (
+            code == "PM3"
+            and evidence.get("vua_benign_population_review") != "does_not_meet"
+        ):
+            return None
         points = _number(evidence, "evidence_points")
         if points is None or points < 1:
             return None
@@ -433,25 +617,32 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
         return "Supporting"
 
     likelihood_ratio = _number(evidence, "likelihood_ratio")
+    if code == "BS4":
+        likelihood_ratio, _, _ = evaluate_bs4_likelihood_ratio(evidence)
     if likelihood_ratio is None or likelihood_ratio < 0:
         return None
     if code == "PP1":
-        if likelihood_ratio >= 350:
+        if likelihood_ratio >= pp4_thresholds["very_strong_min_inclusive"] and evidence.get("very_strong_effect_basis") in {
+            "predicted_protein",
+            "predicted_splicing",
+            "experimental_protein",
+            "experimental_splicing",
+        }:
             return "Very Strong"
-        if likelihood_ratio >= 18.7:
+        if likelihood_ratio >= pp4_thresholds["strong_min_inclusive"]:
             return "Strong"
-        if likelihood_ratio >= 4.3:
+        if likelihood_ratio >= pp4_thresholds["moderate_min_inclusive"]:
             return "Moderate"
-        if likelihood_ratio >= 2.08:
+        if likelihood_ratio >= pp4_thresholds["supporting_min_inclusive"]:
             return "Supporting"
     elif code == "BS4":
-        if likelihood_ratio <= 0.00285:
+        if likelihood_ratio <= bp5_thresholds["very_strong_max_inclusive"]:
             return "Very Strong"
-        if likelihood_ratio <= 0.05:
+        if likelihood_ratio <= bp5_thresholds["strong_max_inclusive"]:
             return "Strong"
-        if likelihood_ratio <= 0.23:
+        if likelihood_ratio <= bp5_thresholds["moderate_max_inclusive"]:
             return "Moderate"
-        if likelihood_ratio <= 0.48:
+        if likelihood_ratio <= bp5_thresholds["supporting_max_inclusive"]:
             return "Supporting"
     return None
 
@@ -459,13 +650,26 @@ def suggest_strength(code: str, evidence: Dict[str, Any]) -> Optional[str]:
 def evaluate_manual_evidence(
     base_criteria: List[Dict[str, Any]],
     manual_criteria: List[Dict[str, Any]],
+    variant_context: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
+    policy_gene = resolve_policy_gene(
+        str((variant_context or {}).get("gene") or "").strip().upper() or None
+    )
     combined = {
         criterion["name"]: {
             "applies": criterion.get("applies", True),
             "strength": criterion.get("strength"),
             "points": criterion.get("points", 0),
             "reason": criterion.get("reason", ""),
+            "single_strong_likely_benign_eligible": criterion.get(
+                "single_strong_likely_benign_eligible", False
+            ),
+            "single_strong_likely_benign_basis": criterion.get(
+                "single_strong_likely_benign_basis", ""
+            ),
+            "independent_evidence_contribution_count": criterion.get(
+                "independent_evidence_contribution_count", 0
+            ),
         }
         for criterion in base_criteria
         if criterion.get("applies", True)
@@ -490,9 +694,23 @@ def evaluate_manual_evidence(
 
     for item in manual_criteria:
         code = item["code"]
+        if item.get("enabled") and not rule_is_applicable(policy_gene, code):
+            raise ValueError(
+                f"{code} is not applicable under the configured VCEP policy for {policy_gene}"
+            )
         definition = MANUAL_CRITERIA[code]
-        suggested = suggest_strength(code, item.get("evidence", {}))
-        override = item.get("override_strength") or None
+        if item.get("override_strength") not in {None, ""}:
+            raise ValueError(
+                "Manual strength overrides are not permitted. "
+                f"ARIANE derives criterion strength from the configured VCEP "
+                f"policy for {policy_gene}."
+            )
+        suggested = suggest_strength(
+            code,
+            item.get("evidence", {}),
+            variant_context=variant_context,
+            base_criteria=base_criteria,
+        )
         evidence = item.get("evidence", {})
         pp4_value, pp4_scale = _pp4_value_and_scale(evidence)
         pp4_source_status = str(
@@ -509,15 +727,17 @@ def evaluate_manual_evidence(
         )
         if code == "PP4" and item.get("enabled") and not pp4_complete:
             raise ValueError("PP4 requires a clinical LR value and scale, recorded source, and clinical data summary")
+        if code == "BP7_RNA" and item.get("enabled") and not suggested:
+            context_result = evaluate_bp7_rna_variant_context(
+                variant_context, base_criteria
+            )
+            if not context_result["eligible"]:
+                raise ValueError(context_result["reason"])
         if code in STRUCTURED_CURATED_CODES - {"PP4"} and item.get("enabled") and not suggested:
             raise ValueError(
                 f"{code} requires a complete structured curated evidence record"
             )
-        if code in STRUCTURED_CURATED_CODES:
-            override = None
-        if override and override not in definition["allowed_strengths"]:
-            raise ValueError(f"{override} is not an ENIGMA v1.2 strength for {code}")
-        selected = override or suggested
+        selected = suggested
         applies = bool(item.get("enabled") and selected)
         points = STRENGTH_POINTS.get(selected, 0)
         if definition["direction"] == "benign":
@@ -525,8 +745,24 @@ def evaluate_manual_evidence(
         reason = (
             f"User-provided evidence; ARIANE suggestion: {suggested or 'threshold not met'}"
         )
-        if override:
-            reason += f"; reviewer selected: {override}"
+        single_strong_eligible = False
+        single_strong_basis = ""
+        contribution_count = 0
+        if code == "BS4" and applies:
+            _, has_multiple_lrs, contribution_count = evaluate_bs4_likelihood_ratio(
+                evidence
+            )
+            single_strong_eligible = bool(
+                selected == "Strong" and has_multiple_lrs
+            )
+            if single_strong_eligible:
+                single_strong_basis = (
+                    "Multiple independently identified segregation likelihood ratios "
+                    "contribute to BS4 Strong"
+                )
+                reason += "; multiple independent LR components satisfy the ENIGMA Table 3 single-Strong condition"
+            elif selected == "Strong":
+                reason += "; BS4 Strong is valid, but the ENIGMA Table 3 single-Strong condition is not documented"
         results.append(
             {
                 "code": code,
@@ -536,9 +772,12 @@ def evaluate_manual_evidence(
                 "points": points if applies else 0,
                 "reason": reason,
                 "threshold_note": definition["threshold"],
-                "overridden": bool(override and override != suggested),
+                "overridden": False,
                 "notes": item.get("notes", ""),
                 "references": item.get("references", []),
+                "single_strong_likely_benign_eligible": single_strong_eligible,
+                "single_strong_likely_benign_basis": single_strong_basis,
+                "independent_evidence_contribution_count": contribution_count,
             }
         )
         if applies:
@@ -554,6 +793,9 @@ def evaluate_manual_evidence(
                 "strength": selected,
                 "points": points,
                 "reason": reason,
+                "single_strong_likely_benign_eligible": single_strong_eligible,
+                "single_strong_likely_benign_basis": single_strong_basis,
+                "independent_evidence_contribution_count": contribution_count,
             }
 
     applied_manual_codes = {
@@ -564,7 +806,7 @@ def evaluate_manual_evidence(
     )
     total_points = sum(c.get("points", 0) for c in combined.values())
     predicted_class, label, note = classify_by_enigma_combination(
-        combined, total_points
+        combined, total_points, gene=policy_gene
     )
     return {
         "predicted_class": predicted_class,

@@ -40,6 +40,7 @@ BP1 není čistě proteinové kritérium. Obsahuje doménovou komponentu i podm�
 | přijaté BP7 Strong (RNA) | PS3 nebo BS3 | zachovat a vyžádat revizi podmínek Figure 1B/1C | Figure 1B, Figure 1C a Appendix E |
 | PS3 nebo BS3 bez PVS1 | relevantní PP3, BP4, BP7 nebo BP1 | zachovat relevantní bioinformatické kódy | Figure 1C |
 | PS3/BS3 a bioinformatický kód v opačném směru | všechny dotčené kódy | zachovat, označit konflikt a vyžádat expertní revizi | Figure 1C |
+| PS3 | BP5 | zachovat obě kritéria; upozornit, že ENIGMA doporučuje zkoumat sníženou penetranci nebo částečný funkční účinek, ale z konfliktu je neodvozovat | Specifications v1.2, úvodní poznámka; Appendix Table 11 |
 | nejasný mRNA výsledek | bioinformatické kódy | neměnit, uvést nejasný RNA výsledek v popisu | Figure 1B |
 
 ## Fail-closed pravidla
@@ -62,4 +63,3 @@ Stavy:
 | `deduplicated` | slabší důkaz nebyl započítán, protože jej nahradil silnější důkaz stejného mechanismu nebo následku |
 | `review_required` | kombinace může být přípustná, ale vyžaduje kontrolu assay a mechanismu |
 | `conflict` | důkazy pro stejný nebo související mechanismus ukazují opačným směrem |
-

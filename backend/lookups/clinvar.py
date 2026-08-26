@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 from typing import Optional, Dict, List
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
+from backend.gene_policy import reference_transcript
 
 CLINVAR_EUTILS   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 CLINVAR_CACHE: Dict[str, dict] = {}  # gene:c_notation -> parsed result
@@ -82,7 +83,7 @@ def clinvar_search_variation_id(gene: str, c_notation: str):
                 raise RuntimeError(f"ClinVar SPDI search failed: {type(exc).__name__}: {exc}") from exc
 
     # ── HGVS fallback - filter by exact c. notation in title ──────────────
-    tx   = "NM_007294.4" if gene == "BRCA1" else "NM_000059.4"
+    tx = reference_transcript(gene)
     hgvs = f"{tx}:{c_notation}"
     url  = (
         f"{CLINVAR_EUTILS}/esearch.fcgi"
@@ -230,7 +231,7 @@ def clinvar_lookup(gene: str, c_notation: str) -> dict:
     if key in CLINVAR_CACHE:
         return CLINVAR_CACHE[key]
 
-    tx   = "NM_007294.4" if gene == "BRCA1" else "NM_000059.4"
+    tx = reference_transcript(gene)
     hgvs = f"{tx}:{c_notation}"
 
     time.sleep(CLINVAR_API_SLEEP)

@@ -44,7 +44,7 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         self.assertEqual(filtering_allele_frequency(3, 100_000), 0.00000797)
 
     def test_gnomad_cache_has_complete_non_cancer_faf95(self):
-        path = DATA / "gnomad" / "gnomad_brca_region_cache_by_variant.with_real_coverage.json"
+        path = DATA / "gnomad" / "gnomad_brca_frequency_snapshot.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         manifest = json.loads(
             (DATA / "gnomad" / "gnomad_panel_manifest.json").read_text(encoding="utf-8")
@@ -165,8 +165,8 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
             0.00010019,
         )
 
-    def test_gnomad_coverage_cache_has_official_sources_and_integrity(self):
-        path = DATA / "gnomad" / "gnomad_brca_coverage_cache.json"
+    def test_gnomad_coverage_snapshot_has_official_sources_and_integrity(self):
+        path = DATA / "gnomad" / "gnomad_brca_coverage_snapshot.json"
         data = json.loads(path.read_text(encoding="utf-8"))
         mapping = data["coverage_by_position"]
         self.assertEqual(data["metadata"]["schema_version"], 2)
@@ -305,29 +305,25 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         )
         self.assertEqual((brca1, brca2), (36, 8))
 
-        splice_ps1 = json.loads(
-            (DATA / "splice_ps1_reference_set.json").read_text(encoding="utf-8")
-        )
-        self.assertEqual(
-            splice_ps1["curation_status"],
-            "pilot_unreviewed_not_for_automatic_scoring",
-        )
-        self.assertEqual(len(splice_ps1["variants"]), 75)
-        self.assertEqual(
-            len({record["source_row"] for record in splice_ps1["variants"]}), 75
-        )
-        self.assertNotIn("GN097", json.dumps(splice_ps1))
-
         protein_ps1 = json.loads(
             (DATA / "ps1_protein_reference_registry.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(protein_ps1["schema_version"], 2)
+        self.assertEqual(protein_ps1["schema_version"], 3)
         self.assertEqual(
             protein_ps1["candidate_source"]["usage"],
             "enigma_reference_set_with_per_record_ps1_eligibility",
         )
         self.assertEqual(protein_ps1["reference_count"], 60)
-        self.assertEqual(protein_ps1["status_counts"], {"eligible": 35, "excluded": 25})
+        self.assertEqual(protein_ps1["status_counts"], {"eligible": 40, "excluded": 20})
+        self.assertTrue(all(
+            record["reference_splice_evidence"]["prediction_policy"]
+            == "runtime_required"
+            for record in protein_ps1["references"]
+        ))
+        self.assertTrue(all(
+            "spliceai_score" not in record["reference_splice_evidence"]
+            for record in protein_ps1["references"]
+        ))
         self.assertEqual(len(protein_ps1["references"]), 60)
         self.assertEqual(
             {

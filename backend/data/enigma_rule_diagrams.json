@@ -1,0 +1,587 @@
+{
+  "schema_version": 1,
+  "decision_trees": [
+    {
+      "id": "figure-1b",
+      "title": "Figure 1B: application of codes based on mRNA assay data",
+      "description": "Accessible redraw of the two official mRNA assay pathways.",
+      "source_id": "enigma-v1.2-specifications",
+      "source_location": "Figure 1B",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["figure-1b-rna", "figure-1b-rna-continued"],
+      "branches": [
+        {
+          "id": "canonical-splice-site",
+          "title": "Donor/acceptor +/-1,2 positions",
+          "entry_node": "rna-canonical-entry",
+          "nodes": [
+            {"id": "rna-canonical-entry", "kind": "entry", "label": "Donor/acceptor +/-1,2 positions"},
+            {"id": "rna-canonical-quality", "kind": "decision", "label": "Review assay design and quality"},
+            {"id": "rna-canonical-confirm", "kind": "decision", "label": "Does the assay confirm the assigned PVS1 code?"},
+            {"id": "rna-canonical-apply", "kind": "outcome", "label": "Apply PVS1 (RNA) at the appropriate weight", "outcome_codes": ["PVS1_RNA"]},
+            {"id": "rna-canonical-reassess", "kind": "outcome", "label": "Reassess flowcharts and apply the relevant RNA code", "outcome_codes": ["PVS1_RNA", "BP7_RNA"]}
+          ],
+          "edges": [
+            {"from": "rna-canonical-entry", "to": "rna-canonical-quality", "result": "start"},
+            {"from": "rna-canonical-quality", "to": "rna-canonical-confirm", "result": "reviewed"},
+            {"from": "rna-canonical-confirm", "to": "rna-canonical-apply", "result": "confirms"},
+            {"from": "rna-canonical-confirm", "to": "rna-canonical-reassess", "result": "does_not_confirm"}
+          ],
+          "layout": {
+            "width": 940, "height": 340, "node_width": 190, "node_height": 72,
+            "positions": {
+              "rna-canonical-entry": [25, 126, 190, 72],
+              "rna-canonical-quality": [270, 126, 190, 72],
+              "rna-canonical-confirm": [515, 126, 190, 72],
+              "rna-canonical-apply": [750, 35, 170, 72],
+              "rna-canonical-reassess": [750, 218, 170, 86]
+            }
+          }
+        },
+        {
+          "id": "other-nucleotide-position",
+          "title": "Any other nucleotide position",
+          "entry_node": "rna-other-entry",
+          "nodes": [
+            {"id": "rna-other-entry", "kind": "entry", "label": "Any other nucleotide position"},
+            {"id": "rna-other-quality", "kind": "decision", "label": "Review assay design, wild-type aberration and transcripts"},
+            {"id": "rna-other-result", "kind": "decision", "label": "Observed mRNA result?"},
+            {"id": "rna-other-aberrant", "kind": "outcome", "label": "Replace bioinformatic codes with PVS1 (RNA); down-weight if required", "outcome_codes": ["PVS1_RNA"]},
+            {"id": "rna-other-unclear", "kind": "outcome", "label": "No change to bioinformatic codes; report unclear result", "outcome_codes": []},
+            {"id": "rna-other-normal-outside", "kind": "outcome", "label": "Outside domain: retain applicable bioinformatic codes; consider BP7 Strong (RNA)", "outcome_codes": ["BP7_RNA"]},
+            {"id": "rna-other-normal-domain", "kind": "outcome", "label": "Inside domain: retain applicable protein prediction; consider BP7 Strong (RNA)", "outcome_codes": ["BP7_RNA"]}
+          ],
+          "edges": [
+            {"from": "rna-other-entry", "to": "rna-other-quality", "result": "start"},
+            {"from": "rna-other-quality", "to": "rna-other-result", "result": "reviewed"},
+            {"from": "rna-other-result", "to": "rna-other-aberrant", "result": "aberrant"},
+            {"from": "rna-other-result", "to": "rna-other-unclear", "result": "unclear"},
+            {"from": "rna-other-result", "to": "rna-other-normal-outside", "result": "normal_outside_domain"},
+            {"from": "rna-other-result", "to": "rna-other-normal-domain", "result": "normal_inside_domain"}
+          ],
+          "layout": {
+            "width": 980, "height": 560, "node_width": 190, "node_height": 80,
+            "positions": {
+              "rna-other-entry": [20, 238, 190, 80],
+              "rna-other-quality": [265, 238, 190, 80],
+              "rna-other-result": [510, 238, 190, 80],
+              "rna-other-aberrant": [755, 20, 205, 92],
+              "rna-other-unclear": [755, 145, 205, 92],
+              "rna-other-normal-outside": [755, 285, 205, 110],
+              "rna-other-normal-domain": [755, 430, 205, 110]
+            }
+          }
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "figure-1c",
+      "title": "Figure 1C: application of functional assay evidence",
+      "description": "Accessible redraw of the official mechanism-specific functional assay guidance.",
+      "source_id": "enigma-v1.2-specifications",
+      "source_location": "Figure 1C",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["figure-1c-functional"],
+      "branches": [
+        {
+          "id": "intronic-silent",
+          "title": "Intronic and silent substitutions",
+          "entry_node": "func-rna-entry",
+          "nodes": [
+            {"id": "func-rna-entry", "kind": "entry", "label": "Intronic variants or silent substitutions"},
+            {"id": "func-rna-assay", "kind": "decision", "label": "Does the assay measure effects via both mRNA and protein?"},
+            {"id": "func-rna-code", "kind": "outcome", "label": "Apply PS3 or BS3 as appropriate; if no PVS1, retain relevant bioinformatic codes", "outcome_codes": ["PS3", "BS3"]},
+            {"id": "func-rna-review", "kind": "outcome", "label": "Do not use as independent functional evidence for this mechanism", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "func-rna-entry", "to": "func-rna-assay", "result": "start"},
+            {"from": "func-rna-assay", "to": "func-rna-code", "result": "yes"},
+            {"from": "func-rna-assay", "to": "func-rna-review", "result": "no"}
+          ],
+          "layout": {"width": 900, "height": 360, "node_width": 200, "node_height": 82, "positions": {
+            "func-rna-entry": [25, 139, 205, 82], "func-rna-assay": [290, 139, 245, 82],
+            "func-rna-code": [625, 40, 245, 100], "func-rna-review": [625, 220, 245, 90]
+          }}
+        },
+        {
+          "id": "exonic-missense-inframe",
+          "title": "Exonic missense / in-frame",
+          "entry_node": "func-protein-entry",
+          "nodes": [
+            {"id": "func-protein-entry", "kind": "entry", "label": "Exonic missense / in-frame"},
+            {"id": "func-protein-splice", "kind": "decision", "label": "Is splicing predicted or observed?"},
+            {"id": "func-protein-combined", "kind": "decision", "label": "Assay measures both mRNA and protein effects"},
+            {"id": "func-protein-only", "kind": "decision", "label": "Assay measures protein-only effect"},
+            {"id": "func-protein-code", "kind": "outcome", "label": "Apply PS3 or BS3 as appropriate; retain relevant bioinformatic codes if PVS1 is not applied", "outcome_codes": ["PS3", "BS3"]},
+            {"id": "func-protein-review", "kind": "outcome", "label": "If functional and clinical data conflict, review a possible hypomorphic effect", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "func-protein-entry", "to": "func-protein-splice", "result": "start"},
+            {"from": "func-protein-splice", "to": "func-protein-combined", "result": "yes"},
+            {"from": "func-protein-splice", "to": "func-protein-only", "result": "no"},
+            {"from": "func-protein-combined", "to": "func-protein-code", "result": "eligible"},
+            {"from": "func-protein-only", "to": "func-protein-code", "result": "eligible"},
+            {"from": "func-protein-code", "to": "func-protein-review", "result": "clinical_conflict"}
+          ],
+          "layout": {"width": 960, "height": 470, "node_width": 200, "node_height": 78, "positions": {
+            "func-protein-entry": [20, 196, 205, 78], "func-protein-splice": [280, 196, 205, 78],
+            "func-protein-combined": [545, 80, 205, 78], "func-protein-only": [545, 310, 205, 78],
+            "func-protein-code": [790, 134, 150, 128], "func-protein-review": [790, 310, 150, 105]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "appendix-pvs1-nonsplice",
+      "title": "Appendix Figures 3 and 5: PVS1 non-splice pathways",
+      "description": "Gene-specific redraw of initiation, PTC, exon-deletion and duplication pathways. Exact exon outcomes are supplied by Table 4.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix Figures 3 and 5; Specifications Table 4",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["appendix-figure-3-brca1-pvs1", "appendix-figure-5-brca2-pvs1"],
+      "branches": [
+        {
+          "id": "initiation",
+          "title": "Initiation codon",
+          "entry_node": "pvs-init-entry",
+          "nodes": [
+            {"id": "pvs-init-entry", "kind": "entry", "label": "Initiation codon variant"},
+            {"id": "pvs-init-alt", "kind": "decision", "label": "Known alternative start codon?"},
+            {"id": "pvs-init-upstream", "kind": "decision", "label": "Pathogenic variant upstream of closest in-frame start?"},
+            {"id": "pvs-init-apply", "kind": "outcome", "label": "Apply PVS1 upgraded from Moderate", "outcome_codes": ["PVS1"]},
+            {"id": "pvs-init-review", "kind": "outcome", "label": "Manual review under the initiation-codon pathway", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "pvs-init-entry", "to": "pvs-init-alt", "result": "start"},
+            {"from": "pvs-init-alt", "to": "pvs-init-upstream", "result": "no"},
+            {"from": "pvs-init-upstream", "to": "pvs-init-apply", "result": "yes"},
+            {"from": "pvs-init-alt", "to": "pvs-init-review", "result": "yes"},
+            {"from": "pvs-init-upstream", "to": "pvs-init-review", "result": "no"}
+          ],
+          "layout": {"width": 930, "height": 360, "node_width": 180, "node_height": 76, "positions": {
+            "pvs-init-entry": [20, 142, 180, 76], "pvs-init-alt": [250, 142, 180, 76],
+            "pvs-init-upstream": [480, 142, 200, 76], "pvs-init-apply": [730, 45, 180, 76],
+            "pvs-init-review": [730, 230, 180, 84]
+          }}
+        },
+        {
+          "id": "nonsense-frameshift",
+          "title": "Nonsense / frameshift",
+          "entry_node": "pvs-ptc-entry",
+          "nodes": [
+            {"id": "pvs-ptc-entry", "kind": "entry", "label": "Nonsense or frameshift"},
+            {"id": "pvs-ptc-nmd", "kind": "decision", "label": "Is NMD predicted?"},
+            {"id": "pvs-ptc-transcript", "kind": "decision", "label": "Variant present in biologically relevant transcript?"},
+            {"id": "pvs-ptc-critical", "kind": "decision", "label": "Truncated or altered region critical to protein function?"},
+            {"id": "pvs-ptc-table4", "kind": "outcome", "label": "Apply the gene- and exon-specific PVS1 result from Table 4", "outcome_codes": ["PVS1", "PVS1_N/A"]},
+            {"id": "pvs-ptc-na", "kind": "outcome", "label": "PVS1 N/A", "outcome_codes": ["PVS1_N/A"]}
+          ],
+          "edges": [
+            {"from": "pvs-ptc-entry", "to": "pvs-ptc-nmd", "result": "start"},
+            {"from": "pvs-ptc-nmd", "to": "pvs-ptc-transcript", "result": "yes"},
+            {"from": "pvs-ptc-nmd", "to": "pvs-ptc-critical", "result": "no"},
+            {"from": "pvs-ptc-transcript", "to": "pvs-ptc-table4", "result": "present"},
+            {"from": "pvs-ptc-transcript", "to": "pvs-ptc-na", "result": "absent"},
+            {"from": "pvs-ptc-critical", "to": "pvs-ptc-table4", "result": "yes"},
+            {"from": "pvs-ptc-critical", "to": "pvs-ptc-na", "result": "unknown"}
+          ],
+          "layout": {"width": 980, "height": 470, "node_width": 190, "node_height": 78, "positions": {
+            "pvs-ptc-entry": [20, 196, 190, 78], "pvs-ptc-nmd": [270, 196, 190, 78],
+            "pvs-ptc-transcript": [525, 80, 205, 78], "pvs-ptc-critical": [525, 310, 205, 78],
+            "pvs-ptc-table4": [780, 130, 180, 96], "pvs-ptc-na": [780, 300, 180, 78]
+          }}
+        },
+        {
+          "id": "exon-deletion",
+          "title": "One or more exon deletion",
+          "entry_node": "pvs-del-entry",
+          "nodes": [
+            {"id": "pvs-del-entry", "kind": "entry", "label": "One or more exon deletion"},
+            {"id": "pvs-del-full", "kind": "decision", "label": "Full gene deletion?"},
+            {"id": "pvs-del-domain", "kind": "decision", "label": "Targets a gene-specific critical coding exon?"},
+            {"id": "pvs-del-frame", "kind": "decision", "label": "Predicted consequence: PTC or in-frame?"},
+            {"id": "pvs-del-size", "kind": "decision", "label": "For in-frame loss, how much coding sequence is removed?"},
+            {"id": "pvs-del-table4", "kind": "outcome", "label": "Apply the exact Table 4 deletion result", "outcome_codes": ["PVS1", "PVS1_N/A"]},
+            {"id": "pvs-del-standalone", "kind": "outcome", "label": "Full-gene deletion: PVS1 plus PM5 Strong (PTC)", "outcome_codes": ["PVS1", "PM5_PTC"]}
+          ],
+          "edges": [
+            {"from": "pvs-del-entry", "to": "pvs-del-full", "result": "start"},
+            {"from": "pvs-del-full", "to": "pvs-del-standalone", "result": "yes"},
+            {"from": "pvs-del-full", "to": "pvs-del-domain", "result": "no"},
+            {"from": "pvs-del-domain", "to": "pvs-del-frame", "result": "assessed"},
+            {"from": "pvs-del-frame", "to": "pvs-del-table4", "result": "ptc"},
+            {"from": "pvs-del-frame", "to": "pvs-del-size", "result": "in_frame"},
+            {"from": "pvs-del-size", "to": "pvs-del-table4", "result": "table4"}
+          ],
+          "layout": {"width": 1040, "height": 520, "node_width": 180, "node_height": 80, "positions": {
+            "pvs-del-entry": [20, 220, 180, 80], "pvs-del-full": [245, 220, 180, 80],
+            "pvs-del-domain": [470, 300, 195, 80], "pvs-del-frame": [710, 300, 180, 80],
+            "pvs-del-size": [710, 420, 180, 80], "pvs-del-table4": [920, 330, 110, 100],
+            "pvs-del-standalone": [470, 75, 230, 90]
+          }}
+        },
+        {
+          "id": "duplication",
+          "title": "One or more exon duplication",
+          "entry_node": "pvs-dup-entry",
+          "nodes": [
+            {"id": "pvs-dup-entry", "kind": "entry", "label": "One or more exon duplication contained within the gene"},
+            {"id": "pvs-dup-tandem", "kind": "decision", "label": "Tandem arrangement proven, presumed, or excluded?"},
+            {"id": "pvs-dup-frame", "kind": "decision", "label": "PTC or reading frame preserved?"},
+            {"id": "pvs-dup-domain", "kind": "decision", "label": "In-frame duplication contained within a critical domain?"},
+            {"id": "pvs-dup-table4", "kind": "outcome", "label": "Apply gene-specific Table 4 strength", "outcome_codes": ["PVS1", "PVS1_N/A"]},
+            {"id": "pvs-dup-na", "kind": "outcome", "label": "Not in tandem: PVS1 N/A", "outcome_codes": ["PVS1_N/A"]}
+          ],
+          "edges": [
+            {"from": "pvs-dup-entry", "to": "pvs-dup-tandem", "result": "start"},
+            {"from": "pvs-dup-tandem", "to": "pvs-dup-frame", "result": "proven_or_presumed"},
+            {"from": "pvs-dup-tandem", "to": "pvs-dup-na", "result": "not_in_tandem"},
+            {"from": "pvs-dup-frame", "to": "pvs-dup-table4", "result": "ptc"},
+            {"from": "pvs-dup-frame", "to": "pvs-dup-domain", "result": "in_frame"},
+            {"from": "pvs-dup-domain", "to": "pvs-dup-table4", "result": "table4"}
+          ],
+          "layout": {"width": 980, "height": 430, "node_width": 190, "node_height": 82, "positions": {
+            "pvs-dup-entry": [20, 174, 205, 82], "pvs-dup-tandem": [280, 174, 205, 82],
+            "pvs-dup-frame": [540, 90, 190, 82], "pvs-dup-domain": [540, 280, 190, 82],
+            "pvs-dup-table4": [785, 110, 175, 92], "pvs-dup-na": [785, 285, 175, 82]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "appendix-pvs1-splice",
+      "title": "Appendix Figures 4 and 6: PVS1 canonical splice-site pathways",
+      "description": "Gene-specific redraw of the official GT-AG +/-1,2 splice-site outcome matrix. Exact variants and weights remain in Table 4 and the continued panels.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix Figures 4 and 6; continued panels; Specifications Table 4",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["appendix-figure-4-brca1-splice-pvs1", "appendix-figure-4-brca1-splice-pvs1-continued", "appendix-figure-6-brca2-splice-pvs1", "appendix-figure-6-brca2-splice-pvs1-continued"],
+      "branches": [
+        {
+          "id": "canonical-splice-outcome",
+          "title": "GT-AG +/-1,2 splice sites",
+          "entry_node": "splice-entry",
+          "nodes": [
+            {"id": "splice-entry", "kind": "entry", "label": "Canonical GT-AG +/-1,2 splice-site variant"},
+            {"id": "splice-coding", "kind": "decision", "label": "Predicted alteration affects coding sequence?"},
+            {"id": "splice-consequence", "kind": "decision", "label": "PTC with NMD, PTC without NMD, or in-frame alteration?"},
+            {"id": "splice-transcript", "kind": "decision", "label": "Biologically relevant transcript and critical region assessment"},
+            {"id": "splice-table4", "kind": "outcome", "label": "Apply exact gene-, exon- and allele-specific Table 4 PVS1 result", "outcome_codes": ["PVS1", "PVS1_N/A"]},
+            {"id": "splice-no-alteration", "kind": "outcome", "label": "No predicted splicing alteration: PVS1 N/A", "outcome_codes": ["PVS1_N/A"]}
+          ],
+          "edges": [
+            {"from": "splice-entry", "to": "splice-coding", "result": "start"},
+            {"from": "splice-coding", "to": "splice-consequence", "result": "yes"},
+            {"from": "splice-coding", "to": "splice-no-alteration", "result": "no"},
+            {"from": "splice-consequence", "to": "splice-transcript", "result": "predicted_alteration"},
+            {"from": "splice-transcript", "to": "splice-table4", "result": "table4"}
+          ],
+          "layout": {"width": 980, "height": 430, "node_width": 190, "node_height": 82, "positions": {
+            "splice-entry": [20, 174, 205, 82], "splice-coding": [280, 174, 190, 82],
+            "splice-consequence": [525, 95, 205, 90], "splice-transcript": [525, 280, 205, 90],
+            "splice-table4": [785, 95, 175, 100], "splice-no-alteration": [785, 285, 175, 90]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "appendix-figure-9",
+      "title": "Appendix Figure 9: interaction of bioinformatic, mRNA and functional evidence",
+      "description": "Accessible redraw of the official mechanism-aware evidence interaction sequence.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix Figure 9",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["appendix-figure-9-evidence-interactions"],
+      "branches": [
+        {
+          "id": "evidence-layers",
+          "title": "Evidence layers",
+          "entry_node": "interaction-entry",
+          "nodes": [
+            {"id": "interaction-entry", "kind": "entry", "label": "Assess position and predicted mRNA/protein impact"},
+            {"id": "interaction-bio", "kind": "decision", "label": "Apply Figure 1A bioinformatic pathway"},
+            {"id": "interaction-rna", "kind": "decision", "label": "Review splicing assay data and adjust same-mechanism codes"},
+            {"id": "interaction-functional", "kind": "decision", "label": "Review mechanism-appropriate functional assay data"},
+            {"id": "interaction-result", "kind": "outcome", "label": "Retain, replace or down-weight evidence according to Figures 1B/1C", "outcome_codes": ["PVS1_RNA", "BP7_RNA", "PS3", "BS3"]},
+            {"id": "interaction-review", "kind": "outcome", "label": "Unclear or contradictory mechanism: expert review", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "interaction-entry", "to": "interaction-bio", "result": "start"},
+            {"from": "interaction-bio", "to": "interaction-rna", "result": "bioinformatic_result"},
+            {"from": "interaction-rna", "to": "interaction-functional", "result": "rna_assessed"},
+            {"from": "interaction-functional", "to": "interaction-result", "result": "interpretable"},
+            {"from": "interaction-rna", "to": "interaction-review", "result": "unclear"},
+            {"from": "interaction-functional", "to": "interaction-review", "result": "contradictory"}
+          ],
+          "layout": {"width": 1040, "height": 430, "node_width": 180, "node_height": 82, "positions": {
+            "interaction-entry": [20, 174, 190, 82], "interaction-bio": [250, 174, 180, 82],
+            "interaction-rna": [470, 174, 170, 82], "interaction-functional": [680, 174, 170, 82],
+            "interaction-result": [890, 45, 135, 100], "interaction-review": [890, 285, 135, 90]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "appendix-exon-ptc-maps",
+      "title": "Appendix Figures 1, 2, 7 and 8: exon, domain and PTC/PM5 maps",
+      "description": "Accessible redraw of the gene maps used for exon numbering, critical domains, coding-sequence percentage and the NMD boundary.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix Figures 1, 2, 7 and 8",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["appendix-figure-1-brca1-gene-map", "appendix-figure-2-brca2-gene-map"],
+      "branches": [
+        {
+          "id": "brca1-exon-map",
+          "title": "BRCA1",
+          "entry_node": "b1-e1",
+          "nodes": [
+            {"id":"b1-e1","kind":"entry","visual":"utr","label":"E1 | UTR"},
+            {"id":"b1-e2","kind":"decision","visual":"ring","label":"E2 | c.1 p.1 | 1.4%"},
+            {"id":"b1-e3","kind":"decision","visual":"ring","label":"E3 | c.81 p.27 | 4.0%"},
+            {"id":"b1-e4","kind":"decision","visual":"ring","label":"E4(5) | c.135 p.45 | 1.4%"},
+            {"id":"b1-e5","kind":"decision","visual":"ring","label":"E5(6) | c.213 p.71 | 1.6%"},
+            {"id":"b1-e6","kind":"decision","visual":"ring-coding","label":"E6(7) | c.301 p.101 | 1.6%"},
+            {"id":"b1-e7","kind":"decision","visual":"coding","label":"E7(8) | c.442 p.148 | 1.9%"},
+            {"id":"b1-e8","kind":"decision","visual":"coding","label":"E8(9) | c.548 p.183 | 0.8%"},
+            {"id":"b1-e9","kind":"decision","visual":"coding","label":"E9(10) | c.594 p.198 | 1.4%"},
+            {"id":"b1-e10","kind":"decision","visual":"coding","label":"E10(11) | c.671 p.224 | 61.3%"},
+            {"id":"b1-e11","kind":"decision","visual":"coiled-coding","label":"E11(12) | c.4097 p.1366 | 1.6%"},
+            {"id":"b1-e12","kind":"decision","visual":"coiled-coding","label":"E12(13) | c.4186 p.1396 | 3.0%"},
+            {"id":"b1-e13","kind":"decision","visual":"coding","label":"E13(14) | c.4358 p.1453 | 2.3%"},
+            {"id":"b1-e14","kind":"decision","visual":"coding","label":"E14(15) | c.4485 p.1495 | 3.4%"},
+            {"id":"b1-e15","kind":"decision","visual":"brct-coding","label":"E15(16) | c.4676 p.1559 | 5.5%"},
+            {"id":"b1-e16","kind":"decision","visual":"brct","label":"E16(17) | c.4987 p.1663 | 1.6%"},
+            {"id":"b1-e17","kind":"decision","visual":"brct","label":"E17(18) | c.5075 p.1692 | 1.4%"},
+            {"id":"b1-e18","kind":"decision","visual":"brct","label":"E18(19) | c.5153 p.1718 | 0.7%"},
+            {"id":"b1-e19","kind":"decision","visual":"brct","label":"E19(20) | c.5194 p.1732 | 1.5%"},
+            {"id":"b1-e20","kind":"decision","visual":"brct","label":"E20(21) | c.5278 p.1760 | 0.9%"},
+            {"id":"b1-e21","kind":"decision","visual":"brct","label":"E21(22) | c.5332 p.1778 | 1.3%"},
+            {"id":"b1-e22","kind":"decision","visual":"brct","label":"E22(23) | c.5407 p.1803 | 1.1%"},
+            {"id":"b1-e23","kind":"outcome","visual":"brct-utr","label":"E23(24) | c.5468 p.1823 | 1.5%"},
+            {"id":"b1-nmd","kind":"outcome","visual":"boundary","label":"PTC/NMD boundary c.5418-c.5419"}
+          ],
+          "edges": [],
+          "layout": {"width":1120,"height":470,"node_width":130,"node_height":68,"positions":{
+            "b1-e1":[10,35,120,68],"b1-e2":[145,35,120,68],"b1-e3":[280,35,120,68],"b1-e4":[415,35,120,68],"b1-e5":[550,35,120,68],"b1-e6":[685,35,120,68],"b1-e7":[820,35,120,68],
+            "b1-e8":[10,145,120,68],"b1-e9":[145,145,120,68],"b1-e10":[280,145,255,68],"b1-e11":[550,145,120,68],"b1-e12":[685,145,120,68],
+            "b1-e13":[10,255,120,68],"b1-e14":[145,255,120,68],"b1-e15":[280,255,120,68],"b1-e16":[415,255,120,68],"b1-e17":[550,255,120,68],"b1-e18":[685,255,120,68],"b1-e19":[820,255,120,68],
+            "b1-e20":[10,365,120,68],"b1-e21":[145,365,120,68],"b1-e22":[280,365,120,68],"b1-e23":[415,365,150,68],"b1-nmd":[625,365,270,68]
+          }}
+        },
+        {
+          "id": "brca2-exon-map",
+          "title": "BRCA2",
+          "entry_node": "b2-e1",
+          "nodes": [
+            {"id":"b2-e1","kind":"entry","visual":"utr","label":"E1 | UTR"},
+            {"id":"b2-e2","kind":"decision","visual":"palb2-coding","label":"E2 | c.1 p.1 | 0.7%"},
+            {"id":"b2-e3","kind":"decision","visual":"palb2-coding","label":"E3 | c.68 p.23 | 2.4%"},
+            {"id":"b2-e4","kind":"decision","visual":"coding","label":"E4 | c.317 p.106 | 1.1%"},
+            {"id":"b2-e5","kind":"decision","visual":"coding","label":"E5 | c.426 p.142 | 0.5%"},
+            {"id":"b2-e6","kind":"decision","visual":"coding","label":"E6 | c.476 p.159 | 0.4%"},
+            {"id":"b2-e7","kind":"decision","visual":"coding","label":"E7 | c.517 p.173 | 1.1%"},
+            {"id":"b2-e8","kind":"decision","visual":"coding","label":"E8 | c.632 p.211 | 0.5%"},
+            {"id":"b2-e9","kind":"decision","visual":"coding","label":"E9 | c.682 p.228 | 1.1%"},
+            {"id":"b2-e10","kind":"decision","visual":"coding","label":"E10 | c.794 p.265 | 10.9%"},
+            {"id":"b2-e11","kind":"decision","visual":"coding","label":"E11 | c.1910 p.637 | 48.1%"},
+            {"id":"b2-e12","kind":"decision","visual":"coding","label":"E12 | c.6842 p.2281 | 0.9%"},
+            {"id":"b2-e13","kind":"decision","visual":"coding","label":"E13 | c.6938 p.2313 | 0.7%"},
+            {"id":"b2-e14","kind":"decision","visual":"coding","label":"E14 | c.7008 p.2336 | 4.2%"},
+            {"id":"b2-e15","kind":"decision","visual":"dbd-coding","label":"E15 | c.7436 p.2479 | 1.8%"},
+            {"id":"b2-e16","kind":"decision","visual":"dbd","label":"E16 | c.7618 p.2540 | 1.8%"},
+            {"id":"b2-e17","kind":"decision","visual":"dbd","label":"E17 | c.7806 p.2602 | 1.7%"},
+            {"id":"b2-e18","kind":"decision","visual":"dbd","label":"E18 | c.7977 p.2659 | 3.5%"},
+            {"id":"b2-e19","kind":"decision","visual":"dbd","label":"E19 | c.8332 p.2778 | 1.5%"},
+            {"id":"b2-e20","kind":"decision","visual":"dbd","label":"E20 | c.8488 p.2830 | 1.4%"},
+            {"id":"b2-e21","kind":"decision","visual":"dbd","label":"E21 | c.8633 p.2878 | 1.2%"},
+            {"id":"b2-e22","kind":"decision","visual":"dbd","label":"E22 | c.8756 p.2919 | 1.9%"},
+            {"id":"b2-e23","kind":"decision","visual":"dbd","label":"E23 | c.8954 p.2985 | 1.6%"},
+            {"id":"b2-e24","kind":"decision","visual":"dbd","label":"E24 | c.9118 p.3040 | 1.4%"},
+            {"id":"b2-e25","kind":"decision","visual":"dbd","label":"E25 | c.9257 p.3086 | 2.4%"},
+            {"id":"b2-e26","kind":"decision","visual":"dbd-coding","label":"E26 | c.9602 p.3168 | 1.4%"},
+            {"id":"b2-e27","kind":"outcome","visual":"coding-utr","label":"E27 | c.9649 p.3217 | 5.9%"},
+            {"id":"b2-nmd","kind":"outcome","visual":"boundary","label":"PTC/NMD boundary c.9599-c.9600"}
+          ],
+          "edges": [],
+          "layout": {"width":1120,"height":570,"node_width":125,"node_height":68,"positions":{
+            "b2-e1":[10,25,110,68],"b2-e2":[135,25,110,68],"b2-e3":[260,25,110,68],"b2-e4":[385,25,110,68],"b2-e5":[510,25,110,68],"b2-e6":[635,25,110,68],"b2-e7":[760,25,110,68],
+            "b2-e8":[10,125,110,68],"b2-e9":[135,125,110,68],"b2-e10":[260,125,180,68],"b2-e11":[455,125,300,68],
+            "b2-e12":[10,225,110,68],"b2-e13":[135,225,110,68],"b2-e14":[260,225,110,68],"b2-e15":[385,225,110,68],"b2-e16":[510,225,110,68],"b2-e17":[635,225,110,68],"b2-e18":[760,225,110,68],
+            "b2-e19":[10,325,110,68],"b2-e20":[135,325,110,68],"b2-e21":[260,325,110,68],"b2-e22":[385,325,110,68],"b2-e23":[510,325,110,68],"b2-e24":[635,325,110,68],"b2-e25":[760,325,110,68],
+            "b2-e26":[10,425,110,68],"b2-e27":[135,425,180,68],"b2-nmd":[385,425,270,68]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "population-evidence-path",
+      "title": "Population evidence decision path",
+      "description": "ARIANE visualization derived from ENIGMA Appendix G and the BA1, BS1 and PM2 specifications. This is not an official ENIGMA figure.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix G; BA1, BS1 and PM2 specifications",
+      "diagram_provenance": "ariane_derived",
+      "original_figure_ids": [],
+      "branches": [
+        {
+          "id": "gnomad-small-variant",
+          "title": "Small variant population evidence",
+          "entry_node": "pop-entry",
+          "nodes": [
+            {"id": "pop-entry", "kind": "entry", "label": "Validated gnomAD v2.1.1 exomes and v3.1.2 genomes"},
+            {"id": "pop-data", "kind": "decision", "label": "Required datasets, QC and coverage available?"},
+            {"id": "pop-founder", "kind": "decision", "label": "Known pathogenic founder exception?"},
+            {"id": "pop-single", "kind": "decision", "label": "Only one outbred observation?"},
+            {"id": "pop-faf", "kind": "decision", "label": "Maximum permitted-population FAF95 band"},
+            {"id": "pop-pm2", "kind": "decision", "label": "Absent from both datasets and eligible variant type?"},
+            {"id": "pop-code", "kind": "outcome", "label": "Apply BA1, BS1, PM2 Supporting, or no population code", "outcome_codes": ["BA1", "BS1", "PM2"]},
+            {"id": "pop-unavailable", "kind": "outcome", "label": "Population evidence unavailable; report why", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "pop-entry", "to": "pop-data", "result": "start"},
+            {"from": "pop-data", "to": "pop-founder", "result": "yes"},
+            {"from": "pop-data", "to": "pop-unavailable", "result": "no"},
+            {"from": "pop-founder", "to": "pop-code", "result": "yes_no_ba1_bs1"},
+            {"from": "pop-founder", "to": "pop-single", "result": "no"},
+            {"from": "pop-single", "to": "pop-code", "result": "yes_no_code"},
+            {"from": "pop-single", "to": "pop-faf", "result": "no"},
+            {"from": "pop-faf", "to": "pop-code", "result": "ba1_or_bs1"},
+            {"from": "pop-faf", "to": "pop-pm2", "result": "below_bs1"},
+            {"from": "pop-pm2", "to": "pop-code", "result": "result"}
+          ],
+          "layout": {"width": 1080, "height": 610, "node_width": 180, "node_height": 78, "positions": {
+            "pop-entry": [20, 266, 190, 78], "pop-data": [250, 266, 190, 78],
+            "pop-founder": [480, 160, 190, 78], "pop-single": [480, 365, 190, 78],
+            "pop-faf": [710, 265, 180, 78], "pop-pm2": [710, 470, 180, 78],
+            "pop-code": [925, 180, 140, 100], "pop-unavailable": [925, 410, 140, 90]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "ps1-reference-eligibility-path",
+      "title": "Protein PS1 reference eligibility path",
+      "description": "ARIANE visualization derived from the ENIGMA PS1 specification. This is not an official ENIGMA figure.",
+      "source_id": "enigma-v1.2-specifications",
+      "source_location": "PS1 specification",
+      "diagram_provenance": "ariane_derived",
+      "original_figure_ids": [],
+      "branches": [
+        {
+          "id": "protein-ps1",
+          "title": "Protein-level PS1",
+          "entry_node": "ps1-entry",
+          "nodes": [
+            {"id": "ps1-entry", "kind": "entry", "label": "Trusted P/LP reference candidate"},
+            {"id": "ps1-same-protein", "kind": "decision", "label": "Same normalized missense substitution and different nucleotide change?"},
+            {"id": "ps1-vcep", "kind": "decision", "label": "Reference classification verified under VCEP specifications?"},
+            {"id": "ps1-splice", "kind": "decision", "label": "Both SpliceAI <=0.1 and defined RNA/splice sources checked?"},
+            {"id": "ps1-dependency", "kind": "decision", "label": "Direct reciprocal PS1 dependency excluded?"},
+            {"id": "ps1-apply", "kind": "outcome", "label": "P reference: PS1 Strong; LP reference: PS1 Moderate", "outcome_codes": ["PS1"]},
+            {"id": "ps1-review", "kind": "outcome", "label": "Review candidate without automatic points", "outcome_codes": []},
+            {"id": "ps1-exclude", "kind": "outcome", "label": "Confirmed splice mechanism: protein PS1 not applicable", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "ps1-entry", "to": "ps1-same-protein", "result": "start"},
+            {"from": "ps1-same-protein", "to": "ps1-vcep", "result": "yes"},
+            {"from": "ps1-same-protein", "to": "ps1-review", "result": "no"},
+            {"from": "ps1-vcep", "to": "ps1-splice", "result": "yes"},
+            {"from": "ps1-vcep", "to": "ps1-review", "result": "no"},
+            {"from": "ps1-splice", "to": "ps1-dependency", "result": "eligible"},
+            {"from": "ps1-splice", "to": "ps1-exclude", "result": "confirmed_splice"},
+            {"from": "ps1-splice", "to": "ps1-review", "result": "incomplete_or_conflicting"},
+            {"from": "ps1-dependency", "to": "ps1-apply", "result": "yes"},
+            {"from": "ps1-dependency", "to": "ps1-review", "result": "no"}
+          ],
+          "layout": {"width": 1120, "height": 600, "node_width": 190, "node_height": 82, "positions": {
+            "ps1-entry": [20, 255, 190, 82], "ps1-same-protein": [250, 255, 200, 82],
+            "ps1-vcep": [490, 160, 190, 82], "ps1-splice": [720, 160, 190, 82],
+            "ps1-dependency": [720, 360, 190, 82], "ps1-apply": [950, 120, 150, 96],
+            "ps1-review": [950, 300, 150, 90], "ps1-exclude": [950, 465, 150, 90]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "clinical-lr-path",
+      "title": "Combined clinical LR decision path",
+      "description": "ARIANE visualization derived from ENIGMA Appendix B and PP4/BP5 thresholds. This is not an official ENIGMA figure.",
+      "source_id": "enigma-v1.2-appendix",
+      "source_location": "Appendix B; PP4 and BP5 specifications",
+      "diagram_provenance": "ariane_derived",
+      "original_figure_ids": [],
+      "branches": [
+        {
+          "id": "combined-clinical-lr",
+          "title": "Combined clinical LR",
+          "entry_node": "lr-entry",
+          "nodes": [
+            {"id": "lr-entry", "kind": "entry", "label": "Variant-specific clinical LR components"},
+            {"id": "lr-sources", "kind": "decision", "label": "Accepted clinical data types and source provenance available?"},
+            {"id": "lr-combine", "kind": "decision", "label": "Combine eligible likelihood ratios once"},
+            {"id": "lr-band", "kind": "decision", "label": "Compare combined LR with ENIGMA PP4/BP5 thresholds"},
+            {"id": "lr-code", "kind": "outcome", "label": "Apply one PP4 or BP5 strength, or no clinical code", "outcome_codes": ["PP4", "BP5"]},
+            {"id": "lr-review", "kind": "outcome", "label": "Incomplete provenance or incompatible data: manual review", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "lr-entry", "to": "lr-sources", "result": "start"},
+            {"from": "lr-sources", "to": "lr-combine", "result": "yes"},
+            {"from": "lr-sources", "to": "lr-review", "result": "no"},
+            {"from": "lr-combine", "to": "lr-band", "result": "combined"},
+            {"from": "lr-band", "to": "lr-code", "result": "threshold_result"}
+          ],
+          "layout": {"width": 960, "height": 390, "node_width": 190, "node_height": 82, "positions": {
+            "lr-entry": [20, 154, 190, 82], "lr-sources": [255, 154, 190, 82],
+            "lr-combine": [490, 75, 190, 82], "lr-band": [490, 265, 190, 82],
+            "lr-code": [745, 80, 195, 96], "lr-review": [745, 265, 195, 82]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    },
+    {
+      "id": "classification-combination-path",
+      "title": "Final classification combination path",
+      "description": "ARIANE visualization derived from ENIGMA Classification Methods and Table 3. This is not an official ENIGMA figure.",
+      "source_id": "enigma-v1.2-specifications",
+      "source_location": "Classification Methods; Table 3",
+      "diagram_provenance": "ariane_derived",
+      "original_figure_ids": [],
+      "branches": [
+        {
+          "id": "classification-method",
+          "title": "Select ENIGMA classification method",
+          "entry_node": "class-entry",
+          "nodes": [
+            {"id": "class-entry", "kind": "entry", "label": "All accepted evidence after mechanism-aware interaction handling"},
+            {"id": "class-ba1", "kind": "decision", "label": "BA1 stand-alone applies?"},
+            {"id": "class-mixed", "kind": "decision", "label": "Pathogenic and benign evidence co-occur?"},
+            {"id": "class-table3", "kind": "outcome", "label": "One direction only: use ENIGMA Table 3 combinations", "outcome_codes": []},
+            {"id": "class-points", "kind": "outcome", "label": "Mixed evidence: use ENIGMA second approach with Tavtigian points; expert review", "outcome_codes": []},
+            {"id": "class-benign", "kind": "outcome", "label": "BA1 stand-alone: Class 1 Benign", "outcome_codes": ["BA1"]}
+          ],
+          "edges": [
+            {"from": "class-entry", "to": "class-ba1", "result": "start"},
+            {"from": "class-ba1", "to": "class-benign", "result": "yes"},
+            {"from": "class-ba1", "to": "class-mixed", "result": "no"},
+            {"from": "class-mixed", "to": "class-points", "result": "yes"},
+            {"from": "class-mixed", "to": "class-table3", "result": "no"}
+          ],
+          "layout": {"width": 930, "height": 390, "node_width": 190, "node_height": 82, "positions": {
+            "class-entry": [20, 154, 205, 82], "class-ba1": [275, 154, 190, 82],
+            "class-mixed": [525, 250, 190, 82], "class-table3": [750, 260, 160, 96],
+            "class-points": [750, 115, 160, 105], "class-benign": [525, 35, 190, 82]
+          }}
+        }
+      ],
+      "condition_definitions": []
+    }
+  ]
+}

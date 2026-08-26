@@ -1,8 +1,9 @@
-"""Build the protein-PS1 reference registry from official ENIGMA v1.2 data.
+"""Build the protein-PS1 reference registry from versioned source data.
 
-ST7 supplies P/LP missense reference candidates.  Table 9, complete ST2 and
-the Table 9 SpliceAI value determine whether each candidate is currently
-eligible, excluded, or requires review for protein-level PS1.
+ST7 supplies P/LP missense reference candidates. Table 9 functional/RNA
+evidence and complete ST2 determine whether each candidate can enter the
+protein branch. SpliceAI is deliberately not embedded in this registry. It is
+computed on demand for both variants when PS1 is evaluated.
 """
 
 from __future__ import annotations
@@ -34,8 +35,6 @@ TABLE9_PATH = DATA / "enigma_table9.json"
 ST2_PATH = DATA / "enigma_st2_splice_evidence.json"
 OUTPUT_PATH = DATA / "ps1_protein_reference_registry.json"
 EXTENSIONS_PATH = DATA / "ps1_protein_reference_extensions.json"
-
-
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -53,17 +52,7 @@ def _is_normalized_missense(p_notation: str) -> bool:
     return bool(re.fullmatch(r"[A-Z][a-z]{2}\d+[A-Z][a-z]{2}", value))
 
 
-def _score(table9: Dict[str, Any]) -> float | None:
-    raw = table9.get("spliceai_prediction")
-    if raw in (None, ""):
-        return None
-    try:
-        return float(raw)
-    except (TypeError, ValueError):
-        return None
-
-
-def _status(score: float | None, splice_status: str) -> tuple[str, str, str]:
+def _status(splice_status: str) -> tuple[str, str, str]:
     if splice_status == "conflicting":
         return (
             "review_required",
@@ -76,18 +65,6 @@ def _status(score: float | None, splice_status: str) -> tuple[str, str, str]:
             "missense_with_splice_effect",
             "Defined ENIGMA sources record a predicted or confirmed splice effect.",
         )
-    if score is None:
-        return (
-            "review_required",
-            "missense_mechanism_unresolved",
-            "The reference-variant SpliceAI value is unavailable.",
-        )
-    if score > 0.1:
-        return (
-            "excluded",
-            "missense_with_predicted_splice_effect",
-            f"Reference-variant SpliceAI {score:.3f} is greater than 0.1.",
-        )
     if splice_status not in {"normal", "none_identified"}:
         return (
             "review_required",
@@ -96,8 +73,8 @@ def _status(score: float | None, splice_status: str) -> tuple[str, str, str]:
         )
     return (
         "eligible",
-        "missense_no_splice_effect",
-        "ST7 P/LP missense reference meets the recorded ENIGMA protein-PS1 splice conditions.",
+        "missense_runtime_spliceai_check_required",
+        "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
     )
 
 
@@ -121,10 +98,7 @@ def build() -> Dict[str, Any]:
         c_notation = source["c_notation"]
         table9 = table9_lookup_ps3_bs3(gene, c_notation)
         splice = evaluate_defined_splice_sources(gene, c_notation, table9)
-        spliceai_score = _score(table9)
-        status, protein_branch, status_reason = _status(
-            spliceai_score, splice["status"]
-        )
+        status, protein_branch, status_reason = _status(splice["status"])
         classification = (
             "Pathogenic" if source["iarc_class"] == 5 else "Likely Pathogenic"
         )
@@ -153,15 +127,16 @@ def build() -> Dict[str, Any]:
                 "table9_summary": table9.get("text"),
             },
             "reference_splice_evidence": {
-                "spliceai_score": spliceai_score,
                 "threshold": 0.1,
+                "prediction_policy": "runtime_required",
                 "confirmed_status": splice["status"],
                 "sources_checked": list(DEFINED_SOURCES),
                 "checked_at": date.today().isoformat(),
                 "source_details": splice,
                 "provenance": {
-                    "provider": "official_enigma_v1_2_snapshots",
+                    "provider": "configured_spliceai_service_at_classification_time",
                     "input_variant": f"{gene}:{c_notation}",
+                    "transcript_policy": "reference_transcript",
                     **source_checksums,
                 },
             },
@@ -191,12 +166,13 @@ def build() -> Dict[str, Any]:
     records.sort(key=lambda item: (item["gene"], item["c_notation"]))
     counts = Counter(record["status"] for record in records)
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "registry_version": date.today().isoformat() + ".1",
         "status": "active",
         "description": (
             "ENIGMA ST7 v1.2 P/LP missense references for protein-level PS1, "
-            "with explicit eligibility derived from the recorded ENIGMA splice checks."
+            "with eligibility from defined ENIGMA RNA/splice sources. The "
+            "reference and assessed-variant SpliceAI scores are computed on demand."
         ),
         "rule_source": {
             "name": "ClinGen ENIGMA BRCA1/2 VCEP PS1 specification",

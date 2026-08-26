@@ -76,6 +76,20 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
         self.assertNotIn("local", result["reason"].lower())
         self.assertNotIn("snapshot", result["reason"].lower())
+        self.assertTrue(result["single_strong_likely_benign_eligible"])
+        self.assertGreaterEqual(result["likelihood_ratio_contribution_count"], 2)
+        self.assertGreaterEqual(len(result["clinical_evidence_types"]), 2)
+
+    def test_single_lr_bp5_strong_is_not_single_strong_class2_eligible(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.1005C>A")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "BP5")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["likelihood_ratio_contribution_count"], 1)
+        self.assertEqual(len(result["clinical_evidence_types"]), 1)
+        self.assertFalse(result["single_strong_likely_benign_eligible"])
 
     def test_pp4_unavailable_reason_does_not_expose_storage_terminology(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
@@ -262,6 +276,30 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
+    def test_c4676_acceptor_variant_with_two_very_strong_criteria_is_pathogenic(self):
+        from backend.main import _classify_one
+
+        with patch(
+            "backend.lookups.spliceai.get_spliceai_score", return_value=0.996
+        ), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
+            return_value=(None, None),
+        ), patch(
+            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup",
+            return_value={"status": "not_found"},
+        ):
+            result = asyncio.run(_classify_one("BRCA1", "c.4676-1G>A", "p.?"))
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(criteria["PVS1"].strength, "Very Strong")
+        self.assertEqual(criteria["PP4"].strength, "Very Strong")
+        self.assertEqual(criteria["PM2_Supporting"].strength, "Supporting")
+        self.assertEqual(result.total_points, 17)
+        self.assertEqual(result.predicted_class, 5)
+        self.assertEqual(result.predicted_label, "Pathogenic")
+
     def test_abbreviated_frameshift_is_classified_with_canonical_output(self):
         from backend.main import _classify_one
 
@@ -375,6 +413,34 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertNotIn("PP4", criteria)
         self.assertEqual(criteria["BP5"].strength, "Strong")
         self.assertEqual(criteria["BP5"].points, -4)
+
+    def test_c3247a_to_c_receives_bp1_and_variant_specific_pp4(self):
+        from backend.main import _classify_one
+
+        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+            "backend.lookups.spliceai.get_spliceai_score", return_value=0.0
+        ), patch(
+            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
+            return_value=(None, None),
+        ), patch(
+            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
+        ), patch(
+            "backend.lookups.clingen.clingen_erepo_lookup",
+            return_value={"status": "not_found"},
+        ):
+            result = asyncio.run(
+                _classify_one("BRCA1", "c.3247A>C", "p.(Met1083Leu)")
+            )
+
+        criteria = {criterion.name: criterion for criterion in result.criteria}
+        self.assertEqual(criteria["BP1"].strength, "Strong")
+        self.assertEqual(criteria["BP1"].points, -4)
+        self.assertEqual(criteria["PP4"].strength, "Moderate")
+        self.assertEqual(criteria["PP4"].points, 2)
+        self.assertIn("combined LR=7.38132", criteria["PP4"].reason)
+        self.assertIn("PMID 31853058", criteria["PP4"].reason)
+        self.assertEqual(result.total_points, -2)
+        self.assertEqual(result.predicted_class, 2)
 
     def test_brca2_multibase_duplication_receives_bp5_supporting(self):
         from backend.main import _classify_one

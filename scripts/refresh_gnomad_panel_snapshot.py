@@ -31,8 +31,8 @@ from typing import Any, Iterable
 ROOT = Path(__file__).resolve().parents[1]
 GNOMAD_DIR = ROOT / "backend" / "data" / "gnomad"
 DEFAULT_MANIFEST = GNOMAD_DIR / "gnomad_panel_manifest.json"
-DEFAULT_VARIANTS = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.with_real_coverage.json"
-DEFAULT_COVERAGE = GNOMAD_DIR / "gnomad_brca_coverage_cache.json"
+DEFAULT_VARIANTS = GNOMAD_DIR / "gnomad_brca_frequency_snapshot.json"
+DEFAULT_COVERAGE = GNOMAD_DIR / "gnomad_brca_coverage_snapshot.json"
 FAF_CONFIDENCE = 0.95
 
 

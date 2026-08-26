@@ -8,21 +8,7 @@ import re
 import time
 import urllib.request
 import urllib.parse
-
-FUNCTIONAL_DOMAINS = {
-    "BRCA1": {
-        "RING": (2, 101),
-        "coiled_coil": (1391, 1424),
-        "BRCT": (1650, 1857)
-    },
-    "BRCA2": {
-        # Source: ENIGMA VCEP v1.2 Appendix J
-        # BRC repeats are NOT listed as a clinically important domain for BP1/PP3/BP4
-        # Only PALB2 binding and DNA binding domain are used for these criteria
-        "PALB2_binding": (10, 40),
-        "DBD": (2481, 3186)
-    }
-}
+from backend.gene_policy import functional_domains
 
 def get_amino_acid_position(p_notation: str) -> Optional[int]:
     """
@@ -46,10 +32,7 @@ def is_in_functional_domain(gene: str, aa_position: int) -> tuple:
     Check if an amino acid position is in a functional domain.
     Returns (is_in_domain, domain_name)
     """
-    if gene not in FUNCTIONAL_DOMAINS:
-        return (False, None)
-
-    for domain_name, (start, end) in FUNCTIONAL_DOMAINS[gene].items():
+    for domain_name, (start, end) in functional_domains(gene).items():
         if start <= aa_position <= end:
             return (True, domain_name)
 
@@ -83,13 +66,3 @@ def get_intron_offset_from_c_notation(c_notation: str) -> Optional[tuple]:
         offset = sign * int(match.group(3))
         return (pos, offset)
     return None
-
-
-if __name__ == "__main__":
-    # test it
-    print("Testing domain lookup:")
-    print(f"  BRCA1 aa 50 -> {is_in_functional_domain('BRCA1', 50)}")
-    print(f"  BRCA1 aa 500 -> {is_in_functional_domain('BRCA1', 500)}")
-    print(f"  BRCA1 aa 1700 -> {is_in_functional_domain('BRCA1', 1700)}")
-    print(f"  BRCA2 aa 1500 -> {is_in_functional_domain('BRCA2', 1500)}")
-

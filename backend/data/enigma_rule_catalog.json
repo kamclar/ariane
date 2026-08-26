@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "catalog_version": "1.2.0",
+  "criteria_specification_id": "GN092",
+  "criteria_specification_version": "1.2.0",
+  "release_date": "2025-01-09",
+  "registry_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
+  "sources": [
+    {
+      "id": "enigma-v1.2-specifications",
+      "title": "ENIGMA BRCA1/2 VCEP Specifications v1.2",
+      "version": "1.2.0",
+      "source_type": "specification",
+      "official_url": "https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data",
+      "sha256": "ff0761c3e052ed916668676d9e92650999804e64d6186ac9cc28488764d327b4",
+      "role": "Criteria definitions and decision figures, including Figure 1A"
+    },
+    {
+      "id": "enigma-v1.2-appendix",
+      "title": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
+      "version": "1.2.0",
+      "source_type": "appendix",
+      "official_url": "https://cspec.genome.network/cspec/File/id/9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data",
+      "sha256": "9a9cc9210178e8d947597089ba8edd5ff0633ff7e4fea268b8f202d46e6c8ebb",
+      "role": "Supporting rules, thresholds and mechanism-specific detail"
+    },
+    {
+      "id": "enigma-v1.2-table4",
+      "title": "ENIGMA BRCA1/2 VCEP Specifications Table 4",
+      "version": "1.2.0",
+      "source_type": "table",
+      "official_url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
+      "sha256": "85af4043ebf9f8965a5879dbe11674c6e62e3aef7f1b8773b07620ee02f03fd9",
+      "role": "PVS1 and PM5 PTC decisions"
+    },
+    {
+      "id": "enigma-v1.2-table9",
+      "title": "ENIGMA BRCA1/2 VCEP Specifications Table 9",
+      "version": "1.2.0",
+      "source_type": "table",
+      "official_url": "https://cspec.genome.network/cspec/File/id/0a35d6a8-5050-44b6-8a9d-babe8cdc06b2/data",
+      "sha256": "b023f69c4d3131d474d90badc08012f130fa9bbdb47a9ece88ea7e3581da6bc8",
+      "role": "Curated calibrated functional assay evidence",
+      "runtime_rows": 4731
+    },
+    {
+      "id": "enigma-v1.2-supplementary-tables",
+      "title": "ENIGMA BRCA1/2 VCEP Supplementary Tables v1.2",
+      "version": "1.2.0",
+      "source_type": "table_collection",
+      "official_url": "https://cspec.genome.network/cspec/File/id/cb4a09fe-30f4-4aa8-9d76-d7ea407c9754/data",
+      "sha256": "2cca22c0c0ef4fb17e95ed1c43b4b5b31f12f1659a6516a53e1b4249b3f69957",
+      "role": "Supplementary reference datasets"
+    }
+  ],
+  "reference_table_registry": {
+    "dataset": "enigma_reference_tables.json",
+    "table_count": 42,
+    "groups": ["specification", "appendix", "supplementary"],
+    "api_path": "/api/rules/tables/{table_id}"
+  },
+  "figures": [
+    {
+      "id": "figure-1a-missense-inframe",
+      "title": "Figure 1A: Missense / in-frame",
+      "source_id": "enigma-v1.2-specifications",
+      "asset_url": "/static/enigma/figure-1a-missense-inframe.png"
+    },
+    {
+      "id": "figure-1a-synonymous-intronic",
+      "title": "Figure 1A: Synonymous and intronic",
+      "source_id": "enigma-v1.2-specifications",
+      "asset_url": "/static/enigma/figure-1a-synonymous-intronic.png"
+    },
+    {
+      "id": "figure-1b-rna",
+      "title": "Figure 1B: mRNA assay decision process",
+      "source_id": "enigma-v1.2-specifications",
+      "asset_url": "/static/enigma/figure-1b-rna.jpg"
+    },
+    {
+      "id": "figure-1b-rna-continued",
+      "title": "Figure 1B continued: RNA evidence weights",
+      "source_id": "enigma-v1.2-specifications",
+      "asset_url": "/static/enigma/figure-1b-rna-continued.png"
+    },
+    {
+      "id": "figure-1c-functional",
+      "title": "Figure 1C: functional assay evidence",
+      "source_id": "enigma-v1.2-specifications",
+      "asset_url": "/static/enigma/figure-1c-functional.jpeg"
+    },
+    {
+      "id": "appendix-figure-1-brca1-gene-map",
+      "title": "Appendix Figures 1 and 7: BRCA1 exon, domain and PTC/PM5 map",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-1-brca1-gene-map.jpg"
+    },
+    {
+      "id": "appendix-figure-2-brca2-gene-map",
+      "title": "Appendix Figures 2 and 8: BRCA2 exon, domain and PTC/PM5 map",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-2-brca2-gene-map.png"
+    },
+    {
+      "id": "appendix-figure-3-brca1-pvs1",
+      "title": "Appendix Figure 3: BRCA1 PVS1 decision tree",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-3-brca1-pvs1.jpg"
+    },
+    {
+      "id": "appendix-figure-4-brca1-splice-pvs1",
+      "title": "Appendix Figure 4: BRCA1 PVS1 splice-site decision tree",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-4-brca1-splice-pvs1.jpg"
+    },
+    {
+      "id": "appendix-figure-4-brca1-splice-pvs1-continued",
+      "title": "Appendix Figure 4 continued: BRCA1 curated splice variants",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-4-brca1-splice-pvs1-continued.png"
+    },
+    {
+      "id": "appendix-figure-5-brca2-pvs1",
+      "title": "Appendix Figure 5: BRCA2 PVS1 decision tree",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-5-brca2-pvs1.jpg"
+    },
+    {
+      "id": "appendix-figure-6-brca2-splice-pvs1",
+      "title": "Appendix Figure 6: BRCA2 PVS1 splice-site decision tree",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-6-brca2-splice-pvs1.jpg"
+    },
+    {
+      "id": "appendix-figure-6-brca2-splice-pvs1-continued",
+      "title": "Appendix Figure 6 continued: BRCA2 curated splice variants",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-6-brca2-splice-pvs1-continued.png"
+    },
+    {
+      "id": "appendix-figure-9-evidence-interactions",
+      "title": "Appendix Figure 9: interaction of mRNA and protein evidence",
+      "source_id": "enigma-v1.2-appendix",
+      "asset_url": "/static/enigma/appendix-figure-9-evidence-interactions.jpg"
+    }
+  ],
+  "decision_trees": [
+    {
+      "id": "figure-1a",
+      "title": "Figure 1A: application of bioinformatic codes",
+      "description": "Application of bioinformatic codes based on variant type and location.",
+      "source_id": "enigma-v1.2-specifications",
+      "source_location": "Figure 1A",
+      "diagram_provenance": "official_redraw",
+      "original_figure_ids": ["figure-1a-missense-inframe", "figure-1a-synonymous-intronic"],
+      "branches": [
+        {
+          "id": "missense-inframe",
+          "title": "Missense / in-frame",
+          "entry_node": "mi-entry",
+          "nodes": [
+            {"id": "mi-entry", "kind": "entry", "label": "Missense / in-frame", "outcome_codes": []},
+            {"id": "mi-splice-impact", "kind": "decision", "label": "Predicted impact on splicing?", "condition_id": "spliceai-impact-band"},
+            {"id": "mi-splice-pp3", "kind": "outcome", "label": "Apply PP3; consider PS1 for splicing", "outcome_codes": ["PP3", "PS1_SPLICING_REVIEW"]},
+            {"id": "mi-domain-after-unknown", "kind": "decision", "label": "Inside functional domain?", "condition_id": "inside-enigma-functional-domain"},
+            {"id": "mi-no-code-after-unknown", "kind": "outcome", "label": "Do not apply a bioinformatic code", "outcome_codes": []},
+            {"id": "mi-protein-after-unknown", "kind": "decision", "label": "Predicted impact on protein?", "condition_id": "bayesdel-impact-band"},
+            {"id": "mi-domain-after-low", "kind": "decision", "label": "Inside functional domain?", "condition_id": "inside-enigma-functional-domain"},
+            {"id": "mi-bp1", "kind": "outcome", "label": "Apply BP1 Strong", "outcome_codes": ["BP1"]},
+            {"id": "mi-protein-after-low", "kind": "decision", "label": "Predicted impact on protein?", "condition_id": "bayesdel-impact-band"},
+            {"id": "mi-protein-pp3-unknown", "kind": "outcome", "label": "Apply PP3; consider PS1 for missense", "outcome_codes": ["PP3", "PS1_PROTEIN_REVIEW"]},
+            {"id": "mi-no-code-protein-unknown", "kind": "outcome", "label": "Do not apply a bioinformatic code", "outcome_codes": []},
+            {"id": "mi-protein-pp3-low", "kind": "outcome", "label": "Apply PP3; consider PS1 for missense", "outcome_codes": ["PP3", "PS1_PROTEIN_REVIEW"]},
+            {"id": "mi-bp4", "kind": "outcome", "label": "Apply BP4", "outcome_codes": ["BP4"]},
+            {"id": "mi-no-code-protein-low", "kind": "outcome", "label": "Do not apply a bioinformatic code", "outcome_codes": []}
+          ],
+          "edges": [
+            {"from": "mi-entry", "to": "mi-splice-impact", "result": "start", "points": [[184, 290], [231, 290]]},
+            {"from": "mi-splice-impact", "to": "mi-splice-pp3", "result": "impact", "points": [[304, 255], [304, 199]], "label_at": [320, 226]},
+            {"from": "mi-splice-impact", "to": "mi-domain-after-unknown", "result": "not_informative", "points": [[377, 290], [532, 290]], "label_at": [454, 279]},
+            {"from": "mi-splice-impact", "to": "mi-domain-after-low", "result": "no_impact", "points": [[304, 325], [304, 396], [337, 396]], "label_at": [322, 366]},
+            {"from": "mi-domain-after-unknown", "to": "mi-protein-after-unknown", "result": "yes", "points": [[606, 255], [606, 199]], "label_at": [619, 226]},
+            {"from": "mi-domain-after-unknown", "to": "mi-no-code-after-unknown", "result": "no", "points": [[680, 290], [800, 290]], "label_at": [740, 279]},
+            {"from": "mi-protein-after-unknown", "to": "mi-protein-pp3-unknown", "result": "impact", "points": [[606, 129], [606, 79]], "label_at": [626, 104]},
+            {"from": "mi-protein-after-unknown", "to": "mi-no-code-protein-unknown", "result": "no_impact_or_not_informative", "points": [[680, 164], [800, 171]], "label_at": [740, 151]},
+            {"from": "mi-domain-after-low", "to": "mi-protein-after-low", "result": "yes", "points": [[485, 396], [532, 396]], "label_at": [509, 385]},
+            {"from": "mi-domain-after-low", "to": "mi-bp1", "result": "no", "points": [[411, 431], [411, 523]], "label_at": [424, 477]},
+            {"from": "mi-protein-after-low", "to": "mi-protein-pp3-low", "result": "impact", "points": [[680, 396], [800, 396]], "label_at": [740, 385]},
+            {"from": "mi-protein-after-low", "to": "mi-bp4", "result": "no_impact", "points": [[606, 431], [606, 523]], "label_at": [625, 477]},
+            {"from": "mi-protein-after-low", "to": "mi-no-code-protein-low", "result": "not_informative", "points": [[653, 431], [653, 496], [800, 496]], "label_at": [724, 485]}
+          ],
+          "layout": {
+            "width": 956,
+            "height": 603,
+            "node_width": 148,
+            "node_height": 70,
+            "positions": {
+              "mi-entry": [7, 255, 177, 70],
+              "mi-splice-impact": [231, 255, 146, 70],
+              "mi-splice-pp3": [230, 129, 147, 70],
+              "mi-domain-after-unknown": [532, 255, 148, 70],
+              "mi-domain-after-low": [337, 361, 148, 70],
+              "mi-no-code-after-unknown": [800, 255, 147, 70],
+              "mi-protein-after-unknown": [532, 129, 148, 70],
+              "mi-protein-after-low": [532, 361, 148, 70],
+              "mi-bp1": [337, 523, 148, 70],
+              "mi-protein-pp3-unknown": [532, 9, 148, 70],
+              "mi-no-code-protein-unknown": [800, 136, 147, 70],
+              "mi-protein-pp3-low": [800, 361, 147, 70],
+              "mi-bp4": [532, 523, 153, 70],
+              "mi-no-code-protein-low": [800, 460, 147, 70]
+            }
+          }
+        },
+        {
+          "id": "synonymous",
+          "title": "Synonymous (silent)",
+          "entry_node": "syn-entry",
+          "nodes": [
+            {"id": "syn-entry", "kind": "entry", "label": "Synonymous (silent)", "outcome_codes": []},
+            {"id": "syn-splice-impact", "kind": "decision", "label": "Predicted impact on splicing?", "condition_id": "spliceai-impact-band"},
+            {"id": "syn-pp3", "kind": "outcome", "label": "Apply PP3; consider PS1 for splicing", "outcome_codes": ["PP3", "PS1_SPLICING_REVIEW"]},
+            {"id": "syn-no-code", "kind": "outcome", "label": "Do not apply a bioinformatic code", "outcome_codes": []},
+            {"id": "syn-domain", "kind": "decision", "label": "Inside functional domain?", "condition_id": "inside-enigma-functional-domain"},
+            {"id": "syn-bp4-bp7", "kind": "outcome", "label": "Apply BP4 and BP7", "outcome_codes": ["BP4", "BP7"]},
+            {"id": "syn-bp1", "kind": "outcome", "label": "Apply BP1 Strong", "outcome_codes": ["BP1"]}
+          ],
+          "edges": [
+            {"from": "syn-entry", "to": "syn-splice-impact", "result": "start", "points": [[219, 151], [274, 151]]},
+            {"from": "syn-splice-impact", "to": "syn-pp3", "result": "impact", "points": [[362, 109], [362, 44], [493, 44]], "label_at": [380, 73]},
+            {"from": "syn-splice-impact", "to": "syn-no-code", "result": "not_informative", "points": [[450, 151], [737, 148]], "label_at": [594, 137]},
+            {"from": "syn-splice-impact", "to": "syn-domain", "result": "no_impact", "points": [[362, 192], [362, 252], [493, 252]], "label_at": [380, 221]},
+            {"from": "syn-domain", "to": "syn-bp4-bp7", "result": "yes", "points": [[668, 252], [737, 252]], "label_at": [702, 241]},
+            {"from": "syn-domain", "to": "syn-bp1", "result": "no", "points": [[580, 295], [580, 361], [737, 361]], "label_at": [599, 328]}
+          ],
+          "layout": {
+            "width": 930,
+            "height": 420,
+            "node_width": 175,
+            "node_height": 84,
+            "positions": {
+              "syn-entry": [4, 109, 215, 84],
+              "syn-splice-impact": [274, 109, 176, 83],
+              "syn-pp3": [493, 1, 175, 85],
+              "syn-no-code": [737, 106, 176, 84],
+              "syn-domain": [493, 210, 175, 85],
+              "syn-bp4-bp7": [737, 210, 176, 85],
+              "syn-bp1": [737, 319, 176, 84]
+            }
+          }
+        },
+        {
+          "id": "intronic",
+          "title": "Intronic",
+          "entry_node": "int-entry",
+          "nodes": [
+            {"id": "int-entry", "kind": "entry", "label": "Intronic", "outcome_codes": []},
+            {"id": "int-canonical-site", "kind": "decision", "label": "Donor/acceptor ±1,2 position?", "condition_id": "canonical-splice-site"},
+            {"id": "int-pvs1", "kind": "outcome", "label": "Apply PVS1 according to Figures 6 and 8", "outcome_codes": ["PVS1"]},
+            {"id": "int-splice-impact", "kind": "decision", "label": "Predicted impact on splicing?", "condition_id": "spliceai-impact-band"},
+            {"id": "int-pp3", "kind": "outcome", "label": "Apply PP3; consider PS1 for splicing", "outcome_codes": ["PP3", "PS1_SPLICING_REVIEW"]},
+            {"id": "int-no-code", "kind": "outcome", "label": "Do not apply a bioinformatic code", "outcome_codes": []},
+            {"id": "int-deep", "kind": "decision", "label": "Deep intronic, at or beyond +7 or -21?", "condition_id": "outside-conserved-splice-motif"},
+            {"id": "int-bp4-bp7", "kind": "outcome", "label": "Apply BP4 and BP7", "outcome_codes": ["BP4", "BP7"]},
+            {"id": "int-bp4", "kind": "outcome", "label": "Apply BP4 only", "outcome_codes": ["BP4"]}
+          ],
+          "edges": [
+            {"from": "int-entry", "to": "int-canonical-site", "result": "start", "points": [[219, 42], [274, 42]]},
+            {"from": "int-canonical-site", "to": "int-pvs1", "result": "yes", "points": [[452, 42], [511, 42]], "label_at": [481, 31]},
+            {"from": "int-canonical-site", "to": "int-splice-impact", "result": "no", "points": [[363, 85], [363, 152], [511, 152]], "label_at": [380, 118]},
+            {"from": "int-splice-impact", "to": "int-pp3", "result": "impact", "points": [[689, 152], [737, 152]], "label_at": [713, 141]},
+            {"from": "int-splice-impact", "to": "int-no-code", "result": "not_informative", "points": [[689, 152], [713, 152], [713, 262], [737, 262]], "label_at": [720, 205]},
+            {"from": "int-splice-impact", "to": "int-deep", "result": "no_impact", "points": [[600, 195], [600, 330]], "label_at": [618, 262]},
+            {"from": "int-deep", "to": "int-bp4-bp7", "result": "yes", "points": [[689, 372], [737, 372]], "label_at": [713, 361]},
+            {"from": "int-deep", "to": "int-bp4", "result": "no", "points": [[600, 415], [600, 482], [737, 482]], "label_at": [618, 449]}
+          ],
+          "layout": {
+            "width": 930,
+            "height": 550,
+            "node_width": 178,
+            "node_height": 85,
+            "positions": {
+              "int-entry": [4, 0, 215, 85],
+              "int-canonical-site": [274, 0, 178, 85],
+              "int-pvs1": [511, 0, 178, 85],
+              "int-splice-impact": [511, 110, 178, 85],
+              "int-pp3": [737, 110, 176, 85],
+              "int-no-code": [737, 220, 176, 85],
+              "int-deep": [511, 330, 178, 85],
+              "int-bp4-bp7": [737, 330, 176, 85],
+              "int-bp4": [737, 440, 176, 85]
+            }
+          }
+        }
+      ],
+      "condition_definitions": [
+        {"id": "spliceai-impact-band", "label": "SpliceAI impact band", "implementation": "spliceai-impact-band-v1", "outputs": ["impact", "not_informative", "no_impact"], "notes": "No impact ≤0.1; not informative >0.1 and <0.2; impact ≥0.2."},
+        {"id": "inside-enigma-functional-domain", "label": "Position in a clinically important functional domain", "implementation": "functional-domain-membership-v1", "outputs": ["yes", "no"]},
+        {"id": "bayesdel-impact-band", "label": "BayesDel_noAF protein impact band", "implementation": "bayesdel-impact-band-v1", "outputs": ["impact", "not_informative", "no_impact"], "notes": "BRCA1: ≤0.15 no impact, >0.15 and <0.28 not informative, ≥0.28 impact. BRCA2: ≤0.18 no impact, >0.18 and <0.30 not informative, ≥0.30 impact."},
+        {"id": "canonical-splice-site", "label": "Canonical donor or acceptor ±1,2 position", "implementation": "canonical-splice-site-v1", "outputs": ["yes", "no"]},
+        {"id": "outside-conserved-splice-motif", "label": "Outside conserved donor/acceptor motif", "implementation": "outside-conserved-splice-motif-v1", "outputs": ["yes", "no"], "notes": "At or beyond donor +7 or acceptor -21."}
+      ]
+    }
+  ]
+}

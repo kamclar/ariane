@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from backend.config import EXON_CNV_EVIDENCE_PATH, EXON_CNV_EVIDENCE_MANIFEST_PATH
+from backend.gene_policy import active_genes
 from backend.modules.table4 import parse_exon_from_deletion_notation
 
 
@@ -67,7 +68,7 @@ def validate_exon_cnv_evidence_snapshot(
     for key, record in exons.items():
         if key != f"{record.get('gene')}:{record.get('exon')}":
             raise RuntimeError(f"Invalid exon-CNV population key: {key}")
-        if record.get("gene") not in {"BRCA1", "BRCA2"}:
+        if record.get("gene") not in set(active_genes()):
             raise RuntimeError(f"Invalid exon-CNV gene: {key}")
         if record.get("coordinate_status") not in {"ok", "unavailable"}:
             raise RuntimeError(f"Invalid exon-CNV coordinate status: {key}")

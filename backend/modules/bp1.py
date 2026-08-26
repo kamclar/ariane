@@ -10,6 +10,8 @@ from backend.modules.utils import (
     get_amino_acid_position,
     is_in_functional_domain,
 )
+from backend.modules.decision_trace import figure1a_path, step
+from backend.gene_policy import spliceai_thresholds
 
 def evaluate_bp1(
     gene: str,
@@ -33,6 +35,7 @@ def evaluate_bp1(
         "points": 0,
         "reason": ""
     }
+    splice_low = spliceai_thresholds(gene)["bp4"]
 
     # BP1 only applies to certain variant types
     # BP1_Strong applies to missense, synonymous, AND inframe insertion/deletion/delins
@@ -52,8 +55,8 @@ def evaluate_bp1(
     if spliceai_score is None:
         result["reason"] = "SpliceAI score not available - cannot confirm no splice effect, BP1 not applied"
         return result
-    if spliceai_score > 0.1:
-        result["reason"] = f"SpliceAI score {spliceai_score:.3f} > 0.1 - possible splicing effect"
+    if spliceai_score > splice_low:
+        result["reason"] = f"SpliceAI score {spliceai_score:.3f} > {splice_low} - possible splicing effect"
         return result
 
     # check if in functional domain
@@ -72,18 +75,25 @@ def evaluate_bp1(
     result["applies"] = True
     result["strength"] = "Strong"
     result["points"] = -4  # benign evidence
+    result["single_strong_likely_benign_eligible"] = True
+    result["single_strong_likely_benign_basis"] = (
+        "ENIGMA Table 3 footnote: BP1 Strong combines variant type, "
+        "position outside a functional domain, and a no-impact splicing prediction"
+    )
+    result["independent_evidence_contribution_count"] = 3
     result["reason"] = f"Variant at aa {aa_pos} is outside functional domains, no splicing predicted"
+    branch_id = "synonymous" if variant_type in {"synonymous", "silent"} else "missense-inframe"
+    splice_node = "syn-splice-impact" if branch_id == "synonymous" else "mi-splice-impact"
+    domain_node = "syn-domain" if branch_id == "synonymous" else "mi-domain-after-low"
+    outcome_node = "syn-bp1" if branch_id == "synonymous" else "mi-bp1"
+    result["decision_path"] = figure1a_path(
+        branch_id=branch_id,
+        criterion="BP1",
+        outcome_node=outcome_node,
+        steps=[
+            step(splice_node, "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}"),
+            step(domain_node, "Inside functional domain?", "no", f"Amino-acid position {aa_pos} is outside ENIGMA functional domains"),
+        ],
+    )
 
     return result
-
-if __name__ == "__main__":
-    # test it - now we must pass spliceai_score explicitly
-    print("Testing BP1 evaluation:")
-    print(f"  Missense at aa 170 (outside domain), SpliceAI=0.03: "
-          f"{evaluate_bp1('BRCA1', 'missense', 'p.(Arg170Gln)', spliceai_score=0.03)}")
-    print(f"  Missense at aa 170 (outside domain), SpliceAI=None:  "
-          f"{evaluate_bp1('BRCA1', 'missense', 'p.(Arg170Gln)', spliceai_score=None)}")
-    print(f"  Missense at aa 50 (in RING domain), SpliceAI=0.02:   "
-          f"{evaluate_bp1('BRCA1', 'missense', 'p.(Arg50Gln)', spliceai_score=0.02)}")
-    print(f"  Missense at aa 1700 (in BRCT domain), SpliceAI=0.02: "
-          f"{evaluate_bp1('BRCA1', 'missense', 'p.(Arg1700Gln)', spliceai_score=0.02)}")

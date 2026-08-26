@@ -16,12 +16,13 @@ DEFINED_SOURCES = [
 ]
 
 _ST2_BY_VARIANT: Optional[Dict[Tuple[str, str], Dict[str, Any]]] = None
+_ST2_PAYLOAD: Optional[Dict[str, Any]] = None
 
 
-def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
-    global _ST2_BY_VARIANT
-    if _ST2_BY_VARIANT is not None:
-        return _ST2_BY_VARIANT
+def _load_st2_payload() -> Dict[str, Any]:
+    global _ST2_PAYLOAD
+    if _ST2_PAYLOAD is not None:
+        return _ST2_PAYLOAD
     if not ST2_EVIDENCE_PATH.is_file():
         raise RuntimeError(
             f"Required complete ENIGMA ST2 splice evidence snapshot is missing: {ST2_EVIDENCE_PATH}"
@@ -34,6 +35,15 @@ def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
         or len(data.get("variants", [])) != 220
     ):
         raise RuntimeError("ENIGMA ST2 splice evidence snapshot is incomplete")
+    _ST2_PAYLOAD = data
+    return data
+
+
+def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
+    global _ST2_BY_VARIANT
+    if _ST2_BY_VARIANT is not None:
+        return _ST2_BY_VARIANT
+    data = _load_st2_payload()
     _ST2_BY_VARIANT = {
         (record["gene"], record["c_notation"]): record
         for record in data["variants"]
@@ -46,6 +56,62 @@ def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
 def get_st2_splice_record(gene: str, c_notation: str) -> Optional[Dict[str, Any]]:
     """Return the exact official ST2 row for a normalized BRCA variant."""
     return _load_st2_evidence().get((gene, c_notation))
+
+
+def list_splice_ps1_candidate_discovery(gene: Optional[str] = None) -> Dict[str, Any]:
+    """Return factual P/LP splice candidates derived directly from official ST2.
+
+    These records support candidate discovery only. They do not establish that
+    a reference is eligible for PS1(splicing), that a VUA has the same event,
+    or which Appendix J/Table 17 strength applies.
+    """
+    payload = _load_st2_payload()
+    requested_gene = gene.upper() if gene else None
+    candidates = []
+    for record in payload["variants"]:
+        record_gene = str(record.get("gene") or "")
+        result = str(record.get("result") or "").strip()
+        classification_numeric = record.get("final_multifactorial_class")
+        if requested_gene and record_gene != requested_gene:
+            continue
+        if classification_numeric not in {4, 5}:
+            continue
+        if not result or result.lower() == "no aberration":
+            continue
+        classification = "Pathogenic" if classification_numeric == 5 else "Likely Pathogenic"
+        source_row = int(record["source_row"])
+        c_notation = str(record.get("c_notation") or "")
+        candidates.append({
+            "key": f"{record_gene}|{c_notation}|{source_row}",
+            "gene": record_gene,
+            "reference_variant": c_notation,
+            "p_notation": str(record.get("p_notation") or ""),
+            "classification": classification,
+            "classification_numeric": classification_numeric,
+            "classification_basis": "ENIGMA ST2 final multifactorial class",
+            "reference_splice_event": result,
+            "assay_result_category": str(record.get("splicing_assay_result_category") or ""),
+            "assay_context": str(record.get("variant_assay_summary") or ""),
+            "included_in_analysis": str(record.get("included_in_analysis") or ""),
+            "prior_probability": record.get("prior_probability"),
+            "source_row": source_row,
+            "source_label": f"ENIGMA Supplementary Table 2 v1.2, source row {source_row}",
+            "source_url": str(payload.get("source_url") or ""),
+            "source_file_sha256": str(payload.get("source_file_sha256") or ""),
+            "eligibility_status": "candidate_discovery_only",
+            "eligibility_note": (
+                "The ST2 record does not by itself confirm PS1(splicing) eligibility, "
+                "same-event matching, prediction-strength comparison, or Appendix J/Table 17 strength."
+            ),
+        })
+    return {
+        "status": "candidate_discovery_only",
+        "source": "ENIGMA Supplementary Table 2 v1.2",
+        "source_url": str(payload.get("source_url") or ""),
+        "source_file_sha256": str(payload.get("source_file_sha256") or ""),
+        "candidate_count": len(candidates),
+        "candidates": candidates,
+    }
 
 
 def evaluate_defined_splice_sources(
@@ -117,5 +183,6 @@ def evaluate_defined_splice_sources(
 
 
 def reset_splice_source_cache_for_tests() -> None:
-    global _ST2_BY_VARIANT
+    global _ST2_BY_VARIANT, _ST2_PAYLOAD
     _ST2_BY_VARIANT = None
+    _ST2_PAYLOAD = None

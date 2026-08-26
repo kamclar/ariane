@@ -13,9 +13,9 @@ from typing import Any, Dict, Optional
 
 from backend.modules.ps1_splice_evidence import get_st2_splice_record
 from backend.modules.table4 import TABLE4_DATA, table4_lookup_deletion
+from backend.gene_policy import policy_name, policy_version, vcep_specification
 
 
-CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
 APPENDIX_URL = (
     "https://cspec.genome.network/cspec/File/id/"
     "9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
@@ -70,13 +70,14 @@ def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
     Other RNA records remain unscored because ST2 does not retain the numerical
     transcript proportions needed by the quantitative Appendix E branches.
     """
+    specification = vcep_specification(gene)
     result: Dict[str, Any] = {
         "applies": False,
         "code": "PVS1_RNA",
         "strength": None,
         "points": 0,
         "reason": "",
-        "source": CSPEC_URL,
+        "source": specification["url"],
         "source_record": None,
         "table4_exon": None,
         "appendix_branch": None,
@@ -148,5 +149,47 @@ def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
             f"to PVS1 {strength} (RNA)."
         ),
         "source": APPENDIX_URL,
+        "decision_path": {
+            "tree_id": "figure-1b",
+            "tree_version": "ENIGMA VCEP 1.2.0",
+            "branch_id": "other-nucleotide-position",
+            "criterion": "PVS1_RNA",
+            "outcome": "applied",
+            "outcome_node": "rna-other-aberrant",
+            "steps": [
+                {
+                    "node_id": "rna-other-quality",
+                    "question": "Review assay design, wild-type aberration and transcripts",
+                    "result": "reviewed",
+                    "observed": (
+                        f"ENIGMA Supplementary Table 2 row {record.get('source_row')}; "
+                        f"{record.get('splicing_assay_result_category')}"
+                    ),
+                },
+                {
+                    "node_id": "rna-other-result",
+                    "question": "Observed mRNA result?",
+                    "result": "aberrant",
+                    "observed": str(record.get("result") or "aberrant transcript"),
+                },
+            ],
+            "sources": [
+                {
+                    "source_id": "enigma-v1.2-specifications",
+                    "label": (
+                        f"{policy_name(gene)} v{policy_version(gene)} Specifications"
+                    ),
+                    "url": specification["url"],
+                    "location": "Figure 1B",
+                    "figure_url": "/static/enigma/figure-1b-rna.jpg",
+                },
+                {
+                    "source_id": "enigma-v1.2-appendix",
+                    "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
+                    "url": APPENDIX_URL,
+                    "location": "Appendix E Table 9",
+                },
+            ],
+        },
     })
     return result

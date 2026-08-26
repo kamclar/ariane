@@ -6,6 +6,8 @@ import time
 import urllib.request
 import urllib.parse
 from backend.modules.utils import get_intron_offset_from_c_notation
+from backend.modules.decision_trace import figure1a_path, step
+from backend.gene_policy import spliceai_thresholds
 
 def evaluate_bp7(
     variant_type: str,
@@ -13,6 +15,8 @@ def evaluate_bp7(
     in_domain: bool = False,
     bp4_met: bool = False,
     c_notation: str = "",
+    *,
+    gene: str,
 ) -> Dict:
     # evaluate BP7 criterion per ENIGMA VCEP v1.2
     #
@@ -35,6 +39,7 @@ def evaluate_bp7(
         "points": 0,
         "reason": ""
     }
+    splice_low = spliceai_thresholds(gene)["bp4"]
 
     if variant_type.lower() == "intronic":
         if not bp4_met:
@@ -58,6 +63,16 @@ def evaluate_bp7(
             f"Intronic variant at offset {offset:+d}, outside conserved donor/acceptor motif, "
             "BP4 met (BP7 applied in addition to BP4 per ENIGMA)"
         )
+        result["decision_path"] = figure1a_path(
+            branch_id="intronic",
+            criterion="BP7",
+            outcome_node="int-bp4-bp7",
+            steps=[
+                step("int-canonical-site", "Donor/acceptor ±1,2 position?", "no", f"Intronic offset {offset:+d}"),
+                step("int-splice-impact", "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}"),
+                step("int-deep", "Deep intronic, at or beyond +7 or -21?", "yes", f"Intronic offset {offset:+d}"),
+            ],
+        )
         return result
 
     # BP7 also applies to synonymous variants inside a functional domain.
@@ -80,8 +95,8 @@ def evaluate_bp7(
     if spliceai_score is None:
         result["reason"] = "SpliceAI not available - cannot confirm no splice effect, BP7 not applied"
         return result
-    if spliceai_score > 0.1:
-        result["reason"] = f"SpliceAI {spliceai_score:.3f} > 0.1 - possible splice effect, BP7 not applied"
+    if spliceai_score > splice_low:
+        result["reason"] = f"SpliceAI {spliceai_score:.3f} > {splice_low} - possible splice effect, BP7 not applied"
         return result
 
     # silent variant inside domain, BP4 met, SpliceAI <= 0.1 -> BP7 in addition to BP4
@@ -89,8 +104,17 @@ def evaluate_bp7(
     result["strength"] = "Supporting"
     result["points"] = -1
     result["reason"] = (
-        f"Silent variant in functional domain, BP4 met, SpliceAI {spliceai_score:.3f} <= 0.1 "
+        f"Silent variant in functional domain, BP4 met, SpliceAI {spliceai_score:.3f} <= {splice_low} "
         "(BP7 applied in addition to BP4 per ENIGMA convention)"
+    )
+    result["decision_path"] = figure1a_path(
+        branch_id="synonymous",
+        criterion="BP7",
+        outcome_node="syn-bp4-bp7",
+        steps=[
+            step("syn-splice-impact", "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}"),
+            step("syn-domain", "Inside functional domain?", "yes", "Variant is inside an ENIGMA functional domain"),
+        ],
     )
 
     return result

@@ -27,6 +27,10 @@ build/
 *.log
 *.sqlite3
 /tmp/
+/.runtime-cache/
+/backend/data/bayesdel_cache.json
+/backend/data/coordinates_cache.json
+/data/spliceai/spliceai_api_cache.json
 /data/sources/*
 !/data/sources/enigma/
 /data/sources/enigma/*
@@ -63,6 +67,8 @@ htmlcov/
 
 # Pytest
 .pytest_cache/
+.test-tmp-*/
+.pytest_tmp_codex_brca/
 
 # Optional: keep requirements.txt and scripts
 !requirements.txt
@@ -85,6 +91,7 @@ htmlcov/
 !/docs/coordinate_and_indel_data_flow.md
 !/docs/tutorial_transcript_criteria_audit.md
 !/docs/navrh_doplnovani_proteinove_notace.md
+!/docs/classification_dag_architecture.md
 !/docs/enigma/
 !/docs/enigma/**
 data/spliceai/build/

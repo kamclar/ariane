@@ -26,7 +26,13 @@ with open(TABLE4_JSON_PATH, encoding="utf-8") as f:
 def validate_table4_data():
     """Check that all exons referenced in rules have corresponding ranges."""
     issues = []
-    for gene in ["BRCA1", "BRCA2"]:
+    gene_sections = ("exon_ranges", "ptc_rules", "deletion_rules", "duplication_rules")
+    genes = sorted({
+        gene
+        for section in gene_sections
+        for gene in (TABLE4_DATA.get(section, {}) or {})
+    })
+    for gene in genes:
         exon_ranges = set(TABLE4_DATA.get("exon_ranges", {}).get(gene, {}).keys())
 
         # Check ptc_rules
@@ -389,35 +395,3 @@ def parse_exon_from_deletion_notation(c_notation: str, gene: str) -> Optional[st
                     return exon_name
 
     return None
-
-
-if __name__ == "__main__":
-    # Test Table 4 lookups
-    print("\nTesting Table 4 lookups:")
-    print("=" * 70)
-
-    # Test critical boundary for BRCA1 c.5551_5552insT
-    print("\n--- Critical boundary test (BRCA1 E23(24)) ---")
-    test1 = table4_lookup_pvs1_ptc("BRCA1", 5551, first_altered_aa=1851)
-    print(f"  c.5551 p.1851: exon={test1['exon']}, PVS1={test1['pvs1_code']} ({test1['pvs1_strength']})")
-    print(f"    {test1['reason']}")
-
-    test2 = table4_lookup_pvs1_ptc("BRCA1", 5565, first_altered_aa=1856)
-    print(f"  c.5565 p.1856: exon={test2['exon']}, PVS1={test2['pvs1_code']} ({test2['pvs1_strength']})")
-    print(f"    {test2['reason']}")
-
-    # Test E9(10) which should be PVS1_N/A
-    print("\n--- E9(10) test (should be PVS1_N/A) ---")
-    test3 = table4_lookup_pvs1_ptc("BRCA1", 628, first_altered_aa=210)
-    print(f"  c.628 p.210: exon={test3['exon']}, PVS1={test3['pvs1_code']}")
-
-    # Test E10(11) which should now work
-    print("\n--- E10(11) test (previously missing) ---")
-    test4 = table4_lookup_pvs1_ptc("BRCA1", 3668, first_altered_aa=1225)
-    print(f"  c.3668 p.1225: exon={test4['exon']}, PVS1={test4['pvs1_code']}")
-
-    # Test splice lookup
-    print("\n--- Splice lookup test ---")
-    for var in ["c.8953+2T>C", "c.8953+2T>A", "c.8953+2T>G"]:
-        r = table4_lookup_splice("BRCA2", var)
-        print(f"  BRCA2 {var}: {r['pvs1_code'] if r['found'] else 'NOT FOUND'}")

@@ -1,6 +1,6 @@
 # ENIGMA VCEP v1.2 source-data audit
 
-Audit date: 2026-08-12
+Audit date: 2026-08-20
 
 Official sources: ClinGen CSpec GN092 for BRCA1 and GN097 for BRCA2,
 ENIGMA BRCA1/2 VCEP v1.2.0, released 2025-01-09.
@@ -13,9 +13,8 @@ ENIGMA BRCA1/2 VCEP v1.2.0, released 2025-01-09.
 | `enigma_table4.json` | Specifications Table 4 v1.2 | Lossless: 493 rows, 20 source columns, plus deterministic executable indexes for PTC, splice, deletion and duplication rules. |
 | `st7_reference_set.json` | Supplementary Table 7 v1.2 | Lossless: 773 rows, 28 source columns. |
 | `clinically_important_residues.json` | Appendix Tables 3 and 4 | Verified complete for pathogenic missense substitutions used by the informational residue display: BRCA1 36, BRCA2 8. Non-missense deletions and termination variants in the appendix are intentionally outside this missense-only display. |
-| `splice_ps1_reference_set.json` | Supplementary Table 2 | All 75 seed records match their declared official source rows. This remains explicitly unreviewed and is not used for automatic scoring. |
-| `enigma_st2_splice_evidence.json` | Supplementary Table 2 | Lossless: all 220 variant rows and 11 source columns, plus source-row and workbook checksum provenance. Used for defined-source splice review and the general Appendix E PVS1 RNA decision path, not as a variant allowlist. |
-| `ps1_protein_reference_registry.json` | ST7 v1.2, Table 9 v1.2 and complete ST2 v1.2 | 60 P/LP missense references: 35 eligible and 25 excluded after the recorded protein-PS1 splice checks. |
+| `enigma_st2_splice_evidence.json` | Supplementary Table 2 | Lossless: all 220 variant rows and 11 source columns, plus source-row and workbook checksum provenance. Used for defined-source splice review, the general Appendix E PVS1 RNA decision path and factual splice-PS1 candidate discovery. Candidate discovery does not assign a criterion or strength. |
+| `ps1_protein_reference_registry.json` | ST7 v1.2, Table 9 v1.2 and complete ST2 v1.2 | 60 P/LP missense references: 40 eligible and 20 excluded by known RNA/splice evidence. SpliceAI is computed on demand and is not embedded in the registry. |
 | `ps1_protein_reference_extensions.json` | Curated official VCEP assertions outside ST7 or documented local ENIGMA VCEP reclassifications | Currently empty. It is a build-time extension source, not a runtime fallback. |
 | `exon_cnv_evidence.json` | ENIGMA Table 4, Appendix G and gnomAD-SV v2.1 | Generic, fail-closed population index for all 50 BRCA1/2 Table 4 exons. Exons and coordinates are generated from versioned sources; the manifest contains no variant allowlist or preassigned criterion. Runtime assigns PM2 Supporting only after every Appendix G decision step passes. Functional criteria are not stored here; PS3/BS3 comes only from Table 9. |
 
@@ -38,8 +37,9 @@ core ENIGMA table.
 
 Protein-level PS1 accepts the official ST7 P/LP classification as its reference
 classification basis. Automatic application additionally requires an
-`eligible` versioned registry record, SpliceAI at most 0.1, no damaging splice
-evidence in Table 9 or complete ST2, provenance and dependency metadata.
+`eligible` versioned registry record, on-demand SpliceAI at most 0.1 for both
+the reference and assessed variant, no damaging splice evidence in Table 9 or
+complete ST2, provenance and dependency metadata.
 Incomplete candidates are returned for manual review without points; excluded
 candidates are shown with the exclusion reason and add no points.
 

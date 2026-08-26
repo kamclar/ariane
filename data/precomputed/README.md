@@ -20,18 +20,18 @@ Scope:
 
 - BRCA1/BRCA2 coding SNVs
 - ARIANE Module 1 automated criteria
-- Precomputed coordinates and reference-transcript SpliceAI scores
+- Precomputed coordinates and historical reference-transcript SpliceAI scores
 
 Intended use:
 
-- Fast lookup by `GENE:c.notation`
+- Fast coordinate and notation lookup by `GENE:c.notation`
 - Landscape analysis
 - Baseline comparison between future ARIANE/data versions
 - Optional display as a precomputed snapshot alongside live/current
   classification
 
-Do not silently replace live/current ARIANE classification with this snapshot
-unless the application verifies that the rule and data versions match.
+Runtime does not use the embedded SpliceAI score or precomputed classification.
+SpliceAI is computed on demand through the configured profile-pinned service.
 
 Rebuild command:
 

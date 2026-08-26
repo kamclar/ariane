@@ -93,24 +93,3 @@ def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
         result["reason"] = f"No Table 9 entry for {key}"
 
     return result
-
-
-if __name__ == "__main__":
-    # Test Table 9 lookup
-    print("\nTesting Table 9 PS3/BS3 lookup:")
-    print("=" * 70)
-
-    test_cases = [
-        ("BRCA1", "c.509G>A"),
-        ("BRCA1", "c.1534C>T"),
-        ("BRCA1", "c.3891_3893del"),
-        ("BRCA1", "c.5217T>A"),
-        ("BRCA1", "c.5551_5552insT"),  # not in Table 9
-    ]
-
-    for gene, c_notation in test_cases:
-        result = table9_lookup_ps3_bs3(gene, c_notation)
-        if result["applies"]:
-            print(f"  {gene} {c_notation}: {result['code']}_{result['strength']} ({result['points']:+d} points)")
-        else:
-            print(f"  {gene} {c_notation}: No Table 9 entry")

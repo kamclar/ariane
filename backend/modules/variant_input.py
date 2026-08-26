@@ -25,7 +25,9 @@ _TRANSCRIPT_C = re.compile(
 )
 _LEADING_C_SEPARATOR = re.compile(r"^:\s*(c\..+)$", re.IGNORECASE)
 _GENE_QUALIFIED_INPUT = re.compile(
-    r"^(BRCA[12])\s*(?::\s*|\s+)(.+)$", re.IGNORECASE
+    r"^((?!CHR[0-9XYM]+(?:\b|:))[A-Z][A-Z0-9-]*)"
+    r"\s*(?::\s*|\s+)(.+)$",
+    re.IGNORECASE,
 )
 _TRANSCRIPT_ACCESSION_GENE = {
     transcript.split(".", 1)[0]: gene for gene, transcript in TRANSCRIPTS.items()
@@ -71,12 +73,16 @@ def normalize_assembly(value: Optional[str]) -> str:
 
 
 def explicit_gene_from_notation(notation: str) -> Optional[str]:
-    """Return an explicitly supplied BRCA gene, rejecting conflicting identifiers."""
+    """Return an explicitly supplied active gene, rejecting unsupported identifiers."""
     submitted = (notation or "").strip()
     gene_from_prefix = None
     gene_match = _GENE_QUALIFIED_INPUT.fullmatch(submitted)
     if gene_match:
         gene_from_prefix = gene_match.group(1).upper()
+        if gene_from_prefix not in TRANSCRIPTS:
+            raise ValueError(
+                f"No reference transcript is configured for gene {gene_from_prefix}"
+            )
         submitted = gene_match.group(2).strip()
 
     gene_from_transcript = None

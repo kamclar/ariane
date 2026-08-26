@@ -227,8 +227,11 @@ async def admin_audit(
     export: str = "",
     admin_user: str = Depends(_require_admin),
 ):
+    from backend.gene_policy import active_genes
+
+    configured_genes = active_genes()
     period = period if period in {"today", "7d", "30d", "custom"} else "7d"
-    gene = gene if gene in {"", "BRCA1", "BRCA2"} else ""
+    gene = gene if gene in {"", *configured_genes} else ""
     page = max(1, page)
     page_size = page_size if page_size in {25, 50, 100} else 50
     params = {
@@ -333,6 +336,10 @@ async def admin_audit(
     export_json = _url(params, export="json", page=None)
 
     _log_admin(request, "admin_audit_viewed", admin_user=admin_user, filters=params, count=len(filtered))
+    gene_options = "".join(
+        f"<option{' selected' if gene == symbol else ''}>{html.escape(symbol)}</option>"
+        for symbol in configured_genes
+    )
     body = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ARIANE audit</title><style>
@@ -348,7 +355,7 @@ table{{border-collapse:collapse;width:100%;background:white;margin-top:10px}} th
 <form method="get"><label>Period<select name="period"><option value="today"{' selected' if period == 'today' else ''}>Today</option><option value="7d"{' selected' if period == '7d' else ''}>7 days</option><option value="30d"{' selected' if period == '30d' else ''}>30 days</option><option value="custom"{' selected' if period == 'custom' else ''}>Custom</option></select></label>
 <label>From<input type="date" name="date_from" value="{html.escape(date_from)}"></label><label>To<input type="date" name="date_to" value="{html.escape(date_to)}"></label>
 <label>Search<input name="q" value="{html.escape(q)}" placeholder="variant, gene, IP, request ID"></label>
-<label>Gene<select name="gene"><option value="">All genes</option><option{' selected' if gene == 'BRCA1' else ''}>BRCA1</option><option{' selected' if gene == 'BRCA2' else ''}>BRCA2</option></select></label>
+<label>Gene<select name="gene"><option value="">All genes</option>{gene_options}</select></label>
 <label>Event<select name="event">{event_select}</select></label><label>Rows<select name="page_size"><option>25</option><option{' selected' if page_size == 50 else ''}>50</option><option{' selected' if page_size == 100 else ''}>100</option></select></label><button type="submit">Apply</button></form>
 <div class="grid"><div class="card"><span>Requests</span><strong>{len(request_records)}</strong></div><div class="card"><span>Errors</span><strong>{len(error_records)}</strong></div><div class="card"><span>Unique IPs</span><strong>{unique_ips}</strong></div><div class="card"><span>Average duration</span><strong>{average_duration:.1f} ms</strong></div><div class="card"><span>Maximum duration</span><strong>{maximum_duration:.1f} ms</strong></div><div class="card"><span>Authenticated admin access</span><strong>{login_success}</strong></div><div class="card"><span>Failed logins</span><strong>{login_failed}</strong></div></div>
 <h2>Classification results</h2><div class="grid">{class_cards}</div>

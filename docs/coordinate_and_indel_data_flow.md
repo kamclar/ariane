@@ -25,7 +25,8 @@ Mutalyzeru. Její výsledek je reprodukovatelný a nemění se mezi jednotlivým
 požadavky.
 
 V současné implementaci se verzovaná intronická mapa načítá před průběžnou
-`coordinates_cache.json`, takže průběžná cache nemůže přepsat její stejné klíče.
+`coordinates_api_cache.json` v runtime adresáři, takže průběžná cache nemůže
+přepsat její stejné klíče. Runtime soubor není verzovaný v Gitu.
 Loader aplikace však zatím nekontroluje metadata a checksum intronické mapy.
 Checksum kontrolují testy a validační příkaz builderu. Tuto kontrolu je vhodné
 doplnit také při startu aplikace.
@@ -153,7 +154,6 @@ flowchart TD
         UCSC[UCSC hg19 a hg38<br/>referenční sekvence]
         IMB[Builder intronické SNV mapy<br/>hranice exonů, ±50 bp, orientace]
         ICM[Intronická mapa souřadnic<br/>13 800 SNV]
-        SAI[SpliceAI cache<br/>pro stejné intronické SNV]
 
         BE[BRCA Exchange release 70]
         IBM[Mapa známých indelů<br/>16 511 záznamů]
@@ -163,7 +163,6 @@ flowchart TD
         CS --> IMB
         UCSC --> IMB
         IMB --> ICM
-        ICM --> SAI
 
         BE --> IBM
         CAR --> COV
@@ -179,8 +178,8 @@ flowchart TD
     CS --> REV
     IBM --> REV
 
-    ICM --> SAIR[Lokální SpliceAI lookup]
-    SAI --> SAIR
+    R --> SAIR[SpliceAI výpočet na požádání<br/>profilově připnutá služba]
+    SAIR --> SAC[Runtime cache skutečně<br/>dotázaných variant]
 
     CS --> R[Ověřená c. notace, p. následek<br/>a GRCh37/GRCh38]
     ICM --> R
@@ -192,7 +191,7 @@ flowchart TD
     EXT -->|úspěch| R
     EXT -->|selhání| W[Uživatelské hlášení<br/>souřadnice nejsou dostupné]
 
-    R --> DS[Navazující datové zdroje<br/>SpliceAI, gnomAD, ClinVar, BayesDel]
+    R --> DS[Navazující datové zdroje<br/>gnomAD, ClinVar, BayesDel]
     R --> CL[ENIGMA klasifikace]
     E --> CL
     DS --> CL
@@ -212,8 +211,9 @@ Mapa známých indelů
 Runtime coordinate cache
   = průběžně uložené výsledky externích resolverů, nikoli referenční dataset
 
-SpliceAI cache
-  = předpočítané predikční skóre, které používá genomové souřadnice z mapy
+SpliceAI runtime cache
+  = profilově vázané výsledky variant, které byly skutečně dotázány
+  = není předpočítaný prostor genu
 ```
 
 Tyto soubory se nemají vzájemně přepisovat. Každý má jiný účel, původ dat,

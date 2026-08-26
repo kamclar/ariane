@@ -14,6 +14,13 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from backend.gene_policy import (
+    active_genes,
+    reference_transcript,
+    spliceai_thresholds,
+    vcep_specification,
+)
+
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 ST7_PATH = DATA_DIR / "st7_reference_set.json"
@@ -26,10 +33,6 @@ APPROVED_CLASSIFICATION_VERIFICATIONS = {
     "enigma_st7_v1_2_reference_set",
 }
 NO_DAMAGING_SPLICE_STATUSES = {"none_identified", "normal"}
-PS1_CSPEC_URL = (
-    "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
-)
-
 _ST7_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
 _APPROVED_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
 _LOADED = False
@@ -54,18 +57,14 @@ def select_vua_spliceai_for_ps1(
     service_or_cache_score: Optional[float],
     table9_result: Optional[Dict[str, Any]],
 ) -> tuple[Optional[float], str]:
-    """Select the ENIGMA-reviewed score for an exact Table 9 variant.
+    """Return the configured SpliceAI result used for protein PS1.
 
-    This is a source-priority rule, not a fallback.  Table 9 is the frozen,
-    variant-specific VCEP assessment and therefore takes precedence over a
-    runtime service/cache value for the same reviewed variant.
+    Table 9 is used separately for curated PS3/BS3 and published splice
+    evidence. Its recorded prediction does not replace the configured result.
+    The second argument remains in the public helper signature for callers that
+    already provide the reviewed Table 9 record.
     """
-    table9_result = table9_result or {}
-    if table9_result.get("reviewed"):
-        table9_score = table9_result.get("spliceai_prediction")
-        if isinstance(table9_score, (int, float)):
-            return float(table9_score), "ENIGMA Specifications Table 9 v1.2"
-    return service_or_cache_score, "SpliceAI service/cache"
+    return service_or_cache_score, "configured SpliceAI source"
 
 
 def _candidate_from_st7(record: Dict[str, Any]) -> Dict[str, Any]:
@@ -75,7 +74,7 @@ def _candidate_from_st7(record: Dict[str, Any]) -> Dict[str, Any]:
         "key": f"ST7|{record['gene']}|{record['c_notation']}",
         "reference_id": "",
         "gene": record["gene"],
-        "transcript": "NM_007294.4" if record["gene"] == "BRCA1" else "NM_000059.4",
+        "transcript": reference_transcript(record["gene"]),
         "c_notation": record["c_notation"],
         "p_notation": record.get("p_notation") or "",
         "classification": classification,
@@ -114,7 +113,7 @@ def compute_approval_basis_checksum(record: Dict[str, Any]) -> str:
 
 def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
     """Validate the curated automatic-scoring registry and known dependencies."""
-    if data.get("schema_version") != 2 or data.get("status") != "active":
+    if data.get("schema_version") != 3 or data.get("status") != "active":
         raise RuntimeError("PS1 protein reference registry has unsupported metadata")
     if not str(data.get("registry_version") or "").strip():
         raise RuntimeError("PS1 protein reference registry has no registry_version")
@@ -164,11 +163,11 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         p_notation = str(record.get("p_notation") or "")
         if not reference_id or reference_id in by_id:
             raise RuntimeError(f"{prefix} has missing or duplicate reference_id")
-        if gene not in {"BRCA1", "BRCA2"} or not c_notation.startswith("c."):
+        if gene not in set(active_genes()) or not c_notation.startswith("c."):
             raise RuntimeError(f"{prefix} has invalid variant identity")
         if not _extract_aa_change(p_notation):
             raise RuntimeError(f"{prefix} is not a normalized missense variant")
-        expected_transcript = "NM_007294.4" if gene == "BRCA1" else "NM_000059.4"
+        expected_transcript = reference_transcript(gene)
         if record.get("transcript") != expected_transcript:
             raise RuntimeError(f"{prefix} does not use the ENIGMA reference transcript")
         variant_key = (gene, c_notation)
@@ -213,10 +212,12 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         splice = record.get("reference_splice_evidence")
         if not isinstance(splice, dict):
             raise RuntimeError(f"{prefix} lacks reference_splice_evidence")
-        score = splice.get("spliceai_score")
         threshold = splice.get("threshold")
-        if threshold != 0.1 or (score is not None and not isinstance(score, (int, float))):
-            raise RuntimeError(f"{prefix} has invalid SpliceAI score/threshold")
+        expected_threshold = spliceai_thresholds(record["gene"])["bp4"]
+        if threshold != expected_threshold or splice.get("prediction_policy") != "runtime_required":
+            raise RuntimeError(f"{prefix} has invalid runtime SpliceAI policy")
+        if "spliceai_score" in splice:
+            raise RuntimeError(f"{prefix} embeds a SpliceAI score in the registry")
         if not splice.get("sources_checked") or not splice.get("checked_at"):
             raise RuntimeError(f"{prefix} lacks an auditable confirmed-splice source review")
         if not set(defined_sources).issubset(set(splice["sources_checked"])):
@@ -225,19 +226,12 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
             raise RuntimeError(f"{prefix} lacks SpliceAI provenance")
         confirmed_status = splice.get("confirmed_status")
         if status == "eligible":
-            if record.get("protein_branch") != "missense_no_splice_effect":
+            if record.get("protein_branch") != "missense_runtime_spliceai_check_required":
                 raise RuntimeError(f"{prefix} lacks protein-missense branch approval")
-            if not isinstance(score, (int, float)) or score > threshold:
-                raise RuntimeError(
-                    f"{prefix} does not meet the ENIGMA SpliceAI <= 0.1 condition"
-                )
             if confirmed_status not in NO_DAMAGING_SPLICE_STATUSES:
                 raise RuntimeError(f"{prefix} has unresolved confirmed splice evidence")
         elif status == "excluded":
-            if not (
-                confirmed_status == "abnormal"
-                or (isinstance(score, (int, float)) and score > threshold)
-            ):
+            if confirmed_status != "abnormal":
                 raise RuntimeError(f"{prefix} has no recorded reason for exclusion")
         _validate_sha256(record.get("approval_basis_checksum"), f"approval_basis_checksum for {reference_id}")
         if record["approval_basis_checksum"] != compute_approval_basis_checksum(record):
@@ -346,6 +340,33 @@ def reset_ps1_reference_cache_for_tests() -> None:
     _APPROVED_LOOKUP = {}
 
 
+def discover_ps1_reference_variants(
+    gene: str,
+    c_notation: str,
+    p_notation: str,
+    variant_type: str,
+) -> List[str]:
+    """Return candidate reference c. variants that require runtime SpliceAI.
+
+    Discovery is local and deterministic. It does not apply PS1 and it does not
+    call an external service. The caller can therefore schedule reference and
+    assessed-variant SpliceAI lookups together.
+    """
+    if (variant_type or "").lower() != "missense":
+        return []
+    aa_key = _extract_aa_change(p_notation)
+    if not aa_key:
+        return []
+    _load_references()
+    return sorted(
+        {
+            str(record["c_notation"])
+            for record in _APPROVED_LOOKUP.get(gene, {}).get(aa_key, [])
+            if record.get("c_notation") != c_notation
+        }
+    )
+
+
 def _deduplicate_candidates(records: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     deduplicated: Dict[tuple, Dict[str, Any]] = {}
     for record in records:
@@ -385,9 +406,10 @@ def evaluate_ps1(
     p_notation: str,
     variant_type: str,
     spliceai_score: Optional[float] = None,
-    vua_spliceai_source: str = "SpliceAI service/cache",
+    vua_spliceai_source: str = "configured SpliceAI source",
     vua_splice_evidence_status: str = "not_assessed",
     vua_splice_sources_checked: Optional[List[str]] = None,
+    reference_spliceai_scores: Optional[Dict[str, Optional[float]]] = None,
 ) -> Dict[str, Any]:
     """Apply PS1 only from an approved reference; otherwise return a review candidate."""
     _load_references()
@@ -407,8 +429,10 @@ def evaluate_ps1(
         "vua_splice_sources_checked": vua_splice_sources_checked or [],
         "vua_spliceai_score": spliceai_score,
         "vua_spliceai_source": vua_spliceai_source,
-        "source_url": PS1_CSPEC_URL,
+        "reference_spliceai_scores": reference_spliceai_scores or {},
+        "source_url": vcep_specification(gene)["url"],
     }
+    splice_low = spliceai_thresholds(gene)["bp4"]
 
     if (variant_type or "").lower() != "missense":
         result["reason"] = "Protein-level PS1 applies only to missense variants"
@@ -452,10 +476,10 @@ def evaluate_ps1(
         result["blocking_reasons"].append(
             "SpliceAI is unavailable for the variant under assessment"
         )
-    elif spliceai_score > 0.1:
+    elif spliceai_score > splice_low:
         result["reason"] = (
             f"Protein-level PS1 not applicable: assessed-variant SpliceAI "
-            f"{spliceai_score:.3f} > 0.1"
+            f"{spliceai_score:.3f} > {splice_low}"
         )
         result["reference_status"] = "ineligible_for_this_application"
         result["application_status"] = "not_applicable"
@@ -490,16 +514,51 @@ def evaluate_ps1(
         )
         return result
 
+    runtime_scores = reference_spliceai_scores or {}
+    runtime_approved_records: List[Dict[str, Any]] = []
+    unavailable_references: List[str] = []
+    high_score_references: List[tuple[str, float]] = []
+    for reference in approved_records:
+        reference_c = str(reference["c_notation"])
+        reference_score = runtime_scores.get(reference_c)
+        if reference_score is None:
+            unavailable_references.append(reference_c)
+        elif reference_score > splice_low:
+            high_score_references.append((reference_c, reference_score))
+        else:
+            runtime_approved_records.append(reference)
+
+    if approved_records and unavailable_references:
+        result["blocking_reasons"].append(
+            "SpliceAI is unavailable for matching reference variant(s): "
+            + ", ".join(unavailable_references)
+        )
+
     if result["blocking_reasons"]:
         result["review_required"] = True
         result["application_status"] = "manual_review_required"
         result["reason"] = "; ".join(result["blocking_reasons"])
         return result
 
+    if approved_records and not runtime_approved_records:
+        result["reference_status"] = "ineligible_for_this_application"
+        result["application_status"] = "not_applicable"
+        result["reason"] = (
+            "Protein-level PS1 not applicable: matching reference variant "
+            f"SpliceAI exceeds {splice_low} ("
+            + ", ".join(
+                f"{reference_c}={score:.3f}"
+                for reference_c, score in high_score_references
+            )
+            + ")"
+        )
+        return result
+
     best = max(
-        approved_records,
+        runtime_approved_records,
         key=lambda item: 5 if item["classification"] == "Pathogenic" else 4,
     )
+    best_reference_score = runtime_scores[str(best["c_notation"])]
     strength = "Strong" if best["classification"] == "Pathogenic" else "Moderate"
     result.update(
         {
@@ -514,7 +573,8 @@ def evaluate_ps1(
                 f"{best['classification']} reference {best['c_notation']} "
                 f"{best['p_notation']} ({best['classification_source']}); both variants "
                 "meet the recorded ENIGMA protein-level PS1 splice conditions "
-                f"(assessed-variant SpliceAI {spliceai_score:.3f} from {vua_spliceai_source})"
+                f"(assessed-variant SpliceAI {spliceai_score:.3f}, reference-variant "
+                f"SpliceAI {best_reference_score:.3f}, source {vua_spliceai_source})"
             ),
         }
     )

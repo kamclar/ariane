@@ -18,9 +18,12 @@ from typing import Optional, Dict, List, Tuple
 from backend.modules.evidence_interactions import (
     apply_automatic_rna_interactions,
     automatic_functional_interactions,
+    clinical_functional_risk_interactions,
     pvs1_prediction_deduplication,
 )
 from backend.modules.pvs1_rna import evaluate_pvs1_rna
+from backend.modules.spliceai_policy import compare_table9_spliceai
+from backend.gene_policy import policy_name, policy_version, vcep_specification
 
 
 def classify_by_points(points: int, has_ba1: bool = False) -> tuple:
@@ -62,7 +65,8 @@ def _classify_pathogenic_combination(criteria: Dict) -> Optional[tuple]:
     supporting = counts["supporting"]
 
     if (
-        (vs >= 1 and (strong >= 1 or moderate >= 1 or supporting >= 2))
+        vs >= 2
+        or (vs >= 1 and (strong >= 1 or moderate >= 1 or supporting >= 2))
         or strong >= 3
         or (strong >= 2 and (moderate >= 1 or supporting >= 2))
         or (strong >= 1 and (
@@ -88,16 +92,18 @@ def _classify_pathogenic_combination(criteria: Dict) -> Optional[tuple]:
 
 def _classify_benign_combination(criteria: Dict) -> Optional[tuple]:
     counts = {"very_strong": 0, "strong": 0, "moderate": 0, "supporting": 0}
-    composite_strong_codes = {"BP1", "BS4", "BP5"}
-    has_composite_strong = False
+    has_eligible_single_strong = False
 
-    for name, criterion in criteria.items():
+    for criterion in criteria.values():
         if criterion.get("points", 0) >= 0:
             continue
         strength = _criterion_strength(criterion)
         counts[strength] += 1
-        if strength == "strong" and name in composite_strong_codes:
-            has_composite_strong = True
+        if (
+            strength == "strong"
+            and criterion.get("single_strong_likely_benign_eligible") is True
+        ):
+            has_eligible_single_strong = True
 
     very_strong = counts["very_strong"]
     strong = counts["strong"]
@@ -105,7 +111,8 @@ def _classify_benign_combination(criteria: Dict) -> Optional[tuple]:
     supporting = counts["supporting"]
 
     if (
-        (very_strong >= 1 and (strong >= 1 or moderate >= 1 or supporting >= 1))
+        very_strong >= 2
+        or (very_strong >= 1 and (strong >= 1 or moderate >= 1 or supporting >= 1))
         or strong >= 2
         or (strong >= 1 and (
             moderate >= 2
@@ -116,8 +123,10 @@ def _classify_benign_combination(criteria: Dict) -> Optional[tuple]:
         return (1, "Benign", "")
 
     if (
-        has_composite_strong
+        very_strong >= 1
+        or has_eligible_single_strong
         or ((very_strong + strong) >= 1 and (moderate >= 1 or supporting >= 1))
+        or moderate >= 2
         or (moderate >= 1 and supporting >= 1)
         or supporting >= 2
     ):
@@ -131,6 +140,15 @@ def classify_by_enigma_combination(criteria: Dict, points: int) -> tuple:
     Apply ENIGMA VCEP v1.2 Table 3 combinations by default.
     Tavtigian points are reserved for contradictory benign/pathogenic evidence.
     """
+    ba1 = criteria.get("BA1")
+    if ba1 and ba1.get("applies", True):
+        return (
+            1,
+            "Benign",
+            "BA1 is stand-alone benign evidence. Other criteria remain visible for audit "
+            "but do not replace the BA1 classification.",
+        )
+
     has_pathogenic = any(criterion.get("points", 0) > 0 for criterion in criteria.values())
     has_benign = any(criterion.get("points", 0) < 0 for criterion in criteria.values())
 
@@ -160,6 +178,27 @@ def classify_by_enigma_combination(criteria: Dict, points: int) -> tuple:
         result = _classify_benign_combination(criteria)
         if result:
             return result
+        strong = [
+            criterion
+            for criterion in criteria.values()
+            if criterion.get("points", 0) < 0
+            and _criterion_strength(criterion) == "strong"
+        ]
+        if len(strong) == 1 and len(criteria) == 1:
+            return (
+                3,
+                "VUS",
+                "A single Strong benign criterion reaches Likely Benign under "
+                "ENIGMA VCEP v1.2 Table 3 only when multiple evidence "
+                "contributions are documented for that criterion. This record "
+                "does not meet that combination requirement.",
+            )
+        return (
+            3,
+            "VUS",
+            "Benign evidence does not yet meet an ENIGMA VCEP v1.2 Table 3 "
+            "combination for Likely Benign.",
+        )
 
     return (3, "VUS", "")
 
@@ -250,34 +289,15 @@ def evaluate_variant(
         "This automated result must not replace a full expert variant classification."
     )
 
-    # For variants explicitly reviewed in Table 9, use the VCEP's frozen
-    # SpliceAI value from that same evidence assessment.  This keeps BP1/BP4
-    # decisions consistent with the published Table 9 rationale and avoids a
-    # later external service version silently changing the classification.
+    # Table 9 is authoritative for its PS3/BS3 recommendation and records the
+    # SpliceAI context used in that functional review.  Figure 1A and PS1 use
+    # the configured ENIGMA-compatible SpliceAI source; Table 9 never replaces
+    # an unavailable or different prediction.
     effective_spliceai_score = spliceai_score
-    table9_spliceai = None
-    if table9_result and table9_result.get("reviewed"):
-        raw_table9_spliceai = table9_result.get("spliceai_prediction")
-        if isinstance(raw_table9_spliceai, (int, float)):
-            table9_spliceai = float(raw_table9_spliceai)
-            effective_spliceai_score = table9_spliceai
-            if spliceai_score is not None and abs(spliceai_score - table9_spliceai) > 1e-9:
-                results["warnings"].append(
-                    f"SpliceAI differs from ENIGMA Table 9: service/cache={spliceai_score:.3f}, "
-                    f"Table 9={table9_spliceai:.3f}. Automated criteria use the frozen "
-                    "Table 9 value to remain consistent with the VCEP-reviewed evidence."
-                )
-            elif spliceai_score is None:
-                results["warnings"].append(
-                    "SpliceAI service/cache is unavailable. Automated criteria for this "
-                    f"VCEP-reviewed variant use the frozen ENIGMA Table 9 value "
-                    f"{table9_spliceai:.3f}."
-                )
-        splice_result = table9_result.get("splice_result_published")
-        if splice_result:
-            results["warnings"].append(
-                f"ENIGMA Table 9 published splice result: {splice_result}."
-            )
+    _, table9_spliceai_warnings = compare_table9_spliceai(
+        gene, spliceai_score, table9_result
+    )
+    results["warnings"].extend(table9_spliceai_warnings)
 
     # ── Residue info (informational only) ──────────────────────────────
     if residue_info and residue_info.get("is_important_residue"):
@@ -332,11 +352,80 @@ def evaluate_variant(
     # ── Step 2: Table 9 - PS3/BS3 ─────────────────────────────────────
     if table9_result and table9_result.get("applies"):
         code = table9_result["code"]
+        functional_branch = (
+            "intronic-silent"
+            if variant_type.lower() in {"intronic", "synonymous", "silent"}
+            else "exonic-missense-inframe"
+        )
+        if functional_branch == "intronic-silent":
+            functional_steps = [
+                {
+                    "node_id": "func-rna-assay",
+                    "question": "Does the assay measure effects via both mRNA and protein?",
+                    "result": "yes",
+                    "observed": table9_result["reason"],
+                }
+            ]
+            functional_outcome = "func-rna-code"
+        else:
+            splice_flag = str(
+                table9_result.get("predicted_or_observed_splicing") or ""
+            ).strip().upper()
+            splicing_present = splice_flag not in {"", "N", "NO"}
+            functional_steps = [
+                {
+                    "node_id": "func-protein-splice",
+                    "question": "Is splicing predicted or observed?",
+                    "result": "yes" if splicing_present else "no",
+                    "observed": (
+                        f"Table 9 predicted/observed splicing: {splice_flag or 'not reported'}"
+                    ),
+                },
+                {
+                    "node_id": (
+                        "func-protein-combined" if splicing_present else "func-protein-only"
+                    ),
+                    "question": (
+                        "Assay measures both mRNA and protein effects"
+                        if splicing_present
+                        else "Assay measures protein-only effect"
+                    ),
+                    "result": "eligible",
+                    "observed": table9_result["reason"],
+                },
+            ]
+            functional_outcome = "func-protein-code"
         results["criteria"][code] = {
             "applies": True,
             "strength": table9_result["strength"],
             "points": table9_result["points"],
             "reason": table9_result["reason"],
+            "decision_path": {
+                "tree_id": "figure-1c",
+                "tree_version": "ENIGMA VCEP 1.2.0",
+                "branch_id": functional_branch,
+                "criterion": code,
+                "outcome": "applied",
+                "outcome_node": functional_outcome,
+                "steps": functional_steps,
+                "sources": [
+                    {
+                        "source_id": "enigma-v1.2-specifications",
+                        "label": (
+                            f"{policy_name(gene)} v{policy_version(gene)} Specifications"
+                        ),
+                        "url": vcep_specification(gene)["url"],
+                        "location": "Figure 1C",
+                        "figure_url": "/static/enigma/figure-1c-functional.jpeg",
+                    },
+                    {
+                        "source_id": "enigma-v1.2-table9",
+                        "label": "ENIGMA Specifications Table 9 v1.2",
+                        "url": "https://cspec.genome.network/cspec/File/id/0a35d6a8-5050-44b6-8a9d-babe8cdc06b2/data",
+                        "location": f"{gene}:{c_notation}",
+                    },
+                ],
+            },
         }
         results["total_points"] += table9_result["points"]
         results["has_functional_evidence"] = True
@@ -392,12 +481,7 @@ def evaluate_variant(
     # ── Step 4: local clinical-LR snapshot - PP4/BP5 ───────────────────
     if pp4_bp5_result and pp4_bp5_result.get("applies"):
         code = pp4_bp5_result["code"]
-        results["criteria"][code] = {
-            "applies": True,
-            "strength": pp4_bp5_result["strength"],
-            "points": pp4_bp5_result["points"],
-            "reason": pp4_bp5_result["reason"],
-        }
+        results["criteria"][code] = dict(pp4_bp5_result)
         results["total_points"] += pp4_bp5_result["points"]
 
     # ── Step 5: approved protein PS1 references ───────────────────────
@@ -415,6 +499,7 @@ def evaluate_variant(
         gene, variant_type, p_notation,
         bayesdel_score=bayesdel_score,
         spliceai_score=effective_spliceai_score,
+        c_notation=c_notation,
     )
     for crit_name, crit_data in pp3_bp4.items():
         if crit_data.get("applies"):
@@ -443,6 +528,7 @@ def evaluate_variant(
             in_domain=in_domain,
             bp4_met=bp4_met,
             c_notation=c_notation,
+            gene=gene,
         )
         if bp7["applies"]:
             results["criteria"]["BP7"] = bp7
@@ -462,15 +548,23 @@ def evaluate_variant(
     results["evidence_interactions"].extend(
         automatic_functional_interactions(results["criteria"])
     )
+    results["evidence_interactions"].extend(
+        clinical_functional_risk_interactions(results["criteria"])
+    )
 
     # ── Step 8: Warnings ───────────────────────────────────────────────
+    figure1a_types = {
+        "missense", "inframe_deletion", "inframe_insertion",
+        "inframe_delins", "delins", "synonymous", "silent", "intronic",
+    }
     if (
         effective_spliceai_score is None
-        and variant_type.lower() not in {"exon_deletion", "exon_duplication"}
+        and variant_type.lower() in figure1a_types
     ):
         results["warnings"].append(
-            f"SpliceAI not available for {gene} {c_notation} - "
-            "benign criteria BP1/BP4/BP7 require confirmed low score"
+            f"Figure 1A bioinformatic result unavailable for {gene} {c_notation}: "
+            "SpliceAI is unavailable. Missing data was not treated as an ENIGMA "
+            "prediction band; PP3, BP4, BP1 and BP7 were not applied."
         )
     bayesdel_applicable_types = {
         "missense",
@@ -527,18 +621,21 @@ def evaluate_variant(
         results["warnings"].append(acmg_note)
 
     results["rna_review"] = evaluate_rna_review(
+        gene=gene,
         variant_type=variant_type,
         spliceai_score=spliceai_score,
         pvs1_result=pvs1_rna if pvs1_rna.get("applies") else pvs1,
         criteria=results["criteria"],
     )
     results["splice_ps1_review"] = evaluate_splice_ps1_review(
+        gene=gene,
         variant_type=variant_type,
         spliceai_score=spliceai_score,
         ps1_result=ps1_result,
     )
-    results["protein_ps1_review"] = evaluate_protein_ps1_review(ps1_result)
+    results["protein_ps1_review"] = evaluate_protein_ps1_review(ps1_result, gene=gene)
     results["initiation_review"] = evaluate_initiation_review(
+        gene=gene,
         variant_type=variant_type,
     )
 

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from backend.data_health import clear_issue, register_issue
+from backend.gene_policy import active_genes
 
 
 FOUNDER_VARIANT_SNAPSHOT = (
@@ -75,7 +76,7 @@ def load_founder_variant_snapshot(path: Path | None = None) -> None:
     elif metadata.get("records_sha256") != _records_sha256(records):
         error = "records checksum mismatch"
     elif any(
-        record.get("gene") not in {"BRCA1", "BRCA2"}
+        record.get("gene") not in set(active_genes())
         or not record.get("canonical_c_notation")
         or not record.get("source_assertions")
         for record in records

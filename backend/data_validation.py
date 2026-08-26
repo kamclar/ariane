@@ -19,6 +19,26 @@ def _load_required_json(label: str, path: Path):
 def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     """Raise RuntimeError before the API starts if a core dataset is unusable."""
     table4 = _load_required_json("ENIGMA Table 4", paths["table4"])
+    from backend.gene_policy import validate_gene_policy_payload
+
+    gene_policy_path = paths["gene_policy_manifest"]
+    gene_policy = _load_required_json("gene policy manifest", gene_policy_path)
+    gene_policy_metadata = _load_required_json(
+        "gene policy metadata", paths["gene_policy_metadata"]
+    )
+    validate_gene_policy_payload(
+        gene_policy,
+        gene_policy_metadata,
+        manifest_bytes=gene_policy_path.read_bytes(),
+    )
+    configured_genes = tuple(
+        gene for gene, record in gene_policy["genes"].items()
+        if record.get("activation_status") == "active"
+    )
+    table4_genes = tuple(
+        gene for gene in configured_genes
+        if {"PVS1", "PM5_PTC"} & set(gene_policy["genes"][gene]["applicable_rules"])
+    )
     if (
         table4.get("schema_version") != 2
         or table4.get("source_columns") != 20
@@ -35,10 +55,10 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     if missing_sections:
         raise RuntimeError(f"Required ENIGMA Table 4 dataset is incomplete: missing {missing_sections}")
     for section in required_table4_sections:
-        for gene in ("BRCA1", "BRCA2"):
+        for gene in table4_genes:
             if not table4.get(section, {}).get(gene):
                 raise RuntimeError(f"Required ENIGMA Table 4 dataset has no {section}/{gene} records")
-    for gene in ("BRCA1", "BRCA2"):
+    for gene in table4_genes:
         exon_ranges = set(table4["exon_ranges"][gene])
         for section in ("ptc_rules", "deletion_rules", "duplication_rules"):
             missing_ranges = sorted(set(table4[section][gene]) - exon_ranges)
@@ -86,7 +106,7 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                     f"{gene}/{branch_name}: {branch.get('pm5_code')!r}"
                 )
     for section in ("ptc_rules", "splice_rules", "deletion_rules"):
-        for gene in ("BRCA1", "BRCA2"):
+        for gene in table4_genes:
             for key, entry in table4[section][gene].items():
                 if entry.get("pvs1_code") not in allowed_pvs1_codes:
                     raise RuntimeError(
@@ -98,7 +118,7 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                         f"Required ENIGMA Table 4 dataset has unknown PM5 code at "
                         f"{section}/{gene}/{key}: {entry.get('pm5_code')!r}"
                     )
-    for gene in ("BRCA1", "BRCA2"):
+    for gene in table4_genes:
         for exon, arrangements in table4["duplication_rules"][gene].items():
             for arrangement, entry in arrangements.items():
                 if arrangement not in {"Unknown", "Tandem"}:
@@ -142,7 +162,7 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                 f"Required ENIGMA Table 9 dataset has unsupported code/strength at "
                 f"{key}: {entry.get('code')!r}/{entry.get('strength')!r}"
             )
-        if not key.startswith(("BRCA1:c.", "BRCA2:c.")):
+        if not any(key.startswith(f"{gene}:c.") for gene in configured_genes):
             raise RuntimeError(f"Required ENIGMA Table 9 dataset has invalid variant key: {key!r}")
 
     st7 = _load_required_json("ENIGMA Supplementary Table 7", paths["st7"])
@@ -168,7 +188,7 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         gene = record.get("gene")
         c_notation = record.get("c_notation")
         key = f"{gene}:{c_notation}"
-        if gene not in {"BRCA1", "BRCA2"} or not str(c_notation).startswith("c."):
+        if gene not in set(configured_genes) or not str(c_notation).startswith("c."):
             raise RuntimeError(f"Required ENIGMA Supplementary Table 7 has invalid record #{index}: {key}")
         if key in seen:
             raise RuntimeError(f"Required ENIGMA Supplementary Table 7 has duplicate variant: {key}")
@@ -192,20 +212,6 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     from backend.modules.ps1 import validate_ps1_reference_registry
 
     validate_ps1_reference_registry(ps1_registry)
-
-    splice_ps1 = _load_required_json(
-        "ENIGMA Supplementary Table 2 splice evidence snapshot",
-        paths["ps1_splice_reference"],
-    )
-    if (
-        splice_ps1.get("curation_status")
-        != "pilot_unreviewed_not_for_automatic_scoring"
-        or not isinstance(splice_ps1.get("variants"), list)
-        or not splice_ps1["variants"]
-    ):
-        raise RuntimeError(
-            "Required ENIGMA Supplementary Table 2 splice evidence snapshot is unusable"
-        )
 
     st2 = _load_required_json(
         "complete ENIGMA Supplementary Table 2 splice evidence",

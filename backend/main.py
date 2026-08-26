@@ -2,7 +2,7 @@
 # ARIANE - FastAPI application
 # Automated ACMG Rule-based Interpretation and Annotation ENgine
 # ============================================================
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
@@ -20,40 +20,54 @@ import uuid
 from typing import Optional
 from fastapi import Header
 from backend.admin import router as admin_router
+from backend.version import ARIANE_VERSION
 
 from backend.config import (
-    DATA_DIR, TABLE4_PATH, TABLE9_PATH, ST7_PATH,
-    PS1_PROTEIN_REGISTRY_PATH, PS1_SPLICE_REFERENCE_PATH,
+    TABLE4_PATH, TABLE9_PATH, ST7_PATH,
+    ENIGMA_REFERENCE_TABLES_PATH, ENIGMA_RULE_CATALOG_PATH,
+    PS1_PROTEIN_REGISTRY_PATH,
     ST2_SPLICE_EVIDENCE_PATH, EXON_CNV_EVIDENCE_PATH,
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
-    ALLOWED_GENES, TRANSCRIPTS,
+    GENE_POLICY_MANIFEST_PATH, GENE_POLICY_METADATA_PATH,
 )
+from backend.gene_policy import active_genes, validate_policy_source_bindings
 from backend.data_validation import validate_required_datasets
-from backend.data_health import get_data_issues, get_user_warnings
-from backend.lookup_execution import lookup_or_unavailable
-from backend.modules.criterion_order import sorted_criterion_items
+from backend.data_health import get_data_issues
+from backend.classification_dag import get_configured_engine_mode
 from backend.models import (
-    VariantRequest, ClassificationResult, CriterionResult,
-    ExternalComparison, ExternalSubmitter, CLASS_LABELS,
+    VariantRequest, ClassificationResult,
     BatchRequest, BatchResponse, BatchItemResult,
-    AlphaMissenseResult, VusExplanation,
-    SpliceAIAudit,
-    RnaReviewRecommendation, ProteinPs1ReviewRecommendation,
     ManualEvidenceRequest, ManualEvidenceResult,
     ManualCriterionResult, EvidenceInteractionWarning,
     ClientValidationRequest, VariantNormalizationResponse,
+    Ps1ReferenceResolutionRequest, Ps1ReferenceResolutionResponse,
+)
+from backend.services import (
+    ClassificationCommand,
+    EvidenceExecutionError,
+    VariantPreparationError,
+    execute_variant_classification,
+    resolve_ps1_reference,
 )
 
 validate_required_datasets({
     "table4": TABLE4_PATH,
     "table9": TABLE9_PATH,
+    "enigma_rule_catalog": ENIGMA_RULE_CATALOG_PATH,
+    "enigma_reference_tables": ENIGMA_REFERENCE_TABLES_PATH,
     "st7": ST7_PATH,
     "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH,
-    "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH,
     "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH,
     "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH,
     "exon_cnv_evidence_manifest": EXON_CNV_EVIDENCE_MANIFEST_PATH,
+    "gene_policy_manifest": GENE_POLICY_MANIFEST_PATH,
+    "gene_policy_metadata": GENE_POLICY_METADATA_PATH,
 })
+validate_policy_source_bindings()
+
+# Validate once at process startup. The engine cannot change underneath a
+# running classification process.
+CLASSIFIER_ENGINE_MODE = get_configured_engine_mode()
 
 # Initialize local sources before serving requests so /api/health reports
 # degraded caches even before the first classification.
@@ -66,20 +80,27 @@ from backend.lookups.precomputed import validate_classification_snapshot  # noqa
 from backend.modules.pp4_bp5 import load_pp4_bp5_snapshot  # noqa: E402
 from backend.modules.residues import initialize_residue_data  # noqa: E402
 from backend.modules.hgvs_engine import validate_hgvs_engine  # noqa: E402
+from backend.modules.enigma_rules import (  # noqa: E402
+    get_decision_tree,
+    public_catalog,
+    search_reference_table,
+    search_table9,
+    validate_rule_catalog,
+)
 
-_spliceai_data_source._load_precomputed_cache()
 _spliceai_data_source._load_api_cache()
 validate_classification_snapshot()
 load_indel_snapshot()
 load_pp4_bp5_snapshot()
 initialize_residue_data()
 validate_hgvs_engine()
+validate_rule_catalog()
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
     title="ARIANE",
-    description="Automated ACMG Rule-based Interpretation and Annotation ENgine for BRCA1/2",
-    version="1.8.0",
+    description="Automated ACMG Rule-based Interpretation and Annotation ENgine",
+    version=ARIANE_VERSION,
 )
 app.include_router(admin_router)
 
@@ -185,13 +206,14 @@ async def health():
     panel = load_panel_provider()
     return {
         "status": "degraded" if issues else "ok",
-        "version": "1.8.0",
+        "version": ARIANE_VERSION,
+        "classification_engine": CLASSIFIER_ENGINE_MODE.value,
         "data": {
             "table4": TABLE4_PATH.exists(),
             "table9": TABLE9_PATH.exists(),
+            "enigma_rule_catalog": ENIGMA_RULE_CATALOG_PATH.exists(),
             "st7":    ST7_PATH.exists(),
             "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH.exists(),
-            "ps1_splice_reference": PS1_SPLICE_REFERENCE_PATH.exists(),
             "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH.exists(),
             "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH.exists(),
             "reference_bundle": panel.provenance.get("reference_bundle", ""),
@@ -202,17 +224,90 @@ async def health():
 
 
 @app.get("/api/resources")
-async def resources():
-    from backend.modules.manual_evidence import MANUAL_CRITERIA, RESOURCE_LINKS
-    from backend.modules.splice_ps1_reference import (
-        load_splice_ps1_reference_candidates,
+async def resources(gene: Optional[str] = None):
+    from backend.modules.manual_evidence import (
+        manual_criteria_for_gene,
+        resource_links_for_gene,
+    )
+    from backend.gene_policy import active_genes, get_gene_policy
+    from backend.modules.ps1_splice_evidence import (
+        list_splice_ps1_candidate_discovery,
     )
 
     return {
-        "manual_criteria": MANUAL_CRITERIA,
-        "links": RESOURCE_LINKS,
-        "splice_ps1_reference_candidates": load_splice_ps1_reference_candidates(),
+        "version": ARIANE_VERSION,
+        "manual_criteria": manual_criteria_for_gene(gene) if gene else {},
+        "genes": [
+            {
+                "symbol": symbol,
+                "reference_transcript": get_gene_policy(symbol)["gene_config"]["reference_transcript"],
+                "reference_protein": get_gene_policy(symbol)["gene_config"]["reference_protein"],
+                "policy_id": get_gene_policy(symbol)["policy"]["runtime_policy_id"],
+                "policy_version": get_gene_policy(symbol)["policy"]["version"],
+            }
+            for symbol in active_genes()
+        ],
+        "links": resource_links_for_gene(gene),
+        "splice_ps1_candidates": list_splice_ps1_candidate_discovery(),
     }
+
+
+@app.get("/api/rules")
+async def enigma_rules_catalog():
+    """Public, versioned source and rule index without local file paths."""
+    return public_catalog()
+
+
+@app.get("/api/rules/trees/{tree_id}")
+async def enigma_decision_tree(tree_id: str):
+    tree = get_decision_tree(tree_id)
+    if tree is None:
+        raise HTTPException(status_code=404, detail="Decision tree not found")
+    return tree
+
+
+@app.get("/api/rules/tables/table9")
+async def enigma_table9_records(
+    gene: Optional[str] = Query(default=None, max_length=40),
+    query: str = Query(default="", max_length=200),
+    code: Optional[str] = Query(default=None, max_length=20),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=25, ge=1, le=100),
+):
+    if gene is not None:
+        gene = gene.strip().upper()
+        if gene not in set(active_genes()):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Gene must be one of: {', '.join(active_genes())}",
+            )
+    return search_table9(
+        gene=gene,
+        query=query,
+        code=code,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@app.get("/api/rules/tables/{table_id}")
+async def enigma_reference_table_records(
+    table_id: str,
+    section: Optional[str] = Query(default=None, max_length=80),
+    query: str = Query(default="", max_length=200),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=25, ge=1, le=100),
+):
+    payload = search_reference_table(
+        table_id,
+        section_id=section,
+        query=query,
+        page=page,
+        page_size=page_size,
+    )
+    if payload is None:
+        raise HTTPException(status_code=404, detail="ENIGMA table or section not found")
+    return payload
 
 
 @app.post("/api/audit/client-validation", status_code=204)
@@ -236,22 +331,35 @@ async def evaluate_manual_evidence_endpoint(
     req: ManualEvidenceRequest,
     request: Request,
 ) -> ManualEvidenceResult:
-    from backend.modules.manual_evidence import evaluate_manual_evidence
+    from backend.classification_dag import DagNodeExecutionError, execute_manual_evidence
 
     try:
-        result = evaluate_manual_evidence(
+        execution = execute_manual_evidence(
             [criterion.model_dump() for criterion in req.base_criteria],
             [criterion.model_dump() for criterion in req.manual_criteria],
+            req.variant_context.model_dump() if req.variant_context else None,
         )
-    except ValueError as exc:
+        result = execution.result
+    except DagNodeExecutionError as exc:
+        cause = exc.__cause__
+        if isinstance(cause, ValueError):
+            detail = str(cause)
+            status_code = 422
+        else:
+            detail = (
+                f"Manual evidence evaluation could not complete at internal "
+                f"step {exc.node_id}. No adjusted classification was returned."
+            )
+            status_code = 503
         _audit(
             request,
             "manual_evidence_error",
             level="warning",
             input=req.model_dump(mode="json"),
             error=str(exc),
+            trace=[entry.as_dict() for entry in exc.trace],
         )
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
+        raise HTTPException(status_code=status_code, detail=detail) from exc
 
     response = ManualEvidenceResult(
         predicted_class=result["predicted_class"],
@@ -286,327 +394,66 @@ async def evaluate_manual_evidence_endpoint(
     return response
 
 
+@app.post("/api/manual-evidence/resolve-ps1-reference")
+async def resolve_ps1_reference_endpoint(
+    req: Ps1ReferenceResolutionRequest,
+    request: Request,
+) -> Ps1ReferenceResolutionResponse:
+    try:
+        result = await resolve_ps1_reference(
+            req.gene,
+            req.assessed_c_notation,
+            req.reference_c_notation,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        _audit(
+            request,
+            "ps1_reference_resolution_error",
+            level="exception",
+            input=req.model_dump(mode="json"),
+            error_type=type(exc).__name__,
+            error=str(exc)[:2000],
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="PS1 reference facts could not be resolved; no criterion was added.",
+        ) from exc
+    response = Ps1ReferenceResolutionResponse(**result)
+    _audit(
+        request,
+        "ps1_reference_resolved",
+        input=req.model_dump(mode="json"),
+        result=response.model_dump(mode="json"),
+    )
+    return response
+
+
 # Semaphore limits concurrent external API calls during batch processing
 BATCH_SEMAPHORE = asyncio.Semaphore(3)
+
 async def _classify_one(
     gene: str,
     c_notation: str,
     p_notation: str = "",
     dup_type: str = "Unknown",
 ) -> ClassificationResult:
-    """Core classification logic shared by single and batch endpoints."""
-    from backend.lookups.coordinates import resolve_variant, get_grch37, get_grch38
-    from backend.modules.variant_type import infer_variant_type
-    from backend.lookups.spliceai import get_spliceai_score
-    from backend.lookups.bayesdel import get_bayesdel_and_alphamissense
-    from backend.lookups.clinvar import clinvar_lookup, clinvar_review_stars
-    from backend.lookups.clingen import clingen_erepo_lookup
-    from backend.modules.frequency import get_gnomad_frequencies
-    from backend.modules.table9 import table9_lookup_ps3_bs3
-    from backend.modules.pp4_bp5 import evaluate_pp4_bp5
-    from backend.modules.ps1 import evaluate_ps1, select_vua_spliceai_for_ps1
-    from backend.modules.residues import check_important_residue
-    from backend.modules.classifier import evaluate_variant as _evaluate
-    from backend.modules.external import external_comparison
-    from backend.modules.variant_input import normalize_variant_input
-
-    # Every entry point, including internal/batch calls, uses the same local
-    # reference-transcript normalizer before any evidence or external lookup.
+    """Compatibility facade for single and batch API handlers."""
     try:
-        normalized_input = normalize_variant_input(
-            gene, c_notation, p_notation=p_notation or None
+        return await execute_variant_classification(
+            ClassificationCommand(
+                gene=gene,
+                c_notation=c_notation,
+                p_notation=p_notation,
+                dup_type=dup_type,
+            ),
+            engine_mode=CLASSIFIER_ENGINE_MODE,
         )
-    except (ValueError, RuntimeError) as exc:
+    except VariantPreparationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
-    c_notation = normalized_input.c_notation
-    p_notation = normalized_input.p_notation
-
-    # Determine the variant type before planning external lookups. Exon-level
-    # CNVs with uncertain breakpoints cannot be represented by one genomic
-    # allele, so SNV/small-variant coordinate services are not applicable.
-    variant_type = infer_variant_type(c_notation, p_notation)
-    is_exon_cnv = variant_type.lower() in {"exon_deletion", "exon_duplication"}
-
-    # Step 1: resolve coordinates where the HGVS description has exact bounds.
-    resolved = {}
-    lookup_diagnostics = []
-    if not is_exon_cnv:
-        try:
-            rv = resolve_variant(gene, c_notation)
-            if rv:
-                resolved[f"{gene}:{c_notation}"] = rv
-                if rv.status != "ok" or rv.source == "Mutalyzer":
-                    lookup_diagnostics.extend(
-                        f"Coordinate resolver: {warning}" for warning in rv.warnings
-                    )
-        except Exception as exc:
-            message = f"Coordinate lookup failed: {type(exc).__name__}: {exc}"
-            logging.getLogger(__name__).exception(message)
-            lookup_diagnostics.append(message)
-    grch37 = get_grch37(resolved, gene, c_notation)
-    grch38 = get_grch38(resolved, gene, c_notation)
-
-    # Step 2: parallel external lookups
-    # get_bayesdel_and_alphamissense returns (bayesdel_score, alphamissense_dict)
-    # in a single myvariant.info call - no extra API overhead for AlphaMissense.
-    external_tasks = [
-        lookup_or_unavailable(
-            clinvar_lookup,
-            {"status": "api_timeout", "error": "ClinVar lookup timed out"},
-            "ClinVar", lookup_diagnostics,
-            gene,
-            c_notation,
-        ),
-        lookup_or_unavailable(
-            clingen_erepo_lookup,
-            {"status": "api_timeout", "error": "ClinGen ERepo lookup timed out"},
-            "ClinGen ERepo", lookup_diagnostics,
-            gene,
-            c_notation,
-        ),
-    ]
-    if is_exon_cnv:
-        cv, er = await asyncio.gather(*external_tasks)
-        spliceai_score = None
-        bayesdel_score, alphamissense = None, None
-    else:
-        spliceai_score, (bayesdel_score, alphamissense), cv, er = await asyncio.gather(
-            lookup_or_unavailable(
-                get_spliceai_score, None, "SpliceAI", lookup_diagnostics,
-                gene, c_notation,
-            ),
-            lookup_or_unavailable(
-                get_bayesdel_and_alphamissense, (None, None),
-                "MyVariant/BayesDel", lookup_diagnostics, gene, c_notation,
-            ),
-            *external_tasks,
-        )
-
-    from backend.lookups.spliceai import SPLICEAI_STATUS_CACHE
-    from backend.lookups.bayesdel import BAYESDEL_STATUS_CACHE
-    variant_key = f"{gene}:{c_notation}"
-    splice_status = {} if is_exon_cnv else SPLICEAI_STATUS_CACHE.get(variant_key, {})
-    if splice_status.get("status") not in {None, "ok"}:
-        lookup_diagnostics.append(
-            f"SpliceAI unavailable: status={splice_status.get('status')}; "
-            f"{splice_status.get('reason', 'no reason reported')}"
-        )
-    bayesdel_status = {} if is_exon_cnv else BAYESDEL_STATUS_CACHE.get(variant_key, {})
-    if bayesdel_status.get("status") in {"api_error", "no_grch37_coords"}:
-        lookup_diagnostics.append(
-            f"MyVariant/BayesDel unavailable: status={bayesdel_status.get('status')}; "
-            f"{bayesdel_status.get('reason', 'no reason reported')}"
-        )
-
-    # Step 4: fast local lookups
-    gnomad_data = None
-    if grch37 or grch38:
-        gnomad_data = get_gnomad_frequencies(
-            gene=gene,
-            grch37=grch37,
-            grch38=grch38,
-        )
-
-    table9_result  = table9_lookup_ps3_bs3(gene, c_notation)
-    from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
-    exon_cnv_result = (
-        lookup_exon_cnv_evidence(gene, c_notation) if is_exon_cnv else None
-    )
-    from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
-    ps1_vua_splice_evidence = evaluate_defined_splice_sources(
-        gene, c_notation, table9_result
-    )
-    ps1_spliceai_score, ps1_spliceai_source = select_vua_spliceai_for_ps1(
-        spliceai_score, table9_result
-    )
-    pp4_bp5_result = evaluate_pp4_bp5(gene, c_notation)
-    ps1_result     = evaluate_ps1(
-        gene, c_notation, p_notation,
-        variant_type=variant_type,
-        spliceai_score=ps1_spliceai_score,
-        vua_spliceai_source=ps1_spliceai_source,
-        vua_splice_evidence_status=ps1_vua_splice_evidence["status"],
-        vua_splice_sources_checked=ps1_vua_splice_evidence["sources_checked"],
-    )
-    residue_info = check_important_residue(gene, p_notation)
-
-    # Step 5: evaluate
-    result = _evaluate(
-        gene=gene, variant_type=variant_type,
-        p_notation=p_notation, c_notation=c_notation,
-        spliceai_score=spliceai_score, bayesdel_score=bayesdel_score,
-        gnomad_data=gnomad_data, table9_result=table9_result,
-        pp4_bp5_result=pp4_bp5_result, ps1_result=ps1_result,
-        exon_cnv_result=exon_cnv_result,
-        residue_info=residue_info, dup_type=dup_type,
-    )
-    # Detailed provider responses belong in the server log, not in the clinical
-    # result. The public result receives one actionable summary per source.
-    for diagnostic in lookup_diagnostics:
-        logging.getLogger(__name__).warning("External lookup diagnostic: %s", diagnostic)
-    if is_exon_cnv:
-        result["warnings"].append(
-            "Small-variant coordinate-dependent evidence was not evaluated because "
-            "this exon-level copy-number variant has uncertain genomic breakpoints. "
-            "Population evidence was evaluated through the general ENIGMA Appendix G "
-            "exon-CNV decision path."
-        )
-        if exon_cnv_result and exon_cnv_result.get("reason"):
-            result["warnings"].append(exon_cnv_result["reason"])
-        if not table9_result or not table9_result.get("applies"):
-            result["warnings"].append(
-                "PS3/BS3 was not applied because this variant has no applicable "
-                "variant-specific recommendation in ENIGMA Table 9."
-            )
-    elif not grch37 and not grch38:
-        result["warnings"].append(
-            "Coordinate-dependent evidence was not evaluated because genomic "
-            "coordinates could not be resolved."
-        )
-    for warning in get_user_warnings():
-        if warning not in result["warnings"]:
-            result["warnings"].append(warning)
-    if cv.get("status") == "ambiguous":
-        result["warnings"].append(
-            "ClinVar lookup was ambiguous; no external ClinVar record was selected. "
-            f"Candidate IDs: {', '.join(cv.get('candidate_ids', [])) or 'not reported'}."
-        )
-    elif cv.get("status") not in {"ok", "not_found"}:
-        result["warnings"].append(
-            "ClinVar comparison is temporarily unavailable."
-        )
-    if er.get("status") not in {"ok", "not_found"}:
-        result["warnings"].append(
-            "ClinGen ERepo comparison is temporarily unavailable."
-        )
-
-    # Step 6: external comparison
-    ext = external_comparison(gene, c_notation, result["predicted_class"], cv, er)
-
-    # Step 7: narrative summary
-    from backend.modules.vus_explanation import explain_vus
-    vus_explanation = explain_vus(result)
-    from backend.modules.narrative import generate_narrative
-    narrative = generate_narrative(
-        gene=gene,
-        c_notation=c_notation,
-        p_notation=p_notation,
-        variant_type=variant_type,
-        result=result,
-        spliceai_score=spliceai_score,
-        bayesdel_score=bayesdel_score,
-        alphamissense=alphamissense,
-    )
-
-    # Step 8: build response model
-    criteria = [
-        CriterionResult(
-            name=name,
-            applies=crit.get("applies", True),
-            strength=crit.get("strength"),
-            points=crit.get("points", 0),
-            reason=crit.get("reason", ""),
-            source=crit.get("source", ""),
-        )
-        for name, crit in sorted_criterion_items(result["criteria"])
-    ]
-    excluded_criteria = [
-        CriterionResult(
-            name=name,
-            applies=False,
-            strength=crit.get("strength"),
-            points=0,
-            reason=crit.get("reason", ""),
-            source=crit.get("source", ""),
-        )
-        for name, crit in sorted_criterion_items(
-            result.get("excluded_criteria", {})
-        )
-    ]
-
-    ext_model = None
-    if cv.get("status") == "ok":
-        submitters = [
-            ExternalSubmitter(
-                scv=s.get("scv", ""),
-                org=s.get("org", ""),
-                classification=s.get("class") or "",
-                date_eval=s.get("date_eval", ""),
-                is_enigma_ep=s.get("is_enigma_ep", False),
-                review_status=s.get("review", ""),
-                curated_status=(
-                    "ClinGen/ENIGMA curated submitter"
-                    if s.get("is_enigma_ep", False)
-                    else ""
-                ),
-                comment=s.get("comment", "")[:200],
-            )
-            for s in cv.get("submissions", [])
-        ]
-        ext_model = ExternalComparison(
-            clinvar_classification=cv.get("aggregate", {}).get("classification", ""),
-            clinvar_review_status=cv.get("aggregate", {}).get("review_status", ""),
-            clinvar_review_stars=clinvar_review_stars(
-                cv.get("aggregate", {}).get("review_status", "")
-            ),
-            clinvar_n_submitters=cv.get("aggregate", {}).get("n_submitters", 0),
-            clinvar_has_conflict=cv.get("has_conflict", False),
-            clinvar_submitters=submitters,
-            enigma_ep_class=ext.get("enigma_class", ""),
-            enigma_ep_source=ext.get("enigma_source", ""),
-        )
-
-    return ClassificationResult(
-        variant=result["variant"],
-        gene=gene,
-        c_notation=c_notation,
-        p_notation=p_notation,
-        reference_transcript=TRANSCRIPTS.get(gene, ""),
-        normalization_source=normalized_input.normalization_source,
-        consequence_status=normalized_input.consequence_status,
-        normalization_provenance=normalized_input.normalization_provenance or {},
-        protein_consequence_explanation=normalized_input.protein_consequence_explanation,
-        predicted_class=result["predicted_class"],
-        predicted_label=CLASS_LABELS.get(result["predicted_class"], ""),
-        total_points=result["total_points"],
-        criteria=criteria,
-        excluded_criteria=excluded_criteria,
-        warnings=result["warnings"],
-        external=ext_model,
-        has_functional_evidence=result.get("has_functional_evidence", False),
-        classification_note=result.get("classification_note", ""),
-        evidence_direction=result.get("evidence_direction", "none"),
-        mixed_evidence=result.get("mixed_evidence", False),
-        pathogenic_points=result.get("pathogenic_points", 0),
-        benign_points=result.get("benign_points", 0),
-        narrative=narrative,
-        alphamissense=AlphaMissenseResult(
-            am_score=alphamissense.get("am_score") if alphamissense else None,
-            am_class=alphamissense.get("am_class", "") if alphamissense else "",
-        ) if alphamissense else None,
-        vus_explanation=VusExplanation(**vus_explanation) if vus_explanation else None,
-        rna_review=RnaReviewRecommendation(**result["rna_review"])
-        if result.get("rna_review") else None,
-        splice_ps1_review=RnaReviewRecommendation(**result["splice_ps1_review"])
-        if result.get("splice_ps1_review") else None,
-        protein_ps1_review=ProteinPs1ReviewRecommendation(**result["protein_ps1_review"])
-        if result.get("protein_ps1_review") else None,
-        initiation_review=RnaReviewRecommendation(**result["initiation_review"])
-        if result.get("initiation_review") else None,
-        spliceai_audit=SpliceAIAudit(**{
-            field: splice_status.get(field)
-            for field in SpliceAIAudit.model_fields
-            if splice_status.get(field) is not None
-        }) if splice_status else None,
-        population_frequency_audit=(
-            gnomad_data.get("population_frequency_audit", {})
-            if gnomad_data else {}
-        ),
-        evidence_interactions=[
-            EvidenceInteractionWarning(**warning)
-            for warning in result.get("evidence_interactions", [])
-        ],
-    )
+    except EvidenceExecutionError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.post("/api/normalize")
@@ -752,7 +599,7 @@ async def clear_cache(
     from backend.lookups.bayesdel import BAYESDEL_CACHE
     from backend.lookups.clinvar import CLINVAR_CACHE
     from backend.lookups.clingen import EREPO_CACHE
-    from backend.modules.frequency import GNOMAD_CACHE, load_gnomad_local_cache, load_gnomad_coverage_cache
+    from backend.modules.frequency import GNOMAD_CACHE, load_gnomad_local_cache, load_gnomad_coverage_snapshot
 
     SPLICEAI_CACHE.clear()
     SPLICEAI_STATUS_CACHE.clear()
@@ -761,7 +608,7 @@ async def clear_cache(
     EREPO_CACHE.clear()
 
     load_gnomad_local_cache()
-    load_gnomad_coverage_cache()
+    load_gnomad_coverage_snapshot()
 
     _audit(request, "cache_cleared")
     return {"status": "ok", "message": "All caches cleared"}

@@ -26,10 +26,10 @@ from scipy.stats import poisson
 
 ROOT = Path(__file__).resolve().parents[1]
 GNOMAD_DIR = ROOT / "backend" / "data" / "gnomad"
-VARIANT_PATH = GNOMAD_DIR / "gnomad_brca_region_cache_by_variant.with_real_coverage.json"
-COVERAGE_PATH = GNOMAD_DIR / "gnomad_brca_coverage_cache.json"
+VARIANT_PATH = GNOMAD_DIR / "gnomad_brca_frequency_snapshot.json"
+COVERAGE_PATH = GNOMAD_DIR / "gnomad_brca_coverage_snapshot.json"
 COVERAGE_PROGRESS_PATH = GNOMAD_DIR / ".gnomad_v3_coverage_build_progress.json"
-DATASET = "gnomad_v3_1_2_genomes_grch38"  # Coverage cache compatibility.
+DATASET = "gnomad_v3_1_2_genomes_grch38"  # Coverage snapshot compatibility.
 V3_DATASET = DATASET
 V2_DATASET = "gnomad_v2_1_1_exomes_grch37"
 V3_VCF_TEMPLATE = (

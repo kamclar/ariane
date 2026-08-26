@@ -6,18 +6,23 @@
 #
 # AlphaMissense is informational only - not used for ENIGMA VCEP scoring.
 #
-# Persistent cache: backend/data/bayesdel_cache.json
+# Persistent cache: ${ARIANE_RUNTIME_CACHE_DIR}/bayesdel_api_cache.json
 # Cache entry also preserves the lookup status/reason so absence is explainable.
 # Old float-only entries are migrated automatically on load.
 
 from typing import Optional, Dict, Tuple
 from pathlib import Path
 import json
+import os
+import tempfile
 import threading
-import urllib.request
-import urllib.parse
 import urllib.error
+import urllib.parse
+import urllib.request
+
 from backend.data_health import clear_issue, register_issue
+from backend.runtime_cache import runtime_cache_path
+from backend.version import ARIANE_VERSION
 
 MYVARIANT_BASE_URL = "https://myvariant.info/v1/variant"
 
@@ -25,14 +30,14 @@ MYVARIANT_BASE_URL = "https://myvariant.info/v1/variant"
 BAYESDEL_CACHE: Dict[str, Optional[dict]] = {}
 BAYESDEL_STATUS_CACHE: Dict[str, dict] = {}
 
-_CACHE_PATH = Path(__file__).resolve().parent.parent / "data" / "bayesdel_cache.json"
+_CACHE_PATH = runtime_cache_path("bayesdel_api_cache.json")
 _FILE_LOCK  = threading.Lock()
 
 
 def _load_cache() -> None:
     global BAYESDEL_CACHE
     if not _CACHE_PATH.exists():
-        register_issue("BayesDel cache", f"cache is missing: {_CACHE_PATH}")
+        clear_issue("BayesDel cache")
         return
     try:
         with open(_CACHE_PATH, encoding="utf-8") as fh:
@@ -70,12 +75,37 @@ def _load_cache() -> None:
 
 def _save_cache() -> None:
     with _FILE_LOCK:
+        temporary_path = None
         try:
-            with open(_CACHE_PATH, "w", encoding="utf-8") as fh:
+            _CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=_CACHE_PATH.parent,
+                prefix="bayesdel_api_cache.",
+                suffix=".tmp",
+                delete=False,
+            ) as fh:
+                temporary_path = Path(fh.name)
                 json.dump(BAYESDEL_CACHE, fh)
+                fh.flush()
+                os.fsync(fh.fileno())
+            os.replace(temporary_path, _CACHE_PATH)
+            clear_issue("BayesDel cache")
         except Exception as exc:
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
             print(f"Warning: could not save BayesDel cache: {exc}")
-            register_issue("BayesDel cache", f"could not save {_CACHE_PATH}: {type(exc).__name__}: {exc}")
+            register_issue(
+                "BayesDel cache",
+                "score was obtained and used, but the runtime cache could not "
+                f"be saved to {_CACHE_PATH}; this request is unaffected, but the "
+                "score may need to be fetched again after restart: "
+                f"{type(exc).__name__}: {exc}",
+            )
 
 
 def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Optional[dict]) -> dict:
@@ -97,7 +127,7 @@ def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Option
     hgvs = f"chr{chrom}:g.{pos}{ref}>{alt}"
     url = (f"{MYVARIANT_BASE_URL}/{urllib.parse.quote(hgvs)}"
            f"?{urllib.parse.urlencode({'fields': 'dbnsfp.bayesdel,alphamissense'})}")
-    req = urllib.request.Request(url, headers={"User-Agent": "BRCA-ACMG/1.8.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": f"ARIANE/{ARIANE_VERSION}"})
 
     try:
         with urllib.request.urlopen(req, timeout=20) as response:

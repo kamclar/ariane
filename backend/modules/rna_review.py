@@ -1,9 +1,7 @@
 """Informational recommendation for review or generation of RNA evidence."""
 
 from typing import Dict, List, Optional
-
-
-ENIGMA_CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
+from backend.gene_policy import spliceai_thresholds, vcep_specification
 
 SPLICE_RELEVANT_TYPES = {
     "splice_site",
@@ -19,6 +17,7 @@ SPLICE_RELEVANT_TYPES = {
 
 
 def evaluate_rna_review(
+    gene: str,
     variant_type: str,
     spliceai_score: Optional[float],
     pvs1_result: Optional[Dict] = None,
@@ -31,6 +30,8 @@ def evaluate_rna_review(
     reasons: List[str] = []
     potential_branches: List[str] = []
     priority = "none"
+    splice_high = spliceai_thresholds(gene)["pp3"]
+    source_url = vcep_specification(gene)["url"]
 
     if criteria.get("PVS1_RNA", {}).get("applies"):
         return {
@@ -42,7 +43,7 @@ def evaluate_rna_review(
             "what_to_test": [],
             "potential_branches": [],
             "limitations": "",
-            "source_url": ENIGMA_CSPEC_URL,
+            "source_url": source_url,
             "is_evidence_criterion": False,
         }
 
@@ -73,7 +74,7 @@ def evaluate_rna_review(
     if (
         variant_type in SPLICE_RELEVANT_TYPES
         and spliceai_score is not None
-        and spliceai_score >= 0.20
+        and spliceai_score >= splice_high
     ):
         if priority == "none":
             priority = "medium"
@@ -90,7 +91,7 @@ def evaluate_rna_review(
     if (
         has_functional_evidence
         and spliceai_score is not None
-        and spliceai_score >= 0.20
+        and spliceai_score >= splice_high
     ):
         if priority == "none":
             priority = "medium"
@@ -110,7 +111,7 @@ def evaluate_rna_review(
             "what_to_test": [],
             "potential_branches": [],
             "limitations": "",
-            "source_url": ENIGMA_CSPEC_URL,
+            "source_url": source_url,
             "is_evidence_criterion": False,
         }
 
@@ -128,7 +129,7 @@ def evaluate_rna_review(
         ),
         "reasons": reasons,
         "what_to_test": [
-            "Confirm the effect on the reference BRCA transcript and identify all abnormal transcript products.",
+            "Confirm the effect on the configured reference transcript and identify all abnormal transcript products.",
             "Quantify the proportion of normal and abnormal transcript where the assay permits.",
             "Document tissue or cell type, assay method, transcript accession, and whether nonsense-mediated decay could be detected.",
             "Determine whether the abnormal transcript is in-frame or out-of-frame and whether functional transcript remains.",
@@ -140,6 +141,6 @@ def evaluate_rna_review(
             "coverage, quantification, and the ability to detect transcripts "
             "subject to nonsense-mediated decay."
         ),
-        "source_url": ENIGMA_CSPEC_URL,
+        "source_url": source_url,
         "is_evidence_criterion": False,
     }

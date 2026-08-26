@@ -1,10 +1,10 @@
 # ============================================================
-# SpliceAI lookup via Broad API and profile-pinned runtime cache
+# SpliceAI lookup via an ENIGMA-compatible API and profile-pinned runtime cache
 #
-# Until the Appendix J reference caches are completely rebuilt, production
-# uses the Broad Institute SpliceAI Lookup API and its profile-pinned runtime
-# cache. Immutable precomputed caches are opt-in and remain disabled by
-# default.
+# Scores are computed on demand. ARIANE does not use a precomputed gene-wide
+# variant space as a classification source. The persistent cache contains only
+# results that were returned by the configured service for variants that were
+# actually requested.
 #
 # API endpoint: https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/
 # Variant format: chr{chrom}-{pos}-{ref}-{alt}
@@ -21,14 +21,11 @@ import re
 import time
 import urllib.request
 import urllib.parse
-import gzip
 import json as _json
 import os
-import shutil
-import subprocess
-import hashlib
 import tempfile
 from backend.data_health import clear_issue, register_issue
+from backend.runtime_cache import choose_runtime_cache_dir
 from backend.spliceai_profile import (
     SPLICEAI_AGGREGATION,
     SPLICEAI_ALTERNATE_FIELDS,
@@ -44,7 +41,6 @@ from backend.spliceai_profile import (
     SPLICEAI_PROFILE_SHA256,
     SPLICEAI_REFERENCE_FIELDS,
     SPLICEAI_TRANSCRIPT_POLICY_REQUIRED,
-    validate_scoring_metadata,
 )
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
@@ -62,34 +58,14 @@ PROJECT_ROOT  = choose_project_root()
 SPLICEAI_DIR  = PROJECT_ROOT / "data" / "spliceai"
 SPLICEAI_DIR.mkdir(parents=True, exist_ok=True)
 
-def choose_runtime_cache_dir() -> Path:
-    """Choose writable runtime storage without mixing it with snapshots."""
-    configured = os.environ.get("ARIANE_RUNTIME_CACHE_DIR")
-    if configured:
-        return Path(configured)
-    railway_volume = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
-    if railway_volume:
-        return Path(railway_volume) / "ariane-runtime-cache"
-    # Local-development compatibility. Production deployments should provide
-    # ARIANE_RUNTIME_CACHE_DIR or attach a Railway volume.
-    return SPLICEAI_DIR
-
-
 RUNTIME_CACHE_DIR = choose_runtime_cache_dir()
 RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Mutable API results are separate from immutable, versioned snapshots.
 SPLICEAI_API_CACHE_PATH = RUNTIME_CACHE_DIR / "spliceai_api_cache.json"
-SPLICEAI_PRECOMPUTED_CACHE_PATH = Path(os.environ.get(
-    "SPLICEAI_PRECOMPUTED_CACHE_PATH",
-    SPLICEAI_DIR / "spliceai_brca_snv_reference_cache.json",
-))
-SPLICEAI_INTRONIC_CACHE_PATH = SPLICEAI_DIR / "spliceai_brca_intronic_snv_reference_cache.json"
-
 # In-memory caches
 SPLICEAI_CACHE:        Dict[str, float] = {}   # policy:gene:c_notation -> score
 SPLICEAI_STATUS_CACHE: Dict[str, dict]  = {}   # gene:c_notation -> status details
-SPLICEAI_PRECOMPUTED_CACHE: Optional[Dict[str, dict]] = None
 
 # Broad API endpoint (Google Cloud Run, hg38) or a local compatible server.
 DEFAULT_SPLICEAI_API_URL = "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/"
@@ -141,13 +117,8 @@ if _requested_transcript_policy != SPLICEAI_TRANSCRIPT_POLICY_REQUIRED:
     )
 SPLICEAI_TRANSCRIPT_POLICY = SPLICEAI_TRANSCRIPT_POLICY_REQUIRED
 
-SPLICEAI_USE_PRECOMPUTED_CACHE = os.environ.get(
-    "SPLICEAI_USE_PRECOMPUTED_CACHE",
-    "0",
-).strip().lower() not in {"0", "false", "no", "off"}
-
 def _load_api_cache() -> dict:
-    """Load persisted API cache from Drive."""
+    """Load the persistent runtime API cache."""
     if SPLICEAI_API_CACHE_PATH.exists():
         try:
             with open(SPLICEAI_API_CACHE_PATH) as f:
@@ -160,86 +131,6 @@ def _load_api_cache() -> dict:
                 f"could not load {SPLICEAI_API_CACHE_PATH}: {type(exc).__name__}: {exc}",
             )
     return {}
-
-
-def _load_precomputed_cache() -> dict:
-    """Load the local BRCA SNV reference-transcript SpliceAI cache once."""
-    global SPLICEAI_PRECOMPUTED_CACHE
-    if SPLICEAI_PRECOMPUTED_CACHE is not None:
-        return SPLICEAI_PRECOMPUTED_CACHE
-
-    SPLICEAI_PRECOMPUTED_CACHE = {}
-    if not SPLICEAI_USE_PRECOMPUTED_CACHE:
-        return SPLICEAI_PRECOMPUTED_CACHE
-    if SPLICEAI_TRANSCRIPT_POLICY != "reference_transcript":
-        return SPLICEAI_PRECOMPUTED_CACHE
-    for path in (SPLICEAI_PRECOMPUTED_CACHE_PATH, SPLICEAI_INTRONIC_CACHE_PATH):
-        component = (
-            "SpliceAI intronic cache"
-            if path == SPLICEAI_INTRONIC_CACHE_PATH
-            else "SpliceAI coding SNV cache"
-        )
-        if not path.exists():
-            register_issue(component, f"cache is missing: {path}")
-            continue
-        try:
-            with open(path, encoding="utf-8") as handle:
-                raw = _json.load(handle)
-            metadata_path = path.with_name(path.stem + ".metadata.json")
-            if not metadata_path.is_file():
-                register_issue(
-                    component,
-                    f"cache build is incomplete: metadata is missing: {metadata_path}",
-                )
-                continue
-            with metadata_path.open(encoding="utf-8") as handle:
-                metadata = _json.load(handle)
-            if not isinstance(raw, dict) or not isinstance(metadata, dict):
-                register_issue(component, "cache or metadata is not a JSON object")
-                continue
-            profile_errors = validate_scoring_metadata(metadata)
-            if profile_errors:
-                register_issue(
-                    component,
-                    "cache scoring profile is not ENIGMA Appendix J compatible: "
-                    + "; ".join(profile_errors),
-                )
-                continue
-            actual_sha = hashlib.sha256(path.read_bytes()).hexdigest()
-            expected_count = metadata.get("expected_variants")
-            if expected_count is None:
-                expected_count = metadata.get("coordinate_variants")
-            if (
-                not isinstance(expected_count, int)
-                or metadata.get("status_ok") != expected_count
-                or metadata.get("status_error", 0) != 0
-                or metadata.get("cache_entries") != expected_count
-                or len(raw) != expected_count
-                or metadata.get("sha256", "").lower() != actual_sha.lower()
-            ):
-                register_issue(
-                    component,
-                    "cache build is incomplete or checksum/count validation failed",
-                )
-                continue
-            invalid_entries = sum(
-                1 for entry in raw.values() if not _precomputed_entry_is_complete(entry)
-            )
-            if invalid_entries:
-                register_issue(
-                    component,
-                    f"cache has {invalid_entries} entries without complete delta, REF, and ALT audit data",
-                )
-                continue
-            SPLICEAI_PRECOMPUTED_CACHE.update(raw)
-            clear_issue(component)
-        except Exception as exc:
-            print(f"Warning: could not load precomputed SpliceAI cache {path}: {exc}")
-            register_issue(
-                component,
-                f"could not load {path}: {type(exc).__name__}: {exc}",
-            )
-    return SPLICEAI_PRECOMPUTED_CACHE
 
 
 def _save_api_cache(cache: dict) -> bool:
@@ -282,11 +173,6 @@ def _cache_key(gene: str, c_notation: str) -> str:
     return f"{SPLICEAI_PROFILE_ID}:{SPLICEAI_TRANSCRIPT_POLICY}:{gene}:{c_notation}"
 
 
-def _precomputed_cache_keys(gene: str, c_notation: str) -> tuple[str, str]:
-    raw_key = f"{gene}:{c_notation}"
-    return raw_key, f"reference_transcript:{raw_key}"
-
-
 def _float_score_map(value: object, fields: tuple[str, ...]) -> Optional[dict[str, float]]:
     if not isinstance(value, dict) or set(value) != set(fields):
         return None
@@ -302,7 +188,7 @@ def _float_score_map(value: object, fields: tuple[str, ...]) -> Optional[dict[st
     return result
 
 
-def _precomputed_entry_is_complete(entry: object) -> bool:
+def _score_entry_is_complete(entry: object) -> bool:
     if not isinstance(entry, dict) or entry.get("status") != "ok":
         return False
     delta_scores = _float_score_map(entry.get("delta_scores"), SPLICEAI_DELTA_FIELDS)
@@ -340,53 +226,7 @@ def _runtime_entry_matches_profile(entry: object) -> bool:
         )
     ):
         return False
-    return _precomputed_entry_is_complete({**entry, "status": "ok"})
-
-
-def _entry_score(entry: dict) -> Optional[float]:
-    try:
-        score = entry.get("score")
-        return float(score) if score is not None else None
-    except (TypeError, ValueError):
-        return None
-
-
-def _lookup_precomputed_score(gene: str, c_notation: str) -> Optional[dict]:
-    if SPLICEAI_TRANSCRIPT_POLICY != "reference_transcript":
-        return None
-    cache = _load_precomputed_cache()
-    for key in _precomputed_cache_keys(gene, c_notation):
-        entry = cache.get(key)
-        if not isinstance(entry, dict):
-            continue
-        if not _precomputed_entry_is_complete(entry):
-            continue
-        score = _entry_score(entry)
-        if score is None:
-            continue
-        return {
-            "score": score,
-            "max_delta_field": entry.get("max_delta_field", ""),
-            "delta_scores": entry.get("delta_scores", {}),
-            "reference_scores": entry.get("reference_scores", {}),
-            "alternate_scores": entry.get("alternate_scores", {}),
-            "selected_transcript": REFERENCE_TRANSCRIPTS.get(gene, {}).get("ensembl", ""),
-            "reference_transcript_score": score,
-            "max_any_transcript_score": entry.get("max_any_transcript_score"),
-            "max_any_transcript": entry.get("max_any_transcript", ""),
-            "source": entry.get("source") or "precomputed BRCA SNV SpliceAI cache",
-            "cache_key": key,
-            "grch38": entry.get("grch38", ""),
-            "variant": entry.get("variant", ""),
-            "scoring_profile_id": SPLICEAI_PROFILE_ID,
-            "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-            "distance": SPLICEAI_MAX_DISTANCE,
-            "mask": SPLICEAI_MASK,
-            "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-            "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-            "aggregation": SPLICEAI_AGGREGATION,
-        }
-    return None
+    return _score_entry_is_complete({**entry, "status": "ok"})
 
 
 def _score_row(row: dict) -> tuple[float, str]:
@@ -612,14 +452,10 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
     Returns a float score or None. None means unavailable, not 0.0.
     Benign criteria must only use confirmed scores <= 0.1.
 
-    Current API-primary lookup order:
+    Lookup order:
       1. In-memory cache (fast, within session)
-      2. Precomputed cache only when explicitly enabled after a complete rebuild
-      3. Persistent Broad API runtime cache
-      4. Broad SpliceAI API
-
-    The precomputed step is disabled by default while Appendix J caches are
-    being rebuilt, so legacy cache metadata do not degrade API-primary runs.
+      2. Persistent profile-pinned runtime cache
+      3. Configured ENIGMA-compatible SpliceAI API
     """
     variant_key = f"{gene}:{c_notation}"
     cache_key = _cache_key(gene, c_notation)
@@ -628,39 +464,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
     if cache_key in SPLICEAI_CACHE:
         return SPLICEAI_CACHE[cache_key]
 
-    # 2. precomputed BRCA coding SNV cache
-    precomputed = _lookup_precomputed_score(gene, c_notation)
-    if precomputed is not None:
-        score = precomputed["score"]
-        SPLICEAI_CACHE[cache_key] = score
-        SPLICEAI_STATUS_CACHE[variant_key] = {
-            "status": "ok",
-            "score": score,
-            "reason": "Loaded from local precomputed BRCA SNV SpliceAI cache",
-            "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
-            "selected_transcript": precomputed.get("selected_transcript"),
-            "reference_transcript_score": precomputed.get("reference_transcript_score"),
-            "max_any_transcript_score": precomputed.get("max_any_transcript_score"),
-            "max_any_transcript": precomputed.get("max_any_transcript", ""),
-            "max_delta_field": precomputed.get("max_delta_field", ""),
-            "delta_scores": precomputed.get("delta_scores", {}),
-            "reference_scores": precomputed.get("reference_scores", {}),
-            "alternate_scores": precomputed.get("alternate_scores", {}),
-            "cache_key": precomputed.get("cache_key"),
-            "source": precomputed.get("source"),
-            "grch38": precomputed.get("grch38"),
-            "variant": precomputed.get("variant"),
-            "scoring_profile_id": SPLICEAI_PROFILE_ID,
-            "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-            "distance": SPLICEAI_MAX_DISTANCE,
-            "mask": SPLICEAI_MASK,
-            "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-            "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-            "aggregation": SPLICEAI_AGGREGATION,
-        }
-        return score
-
-    # 3. persistent Broad API cache
+    # 2. persistent runtime cache
     api_cache = _load_api_cache()
     if cache_key in api_cache:
         entry = api_cache[cache_key]
@@ -670,8 +474,8 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             SPLICEAI_STATUS_CACHE[variant_key] = {
                 "status": "ok",
                 "score": score,
-                "reason": "Loaded from persistent Broad API runtime cache",
-                "source": entry.get("source") or entry.get("api_source") or "Broad SpliceAI API runtime cache",
+                "reason": "Loaded from persistent SpliceAI runtime cache",
+                "source": entry.get("source") or entry.get("api_source") or "SpliceAI runtime cache",
                 "transcript_policy": entry.get("transcript_policy"),
                 "selected_transcript": entry.get("selected_transcript"),
                 "reference_transcript_score": entry.get("reference_transcript_score"),
@@ -697,7 +501,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "ignored a runtime record created with an incompatible or incomplete scoring profile",
         )
 
-    # 4. need GRCh38 coords to call API
+    # 3. need GRCh38 coords to call API
     resolved = {}
     resolved_variant = resolve_variant(gene, c_notation)
     if resolved_variant and resolved_variant.status != "failed":
@@ -717,7 +521,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         }
         return None
 
-    # 5. live API call
+    # 4. live API call
     time.sleep(SPLICEAI_API_RATE_SLEEP)
     selected = _query_spliceai_api(
         gene, coords["chrom"], coords["pos"], coords["ref"], coords["alt"]
@@ -852,6 +656,11 @@ def variant_type_allows_spliceai_pp3(variant_type: str) -> bool:
 
 def variant_type_allows_spliceai_bp4(variant_type: str) -> bool:
     return normalize_variant_type(variant_type) in SPLICEAI_BP4_ALLOWED_TYPES
+
+
+def get_spliceai_status(gene: str, c_notation: str) -> dict:
+    """Return recorded provenance/status for the most recent score lookup."""
+    return dict(SPLICEAI_STATUS_CACHE.get(f"{gene}:{c_notation}", {}))
 
 def spliceai_lookup_report(gene: str, c_notation: str) -> dict:
     """

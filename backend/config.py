@@ -5,6 +5,14 @@
 from pathlib import Path
 import os
 
+from backend.gene_policy import (
+    GENE_POLICY_MANIFEST_PATH,
+    GENE_POLICY_METADATA_PATH,
+    active_genes,
+    domains_by_gene,
+    transcripts_by_gene,
+)
+
 # ── Paths ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -13,62 +21,23 @@ PANEL_REFERENCE_DIR = PROJECT_DIR / "data" / "reference" / "panel"
 
 TABLE4_PATH      = DATA_DIR / "enigma_table4.json"
 TABLE9_PATH      = DATA_DIR / "enigma_table9.json"
+ENIGMA_RULE_CATALOG_PATH = DATA_DIR / "enigma_rule_catalog.json"
+ENIGMA_RULE_DIAGRAMS_PATH = DATA_DIR / "enigma_rule_diagrams.json"
+ENIGMA_REFERENCE_TABLES_PATH = DATA_DIR / "enigma_reference_tables.json"
 ST7_PATH         = DATA_DIR / "st7_reference_set.json"
 PS1_PROTEIN_REGISTRY_PATH = DATA_DIR / "ps1_protein_reference_registry.json"
-PS1_SPLICE_REFERENCE_PATH = DATA_DIR / "splice_ps1_reference_set.json"
 ST2_SPLICE_EVIDENCE_PATH = DATA_DIR / "enigma_st2_splice_evidence.json"
 EXON_CNV_EVIDENCE_PATH = DATA_DIR / "exon_cnv_evidence.json"
 EXON_CNV_EVIDENCE_MANIFEST_PATH = (
     PROJECT_DIR / "data" / "sources" / "enigma" / "exon_cnv_evidence_manifest.json"
 )
 RESIDUES_PATH    = DATA_DIR / "clinically_important_residues.json"
-GNOMAD_CACHE_DIR = DATA_DIR / "gnomad_brca_cache"
-SPLICEAI_CACHE       = DATA_DIR / "spliceai_api_cache.json"
-BAYESDEL_CACHE_FILE  = DATA_DIR / "bayesdel_cache.json"
-COORDINATES_CACHE_FILE = DATA_DIR / "coordinates_cache.json"
 
 # ── ENIGMA VCEP v1.2 thresholds ───────────────────────────────────────────
-BA1_FAF_THRESHOLD        = 0.001
-BS1_STRONG_THRESHOLD     = 0.0001
-BS1_SUPPORTING_THRESHOLD = 0.00002
-PM2_MIN_COVERAGE         = 25
-
-BAYESDEL_THRESHOLDS = {
-    "BRCA1": {"pp3": 0.28, "bp4": 0.15},
-    "BRCA2": {"pp3": 0.30, "bp4": 0.18},
-}
-
-SPLICEAI_PP3_THRESHOLD = 0.2
-SPLICEAI_BP4_THRESHOLD = 0.1
-
-PP4_LR_THRESHOLDS = {
-    "Very Strong": 350,
-    "Strong":      18.7,
-    "Moderate":    4.3,
-    "Supporting":  2.08,
-}
-BP5_LR_THRESHOLDS = {
-    "Very Strong": 0.00285,
-    "Strong":      0.05,
-    "Moderate":    0.23,
-    "Supporting":  0.48,
-}
-
-CLASS_THRESHOLDS = {5: 10, 4: 6, 3: -1, 2: -6}
-
+_ACTIVE_GENES = active_genes()
 # ── Functional domains (ENIGMA Appendix Tables 3/4) ───────────────────────
 # RING starts at aa 2 per Appendix Table 3 (AA start=2)
-FUNCTIONAL_DOMAINS = {
-    "BRCA1": {
-        "RING":        (2, 101),
-        "coiled_coil": (1391, 1424),
-        "BRCT":        (1650, 1857),
-    },
-    "BRCA2": {
-        "PALB2_binding": (10, 40),
-        "DBD":           (2481, 3186),
-    },
-}
+FUNCTIONAL_DOMAINS = domains_by_gene()
 
 # ── External API URLs ──────────────────────────────────────────────────────
 SPLICEAI_API_URL     = "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/"
@@ -80,9 +49,5 @@ CLINVAR_EUTILS   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 CLINVAR_API_SLEEP = 0.4
 EREPO_BASE       = "https://erepo.clinicalgenome.org/evrepo/api"
 
-TRANSCRIPTS = {
-    "BRCA1": "NM_007294.4",
-    "BRCA2": "NM_000059.4",
-}
-
-ALLOWED_GENES = {"BRCA1", "BRCA2"}
+TRANSCRIPTS = transcripts_by_gene()
+ALLOWED_GENES = set(_ACTIVE_GENES)

@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260814-10">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260826-2">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>ARIANE</h1>
+            <div class="brand-line">
+                <h1>ARIANE</h1>
+                <span id="ariane-version" class="app-version-badge" aria-label="ARIANE application version">version loading</span>
+            </div>
             <p class="subtitle">Automated ACMG Rule-based Interpretation and Annotation ENgine</p>
             <p class="version">BRCA1/2 variant classification following ENIGMA VCEP v1.2</p>
         </div>
@@ -27,6 +30,8 @@
         <div class="mode-tabs">
             <button class="tab-btn" :class="{ active: mode === 'single' }" @click="mode = 'single'">Single variant</button>
             <button class="tab-btn" :class="{ active: mode === 'batch' }" @click="mode = 'batch'">Batch</button>
+            <button class="tab-btn" :class="{ active: mode === 'rules' }"
+                    @click="openRules((result?.criteria || []).find(c => c.decision_path)?.decision_path || null)">ENIGMA rules</button>
         </div>
 
         <!-- Search form (single mode) -->
@@ -35,9 +40,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="gene">Gene</label>
-                        <select id="gene" x-model="gene" @change="syncGeneFromVariantInput()" required>
-                            <option value="BRCA1">BRCA1</option>
-                            <option value="BRCA2">BRCA2</option>
+                        <select id="gene" x-model="gene" @change="syncGeneFromVariantInput()"
+                                x-on:change.debounce="loadManualDefinitions()" required>
+                            <template x-for="item in configuredGenes" :key="item.symbol">
+                                <option :value="item.symbol" x-text="item.symbol"></option>
+                            </template>
                         </select>
                     </div>
                     <div class="form-group form-group-wide">
@@ -78,7 +85,7 @@
             <p class="input-hint" x-show="resourceError" x-text="resourceError" style="color: var(--color-warning);"></p>
             <p class="input-hint">
                 Reference transcript:
-                <strong x-text="gene === 'BRCA1' ? 'NM_007294.4' : 'NM_000059.4'"></strong>.
+                <strong x-text="transcriptByGene[gene] || 'not configured'"></strong>.
                 ARIANE derives and verifies canonical c. and three-letter p. HGVS locally.
                 <span x-show="!isGenomicInput()">Genome assembly is not needed for c. HGVS.</span>
                 <span x-show="isGenomicInput()">Select GRCh37 or GRCh38 for the genomic coordinate.</span>
@@ -146,13 +153,32 @@
                         </p>
                     </div>
                 </div>
+                <template x-for="annotation in (result?.clinical_annotations || [])"
+                          :key="`${annotation.category}-${annotation.source_row}`">
+                    <aside class="clinical-annotation-strip"
+                           :class="`clinical-annotation-${annotation.category.replaceAll('_', '-')}`">
+                        <div>
+                            <strong x-text="annotation.label"></strong>
+                            <span x-text="annotation.summary"></span>
+                        </div>
+                        <div class="clinical-annotation-sources">
+                            <a :href="annotation.source_url" target="_blank" rel="noopener"
+                               x-text="annotation.source"></a>
+                            <template x-for="publication in annotation.publications"
+                                      :key="publication.pmid">
+                                <a :href="publication.url" target="_blank" rel="noopener"
+                                   x-text="publication.label"></a>
+                            </template>
+                        </div>
+                    </aside>
+                </template>
                 <div class="mixed-evidence-strip"
                      :class="'class-' + result?.predicted_class"
                      x-show="result?.mixed_evidence">
                     <strong>Mixed evidence.</strong>
                     Pathogenic and benign evidence co-occur. ENIGMA v1.2 second classification approach,
                     using Tavtigian 2020 points, was applied. Expert review required.
-                    <a href="https://cspec.genome.network/cspec/File/id/02537f62-66a3-4e67-8aec-cf44b326534d/data"
+                    <a href="https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data"
                        target="_blank" rel="noopener">
                         ENIGMA v1.2, Classification Methods, second approach
                     </a>
@@ -163,6 +189,12 @@
             <div class="criteria-section" x-show="result?.criteria?.length > 0">
                 <h3>Applied criteria</h3>
                 <table class="criteria-table">
+                    <colgroup>
+                        <col class="criterion-column">
+                        <col class="strength-column">
+                        <col class="points-column">
+                        <col class="reason-column">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Criterion</th>
@@ -173,11 +205,37 @@
                     </thead>
                     <tbody>
                         <template x-for="c in result?.criteria" :key="c.name">
-                            <tr>
-                                <td><span class="criterion-badge" x-text="c.name"></span></td>
-                                <td x-text="c.strength || '-'"></td>
-                                <td x-text="c.points"></td>
-                                <td class="reason-cell" x-text="c.reason"></td>
+                            <tr class="criterion-composite-row">
+                                <td colspan="4">
+                                    <div class="criterion-summary-grid">
+                                        <div><span class="criterion-badge" x-text="c.name"></span></div>
+                                        <div x-text="c.strength || '-'"></div>
+                                        <div x-text="c.points"></div>
+                                        <div class="reason-cell" x-text="c.reason"></div>
+                                    </div>
+                                    <details class="decision-path-details decision-path-wide" x-show="c.decision_path">
+                                        <summary>Show decision path</summary>
+                                        <div class="decision-path-graph" x-html="decisionPathSvg(c.decision_path)"></div>
+                                        <ol class="decision-path-list decision-path-accessible">
+                                            <template x-for="item in c.decision_path?.steps || []" :key="item.node_id">
+                                                <li>
+                                                    <strong x-text="item.question"></strong>
+                                                    <span class="decision-path-result" x-text="item.result.replaceAll('_', ' ')"></span>
+                                                    <small x-text="item.observed"></small>
+                                                </li>
+                                            </template>
+                                        </ol>
+                                        <div class="decision-path-links">
+                                            <template x-for="source in c.decision_path?.sources || []" :key="source.source_id">
+                                                <span class="decision-source-links">
+                                                    <a x-show="source.figure_url" :href="source.figure_url" target="_blank" rel="noopener">Open source figure</a>
+                                                    <a :href="source.url" target="_blank" rel="noopener" x-text="source.label"></a>
+                                                </span>
+                                            </template>
+                                            <button type="button" class="link-button" @click="openRules(c.decision_path)">Open full decision tree</button>
+                                        </div>
+                                    </details>
+                                </td>
                             </tr>
                         </template>
                     </tbody>
@@ -601,18 +659,80 @@
                                     <label>Lower confidence limit
                                         <input type="number" min="0" step="any" x-model="item.evidence.lower_ci">
                                     </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.case_control_country_matched">
+                                        Case and control datasets are country-matched
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.case_control_ethnicity_matched">
+                                        Case and control datasets are ethnicity-matched
+                                    </label>
                                 </div>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PM3' || item.code === 'BS2'">
                                     <label>ENIGMA evidence points
                                         <input type="number" min="0" step="0.5" x-model="item.evidence.evidence_points">
                                     </label>
+                                    <label>Co-occurring P/LP classification basis
+                                        <select x-model="item.evidence.cooccurring_variant_classification_basis">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="vcep_specifications">Classified using VCEP specifications</option>
+                                            <option value="other">Other or not verified</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.code === 'PM3'">Population evidence review for the assessed variant
+                                        <select x-model="item.evidence.vua_benign_population_review">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="does_not_meet">Does not meet a benign population evidence code</option>
+                                            <option value="meets">Meets a benign population evidence code</option>
+                                        </select>
+                                    </label>
                                 </div>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PP1' || item.code === 'BS4'">
-                                    <label>Likelihood ratio
+                                    <label x-show="item.code === 'PP1'">Likelihood ratio
                                         <input type="number" min="0" step="any" x-model="item.evidence.likelihood_ratio">
                                     </label>
+                                    <label x-show="item.code === 'BS4'">Reported combined likelihood ratio
+                                        <input type="number" min="0" step="any" x-model="item.evidence.likelihood_ratio">
+                                    </label>
+                                    <label x-show="item.code === 'PP1'">
+                                        Effect evidence relevant to PP1 Very Strong
+                                        <select x-model="item.evidence.very_strong_effect_basis">
+                                            <option value="">Not documented</option>
+                                            <option value="predicted_protein">Predicted protein effect</option>
+                                            <option value="predicted_splicing">Predicted mRNA splicing effect</option>
+                                            <option value="experimental_protein">Experimentally proven protein effect</option>
+                                            <option value="experimental_splicing">Experimentally proven mRNA splicing effect</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="bs4-lr-components" x-show="item.code === 'BS4'">
+                                    <p class="field-hint">
+                                        A reported combined LR is sufficient to derive BS4 strength. To let BS4 Strong qualify as the sole Strong code for Likely Benign under ENIGMA Table 3, record at least two independent LR components. Their product must equal the reported combined LR.
+                                    </p>
+                                    <template x-for="(component, componentIndex) in (item.evidence.likelihood_ratio_components || [])" :key="componentIndex">
+                                        <div class="bs4-lr-component-row">
+                                            <label>Component LR
+                                                <input type="number" min="0" step="any" x-model="component.likelihood_ratio">
+                                            </label>
+                                            <label>Source
+                                                <input type="text" x-model="component.source" placeholder="Family, publication or analysis record">
+                                            </label>
+                                            <label>Independence group
+                                                <input type="text" x-model="component.independence_group" placeholder="Unique family or cohort identifier">
+                                            </label>
+                                            <button type="button" class="btn-secondary bs4-remove-component"
+                                                @click="item.evidence.likelihood_ratio_components.splice(componentIndex, 1)">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <button type="button" class="btn-secondary"
+                                        @click="item.evidence.likelihood_ratio_components.push({ likelihood_ratio: '', source: '', independence_group: '' })">
+                                        Add LR component
+                                    </button>
                                 </div>
 
                                 <div x-show="item.code === 'PP1' || item.code === 'PS4'">
@@ -736,11 +856,13 @@
                                             <option value="not_applicable">Not applicable</option>
                                         </select>
                                     </label>
-                                    <label x-show="item.code === 'BP7_RNA'" class="checkbox-label">
-                                        <input type="checkbox" x-model="item.evidence.bp7_rna_eligible">
-                                        Meets BP7_Strong (RNA) eligibility stipulations
-                                    </label>
                                 </div>
+
+                                <p class="field-hint" x-show="item.code === 'BP7_RNA'">
+                                    ARIANE checks BP7 Strong (RNA) against the classified variant. A missense variant inside an ENIGMA functional domain must already meet BS3 through calibrated Table 9 evidence. This condition cannot be confirmed by a manual checkbox.
+                                </p>
+                                <p class="curation-warning" x-show="item.code === 'BP7_RNA' && result?.bp7_rna_context && !result.bp7_rna_context.eligible"
+                                    x-text="result?.bp7_rna_context?.reason || ''"></p>
 
                                 <label class="full-width-label" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
                                     RNA transcript result summary
@@ -799,18 +921,32 @@
 
                                 <div x-show="item.code === 'PS1_SPLICE'" class="reference-helper">
                                     <label class="full-width-label">
-                                        Candidate reference variant from pilot set
+                                        Candidate reference variant from ENIGMA ST2
                                         <select x-model="item.evidence.splice_ps1_candidate_key"
-                                            @change="applySplicePs1Candidate(item)">
-                                            <option value="">Select a candidate to prefill reference fields</option>
+                                            @change="applySplicePs1CandidateFacts(item)">
+                                            <option value="">Select a candidate to prefill factual source fields</option>
                                             <template x-for="candidate in splicePs1CandidatesForCurrentGene()" :key="candidate.key">
                                                 <option :value="candidate.key" x-text="splicePs1CandidateLabel(candidate)"></option>
                                             </template>
                                         </select>
                                         <span class="field-hint">
-                                            Pilot candidates are copied from the ENIGMA ST2 splicing dataset and require expert review before PS1(splice) use.
+                                            <strong>Candidate discovery only.</strong>
+                                            The ST2 record does not confirm PS1 eligibility, the same splice event for this variant, or the applicable Appendix J/Table 17 strength.
                                         </span>
                                     </label>
+                                    <details class="ps1-splice-guidance">
+                                        <summary>Why PS1 cannot be assigned from ST2 alone</summary>
+                                        <p>ENIGMA additionally requires:</p>
+                                        <ul>
+                                            <li>a reference P/LP classification assigned using VCEP specifications;</li>
+                                            <li>precisely the same splice event in the assessed and reference variants;</li>
+                                            <li>a splice prediction for the assessed variant that is similar to or stronger than the reference prediction;</li>
+                                            <li>the correct Appendix J/Table 17 branch based on the positions of both variants within the donor or acceptor motif;</li>
+                                            <li>the assessed variant's baseline PP3 or PVS1 result to be included in the Table 17 decision;</li>
+                                            <li>review of any concurrent protein-level consequence for an exonic variant.</li>
+                                        </ul>
+                                        <p>ARIANE therefore leaves same-event confirmation, prediction comparison and PS1 strength for manual review.</p>
+                                    </details>
                                 </div>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PS1_SPLICE'">
@@ -831,11 +967,11 @@
                                     </label>
                                     <label>Reference event type
                                         <input type="text" x-model="item.evidence.reference_event_type"
-                                            placeholder="Filled from pilot candidate when available">
+                                            placeholder="e.g. exon skipping, cryptic splice-site use">
                                     </label>
                                     <label>Reference assay/context
                                         <input type="text" x-model="item.evidence.reference_assay_result_category"
-                                            placeholder="Filled from pilot candidate when available">
+                                            placeholder="Describe the RNA assay and biological context">
                                     </label>
                                     <label class="checkbox-label">
                                         <input type="checkbox" x-model="item.evidence.same_splice_event_confirmed">
@@ -856,13 +992,8 @@
                                             <option value="Moderate">Moderate</option>
                                             <option value="Strong">Strong</option>
                                         </select>
-                                        <span class="field-hint" x-show="!item.evidence.ps1_splice_prefill_suggestion">
+                                        <span class="field-hint">
                                             Select manually from ENIGMA Appendix J/Table 17; ARIANE does not infer this strength automatically.
-                                        </span>
-                                        <span class="field-hint" x-show="item.evidence.ps1_splice_prefill_suggestion">
-                                            Prefilled suggestion:
-                                            <strong x-text="item.evidence.ps1_splice_prefill_suggestion"></strong>.
-                                            Reviewer must confirm ENIGMA Appendix J/Table 17.
                                         </span>
                                     </label>
                                 </div>
@@ -877,12 +1008,6 @@
                                     <textarea rows="2" x-model="item.evidence.reference_splice_event"
                                         placeholder="Describe the reference variant splice event and why it matches the VUA event."></textarea>
                                 </label>
-                                <p class="curation-warning" x-show="item.code === 'PS1_SPLICE' && item.evidence.reference_curation_status">
-                                    <strong>Reference set status:</strong>
-                                    <span x-text="item.evidence.reference_curation_status"></span>
-                                    <span x-show="item.evidence.reference_curation_note"> - </span>
-                                    <span x-text="item.evidence.reference_curation_note"></span>
-                                </p>
                                 <label class="full-width-label" x-show="item.code === 'PS1_SPLICE'">
                                     PS1(splice) rationale
                                     <textarea rows="3" x-model="item.evidence.ps1_splice_rationale"
@@ -893,6 +1018,14 @@
                                     <label>Reference P/LP variant
                                         <input type="text" x-model="item.evidence.reference_variant">
                                     </label>
+                                    <div class="ps1-reference-action">
+                                        <button type="button" class="btn-secondary"
+                                            @click="resolveProteinPs1Reference(item)"
+                                            :disabled="ps1ReferenceLoading">
+                                            <span x-text="ps1ReferenceLoading ? 'Checking reference...' : 'Complete reference facts'"></span>
+                                        </button>
+                                        <span class="field-hint">Enter c. HGVS, for example c.5217T&gt;G.</span>
+                                    </div>
                                     <label>Reference protein consequence
                                         <input type="text" x-model="item.evidence.reference_p_notation">
                                     </label>
@@ -960,6 +1093,12 @@
                                         </select>
                                     </label>
                                 </div>
+                                <p class="field-hint ps1-resolution-message"
+                                    x-show="item.code === 'PS1_PROTEIN' && ps1ReferenceMessage"
+                                    x-text="ps1ReferenceMessage"></p>
+                                <p class="inline-error"
+                                    x-show="item.code === 'PS1_PROTEIN' && ps1ReferenceError"
+                                    x-text="ps1ReferenceError"></p>
                                 <p class="field-hint" x-show="item.code === 'PS1_PROTEIN'">
                                     Defined sources:
                                     <span x-text="(item.evidence.splice_sources_checked || []).join(', ') || 'not recorded'"></span>.
@@ -983,19 +1122,8 @@
 
                                 <div class="strength-row">
                                     <span>
-                                        ARIANE suggestion:
-                                        <strong x-text="suggestedManualStrength(item) || 'threshold not met'"></strong>
+                                        Criterion strength is calculated by the backend after the evidence is submitted.
                                     </span>
-                                    <label x-show="item.code !== 'PP4' && item.code !== 'PVS1_RNA' && item.code !== 'BP7_RNA' && item.code !== 'PVS1_INIT' && item.code !== 'PS1_SPLICE' && item.code !== 'PS1_PROTEIN'">Reviewer-selected strength
-                                        <select x-model="item.override_strength">
-                                            <option value="">Use ARIANE suggestion</option>
-                                            <template
-                                                x-for="strength in (manualDefinition(item.code)?.allowed_strengths || [])"
-                                                :key="strength">
-                                                <option :value="strength" x-text="strength"></option>
-                                            </template>
-                                        </select>
-                                    </label>
                                 </div>
 
                                 <details class="checklist-details">
@@ -1101,7 +1229,6 @@
                                         <td x-text="criterion.suggested_strength || 'threshold not met'"></td>
                                         <td>
                                             <span x-text="criterion.selected_strength"></span>
-                                            <span class="override-flag" x-show="criterion.overridden">reviewer override</span>
                                         </td>
                                         <td x-text="criterion.points"></td>
                                     </tr>
@@ -1139,9 +1266,14 @@
                 <div class="external-content" x-show="open" x-transition>
 
                     <!-- ClinVar aggregate -->
-                    <div class="external-block" x-show="result?.external?.clinvar_classification">
+                    <div class="external-block">
                         <h4>ClinVar</h4>
-                        <table class="detail-table">
+                        <p class="external-source-status"
+                           x-text="result?.external?.clinvar_message || 'ClinVar status was not reported.'"></p>
+                        <p class="external-source-error"
+                           x-show="result?.external?.clinvar_error"
+                           x-text="result?.external?.clinvar_error"></p>
+                        <table class="detail-table" x-show="result?.external?.clinvar_classification">
                             <tr>
                                 <td>Aggregate classification</td>
                                 <td x-text="result?.external?.clinvar_classification"></td>
@@ -1206,9 +1338,15 @@
                     </div>
 
                     <!-- ENIGMA EP comparison -->
-                    <div class="external-block" x-show="result?.external?.enigma_ep_class">
+                    <div class="external-block">
                         <h4>ENIGMA Expert Panel</h4>
-                        <table class="detail-table">
+                        <p class="external-source-status"
+                           x-show="!result?.external?.enigma_ep_class"
+                           x-text="result?.external?.clingen_message || 'ClinGen ERepo status was not reported.'"></p>
+                        <p class="external-source-error"
+                           x-show="result?.external?.clingen_error"
+                           x-text="result?.external?.clingen_error"></p>
+                        <table class="detail-table" x-show="result?.external?.enigma_ep_class">
                             <tr>
                                 <td>ENIGMA EP classification</td>
                                 <td x-text="result?.external?.enigma_ep_class"></td>
@@ -1218,6 +1356,9 @@
                                 <td x-text="result?.external?.enigma_ep_source"></td>
                             </tr>
                         </table>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_evidence_codes?.length"
+                           x-text="'ClinGen evidence codes: ' + result.external.erepo_evidence_codes.join(', ')"></p>
                     </div>
 
                 </div>
@@ -1244,6 +1385,278 @@
                 </div>
             </div>
 
+        </section>
+
+        <!-- ENIGMA rules explorer -->
+        <section class="rules-section" x-show="mode === 'rules'">
+            <div class="rules-header">
+                <div>
+                    <h2>ENIGMA rules used by ARIANE</h2>
+                    <p x-show="rulesCatalog">
+                        ClinGen ENIGMA BRCA1/2 VCEP
+                        <strong x-text="rulesCatalog?.criteria_specification_version"></strong>,
+                        released <span x-text="rulesCatalog?.release_date"></span>.
+                    </p>
+                </div>
+                <a x-show="rulesCatalog" :href="rulesCatalog?.registry_url" target="_blank" rel="noopener">Official specification</a>
+            </div>
+
+            <p class="rules-status" x-show="rulesLoading">Loading validated rules and data sources...</p>
+            <p class="rules-status rules-error" x-show="rulesError" x-text="rulesError"></p>
+
+            <div class="rules-subtabs" x-show="rulesCatalog">
+                <button :class="{ active: rulesView === 'trees' }" @click="rulesView = 'trees'">Decision trees</button>
+                <button :class="{ active: rulesView === 'figures' }" @click="rulesView = 'figures'">Original figures</button>
+                <button :class="{ active: rulesView === 'tables' }"
+                        @click="rulesView = 'tables'; ensureReferenceTableSelected()">Tables</button>
+                <button :class="{ active: rulesView === 'sources' }" @click="rulesView = 'sources'">Sources and versions</button>
+            </div>
+
+            <div x-show="rulesView === 'trees' && rulesTree" class="rules-panel">
+                <div class="rule-tree-selector">
+                    <label for="rule-tree-select">Decision diagram</label>
+                    <select id="rule-tree-select" x-model="selectedRuleTreeId"
+                            @change="selectRuleTree(selectedRuleTreeId)">
+                        <template x-for="tree in rulesCatalog?.decision_trees || []" :key="tree.id">
+                            <option :value="tree.id" x-text="ruleTreeOptionLabel(tree)"></option>
+                        </template>
+                    </select>
+                </div>
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3 x-text="rulesTree?.title"></h3>
+                        <p x-text="rulesTree?.description"></p>
+                        <p class="diagram-provenance"
+                           :class="rulesTree?.diagram_provenance === 'official_redraw' ? 'official' : 'derived'">
+                            <strong x-text="rulesTree?.diagram_provenance === 'official_redraw' ? 'Official ENIGMA figure redrawn' : 'ARIANE decision path derived from ENIGMA rules'"></strong>
+                            <span x-text="rulesTree?.source_location"></span>
+                        </p>
+                    </div>
+                    <div class="rules-heading-links">
+                        <template x-for="figure in selectedRuleOriginalFigures()" :key="figure.id">
+                            <a :href="figure.asset_url" target="_blank" rel="noopener"
+                               x-text="'Open original ' + figure.title"></a>
+                        </template>
+                        <a :href="(rulesCatalog?.sources || []).find(s => s.id === rulesTree?.source_id)?.official_url"
+                           target="_blank" rel="noopener">Open complete specification</a>
+                    </div>
+                </div>
+                <p class="rules-highlight-note" x-show="highlightedRulePath?.tree_id === selectedRuleTreeId && highlightedRulePath?.branch_id === selectedRuleBranch">
+                    The coloured nodes and connectors show the path used for the selected applied criterion.
+                </p>
+                <div class="rule-path-context" x-show="highlightedRulePath?.tree_id === selectedRuleTreeId">
+                    <div class="rule-path-context-heading">
+                        <div>
+                            <span>Selected variant path</span>
+                            <strong x-text="result?.variant || highlightedRulePath?.criterion"></strong>
+                        </div>
+                        <span class="rule-path-criterion" x-text="highlightedRulePath?.criterion"></span>
+                    </div>
+                    <div class="rule-path-facts">
+                        <template x-for="item in highlightedRulePath?.steps || []" :key="item.node_id">
+                            <span>
+                                <b x-text="edgeDisplayLabel(item.result)"></b>
+                                <small x-text="item.observed"></small>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+                <div class="rule-path-selector" x-show="resultDecisionPaths().length > 1">
+                    <span>Show path for:</span>
+                    <template x-for="criterion in resultDecisionPaths()" :key="criterion.name">
+                        <button type="button"
+                                :class="{ active: highlightedRulePath?.criterion === criterion.name }"
+                                @click="selectResultDecisionPath(criterion)"
+                                x-text="criterion.name"></button>
+                    </template>
+                </div>
+                <p class="rules-no-path" x-show="!highlightedRulePath || highlightedRulePath?.tree_id !== selectedRuleTreeId || highlightedRulePath?.branch_id !== selectedRuleBranch">
+                    <span x-show="!highlightedRulePath || highlightedRulePath?.tree_id !== selectedRuleTreeId">General rule view. Classify a variant, then open a criterion's decision path to highlight the route supported by its evidence.</span>
+                    <span x-show="highlightedRulePath?.tree_id === selectedRuleTreeId && highlightedRulePath?.branch_id !== selectedRuleBranch">
+                        General view of this branch. The selected variant follows the
+                        <strong x-text="ruleBranchTitle(highlightedRulePath?.branch_id)"></strong> branch.
+                    </span>
+                </p>
+                <div class="tree-branch-tabs" role="tablist" aria-label="Decision diagram branch">
+                    <template x-for="branch in rulesTree?.branches || []" :key="branch.id">
+                        <button type="button" role="tab"
+                                :aria-selected="selectedRuleBranch === branch.id"
+                                :class="{ active: selectedRuleBranch === branch.id }"
+                                @click="selectedRuleBranch = branch.id"
+                                x-text="branch.title"></button>
+                    </template>
+                </div>
+                <div class="decision-tree-canvas" x-show="selectedTreeBranch()">
+                    <div x-html="decisionTreeSvg(selectedTreeBranch(), highlightedRulePath?.tree_id === selectedRuleTreeId ? highlightedRulePath : null)"></div>
+                </div>
+                <div class="tree-legend">
+                    <span><i class="legend-entry"></i> Variant type</span>
+                    <span><i class="legend-decision"></i> Decision</span>
+                    <span><i class="legend-outcome"></i> Outcome</span>
+                    <span><i class="legend-active"></i> Path used for this result</span>
+                </div>
+                <div class="condition-definitions" x-show="(rulesTree?.condition_definitions || []).length">
+                    <h4>Key</h4>
+                    <template x-for="condition in rulesTree?.condition_definitions || []" :key="condition.id">
+                        <div>
+                            <strong x-text="condition.label"></strong>
+                            <span x-text="condition.notes || ''"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'figures' && rulesCatalog" class="rules-panel">
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3>Original ENIGMA figures</h3>
+                        <p>Original panels extracted from the checksum-validated ENIGMA Specifications and Appendix v1.2 documents.</p>
+                    </div>
+                    <a :href="(rulesCatalog?.sources || []).find(s => s.id === 'enigma-v1.2-specifications')?.official_url"
+                       target="_blank" rel="noopener">Open complete specification</a>
+                </div>
+                <div class="rules-figure-gallery">
+                    <template x-for="figure in rulesCatalog?.figures || []" :key="figure.id">
+                        <figure class="rules-figure-card">
+                            <figcaption x-text="figure.title"></figcaption>
+                            <a :href="figure.asset_url" target="_blank" rel="noopener" :aria-label="'Open ' + figure.title + ' at full size'">
+                                <img :src="figure.asset_url" :alt="figure.title" loading="lazy">
+                            </a>
+                        </figure>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'tables' && rulesCatalog" class="rules-panel">
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3>ENIGMA tables</h3>
+                        <p>
+                            ENIGMA tables used by ARIANE are shown first. The complete
+                            <strong x-text="rulesCatalog?.tables?.table_count"></strong>-table v1.2 source bundle
+                            remains available for expert review and audit.
+                        </p>
+                    </div>
+                    <a :href="referenceTableSourceUrl()" target="_blank" rel="noopener">Open official source</a>
+                </div>
+
+                <div class="reference-table-groups" role="tablist" aria-label="ENIGMA table role">
+                    <template x-for="role in referenceTableRoles()" :key="role.id">
+                        <button type="button" role="tab"
+                                :class="{ active: selectedReferenceTableRole === role.id }"
+                                :aria-selected="selectedReferenceTableRole === role.id"
+                                :title="role.description"
+                                @click="selectReferenceTableRole(role.id)">
+                            <span x-text="role.title"></span>
+                            <small x-text="role.table_count"></small>
+                        </button>
+                    </template>
+                </div>
+
+                <div class="reference-table-controls">
+                    <label>
+                        <span>Table</span>
+                        <select x-model="selectedReferenceTableId"
+                                @change="selectReferenceTable(selectedReferenceTableId)">
+                            <template x-for="table in referenceTablesForRole()" :key="table.id">
+                                <option :value="table.id"
+                                        x-text="referenceTableOptionLabel(table)"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label x-show="(selectedReferenceTable()?.sections || []).length > 1">
+                        <span>Worksheet</span>
+                        <select x-model="selectedReferenceSectionId"
+                                @change="selectReferenceSection(selectedReferenceSectionId)">
+                            <template x-for="section in selectedReferenceTable()?.sections || []" :key="section.id">
+                                <option :value="section.id" x-text="section.title"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <form class="reference-table-search" @submit.prevent="searchReferenceTable(1)">
+                        <label>
+                            <span>Search this table</span>
+                            <input x-model="referenceTableQuery" type="search"
+                                   placeholder="Variant, criterion, PMID or text">
+                        </label>
+                        <button type="submit" class="btn-primary">Search</button>
+                    </form>
+                </div>
+
+                <article class="reference-table-summary" x-show="selectedReferenceTable()">
+                    <div>
+                        <h4 x-text="selectedReferenceTable()?.title"></h4>
+                        <p x-text="selectedReferenceTable()?.usage_text"></p>
+                        <p x-show="selectedReferenceTable()?.consumer">
+                            <strong>ARIANE use:</strong>
+                            <span x-text="selectedReferenceTable()?.consumer"></span>
+                        </p>
+                    </div>
+                    <span class="reference-table-usage" :class="selectedReferenceTable()?.usage"
+                          x-text="referenceTableUsageLabel()"></span>
+                </article>
+
+                <p class="reference-table-note" x-text="rulesCatalog?.tables?.description"></p>
+                <p class="rules-status" x-show="referenceTableLoading">Loading table rows...</p>
+                <p class="rules-status rules-error" x-show="referenceTableError" x-text="referenceTableError"></p>
+
+                <div class="reference-table-grid-wrap" x-show="!referenceTableLoading && !referenceTableError">
+                    <table class="reference-table-grid">
+                        <thead>
+                            <tr>
+                                <th scope="col">Row</th>
+                                <template x-for="column in referenceTableColumns" :key="column">
+                                    <th scope="col" x-text="column"></th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="row in referenceTableItems" :key="row.source_row">
+                                <tr>
+                                    <th scope="row" x-text="row.source_row"></th>
+                                    <template x-for="(cell, cellIndex) in row.cells" :key="cellIndex">
+                                        <td x-text="referenceCellText(cell)"
+                                            :title="referenceCellFormula(cell)"></td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="reference-table-empty"
+                   x-show="!referenceTableLoading && !referenceTableError && referenceTableItems.length === 0">
+                    No rows match this search.
+                </p>
+                <div class="table9-pagination" x-show="!referenceTableError">
+                    <button class="btn-secondary" @click="searchReferenceTable(referenceTablePage - 1)"
+                            :disabled="referenceTablePage <= 1 || referenceTableLoading">Previous</button>
+                    <span>
+                        <strong x-text="referenceTableTotal"></strong> rows,
+                        page <b x-text="referenceTablePage"></b> of <b x-text="referenceTableLastPage()"></b>
+                    </span>
+                    <button class="btn-secondary" @click="searchReferenceTable(referenceTablePage + 1)"
+                            :disabled="referenceTablePage >= referenceTableLastPage() || referenceTableLoading">Next</button>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'sources' && rulesCatalog" class="rules-panel">
+                <h3>Validated sources and versions</h3>
+                <p class="panel-intro">Checksums identify the exact official files used to build and verify ARIANE data. Local server paths are not exposed.</p>
+                <div class="rules-source-grid">
+                    <template x-for="source in rulesCatalog?.sources || []" :key="source.id">
+                        <article class="rules-source-card">
+                            <h4 x-text="source.title"></h4>
+                            <p x-text="source.role"></p>
+                            <dl>
+                                <dt>Version</dt><dd x-text="source.version"></dd>
+                                <dt>SHA256</dt><dd><code x-text="source.sha256"></code></dd>
+                                <dt x-show="source.runtime_rows">Runtime records</dt><dd x-show="source.runtime_rows" x-text="source.runtime_rows"></dd>
+                            </dl>
+                            <a :href="source.official_url" target="_blank" rel="noopener">Open official source</a>
+                        </article>
+                    </template>
+                </div>
+            </div>
         </section>
 
         <!-- Batch mode -->
@@ -1341,12 +1754,12 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
 
     <footer>
         <div class="container">
-            <p>ARIANE v1.8.0 - Classification follows ENIGMA VCEP v1.2 (2024-11-18).
+            <p>ARIANE <span id="ariane-footer-version">version loading</span> - Classification follows ENIGMA VCEP v1.2 (2024-11-18).
                External comparison is read-only and does not influence the predicted class.</p>
             <p>This tool is a research prototype. Do not use for clinical decisions without expert review.</p>
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260814-11"></script>
+    <script src="/static/js/app.js?v=20260826-2"></script>
 </body>
 </html>

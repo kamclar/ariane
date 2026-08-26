@@ -12,6 +12,7 @@ from backend.modules.utils import (
     get_intron_offset_from_c_notation,
 )
 from backend.modules.table4 import (
+    TABLE4_DATA,
     table4_lookup_splice,
     parse_pvs1_code_strength,
     table4_lookup_pvs1_ptc,
@@ -20,6 +21,60 @@ from backend.modules.table4 import (
     parse_exon_from_deletion_notation,
     parse_exon_from_duplication_notation,
 )
+from backend.gene_policy import (
+    decision_asset,
+    pvs1_thresholds,
+    spliceai_thresholds,
+    vcep_specification,
+)
+
+
+APPENDIX_URL = (
+    "https://cspec.genome.network/cspec/File/id/"
+    "9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
+)
+
+
+def _pvs1_path(
+    *,
+    gene: str,
+    branch_id: str,
+    outcome_node: str,
+    steps: List[Dict[str, str]],
+) -> Dict:
+    specification = vcep_specification(gene)
+    if branch_id == "canonical-splice-outcome":
+        tree_id = "appendix-pvs1-splice"
+        asset = decision_asset(gene, "PVS1", "splice")
+    else:
+        tree_id = "appendix-pvs1-nonsplice"
+        asset = decision_asset(gene, "PVS1", "nonsplice")
+    figure_number = asset["figure_number"]
+    figure_url = asset["figure_url"]
+    return {
+        "tree_id": tree_id,
+        "tree_version": "ENIGMA VCEP 1.2.0",
+        "branch_id": branch_id,
+        "criterion": "PVS1",
+        "outcome": "applied",
+        "outcome_node": outcome_node,
+        "steps": steps,
+        "sources": [
+            {
+                "source_id": "enigma-v1.2-appendix",
+                "label": f"VCEP {specification['id']} Appendix v{specification['version']}",
+                "url": APPENDIX_URL,
+                "location": f"Figure {figure_number}",
+                "figure_url": figure_url,
+            },
+            {
+                "source_id": "enigma-v1.2-table4",
+                "label": "ENIGMA Specifications Table 4 v1.2",
+                "url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
+                "location": "Exact gene/exon rule",
+            },
+        ],
+    }
 
 
 def _termination_aa_position(p_notation: str) -> Optional[int]:
@@ -58,7 +113,7 @@ def evaluate_pvs1(
         "exon": None,
         "pm5_exon": None,
         "pvs1_code": None,
-        "source": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
+        "source": vcep_specification(gene)["url"],
     }
 
     lof_types = [
@@ -114,6 +169,33 @@ def evaluate_pvs1(
                 if requires_rna:
                     result["reason"] += " (requires RNA confirmation)"
 
+            if result["applies"]:
+                result["decision_path"] = _pvs1_path(
+                    gene=gene,
+                    branch_id="canonical-splice-outcome",
+                    outcome_node="splice-table4",
+                    steps=[
+                        {
+                            "node_id": "splice-coding",
+                            "question": "Predicted alteration affects coding sequence?",
+                            "result": "yes",
+                            "observed": table4_splice["reason"],
+                        },
+                        {
+                            "node_id": "splice-consequence",
+                            "question": "Predicted splice consequence?",
+                            "result": "predicted_alteration",
+                            "observed": str(table4_splice.get("notes") or "Table 4 splice consequence"),
+                        },
+                        {
+                            "node_id": "splice-transcript",
+                            "question": "Biologically relevant transcript and critical region assessment",
+                            "result": "table4",
+                            "observed": f"{gene} {table4_splice['exon']}: {pvs1_code}",
+                        },
+                    ],
+                )
+
             return result
 
         # Fallback: parse intron offset and use generic rules
@@ -136,11 +218,12 @@ def evaluate_pvs1(
                 f"NOT FOUND in Table 4. Manual review required. "
                 f"Do not auto-apply PVS1 for BRCA splice variants."
             )
-            if spliceai_score is not None and spliceai_score < 0.1:
+            splice_low = spliceai_thresholds(gene)["bp4"]
+            if spliceai_score is not None and spliceai_score < splice_low:
                 result["applies"] = False
                 result["strength"] = None
                 result["points"] = 0
-                result["reason"] = f"Canonical splice but SpliceAI {spliceai_score:.3f} < 0.1 - flag for review"
+                result["reason"] = f"Canonical splice but SpliceAI {spliceai_score:.3f} < {splice_low} - flag for review"
         else:
             score_str = f"{spliceai_score:.3f}" if spliceai_score is not None else "N/A"
             result["reason"] = (
@@ -183,6 +266,44 @@ def evaluate_pvs1(
             result["pm5_points"] = table4_result["pm5_points"]
             result["pm5_exon"] = table4_result.get("pm5_exon")
 
+        if result["applies"]:
+            nmd_boundary = pvs1_thresholds(gene)["nmd_boundary_c_first_not_predicted"]
+            estimated_ptc_c = (
+                (termination_aa * 3 - 2) if termination_aa is not None else cds_pos
+            )
+            nmd_predicted = estimated_ptc_c < nmd_boundary
+            branch_steps: List[Dict[str, str]] = [
+                {
+                    "node_id": "pvs-ptc-nmd",
+                    "question": "Is nonsense-mediated decay predicted?",
+                    "result": "yes" if nmd_predicted else "no",
+                    "observed": (
+                        f"Predicted termination near c.{estimated_ptc_c}; "
+                        f"gene-specific NMD boundary c.{nmd_boundary - 1}_c.{nmd_boundary}"
+                    ),
+                }
+            ]
+            if nmd_predicted:
+                branch_steps.append({
+                    "node_id": "pvs-ptc-transcript",
+                    "question": "Variant present in a biologically relevant transcript?",
+                    "result": "present",
+                    "observed": f"Table 4 {gene} {table4_result['exon']} -> {table4_result['pvs1_code']}",
+                })
+            else:
+                branch_steps.append({
+                    "node_id": "pvs-ptc-critical",
+                    "question": "Is the truncated or altered region critical to protein function?",
+                    "result": "yes",
+                    "observed": table4_result["reason"],
+                })
+            result["decision_path"] = _pvs1_path(
+                gene=gene,
+                branch_id="nonsense-frameshift",
+                outcome_node="pvs-ptc-table4",
+                steps=branch_steps,
+            )
+
         return result
 
     # ---- Exon deletion ----
@@ -203,6 +324,50 @@ def evaluate_pvs1(
                 else:
                     result["applies"] = False
                     result["reason"] = del_result["reason"]
+                if result["applies"]:
+                    exon_range = TABLE4_DATA.get("exon_ranges", {}).get(gene, {}).get(exon)
+                    exon_length = (
+                        exon_range[1] - exon_range[0] + 1
+                        if isinstance(exon_range, list) and len(exon_range) == 2
+                        else None
+                    )
+                    in_frame = exon_length is not None and exon_length % 3 == 0
+                    steps: List[Dict[str, str]] = [
+                        {
+                            "node_id": "pvs-del-full",
+                            "question": "Full gene deletion?",
+                            "result": "no",
+                            "observed": f"Single-exon Table 4 lookup: {exon}",
+                        },
+                        {
+                            "node_id": "pvs-del-domain",
+                            "question": "Targets a gene-specific critical coding exon?",
+                            "result": "assessed",
+                            "observed": del_result["reason"],
+                        },
+                        {
+                            "node_id": "pvs-del-frame",
+                            "question": "Predicted consequence: PTC or in-frame?",
+                            "result": "in_frame" if in_frame else "ptc",
+                            "observed": (
+                                f"Coding length {exon_length} nt" if exon_length is not None
+                                else "Reading-frame status represented by Table 4"
+                            ),
+                        },
+                    ]
+                    if in_frame:
+                        steps.append({
+                            "node_id": "pvs-del-size",
+                            "question": "How much coding sequence is removed?",
+                            "result": "table4",
+                            "observed": f"Exact {gene} {exon} deletion rule",
+                        })
+                    result["decision_path"] = _pvs1_path(
+                        gene=gene,
+                        branch_id="exon-deletion",
+                        outcome_node="pvs-del-table4",
+                        steps=steps,
+                    )
                 return result
 
         result["applies"] = False
@@ -231,6 +396,45 @@ def evaluate_pvs1(
                 else:
                     result["applies"] = False
                     result["reason"] = dup_result["reason"]
+                if result["applies"]:
+                    exon_range = TABLE4_DATA.get("exon_ranges", {}).get(gene, {}).get(exon)
+                    exon_length = (
+                        exon_range[1] - exon_range[0] + 1
+                        if isinstance(exon_range, list) and len(exon_range) == 2
+                        else None
+                    )
+                    in_frame = exon_length is not None and exon_length % 3 == 0
+                    steps = [
+                        {
+                            "node_id": "pvs-dup-tandem",
+                            "question": "Tandem arrangement proven, presumed, or excluded?",
+                            "result": "proven_or_presumed",
+                            "observed": f"Duplication arrangement: {dup_type}",
+                        },
+                        {
+                            "node_id": "pvs-dup-frame",
+                            "question": "PTC or reading frame preserved?",
+                            "result": "in_frame" if in_frame else "ptc",
+                            "observed": (
+                                f"Duplicated coding length {exon_length} nt"
+                                if exon_length is not None
+                                else "Reading-frame status represented by Table 4"
+                            ),
+                        },
+                    ]
+                    if in_frame:
+                        steps.append({
+                            "node_id": "pvs-dup-domain",
+                            "question": "Is the in-frame duplication contained within a critical domain?",
+                            "result": "table4",
+                            "observed": dup_result["reason"],
+                        })
+                    result["decision_path"] = _pvs1_path(
+                        gene=gene,
+                        branch_id="duplication",
+                        outcome_node="pvs-dup-table4",
+                        steps=steps,
+                    )
                 return result
 
         result["applies"] = False
@@ -241,26 +445,3 @@ def evaluate_pvs1(
         return result
 
     return result
-
-
-if __name__ == "__main__":
-    # Test evaluate_pvs1
-    print("\nTesting evaluate_pvs1:")
-    print("=" * 70)
-
-    test_cases = [
-        ("BRCA1", "frameshift", "p.(Asp1851ValfsTer29)", "c.5551_5552insT"),  # Should be PVS1 Very Strong
-        ("BRCA1", "nonsense", "p.(Gln210Ter)", "c.628C>T"),  # E9(10) -> PVS1_N/A
-        ("BRCA1", "frameshift", "p.(Cys1225fs)", "c.3668_3671dup"),  # E10(11) -> PVS1
-        ("BRCA2", "splice_site", "p.(?)", "c.8953+2T>C"),  # PVS1_N/A
-        ("BRCA2", "splice_site", "p.(?)", "c.8953+2T>A"),  # PVS1
-    ]
-
-    for gene, vtype, p, c in test_cases:
-        r = evaluate_pvs1(gene, vtype, p, c, spliceai_score=0.9)
-        status = f"{r['strength']} ({r['points']} pts)" if r['applies'] else "Not applied"
-        print(f"  {gene} {c}: PVS1 {status}")
-        print(f"    Exon: {r.get('exon', 'N/A')}")
-        print(f"    {r['reason'][:80]}...")
-        if r.get('pm5_code'):
-            print(f"    PM5: {r['pm5_code']} ({r['pm5_points']} pts)")

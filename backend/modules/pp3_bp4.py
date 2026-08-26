@@ -1,7 +1,5 @@
-# BayesDel_noAF thresholds are gene-specific per ENIGMA VCEP v1.2
-# BRCA1: PP3 >= 0.28, BP4 <= 0.15
-# BRCA2: PP3 >= 0.30, BP4 <= 0.18
-# Using generic thresholds for both genes would be wrong.
+# BayesDel_noAF thresholds are loaded from the active gene policy manifest.
+# A missing gene-specific threshold set fails closed.
 
 from typing import Optional, Dict, List, Tuple
 from pathlib import Path
@@ -17,14 +15,11 @@ from backend.modules.utils import (
 )
 from backend.lookups.spliceai import (
     normalize_variant_type,
-    spliceai_predicts_splice_effect,
     variant_type_allows_spliceai_pp3,
 )
-
-BAYESDEL_THRESHOLDS = {
-    "BRCA1": {"pp3": 0.28, "bp4": 0.15},
-    "BRCA2": {"pp3": 0.30, "bp4": 0.18},
-}
+from backend.modules.decision_trace import figure1a_path, step
+from backend.modules.utils import get_intron_offset_from_c_notation
+from backend.gene_policy import bayesdel_thresholds, spliceai_thresholds
 
 
 def evaluate_pp3_bp4(
@@ -32,7 +27,8 @@ def evaluate_pp3_bp4(
     variant_type: str,
     p_notation: str,
     bayesdel_score: Optional[float] = None,
-    spliceai_score: Optional[float] = None
+    spliceai_score: Optional[float] = None,
+    c_notation: str = "",
 ) -> Dict:
     # evaluate PP3 and BP4 using BayesDel_noAF and SpliceAI
     #
@@ -42,6 +38,8 @@ def evaluate_pp3_bp4(
     # exon-level deletion, or canonical splice-site variants, where PVS1/RNA
     # logic evaluates the loss-of-function/splicing mechanism.
     #
+    # Every Figure 1A route requires an actual SpliceAI result. Missing data is
+    # not the ENIGMA "not informative" band and must not advance to BayesDel.
     # BP4 requires confirmed low SpliceAI (<= 0.1), never missing SpliceAI.
     # For missense/in-frame variants in a functional domain it also requires
     # BayesDel_noAF <= the gene-specific BP4 threshold.
@@ -49,9 +47,12 @@ def evaluate_pp3_bp4(
 
     vtype = normalize_variant_type(variant_type)
 
-    thresholds = BAYESDEL_THRESHOLDS.get(gene, {"pp3": 0.28, "bp4": 0.15})
+    thresholds = bayesdel_thresholds(gene)
+    splice_thresholds = spliceai_thresholds(gene)
     pp3_threshold = thresholds["pp3"]
     bp4_threshold = thresholds["bp4"]
+    splice_high = splice_thresholds["pp3"]
+    splice_low = splice_thresholds["bp4"]
 
     aa_pos = get_amino_acid_position(p_notation)
     in_domain = False
@@ -68,18 +69,48 @@ def evaluate_pp3_bp4(
     # SpliceAI branch. This must not be "any variant type".
     if (
         variant_type_allows_spliceai_pp3(vtype)
-        and spliceai_predicts_splice_effect(spliceai_score)
+        and spliceai_score is not None
+        and spliceai_score >= splice_high
     ):
         results["PP3"] = {
             "applies": True,
             "strength": "Supporting",
             "points": 1,
-            "reason": f"SpliceAI {spliceai_score:.3f} >= 0.2 - predicted splice effect"
+            "reason": f"SpliceAI {spliceai_score:.3f} >= {splice_high} - predicted splice effect"
         }
+        branch_id, node_id = {
+            "synonymous": ("synonymous", "syn-pp3"),
+            "silent": ("synonymous", "syn-pp3"),
+            "intronic": ("intronic", "int-pp3"),
+        }.get(vtype, ("missense-inframe", "mi-splice-pp3"))
+        trace_steps = []
+        if branch_id == "intronic":
+            intron_info = get_intron_offset_from_c_notation(c_notation)
+            if intron_info is not None:
+                _, offset = intron_info
+                trace_steps.append(step(
+                    "int-canonical-site",
+                    "Donor/acceptor ±1,2 position?",
+                    "no" if abs(offset) > 2 else "yes",
+                    f"Intronic offset {offset:+d}",
+                ))
+        trace_steps.append(step(
+            "syn-splice-impact" if branch_id == "synonymous" else
+            "int-splice-impact" if branch_id == "intronic" else "mi-splice-impact",
+            "Predicted impact on splicing?",
+            "impact",
+            f"SpliceAI {spliceai_score:.3f} ≥ {splice_high}",
+        ))
+        results["PP3"]["decision_path"] = figure1a_path(
+            branch_id=branch_id,
+            criterion="PP3",
+            outcome_node=node_id,
+            steps=trace_steps,
+        )
 
     # BayesDel branch: missense/in-frame in functional domain only.
     # Only if SpliceAI did not already trigger PP3 (same criterion cannot stack).
-    elif vtype in protein_prediction_types:
+    elif vtype in protein_prediction_types and spliceai_score is not None:
         if in_domain and bayesdel_score is not None and bayesdel_score >= pp3_threshold:
             results["PP3"] = {
                 "applies": True,
@@ -90,6 +121,37 @@ def evaluate_pp3_bp4(
                     f"in functional domain ({domain_name})"
                 )
             }
+            splice_result = "no_impact" if spliceai_score <= splice_low else "not_informative"
+            protein_outcome = (
+                "mi-protein-pp3-low"
+                if spliceai_score <= splice_low
+                else "mi-protein-pp3-unknown"
+            )
+            results["PP3"]["decision_path"] = figure1a_path(
+                branch_id="missense-inframe",
+                criterion="PP3",
+                outcome_node=protein_outcome,
+                steps=[
+                    step(
+                        "mi-splice-impact",
+                        "Predicted impact on splicing?",
+                        splice_result,
+                        f"SpliceAI {spliceai_score:.3f}",
+                    ),
+                    step(
+                        "mi-domain-after-low" if spliceai_score <= splice_low else "mi-domain-after-unknown",
+                        "Inside functional domain?",
+                        "yes",
+                        domain_name or "ENIGMA functional domain",
+                    ),
+                    step(
+                        "mi-protein-after-low" if spliceai_score <= splice_low else "mi-protein-after-unknown",
+                        "Predicted impact on protein?",
+                        "impact",
+                        f"BayesDel_noAF {bayesdel_score:.3f} ≥ {pp3_threshold}",
+                    ),
+                ],
+            )
         elif in_domain and bayesdel_score is None:
             results["PP3"] = {
                 "applies": False,
@@ -102,7 +164,7 @@ def evaluate_pp3_bp4(
                     f"BayesDel_noAF {bayesdel_score:.3f} >= {pp3_threshold} ({gene}-specific threshold) "
                     f"but variant is outside functional domains: PP3 from BayesDel applies only inside "
                     f"a clinically important functional domain per ENIGMA VCEP v1.2. "
-                    f"For variants outside domain, BP1 applies if SpliceAI <= 0.1."
+                    f"For variants outside domain, BP1 applies if SpliceAI <= {splice_low}."
                 )
             }
 
@@ -110,17 +172,27 @@ def evaluate_pp3_bp4(
     if vtype in protein_prediction_types:
         if in_domain:
             if bayesdel_score is not None and spliceai_score is not None:
-                if bayesdel_score <= bp4_threshold and spliceai_score <= 0.1:
+                if bayesdel_score <= bp4_threshold and spliceai_score <= splice_low:
                     results["BP4"] = {
                         "applies": True,
                         "strength": "Supporting",
                         "points": -1,
                         "reason": (
                             f"BayesDel_noAF {bayesdel_score:.3f} <= {bp4_threshold} ({gene}-specific threshold) AND "
-                            f"SpliceAI {spliceai_score:.3f} <= 0.1 "
+                            f"SpliceAI {spliceai_score:.3f} <= {splice_low} "
                             f"(in domain: {domain_name})"
                         )
                     }
+                    results["BP4"]["decision_path"] = figure1a_path(
+                        branch_id="missense-inframe",
+                        criterion="BP4",
+                        outcome_node="mi-bp4",
+                        steps=[
+                            step("mi-splice-impact", "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}"),
+                            step("mi-domain-after-low", "Inside functional domain?", "yes", domain_name or "ENIGMA functional domain"),
+                            step("mi-protein-after-low", "Predicted impact on protein?", "no_impact", f"BayesDel_noAF {bayesdel_score:.3f} ≤ {bp4_threshold}"),
+                        ],
+                    )
             elif bayesdel_score is None:
                 results["BP4"] = {
                     "applies": False,
@@ -131,37 +203,49 @@ def evaluate_pp3_bp4(
                     "applies": False,
                     "reason": (
                         f"BayesDel_noAF {bayesdel_score:.3f} <= {bp4_threshold} ({gene}-specific threshold) "
-                        f"but SpliceAI not available: BP4 requires confirmed SpliceAI <= 0.1 per ENIGMA VCEP v1.2"
+                        f"but SpliceAI not available: BP4 requires confirmed SpliceAI <= {splice_low} per the configured VCEP policy"
                     )
                 }
 
     elif vtype in ["synonymous", "silent"]:
-        if in_domain and spliceai_score is not None and spliceai_score <= 0.1:
+        if in_domain and spliceai_score is not None and spliceai_score <= splice_low:
             results["BP4"] = {
                 "applies": True,
                 "strength": "Supporting",
                 "points": -1,
-                "reason": f"Silent variant in domain ({domain_name}), SpliceAI {spliceai_score:.3f} <= 0.1"
+                "reason": f"Silent variant in domain ({domain_name}), SpliceAI {spliceai_score:.3f} <= {splice_low}"
             }
+            results["BP4"]["decision_path"] = figure1a_path(
+                branch_id="synonymous",
+                criterion="BP4",
+                outcome_node="syn-bp4-bp7",
+                steps=[
+                    step("syn-splice-impact", "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}"),
+                    step("syn-domain", "Inside functional domain?", "yes", domain_name or "ENIGMA functional domain"),
+                ],
+            )
 
     elif vtype == "intronic":
-        if spliceai_score is not None and spliceai_score <= 0.1:
+        if spliceai_score is not None and spliceai_score <= splice_low:
             results["BP4"] = {
                 "applies": True,
                 "strength": "Supporting",
                 "points": -1,
-                "reason": f"Intronic variant, SpliceAI {spliceai_score:.3f} <= 0.1"
+                "reason": f"Intronic variant, SpliceAI {spliceai_score:.3f} <= {splice_low}"
             }
+            results["BP4"]["decision_path"] = figure1a_path(
+                branch_id="intronic",
+                criterion="BP4",
+                outcome_node="int-bp4",
+                steps=(
+                    ([step(
+                        "int-canonical-site",
+                        "Donor/acceptor ±1,2 position?",
+                        "no",
+                        f"Intronic offset {get_intron_offset_from_c_notation(c_notation)[1]:+d}",
+                    )] if get_intron_offset_from_c_notation(c_notation) is not None else [])
+                    + [step("int-splice-impact", "Predicted impact on splicing?", "no_impact", f"SpliceAI {spliceai_score:.3f} ≤ {splice_low}")]
+                ),
+            )
 
     return results
-
-if __name__ == "__main__":
-    print("Testing PP3/BP4 with BayesDel and SpliceAI:")
-    print("=" * 60)
-    print(f"SpliceAI 0.5 missense:             {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg170Gln)', spliceai_score=0.5)}")
-    print(f"SpliceAI 0.5 nonsense:             {evaluate_pp3_bp4('BRCA1', 'nonsense', 'p.(Gln210Ter)', spliceai_score=0.5)}")
-    print(f"BayesDel 0.35, in BRCT domain:     {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg1700Gln)', bayesdel_score=0.35, spliceai_score=0.02)}")
-    print(f"BayesDel 0.10, in BRCT domain:     {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg1700Gln)', bayesdel_score=0.10, spliceai_score=0.03)}")
-    print(f"BayesDel 0.35, outside domain:     {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg500Gln)', bayesdel_score=0.35, spliceai_score=0.02)}")
-    print(f"BayesDel 0.20 (uninformative):     {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg1700Gln)', bayesdel_score=0.20, spliceai_score=0.03)}")
-    print(f"No scores available:               {evaluate_pp3_bp4('BRCA1', 'missense', 'p.(Arg170Gln)')}")

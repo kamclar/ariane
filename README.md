@@ -41,6 +41,11 @@ The application automatically uses `RAILWAY_VOLUME_MOUNT_PATH` and stores its
 mutable files below `ariane-runtime-cache/`. Outside Railway, set
 `ARIANE_RUNTIME_CACHE_DIR` to a writable persistent directory. Precomputed
 snapshots remain in the repository and are never modified at runtime.
+Without either deployment setting, local development uses the ignored
+`.runtime-cache/` directory. The mutable files are
+`coordinates_api_cache.json`, `bayesdel_api_cache.json` and
+`spliceai_api_cache.json`. They are read before a network request and remain
+available when an upstream API is temporarily unavailable.
 
 ## Project structure
 
@@ -67,10 +72,7 @@ ariane/
 │   │   ├── clinvar.py       # ClinVar eutils VCV parser
 │   │   ├── clingen.py       # ClinGen Evidence Repository API
 │   │   └── coordinates.py   # HGVS → GRCh37/38 resolution
-│   └── data/
-│       ├── enigma_table4.json
-│       ├── enigma_table9.json
-│       └── spliceai_api_cache.json
+│   └── data/                 # immutable, versioned reference datasets
 ├── frontend/
 │   ├── index.html
 │   └── static/
@@ -125,6 +127,26 @@ but an interval alone cannot activate a gene. Every target must reference an
 explicit active gene-specific policy containing its VCEP provenance, transcript,
 frequency datasets, population groups, thresholds, coverage rules and excluded
 variant types. The BRCA policy is never inherited by another gene.
+Runtime gene and VCEP configuration is held in
+`backend/data/gene_policy_manifest.json` with checksum metadata. It is the
+authoritative source for active genes, reference transcripts, VCEP policy IDs,
+decision thresholds, functional domains and applicable rules. Source-specific
+manifests are checked against it at startup and cannot silently override the
+policy.
+
+Each VCEP policy also declares an `implementation_profile`. The runtime fails
+closed when that profile has no registered DAG implementation. Input gene
+prefixes, VCEP links, HGVS startup checks, PVS1 decision assets and domain
+descriptions are manifest-driven. BRCA-specific source names remain explicit
+only for datasets whose documented scope is BRCA1/2.
+
+After an approved policy or threshold change, increment `manifest_version` and
+refresh the checksum metadata with:
+
+```powershell
+.\venv\Scripts\python.exe scripts\update_gene_policy_manifest_metadata.py --write
+```
+
 The update check also verifies that a newer release contains the equivalent
 small-variant Hail Table. A release directory for another data type is not
 reported as a usable frequency-data update.
@@ -202,11 +224,11 @@ reviewer confirms the reference variant, P/LP classification source, same splice
 event, similar or stronger prediction evidence, and Appendix J/Table 17
 strength. ARIANE does not infer this strength automatically.
 
-A pilot, unreviewed seed set for this review is available at
-`backend/data/splice_ps1_reference_set.json`; see
-`docs/splice_ps1_reference_set.md`. The manual-review UI can use it to prefill
-reference fields and a provisional strength suggestion. It is not used for
-automatic scoring.
+The manual-review form can search factual P/LP splice candidates derived
+directly from the complete official ENIGMA Supplementary Table 2 snapshot. A
+selection prefills only source facts such as the reference variant, reported
+splice event, assay context and multifactorial class. It does not confirm PS1
+eligibility, same-event matching, prediction strength or criterion strength.
 
 ClinVar review stars are displayed as the official review level of the
 aggregate ClinVar assertion. Individual submitters are not assigned an

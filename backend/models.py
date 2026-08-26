@@ -6,6 +6,7 @@ from typing import Optional, List, Dict, Any, Literal
 import re
 
 from backend.modules.variant_input import normalize_variant_input
+from backend.gene_policy import active_genes
 
 
 class VariantRequest(BaseModel):
@@ -52,8 +53,9 @@ class VariantRequest(BaseModel):
     @classmethod
     def validate_gene(cls, v):
         v = v.strip().upper()
-        if v not in ("BRCA1", "BRCA2"):
-            raise ValueError("Gene must be BRCA1 or BRCA2")
+        supported = set(active_genes())
+        if v not in supported:
+            raise ValueError(f"Gene must be one of: {', '.join(sorted(supported))}")
         return v
 
     @field_validator("c_notation")
@@ -114,6 +116,12 @@ class CriterionResult(BaseModel):
     points: int = 0
     reason: str = ""
     source: str = ""
+    decision_path: Optional[Dict[str, Any]] = None
+    single_strong_likely_benign_eligible: bool = False
+    single_strong_likely_benign_basis: str = ""
+    independent_evidence_contribution_count: int = 0
+    likelihood_ratio_contribution_count: int = 0
+    clinical_evidence_types: List[str] = Field(default_factory=list)
 
 
 class ExternalSubmitter(BaseModel):
@@ -128,12 +136,18 @@ class ExternalSubmitter(BaseModel):
 
 
 class ExternalComparison(BaseModel):
+    clinvar_status: str = "not_found"
+    clinvar_message: str = ""
+    clinvar_error: str = ""
     clinvar_classification: str = ""
     clinvar_review_status: str = ""
     clinvar_review_stars: int = 0
     clinvar_n_submitters: int = 0
     clinvar_has_conflict: bool = False
     clinvar_submitters: List[ExternalSubmitter] = []
+    clingen_status: str = "not_found"
+    clingen_message: str = ""
+    clingen_error: str = ""
     enigma_ep_class: str = ""
     enigma_ep_source: str = ""
     erepo_evidence_codes: List[str] = []
@@ -179,6 +193,24 @@ class EvidenceInteractionWarning(BaseModel):
     source: str
     source_url: str
     review_required: bool = False
+
+
+class ClinicalAnnotationPublication(BaseModel):
+    pmid: str
+    label: str
+    url: str
+
+
+class ClinicalAnnotation(BaseModel):
+    category: Literal["reduced_penetrance"]
+    label: str
+    summary: str
+    evidence: str
+    source: str
+    source_url: str
+    source_row: int
+    publications: List[ClinicalAnnotationPublication] = Field(default_factory=list)
+    affects_classification: bool = False
 
 
 class VusExplanation(BaseModel):
@@ -237,6 +269,8 @@ class ProteinPs1ReviewRecommendation(BaseModel):
     candidates: List[ProteinPs1Candidate] = Field(default_factory=list)
     splice_sources_checked: List[str] = Field(default_factory=list)
     vua_splice_evidence_status: str = "not_assessed"
+    vua_spliceai_score: Optional[float] = None
+    reference_spliceai_scores: Dict[str, Optional[float]] = Field(default_factory=dict)
 
 
 class ClassificationResult(BaseModel):
@@ -244,6 +278,8 @@ class ClassificationResult(BaseModel):
     gene: str
     c_notation: str
     p_notation: str = ""
+    variant_type: str = "unknown"
+    bp7_rna_context: Dict[str, Any] = Field(default_factory=dict)
     reference_transcript: str = ""
     submitted_notation: str = ""
     normalization_source: str = ""
@@ -268,6 +304,7 @@ class ClassificationResult(BaseModel):
     spliceai_audit: Optional[SpliceAIAudit] = None
     population_frequency_audit: Dict[str, Any] = Field(default_factory=dict)
     evidence_interactions: List[EvidenceInteractionWarning] = []
+    clinical_annotations: List[ClinicalAnnotation] = Field(default_factory=list)
     vus_explanation: Optional[VusExplanation] = None
     rna_review: Optional[RnaReviewRecommendation] = None
     splice_ps1_review: Optional[RnaReviewRecommendation] = None
@@ -288,13 +325,80 @@ class VariantNormalizationResponse(BaseModel):
     assembly: Optional[Literal["GRCh37", "GRCh38"]] = None
 
 
+class Ps1ReferenceResolutionRequest(BaseModel):
+    gene: str
+    assessed_c_notation: str
+    reference_c_notation: str
+
+    @field_validator("gene")
+    @classmethod
+    def validate_ps1_gene(cls, value):
+        gene = value.strip().upper()
+        supported = set(active_genes())
+        if gene not in supported:
+            raise ValueError(f"Gene must be one of: {', '.join(sorted(supported))}")
+        return gene
+
+    @field_validator("assessed_c_notation", "reference_c_notation")
+    @classmethod
+    def require_ps1_notation(cls, value):
+        if not value.strip():
+            raise ValueError("Both assessed and reference c. notations are required")
+        return value.strip()
+
+
+class Ps1ResolvedVariant(BaseModel):
+    gene: str
+    reference_transcript: str
+    c_notation: str
+    p_notation: str
+    spliceai_score: Optional[float] = None
+    spliceai_status: str = "unavailable"
+    spliceai_reason: str = ""
+
+
+class Ps1ReferenceResolutionResponse(BaseModel):
+    assessed: Ps1ResolvedVariant
+    reference: Ps1ResolvedVariant
+    same_missense_substitution: bool
+    different_nucleotide_change: bool
+    clinvar_status: str = "not_found"
+    clinvar_error: str = ""
+    clinvar_variation_id: str = ""
+    clinvar_accession: str = ""
+    clinvar_classification: str = ""
+    clinvar_review_status: str = ""
+    clinvar_stars: int = 0
+    clingen_status: str = "not_found"
+    clingen_error: str = ""
+    clingen_caid: str = ""
+    classification: str = ""
+    classification_verification: str = "unresolved"
+    classification_source: str = ""
+    objective_ps1_checks_pass: bool = False
+    review_message: str = ""
+    references: List[str] = Field(default_factory=list)
+
+
 class ManualCriterionInput(BaseModel):
     code: str
     enabled: bool = False
     evidence: Dict[str, Any] = Field(default_factory=dict)
-    override_strength: Optional[str] = None
     notes: str = ""
     references: List[str] = Field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_strength_override(cls, data):
+        if (
+            isinstance(data, dict)
+            and data.get("override_strength") not in {None, ""}
+        ):
+            raise ValueError(
+                "Manual strength overrides are not permitted; criterion strength "
+                "is derived from the configured VCEP evidence thresholds"
+            )
+        return data
 
     @field_validator("code")
     @classmethod
@@ -317,9 +421,32 @@ class ManualCriterionInput(BaseModel):
         return code
 
 
+class ManualVariantContext(BaseModel):
+    gene: str
+    c_notation: str
+    p_notation: str
+
+    @field_validator("gene")
+    @classmethod
+    def validate_context_gene(cls, value):
+        gene = value.strip().upper()
+        supported = set(active_genes())
+        if gene not in supported:
+            raise ValueError(f"Gene must be one of: {', '.join(sorted(supported))}")
+        return gene
+
+    @field_validator("c_notation", "p_notation")
+    @classmethod
+    def require_variant_notation(cls, value):
+        if not value.strip():
+            raise ValueError("Manual evidence variant context must not be empty")
+        return value.strip()
+
+
 class ManualEvidenceRequest(BaseModel):
     base_criteria: List[CriterionResult]
     manual_criteria: List[ManualCriterionInput]
+    variant_context: Optional[ManualVariantContext] = None
     assessor: str
     assessed_at: str
 
@@ -329,6 +456,27 @@ class ManualEvidenceRequest(BaseModel):
         if not v.strip():
             raise ValueError("Audit fields must not be empty")
         return v.strip()
+
+    @model_validator(mode="after")
+    def require_complete_enabled_records(self):
+        enabled = [item for item in self.manual_criteria if item.enabled]
+        if not enabled:
+            raise ValueError("Select at least one manually reviewed criterion")
+        for item in enabled:
+            if item.code == "PS1_PROTEIN" and self.variant_context is None:
+                raise ValueError(
+                    "PS1_PROTEIN requires the assessed variant context so the backend "
+                    "can verify the protein consequence and nucleotide change"
+                )
+            if not item.notes.strip():
+                raise ValueError(
+                    f"{item.code} requires evidence notes"
+                )
+            if not any(reference.strip() for reference in item.references):
+                raise ValueError(
+                    f"{item.code} requires at least one evidence reference"
+                )
+        return self
 
 
 class ManualCriterionResult(BaseModel):
@@ -342,6 +490,9 @@ class ManualCriterionResult(BaseModel):
     overridden: bool = False
     notes: str = ""
     references: List[str] = []
+    single_strong_likely_benign_eligible: bool = False
+    single_strong_likely_benign_basis: str = ""
+    independent_evidence_contribution_count: int = 0
 
 
 class ManualEvidenceResult(BaseModel):

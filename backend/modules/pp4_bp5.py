@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional
+from backend.gene_policy import clinical_lr_thresholds
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -30,26 +31,28 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def lr_to_pp4_strength(lr: float) -> Optional[str]:
-    if lr >= 350:
+def lr_to_pp4_strength(gene: str, lr: float) -> Optional[str]:
+    thresholds = clinical_lr_thresholds(gene)["pp4"]
+    if lr >= thresholds["very_strong_min_inclusive"]:
         return "Very Strong"
-    if lr >= 18.7:
+    if lr >= thresholds["strong_min_inclusive"]:
         return "Strong"
-    if lr >= 4.3:
+    if lr >= thresholds["moderate_min_inclusive"]:
         return "Moderate"
-    if lr >= 2.08:
+    if lr >= thresholds["supporting_min_inclusive"]:
         return "Supporting"
     return None
 
 
-def lr_to_bp5_strength(lr: float) -> Optional[str]:
-    if lr <= 0.00285:
+def lr_to_bp5_strength(gene: str, lr: float) -> Optional[str]:
+    thresholds = clinical_lr_thresholds(gene)["bp5"]
+    if lr <= thresholds["very_strong_max_inclusive"]:
         return "Very Strong"
-    if lr <= 0.05:
+    if lr <= thresholds["strong_max_inclusive"]:
         return "Strong"
-    if lr <= 0.23:
+    if lr <= thresholds["moderate_max_inclusive"]:
         return "Moderate"
-    if lr <= 0.48:
+    if lr <= thresholds["supporting_max_inclusive"]:
         return "Supporting"
     return None
 
@@ -116,6 +119,11 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "applies": False, "code": None, "strength": None, "points": 0,
         "reason": "", "likelihood_ratio": None,
         "source_components": [],
+        "clinical_evidence_types": [],
+        "likelihood_ratio_contribution_count": 0,
+        "independent_evidence_contribution_count": 0,
+        "single_strong_likely_benign_eligible": False,
+        "single_strong_likely_benign_basis": "",
     }
     if entry is None:
         result["reason"] = (
@@ -127,7 +135,24 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     lr = entry["combined_lr"]
     result["likelihood_ratio"] = lr
     result["source_components"] = entry.get("source_components", [])
-    code = entry.get("criterion")
+    clinical_data = [
+        item
+        for component in result["source_components"]
+        for item in component.get("clinical_data", [])
+        if isinstance(item, dict) and item.get("lr") is not None
+    ]
+    clinical_evidence_types = sorted({
+        str(item.get("data_type") or "").strip()
+        for item in clinical_data
+        if str(item.get("data_type") or "").strip()
+    })
+    result["clinical_evidence_types"] = clinical_evidence_types
+    result["likelihood_ratio_contribution_count"] = len(clinical_data)
+    result["independent_evidence_contribution_count"] = len(clinical_evidence_types)
+    pp4_strength = lr_to_pp4_strength(gene, lr)
+    bp5_strength = lr_to_bp5_strength(gene, lr)
+    code = "PP4" if pp4_strength else "BP5" if bp5_strength else None
+    strength = pp4_strength or bp5_strength
     if not code:
         result["reason"] = f"Combined clinical LR={lr:.6g} is not informative for PP4 or BP5"
         return result
@@ -135,13 +160,24 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     result.update({
         "applies": True,
         "code": code,
-        "strength": entry["strength"],
-        "points": entry["points"],
+        "strength": strength,
+        "points": (PP4_POINTS if code == "PP4" else BP5_POINTS)[strength],
     })
+    if (
+        code == "BP5"
+        and strength == "Strong"
+        and len(clinical_data) >= 2
+        and len(clinical_evidence_types) >= 2
+    ):
+        result["single_strong_likely_benign_eligible"] = True
+        result["single_strong_likely_benign_basis"] = (
+            "Multiple recorded clinical evidence types and likelihood-ratio "
+            "contributions support the BP5 Strong code"
+        )
     pmids = sorted({component["pmid"] for component in result["source_components"]})
     result["reason"] = (
         f"ENIGMA v1.2 combined clinical evidence: "
-        f"combined LR={lr:.6g}; {code} {entry['strength']}; "
+        f"combined LR={lr:.6g}; {code} {strength}; "
         f"PMID {', '.join(pmids)}"
     )
     return result

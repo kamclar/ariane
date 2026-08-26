@@ -1,19 +1,19 @@
 """Informational recommendation for initiation-codon PVS1 review."""
 
 from typing import Dict
+from backend.gene_policy import vcep_specification
 
 
-ENIGMA_CSPEC_URL = "https://cspec.genome.network/cspec/ui/svi/doc/GN097"
 INITIATION_REFERENCE_SOURCE = (
     "Rule/weighting: ENIGMA BRCA1/2 VCEP v1.2 Specifications Table 4 and "
     "Appendix D initiation-codon PVS1 flowchart."
 )
 
 
-def evaluate_initiation_review(variant_type: str) -> Dict:
+def evaluate_initiation_review(gene: str, variant_type: str) -> Dict:
     """Flag Met1/start-loss variants for curated PVS1_INIT review."""
     if (variant_type or "").lower() != "initiation_codon":
-        return _empty()
+        return _empty(gene)
 
     return {
         "recommended": True,
@@ -41,12 +41,12 @@ def evaluate_initiation_review(variant_type: str) -> Dict:
             "curated ENIGMA initiation-codon flowchart assessment."
         ),
         "reference_source": INITIATION_REFERENCE_SOURCE,
-        "source_url": ENIGMA_CSPEC_URL,
+        "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
     }
 
 
-def _empty() -> Dict:
+def _empty(gene: str) -> Dict:
     return {
         "recommended": False,
         "priority": "none",
@@ -57,6 +57,6 @@ def _empty() -> Dict:
         "potential_branches": [],
         "limitations": "",
         "reference_source": "",
-        "source_url": ENIGMA_CSPEC_URL,
+        "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
     }

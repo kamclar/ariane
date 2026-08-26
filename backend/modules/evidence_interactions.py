@@ -77,6 +77,33 @@ def automatic_functional_interactions(
     ]
 
 
+def clinical_functional_risk_interactions(
+    criteria: Dict[str, Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Flag PS3 plus BP5 without inferring reduced penetrance."""
+    if "PS3" not in criteria or "BP5" not in criteria:
+        return []
+    return [
+        interaction(
+            status="conflict",
+            mechanism="protein_function_and_clinical_likelihood",
+            criteria=["PS3", "BP5"],
+            retained=["PS3", "BP5"],
+            reason=(
+                "Functional PS3 and benign clinical-likelihood BP5 evidence point "
+                "in opposite directions. ENIGMA states that discordance across "
+                "evidence types should prompt investigation of reduced penetrance "
+                "or a partial functional effect. This conflict alone does not "
+                "establish reduced penetrance; variant-specific clinical evidence "
+                "is required."
+            ),
+            source="ENIGMA BRCA1/2 VCEP Specifications v1.2, introductory note",
+            source_url=SPECIFICATIONS_URL,
+            review_required=True,
+        )
+    ]
+
+
 def pvs1_prediction_deduplication() -> Dict[str, Any]:
     return interaction(
         status="deduplicated",
