@@ -27,6 +27,20 @@ def test_applied_criteria_immediately_follows_classification_header():
     assert html.count("<!-- Criteria table -->") == 1
 
 
+def test_not_used_vcep_codes_are_compact_and_backend_driven():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+
+    assert 'class="not-used-criteria-details"' in html
+    assert "Show codes and reasons" in html
+    assert "currentNotUsedCriteria()" in html
+    assert "item.reason" in html
+    assert "item.source_section" not in html
+    assert "item.not_used_criteria" in javascript
+    assert "policyByGene" in javascript
+    assert "De novo evidence is not calibrated" not in html
+
+
 def test_point_thermometer_is_present_for_every_classified_result():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
     thermometer = html.index('class="point-thermometer"')

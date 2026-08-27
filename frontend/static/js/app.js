@@ -8,6 +8,7 @@ function ariane() {
         gene: "",
         configuredGenes: [],
         transcriptByGene: {},
+        policyByGene: {},
         c_notation: "",
         p_notation: "",
         assembly: "",
@@ -84,6 +85,14 @@ function ariane() {
                     this.transcriptByGene = Object.fromEntries(
                         this.configuredGenes.map(item => [item.symbol, item.reference_transcript])
                     );
+                    this.policyByGene = Object.fromEntries(
+                        this.configuredGenes.map(item => [item.symbol, {
+                            name: item.policy_name,
+                            version: item.policy_version,
+                            sourceUrl: item.policy_source_url,
+                            notUsedCriteria: item.not_used_criteria || [],
+                        }])
+                    );
                     if (!this.gene && this.configuredGenes.length) {
                         this.gene = this.configuredGenes[0].symbol;
                     }
@@ -113,6 +122,21 @@ function ariane() {
             const footerVersion = document.getElementById("ariane-footer-version");
             if (headerVersion) headerVersion.textContent = label;
             if (footerVersion) footerVersion.textContent = label;
+        },
+
+        currentPolicyInfo() {
+            const symbol = String(this.result?.gene || this.gene || "").toUpperCase();
+            return this.policyByGene[symbol] || null;
+        },
+
+        currentPolicyLabel() {
+            const policy = this.currentPolicyInfo();
+            if (!policy) return "the selected VCEP specification";
+            return `${policy.name} v${policy.version}`;
+        },
+
+        currentNotUsedCriteria() {
+            return this.currentPolicyInfo()?.notUsedCriteria || [];
         },
 
         async loadManualDefinitions() {

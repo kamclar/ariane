@@ -229,7 +229,7 @@ async def resources(gene: Optional[str] = None):
         manual_criteria_for_gene,
         resource_links_for_gene,
     )
-    from backend.gene_policy import active_genes, get_gene_policy
+    from backend.gene_policy import active_genes, get_gene_policy, not_used_criteria
     from backend.modules.ps1_splice_evidence import (
         list_splice_ps1_candidate_discovery,
     )
@@ -243,7 +243,10 @@ async def resources(gene: Optional[str] = None):
                 "reference_transcript": get_gene_policy(symbol)["gene_config"]["reference_transcript"],
                 "reference_protein": get_gene_policy(symbol)["gene_config"]["reference_protein"],
                 "policy_id": get_gene_policy(symbol)["policy"]["runtime_policy_id"],
+                "policy_name": get_gene_policy(symbol)["policy"]["name"],
                 "policy_version": get_gene_policy(symbol)["policy"]["version"],
+                "policy_source_url": get_gene_policy(symbol)["policy"]["source_url"],
+                "not_used_criteria": not_used_criteria(symbol),
             }
             for symbol in active_genes()
         ],

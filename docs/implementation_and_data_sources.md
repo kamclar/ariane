@@ -29,6 +29,13 @@ Manifest pro každý aktivní gen obsahuje:
 - úplný seznam použitelných automatických a manuálních pravidel,
 - požadované datové zdroje pro jednotlivé rodiny pravidel.
 
+Sdílená VCEP politika obsahuje také verzovaný seznam původních ACMG/AMP použití,
+která specifikace označuje jako `Do not use`. Každá položka má kód, krátký důvod
+a část zdrojového dokumentu. Tento seznam se nesmí zaměňovat s kritériem, které
+je pouze nesplněné nebo nepoužitelné pro konkrétní variantu. Veřejné rozhraní
+zobrazuje ve výchozím stavu pouze počet těchto položek. Kódy a stručné důvody se
+zobrazí až po rozbalení řádku pod aplikovanými kritérii.
+
 Sdílená část VCEP politiky obsahuje prahy SpliceAI, PP4, BP5, BA1, BS1, PM2 a
 hranice bodové klasifikace pro mixed evidence. Python neobsahuje náhradní
 BayesDel prahy pro neznámý gen. Gen bez aktivního záznamu je odmítnut. Kritérium,

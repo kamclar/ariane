@@ -23,6 +23,9 @@ GENE_POLICY_METADATA_PATH = DATA_DIR / "gene_policy_manifest.metadata.json"
 
 _TRANSCRIPT_RE = re.compile(r"^N[MR]_\d+\.\d+$")
 _PROTEIN_RE = re.compile(r"^NP_\d+\.\d+$")
+_STANDARD_CRITERION_RE = re.compile(
+    r"^(?:PVS1|PS[1-4]|PM[1-6]|PP[1-5]|BA1|BS[1-4]|BP[1-7])$"
+)
 
 
 class GenePolicyError(RuntimeError):
@@ -81,6 +84,7 @@ def validate_gene_policy_payload(
             {
                 "name", "version", "runtime_policy_id", "implementation_profile",
                 "external_evidence", "thresholds", "supported_rule_codes",
+                "criterion_applicability",
             },
             f"policies/{policy_id}",
         )
@@ -179,6 +183,45 @@ def validate_gene_policy_payload(
         rules = policy["supported_rule_codes"]
         if not isinstance(rules, list) or not rules or len(rules) != len(set(rules)):
             raise GenePolicyError(f"Policy {policy_id} supported_rule_codes must be a unique non-empty list")
+        applicability = policy["criterion_applicability"]
+        if not isinstance(applicability, dict):
+            raise GenePolicyError(
+                f"Policy {policy_id} criterion_applicability must be an object"
+            )
+        _require_keys(
+            applicability,
+            {"not_used"},
+            f"policies/{policy_id}/criterion_applicability",
+        )
+        not_used = applicability["not_used"]
+        if not isinstance(not_used, list):
+            raise GenePolicyError(
+                f"Policy {policy_id} criterion_applicability/not_used must be a list"
+            )
+        identities: set[tuple[str, str]] = set()
+        for index, item in enumerate(not_used):
+            location = f"policies/{policy_id}/criterion_applicability/not_used/{index}"
+            if not isinstance(item, dict):
+                raise GenePolicyError(f"Gene policy {location} must be an object")
+            _require_keys(item, {"code", "reason", "source_section"}, location)
+            code = str(item["code"]).strip().upper()
+            scope = str(item.get("scope") or "").strip()
+            if not _STANDARD_CRITERION_RE.fullmatch(code):
+                raise GenePolicyError(f"Gene policy {location} has invalid criterion code")
+            identity = (code, scope)
+            if identity in identities:
+                raise GenePolicyError(
+                    f"Policy {policy_id} has a duplicate not-used criterion {identity}"
+                )
+            identities.add(identity)
+            if code in set(rules):
+                raise GenePolicyError(
+                    f"Policy {policy_id} marks supported rule {code} as not used"
+                )
+            if not str(item["reason"]).strip() or not str(item["source_section"]).strip():
+                raise GenePolicyError(
+                    f"Gene policy {location} requires a reason and source section"
+                )
 
     active_genes = 0
     for raw_gene, gene in genes.items():
@@ -380,6 +423,12 @@ def policy_name(gene: str) -> str:
 
 def external_evidence_config(gene: str) -> dict[str, str]:
     return deepcopy(get_gene_policy(gene)["policy"]["external_evidence"])
+
+
+def not_used_criteria(gene: str) -> list[dict[str, str]]:
+    """Return policy-level ACMG/AMP uses explicitly rejected by the VCEP."""
+    values = get_gene_policy(gene)["policy"]["criterion_applicability"]["not_used"]
+    return deepcopy(values)
 
 
 def resolve_policy_identity(gene: str | None = None) -> tuple[str, str]:

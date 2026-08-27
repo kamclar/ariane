@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "manifest_id": "ariane_gene_policy_registry",
-  "manifest_version": "2026.08.25",
+  "manifest_version": "2026.08.27",
   "status": "active",
   "policies": {
     "enigma_brca_vcep_1_2": {
@@ -53,7 +53,62 @@
         "PS1", "PS1_PROTEIN", "PS1_SPLICE", "PS3", "BS3", "PP3", "BP4", "BP1", "BP7",
         "PS4", "PM3", "PP1", "PP4", "BS2", "BS4", "BP5",
         "BP7_RNA", "PVS1_INIT"
-      ]
+      ],
+      "criterion_applicability": {
+        "not_used": [
+          {
+            "code": "PS2",
+            "reason": "De novo evidence is not calibrated for BRCA1/2-related cancers.",
+            "source_section": "PS2"
+          },
+          {
+            "code": "PM1",
+            "reason": "Domain and hotspot information is incorporated into the PP3/BP4 bioinformatic pathway.",
+            "source_section": "PM1"
+          },
+          {
+            "code": "PM4",
+            "reason": "Protein-length changes are evaluated through the PP3/BP4 bioinformatic pathway.",
+            "source_section": "PM4"
+          },
+          {
+            "code": "PM5",
+            "scope": "original missense use",
+            "reason": "Original missense PM5 is not used; ENIGMA separately repurposes PM5 for PTC variants.",
+            "source_section": "PM5 and PM5 Variable Weight (PTC)"
+          },
+          {
+            "code": "PM6",
+            "reason": "De novo evidence is not calibrated for BRCA1/2-related cancers.",
+            "source_section": "PM6"
+          },
+          {
+            "code": "PP2",
+            "reason": "BRCA1/2 have a high frequency of benign missense variation.",
+            "source_section": "PP2"
+          },
+          {
+            "code": "PP5",
+            "reason": "A reputable-source assertion without reviewable evidence is not used.",
+            "source_section": "PP5"
+          },
+          {
+            "code": "BP2",
+            "reason": "Co-occurrence observations are considered only within the BS2 pathway.",
+            "source_section": "BP2"
+          },
+          {
+            "code": "BP3",
+            "reason": "Repeat-region and domain information is captured by the bioinformatic pathway.",
+            "source_section": "BP3"
+          },
+          {
+            "code": "BP6",
+            "reason": "A reputable-source assertion without reviewable evidence is not used.",
+            "source_section": "BP6"
+          }
+        ]
+      }
     }
   },
   "genes": {

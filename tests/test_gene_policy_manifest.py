@@ -14,6 +14,7 @@ from backend.gene_policy import (
     active_genes,
     bayesdel_thresholds,
     load_gene_policy_manifest,
+    not_used_criteria,
     reference_transcript,
     runtime_policy_id,
     validate_gene_policy_payload,
@@ -34,7 +35,7 @@ def _modified_manifest():
 def test_checked_manifest_and_source_bindings_are_valid():
     manifest = load_gene_policy_manifest()
     assert active_genes() == ("BRCA1", "BRCA2")
-    assert manifest["manifest_version"] == "2026.08.25"
+    assert manifest["manifest_version"] == "2026.08.27"
     assert reference_transcript("BRCA1") == "NM_007294.4"
     assert runtime_policy_id("BRCA2") == "ENIGMA_BRCA_VCEP_1.2"
     assert manifest["genes"]["BRCA1"]["decision_assets"]["PVS1"][
@@ -44,6 +45,17 @@ def test_checked_manifest_and_source_bindings_are_valid():
         "description"
     ].startswith("DNA-binding domain")
     validate_policy_source_bindings()
+
+
+def test_vcep_not_used_criteria_are_explicit_and_versioned():
+    entries = not_used_criteria("BRCA1")
+    assert entries == not_used_criteria("BRCA2")
+    assert {item["code"] for item in entries} == {
+        "PS2", "PM1", "PM4", "PM5", "PM6", "PP2", "PP5", "BP2", "BP3", "BP6"
+    }
+    pm5 = next(item for item in entries if item["code"] == "PM5")
+    assert pm5["scope"] == "original missense use"
+    assert "PTC" in pm5["reason"]
 
 
 def test_unknown_gene_has_no_threshold_fallback():
