@@ -209,6 +209,11 @@ def test_protein_ps1_reference_facts_are_requested_from_backend():
     assert "resolved.assessed.spliceai_score" in javascript
     assert "resolved.reference.spliceai_score" in javascript
     assert "resolved.classification_verification" in javascript
+    assert "Using the ClinVar aggregate conclusion itself" in html
+    assert "would be circular" in html
+    resolver_start = javascript.index("async resolveProteinPs1Reference(item)")
+    resolver_end = javascript.index("applySplicePs1CandidateFacts(item)", resolver_start)
+    assert "item.references =" not in javascript[resolver_start:resolver_end]
 
 
 def test_manual_review_ui_collects_required_enigma_stipulations():

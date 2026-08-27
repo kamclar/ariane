@@ -627,13 +627,14 @@ p. následek, porovná jej s hodnocenou variantou a získá SpliceAI pro obě
 varianty ze stejného profilu. Současně ověří přesnou referenci v ClinVar a
 ClinGen ERepo. Frontend pouze zobrazí vrácená fakta.
 
-Dvě hvězdičky ClinVar označují shodné klasifikace více submitterů, nikoliv
-klasifikaci podle ENIGMA VCEP specifications. Takový záznam je pouze kandidát
-k revizi. Tři hvězdičky lze použít jako VCEP ověření jen tehdy, když je
-konkrétní assertion od příslušného ENIGMA/ClinGen expert panelu. Ani potom se
-nepřeskakuje kontrola definovaných RNA/splice zdrojů a přímé reciproční PS1
-závislosti. Nedostupné p. odvození nebo SpliceAI zůstane nedostupné a PS1 se
-nepřidá.
+Hvězdičky ClinVar popisují review status a žádný jejich počet nekvalifikuje
+referenci pro PS1. Samostatně identifikovaná assertion příslušného ENIGMA/ClinGen
+VCEP může být způsobilá nezávisle na aggregate star rating. Běžný ClinVar
+aggregate závěr nepředvyplňuje klasifikaci reference, její ověření, klasifikační
+zdroj ani evidenční reference. Jinak by se závěr klasifikace znovu použil jako
+její vlastní podklad. Ani u skutečné VCEP assertion se nepřeskakuje kontrola
+definovaných RNA/splice zdrojů a přímé reciproční PS1 závislosti. Nedostupné p.
+odvození nebo SpliceAI zůstane nedostupné a PS1 se nepřidá.
 
 ### 3.6 PP3
 

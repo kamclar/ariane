@@ -49,9 +49,9 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["assessed"]["spliceai_score"], 0.03)
         self.assertEqual(result["reference"]["spliceai_score"], 0.00)
         self.assertEqual(result["clinvar_stars"], 1)
-        self.assertEqual(
-            result["classification_verification"], "historical_classification_only"
-        )
+        self.assertEqual(result["classification"], "")
+        self.assertEqual(result["classification_verification"], "unresolved")
+        self.assertEqual(result["classification_source"], "")
         self.assertFalse(result["objective_ps1_checks_pass"])
 
     async def test_enigma_expert_panel_assertion_is_recognized(self):

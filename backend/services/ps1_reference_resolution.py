@@ -144,9 +144,12 @@ async def resolve_ps1_reference(
         if clingen.get("caid"):
             source += f" {clingen['caid']}"
     elif aggregate_class in P_LP:
-        classification = aggregate_class
-        verification = "historical_classification_only"
-        source = f"ClinVar aggregate, {stars} star" + ("s" if stars != 1 else "")
+        # An aggregate ClinVar conclusion is candidate-discovery context only.
+        # It is not the underlying VCEP evidence record and must not prefill
+        # classification fields used to award PS1.
+        classification = ""
+        verification = "unresolved"
+        source = ""
 
     same_missense = assessed.p_notation == reference.p_notation
     different_nucleotide = assessed.c_notation != reference.c_notation
@@ -166,9 +169,10 @@ async def resolve_ps1_reference(
         )
     elif aggregate_class in P_LP:
         review_message = (
-            f"ClinVar reports {aggregate_class} with {stars} star"
-            f"{'s' if stars != 1 else ''}, but this is not a verified ENIGMA VCEP "
-            "assertion. It can support candidate review only and adds no PS1 points."
+            f"ClinVar reports an aggregate {aggregate_class} classification with "
+            f"{stars} review star{'s' if stars != 1 else ''}. This is discovery "
+            "context only. It did not prefill the reference classification, "
+            "verification, or classification source and adds no PS1 points."
         )
     else:
         review_message = (

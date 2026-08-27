@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260826-2">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260827-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -1104,6 +1104,14 @@
                                     <span x-text="(item.evidence.splice_sources_checked || []).join(', ') || 'not recorded'"></span>.
                                     “None identified” means only that these recorded sources were checked; it is not an absolute claim that no splice evidence exists.
                                 </p>
+                                <p class="curation-warning" x-show="item.code === 'PS1_PROTEIN'">
+                                    ClinVar review stars describe the review status of a submitted classification.
+                                    They do not establish that the reference was classified under the applicable
+                                    ENIGMA VCEP specifications. Using the ClinVar aggregate conclusion itself as
+                                    proof of the reference classification would be circular. ARIANE therefore does
+                                    not copy an ordinary ClinVar aggregate classification, verification, source, or
+                                    reference into the PS1 evidence record.
+                                </p>
                                 <div x-show="item.code === 'PS1_PROTEIN' && item.evidence.reference_classification_used_ps1 === 'yes'">
                                     <label class="full-width-label">PS1 reference used in the reference classification
                                         <input type="text" x-model="item.evidence.reference_ps1_dependency_reference"
@@ -1760,6 +1768,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260826-2"></script>
+    <script src="/static/js/app.js?v=20260827-1"></script>
 </body>
 </html>

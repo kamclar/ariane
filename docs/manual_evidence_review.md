@@ -133,10 +133,11 @@ SpliceAI for both variants through the configured profile. It also checks the ex
 reference variant in ClinVar and ClinGen ERepo. These facts are filled into the
 form, but they do not by themselves add PS1 points.
 
-ClinVar review stars are used only to describe the candidate source. A two-star
-aggregate assertion is not an ENIGMA VCEP assertion and therefore remains a
-manual-review candidate. A three-star record qualifies as VCEP verification only
-when the underlying assertion is from the applicable ENIGMA/ClinGen expert panel.
+ClinVar review stars are used only to describe review status. No star count
+qualifies a reference for PS1. A separately identified assertion from the
+applicable ENIGMA/ClinGen VCEP may qualify independently of the aggregate star
+count. An ordinary ClinVar aggregate conclusion does not prefill the reference
+classification, verification, classification source, or evidence references.
 The named RNA/splice source review and reciprocal-dependency check remain required.
 If normalization, SpliceAI, ClinVar, or ClinGen is unavailable, the corresponding
 field is reported as unavailable and no missing value is interpreted as evidence.

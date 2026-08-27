@@ -84,9 +84,11 @@ podklad úplné reklasifikace.
 Ve strukturované manuální revizi lze zadat pouze c. HGVS referenční varianty.
 Backend z referenčního transkriptu odvodí a ověří p. následek, porovná jej s
 hodnocenou variantou a získá SpliceAI pro obě varianty. Přesnou referenci ověří
-také v ClinVar a ClinGen ERepo. Dvouhvězdičkový ClinVar záznam zůstává pouze
-kandidátem. Tříhvězdičkový záznam lze označit jako oficiální VCEP ověření jen
-tehdy, když jde o assertion příslušného ENIGMA/ClinGen expert panelu.
+také v ClinVar a ClinGen ERepo. Hvězdičky ClinVar popisují pouze review status
+a žádný jejich počet nekvalifikuje referenci pro PS1. Běžný ClinVar aggregate
+závěr nepředvyplňuje klasifikaci, ověření, klasifikační zdroj ani evidenční
+reference. Použít lze pouze samostatně identifikovanou assertion příslušného
+ENIGMA/ClinGen VCEP nebo úplnou lokální reklasifikaci.
 
 ## Odkud se berou jednotlivá pole
 

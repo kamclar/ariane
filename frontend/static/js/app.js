@@ -1023,11 +1023,6 @@ function ariane() {
                     vua_spliceai_score: resolved.assessed.spliceai_score ?? "",
                     reference_spliceai_score: resolved.reference.spliceai_score ?? "",
                 };
-                const references = [
-                    ...(item.references || "").split(/\r?\n/),
-                    ...(resolved.references || []),
-                ].map(value => value.trim()).filter(Boolean);
-                item.references = [...new Set(references)].join("\n");
                 this.ps1ReferenceMessage = resolved.review_message || "Reference facts resolved.";
             } catch (e) {
                 this.ps1ReferenceError = "Network error - PS1 reference facts could not be resolved.";
