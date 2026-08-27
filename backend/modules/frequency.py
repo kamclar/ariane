@@ -1153,6 +1153,44 @@ def _frequency_qc_ok(gnomad_data: Dict[str, Any]) -> bool:
     return False
 
 
+def pm2_not_applicable_decision(
+    variant_type: str,
+    *,
+    gene: Optional[str] = None,
+    c_notation: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
+    """Return an explicit PM2 N/A decision determined without gnomAD data."""
+    policy = _classification_policy_for_gene(gene)
+    if policy is None:
+        return None
+    frequency_policy = policy.get("frequency_criteria") or {}
+    pm2_policy = frequency_policy.get("pm2") or {}
+    excluded_types = {
+        str(value).lower()
+        for value in pm2_policy.get("excluded_variant_types", [])
+    }
+    c_allele_is_indel = bool(
+        re.search(r"(?:delins|del|dup|ins)", (c_notation or "").lower())
+    )
+    if variant_type.lower() not in excluded_types and not c_allele_is_indel:
+        return None
+    exclusion_basis = (
+        f"c. HGVS {c_notation} describes an indel"
+        if c_allele_is_indel
+        else f"variant type {variant_type} is excluded"
+    )
+    return {
+        "applies": False,
+        "strength": None,
+        "points": 0,
+        "reason": (
+            f"PM2 not applicable because {exclusion_basis} under "
+            f"{policy.get('rule_set') or 'the active VCEP frequency specification'}"
+        ),
+        "source": frequency_policy.get("source_url", ""),
+    }
+
+
 def evaluate_frequency_criteria(
     gnomad_data: Dict[str, Any],
     variant_type: str,
@@ -1206,21 +1244,16 @@ def evaluate_frequency_criteria(
                 "reason": "Frequency criteria not applied: active policy is incomplete",
             }
         }
-    pm2_excluded_types = {
-        str(value).lower() for value in pm2_policy.get("excluded_variant_types", [])
-    }
-    # The protein consequence can route an indel into the PTC/nonsense branch.
-    # For example, c.5533_5534insG has p.(Tyr1845Ter), so its consequence type
-    # is "nonsense" even though the underlying allele is an insertion.  PM2
-    # applicability is defined by the allele class, therefore the c. HGVS
-    # operation must independently exclude indels and exon CNVs.
-    c_allele_is_indel = bool(
-        re.search(r"(?:delins|del|dup|ins)", (c_notation or "").lower())
+    # Applicability is independent of whether a gnomAD record exists. The
+    # protein consequence can route an indel into another consequence type,
+    # so the c. HGVS operation is checked as well.
+    pm2_not_applicable = pm2_not_applicable_decision(
+        variant_type,
+        gene=gene,
+        c_notation=c_notation,
     )
-    pm2_excluded = (
-        variant_type.lower() in pm2_excluded_types
-        or c_allele_is_indel
-    )
+    if pm2_not_applicable:
+        criteria["PM2"] = pm2_not_applicable
 
     status = gnomad_data.get("status", "not_queried")
     max_af = _as_float(gnomad_data.get("max_af"))
@@ -1412,19 +1445,7 @@ def evaluate_frequency_criteria(
             },
         )
 
-    if pm2_excluded:
-        exclusion_basis = (
-            f"c. HGVS {c_notation} describes an indel"
-            if c_allele_is_indel
-            else f"variant type {variant_type} is excluded"
-        )
-        criteria["PM2"] = {
-            "applies": False, "strength": None, "points": 0,
-            "reason": (
-                f"PM2 not applicable because {exclusion_basis} under "
-                f"policy {policy['policy_id']}"
-            )
-        }
+    if pm2_not_applicable:
         return criteria
 
     if gnomad_data.get("pm2_absence_established"):

@@ -257,6 +257,7 @@ def evaluate_variant(
     from backend.modules.pp3_bp4 import evaluate_pp3_bp4
     from backend.modules.bp7 import evaluate_bp7
     from backend.modules.frequency import evaluate_frequency_criteria
+    from backend.modules.frequency import pm2_not_applicable_decision
     from backend.modules.rna_review import evaluate_rna_review
     from backend.modules.splice_ps1_review import evaluate_splice_ps1_review
     from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
@@ -270,6 +271,7 @@ def evaluate_variant(
         "p_notation": p_notation,
         "criteria": {},
         "excluded_criteria": {},
+        "not_applicable_criteria": {},
         "total_points": 0,
         "warnings": [],
         "has_functional_evidence": False,
@@ -288,6 +290,14 @@ def evaluate_variant(
         "PP1 (co-segregation), BS2 (healthy carriers), BS4 (segregation absence). "
         "This automated result must not replace a full expert variant classification."
     )
+
+    pm2_not_applicable = pm2_not_applicable_decision(
+        variant_type,
+        gene=gene,
+        c_notation=c_notation,
+    )
+    if pm2_not_applicable:
+        results["not_applicable_criteria"]["PM2"] = pm2_not_applicable
 
     # Table 9 is authoritative for its PS3/BS3 recommendation and records the
     # SpliceAI context used in that functional review.  Figure 1A and PS1 use
@@ -318,7 +328,13 @@ def evaluate_variant(
                 results["criteria"][crit_name] = crit_data
                 results["total_points"] += crit_data["points"]
             elif crit_name == "PM2" and not crit_data.get("applies"):
-                results["warnings"].append(crit_data["reason"])
+                if (
+                    "not applicable" in str(crit_data.get("reason") or "").lower()
+                    and not pm2_not_applicable
+                ):
+                    results["not_applicable_criteria"]["PM2"] = crit_data
+                else:
+                    results["warnings"].append(crit_data["reason"])
 
         results["excluded_criteria"].update(
             freq_criteria.get("_excluded_criteria", {})
@@ -451,7 +467,7 @@ def evaluate_variant(
     ]:
         results["warnings"].append(pvs1["reason"])
         if "N/A" in str(pvs1.get("pvs1_code") or ""):
-            results["excluded_criteria"]["PVS1"] = {
+            results["not_applicable_criteria"]["PVS1"] = {
                 "applies": False,
                 "strength": "N/A",
                 "points": 0,

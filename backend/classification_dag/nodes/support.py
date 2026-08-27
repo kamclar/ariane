@@ -38,6 +38,7 @@ class SpliceContext:
 class RetainedEvidence:
     criteria: tuple[CriterionDecision, ...]
     excluded_criteria: tuple[CriterionDecision, ...]
+    not_applicable_criteria: tuple[CriterionDecision, ...]
     warnings: tuple[str, ...]
     evidence_interactions: tuple[Mapping[str, Any], ...]
     has_functional_evidence: bool

@@ -59,6 +59,7 @@ class EvidenceInteractionNode:
         )
         criteria = {}
         excluded = {}
+        not_applicable = {}
         for family in families:
             for item in family.criteria:
                 if rule_is_applicable(ci.gene, item.code):
@@ -67,6 +68,11 @@ class EvidenceInteractionNode:
                     excluded[item.code] = excluded_by_policy(item, ci.gene)
             for item in family.excluded_criteria:
                 excluded[item.code] = item
+            for item in family.not_applicable_criteria:
+                not_applicable[item.code] = item
+
+        for code in set(criteria) | set(excluded):
+            not_applicable.pop(code, None)
 
         warnings: list[str] = [FIRST_PASS_WARNING]
         warnings.extend(splice.warnings)
@@ -78,6 +84,7 @@ class EvidenceInteractionNode:
             retained = RetainedEvidence(
                 criteria=(criteria["BA1"],),
                 excluded_criteria=tuple(excluded.values()),
+                not_applicable_criteria=tuple(not_applicable.values()),
                 warnings=tuple(warnings),
                 evidence_interactions=(),
                 has_functional_evidence=False,
@@ -104,6 +111,7 @@ class EvidenceInteractionNode:
         retained = RetainedEvidence(
             criteria=retained_decisions,
             excluded_criteria=tuple(excluded.values()),
+            not_applicable_criteria=tuple(not_applicable.values()),
             warnings=tuple(warnings),
             evidence_interactions=tuple(interactions),
             has_functional_evidence=any(
@@ -143,6 +151,7 @@ class ClassificationPolicyNode:
         retained = inputs["retained_evidence"]
         criteria = criteria_dict(retained.criteria)
         excluded = criteria_dict(retained.excluded_criteria)
+        not_applicable = criteria_dict(retained.not_applicable_criteria)
         result: dict[str, Any] = {
             "variant": f"{variant.gene} {variant.c_notation} {variant.p_notation}",
             "gene": variant.gene,
@@ -150,6 +159,7 @@ class ClassificationPolicyNode:
             "p_notation": variant.p_notation,
             "criteria": criteria,
             "excluded_criteria": excluded,
+            "not_applicable_criteria": not_applicable,
             "total_points": sum(item.points for item in retained.criteria),
             "warnings": list(retained.warnings),
             "has_functional_evidence": retained.has_functional_evidence,

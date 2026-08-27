@@ -33,6 +33,7 @@ class Pvs1CriteriaNode:
         pvs1_rna = evaluate_pvs1_rna(ci.gene, ci.c_notation)
         decisions: list[CriterionDecision] = []
         excluded: list[CriterionDecision] = []
+        not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
         functional = False
         if pvs1["applies"]:
@@ -65,7 +66,7 @@ class Pvs1CriteriaNode:
         }:
             warnings.append(pvs1["reason"])
             if "N/A" in str(pvs1.get("pvs1_code") or ""):
-                excluded.append(
+                not_applicable.append(
                     decision(
                         "PVS1",
                         {
@@ -77,7 +78,7 @@ class Pvs1CriteriaNode:
                         },
                         gene=ci.gene,
                         family_id=self.id,
-                        status=CriterionDecisionStatus.EXCLUDED,
+                        status=CriterionDecisionStatus.NOT_APPLICABLE,
                     )
                 )
         if (
@@ -107,6 +108,7 @@ class Pvs1CriteriaNode:
             self.id,
             criteria=tuple(decisions),
             excluded_criteria=tuple(excluded),
+            not_applicable_criteria=tuple(not_applicable),
             warnings=tuple(warnings),
             has_functional_evidence=functional,
             metadata={"pvs1": pvs1, "pvs1_rna": pvs1_rna},

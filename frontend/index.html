@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260827-2">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260827-3">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -242,28 +242,29 @@
                 </table>
             </div>
 
-            <details class="not-used-criteria-details"
-                     x-show="result && currentNotUsedCriteria().length > 0">
+            <details class="not-applicable-criteria-details"
+                     x-show="result?.not_applicable_criteria?.length > 0">
                 <summary>
                     <span>
-                        <strong x-text="currentNotUsedCriteria().length"></strong>
-                        standard ACMG/AMP criterion uses are not used under
-                        <span x-text="currentPolicyLabel()"></span>.
+                        Not applicable to this variant
+                        (<strong x-text="result?.not_applicable_criteria?.length || 0"></strong>)
                     </span>
-                    <span class="not-used-criteria-toggle">Show codes and reasons</span>
+                    <span class="not-applicable-criteria-toggle">Show codes and reasons</span>
                 </summary>
-                <div class="not-used-criteria-content">
-                    <ul class="not-used-criteria-list">
-                        <template x-for="item in currentNotUsedCriteria()"
-                                  :key="item.code + ':' + (item.scope || '')">
+                <div class="not-applicable-criteria-content">
+                    <p>
+                        These outcomes were explicitly marked as not applicable by the
+                        variant-specific ENIGMA decision path. Criteria that were not met,
+                        unavailable, or excluded are not included here.
+                    </p>
+                    <ul class="not-applicable-criteria-list">
+                        <template x-for="item in result?.not_applicable_criteria || []"
+                                  :key="item.name">
                             <li>
-                                <span class="not-used-criterion-identity">
-                                    <span class="criterion-badge" x-text="item.code"></span>
-                                    <span class="not-used-criterion-scope"
-                                          x-show="item.scope"
-                                          x-text="item.scope"></span>
-                                </span>
+                                <span class="criterion-badge" x-text="item.name"></span>
                                 <span x-text="item.reason"></span>
+                                <a x-show="item.source" :href="item.source"
+                                   target="_blank" rel="noopener">ENIGMA source</a>
                             </li>
                         </template>
                     </ul>
@@ -1798,6 +1799,6 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260827-2"></script>
+    <script src="/static/js/app.js?v=20260827-3"></script>
 </body>
 </html>

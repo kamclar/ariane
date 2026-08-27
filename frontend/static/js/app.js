@@ -90,7 +90,6 @@ function ariane() {
                             name: item.policy_name,
                             version: item.policy_version,
                             sourceUrl: item.policy_source_url,
-                            notUsedCriteria: item.not_used_criteria || [],
                         }])
                     );
                     if (!this.gene && this.configuredGenes.length) {
@@ -133,10 +132,6 @@ function ariane() {
             const policy = this.currentPolicyInfo();
             if (!policy) return "the selected VCEP specification";
             return `${policy.name} v${policy.version}`;
-        },
-
-        currentNotUsedCriteria() {
-            return this.currentPolicyInfo()?.notUsedCriteria || [];
         },
 
         async loadManualDefinitions() {
@@ -874,6 +869,7 @@ function ariane() {
             if (!result) return result;
             result.criteria = this.sortCriterionList(result.criteria);
             result.excluded_criteria = this.sortCriterionList(result.excluded_criteria);
+            result.not_applicable_criteria = this.sortCriterionList(result.not_applicable_criteria);
             return result;
         },
 

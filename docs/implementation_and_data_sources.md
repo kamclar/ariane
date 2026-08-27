@@ -32,9 +32,18 @@ Manifest pro každý aktivní gen obsahuje:
 Sdílená VCEP politika obsahuje také verzovaný seznam původních ACMG/AMP použití,
 která specifikace označuje jako `Do not use`. Každá položka má kód, krátký důvod
 a část zdrojového dokumentu. Tento seznam se nesmí zaměňovat s kritériem, které
-je pouze nesplněné nebo nepoužitelné pro konkrétní variantu. Veřejné rozhraní
-zobrazuje ve výchozím stavu pouze počet těchto položek. Kódy a stručné důvody se
-zobrazí až po rozbalení řádku pod aplikovanými kritérii.
+je pouze nesplněné nebo nepoužitelné pro konkrétní variantu. Seznam `Do not use`
+je vlastnost VCEP politiky, nikoliv výsledek klasifikace jedné varianty.
+
+Výsledek klasifikace má samostatná pole pro aplikovaná kritéria, kritéria
+vyloučená výjimkou a kritéria explicitně označená jako `not_applicable` ve
+variantově specifické rozhodovací cestě. Rozhraní zobrazuje poslední skupinu
+v rozbalovacím řádku `Not applicable to this variant`. Pouhá absence kódu ve
+výsledku se na `not_applicable` nepřevádí. Nesplněný práh, nedostupný zdroj,
+nejednoznačná evidence a výjimkou vyloučené kritérium zůstávají odlišné stavy.
+Prvními automaticky zveřejněnými případy jsou PVS1 označené jako N/A přímo v
+ENIGMA Table 4 a PM2, jehož nepoužitelnost pro daný typ alely určuje aktivní
+VCEP politika.
 
 Sdílená část VCEP politiky obsahuje prahy SpliceAI, PP4, BP5, BA1, BS1, PM2 a
 hranice bodové klasifikace pro mixed evidence. Python neobsahuje náhradní

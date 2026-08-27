@@ -153,6 +153,11 @@ stručného klinického výsledku.
 9. Genové prefixy ve vstupu, zdrojové CSpec URL, HGVS startup testy, PVS1 obrázky
    a popisy funkčních domén se načítají z manifestu. Python neobsahuje větvení
    `if gene == "BRCA1"` nebo `if gene == "BRCA2"`.
+10. `CriterionFamilyResult` a `VariantAssertion` přenášejí explicitní
+    `not_applicable_criteria` odděleně od aplikovaných a výjimkou vyloučených
+    kritérií. Tento stav smí vzniknout pouze z konkrétní rozhodovací větve.
+    Chybějící data, nesplněný práh ani pouhá absence výsledku se na
+    `not_applicable` nepřevádějí.
 
 ## Implementované uzly
 

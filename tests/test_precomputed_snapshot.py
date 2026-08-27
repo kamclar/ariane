@@ -364,8 +364,15 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(criteria["PM2_Supporting"].strength, "Supporting")
         self.assertEqual(criteria["PM2_Supporting"].points, 1)
         self.assertNotIn("BS3", criteria)
-        excluded = {criterion.name: criterion for criterion in result.excluded_criteria}
-        self.assertEqual(excluded["PVS1"].strength, "N/A")
+        not_applicable = {
+            criterion.name: criterion
+            for criterion in result.not_applicable_criteria
+        }
+        self.assertEqual(not_applicable["PVS1"].strength, "N/A")
+        self.assertNotIn(
+            "PVS1",
+            {criterion.name for criterion in result.excluded_criteria},
+        )
         self.assertEqual(result.total_points, 1)
         self.assertEqual(result.predicted_class, 3)
         self.assertFalse(result.mixed_evidence)

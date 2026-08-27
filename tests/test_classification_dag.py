@@ -516,6 +516,44 @@ def test_dag_contract_accepts_supported_variant_families(
     assert compare_classification_results(direct, dag.result) == ()
 
 
+def test_table4_pvs1_na_is_reported_separately_from_excluded_evidence():
+    execution = execute_classification(
+        ClassificationInputs(
+            gene="BRCA2",
+            variant_type="splice_site",
+            c_notation="c.8953+2T>C",
+            p_notation="p.?",
+            spliceai_score=0.90,
+            reference_transcript="NM_000059.4",
+        ),
+        mode="dag",
+    )
+
+    pvs1 = execution.result["not_applicable_criteria"]["PVS1"]
+    assert pvs1["strength"] == "N/A"
+    assert pvs1["points"] == 0
+    assert "PVS1" not in execution.result["excluded_criteria"]
+
+
+def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states():
+    execution = execute_classification(
+        ClassificationInputs(
+            gene="BRCA1",
+            variant_type="frameshift",
+            c_notation="c.5266dup",
+            p_notation="p.(Gln1756ProfsTer74)",
+            reference_transcript="NM_007294.4",
+        ),
+        mode="dag",
+    )
+
+    pm2 = execution.result["not_applicable_criteria"]["PM2"]
+    assert pm2["points"] == 0
+    assert "not applicable" in pm2["reason"].lower()
+    assert "PM2" not in execution.result["excluded_criteria"]
+    assert "PM2" not in execution.result["criteria"]
+
+
 def test_unknown_runtime_mode_is_rejected(monkeypatch):
     monkeypatch.setenv("ARIANE_CLASSIFIER_ENGINE", "fallback")
     with pytest.raises(ValueError, match="Invalid ARIANE_CLASSIFIER_ENGINE"):

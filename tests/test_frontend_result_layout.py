@@ -27,17 +27,18 @@ def test_applied_criteria_immediately_follows_classification_header():
     assert html.count("<!-- Criteria table -->") == 1
 
 
-def test_not_used_vcep_codes_are_compact_and_backend_driven():
+def test_variant_specific_not_applicable_criteria_are_compact_and_backend_driven():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
     javascript = FRONTEND_JS.read_text(encoding="utf-8")
 
-    assert 'class="not-used-criteria-details"' in html
+    assert 'class="not-applicable-criteria-details"' in html
+    assert "Not applicable to this variant" in html
     assert "Show codes and reasons" in html
-    assert "currentNotUsedCriteria()" in html
+    assert "result?.not_applicable_criteria" in html
     assert "item.reason" in html
-    assert "item.source_section" not in html
-    assert "item.not_used_criteria" in javascript
-    assert "policyByGene" in javascript
+    assert "Criteria that were not met" in html
+    assert "result.not_applicable_criteria = this.sortCriterionList" in javascript
+    assert "currentNotUsedCriteria()" not in html
     assert "De novo evidence is not calibrated" not in html
 
 

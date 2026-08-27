@@ -137,6 +137,10 @@ class ClassificationPresentationService:
             result.get("excluded_criteria", {}),
             applies=False,
         )
+        not_applicable = _criterion_models(
+            result.get("not_applicable_criteria", {}),
+            applies=False,
+        )
         spliceai_score = artifacts.get("spliceai_score")
         bayesdel_score = artifacts.get("bayesdel_score")
         alphamissense = artifacts.get("alphamissense")
@@ -178,6 +182,7 @@ class ClassificationPresentationService:
             total_points=result["total_points"],
             criteria=criteria,
             excluded_criteria=excluded,
+            not_applicable_criteria=not_applicable,
             warnings=result["warnings"],
             external=_external_model(evidence),
             has_functional_evidence=result.get("has_functional_evidence", False),

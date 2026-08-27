@@ -155,6 +155,7 @@ class CriterionFamilyResult:
     family_id: str
     criteria: tuple[CriterionDecision, ...] = ()
     excluded_criteria: tuple[CriterionDecision, ...] = ()
+    not_applicable_criteria: tuple[CriterionDecision, ...] = ()
     warnings: tuple[str, ...] = ()
     evidence_interactions: tuple[Mapping[str, Any], ...] = ()
     has_functional_evidence: bool = False
@@ -163,18 +164,51 @@ class CriterionFamilyResult:
     def __post_init__(self) -> None:
         applied_codes = [decision.code for decision in self.criteria]
         excluded_codes = [decision.code for decision in self.excluded_criteria]
+        not_applicable_codes = [
+            decision.code for decision in self.not_applicable_criteria
+        ]
         duplicate_applied = sorted({
             code for code in applied_codes if applied_codes.count(code) > 1
         })
         duplicate_excluded = sorted({
             code for code in excluded_codes if excluded_codes.count(code) > 1
         })
-        overlap = sorted(set(applied_codes) & set(excluded_codes))
-        if duplicate_applied or duplicate_excluded or overlap:
+        duplicate_not_applicable = sorted({
+            code
+            for code in not_applicable_codes
+            if not_applicable_codes.count(code) > 1
+        })
+        overlap = sorted(
+            (set(applied_codes) & set(excluded_codes))
+            | (set(applied_codes) & set(not_applicable_codes))
+            | (set(excluded_codes) & set(not_applicable_codes))
+        )
+        invalid_statuses = [
+            f"{decision.code}:{decision.status.value}"
+            for decisions, expected in (
+                (self.criteria, CriterionDecisionStatus.APPLIED),
+                (self.excluded_criteria, CriterionDecisionStatus.EXCLUDED),
+                (
+                    self.not_applicable_criteria,
+                    CriterionDecisionStatus.NOT_APPLICABLE,
+                ),
+            )
+            for decision in decisions
+            if decision.status != expected
+        ]
+        if (
+            duplicate_applied
+            or duplicate_excluded
+            or duplicate_not_applicable
+            or overlap
+            or invalid_statuses
+        ):
             raise ValueError(
                 f"Invalid criterion family {self.family_id}: "
                 f"duplicate_applied={duplicate_applied}, "
-                f"duplicate_excluded={duplicate_excluded}, overlap={overlap}"
+                f"duplicate_excluded={duplicate_excluded}, "
+                f"duplicate_not_applicable={duplicate_not_applicable}, "
+                f"overlap={overlap}, invalid_statuses={invalid_statuses}"
             )
 
     @property
@@ -192,6 +226,7 @@ class VariantAssertion:
     p_notation: str
     criteria: tuple[CriterionDecision, ...]
     excluded_criteria: tuple[CriterionDecision, ...]
+    not_applicable_criteria: tuple[CriterionDecision, ...]
     predicted_class: int
     predicted_label: str
     total_points: int
@@ -230,6 +265,8 @@ class VariantAssertion:
             raise TypeError("criteria must be a mapping")
         if not isinstance(result["excluded_criteria"], Mapping):
             raise TypeError("excluded_criteria must be a mapping")
+        if not isinstance(result.get("not_applicable_criteria", {}), Mapping):
+            raise TypeError("not_applicable_criteria must be a mapping")
         if not isinstance(result["warnings"], list):
             raise TypeError("warnings must be a list")
         if not isinstance(result["total_points"], int):
@@ -253,6 +290,14 @@ class VariantAssertion:
             )
             for code, value in result["excluded_criteria"].items()
         )
+        not_applicable = tuple(
+            CriterionDecision.from_public_mapping(
+                code,
+                {**value, "points": 0},
+                status=CriterionDecisionStatus.NOT_APPLICABLE,
+            )
+            for code, value in result.get("not_applicable_criteria", {}).items()
+        )
         calculated_points = sum(criterion.points for criterion in criteria)
         if calculated_points != result["total_points"]:
             raise ValueError(
@@ -267,6 +312,7 @@ class VariantAssertion:
             p_notation=str(result["p_notation"]),
             criteria=criteria,
             excluded_criteria=excluded,
+            not_applicable_criteria=not_applicable,
             predicted_class=int(result["predicted_class"]),
             predicted_label=str(result["predicted_label"]),
             total_points=result["total_points"],
