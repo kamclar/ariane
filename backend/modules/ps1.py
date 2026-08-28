@@ -27,10 +27,14 @@ ST7_PATH = DATA_DIR / "st7_reference_set.json"
 PS1_REGISTRY_PATH = DATA_DIR / "ps1_protein_reference_registry.json"
 
 PS1_POINTS = {"Strong": 4, "Moderate": 2}
-APPROVED_CLASSIFICATION_VERIFICATIONS = {
+KNOWN_CLASSIFICATION_VERIFICATIONS = {
     "external_vcep_assertion",
     "locally_recurated_under_enigma_vcep",
     "enigma_st7_v1_2_reference_set",
+}
+AUTOMATIC_CLASSIFICATION_VERIFICATIONS = {
+    "external_vcep_assertion",
+    "locally_recurated_under_enigma_vcep",
 }
 NO_DAMAGING_SPLICE_STATUSES = {"none_identified", "normal"}
 _ST7_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
@@ -113,7 +117,7 @@ def compute_approval_basis_checksum(record: Dict[str, Any]) -> str:
 
 def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
     """Validate the curated automatic-scoring registry and known dependencies."""
-    if data.get("schema_version") != 3 or data.get("status") != "active":
+    if data.get("schema_version") != 4 or data.get("status") != "active":
         raise RuntimeError("PS1 protein reference registry has unsupported metadata")
     if not str(data.get("registry_version") or "").strip():
         raise RuntimeError("PS1 protein reference registry has no registry_version")
@@ -128,7 +132,7 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
     )
     if not isinstance(accepted_bases, list) or {
         item.get("id") for item in accepted_bases if isinstance(item, dict)
-    } != APPROVED_CLASSIFICATION_VERIFICATIONS:
+    } != KNOWN_CLASSIFICATION_VERIFICATIONS:
         raise RuntimeError("PS1 protein reference registry has invalid reference source policy")
     source_checksums = data.get("source_checksums")
     required_checksum_keys = {
@@ -181,8 +185,19 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         if record.get("classification") not in {"Pathogenic", "Likely Pathogenic"}:
             raise RuntimeError(f"{prefix} lacks a P/LP classification")
         verification = record.get("classification_verification")
-        if verification not in APPROVED_CLASSIFICATION_VERIFICATIONS:
-            raise RuntimeError(f"{prefix} lacks qualifying VCEP classification verification")
+        if verification not in KNOWN_CLASSIFICATION_VERIFICATIONS:
+            raise RuntimeError(f"{prefix} has an unknown classification verification")
+        if status == "eligible" and verification not in AUTOMATIC_CLASSIFICATION_VERIFICATIONS:
+            raise RuntimeError(
+                f"{prefix} is eligible without a separately verified VCEP classification"
+            )
+        if (
+            verification == "enigma_st7_v1_2_reference_set"
+            and status not in {"review_required", "excluded"}
+        ):
+            raise RuntimeError(
+                f"{prefix} treats ST7 candidate status as automatic PS1 eligibility"
+            )
         if not str(record.get("classification_source") or "").strip():
             raise RuntimeError(f"{prefix} lacks classification_source")
         if verification == "external_vcep_assertion":
@@ -361,7 +376,8 @@ def discover_ps1_reference_variants(
     return sorted(
         {
             str(record["c_notation"])
-            for record in _APPROVED_LOOKUP.get(gene, {}).get(aa_key, [])
+            for record in _ST7_LOOKUP.get(gene, {}).get(aa_key, [])
+            if record.get("reference_status") != "excluded"
             if record.get("c_notation") != c_notation
         }
     )
@@ -393,6 +409,12 @@ def _public_registry_candidate(record: Dict[str, Any]) -> Dict[str, Any]:
         "reference_status": "approved" if registry_status == "eligible" else registry_status,
         "status_reason": record.get("status_reason", ""),
         "source_dataset": record.get("candidate_source", "Curated PS1 protein reference registry"),
+        "reference_splice_evidence_status": (
+            record.get("reference_splice_evidence", {}).get("confirmed_status", "not_assessed")
+        ),
+        "reference_splice_sources_checked": (
+            record.get("reference_splice_evidence", {}).get("sources_checked", [])
+        ),
     }
 
 
@@ -431,6 +453,11 @@ def evaluate_ps1(
         "vua_spliceai_source": vua_spliceai_source,
         "reference_spliceai_scores": reference_spliceai_scores or {},
         "source_url": vcep_specification(gene)["url"],
+        "assessed_variant": {
+            "gene": gene,
+            "c_notation": c_notation,
+            "p_notation": p_notation,
+        },
     }
     splice_low = spliceai_thresholds(gene)["bp4"]
 
@@ -502,11 +529,7 @@ def evaluate_ps1(
             "The defined confirmed RNA/splice evidence sources have not been completely checked"
         )
 
-    if not approved_records and review_candidates:
-        result["blocking_reasons"].append(
-            "At least one matching ST7 reference still requires protein-PS1 eligibility review"
-        )
-    elif not approved_records and excluded_candidates:
+    if not approved_records and excluded_candidates and not review_candidates:
         result["application_status"] = "reference_ineligible"
         result["reason"] = "; ".join(
             item.get("status_reason") or "Matching ST7 reference is ineligible"
@@ -515,6 +538,41 @@ def evaluate_ps1(
         return result
 
     runtime_scores = reference_spliceai_scores or {}
+    if not approved_records and review_candidates:
+        review_unavailable = [
+            str(item["c_notation"])
+            for item in review_candidates
+            if runtime_scores.get(str(item["c_notation"])) is None
+        ]
+        review_high = [
+            (str(item["c_notation"]), float(runtime_scores[str(item["c_notation"])]))
+            for item in review_candidates
+            if runtime_scores.get(str(item["c_notation"])) is not None
+            and float(runtime_scores[str(item["c_notation"])]) > splice_low
+        ]
+        if len(review_high) == len(review_candidates):
+            result["reference_status"] = "ineligible_for_this_application"
+            result["application_status"] = "not_applicable"
+            result["reason"] = (
+                "Protein-level PS1 not applicable: every matching ST7 reference "
+                f"has SpliceAI above {splice_low} ("
+                + ", ".join(
+                    f"{reference_c}={score:.3f}"
+                    for reference_c, score in review_high
+                )
+                + ")"
+            )
+            return result
+        result["blocking_reasons"].append(
+            "A matching ST7 reference was found, but no separate ENIGMA/ClinGen "
+            "VCEP assertion has been verified for automatic protein-level PS1"
+        )
+        if review_unavailable:
+            result["blocking_reasons"].append(
+                "SpliceAI is unavailable for matching reference variant(s): "
+                + ", ".join(review_unavailable)
+            )
+
     runtime_approved_records: List[Dict[str, Any]] = []
     unavailable_references: List[str] = []
     high_score_references: List[tuple[str, float]] = []

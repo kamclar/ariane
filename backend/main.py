@@ -33,7 +33,7 @@ from backend.config import (
 from backend.gene_policy import active_genes, validate_policy_source_bindings
 from backend.data_validation import validate_required_datasets
 from backend.data_health import get_data_issues
-from backend.classification_dag import get_configured_engine_mode
+from backend.classification_dag import ProviderDependencies, get_configured_engine_mode
 from backend.models import (
     VariantRequest, ClassificationResult,
     BatchRequest, BatchResponse, BatchItemResult,
@@ -44,6 +44,7 @@ from backend.models import (
 )
 from backend.services import (
     ClassificationCommand,
+    EvidenceOrchestrationService,
     EvidenceExecutionError,
     VariantPreparationError,
     execute_variant_classification,
@@ -71,7 +72,7 @@ CLASSIFIER_ENGINE_MODE = get_configured_engine_mode()
 
 # Initialize local sources before serving requests so /api/health reports
 # degraded caches even before the first classification.
-from backend.modules import frequency as _frequency_data_source  # noqa: E402,F401
+from backend.population_frequency import PopulationFrequencyService  # noqa: E402
 from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402,F401
 from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
 from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
@@ -95,6 +96,17 @@ load_pp4_bp5_snapshot()
 initialize_residue_data()
 validate_hgvs_engine()
 validate_rule_catalog()
+
+# Population snapshots are loaded explicitly and owned by the application.
+# Provider dependencies retain the service method, so an administrative reload
+# atomically replaces the repository used by subsequent requests.
+POPULATION_FREQUENCY_SERVICE = PopulationFrequencyService.load_default()
+CLASSIFICATION_ORCHESTRATION = EvidenceOrchestrationService(
+    engine_mode=CLASSIFIER_ENGINE_MODE,
+    provider_dependencies=ProviderDependencies.production(
+        population_frequency_lookup=POPULATION_FREQUENCY_SERVICE.get_frequencies,
+    ),
+)
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -452,6 +464,7 @@ async def _classify_one(
                 dup_type=dup_type,
             ),
             engine_mode=CLASSIFIER_ENGINE_MODE,
+            orchestration=CLASSIFICATION_ORCHESTRATION,
         )
     except VariantPreparationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -602,7 +615,6 @@ async def clear_cache(
     from backend.lookups.bayesdel import BAYESDEL_CACHE
     from backend.lookups.clinvar import CLINVAR_CACHE
     from backend.lookups.clingen import EREPO_CACHE
-    from backend.modules.frequency import GNOMAD_CACHE, load_gnomad_local_cache, load_gnomad_coverage_snapshot
 
     SPLICEAI_CACHE.clear()
     SPLICEAI_STATUS_CACHE.clear()
@@ -610,8 +622,7 @@ async def clear_cache(
     CLINVAR_CACHE.clear()
     EREPO_CACHE.clear()
 
-    load_gnomad_local_cache()
-    load_gnomad_coverage_snapshot()
+    POPULATION_FREQUENCY_SERVICE.reload()
 
     _audit(request, "cache_cleared")
     return {"status": "ok", "message": "All caches cleared"}

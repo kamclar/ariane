@@ -2,7 +2,7 @@
 
 import unittest
 
-from backend.modules.classifier import evaluate_variant
+from tests.dag_test_support import classify_with_dag as evaluate_variant
 from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.variant_type import infer_variant_type
@@ -68,8 +68,8 @@ class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
             "c": "c.5266dup",
             "p": "p.(Gln1756ProfsTer74)",
             "pp4": True,
-            "required": {"PVS1", "PM5_PTC", "PP4"},
-            "forbidden": {"PP3", "BP1", "BP4", "BP7"},
+            "required": {"PVS1", "PM5_PTC"},
+            "forbidden": {"PP4", "PP3", "BP1", "BP4", "BP7"},
             "class": 5,
         },
         {

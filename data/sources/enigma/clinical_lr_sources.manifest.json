@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "status": "validated_source_manifest",
   "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
   "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
@@ -114,11 +114,27 @@
     }
   ],
   "combination_rules": {
-    "only_independent_components": true,
+    "source_bundle_policy": "A published combined result within one admitted source bundle may be used as supplied. Results from different source bundles may be multiplied only when every pair is explicitly marked verified_independent in this manifest.",
     "duplicate_source_id": "fatal",
     "duplicate_independence_group": "fatal",
+    "missing_overlap_assessment": "manual_review_without_automatic_code",
+    "unknown_or_potential_overlap": "manual_review_without_automatic_code",
     "component_level_codes": "not scored",
     "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
     "posterior_probability_prior": "not used"
-  }
+  },
+  "source_bundle_overlap_matrix": [
+    {
+      "left_source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
+      "right_source_bundle_id": "zanti_2025_case_control",
+      "overlap_status": "unknown",
+      "double_counting_risk": true,
+      "automatic_combination_allowed": false,
+      "assessment_note": "The versioned source material currently curated by ARIANE does not contain a documented assessment establishing that the UCSC ENIGMA BRCAmfa clinical LR bundle and the Zanti et al. 2025 case-control LR bundle can be combined as independent lines of evidence.",
+      "assessment_sources": [
+        "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+        "https://doi.org/10.1038/s41467-025-59979-6"
+      ]
+    }
+  ]
 }

@@ -1,13 +1,8 @@
 # functional domains as defined by ENIGMA
 # these are amino acid positions
 
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
-import json
+from typing import Optional
 import re
-import time
-import urllib.request
-import urllib.parse
 from backend.gene_policy import functional_domains
 
 def get_amino_acid_position(p_notation: str) -> Optional[int]:

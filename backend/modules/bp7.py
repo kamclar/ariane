@@ -1,10 +1,4 @@
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
-import json
-import re
-import time
-import urllib.request
-import urllib.parse
+from typing import Optional, Dict
 from backend.modules.utils import get_intron_offset_from_c_notation
 from backend.modules.decision_trace import figure1a_path, step
 from backend.gene_policy import spliceai_thresholds
@@ -118,14 +112,3 @@ def evaluate_bp7(
     )
 
     return result
-
-
-if __name__ == "__main__":
-    # Test BP7
-    print("Testing BP7 evaluation:")
-    print("=" * 60)
-    print(f"Synonymous outside domain, SpliceAI=0.05:            {evaluate_bp7('synonymous', 0.05, in_domain=False, bp4_met=False)}")
-    print(f"Synonymous in domain, BP4 met, SpliceAI=0.05:     {evaluate_bp7('synonymous', 0.05, in_domain=True, bp4_met=True)}")
-    print(f"Synonymous in domain, BP4 not met, SpliceAI=0.05: {evaluate_bp7('synonymous', 0.05, in_domain=True, bp4_met=False)}")
-    print(f"Synonymous in domain, BP4 met, SpliceAI=0.3:      {evaluate_bp7('synonymous', 0.3, in_domain=True, bp4_met=True)}")
-    print(f"Missense, SpliceAI=0.05:                          {evaluate_bp7('missense', 0.05)}")

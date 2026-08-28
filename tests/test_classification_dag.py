@@ -21,10 +21,9 @@ from backend.classification_dag import (
     execute_classification,
     get_configured_engine_mode,
 )
-from backend.classification_dag.runtime import compare_classification_results
 from backend.classification_dag.policy import classify_by_enigma_combination
-from backend.modules.classifier import evaluate_variant
 from backend.modules.table9 import table9_lookup_ps3_bs3
+from backend.population_frequency.policy import classification_policy_for_gene
 
 
 CONTEXT = DagExecutionContext(
@@ -187,24 +186,6 @@ def _representative_inputs():
         submitted_notation="BRCA1 c.5366C>T",
         normalization_source="test reference engine",
     )
-
-
-def _oracle_kwargs(inputs):
-    return {
-        "gene": inputs.gene,
-        "variant_type": inputs.variant_type,
-        "p_notation": inputs.p_notation,
-        "c_notation": inputs.c_notation,
-        "spliceai_score": inputs.spliceai_score,
-        "bayesdel_score": inputs.bayesdel_score,
-        "gnomad_data": inputs.gnomad_data,
-        "table9_result": inputs.table9_result,
-        "pp4_bp5_result": inputs.pp4_bp5_result,
-        "ps1_result": inputs.ps1_result,
-        "exon_cnv_result": inputs.exon_cnv_result,
-        "residue_info": inputs.residue_info,
-        "dup_type": inputs.dup_type,
-    }
 
 
 def test_classification_inputs_create_typed_variant_and_evidence_bundle():
@@ -426,12 +407,19 @@ def test_dag_preserves_bp5_provenance_and_rejects_single_lr_class2_shortcut():
     assert "multiple evidence contributions" in execution.result["classification_note"]
 
 
-def test_dag_mode_preserves_current_clinical_result_exactly():
+def test_dag_produces_approved_representative_clinical_result():
     inputs = _representative_inputs()
-    legacy = evaluate_variant(**_oracle_kwargs(inputs))
     execution = execute_classification(inputs, mode="dag")
 
-    assert compare_classification_results(legacy, execution.result) == ()
+    assert execution.result["predicted_class"] == 3
+    assert execution.result["total_points"] == 5
+    assert {
+        code: (item["strength"], item["points"])
+        for code, item in execution.result["criteria"].items()
+    } == {
+        "PS3": ("Strong", 4),
+        "PP3": ("Supporting", 1),
+    }
     assert execution.graph_id == "ariane.vcep.classification"
     assert [entry.node_id for entry in execution.trace] == [
         "contract.classification_inputs",
@@ -511,9 +499,14 @@ def test_dag_contract_accepts_supported_variant_families(
         p_notation=p_notation,
         table9_result=table9_lookup_ps3_bs3(gene, c_notation),
     )
-    direct = evaluate_variant(**_oracle_kwargs(inputs))
-    dag = execute_classification(inputs, mode="dag")
-    assert compare_classification_results(direct, dag.result) == ()
+    execution = execute_classification(inputs, mode="dag")
+    assert execution.result["gene"] == gene
+    assert execution.result["c_notation"] == c_notation
+    assert execution.result["p_notation"] == p_notation
+    assert execution.result["predicted_class"] in {1, 2, 3, 4, 5}
+    assert execution.result["total_points"] == sum(
+        item["points"] for item in execution.result["criteria"].values()
+    )
 
 
 def test_table4_pvs1_na_is_reported_separately_from_excluded_evidence():
@@ -543,6 +536,7 @@ def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states()
             c_notation="c.5266dup",
             p_notation="p.(Gln1756ProfsTer74)",
             reference_transcript="NM_007294.4",
+            frequency_policy=classification_policy_for_gene("BRCA1"),
         ),
         mode="dag",
     )

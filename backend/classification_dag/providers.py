@@ -62,7 +62,11 @@ class ProviderDependencies:
     ps1_lookup: Callable[..., Any]
 
     @classmethod
-    def production(cls) -> "ProviderDependencies":
+    def production(
+        cls,
+        *,
+        population_frequency_lookup: Callable[..., Any] | None = None,
+    ) -> "ProviderDependencies":
         from backend.lookups.bayesdel import (
             BAYESDEL_STATUS_CACHE,
             get_bayesdel_and_alphamissense,
@@ -70,7 +74,7 @@ class ProviderDependencies:
         from backend.lookups.coordinates import get_grch37, get_grch38, resolve_variant
         from backend.lookups.spliceai import SPLICEAI_STATUS_CACHE, get_spliceai_score
         from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
-        from backend.modules.frequency import get_gnomad_frequencies
+        from backend.population_frequency import PopulationFrequencyService
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
         from backend.modules.ps1 import (
             discover_ps1_reference_variants,
@@ -80,6 +84,10 @@ class ProviderDependencies:
         from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
         from backend.modules.residues import check_important_residue
 
+        if population_frequency_lookup is None:
+            population_frequency_lookup = (
+                PopulationFrequencyService.load_default().get_frequencies
+            )
         return cls(
             resolve_variant=resolve_variant,
             get_grch37=get_grch37,
@@ -92,7 +100,7 @@ class ProviderDependencies:
             bayesdel_status=lambda gene, c: dict(
                 BAYESDEL_STATUS_CACHE.get(f"{gene}:{c}", {})
             ),
-            gnomad_lookup=get_gnomad_frequencies,
+            gnomad_lookup=population_frequency_lookup,
             clinical_lr_lookup=evaluate_pp4_bp5,
             exon_cnv_lookup=lookup_exon_cnv_evidence,
             residue_lookup=check_important_residue,
@@ -393,24 +401,29 @@ class GnomadEvidenceNode:
     def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
         coordinates = inputs["coordinate_context"]
-        applicable = coordinates.grch37 is not None or coordinates.grch38 is not None
-        value = (
-            self.dependencies.gnomad_lookup(
-                gene=variant.gene,
-                grch37=coordinates.grch37,
-                grch38=coordinates.grch38,
-            )
-            if applicable else None
+        coordinates_available = (
+            coordinates.grch37 is not None or coordinates.grch38 is not None
+        )
+        value = self.dependencies.gnomad_lookup(
+            gene=variant.gene,
+            c_notation=variant.c_notation,
+            grch37=coordinates.grch37,
+            grch38=coordinates.grch38,
         )
         evidence = EvidenceItem(
             id="gnomad",
             kind="population_frequency",
-            status=_evidence_status(value, applicable=applicable),
+            status=(
+                EvidenceStatus.AVAILABLE
+                if coordinates_available
+                else EvidenceStatus.NOT_APPLICABLE
+            ),
             value=value,
             source_id="gnomAD non-cancer panel datasets",
             reason=(
-                str(value.get("status") or "") if isinstance(value, Mapping)
-                else "Genomic coordinates are unavailable"
+                str(value.get("status") or "")
+                if coordinates_available
+                else "Genomic coordinates are unavailable; policy context remains available"
             ),
             provenance={
                 "status": value.get("status") if isinstance(value, Mapping) else "not_queried",
@@ -604,6 +617,7 @@ class EvidenceBundleAssemblyNode:
         ))
         bundle = EvidenceBundle(items)
         value = lambda evidence_id: bundle.get(evidence_id).value
+        gnomad_value = value("gnomad")
         classification_inputs = ClassificationInputs(
             gene=variant.gene,
             variant_type=variant.variant_type,
@@ -611,7 +625,12 @@ class EvidenceBundleAssemblyNode:
             c_notation=variant.c_notation,
             spliceai_score=value("spliceai"),
             bayesdel_score=value("bayesdel"),
-            gnomad_data=value("gnomad"),
+            gnomad_data=gnomad_value,
+            frequency_policy=(
+                (gnomad_value or {}).get("classification_policy")
+                if isinstance(gnomad_value, Mapping)
+                else None
+            ),
             table9_result=value("enigma_table9"),
             pp4_bp5_result=value("clinical_lr"),
             ps1_result=value("protein_ps1"),
@@ -638,7 +657,8 @@ class EvidenceBundleAssemblyNode:
             "bayesdel_score": value("bayesdel"),
             "spliceai_status": dict(inputs["spliceai_evidence"].provenance),
             "bayesdel_status": dict(inputs["bayesdel_evidence"].provenance),
-            "gnomad_data": value("gnomad"),
+            "gnomad_data": gnomad_value,
+            "clinical_lr_result": value("clinical_lr"),
             "table9_result": value("enigma_table9"),
             "exon_cnv_result": value("exon_cnv"),
             "evidence_audit": {

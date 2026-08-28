@@ -308,13 +308,21 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         protein_ps1 = json.loads(
             (DATA / "ps1_protein_reference_registry.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(protein_ps1["schema_version"], 3)
+        self.assertEqual(protein_ps1["schema_version"], 4)
         self.assertEqual(
             protein_ps1["candidate_source"]["usage"],
-            "enigma_reference_set_with_per_record_ps1_eligibility",
+            "trusted_candidate_discovery_and_guided_review",
         )
         self.assertEqual(protein_ps1["reference_count"], 60)
-        self.assertEqual(protein_ps1["status_counts"], {"eligible": 40, "excluded": 20})
+        self.assertEqual(
+            protein_ps1["status_counts"],
+            {"excluded": 20, "review_required": 40},
+        )
+        self.assertFalse(any(
+            record["classification_verification"] == "enigma_st7_v1_2_reference_set"
+            and record["status"] == "eligible"
+            for record in protein_ps1["references"]
+        ))
         self.assertTrue(all(
             record["reference_splice_evidence"]["prediction_policy"]
             == "runtime_required"

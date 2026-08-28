@@ -1,4 +1,8 @@
 {
+  "automatic_application_statuses": {
+    "eligible": 4175,
+    "review_required": 972
+  },
   "case_control_quantitative_records": 1710,
   "case_control_quantitative_records_by_gene": {
     "BRCA1": 681,
@@ -32,8 +36,9 @@
     "component_codes_scored_separately": false,
     "duplicate_independence_groups": "fatal",
     "duplicate_source_ids": "fatal",
-    "method": "multiply admitted variant-specific clinical LR components",
+    "method": "multiply source bundles only after versioned overlap assessment",
     "single_final_code": true,
+    "unknown_overlap": "manual review without automatic PP4/BP5",
     "zanti_admission": "Supplementary Data 5; CDS +/-5 bp; non-founder FAF <=0.001; >=3 combined carriers; BRCA2 evidence from >=2 datasets"
   },
   "conflicting_canonical_keys": [
@@ -58,6 +63,7 @@
           "evidence_family": "published_multifactorial_clinical_lr",
           "independence_group": "li_2020_ambry_testing_cohort",
           "pmid": "31853058",
+          "source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
           "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
           "source_id": "li_2020_personal_family_history"
         }
@@ -80,6 +86,7 @@
           "evidence_family": "published_multifactorial_clinical_lr",
           "independence_group": "li_2020_ambry_testing_cohort",
           "pmid": "31853058",
+          "source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
           "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
           "source_id": "li_2020_personal_family_history"
         }
@@ -87,11 +94,11 @@
       "reason": "different clinical LR components under the same source ID"
     }
   },
-  "created_utc": "2026-08-14T11:34:49.920869+00:00",
+  "created_utc": "2026-08-27T18:35:03.788155+00:00",
   "criteria": {
-    "BP5": 2117,
-    "PP4": 1017,
-    "not_informative": 2013
+    "BP5": 1441,
+    "PP4": 813,
+    "not_informative": 2893
   },
   "dataset": "BRCA1/2 combined clinical likelihood-ratio snapshot",
   "excluded": {
@@ -169,7 +176,7 @@
       "source_id": "parsons_2019_multifactorial"
     }
   },
-  "index_sha256": "bee263e46cc6ca878b28f2b634a6647e60af16048a3c33cb9c3c7d137d7f055b",
+  "index_sha256": "b9504bdf87390b1f15ece7f48c3ca9b65b891f4807615d1513f497d131b64ab7",
   "normalization": {
     "counts": {
       "canonical_source_rows_merged": 24,
@@ -311,8 +318,10 @@
       "duplicate_independence_group": "fatal",
       "duplicate_source_id": "fatal",
       "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
-      "only_independent_components": true,
-      "posterior_probability_prior": "not used"
+      "missing_overlap_assessment": "manual_review_without_automatic_code",
+      "posterior_probability_prior": "not used",
+      "source_bundle_policy": "A published combined result within one admitted source bundle may be used as supplied. Results from different source bundles may be multiplied only when every pair is explicitly marked verified_independent in this manifest.",
+      "unknown_or_potential_overlap": "manual_review_without_automatic_code"
     },
     "datasets": {
       "ucsc_enigma_brcamfa_v1_1": {
@@ -357,13 +366,27 @@
         "version": "Nature Communications version of record, 2025-05-25"
       }
     },
-    "schema_version": 1,
+    "schema_version": 2,
     "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
+    "source_bundle_overlap_matrix": [
+      {
+        "assessment_note": "The versioned source material currently curated by ARIANE does not contain a documented assessment establishing that the UCSC ENIGMA BRCAmfa clinical LR bundle and the Zanti et al. 2025 case-control LR bundle can be combined as independent lines of evidence.",
+        "assessment_sources": [
+          "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+          "https://doi.org/10.1038/s41467-025-59979-6"
+        ],
+        "automatic_combination_allowed": false,
+        "double_counting_risk": true,
+        "left_source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
+        "overlap_status": "unknown",
+        "right_source_bundle_id": "zanti_2025_case_control"
+      }
+    ],
     "status": "validated_source_manifest",
     "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2"
   },
   "source_manifest_file": "clinical_lr_sources.manifest.json",
-  "source_manifest_sha256": "2c911d233c30744154fd210f175d6396412a411e90c509b65f733e026f45594a",
+  "source_manifest_sha256": "53b71c5a039b67a28dd67069de715e5a75c3ddc77d9d8b099f2d8deaca883904",
   "status": "validated_derived_snapshot",
   "target_rule_version": "ENIGMA BRCA1/2 VCEP 1.2 PP4/BP5 thresholds"
 }

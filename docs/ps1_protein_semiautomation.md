@@ -4,8 +4,9 @@
 
 ST7 je oficiální ENIGMA referenční dataset. Jeho P/LP missense varianty jsou
 zařazeny do proteinového PS1 registru. Aktuální registr obsahuje 60 referencí:
-40 `eligible` a 20 `excluded` podle známé RNA a splice evidence. SpliceAI skóre
-není v registru uloženo.
+40 `review_required` a 20 `excluded` podle známé RNA a splice evidence.
+Samotná ST7 není považována za automatický PS1 allowlist. SpliceAI skóre není
+v registru uloženo.
 
 Automatické proteinové PS1 vyžaduje:
 
@@ -19,31 +20,32 @@ SpliceAI pro referenci i hodnocenou variantu se získá při klasifikaci ze stej
 nakonfigurované služby. Chybějící skóre se nepovažuje za nulu a PS1 se
 automaticky nepřidělí.
 
-Implementační politika ARIANE přijímá oficiální P/LP klasifikaci v ENIGMA ST7
-v1.2 jako klasifikační základ reference. ST7 záznam se však stane `eligible`
-teprve po samostatné kontrole proteinového typu a splice podmínek.
+Implementační politika ARIANE používá oficiální P/LP klasifikaci v ENIGMA ST7
+v1.2 jako důvěryhodný zdroj kandidátů. Pro automatický stav `eligible` je navíc
+nutná samostatně ověřená ENIGMA/ClinGen VCEP assertion nebo úplná lokální
+reklasifikace podle uvedené verze ENIGMA VCEP pravidel.
 
 P reference dává PS1 Strong. LP reference dává PS1 Moderate. Síly z více
 referencí se nesčítají.
 
 ```text
-ST7 a proteinový PS1 registr
+ST7 kandidát
           |
           v
 stejný missense následek + jiná c. změna
           |
           v
-stav reference v registru?
-     |                  |
-review/excluded       eligible podle známé RNA evidence
-     |                  |
-revize nebo důvod   SpliceAI VUA i reference <= 0,1?
-                         |              |
-                        ne             ano
-                         |              |
-                  bez PS1 / revize   automatické PS1
-                                     P: Strong
-                                     LP: Moderate
+ověřená ENIGMA/ClinGen VCEP assertion?
+     |                         |
+    ne                        ano
+     |                         |
+předvyplněná revize       splice podmínky splněny?
+bez bodů                    |             |
+                           ne            ano
+                           |              |
+                     bez PS1 / revize  automatické PS1
+                                       P: Strong
+                                       LP: Moderate
 ```
 
 ## Datasety
@@ -61,7 +63,7 @@ revize nebo důvod   SpliceAI VUA i reference <= 0,1?
 Registr přijímá pouze missense P/LP reference v kanonickém ENIGMA transkriptu,
 které mají dohledatelný klasifikační původ. Přípustné klasifikační základy jsou:
 
-1. P/LP reference z oficiální ENIGMA Supplementary Table 7 v1.2;
+1. P/LP kandidáti z oficiální ENIGMA Supplementary Table 7 v1.2;
 2. verzovaná oficiální ENIGMA/ClinGen VCEP assertion, například z ClinGen
    Evidence Repository, pokud ještě není v ST7;
 3. lokální úplná reklasifikace podle uvedené verze ENIGMA VCEP pravidel.
@@ -75,6 +77,13 @@ Nové oficiální nebo lokálně reklasifikované reference mimo ST7 se zapisuj�
 `backend/data/ps1_protein_reference_extensions.json`. Generátor je sloučí se
 ST7 a vytvoří jediný runtime registr. Prázdný extension soubor znamená, že
 aktuální registr obsahuje pouze oficiální ST7 reference.
+
+Při nálezu ST7 kandidáta ARIANE předvyplní referenční c. a p. notaci, ST7
+klasifikaci a zdroj, shodu proteinového následku, rozdílnou nukleotidovou změnu,
+dostupná SpliceAI skóre a výsledky kontroly definovaných RNA/splice zdrojů.
+Současně na pozadí ověří ClinVar a ClinGen ERepo. Pokud najde samostatnou
+ENIGMA VCEP assertion, doplní její klasifikaci a zdroj. Uživatel potvrzuje jen
+podmínky, které nebylo možné doložit automaticky. Neúplná revize nepřidá body.
 
 Samotný záznam v ClinVar bez ENIGMA/ClinGen expert-panel assertion, CANVarUK,
 BRCA Exchange, jednotlivá publikace nebo výpočetní predikce nestačí k vytvoření
@@ -100,7 +109,7 @@ ENIGMA/ClinGen VCEP nebo úplnou lokální reklasifikaci.
 | podklad proteinového mechanismu | PS3 funkční evidence z Table 9, nebo u patogenní missense reference doložená absence predikovaného a potvrzeného splice efektu |
 | SpliceAI reference | výpočet na požádání stejnou profilově připnutou službou jako u hodnocené varianty |
 | známá RNA/splice evidence | úplná ENIGMA Table 9 v1.2 a úplná Supplementary Table 2 v1.2 |
-| stav `eligible`, `excluded`, `review_required` | deterministické rozhodnutí generátoru z typu varianty a známé RNA/splice evidence; predikční podmínka se ověřuje za běhu |
+| stav `eligible`, `excluded`, `review_required` | ST7 je `review_required` nebo `excluded`; `eligible` vyžaduje samostatně ověřenou VCEP klasifikaci a úplné PS1 podmínky; predikční podmínka se ověřuje za běhu |
 | případná PS1 závislost klasifikace reference | oficiální assertion nebo úplný lokální evidenční záznam |
 | provenance a checksumy | generátor registru ze všech použitých verzovaných vstupních souborů |
 

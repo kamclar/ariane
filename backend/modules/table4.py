@@ -3,13 +3,10 @@
 # ============================================================
 # v1.6.0: Load Table 4 data from JSON file in data/ directory
 
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict
 from pathlib import Path
 import json
 import re
-import time
-import urllib.request
-import urllib.parse
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 

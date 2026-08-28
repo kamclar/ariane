@@ -2,12 +2,19 @@ from pathlib import Path
 
 
 FRONTEND_HTML = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
-FRONTEND_JS = Path(__file__).resolve().parents[1] / "frontend" / "static" / "js" / "app.js"
+FRONTEND_JS_DIR = Path(__file__).resolve().parents[1] / "frontend" / "static" / "js"
+
+
+def frontend_javascript() -> str:
+    return "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(FRONTEND_JS_DIR.glob("*.js"))
+    )
 
 
 def test_application_version_is_loaded_from_backend_and_visible_in_header_and_footer():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert 'id="ariane-version"' in html
     assert 'id="ariane-footer-version"' in html
@@ -29,7 +36,7 @@ def test_applied_criteria_immediately_follows_classification_header():
 
 def test_variant_specific_not_applicable_criteria_are_compact_and_backend_driven():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert 'class="not-applicable-criteria-details"' in html
     assert "Not applicable to this variant" in html
@@ -79,9 +86,22 @@ def test_external_comparison_remains_visible_for_not_found_or_failed_sources():
     assert "result?.external?.erepo_evidence_codes" in html
 
 
+def test_clinical_lr_overlap_audit_is_visible_and_backend_driven():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+
+    assert "result?.clinical_lr_audit" in html
+    assert "PP4/BP5 clinical likelihood ratios" in html
+    assert "Overlap status" in html
+    assert "Automatic combination" in html
+    assert "Unadmitted product for audit" in html
+    assert "Verified independent source groups" in html
+    assert "result?.clinical_lr_audit?.source_components" in html
+    assert "result.clinical_lr_audit.overlap_assessment_sources" in html
+
+
 def test_variant_input_can_synchronise_the_explicit_gene_selector():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert '@input="syncGeneFromVariantInput()"' in html
     assert '@change="syncGeneFromVariantInput()"' in html
@@ -95,7 +115,7 @@ def test_variant_input_can_synchronise_the_explicit_gene_selector():
 def test_unreviewed_splice_ps1_pilot_is_not_exposed_in_production_ui():
     project_root = FRONTEND_HTML.parents[1]
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
     backend_main = (project_root / "backend" / "main.py").read_text(encoding="utf-8")
 
     assert not (project_root / "backend" / "data" / "splice_ps1_reference_set.json").exists()
@@ -141,7 +161,7 @@ def test_decision_path_stays_inside_applied_criteria_details():
 
 def test_embedded_decision_path_uses_full_width_without_horizontal_scrollbar():
     css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     graph_start = css.index(".decision-path-graph {")
     svg_start = css.index(".decision-path-svg {", graph_start)
@@ -170,7 +190,7 @@ def test_rules_navigation_labels_are_not_left_to_global_button_colours():
 
 def test_decision_tree_is_responsive_without_horizontal_scrollbar():
     css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     canvas_rule = css[css.index(".decision-tree-canvas"):css.index(".decision-tree-svg")]
     svg_rule = css[css.index(".decision-tree-svg {"):css.index(".decision-tree-svg .tree-connector")]
@@ -187,7 +207,7 @@ def test_decision_tree_is_responsive_without_horizontal_scrollbar():
 
 def test_manual_review_ui_has_no_strength_override_control():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert "Reviewer-selected strength" not in html
     assert "reviewer override" not in html
@@ -199,7 +219,7 @@ def test_manual_review_ui_has_no_strength_override_control():
 
 def test_frontend_does_not_calculate_manual_criterion_strength_or_eligibility():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert "suggestedManualStrength" not in javascript
     assert "numberOrNull" not in javascript
@@ -215,15 +235,20 @@ def test_frontend_does_not_calculate_manual_criterion_strength_or_eligibility():
 
 def test_protein_ps1_reference_facts_are_requested_from_backend():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     assert "Complete reference facts" in html
+    assert "Assessed variant" in html
+    assert "Assessed protein consequence" in html
+    assert "`${result.gene} ${result.c_notation}`" in html
     assert "resolveProteinPs1Reference(item)" in html
     assert 'fetch("/api/manual-evidence/resolve-ps1-reference"' in javascript
     assert "resolved.reference.p_notation" in javascript
     assert "resolved.assessed.spliceai_score" in javascript
     assert "resolved.reference.spliceai_score" in javascript
     assert "resolved.classification_verification" in javascript
+    assert "review.manual_review_prefill" in javascript
+    assert "const requiredSources" not in javascript
     assert "Using the ClinVar aggregate conclusion itself" in html
     assert "would be circular" in html
     resolver_start = javascript.index("async resolveProteinPs1Reference(item)")
@@ -233,7 +258,7 @@ def test_protein_ps1_reference_facts_are_requested_from_backend():
 
 def test_manual_review_ui_collects_required_enigma_stipulations():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
-    javascript = FRONTEND_JS.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
 
     for field in (
         "case_control_country_matched",

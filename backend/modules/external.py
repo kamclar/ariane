@@ -2,13 +2,7 @@
 # External comparison - ClinVar + ClinGen ERepo
 # Read-only reference, does not feed into classification
 # ============================================================
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
-import json
-import re
-import time
-import urllib.request
-import urllib.parse
+from typing import Dict
 
 CLASSIFICATION_MAP = {
     "Pathogenic":               5,

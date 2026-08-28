@@ -5,13 +5,9 @@
 #
 # Table 9 contains ~4,300 variants with reviewed functional assay evidence
 
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict
 from pathlib import Path
 import json
-import re
-import time
-import urllib.request
-import urllib.parse
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Load Table 9 from JSON

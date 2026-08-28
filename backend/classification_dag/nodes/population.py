@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Mapping
 
 from backend.classification_dag.domain import (
     CriterionDecision,
@@ -24,7 +25,7 @@ class FrequencyCriteriaNode:
     provides: frozenset[str] = frozenset({"frequency_family"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.frequency import (
+        from backend.population_frequency.criteria import (
             evaluate_frequency_criteria,
             pm2_not_applicable_decision,
         )
@@ -37,10 +38,15 @@ class FrequencyCriteriaNode:
         excluded: list[CriterionDecision] = []
         not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
+        gnomad_data = bundle_value(evidence, "gnomad") or {}
+        policy = ci.frequency_policy
+        if policy is None and isinstance(gnomad_data, Mapping):
+            policy = gnomad_data.get("classification_policy")
         pm2_not_applicable = pm2_not_applicable_decision(
             ci.variant_type,
             gene=ci.gene,
             c_notation=ci.c_notation,
+            policy=policy,
         )
         if pm2_not_applicable:
             not_applicable.append(
@@ -52,13 +58,13 @@ class FrequencyCriteriaNode:
                     status=CriterionDecisionStatus.NOT_APPLICABLE,
                 )
             )
-        gnomad_data = bundle_value(evidence, "gnomad")
         if gnomad_data:
             evaluated = evaluate_frequency_criteria(
                 gnomad_data,
                 ci.variant_type,
                 gene=ci.gene,
                 c_notation=ci.c_notation,
+                policy=policy,
             )
             for code, value in evaluated.items():
                 if code.startswith("_"):

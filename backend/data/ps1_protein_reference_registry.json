@@ -1,8 +1,8 @@
 {
-  "schema_version": 3,
-  "registry_version": "2026-08-20.1",
+  "schema_version": 4,
+  "registry_version": "2026-08-27.1",
   "status": "active",
-  "description": "ENIGMA ST7 v1.2 P/LP missense references for protein-level PS1, with eligibility from defined ENIGMA RNA/splice sources. The reference and assessed-variant SpliceAI scores are computed on demand.",
+  "description": "ENIGMA ST7 v1.2 P/LP missense candidates for guided protein-level PS1 review, plus separately verified VCEP references from curated extensions. The reference and assessed-variant SpliceAI scores are computed on demand.",
   "rule_source": {
     "name": "ClinGen ENIGMA BRCA1/2 VCEP PS1 specification",
     "version": "1.2.0",
@@ -11,15 +11,15 @@
   "candidate_source": {
     "name": "ClinGen ENIGMA BRCA1/2 VCEP Supplementary Table 7",
     "version": "1.2.0",
-    "usage": "enigma_reference_set_with_per_record_ps1_eligibility"
+    "usage": "trusted_candidate_discovery_and_guided_review"
   },
-  "classification_policy": "P/LP classifications in official ENIGMA ST7 v1.2 are accepted as the reference classification basis. Protein-PS1 eligibility additionally requires a missense consequence, SpliceAI <= 0.1 and no damaging splice evidence in the defined sources.",
+  "classification_policy": "Official ENIGMA ST7 v1.2 P/LP records identify trusted PS1 candidates but do not establish the separate VCEP-assertion requirement for automatic scoring. Automatic protein-level PS1 additionally requires a versioned ENIGMA/ClinGen VCEP assertion or documented local reclassification, a missense consequence, SpliceAI <= 0.1 and no damaging splice evidence in the defined sources.",
   "reference_source_policy": {
     "accepted_classification_bases": [
       {
         "id": "enigma_st7_v1_2_reference_set",
         "source": "ENIGMA Supplementary Table 7 v1.2",
-        "use": "Official P/LP reference classification; each missense record still requires the protein-PS1 splice checks."
+        "use": "Trusted candidate discovery and guided review only; it does not by itself permit automatic PS1 scoring."
       },
       {
         "id": "external_vcep_assertion",
@@ -58,8 +58,8 @@
   },
   "reference_count": 60,
   "status_counts": {
-    "eligible": 40,
-    "excluded": 20
+    "excluded": 20,
+    "review_required": 40
   },
   "references": [
     {
@@ -73,8 +73,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -90,7 +90,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -119,7 +119,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "ecfc3dc1c25c7d43ae3a92154de8325fba1482a722cfb5252cc56a892267ca42"
+      "approval_basis_checksum": "7af0ba5fe851e0fdd2a1bc41df213ee14b5ccfc106984d7bfd59f517c552a96d"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.130T>A",
@@ -132,8 +132,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -149,7 +149,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -178,7 +178,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "4fa4d9d2d858d2b4933747536eaedff4a6e6e486b21a0afffcb1fd10ec48af99"
+      "approval_basis_checksum": "a01d7fd89dd96445ead6a88bb6026d8a000c82b6bb30978ec33668db4a42e1a7"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.131G>T",
@@ -191,8 +191,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -208,7 +208,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -237,7 +237,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "3e0ef368f08e53cfec21665236cf247b6b241e21b4fb4a48cca5037eea095960"
+      "approval_basis_checksum": "2171f22b53c49dd8b6404313065f2916f3474f136748edb27aa84440d0b3f655"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.140G>A",
@@ -267,7 +267,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -296,7 +296,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "72a34c92d2026dfdb099d21119f7da7907f887265babc8426f33ee31394ca7e2"
+      "approval_basis_checksum": "6a478dfbccee5c7fbb2645c5c5cf58ae0f6297474be6665d3a3873c36a43a744"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.181T>A",
@@ -309,8 +309,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -326,7 +326,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -355,7 +355,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "da8e5680e2e15ae50656ec769d8d131f38a26c58772adb3579153be9efe50eb9"
+      "approval_basis_checksum": "4cf8d564e128e092c6886f9c80b0dc32608d9f4527cf0144b3f6ea2b0bcc78b3"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.181T>G",
@@ -385,7 +385,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -414,7 +414,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "a7026be803a79b3479644bd318ca9e07868428a46b863912ac06a09ca63e2d29"
+      "approval_basis_checksum": "864620c4f8d0bd9c91192a696dafa1530a4d78868b66d7b0d8585e00bc04083a"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.191G>A",
@@ -427,8 +427,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -444,7 +444,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -473,7 +473,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c707d52ac1814d52fc7c39ea2a36e15747f50610d3a9fab4909cbe86ef7b7b34"
+      "approval_basis_checksum": "90e61d05f9e9de764cb117a1c85ebc0e0d8e50592c877df6e17e0a12594431be"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.211A>G",
@@ -503,7 +503,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -532,7 +532,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "420a3301251e6bc1f7aac4d7c3b9102d75722a0f4462a2880afccaf073d1f030"
+      "approval_basis_checksum": "5ace9853e9275dd66f0b3352082bce5d1ee225079eab529fd1eaf06d289ec27b"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4484G>C",
@@ -562,7 +562,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -591,7 +591,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "79aa5a78020914be3d212f8c9e1b8162f8590f04a741fb0388c07e00ccfe34a2"
+      "approval_basis_checksum": "96f2687a6c3b6642246b9e4d21111b47a23ad1d5408e55cf36b6fab5532c20d2"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4484G>T",
@@ -621,7 +621,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -650,7 +650,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "a78034602457a35fb27d5cec9b67fb3c4e019114877fb55d529b02ad3f9d188d"
+      "approval_basis_checksum": "e772ced183e80738729e9c9c2a5f295cfbde389c05b3e6fa489e4702b5fee25b"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4675G>A",
@@ -680,7 +680,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -709,7 +709,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "28ed8080138d2c853eaa0c3980dbd3839abb15a5a9f63d0831b748cc138ece6e"
+      "approval_basis_checksum": "15c734a1a5940985d191c6b1c931c274fedcb2947a5e7083cb5a04c958c9bf7b"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.4868C>G",
@@ -739,7 +739,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -768,7 +768,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "3cac68ab52dd7172eeabab86d4fc06b29fa547f0d63a821080c6d71cf5b49191"
+      "approval_basis_checksum": "a945a1dc771994ff339042d22652a04187e82f66e0cefe4891749dfe8d755814"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5053A>G",
@@ -781,8 +781,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -798,7 +798,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -827,7 +827,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "695cbb27c745a4d6f4184d1f1406ae7f1cc305f2525abc2fa2c90423c1dc33be"
+      "approval_basis_checksum": "29a83a7d720bc0daf34b0ba5f87ff9a53e80918ae92fd20932bd6b6952845092"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5054C>T",
@@ -840,8 +840,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -857,7 +857,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -886,7 +886,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "25aadf03a6c420402fda2d7340cd9faa10a5e36874d28ff7dc4f5f0a3badaaf6"
+      "approval_basis_checksum": "61ee78f92892b65e636eed49ca6077e24c3ca952bd5768cc86dfd6cd18620078"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5066T>G",
@@ -916,7 +916,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -945,7 +945,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "bf6d2ea6e8e5f67b276975d21dc2194e553392b3476cb7848f424dce19db5431"
+      "approval_basis_checksum": "665cc9cabbd13683828a29290d13fcaecb0cc6a4fe42d5f798ccdf8df76ec543"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5074G>C",
@@ -975,7 +975,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -1004,7 +1004,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "75d47e86e5e4669f9221a9967d55d6c31ec541051407d65432e0c0524a6ee40d"
+      "approval_basis_checksum": "4de19200de229b6f233e6d1c93ec253d6680e4bae3df90a51efcc0ed537e29a6"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5089T>C",
@@ -1017,8 +1017,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1034,7 +1034,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1063,7 +1063,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "ce5e487cbb2ddc32a35c51bb531bf7055cf57f9fac25a4d23779f161119bdc68"
+      "approval_basis_checksum": "1341be3d542026a4abad555bef0dadb2cfc359a40f6b12a39f418d057b753f51"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5095C>T",
@@ -1076,8 +1076,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1093,7 +1093,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1122,7 +1122,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "934892d6b45c74f4cac4f50729183c0cd485fd977802761fa189fa78c2c77a5b"
+      "approval_basis_checksum": "06e2f63b797e95ae9749f3dddbd6530bcff2e65cce143ac20b73b4569d7c0db5"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5117G>A",
@@ -1135,8 +1135,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1152,7 +1152,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1181,7 +1181,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "997891cbbe1bce09ec0e010d57625651d89649255a04ee17d829cc850ba30fa2"
+      "approval_basis_checksum": "d8d53535ca11e4df0cdfb4c9773fb5e0048884b2b05cfb50e32311ef05cfd310"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5123C>A",
@@ -1211,7 +1211,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -1240,7 +1240,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "702b12bf9d380ae6381760c9488ef031bb36a460f576e2f1483e99d16778da08"
+      "approval_basis_checksum": "d4c17353b9421ba0aca65dd1f0bddf3b475915f49b3f9fa72dc93ad667ad335c"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5143A>C",
@@ -1253,8 +1253,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1270,7 +1270,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1299,7 +1299,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "beae154bb0ba77f7bc6a78e96e968b6e7716840b1008a04fa1ce57296721da2e"
+      "approval_basis_checksum": "0d7a00d5b53e43de19cc58320fc5a96bb1571e76d6df572265cf51f5bdf5c3dd"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5144G>A",
@@ -1312,8 +1312,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1329,7 +1329,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1358,7 +1358,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "1285a951d7ccc2e1a5dba5625a3795fc89a21069c012306afefab35784c73fc2"
+      "approval_basis_checksum": "10a0b79e1b5ede896eb9d1d2aaf9b78caa1e121282d3867aa506143e7ce1afc9"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5207T>C",
@@ -1371,8 +1371,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
@@ -1388,7 +1388,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1417,7 +1417,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "bad49b38c07b817f04de589d8861a855b8e4cfef92ff66e060782a7645b72b11"
+      "approval_basis_checksum": "a5a536b25d9b4d2d5c4fe69805dbc15c31aadee644615bfea043d598d7695379"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5207T>G",
@@ -1430,8 +1430,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1447,7 +1447,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1476,7 +1476,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "d6ccfc6d2a0f258bcc3078b0c69f8a78202d4b8d661a46c267840f795386f958"
+      "approval_basis_checksum": "db770314e108f730df8f50084d9de01d660ef0fdb3367613a7b32e4f832bd06f"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5212G>A",
@@ -1489,8 +1489,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1506,7 +1506,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1535,7 +1535,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "32fd2426f4440f00a5d857f89a791c65d8df21e2c32265b5623365b2c3250318"
+      "approval_basis_checksum": "04ca36de0d51cd959e32a53068b370161d431e0af441ba265c4829f7a8718332"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5213G>A",
@@ -1548,8 +1548,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1565,7 +1565,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1594,7 +1594,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "17286de54b3ef11190babfb8c08051e2d3af67b309b7dcd38b08a58ebf01f80c"
+      "approval_basis_checksum": "277f59c05b114fc17de75e7f7845975c6fb49b24dd92b35e771ecd0eab15c0b8"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5216A>T",
@@ -1607,8 +1607,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
@@ -1624,7 +1624,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1653,7 +1653,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "5b28e53a24815cc4eac55a9d9eba166fc1e4d39153d1d2e617deb812d0542207"
+      "approval_basis_checksum": "39c809925769277700498a2e205f372c3f618f61374e2cae8ec2e806837b2e12"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5243G>A",
@@ -1666,8 +1666,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1683,7 +1683,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1712,7 +1712,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c3c77bc02969f85854dba879f7a19ea9e15b67706ffe1c26c0a0fb9beb9d70c6"
+      "approval_basis_checksum": "a6b0184fc2fde70a095c216fdcdd16b52707e3b624e35d9ae61fa8ba9a453991"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5291T>C",
@@ -1725,8 +1725,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1742,7 +1742,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1771,7 +1771,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "15594ed5b540c9cca447e60541d974952437ee447d233ef96dca0bb037e7cb9c"
+      "approval_basis_checksum": "a9c2ea9cba6170ff21c3199e21f70a2454e2444df01837abc045475ad727a6c3"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5297T>G",
@@ -1784,8 +1784,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1801,7 +1801,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1830,7 +1830,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "de7d29bafd06d9a195847ecda9f34f31bb574c875fc043b8f741fffb5770bf5e"
+      "approval_basis_checksum": "acdb16bf1958683b3b141b8956fdd22ee15e25b4b5fc9aa5beb172be093f74bc"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5309G>T",
@@ -1843,8 +1843,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
@@ -1860,7 +1860,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1889,7 +1889,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "2826e6e1fb1c96266f71b863a5c5942ea0a548c70d6880a510082897ee7fc158"
+      "approval_basis_checksum": "c48201f1c585e6a8edcad9bf8f4bf5aaf52d5e87c0c42e871793f19721a9895b"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5324T>A",
@@ -1902,8 +1902,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1919,7 +1919,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -1948,7 +1948,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "3e1bec8acb203e6814c6cabcf9cd70200693ae9180b8c53e3543036a9ee50775"
+      "approval_basis_checksum": "b0b5976305b3656f1004f1d45816dc6eaf5795254b0dbdc73adb4d2e58f33f44"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5324T>G",
@@ -1961,8 +1961,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -1978,7 +1978,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2007,7 +2007,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "50c1889d56113e4d48c081ae604b846431cdaf73933bc1dd7080b23ba906f1ce"
+      "approval_basis_checksum": "0911c8cc1723f977ea22acd74bcf5ef8303e36181ec22c4e0fce16ecf0892a73"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5357T>C",
@@ -2020,8 +2020,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2037,7 +2037,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2066,7 +2066,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "2fdb65f7ed13394b76b145bf5516a5fff9fbeb86a2922143ae9ce1af0f4a6405"
+      "approval_basis_checksum": "baf75c7f5e1729d2c55a43ac91f235de04f67b7d636f458baf359bdec3d56f7e"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5359T>A",
@@ -2079,8 +2079,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
@@ -2096,7 +2096,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2125,7 +2125,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "381446cf4ff54b7a4199ce5d633cb8877efc43bf15796cf4e5f4b2bf96307f19"
+      "approval_basis_checksum": "e79e0cb81b8b6ae51a19f2d5d5caef32f70697ef6888c61d1999a3cb983eea68"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5363G>T",
@@ -2138,8 +2138,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2155,7 +2155,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2184,7 +2184,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "41d40c6e23b5ea1fcf6968b75374b2debc5c1db207dcb647a72aca8dcd279f8a"
+      "approval_basis_checksum": "cb63c1bcb1bbb2ec24b3320944a084240ca06331809195312c848d79fd1ee321"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.53T>C",
@@ -2197,8 +2197,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2214,7 +2214,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2243,7 +2243,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f22ceb075e11833ed6d63fc999d4e5b6de0724f988bafb1729e342bc855cc900"
+      "approval_basis_checksum": "f9d61114e7f5d6bc7d96f68c9268960080300e1f865d78802e477c3e51469de1"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5509T>C",
@@ -2256,8 +2256,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2273,7 +2273,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2302,7 +2302,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "47bb442c77f9d34fc524497103647a61c375d2988622895c6b65b887f1af0fa9"
+      "approval_basis_checksum": "e8e47fb3c7a356d91b53d99c3688d07b6b32ca2d25a63f0c801c54e302a67842"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5513T>A",
@@ -2315,8 +2315,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2332,7 +2332,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2361,7 +2361,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c6b458e757d56cad026e387d6fe3ecb8ae1caa7e2485a81b53824d11dcea58a1"
+      "approval_basis_checksum": "a71f8a26b1f721eb318f282b09197cbaa88aa676510804a5cc04b9367c07c903"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5516T>C",
@@ -2374,8 +2374,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2391,7 +2391,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2420,7 +2420,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "5bed676556ba5e3621dcca7de7c3e50dfd857b0eaf3e023c335de75f1f721e75"
+      "approval_basis_checksum": "20ef3e92676c43ee58dd776c2bbdc9be3e1caba0c2365f3f28adec9557e96348"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA1|c.5558A>G",
@@ -2433,8 +2433,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2450,7 +2450,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2479,7 +2479,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "c913fbcccbba4f463d80c2b15aa96cce779d4cca8add717e72e72cc45981cf5c"
+      "approval_basis_checksum": "660a5270186ae5e7949bd64bdc74ad5a6955dd7005647c6d2057aa71d76ec728"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7007G>A",
@@ -2509,7 +2509,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2538,7 +2538,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "db37e3d4a26ef5fd6401bd7093bf048ef024d130d95bf051f36fcfd07a2be83d"
+      "approval_basis_checksum": "41a59fa1c83f42d79500e90ed6d10b498a57dcbf6a7b45015ff0d4bb95142a3a"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7819A>C",
@@ -2551,8 +2551,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect",
@@ -2568,7 +2568,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2597,7 +2597,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "66b77f3ec5753bc5d9ab6181a1f2fdb26f472d73834e5ae6401212966ad90482"
+      "approval_basis_checksum": "5b9b0dc2f6d41780e8a080d3cac553e7f4a4eb0d5277edcb16fe1f0d295e763f"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7879A>T",
@@ -2610,8 +2610,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2627,7 +2627,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2656,7 +2656,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "41c36fb3c812764196e7f9db2edbe73d6fdcc3aa4dc2839fd80923e2b169865a"
+      "approval_basis_checksum": "92e9374b5c7f306d3dd4ab1ea114f2f584dd7e9af025556e340a3bdd29e9532f"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7940T>C",
@@ -2669,8 +2669,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2686,7 +2686,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2715,7 +2715,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "57c484e187086288ce0cdeb38ae838f69bb15bfee0e59dfb7a8dc269cf95fa10"
+      "approval_basis_checksum": "f697bbac3bf8b2e56fad6dbc51e606706e3a8df34e6d9e1837e5efd6c3e412a4"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7958T>C",
@@ -2728,8 +2728,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -2745,7 +2745,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -2774,7 +2774,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "e45e06f6ccaaf7ff32e96c50723bd9b91423df7d958143c1f81afb38ba6ce195"
+      "approval_basis_checksum": "5d3dadfe9011df99149b0c66b0895c6c4298c34301258cf62db1292d6416bdcc"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7975A>G",
@@ -2804,7 +2804,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2833,7 +2833,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "8bac2e63625dbed5fdb878d9551ba604cfd9f63e018ab1e002c6ecfaf8bfa7d7"
+      "approval_basis_checksum": "0eed894c3491e11107f408a36a86c7a4057c6c2d038cb93db87016e62188dce5"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7976G>A",
@@ -2863,7 +2863,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2892,7 +2892,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "bcc2cd6790f4da7f648a30baa68cdc6c8b371783669f92fdee9571278a802f95"
+      "approval_basis_checksum": "635d470a5b04ccbe810740ed9c7e9cf4e42a6ad91893957be9114b0d24ad08bc"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7976G>C",
@@ -2922,7 +2922,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -2951,7 +2951,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "8e0d0a147d3952dfefe3d0462043e288a7536a265377628e5353b68e71620021"
+      "approval_basis_checksum": "55fabfa6722303aca69435c07b82e2d97e08c45c0abe119bba5909177267bdc5"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.7988A>T",
@@ -2981,7 +2981,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3010,7 +3010,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "07fed54cdfb331a160a931baeebfff1194ee8fc398999504651a9a853e15e728"
+      "approval_basis_checksum": "60dbbc0c11ba9b40f3f2b5f18f76dce0b585b654340ec44f2d52910b4499dd4a"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8009C>T",
@@ -3040,7 +3040,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3069,7 +3069,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "fbf3ffe594c16d1aad1960f257ce7e61fb8000637028b3a2c5b782d468cff1a3"
+      "approval_basis_checksum": "6f835c938ea3eacfa8406bfa16850a220b033caac4bb98d8be0e79790d18dd00"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8023A>G",
@@ -3099,7 +3099,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3128,7 +3128,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "18ae509f10c4ff47858dea9272971d2e297393fe584fb906d4f52a9786857044"
+      "approval_basis_checksum": "7aea2f62a46cd7e893860a586eb32bb788d45958a557fbf8de63b45dba37e571"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8035G>T",
@@ -3158,7 +3158,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3187,7 +3187,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "4ff0be3e8b59c65bf75a7867d45e99ae5cc3d10115eb34b1f5f87f810a5248be"
+      "approval_basis_checksum": "73d86541ad34992f47a5f3bcaf119ed9cfcdadd3b5e45ddfbd7908ed2b864d10"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8165C>G",
@@ -3217,7 +3217,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3246,7 +3246,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "59bb297044967c3d63c6986d46a89877df9f2a1d475e5008dd44df59cd81d964"
+      "approval_basis_checksum": "db2aec5bdd916185420f47f52e8e1e435bab2c1502877054152921a40e04abf6"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8167G>C",
@@ -3259,8 +3259,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -3276,7 +3276,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3305,7 +3305,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "070372068ced804657b9554f5a9dcdba1bd02b2f476df709fc04a733abc6eb97"
+      "approval_basis_checksum": "398dab02deb4fac36d0ea89e24a194c19676a7e94b91ee703e59a1534a7266ce"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8168A>G",
@@ -3335,7 +3335,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "abnormal",
           "sources_checked": [
@@ -3364,7 +3364,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "b02f23e5f454ade72006fd450f875411816cd607060badbbacf4cc9335ee8212"
+      "approval_basis_checksum": "8baa0578a27d2d758b825e36b4ba85d1cba5012e8257b79d129e57834bfbce05"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.8243G>A",
@@ -3377,8 +3377,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -3394,7 +3394,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3423,7 +3423,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "1b414a92a73d0e3913f830ac69ed32a11aea3a394afe2ac23fc2144da0a6b0fc"
+      "approval_basis_checksum": "f7e63a33493718560d70f83d2bd67263b3cd709d0fd57defc745cd96750c4427"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9154C>T",
@@ -3436,8 +3436,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -3453,7 +3453,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3482,7 +3482,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "058fa6e784d30c1002b338e684e9857c0ea28a7d31b5f2287786ddacda9be917"
+      "approval_basis_checksum": "2a53aa11bc09f7d7cb5d284d06c3d0761edff3845f75d4afdaeff76929ff3113"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9285C>G",
@@ -3495,8 +3495,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "http://hci-exlovd.hci.utah.edu/home.php",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -3512,7 +3512,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3541,7 +3541,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "057972e5c60c1e59c2a9d4d57b58cdc368af0fa51f3fedbe28fdbc1c16c64d5c"
+      "approval_basis_checksum": "6dd0510ea10cf7debb7e1c7dfa248653e55ce95ba3c43d2954f3c1bbc7bd3ccd"
     },
     {
       "reference_id": "ENIGMA_ST7_V1_2|BRCA2|c.9371A>T",
@@ -3554,8 +3554,8 @@
       "classification_verification": "enigma_st7_v1_2_reference_set",
       "classification_source": "Parsons et al. 2019 (PMID 31131967)",
       "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
-      "status": "eligible",
-      "status_reason": "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+      "status": "review_required",
+      "status_reason": "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
       "protein_branch": "missense_runtime_spliceai_check_required",
       "protein_mechanism_evidence": {
         "basis": "enigma_table9_ps3_functional_evidence",
@@ -3571,7 +3571,7 @@
           "ENIGMA Specifications Table 9 v1.2",
           "ENIGMA Supplementary Table 2 v1.2"
         ],
-        "checked_at": "2026-08-20",
+        "checked_at": "2026-08-27",
         "source_details": {
           "status": "normal",
           "sources_checked": [
@@ -3600,7 +3600,7 @@
         "used": "unknown",
         "reference_ids": []
       },
-      "approval_basis_checksum": "f13d2eae3e36d98feaef7575e3f35ed5a6fe87802c10ced8f7266219c5a4c84c"
+      "approval_basis_checksum": "b96466d72d9e5b0181365622910deda10efdb350ee11fc05ed260d5a0df8bc12"
     }
   ]
 }

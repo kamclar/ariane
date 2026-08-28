@@ -72,9 +72,9 @@ def _status(splice_status: str) -> tuple[str, str, str]:
             "The defined RNA/splice source review is incomplete.",
         )
     return (
-        "eligible",
+        "review_required",
         "missense_runtime_spliceai_check_required",
-        "Known RNA/splice sources do not exclude the protein branch. SpliceAI <= 0.1 must still be confirmed on demand.",
+        "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
     )
 
 
@@ -166,12 +166,13 @@ def build() -> Dict[str, Any]:
     records.sort(key=lambda item: (item["gene"], item["c_notation"]))
     counts = Counter(record["status"] for record in records)
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "registry_version": date.today().isoformat() + ".1",
         "status": "active",
         "description": (
-            "ENIGMA ST7 v1.2 P/LP missense references for protein-level PS1, "
-            "with eligibility from defined ENIGMA RNA/splice sources. The "
+            "ENIGMA ST7 v1.2 P/LP missense candidates for guided protein-level "
+            "PS1 review, plus separately verified VCEP references from curated "
+            "extensions. The "
             "reference and assessed-variant SpliceAI scores are computed on demand."
         ),
         "rule_source": {
@@ -182,20 +183,22 @@ def build() -> Dict[str, Any]:
         "candidate_source": {
             "name": "ClinGen ENIGMA BRCA1/2 VCEP Supplementary Table 7",
             "version": "1.2.0",
-            "usage": "enigma_reference_set_with_per_record_ps1_eligibility",
+            "usage": "trusted_candidate_discovery_and_guided_review",
         },
         "classification_policy": (
-            "P/LP classifications in official ENIGMA ST7 v1.2 are accepted as the "
-            "reference classification basis. Protein-PS1 eligibility additionally "
-            "requires a missense consequence, SpliceAI <= 0.1 and no damaging "
-            "splice evidence in the defined sources."
+            "Official ENIGMA ST7 v1.2 P/LP records identify trusted PS1 candidates "
+            "but do not establish the separate VCEP-assertion requirement for "
+            "automatic scoring. Automatic protein-level PS1 additionally requires "
+            "a versioned ENIGMA/ClinGen VCEP assertion or documented local "
+            "reclassification, a missense consequence, SpliceAI <= 0.1 and no "
+            "damaging splice evidence in the defined sources."
         ),
         "reference_source_policy": {
             "accepted_classification_bases": [
                 {
                     "id": "enigma_st7_v1_2_reference_set",
                     "source": "ENIGMA Supplementary Table 7 v1.2",
-                    "use": "Official P/LP reference classification; each missense record still requires the protein-PS1 splice checks."
+                    "use": "Trusted candidate discovery and guided review only; it does not by itself permit automatic PS1 scoring."
                 },
                 {
                     "id": "external_vcep_assertion",

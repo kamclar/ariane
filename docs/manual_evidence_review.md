@@ -119,6 +119,11 @@ and criterion strength unset.
 `PS1_PROTEIN` is prefilled when ARIANE finds a matching P/LP missense reference
 whose registry status is `review_required`. A reference marked `excluded` is
 shown with its exclusion reason but cannot be manually confirmed as protein PS1.
+The prefill includes the normalized reference variant and protein consequence,
+the ST7 class and source, objective variant comparison, available SpliceAI
+results, and recorded checks of the defined RNA/splice sources. ARIANE then
+checks ClinVar and ClinGen ERepo for a separate ENIGMA VCEP assertion in the
+background. Fields that cannot be established remain explicitly unresolved.
 It requires a qualifying VCEP classification verification, the same normalized
 missense substitution, a different nucleotide change, SpliceAI at most 0.1 for
 both variants, and a completed check of named RNA/splice sources for both

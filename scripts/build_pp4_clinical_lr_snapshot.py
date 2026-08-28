@@ -5,9 +5,10 @@ The build combines two versioned public ENIGMA resources:
 * multifactorial clinical LRs from the UCSC ENIGMA ``BRCAmfa`` track;
 * case-control LRs from Zanti et al. 2025 Supplementary Data 5.
 
-Every component remains visible in provenance.  A variant receives one final
-PP4 or BP5 code from the product of the admitted components; component-level
-codes are never scored separately.
+Every component remains visible in provenance. A variant receives one final
+PP4 or BP5 code only when all source bundles used in the product have a
+versioned overlap assessment that permits automatic combination. Component-
+level codes are never scored separately.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ import re
 import sys
 from collections import Counter
 from datetime import datetime, timezone
+from itertools import combinations
 from pathlib import Path
 
 import openpyxl
@@ -117,6 +119,40 @@ def load_source_manifest(
     configured = manifest.get("datasets")
     if not isinstance(configured, dict):
         raise RuntimeError("Clinical LR source manifest datasets are missing")
+    if manifest.get("schema_version") != 2:
+        raise RuntimeError("Clinical LR source manifest schema is unsupported")
+    overlap_matrix = manifest.get("source_bundle_overlap_matrix")
+    if not isinstance(overlap_matrix, list):
+        raise RuntimeError("Clinical LR source-bundle overlap matrix is missing")
+    seen_pairs: set[frozenset[str]] = set()
+    allowed_statuses = {
+        "verified_independent",
+        "potential_overlap",
+        "inseparable",
+        "unknown",
+    }
+    for item in overlap_matrix:
+        if not isinstance(item, dict):
+            raise RuntimeError("Clinical LR overlap assessment must be an object")
+        left = str(item.get("left_source_bundle_id") or "")
+        right = str(item.get("right_source_bundle_id") or "")
+        pair = frozenset((left, right))
+        if not left or not right or left == right or not pair.issubset(configured):
+            raise RuntimeError("Clinical LR overlap assessment has invalid source IDs")
+        if pair in seen_pairs:
+            raise RuntimeError("Clinical LR overlap assessment pair is duplicated")
+        seen_pairs.add(pair)
+        status = item.get("overlap_status")
+        if status not in allowed_statuses:
+            raise RuntimeError("Clinical LR overlap assessment status is unsupported")
+        automatic = item.get("automatic_combination_allowed")
+        risk = item.get("double_counting_risk")
+        if not isinstance(automatic, bool) or not isinstance(risk, bool):
+            raise RuntimeError("Clinical LR overlap assessment booleans are missing")
+        if automatic and (status != "verified_independent" or risk):
+            raise RuntimeError(
+                "Clinical LR automatic combination requires verified independence"
+            )
 
     required = {
         "ucsc_enigma_brcamfa_v1_1": multifactorial_source,
@@ -167,8 +203,75 @@ def strength_for_lr(lr: float) -> tuple[str | None, str | None, int]:
     return None, None, 0
 
 
-def apply_combined_evidence(record: dict) -> None:
-    """Recompute the combined LR after independently sourced rows are merged."""
+def _bundle_overlap_assessment(bundle_ids: list[str], source_manifest: dict) -> dict:
+    if len(bundle_ids) == 1:
+        return {
+            "overlap_status": "not_applicable_single_source_bundle",
+            "double_counting_risk": False,
+            "automatic_combination_allowed": True,
+            "assessment_note": (
+                "All LR components for this variant come from one admitted source "
+                "bundle; the source-provided combination is retained as one evidence item."
+            ),
+            "assessment_sources": [],
+        }
+
+    configured = {}
+    for item in source_manifest.get("source_bundle_overlap_matrix", []):
+        left = str(item.get("left_source_bundle_id") or "")
+        right = str(item.get("right_source_bundle_id") or "")
+        if left and right:
+            configured[frozenset((left, right))] = item
+
+    pair_assessments = []
+    for left, right in combinations(bundle_ids, 2):
+        item = configured.get(frozenset((left, right)))
+        if item is None:
+            pair_assessments.append({
+                "left_source_bundle_id": left,
+                "right_source_bundle_id": right,
+                "overlap_status": "unknown",
+                "double_counting_risk": True,
+                "automatic_combination_allowed": False,
+                "assessment_note": "No versioned source-overlap assessment is available.",
+                "assessment_sources": [],
+            })
+        else:
+            pair_assessments.append(dict(item))
+
+    automatic = all(
+        item.get("overlap_status") == "verified_independent"
+        and item.get("automatic_combination_allowed") is True
+        for item in pair_assessments
+    )
+    statuses = {str(item.get("overlap_status") or "unknown") for item in pair_assessments}
+    return {
+        "overlap_status": (
+            "verified_independent" if automatic
+            else next(iter(statuses)) if len(statuses) == 1
+            else "mixed_or_unknown"
+        ),
+        "double_counting_risk": any(
+            item.get("double_counting_risk") is not False
+            for item in pair_assessments
+        ),
+        "automatic_combination_allowed": automatic,
+        "assessment_note": " ".join(
+            str(item.get("assessment_note") or "").strip()
+            for item in pair_assessments
+            if str(item.get("assessment_note") or "").strip()
+        ),
+        "assessment_sources": sorted({
+            str(source)
+            for item in pair_assessments
+            for source in item.get("assessment_sources", [])
+            if source
+        }),
+    }
+
+
+def apply_combined_evidence(record: dict, source_manifest: dict) -> None:
+    """Recompute an LR only when source-bundle overlap policy permits it."""
     components = sorted(record["source_components"], key=lambda item: item["source_id"])
     source_ids = [component["source_id"] for component in components]
     if len(source_ids) != len(set(source_ids)):
@@ -182,16 +285,33 @@ def apply_combined_evidence(record: dict) -> None:
             f"Clinical LR independence group counted more than once for {record['gene']}:"
             f"{record['canonical_c_notation']}"
         )
-    combined_lr = math.prod(component["component_lr"] for component in components)
-    code, strength, points = strength_for_lr(combined_lr)
+    source_bundle_ids = sorted({component["source_bundle_id"] for component in components})
+    overlap = _bundle_overlap_assessment(source_bundle_ids, source_manifest)
+    candidate_lr = math.prod(component["component_lr"] for component in components)
+    combined_lr = candidate_lr if overlap["automatic_combination_allowed"] else None
+    code, strength, points = (
+        strength_for_lr(combined_lr) if combined_lr is not None else (None, None, 0)
+    )
     record.update({
         "source_components": components,
+        "source_bundle_ids": source_bundle_ids,
+        "source_bundle_count": len(source_bundle_ids),
+        "independent_source_group_count": (
+            len(source_bundle_ids) if overlap["automatic_combination_allowed"] else 0
+        ),
+        "candidate_combined_lr": candidate_lr,
         "combined_lr": combined_lr,
-        "log10_combined_lr": math.log10(combined_lr) if combined_lr > 0 else None,
+        "log10_combined_lr": (
+            math.log10(combined_lr) if combined_lr is not None and combined_lr > 0 else None
+        ),
         "criterion": code,
         "strength": strength,
         "points": points,
         "informative": code is not None,
+        "automatic_application_status": (
+            "eligible" if overlap["automatic_combination_allowed"] else "review_required"
+        ),
+        **overlap,
     })
 
 
@@ -350,6 +470,7 @@ def build(
                     "component_lr": component_lr,
                     "evidence_family": "published_multifactorial_clinical_lr",
                     "independence_group": definition["independence_group"],
+                    "source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
                     "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
                 })
             if not all_values:
@@ -381,7 +502,7 @@ def build(
                     "description_url": TRACK_DESCRIPTION_URL,
                 },
             }
-            apply_combined_evidence(record)
+            apply_combined_evidence(record, source_manifest)
             previous = records.get(key)
             if previous:
                 existing_by_source_id = {
@@ -429,7 +550,7 @@ def build(
                     len(record["source_components"]) - len(new_components)
                 )
                 previous["source_components"].extend(new_components)
-                apply_combined_evidence(previous)
+                apply_combined_evidence(previous, source_manifest)
                 continue
             records[key] = record
 
@@ -546,6 +667,7 @@ def build(
             ),
             "evidence_family": "case_control_likelihood_ratio",
             "independence_group": ZANTI_SOURCE["independence_group"],
+            "source_bundle_id": "zanti_2025_case_control",
             "source_dataset": "Zanti et al. 2025 Supplementary Data 5",
             "cohorts": ZANTI_SOURCE["cohorts"],
             "carriers": str(values[36]),
@@ -580,7 +702,7 @@ def build(
                 set(previous["input_c_notations"] + [c_notation, canonical_c])
             )
             previous.setdefault("source_variant_ids", []).append(source_interval)
-            apply_combined_evidence(previous)
+            apply_combined_evidence(previous, source_manifest)
         else:
             record = {
                 "gene": gene,
@@ -596,7 +718,7 @@ def build(
                     "source_url": ZANTI_SOURCE_URL,
                 },
             }
-            apply_combined_evidence(record)
+            apply_combined_evidence(record, source_manifest)
             records[key] = record
         case_control_rows_admitted += 1
         case_control_by_gene[gene] += 1
@@ -625,6 +747,9 @@ def build(
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes((json.dumps(records, indent=2, sort_keys=True) + "\n").encode("utf-8"))
     criteria = Counter(record["criterion"] or "not_informative" for record in records.values())
+    application_statuses = Counter(
+        record["automatic_application_status"] for record in records.values()
+    )
     evidence_counts = Counter(
         component["source_id"]
         for record in records.values()
@@ -659,6 +784,7 @@ def build(
         "rows_seen": rows_seen,
         "records": len(records),
         "criteria": dict(sorted(criteria.items())),
+        "automatic_application_statuses": dict(sorted(application_statuses.items())),
         "records_by_source_id": dict(sorted(evidence_counts.items())),
         "included_multifactorial_sources": SOURCES,
         "included_case_control_source": ZANTI_SOURCE,
@@ -669,11 +795,12 @@ def build(
         "case_control_quantitative_records_by_gene": dict(sorted(case_control_by_gene.items())),
         "case_control_unavailable_records": case_control_unavailable_records,
         "combination_policy": {
-            "method": "multiply admitted variant-specific clinical LR components",
+            "method": "multiply source bundles only after versioned overlap assessment",
             "single_final_code": True,
             "component_codes_scored_separately": False,
             "duplicate_source_ids": "fatal",
             "duplicate_independence_groups": "fatal",
+            "unknown_overlap": "manual review without automatic PP4/BP5",
             "zanti_admission": (
                 "Supplementary Data 5; CDS +/-5 bp; non-founder FAF <=0.001; "
                 ">=3 combined carriers; BRCA2 evidence from >=2 datasets"

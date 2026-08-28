@@ -79,6 +79,7 @@ class EvidenceInteractionNode:
         if ci.residue_info and ci.residue_info.get("is_important_residue"):
             warnings.append(ci.residue_info["message"])
         warnings.extend(frequency.warnings)
+        warnings.extend(inputs["clinical_lr_family"].warnings)
 
         if "BA1" in criteria:
             retained = RetainedEvidence(
@@ -96,7 +97,8 @@ class EvidenceInteractionNode:
             )
 
         for family in families[1:]:
-            warnings.extend(family.warnings)
+            if family.family_id != "rule.clinical_lr":
+                warnings.extend(family.warnings)
         interactions: list[Mapping[str, Any]] = list(
             inputs["bioinformatic_family"].evidence_interactions
         )

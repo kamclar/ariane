@@ -14,7 +14,7 @@ from backend.modules.enigma_rules import (
     search_table9,
     validate_rule_catalog,
 )
-from backend.modules.classifier import evaluate_variant
+from tests.dag_test_support import classify_with_dag as evaluate_variant
 from backend.modules.pvs1_rna import evaluate_pvs1_rna
 from backend.modules.pvs1 import evaluate_pvs1
 from backend.modules.table9 import table9_lookup_ps3_bs3
@@ -226,7 +226,10 @@ def test_applied_figure1a_criteria_carry_the_actual_decision_path(
 
 def test_frontend_contains_complete_tables_page_and_expandable_decision_path():
     html = (ROOT / "frontend" / "index.html").read_text(encoding="utf-8")
-    javascript = (ROOT / "frontend" / "static" / "js" / "app.js").read_text(encoding="utf-8")
+    javascript = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / "frontend" / "static" / "js").glob("*.js"))
+    )
 
     assert "ENIGMA rules" in html
     assert "Show decision path" in html

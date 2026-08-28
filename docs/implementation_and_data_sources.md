@@ -89,11 +89,9 @@ Manuální vyhodnocení kontroluje také povinné stipulace CSpec v1.2. PS4 vyž
 
 Produkční klasifikace je v `backend/classification_dag/`. Automatický výpočet
 spouští `runtime.py`, jednotlivé rodiny pravidel jsou v podbalíku `nodes/` a společná
-ENIGMA combinační politika je v `policy.py`. Soubor
-`backend/modules/classifier.py` není produkční závislost. Dočasně slouží pouze
-jako nezávislý oracle v regresních testech před jeho odstraněním. Společně s ním
-se odstraní paritní testy a kompatibilní re-export
-`backend/classification_dag/native.py`; produkční runtime tento soubor nepoužívá.
+ENIGMA combinační politika je v `policy.py`. Starý sekvenční klasifikátor a
+kompatibilní re-export `classification_dag/native.py` byly odstraněny. V aplikaci
+i testech existuje jediná implementace klasifikační logiky, tedy DAG.
 
 Transportní vrstva `backend/main.py` předává klasifikační požadavek službě
 `backend/services/variant_classification_service.py`. Normalizaci, sestavení vstupu provider DAGu,
@@ -334,6 +332,30 @@ revize.
 
 Zdroj: lokální snapshoty gnomAD v2.1.1 exomes non-cancer a gnomAD v3.1.2 genomes non-cancer včetně pokrytí.
 
+Populační vrstva je rozdělena v `backend/population_frequency/` podle jedné
+odpovědnosti na modul:
+
+| Modul | Odpovědnost |
+| --- | --- |
+| `policy.py` | vazba runtime datasetů na checksumovaný manifest a výběr genově specifické VCEP politiky |
+| `snapshot_repository.py` | kontrola checksumů a explicitní načtení frekvenčního a coverage snapshotu |
+| `coverage.py` | výpočet pokrytí referenčního rozsahu a coverage QC |
+| `lookup.py` | čtení AC, AN, FAF95, populačního kontextu a coverage z předaného repository |
+| `service.py` | aplikační vlastnictví aktuálního repository, atomický reload a připojení founder evidence |
+| `criteria.py` | čisté rozhodnutí BA1, BS1 a PM2 bez čtení souborů, globálních cache nebo volání lookupů |
+
+Snapshoty se nenačítají jako vedlejší efekt importu. `backend/main.py` vytvoří při
+startu jediný `PopulationFrequencyService`, předá jeho metodu gnomAD provideru
+DAGu a při administrativním reloadu atomicky vymění celé neměnné repository.
+Rozpracovaný požadavek tak vždy čte jednu konzistentní verzi frekvenčních i
+coverage dat.
+
+Founder výjimka je evidence provideru, ne skrytý lookup uvnitř pravidla.
+Provider ji získá pro normalizovanou identitu varianty a vloží ji do gnomAD
+evidence. `criteria.py` z této evidence rozhodne, zda BA1 nebo BS1 použít,
+vyloučit, nebo při nedostupné kontrole skončit bez kritéria. Chybějící founder
+výsledek se nikdy neinterpretuje jako negativní nález.
+
 Pro BA1 a BS1 se používá výhradně nejvyšší non-cancer FAF95 v populacích AFR,
 AMR, EAS, NFE a SAS. `popmax_AF` a běžné `AF` jsou pouze doplňující údaje.
 Chybějící FAF95 se jimi nenahrazuje a uživatel dostane vysvětlení, proč BA1/BS1
@@ -545,28 +567,35 @@ kontrolují proti normalizovanému indelovému snapshotu. Nejde o runtime fallba
 ani o ruční slovník. Nevalidní notace a konflikt normalizovaných zdrojů se
 nezařadí a důvod zůstane v metadatech.
 
-Pokud více řádků po normalizaci popisuje stejnou alelu, builder spojí její přijaté komponenty a přepočítá jediný combined LR. Kritérium jednotlivé komponenty se samostatně neboduje. Z výsledného LR vznikne právě jedno PP4 nebo BP5. Stejný `source_id` ani stejná skupina nezávislosti se nesmí započítat dvakrát. Duplicita je fatální chyba buildu. Rozdílné hodnoty pod stejným zdrojem jsou konflikt a daná alela se automaticky nepoužije.
+Pokud více řádků po normalizaci popisuje stejnou alelu, builder spojí její přijaté komponenty. Kritérium jednotlivé komponenty se samostatně neboduje. Komponenty uvnitř jednoho publikovaného zdrojového balíku se zachovají jako jeden zdrojem poskytnutý kombinovaný celek. Hodnoty z různých zdrojových balíků se smí násobit pouze tehdy, když verzovaná matice překryvu označí každou dvojici jako `verified_independent` a výslovně povolí automatickou kombinaci. Chybějící, neznámé nebo možné překrytí vede k `review_required` bez PP4/BP5 bodů. Kandidátní součin zůstane pouze v auditu a klasifikace jej nepoužije.
+
+ENIGMA Appendix B výslovně stanovuje, že se mají zahrnout pouze nezávislé linie evidence. Neurčuje však konkrétní datovou strukturu ani pojem `source_bundle_overlap_matrix`. Matice je verzovaná implementační kontrola ARIANE, která prokazatelně uplatňuje tento požadavek fail-closed. Není novým klinickým kritériem, nemění ENIGMA LR prahy a nevydává neznámý překryv za prokázanou závislost. Při neúplných podkladech pouze odmítne automatické bodování a předá záznam k revizi.
+
+Normativním zdrojem je [ENIGMA BRCA1/2 VCEP v1.2](https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0), část PP4/BP5 a Appendix B v lokálně checksumovaném souboru `docs/enigma/v1.2/source/Appendix_V1.2.docx`.
+
+Stejný `source_id` ani stejná skupina nezávislosti se nesmí započítat dvakrát. Duplicita je fatální chyba buildu. Rozdílné hodnoty pod stejným zdrojem jsou konflikt a daná alela se automaticky nepoužije. Zdrojový manifest `data/sources/enigma/clinical_lr_sources.manifest.json` obsahuje verzi politiky, identifikátory zdrojových balíků a párovou matici překryvu. Nejde o variantový allowlist ani o fallback.
 
 Metadata obsahují zdrojový manifest, URL a checksum obou zdrojových datasetů, checksum indexu, verzi pravidel,
 provenance HGVS enginu a referenčního balíku, checksum závislého indelového
 snapshotu, počty záznamů a seznam konfliktů. Chybějící metadata, nesprávný
-checksum indexu nebo zdrojového manifestu, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` je combined LR z Li et al. 2020 a Zanti et al. 2025 `1,36181 × 10^90`, což odpovídá PP4 Very Strong. Pro
+checksum indexu nebo zdrojového manifestu, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` je kandidátní součin LR z Li et al. 2020 a Zanti et al. 2025 `1,36181 × 10^90`. Protože nezávislost těchto dvou zdrojových balíků není ve verzované matici doložena, hodnota se pouze zobrazí v auditu a PP4 se automaticky nepřidělí. Pro
 `BRCA2 c.9891_9894dup` a zdrojový zápis `c.9891_9894dupATTT` obsahuje LR
 `0,41018` ze studie Li et al. 2020, což odpovídá BP5 Supporting.
 
-Pro `BRCA1 c.509G>A` se multifaktoriální LR `6,1764` násobí case-control LR `0,00639025`. Výsledný combined LR je `0,0394687`, proto se aplikuje jediné kritérium BP5 Strong. Dílčí PP4 Moderate se samostatně neaplikuje.
+Pro `BRCA1 c.509G>A` je multifaktoriální LR `6,1764` a case-control LR `0,00639025`. Jejich kandidátní součin je `0,0394687`. Multifaktoriální data a Zanti case-control data však patří do dvou zdrojových balíků s neověřenou nezávislostí. ARIANE proto nepřidělí ani BP5 Strong, ani dílčí PP4 Moderate. Zobrazí obě komponenty, kandidátní součin, stav překryvu a požadavek na odbornou revizi.
 
 Síla BP5 a použití této síly v klasifikační kombinaci jsou dvě oddělená
 rozhodnutí. ENIGMA Table 3 dovoluje přiřadit Likely Benign z jediného Strong
 benigního kódu pouze tehdy, když do něj přispělo více typů evidence. ARIANE
-proto u každého BP5 Strong zachovává počet LR příspěvků a seznam klinických
-typů evidence. Jediné BP5 Strong může samo vést ke Class 2 pouze při nejméně
-dvou zaznamenaných LR příspěvcích ze dvou klinických typů evidence. Jeden LR
-zůstává platným BP5 Strong, ale bez další benigní evidence sám nestačí na
-Class 2. Aktuální snapshot obsahuje 378 BP5 Strong záznamů. Z nich 218 má
-nejméně dva zaznamenané LR příspěvky a 160 má pouze jeden LR příspěvek.
+proto u každého automaticky přijatého BP5 Strong zachovává počet LR příspěvků,
+seznam klinických typů evidence, počet zdrojových balíků a počet skupin s
+doloženou nezávislostí. Jediné BP5 Strong může samo vést ke Class 2 pouze při
+více typech klinické evidence. Záznam z více balíků s nedoloženou nezávislostí
+se do této kombinace vůbec nedostane.
 
-Aktuální snapshot obsahuje 5 147 jednoznačných variantových záznamů. Zanti case-control komponentu obsahuje 1 710 záznamů.
+Aktuální snapshot obsahuje 5 147 jednoznačných variantových záznamů. Zanti case-control komponentu obsahuje 1 710 záznamů. Automatické použití je povoleno u 4 175 záznamů. U 972 záznamů obsahujících oba zdrojové balíky je vyžadována revize překryvu a automatické PP4/BP5 je zablokováno.
+
+Veřejný výsledek obsahuje samostatný audit `clinical_lr_audit`. V rozbalovací položce `Evidence details > PP4/BP5 clinical likelihood ratios` ukazuje použité nebo nepoužité LR, jednotlivé komponenty, zdrojové balíky, stav překryvu, riziko dvojího započítání a důvod případné manuální revize. Technický název lokálního úložiště se v klinickém odůvodnění nezobrazuje.
 
 Zdrojový manifest eviduje všechny studie vyjmenované v ENIGMA Appendix B a navíc Caputo 2021 a Zanti 2025, jejichž variantově specifická data používá automatický výpočet:
 
@@ -603,8 +632,9 @@ PS1 vyžaduje:
 - missense variantu,
 - stejnou normalizovanou missense substituci jako známá P/LP varianta,
 - jinou nukleotidovou změnu,
-- P/LP klasifikaci reference v ENIGMA ST7 v1.2, oficiální ENIGMA/ClinGen VCEP
-  assertion nebo úplnou lokální reklasifikaci podle uvedené verze ENIGMA VCEP,
+- samostatně ověřenou oficiální ENIGMA/ClinGen VCEP assertion nebo úplnou
+  lokální reklasifikaci podle uvedené verze ENIGMA VCEP; ST7 slouží k nalezení
+  důvěryhodného kandidáta, ale sama tuto podmínku neuzavírá,
 - SpliceAI nejvýše 0,1 u reference i hodnocené varianty,
 - žádný potvrzený škodlivý splice efekt u obou variant po kontrole definovaných
   verzovaných ENIGMA zdrojů.
@@ -620,7 +650,7 @@ predikčními pásmy vyžaduje odbornou kontrolu provenance.
 
 Automatické body lze přidat pouze ze záznamu se stavem `eligible` v
 `backend/data/ps1_protein_reference_registry.json`. Registr nyní obsahuje 60
-ST7 missense referencí: 37 `eligible` a 23 `excluded`. Každý záznam obsahuje
+ST7 missense referencí: 40 `review_required` a 20 `excluded`. Každý záznam obsahuje
 původ klasifikace, splice stav reference, SpliceAI provenance, kontrolované
 zdroje, datum, checksum podkladu a známé PS1 závislosti. Validátor odmítá přímou
 i delší známou kruhovou závislost.
@@ -630,6 +660,12 @@ strukturovanou manuální revizi `PS1_PROTEIN`, bez bodů. Záznam `excluded` se
 zobrazí s důvodem vyloučení a nelze jej manuálně potvrdit jako proteinové PS1.
 Potvrzený nebo predikovaný splice efekt proteinové PS1 vylučuje. Konfliktní
 nebo neúplná evidence vede k revizi.
+
+ARIANE u kandidáta předvyplní c. a p. notaci reference, ST7 klasifikaci a
+zdroj, shodu proteinového následku, odlišnost nukleotidové změny, dostupné
+SpliceAI výsledky a kontrolu definovaných RNA/splice zdrojů. ClinVar a ClinGen
+ERepo se na pozadí kontrolují na samostatnou ENIGMA VCEP assertion. Nedoložené
+podmínky zůstávají viditelně neuzavřené.
 
 Stav `none_identified` neznamená, že splice efekt neexistuje. Znamená pouze, že
 nebyl nalezen při kontrole přesně uvedených verzí ENIGMA Table 9 a
@@ -962,13 +998,13 @@ Registr proteinových referencí:
 Generátor: `scripts/build_ps1_protein_reference_registry.py`.
 
 Registr obsahuje 60 P/LP missense referencí z ST7. Aktuální sestavení obsahuje
-40 záznamů `eligible` a 20 `excluded`; žádný záznam nyní není
-`review_required`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
+40 záznamů `review_required` a 20 `excluded`; žádný samotný ST7 záznam není
+`eligible`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
 aplikace.
 
 Povolené klasifikační zdroje registru jsou:
 
-- oficiální P/LP reference ENIGMA ST7 v1.2;
+- oficiální P/LP reference ENIGMA ST7 v1.2 jako důvěryhodní kandidáti k revizi;
 - verzované oficiální ENIGMA/ClinGen VCEP assertions mimo ST7;
 - úplné lokální reklasifikace podle deklarované verze ENIGMA VCEP pravidel,
   jasně označené jako lokální.
@@ -991,11 +1027,18 @@ variantu stejnou verzovanou službou. Transkript a normalizovaný proteinový
 následek se vážou na kanonické ENIGMA RefSeq transkripty. Registr ukládá
 checksum ST7, Table 9, ST2 i kurátorovaného extension souboru.
 
-Každý záznam ukládá také podklad proteinového mechanismu. Z 40 současných
-`eligible` referencí má 35 PS3 Strong funkční evidenci v Table 9. U pěti je
+Každý záznam ukládá také podklad proteinového mechanismu. Ze 40 současných
+`review_required` referencí má 35 PS3 Strong funkční evidenci v Table 9. U pěti je
 podkladem patogenní missense klasifikace spolu s absencí predikovaného a
 potvrzeného splice efektu. Nový externí nebo lokálně reklasifikovaný záznam musí
 mít odpovídající mechanismus výslovně kurátorovaný.
+
+Nález ST7 shody vytvoří vedenou revizi bez bodů. Formulář automaticky předvyplní
+identitu reference, proteinový následek, ST7 klasifikaci a zdroj, objektivní
+porovnání variant, dostupná SpliceAI skóre a kontrolu definovaných RNA/splice
+zdrojů. ClinVar a ClinGen ERepo se následně kontrolují na samostatnou ENIGMA
+VCEP assertion. Běžná ClinVar P/LP klasifikace ani počet hvězdiček stav
+`eligible` nevytvářejí.
 
 ### 6.4 Velké exonové CNV
 
@@ -1671,22 +1714,23 @@ Síťové API, lokální cache a předpočítané datasety zůstávají zdroji p
 nikoli součástí pravidlových uzlů. Nedostupnost se nesmí převést na nulové
 skóre, nesplněné kritérium, první nalezené ID nebo náhradní fixture.
 
-### 15.4 Starý klasifikátor
+### 15.4 Jediná klasifikační implementace
 
-Produkční kód `backend/main.py` neimportuje `backend/modules/classifier.py`.
-Starý klasifikátor zůstává pouze jako nezávislý testovací oracle pro kontrolu
-parity. Jeho fyzické odstranění vyžaduje přesun zbývajících testů na veřejný
-DAG kontrakt a samostatné schválení regresní parity. Odstranění nesmí být
-spojeno se změnou klinických pravidel nebo očekávaných výsledků.
+ARIANE neobsahuje starý sekvenční klasifikátor, kompatibilní re-export ani
+alternativní runtime režim. Produkce i testy používají veřejný DAG kontrakt.
+Testovací adaptér pouze sestaví `ClassificationInputs` a spustí DAG. Neobsahuje
+prahy, kombinace kritérií ani jinou klinickou logiku.
 
 ### 15.5 Regresní ověření DAG
 
-Paritní testy pokrývají tutorialové varianty, hlavní typy variant, PVS1 a PM5,
+Regresní testy používají explicitně schválené očekávané třídy, body, kritéria a
+review stavy. Pokrývají tutorialové varianty, hlavní typy variant, PVS1 a PM5,
 Table 9, proteinové PS1, exonové CNV, klinické LR, BA1 terminální větev, BS1
-mixed evidence, PM2 a manuální RNA interakce. Aktuální počet testů je uváděn v
-protokolu konkrétního vydání, ne jako vlastnost architektury.
+mixed evidence, PM2 a manuální RNA interakce. Výsledek se neporovnává s druhou
+implementací klasifikátoru. Změna klinického výstupu proto vyžaduje vědomou
+úpravu schváleného regresního očekávání.
 
-Podrobný návrh, invarianty a plán odstranění starého souboru jsou v
+Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.
 
 ### 15.6 Veřejný přístup k pravidlům a tabulkám

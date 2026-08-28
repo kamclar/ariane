@@ -8,6 +8,7 @@ from backend.gene_policy import (
     spliceai_thresholds,
     vcep_specification,
 )
+from backend.modules.ps1_splice_evidence import DEFINED_SOURCES
 
 
 def evaluate_protein_ps1_review(
@@ -69,6 +70,69 @@ def evaluate_protein_ps1_review(
     reasons = list(ps1_result.get("blocking_reasons", []))
     if candidate_names:
         reasons.insert(0, f"Matching P/LP reference candidate(s): {candidate_names}")
+    first_candidate = candidates[0] if candidates else {}
+    assessed = ps1_result.get("assessed_variant", {})
+    assessed_sources = set(ps1_result.get("vua_splice_sources_checked", []))
+    reference_sources = set(
+        first_candidate.get("reference_splice_sources_checked", [])
+    )
+    completed_sources = [
+        source
+        for source in DEFINED_SOURCES
+        if source in assessed_sources and source in reference_sources
+    ]
+    same_missense = bool(
+        assessed.get("p_notation")
+        and assessed.get("p_notation") == first_candidate.get("p_notation")
+    )
+    different_nucleotide = bool(
+        assessed.get("c_notation")
+        and assessed.get("c_notation") != first_candidate.get("c_notation")
+    )
+    classification_basis = first_candidate.get("classification_basis", "")
+    classification_verification = (
+        "historical_classification_only"
+        if classification_basis == "enigma_st7_v1_2_reference_set"
+        else classification_basis or "unresolved"
+    )
+    reference_label = (
+        f"{first_candidate.get('gene', '')} {first_candidate.get('c_notation', '')}"
+    ).strip()
+    rationale = (
+        f"ARIANE found {reference_label} {first_candidate.get('p_notation', '')} "
+        f"as a matching {first_candidate.get('classification') or 'P/LP'} candidate "
+        f"in {first_candidate.get('source_dataset') or 'ENIGMA ST7'}. "
+        "The normalized missense consequence and nucleotide change were compared "
+        "against the assessed variant. A separate ENIGMA/ClinGen VCEP assertion "
+        "must be verified before PS1 can be scored."
+    )
+    manual_review_prefill = {
+        "reference_variant": reference_label,
+        "reference_p_notation": first_candidate.get("p_notation", ""),
+        "reference_classification": first_candidate.get("classification", ""),
+        "classification_verification": classification_verification,
+        "classification_source": first_candidate.get("classification_source", ""),
+        "same_missense_confirmed": same_missense,
+        "different_nucleotide_change_confirmed": different_nucleotide,
+        "vua_spliceai_score": ps1_result.get("vua_spliceai_score"),
+        "reference_spliceai_score": ps1_result.get(
+            "reference_spliceai_scores", {}
+        ).get(first_candidate.get("c_notation")),
+        "splice_source_check_completed": set(DEFINED_SOURCES).issubset(
+            set(completed_sources)
+        ),
+        "splice_sources_checked": completed_sources,
+        "vua_confirmed_splice_status": ps1_result.get(
+            "vua_splice_evidence_status", "not_assessed"
+        ),
+        "reference_confirmed_splice_status": first_candidate.get(
+            "reference_splice_evidence_status", "not_assessed"
+        ),
+        "reference_classification_used_ps1": "unknown",
+        "reference_ps1_dependency_reference": "",
+        "direct_reciprocal_dependency_excluded": False,
+        "ps1_protein_rationale": rationale,
+    }
     return {
         "display": True,
         "recommended": True,
@@ -108,6 +172,7 @@ def evaluate_protein_ps1_review(
         ),
         "vua_spliceai_score": ps1_result.get("vua_spliceai_score"),
         "reference_spliceai_scores": ps1_result.get("reference_spliceai_scores", {}),
+        "manual_review_prefill": manual_review_prefill,
     }
 
 
@@ -131,4 +196,5 @@ def _empty(gene: str) -> Dict[str, Any]:
         "vua_splice_evidence_status": "not_assessed",
         "vua_spliceai_score": None,
         "reference_spliceai_scores": {},
+        "manual_review_prefill": {},
     }

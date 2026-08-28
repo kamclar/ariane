@@ -80,6 +80,7 @@ class ClassificationInputs:
     spliceai_score: Optional[float] = None
     bayesdel_score: Optional[float] = None
     gnomad_data: Optional[Mapping[str, Any]] = None
+    frequency_policy: Optional[Mapping[str, Any]] = None
     table9_result: Optional[Mapping[str, Any]] = None
     pp4_bp5_result: Optional[Mapping[str, Any]] = None
     ps1_result: Optional[Mapping[str, Any]] = None
@@ -243,7 +244,7 @@ class _PublicProjectionNode:
 
 
 def build_native_graph() -> DagDefinition:
-    """Build the complete production graph without invoking the legacy classifier."""
+    """Build the synchronous classification graph from explicit evidence inputs."""
     return DagDefinition(
         id="ariane.vcep.classification",
         version="4.0.0-gene-policy",

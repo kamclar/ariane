@@ -122,6 +122,7 @@ class CriterionResult(BaseModel):
     independent_evidence_contribution_count: int = 0
     likelihood_ratio_contribution_count: int = 0
     clinical_evidence_types: List[str] = Field(default_factory=list)
+    distinct_clinical_evidence_type_count: int = 0
 
 
 class ExternalSubmitter(BaseModel):
@@ -180,6 +181,27 @@ class SpliceAIAudit(BaseModel):
     alternate_scores: Dict[str, float] = Field(default_factory=dict)
     grch38: str = ""
     cache_key: str = ""
+    reason: str = ""
+
+
+class ClinicalLrAudit(BaseModel):
+    application_status: str = "not_found"
+    likelihood_ratio: Optional[float] = None
+    candidate_likelihood_ratio: Optional[float] = None
+    code: Optional[str] = None
+    strength: Optional[str] = None
+    source_bundle_ids: List[str] = Field(default_factory=list)
+    source_bundle_count: int = 0
+    independent_source_group_count: int = 0
+    clinical_evidence_types: List[str] = Field(default_factory=list)
+    distinct_clinical_evidence_type_count: int = 0
+    likelihood_ratio_contribution_count: int = 0
+    overlap_status: str = "not_assessed"
+    double_counting_risk: bool = False
+    automatic_combination_allowed: bool = False
+    overlap_assessment_note: str = ""
+    overlap_assessment_sources: List[str] = Field(default_factory=list)
+    source_components: List[Dict[str, Any]] = Field(default_factory=list)
     reason: str = ""
 
 
@@ -250,6 +272,8 @@ class ProteinPs1Candidate(BaseModel):
     reference_status: str = "review_required"
     status_reason: str = ""
     source_dataset: str = ""
+    reference_splice_evidence_status: str = "not_assessed"
+    reference_splice_sources_checked: List[str] = Field(default_factory=list)
 
 
 class ProteinPs1ReviewRecommendation(BaseModel):
@@ -271,6 +295,7 @@ class ProteinPs1ReviewRecommendation(BaseModel):
     vua_splice_evidence_status: str = "not_assessed"
     vua_spliceai_score: Optional[float] = None
     reference_spliceai_scores: Dict[str, Optional[float]] = Field(default_factory=dict)
+    manual_review_prefill: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ClassificationResult(BaseModel):
@@ -303,6 +328,7 @@ class ClassificationResult(BaseModel):
     narrative: str = ""
     alphamissense: Optional[AlphaMissenseResult] = None
     spliceai_audit: Optional[SpliceAIAudit] = None
+    clinical_lr_audit: Optional[ClinicalLrAudit] = None
     population_frequency_audit: Dict[str, Any] = Field(default_factory=dict)
     evidence_interactions: List[EvidenceInteractionWarning] = []
     clinical_annotations: List[ClinicalAnnotation] = Field(default_factory=list)

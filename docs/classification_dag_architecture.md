@@ -28,9 +28,8 @@ Pravidlové uzly jsou rozdělené podle odpovědnosti v
 | `support.py` | Neměnné společné typy a převod rozhodnutí |
 
 Produkční `runtime.py` importuje tematické moduly přes `nodes/__init__.py`.
-Původní `native.py` je pouze kompatibilní re-export a neobsahuje rozhodovací
-logiku. Je dočasný a nesmí se stát produkční závislostí. Po přijetí DAG migrace
-se odstraní společně se starým `backend/modules/classifier.py` a paritními testy.
+Původní kompatibilní `native.py` i starý sekvenční klasifikátor byly odstraněny.
+Žádná druhá implementace klasifikačních pravidel není součástí backendu.
 
 Klasifikační evidence se již nezískává v `main.py`. Samostatné provider uzly
 získávají souřadnice, SpliceAI, BayesDel, gnomAD, Table 9, klinické LR, exonové
@@ -38,11 +37,36 @@ CNV, důležité aminokyselinové pozice a podklady proteinového PS1. Každý z
 vrací `EvidenceItem` s explicitním stavem, důvodem a provenance. Sestavovací uzel
 vytvoří jediný neměnný `EvidenceBundle`, ze kterého čtou pravidlové uzly.
 
+Populační provider používá aplikačně vlastněný `PopulationFrequencyService` z
+`backend/population_frequency/`. Repository načte a ověří frekvenční a coverage
+snapshot. Lookup z něj vytvoří gnomAD evidence včetně výsledku kontroly founder
+výjimky. Teprve čistý uzel `rule.population_frequency` z předané evidence
+vyhodnotí BA1, BS1 a PM2. Pravidlový uzel neotevírá soubory a nevolá founder
+registr. Chybějící výsledek founder kontroly vede k nedostupnému BA1/BS1, nikoli
+k předpokladu, že varianta founder výjimkou není.
+
+```text
+souřadnice + normalizovaná c. notace
+                |
+                v
+gnomAD repository lookup + founder evidence provider
+                |
+                v
+EvidenceItem(kind=population_frequency)
+                |
+                v
+rule.population_frequency
+                |
+                v
+BA1 / BS1 / PM2 decision
+```
+
 ## Aplikační orchestrace
 
-FastAPI modul `backend/main.py` je kompoziční kořen a transportní vrstva. Neřeší
-normalizaci, výběr providerů, spuštění klasifikačního DAGu, diagnostiku zdrojů ani
-sestavení veřejného klasifikačního modelu.
+FastAPI modul `backend/main.py` je kompoziční kořen a transportní vrstva. Při
+startu propojí aplikačně vlastněné služby s provider adaptéry, ale sám neprovádí
+normalizaci, lookupy, klasifikační rozhodování, diagnostiku zdrojů ani sestavení
+veřejného klasifikačního modelu.
 
 Tyto odpovědnosti jsou rozdělené v `backend/services/`:
 
@@ -199,14 +223,15 @@ BA1 zůstává stand-alone benigní klasifikací také po doplnění manuální
 evidence. Ostatní kritéria zůstávají ve výsledku pro audit, ale nepřepínají
 klasifikaci do bodového postupu pro mixed evidence.
 
-Starý `backend/modules/classifier.py` není produkční závislost ani dostupný runtime
-režim. Po samostatné akceptaci DAG a přesunu zbývajících testů se odstraní tento
-soubor, paritní testy a dočasný kompatibilní `backend/classification_dag/native.py`.
-
 Synchronní graf `4.0.0-gene-policy`, který přijímá předem sestavené
-`ClassificationInputs`, zůstává pouze pro izolované testy pravidel a porovnání se
-starým testovacím oraclem. HTTP klasifikace vždy používá asynchronní provider graf
+`ClassificationInputs`, zůstává pro izolované testy pravidel a explicitní
+regresní korpus. HTTP klasifikace vždy používá asynchronní provider graf
 `4.0.0-gene-policy-provider-dag`.
+
+Regresní korpus nevolá alternativní klasifikátor. U každé varianty obsahuje
+schválenou třídu, počet bodů, přesný seznam kritérií, mixed evidence stav a
+not-applicable výstupy. Testovací adaptér pouze převádí zadanou evidenci na
+`ClassificationInputs` a volá veřejný DAG kontrakt.
 
 ## Vazba na externí modely
 

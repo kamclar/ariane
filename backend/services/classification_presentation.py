@@ -7,6 +7,7 @@ from backend.models import (
     CLASS_LABELS,
     ClassificationResult,
     ClinicalAnnotation,
+    ClinicalLrAudit,
     CriterionResult,
     EvidenceInteractionWarning,
     ExternalComparison,
@@ -43,6 +44,9 @@ def _criterion_models(values: dict, *, applies: bool) -> list[CriterionResult]:
                 "likelihood_ratio_contribution_count", 0
             ),
             clinical_evidence_types=criterion.get("clinical_evidence_types", []),
+            distinct_clinical_evidence_type_count=criterion.get(
+                "distinct_clinical_evidence_type_count", 0
+            ),
         )
         for name, criterion in sorted_criterion_items(values)
     ]
@@ -232,6 +236,12 @@ class ClassificationPresentationService:
                     }
                 )
                 if splice_status
+                else None
+            ),
+            clinical_lr_audit=(
+                ClinicalLrAudit(**artifacts["clinical_lr_result"])
+                if artifacts.get("clinical_lr_result", {}).get("application_status")
+                != "not_found"
                 else None
             ),
             population_frequency_audit=(

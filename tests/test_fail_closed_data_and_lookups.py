@@ -52,8 +52,66 @@ class RequiredDatasetValidationTests(unittest.TestCase):
 
 
 class GnomadFailClosedTests(unittest.TestCase):
+    def test_population_service_attaches_founder_evidence_before_rules_run(self):
+        from backend.population_frequency.models import GnomadRepository
+        from backend.population_frequency.service import PopulationFrequencyService
+
+        repository = GnomadRepository(
+            variants={}, metadata={}, coverage_by_position={},
+            frequency_path=None, frequency_status="missing",
+            coverage_path=None, coverage_status="missing",
+        )
+        service = PopulationFrequencyService(
+            repository,
+            founder_lookup=lambda gene, c_notation: {
+                "status": "not_found",
+                "is_pathogenic_founder": False,
+                "reason": f"checked {gene}:{c_notation}",
+            },
+        )
+        result = service.get_frequencies(
+            gene="BRCA1",
+            c_notation="c.509G>A",
+            grch37={"chrom": "17", "pos": 1, "ref": "A", "alt": "G"},
+        )
+        self.assertFalse(result["founder_exception"]["is_pathogenic_founder"])
+        self.assertEqual(
+            result["founder_exception"]["reason"],
+            "checked BRCA1:c.509G>A",
+        )
+
+    def test_population_service_reload_replaces_repository_for_bound_provider(self):
+        from backend.population_frequency.models import GnomadRepository
+        from backend.population_frequency.service import PopulationFrequencyService
+
+        def repository(status):
+            return GnomadRepository(
+                variants={}, metadata={}, coverage_by_position={},
+                frequency_path=None, frequency_status=status,
+                coverage_path=None, coverage_status=status,
+            )
+
+        service = PopulationFrequencyService(
+            repository("missing"),
+            founder_lookup=lambda *_args: {
+                "status": "not_found",
+                "is_pathogenic_founder": False,
+                "reason": "test",
+            },
+        )
+        provider = service.get_frequencies
+        with patch(
+            "backend.population_frequency.service.load_gnomad_repository",
+            return_value=repository("approved_snapshot"),
+        ):
+            service.reload()
+        result = provider(gene="BRCA1", c_notation="c.509G>A")
+        self.assertEqual(service.repository.frequency_status, "approved_snapshot")
+        self.assertEqual(result["cache_mode"], "approved_snapshot")
+
     def test_legacy_source_label_cannot_replace_extraction_provenance(self):
-        from backend.modules import frequency
+        from backend.population_frequency.lookup import dataset_extraction_ok
+        from backend.population_frequency.models import GnomadRepository
 
         legacy_metadata = {
             "source": "gnomad_v2_1_1_exomes_grch37",
@@ -63,19 +121,24 @@ class GnomadFailClosedTests(unittest.TestCase):
                 }
             },
         }
-        with patch.object(
-            frequency, "GNOMAD_CACHE_METADATA", legacy_metadata
-        ):
-            self.assertFalse(
-                frequency._dataset_extraction_ok(
-                    ["gnomad_v2_1_1_exomes_grch37"],
-                    {"chrom": "17", "pos": 50},
-                    "GRCh37",
-                )
+        repository = GnomadRepository(
+            variants={}, metadata=legacy_metadata, coverage_by_position={},
+            frequency_path=None, frequency_status="approved_snapshot",
+            coverage_path=None, coverage_status="approved_snapshot",
+        )
+        self.assertFalse(
+            dataset_extraction_ok(
+                repository,
+                ["gnomad_v2_1_1_exomes_grch37"],
+                {"chrom": "17", "pos": 50},
+                "GRCh37",
             )
+        )
 
     def test_founder_only_database_record_is_absent_for_outbred_presence(self):
-        from backend.modules import frequency
+        from backend.population_frequency.lookup import query_gnomad_dataset
+        from backend.population_frequency.models import GnomadRepository
+        from backend.population_frequency.policy import GNOMAD_LOCAL_DATASET_CONFIG
 
         variant_id = "13-100-A-G"
         record = {
@@ -104,23 +167,39 @@ class GnomadFailClosedTests(unittest.TestCase):
                 }
             },
         }
-        coverage = {"mean_depth": 30.0, "passes": True}
-        with patch.object(frequency, "GNOMAD_CACHE", {variant_id: [record]}), patch.object(
-            frequency, "GNOMAD_CACHE_MODE", "approved_snapshot"
-        ), patch.object(
-            frequency, "_coords_in_cached_region", return_value=True
-        ), patch.object(
-            frequency, "_dataset_extraction_ok", return_value=True
-        ), patch.object(
-            frequency, "_lookup_coverage_by_position", return_value=coverage
-        ):
-            result = frequency.query_gnomad_dataset_local(
-                variant_id,
-                {"chrom": "13", "pos": 100, "ref": "A", "alt": "G"},
-                frequency.GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
-                25.0,
-                ["afr", "amr", "eas", "nfe", "sas"],
-            )
+        dataset = "gnomad_v2_1_1_exomes_grch37"
+        repository = GnomadRepository(
+            variants={variant_id: (record,)},
+            metadata={
+                "regions": {
+                    "GRCh37": {
+                        "test": {"chrom": "13", "start": 1, "end": 200}
+                    }
+                },
+                "region_padding_bp": 0,
+                "extraction_log": [
+                    {"dataset": dataset, "status": "ok", "chrom": "13"}
+                ],
+            },
+            coverage_by_position={
+                f"{dataset}|GRCh37|13|100": {
+                    "mean_depth": 30.0,
+                    "source": "test",
+                }
+            },
+            frequency_path=None,
+            frequency_status="approved_snapshot",
+            coverage_path=None,
+            coverage_status="approved_snapshot",
+        )
+        result = query_gnomad_dataset(
+            repository,
+            variant_id,
+            {"chrom": "13", "pos": 100, "ref": "A", "alt": "G"},
+            GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
+            25.0,
+            ["afr", "amr", "eas", "nfe", "sas"],
+        )
 
         self.assertEqual(result["status"], "absent_in_non_founder_populations")
         self.assertFalse(result["found"])
@@ -130,19 +209,19 @@ class GnomadFailClosedTests(unittest.TestCase):
         )
 
     def test_frequency_cache_requires_non_cancer_faf95_provenance(self):
-        from backend.modules.frequency import (
-            _approved_manifest,
-            _approved_manifest_sha256,
-            _canonical_sha256,
-            _validate_gnomad_cache_payload,
+        from backend.population_frequency.policy import (
+            approved_manifest,
+            approved_manifest_sha256,
+            canonical_sha256,
         )
+        from backend.population_frequency.snapshot_repository import validate_frequency_snapshot
 
         payload = {
             "metadata": {
                 "schema_version": 2,
-                "manifest_sha256": _approved_manifest_sha256(),
+                "manifest_sha256": approved_manifest_sha256(),
                 "automatic_release_activation": False,
-                "classification_policies": _approved_manifest()[
+                "classification_policies": approved_manifest()[
                     "classification_policies"
                 ],
                 "v2_faf95": {"raw_af_fallback_allowed": False},
@@ -172,12 +251,12 @@ class GnomadFailClosedTests(unittest.TestCase):
                 }],
             },
         }
-        payload["metadata"]["records_sha256"] = _canonical_sha256(payload["variants"])
-        reason = _validate_gnomad_cache_payload(payload)
+        payload["metadata"]["records_sha256"] = canonical_sha256(payload["variants"])
+        reason = validate_frequency_snapshot(payload)
         self.assertIn("lack ENIGMA-compatible non-cancer FAF95", reason)
 
     def test_coverage_cache_rejects_manifest_mismatch(self):
-        from backend.modules.frequency import _validate_gnomad_coverage_payload
+        from backend.population_frequency.snapshot_repository import validate_coverage_snapshot
 
         payload = {
             "metadata": {
@@ -194,41 +273,40 @@ class GnomadFailClosedTests(unittest.TestCase):
         }
         self.assertIn(
             "different panel/source manifest",
-            _validate_gnomad_coverage_payload(payload),
+            validate_coverage_snapshot(payload),
         )
 
     def test_missing_approved_snapshot_has_no_alternate_selection(self):
-        from backend.modules import frequency
+        from backend.population_frequency.snapshot_repository import choose_frequency_snapshot
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            with patch.object(
-                frequency,
-                "GNOMAD_FREQUENCY_SNAPSHOT_PATH",
-                root / "missing.json",
-            ):
-                self.assertIsNone(frequency.choose_gnomad_cache_file())
+            self.assertIsNone(choose_frequency_snapshot(root / "missing.json"))
 
     def test_untrusted_cache_cannot_produce_frequency_evidence(self):
-        from backend.modules import frequency
+        from backend.population_frequency.lookup import query_gnomad_dataset
+        from backend.population_frequency.models import GnomadRepository
+        from backend.population_frequency.policy import GNOMAD_LOCAL_DATASET_CONFIG
 
-        old_cache = frequency.GNOMAD_CACHE
-        old_mode = frequency.GNOMAD_CACHE_MODE
-        try:
-            frequency.GNOMAD_CACHE = {"17-1-A-G": [{"dataset": "fixture"}]}
-            frequency.GNOMAD_CACHE_MODE = "unapproved"
-            result = frequency.query_gnomad_dataset_local(
-                "17-1-A-G",
-                {"chrom": "17", "pos": 1, "ref": "A", "alt": "G"},
-                frequency.GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
-                25.0,
-                ["afr", "amr", "eas", "nfe", "sas"],
-            )
-            self.assertEqual(result["status"], "cache_untrusted")
-            self.assertIn("not approved", result["errors"][0])
-        finally:
-            frequency.GNOMAD_CACHE = old_cache
-            frequency.GNOMAD_CACHE_MODE = old_mode
+        repository = GnomadRepository(
+            variants={"17-1-A-G": ({"dataset": "fixture"},)},
+            metadata={},
+            coverage_by_position={},
+            frequency_path=None,
+            frequency_status="unapproved",
+            coverage_path=None,
+            coverage_status="unapproved",
+        )
+        result = query_gnomad_dataset(
+            repository,
+            "17-1-A-G",
+            {"chrom": "17", "pos": 1, "ref": "A", "alt": "G"},
+            GNOMAD_LOCAL_DATASET_CONFIG["v2_1_non_cancer"],
+            25.0,
+            ["afr", "amr", "eas", "nfe", "sas"],
+        )
+        self.assertEqual(result["status"], "cache_untrusted")
+        self.assertIn("not approved", result["errors"][0])
 
 
 class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
@@ -639,9 +717,9 @@ class RemainingFallbackTests(unittest.TestCase):
         self.assertEqual(result["candidate_caids"], ["CA1", "CA2"])
 
     def test_failed_pvs1_evaluation_is_visible_for_frameshift(self):
-        from backend.modules.classifier import evaluate_variant
+        from tests.dag_test_support import classify_with_dag
 
-        result = evaluate_variant(
+        result = classify_with_dag(
             gene="BRCA1",
             variant_type="frameshift",
             p_notation="p.(Gly9999ValfsTer2)",

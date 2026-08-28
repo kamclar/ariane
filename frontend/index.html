@@ -417,6 +417,11 @@
                         x-text="result?.protein_ps1_review?.priority"></span>
                 </h3>
                 <p class="review-summary" x-text="result?.protein_ps1_review?.summary"></p>
+                <p class="threshold-note" x-show="result?.protein_ps1_review?.recommended">
+                    <strong>Next step:</strong> ARIANE has prefilled the Protein PS1 manual review
+                    and is checking ClinVar and ClinGen for an official ENIGMA VCEP assertion.
+                    Review the remaining unconfirmed fields before submitting manual evidence.
+                </p>
                 <div class="review-grid">
                     <div x-show="result?.protein_ps1_review?.what_to_check?.length">
                         <h4>Why it was flagged</h4>
@@ -500,7 +505,7 @@
             </div>
 
             <section class="evidence-details"
-                     x-show="result?.normalization_provenance || result?.spliceai_audit || result?.population_frequency_audit?.datasets?.length || result?.mixed_evidence || result?.evidence_interactions?.length">
+                     x-show="result?.normalization_provenance || result?.spliceai_audit || result?.clinical_lr_audit || result?.population_frequency_audit?.datasets?.length || result?.mixed_evidence || result?.evidence_interactions?.length">
                 <h3>Evidence details</h3>
                 <details class="evidence-detail-item" x-show="result?.normalization_provenance">
                     <summary>
@@ -517,6 +522,51 @@
                         <div><dt>Reference bundle</dt><dd x-text="result?.normalization_provenance?.reference_bundle || 'Not reported'"></dd></div>
                         <div class="evidence-detail-wide"><dt>Reference manifest checksum</dt><dd x-text="result?.normalization_provenance?.reference_manifest_sha256 || 'Not reported'"></dd></div>
                     </dl>
+                </details>
+                <details class="evidence-detail-item" x-show="result?.clinical_lr_audit">
+                    <summary>
+                        <span>PP4/BP5 clinical likelihood ratios</span>
+                        <span class="evidence-detail-summary"
+                              x-text="result?.clinical_lr_audit?.application_status === 'review_required' ? 'Expert review required' : (result?.clinical_lr_audit?.code ? `${result.clinical_lr_audit.code} ${result.clinical_lr_audit.strength}` : 'Not informative')"></span>
+                    </summary>
+                    <div class="evidence-interaction-list">
+                        <article class="evidence-interaction"
+                                 :class="result?.clinical_lr_audit?.double_counting_risk ? 'interaction-review_required' : 'interaction-deduplicated'">
+                            <p><strong x-text="result?.clinical_lr_audit?.reason"></strong></p>
+                            <p class="evidence-interaction-meta">
+                                Overlap status: <span x-text="result?.clinical_lr_audit?.overlap_status?.replaceAll('_', ' ')"></span>.
+                                Automatic combination: <span x-text="result?.clinical_lr_audit?.automatic_combination_allowed ? 'allowed' : 'not allowed'"></span>.
+                            </p>
+                            <p class="evidence-interaction-meta" x-show="result?.clinical_lr_audit?.overlap_assessment_note"
+                               x-text="result?.clinical_lr_audit?.overlap_assessment_note"></p>
+                            <p class="evidence-interaction-meta"
+                               x-show="result?.clinical_lr_audit?.overlap_assessment_sources?.length">
+                                Assessment sources:
+                                <template x-for="(source, index) in result.clinical_lr_audit.overlap_assessment_sources" :key="source">
+                                    <span><a :href="source" target="_blank" rel="noopener" x-text="`source ${index + 1}`"></a><span x-show="index < result.clinical_lr_audit.overlap_assessment_sources.length - 1">, </span></span>
+                                </template>
+                            </p>
+                        </article>
+                        <dl class="evidence-detail-grid">
+                            <div><dt>LR used for classification</dt><dd x-text="result?.clinical_lr_audit?.likelihood_ratio ?? 'Not used'"></dd></div>
+                            <div><dt>Unadmitted product for audit</dt><dd x-text="result?.clinical_lr_audit?.candidate_likelihood_ratio ?? 'Not available'"></dd></div>
+                            <div><dt>Source bundles</dt><dd x-text="result?.clinical_lr_audit?.source_bundle_count ?? 0"></dd></div>
+                            <div><dt>Verified independent source groups</dt><dd x-text="result?.clinical_lr_audit?.independent_source_group_count ?? 0"></dd></div>
+                        </dl>
+                        <table class="criteria-table">
+                            <thead><tr><th>Source</th><th>Clinical data</th><th>Component LR</th><th>PMID</th></tr></thead>
+                            <tbody>
+                                <template x-for="component in (result?.clinical_lr_audit?.source_components || [])" :key="component.source_id">
+                                    <tr>
+                                        <td x-text="component.citation || component.source_id"></td>
+                                        <td x-text="(component.clinical_data || []).map(item => item.data_type?.replaceAll('_', ' ')).join(', ')"></td>
+                                        <td x-text="component.component_lr"></td>
+                                        <td x-text="component.pmid"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </details>
                 <details class="evidence-detail-item"
                          x-show="result?.evidence_interactions?.length">
@@ -1046,6 +1096,14 @@
                                 </label>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PS1_PROTEIN'">
+                                    <label>Assessed variant
+                                        <input type="text"
+                                            :value="result ? `${result.gene} ${result.c_notation}` : ''"
+                                            readonly>
+                                    </label>
+                                    <label>Assessed protein consequence
+                                        <input type="text" :value="result?.p_notation || ''" readonly>
+                                    </label>
                                     <label>Reference P/LP variant
                                         <input type="text" x-model="item.evidence.reference_variant">
                                     </label>
@@ -1134,6 +1192,14 @@
                                     Defined sources:
                                     <span x-text="(item.evidence.splice_sources_checked || []).join(', ') || 'not recorded'"></span>.
                                     “None identified” means only that these recorded sources were checked; it is not an absolute claim that no splice evidence exists.
+                                </p>
+                                <p class="threshold-note" x-show="item.code === 'PS1_PROTEIN'">
+                                    <strong>Prefilled facts:</strong> Variant identity, protein consequence,
+                                    ST7 candidate classification, available SpliceAI results and recorded
+                                    ENIGMA RNA/splice source checks are completed automatically where data
+                                    are available. A historical ST7 classification remains non-scoring until
+                                    an ENIGMA/ClinGen VCEP assertion or a documented local reclassification
+                                    is selected and supported.
                                 </p>
                                 <p class="curation-warning" x-show="item.code === 'PS1_PROTEIN'">
                                     ClinVar review stars describe the review status of a submitted classification.
@@ -1799,6 +1865,14 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
         </div>
     </footer>
 
-    <script src="/static/js/app.js?v=20260827-3"></script>
+    <script src="/static/js/api.js?v=20260828-1"></script>
+    <script src="/static/js/core.js?v=20260828-1"></script>
+    <script src="/static/js/rules.js?v=20260828-1"></script>
+    <script src="/static/js/graphs.js?v=20260828-1"></script>
+    <script src="/static/js/classification.js?v=20260828-1"></script>
+    <script src="/static/js/formatters.js?v=20260828-1"></script>
+    <script src="/static/js/manual-review.js?v=20260828-1"></script>
+    <script src="/static/js/batch.js?v=20260828-1"></script>
+    <script src="/static/js/app.js?v=20260828-1"></script>
 </body>
 </html>

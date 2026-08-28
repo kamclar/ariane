@@ -20,6 +20,7 @@ class ClinicalLrCriteriaNode:
         variant = inputs["normalized_variant"]
         value = bundle_value(inputs["evidence_bundle"], "clinical_lr") or {}
         decisions = ()
+        warnings = ()
         if value.get("applies"):
             decisions = (
                 decision(
@@ -30,11 +31,15 @@ class ClinicalLrCriteriaNode:
                     evidence_item_ids=("clinical_lr",),
                 ),
             )
+        elif value.get("application_status") == "review_required":
+            warnings = (value.get("reason") or "Clinical LR review is required.",)
         return NodeResult.succeeded(
             {
                 "clinical_lr_family": CriterionFamilyResult(
                     self.id,
                     criteria=decisions,
+                    warnings=warnings,
+                    metadata={"clinical_lr": value},
                 )
             }
         )

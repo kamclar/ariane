@@ -156,7 +156,7 @@ MANUAL_CRITERIA = {
         "title": "Same missense substitution as a VCEP-classified P/LP reference",
         "threshold": "Strong for a Pathogenic reference and Moderate for a Likely Pathogenic reference, after the complete ENIGMA protein-level PS1 reference and splice review.",
         "check": "Confirm the VCEP classification source, same normalized missense substitution, different nucleotide change, SpliceAI <= 0.1 for both variants, and no damaging splice effect in the defined reviewed sources.",
-        "literature": "ST7 supplies the P/LP reference classification. Automatic protein PS1 additionally requires an eligible registry status after the ENIGMA splice checks. Review ENIGMA BRCA1/2 VCEP v1.2 PS1 and Appendix J.",
+        "literature": "ST7 supplies a trusted P/LP reference candidate. Automatic protein PS1 requires a separately verified ENIGMA/ClinGen VCEP assertion or documented local VCEP reclassification, plus the complete ENIGMA splice checks. Review ENIGMA BRCA1/2 VCEP v1.2 PS1 and Appendix J.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, protein-level PS1 and Appendix J",
     },

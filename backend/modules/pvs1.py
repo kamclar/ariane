@@ -1,10 +1,5 @@
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
-import json
+from typing import Optional, Dict, List
 import re
-import time
-import urllib.request
-import urllib.parse
 
 from backend.modules.utils import (
     get_amino_acid_position,

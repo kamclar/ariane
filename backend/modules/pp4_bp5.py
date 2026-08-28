@@ -74,6 +74,11 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         raise RuntimeError("PP4/BP5 clinical LR source manifest is missing")
     if metadata.get("source_manifest_sha256") != _sha256(SOURCE_MANIFEST_PATH):
         raise RuntimeError("PP4/BP5 clinical LR source manifest checksum mismatch")
+    source_manifest = json.loads(SOURCE_MANIFEST_PATH.read_text(encoding="utf-8"))
+    if source_manifest.get("schema_version") != 2:
+        raise RuntimeError("PP4/BP5 clinical LR source manifest schema is unsupported")
+    if not isinstance(source_manifest.get("source_bundle_overlap_matrix"), list):
+        raise RuntimeError("PP4/BP5 source-bundle overlap matrix is missing")
     normalization = metadata.get("normalization")
     if not isinstance(normalization, dict) or not normalization.get("provenance"):
         raise RuntimeError("PP4/BP5 clinical LR snapshot normalization provenance is missing")
@@ -119,7 +124,18 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "applies": False, "code": None, "strength": None, "points": 0,
         "reason": "", "likelihood_ratio": None,
         "source_components": [],
+        "source_bundle_ids": [],
+        "source_bundle_count": 0,
+        "independent_source_group_count": 0,
+        "candidate_likelihood_ratio": None,
+        "overlap_status": "not_assessed",
+        "double_counting_risk": False,
+        "overlap_assessment_note": "",
+        "overlap_assessment_sources": [],
+        "automatic_combination_allowed": False,
+        "application_status": "not_found",
         "clinical_evidence_types": [],
+        "distinct_clinical_evidence_type_count": 0,
         "likelihood_ratio_contribution_count": 0,
         "independent_evidence_contribution_count": 0,
         "single_strong_likely_benign_eligible": False,
@@ -132,7 +148,25 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         )
         return result
 
-    lr = entry["combined_lr"]
+    result.update({
+        "source_bundle_ids": entry.get("source_bundle_ids", []),
+        "source_bundle_count": entry.get("source_bundle_count", 0),
+        "independent_source_group_count": entry.get(
+            "independent_source_group_count", 0
+        ),
+        "candidate_likelihood_ratio": entry.get("candidate_combined_lr"),
+        "overlap_status": entry.get("overlap_status", "unknown"),
+        "double_counting_risk": entry.get("double_counting_risk", True),
+        "overlap_assessment_note": entry.get("assessment_note", ""),
+        "overlap_assessment_sources": entry.get("assessment_sources", []),
+        "automatic_combination_allowed": entry.get(
+            "automatic_combination_allowed", False
+        ),
+        "application_status": entry.get(
+            "automatic_application_status", "review_required"
+        ),
+    })
+    lr = entry.get("combined_lr")
     result["likelihood_ratio"] = lr
     result["source_components"] = entry.get("source_components", [])
     clinical_data = [
@@ -147,8 +181,23 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         if str(item.get("data_type") or "").strip()
     })
     result["clinical_evidence_types"] = clinical_evidence_types
+    result["distinct_clinical_evidence_type_count"] = len(clinical_evidence_types)
     result["likelihood_ratio_contribution_count"] = len(clinical_data)
-    result["independent_evidence_contribution_count"] = len(clinical_evidence_types)
+    result["independent_evidence_contribution_count"] = result[
+        "independent_source_group_count"
+    ]
+    if not result["automatic_combination_allowed"]:
+        result["reason"] = (
+            "Clinical LR evidence is available from more than one source, but "
+            "independence of the underlying clinical observations has not been "
+            "established. To avoid counting the same observations twice, ARIANE "
+            "did not apply PP4/BP5 automatically. Expert review is required."
+        )
+        return result
+    if lr is None:
+        raise RuntimeError(
+            "Clinical LR record permits automatic combination but has no combined LR"
+        )
     pp4_strength = lr_to_pp4_strength(gene, lr)
     bp5_strength = lr_to_bp5_strength(gene, lr)
     code = "PP4" if pp4_strength else "BP5" if bp5_strength else None
@@ -162,6 +211,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "code": code,
         "strength": strength,
         "points": (PP4_POINTS if code == "PP4" else BP5_POINTS)[strength],
+        "application_status": "applied",
     })
     if (
         code == "BP5"

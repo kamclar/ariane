@@ -2,6 +2,7 @@ import unittest
 import asyncio
 import json
 import hashlib
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -24,6 +25,11 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         records = json.loads(index_path.read_text(encoding="utf-8"))
         self.assertEqual(metadata["status"], "validated_derived_snapshot")
+        self.assertEqual(metadata["source_manifest"]["schema_version"], 2)
+        self.assertEqual(
+            metadata["automatic_application_statuses"],
+            {"eligible": 4175, "review_required": 972},
+        )
         self.assertEqual(metadata["records"], len(records))
         self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
         self.assertEqual(
@@ -43,40 +49,48 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             "biocommons.hgvs",
         )
 
-    def test_pp4_snapshot_resolves_c5266_alias_as_very_strong(self):
+    def test_cross_bundle_c5266_alias_requires_overlap_review(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         canonical = evaluate_pp4_bp5("BRCA1", "c.5266dup")
         alias = evaluate_pp4_bp5("BRCA1", "c.5266dupC")
-        self.assertTrue(canonical["applies"])
-        self.assertEqual(canonical["code"], "PP4")
-        self.assertEqual(canonical["strength"], "Very Strong")
-        self.assertEqual(canonical["points"], 8)
-        self.assertAlmostEqual(canonical["likelihood_ratio"], 1.3618122912956548e90)
-        self.assertEqual(alias["likelihood_ratio"], canonical["likelihood_ratio"])
+        self.assertFalse(canonical["applies"])
+        self.assertEqual(canonical["application_status"], "review_required")
+        self.assertTrue(canonical["double_counting_risk"])
+        self.assertFalse(canonical["automatic_combination_allowed"])
+        self.assertIsNone(canonical["likelihood_ratio"])
+        self.assertAlmostEqual(
+            canonical["candidate_likelihood_ratio"], 1.3618122912956548e90
+        )
+        self.assertEqual(
+            alias["candidate_likelihood_ratio"],
+            canonical["candidate_likelihood_ratio"],
+        )
         self.assertEqual(
             {item["pmid"] for item in canonical["source_components"]},
             {"31853058", "40413188"},
         )
 
-    def test_pp4_public_reason_uses_enigma_method_not_storage_terminology(self):
+    def test_cross_bundle_c509_is_reviewed_without_automatic_bp5(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.509G>A")
-        self.assertTrue(result["applies"])
-        self.assertEqual(result["code"], "BP5")
-        self.assertEqual(result["strength"], "Strong")
-        self.assertEqual(result["points"], -4)
-        self.assertAlmostEqual(result["likelihood_ratio"], 0.03946874736088844)
-        self.assertIn("ENIGMA v1.2 combined clinical evidence", result["reason"])
-        self.assertIn("combined LR=0.0394687", result["reason"])
+        self.assertFalse(result["applies"])
+        self.assertEqual(result["application_status"], "review_required")
+        self.assertEqual(result["overlap_status"], "unknown")
+        self.assertTrue(result["double_counting_risk"])
+        self.assertAlmostEqual(
+            result["candidate_likelihood_ratio"], 0.03946874736088844
+        )
+        self.assertIn("independence of the underlying clinical observations", result["reason"])
+        self.assertIn("avoid counting the same observations twice", result["reason"])
         self.assertEqual(
             {item["pmid"] for item in result["source_components"]},
             {"31131967", "31853058", "40413188"},
         )
         self.assertNotIn("local", result["reason"].lower())
         self.assertNotIn("snapshot", result["reason"].lower())
-        self.assertTrue(result["single_strong_likely_benign_eligible"])
+        self.assertFalse(result["single_strong_likely_benign_eligible"])
         self.assertGreaterEqual(result["likelihood_ratio_contribution_count"], 2)
         self.assertGreaterEqual(len(result["clinical_evidence_types"]), 2)
 
@@ -128,15 +142,15 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             {"31131967", "31853058"},
         )
 
-    def test_combined_clinical_lr_includes_caputo_and_case_control_components(self):
+    def test_caputo_and_case_control_components_require_overlap_review(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.3891_3893del")
-        self.assertTrue(result["applies"])
-        self.assertEqual(result["code"], "BP5")
-        self.assertEqual(result["strength"], "Strong")
-        self.assertEqual(result["points"], -4)
-        self.assertAlmostEqual(result["likelihood_ratio"], 0.02896079544190584)
+        self.assertFalse(result["applies"])
+        self.assertEqual(result["application_status"], "review_required")
+        self.assertAlmostEqual(
+            result["candidate_likelihood_ratio"], 0.02896079544190584
+        )
         self.assertEqual(
             {item["pmid"] for item in result["source_components"]},
             {"31131967", "34597585", "40413188"},
@@ -157,7 +171,9 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_c4185_full_path_applies_official_rna_pvs1_and_pp4_strong(self):
-        from backend.main import _classify_one
+        from backend.classification_dag import ClassifierEngineMode
+        from backend.main import CLASSIFICATION_ORCHESTRATION, _classify_one
+        from backend.services import EvidenceOrchestrationService, ExternalEvidenceDependencies
 
         pm2 = {
             "PM2_Supporting": {
@@ -171,24 +187,31 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             "chrom": "17", "pos": 43090944, "ref": "C", "alt": "T",
             "assembly": "GRCh38",
         }
-        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
-            "backend.lookups.coordinates.get_grch37", return_value=coordinates
-        ), patch(
-            "backend.lookups.coordinates.get_grch38", return_value=coordinates
-        ), patch(
-            "backend.modules.frequency.get_gnomad_frequencies", return_value={"available": True}
-        ), patch(
-            "backend.modules.frequency.evaluate_frequency_criteria", return_value=pm2
-        ), patch(
-            "backend.lookups.spliceai.get_spliceai_score", return_value=0.95
-        ), patch(
-            "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
-            return_value=(None, None),
-        ), patch(
-            "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}
-        ), patch(
-            "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
-        ):
+        dependencies = replace(
+            CLASSIFICATION_ORCHESTRATION.provider_dependencies,
+            resolve_variant=lambda *_args, **_kwargs: None,
+            get_grch37=lambda *_args, **_kwargs: coordinates,
+            get_grch38=lambda *_args, **_kwargs: coordinates,
+            gnomad_lookup=lambda **_kwargs: {"available": True},
+            spliceai_lookup=lambda *_args, **_kwargs: 0.95,
+            spliceai_status=lambda *_args, **_kwargs: {
+                "status": "ok", "score": 0.95, "source": "test"
+            },
+            bayesdel_lookup=lambda *_args, **_kwargs: (None, None),
+            bayesdel_status=lambda *_args, **_kwargs: {"status": "not_found"},
+        )
+        orchestration = EvidenceOrchestrationService(
+            engine_mode=ClassifierEngineMode.DAG,
+            provider_dependencies=dependencies,
+            external_dependencies=ExternalEvidenceDependencies(
+                clinvar_lookup=lambda *_args, **_kwargs: {"status": "not_found"},
+                clingen_lookup=lambda *_args, **_kwargs: {"status": "not_found"},
+            ),
+        )
+        with patch(
+            "backend.population_frequency.criteria.evaluate_frequency_criteria",
+            return_value=pm2,
+        ), patch("backend.main.CLASSIFICATION_ORCHESTRATION", orchestration):
             result = asyncio.run(
                 _classify_one("BRCA1", "c.4185G>A", "p.(Gln1395=)")
             )
@@ -381,7 +404,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "\n".join(result.warnings),
         )
 
-    def test_c5266_automatically_receives_pp4_very_strong(self):
+    def test_c5266_cross_bundle_clinical_lr_requires_review(self):
         from backend.main import _classify_one
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
@@ -393,12 +416,14 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
                 _classify_one("BRCA1", "c.5266dup", "p.(Gln1756ProfsTer74)")
             )
 
-        pp4 = next(criterion for criterion in result.criteria if criterion.name == "PP4")
-        self.assertTrue(pp4.applies)
-        self.assertEqual(pp4.strength, "Very Strong")
-        self.assertEqual(pp4.points, 8)
+        self.assertNotIn("PP4", {criterion.name for criterion in result.criteria})
+        self.assertEqual(result.clinical_lr_audit.application_status, "review_required")
+        self.assertTrue(result.clinical_lr_audit.double_counting_risk)
+        self.assertTrue(
+            any("expert review is required" in item.lower() for item in result.warnings)
+        )
 
-    def test_c509_full_classification_uses_combined_bp5_not_component_pp4(self):
+    def test_c509_full_classification_does_not_score_unverified_cross_bundle_lr(self):
         from backend.main import _classify_one
 
         with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
@@ -418,8 +443,12 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
         self.assertNotIn("PP4", criteria)
-        self.assertEqual(criteria["BP5"].strength, "Strong")
-        self.assertEqual(criteria["BP5"].points, -4)
+        self.assertNotIn("BP5", criteria)
+        self.assertEqual(result.clinical_lr_audit.application_status, "review_required")
+        self.assertAlmostEqual(
+            result.clinical_lr_audit.candidate_likelihood_ratio,
+            0.03946874736088844,
+        )
 
     def test_c3247a_to_c_receives_bp1_and_variant_specific_pp4(self):
         from backend.main import _classify_one
