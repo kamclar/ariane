@@ -9,6 +9,19 @@ import uuid
 from backend.classification_dag.engine import DagDefinition, DagExecutor
 from backend.classification_dag.policy import classify_by_enigma_combination
 from backend.classification_dag.types import DagExecutionContext, DagTraceEntry, NodeResult
+from backend.gene_policy import resolve_policy_identity
+from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
+from backend.modules.criterion_order import criterion_sort_key
+from backend.modules.evidence_interactions import apply_manual_rna_interactions
+from backend.modules.manual_evidence import (
+    MANUAL_CRITERIA,
+    STRENGTH_POINTS,
+    STRUCTURED_CURATED_CODES,
+    _pp4_source_is_recorded,
+    _pp4_value_and_scale,
+    evaluate_bs4_likelihood_ratio,
+    suggest_strength,
+)
 
 
 @dataclass(frozen=True)
@@ -80,17 +93,6 @@ class ManualCriterionEvaluationNode:
     provides: frozenset[str] = frozenset({"evaluated_manual_evidence"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.manual_evidence import (
-            MANUAL_CRITERIA,
-            STRENGTH_POINTS,
-            STRUCTURED_CURATED_CODES,
-            _pp4_source_is_recorded,
-            _pp4_value_and_scale,
-            evaluate_bs4_likelihood_ratio,
-            suggest_strength,
-        )
-        from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
-
         source = inputs["validated_manual_inputs"]
         combined = {
             item["name"]: {
@@ -237,8 +239,6 @@ class ManualEvidenceInteractionNode:
     provides: frozenset[str] = frozenset({"interacted_manual_evidence"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.evidence_interactions import apply_manual_rna_interactions
-
         source = inputs["evaluated_manual_evidence"]
         combined = {code: dict(item) for code, item in source.base_combined.items()}
         applied = {item["code"] for item in source.decisions if item["applies"]}
@@ -258,8 +258,6 @@ class ManualClassificationPolicyNode:
     provides: frozenset[str] = frozenset({"manual_classification_result"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.criterion_order import criterion_sort_key
-
         source = inputs["interacted_manual_evidence"]
         total = sum(item.get("points", 0) for item in source.combined.values())
         cls, label, note = classify_by_enigma_combination(
@@ -298,8 +296,6 @@ def execute_manual_evidence(
     manual_criteria: Sequence[Mapping[str, Any]],
     variant_context: Mapping[str, Any] | None = None,
 ) -> ManualEvidenceExecution:
-    from backend.gene_policy import resolve_policy_identity
-
     gene = str((variant_context or {}).get("gene") or "").strip().upper() or None
     selected_policy_id, selected_policy_version = resolve_policy_identity(gene)
     graph = build_manual_evidence_graph()

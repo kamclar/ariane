@@ -5,13 +5,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 import os
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping
 import uuid
 
 from backend.gene_policy import implementation_profile, policy_version, runtime_policy_id
 
 from backend.classification_dag.engine import DagDefinition, DagExecutor
 from backend.classification_dag.domain import (
+    ClassificationInputs,
     EvidenceBundle,
     EvidenceItem,
     EvidenceStatus,
@@ -39,6 +40,7 @@ from backend.classification_dag.providers import (
     SpliceAiEvidenceNode,
     Table9EvidenceNode,
 )
+from backend.classification_dag.provider_wiring import production_provider_dependencies
 from backend.classification_dag.nodes import (
     BioinformaticCriteriaNode,
     ClassificationPolicyNode,
@@ -70,81 +72,6 @@ def _require_supported_profile(gene: str) -> str:
         )
     return profile
 
-
-@dataclass(frozen=True)
-class ClassificationInputs:
-    gene: str
-    variant_type: str
-    p_notation: str
-    c_notation: str
-    spliceai_score: Optional[float] = None
-    bayesdel_score: Optional[float] = None
-    gnomad_data: Optional[Mapping[str, Any]] = None
-    frequency_policy: Optional[Mapping[str, Any]] = None
-    table9_result: Optional[Mapping[str, Any]] = None
-    pp4_bp5_result: Optional[Mapping[str, Any]] = None
-    ps1_result: Optional[Mapping[str, Any]] = None
-    exon_cnv_result: Optional[Mapping[str, Any]] = None
-    residue_info: Optional[Mapping[str, Any]] = None
-    dup_type: str = "Unknown"
-    reference_transcript: str = ""
-    submitted_notation: str = ""
-    normalization_source: str = ""
-    consequence_status: str = ""
-    normalization_provenance: Optional[Mapping[str, str]] = None
-    protein_consequence_explanation: str = ""
-    assembly: str = ""
-    genomic_notation: str = ""
-
-    @property
-    def variant_key(self) -> str:
-        return f"{self.gene}:{self.c_notation}"
-
-    def normalized_variant(self) -> NormalizedVariant:
-        return NormalizedVariant(
-            gene=self.gene,
-            reference_transcript=self.reference_transcript,
-            c_notation=self.c_notation,
-            p_notation=self.p_notation,
-            variant_type=self.variant_type,
-            submitted_notation=self.submitted_notation,
-            normalization_source=self.normalization_source,
-            consequence_status=self.consequence_status,
-            normalization_provenance=dict(self.normalization_provenance or {}),
-            protein_consequence_explanation=self.protein_consequence_explanation,
-            assembly=self.assembly,
-            genomic_notation=self.genomic_notation,
-        )
-
-    def evidence_bundle(self) -> EvidenceBundle:
-        raw_items = (
-            ("spliceai", "splice_prediction", self.spliceai_score),
-            ("bayesdel", "protein_prediction", self.bayesdel_score),
-            ("gnomad", "population_frequency", self.gnomad_data),
-            ("clinical_lr", "clinical_likelihood_ratio", self.pp4_bp5_result),
-            ("protein_ps1", "protein_reference", self.ps1_result),
-            ("exon_cnv", "copy_number", self.exon_cnv_result),
-            ("residue", "protein_residue", self.residue_info),
-        )
-        return EvidenceBundle(tuple(
-            EvidenceItem(
-                id=evidence_id,
-                kind=kind,
-                status=(
-                    EvidenceStatus.AVAILABLE
-                    if value is not None
-                    else EvidenceStatus.NOT_PROVIDED
-                ),
-                value=value,
-                reason=(
-                    "Evidence value was supplied to the classification DAG."
-                    if value is not None
-                    else "No evidence value was supplied to the classification DAG."
-                ),
-                provenance={"adapter": "classification-inputs-v1"},
-            )
-            for evidence_id, kind, value in raw_items
-        ))
 
 @dataclass(frozen=True)
 class ClassificationExecution:
@@ -273,7 +200,7 @@ def build_provider_graph(
     dependencies: ProviderDependencies | None = None,
 ) -> DagDefinition:
     """Build the production graph including all classification evidence providers."""
-    providers = dependencies or ProviderDependencies.production()
+    providers = dependencies or production_provider_dependencies()
     return DagDefinition(
         id="ariane.vcep.classification",
         version="4.0.0-gene-policy-provider-dag",

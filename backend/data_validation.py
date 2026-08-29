@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 from typing import Mapping
 
+from backend.gene_policy import validate_gene_policy_payload
+from backend.modules.exon_cnv_evidence import validate_exon_cnv_evidence_snapshot
+from backend.modules.ps1 import validate_ps1_reference_registry
+
 
 def _load_required_json(label: str, path: Path):
     if not path.is_file():
@@ -19,8 +23,6 @@ def _load_required_json(label: str, path: Path):
 def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     """Raise RuntimeError before the API starts if a core dataset is unusable."""
     table4 = _load_required_json("ENIGMA Table 4", paths["table4"])
-    from backend.gene_policy import validate_gene_policy_payload
-
     gene_policy_path = paths["gene_policy_manifest"]
     gene_policy = _load_required_json("gene policy manifest", gene_policy_path)
     gene_policy_metadata = _load_required_json(
@@ -209,8 +211,6 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     ps1_registry = _load_required_json(
         "protein PS1 reference registry", paths["ps1_protein_registry"]
     )
-    from backend.modules.ps1 import validate_ps1_reference_registry
-
     validate_ps1_reference_registry(ps1_registry)
 
     st2 = _load_required_json(
@@ -230,8 +230,6 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     exon_cnv = _load_required_json(
         "exon-CNV evidence snapshot", paths["exon_cnv_evidence"]
     )
-    from backend.modules.exon_cnv_evidence import validate_exon_cnv_evidence_snapshot
-
     validate_exon_cnv_evidence_snapshot(
         exon_cnv, paths["exon_cnv_evidence_manifest"]
     )

@@ -8,6 +8,11 @@ from typing import Any, Mapping
 from backend.classification_dag.domain import CriterionDecision, CriterionFamilyResult
 from backend.classification_dag.nodes.support import bundle_value, decision
 from backend.classification_dag.types import NodeResult
+from backend.modules.bp1 import evaluate_bp1
+from backend.modules.bp7 import evaluate_bp7
+from backend.modules.evidence_interactions import pvs1_prediction_deduplication
+from backend.modules.pp3_bp4 import evaluate_pp3_bp4
+from backend.modules.utils import get_amino_acid_position, is_in_functional_domain
 
 
 @dataclass(frozen=True)
@@ -20,12 +25,6 @@ class BioinformaticCriteriaNode:
     provides: frozenset[str] = frozenset({"bioinformatic_family"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.bp1 import evaluate_bp1
-        from backend.modules.bp7 import evaluate_bp7
-        from backend.modules.evidence_interactions import pvs1_prediction_deduplication
-        from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-        from backend.modules.utils import get_amino_acid_position, is_in_functional_domain
-
         ci = inputs["classification_inputs"]
         bundle = inputs["evidence_bundle"]
         bayesdel_score = bundle_value(bundle, "bayesdel")

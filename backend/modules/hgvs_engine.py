@@ -18,6 +18,7 @@ from hgvs.parser import Parser
 from hgvs.variantmapper import VariantMapper
 
 from backend.config import TRANSCRIPTS
+from backend.gene_policy import active_genes, normalization_validation_variant
 from backend.modules.hgvs import normalize_c_notation, normalize_protein_notation
 from backend.modules.hgvs_provider import PanelProvider, load_panel_provider
 
@@ -205,8 +206,6 @@ def derive_protein_consequence(gene: str, c_notation: str) -> ProteinConsequence
 
 def validate_hgvs_engine() -> None:
     engine = load_hgvs_engine()
-    from backend.gene_policy import active_genes, normalization_validation_variant
-
     for gene in active_genes():
         validation = normalization_validation_variant(gene)
         c_notation = validation["c_notation"]

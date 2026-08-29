@@ -13,6 +13,10 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.nodes.support import bundle_value, decision
 from backend.classification_dag.types import NodeResult
+from backend.population_frequency.criteria import (
+    evaluate_frequency_criteria,
+    pm2_not_applicable_decision,
+)
 
 
 @dataclass(frozen=True)
@@ -25,11 +29,6 @@ class FrequencyCriteriaNode:
     provides: frozenset[str] = frozenset({"frequency_family"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.population_frequency.criteria import (
-            evaluate_frequency_criteria,
-            pm2_not_applicable_decision,
-        )
-
         ci = inputs["classification_inputs"]
         evidence = inputs["evidence_bundle"]
         if not isinstance(evidence, EvidenceBundle):
@@ -80,21 +79,7 @@ class FrequencyCriteriaNode:
                         )
                     )
                 elif code == "PM2":
-                    if (
-                        "not applicable" in str(value.get("reason") or "").lower()
-                        and not pm2_not_applicable
-                    ):
-                        not_applicable.append(
-                            decision(
-                                code,
-                                value,
-                                gene=ci.gene,
-                                family_id=self.id,
-                                status=CriterionDecisionStatus.NOT_APPLICABLE,
-                                evidence_item_ids=("gnomad",),
-                            )
-                        )
-                    else:
+                    if not pm2_not_applicable:
                         warnings.append(value["reason"])
             for code, value in evaluated.get("_excluded_criteria", {}).items():
                 excluded.append(

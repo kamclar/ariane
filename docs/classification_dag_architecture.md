@@ -45,6 +45,10 @@ vyhodnotí BA1, BS1 a PM2. Pravidlový uzel neotevírá soubory a nevolá founde
 registr. Chybějící výsledek founder kontroly vede k nedostupnému BA1/BS1, nikoli
 k předpokladu, že varianta founder výjimkou není.
 
+Stav PM2 `NOT_APPLICABLE` vzniká výhradně z explicitní genové VCEP policy a
+typu alely. Text pole `reason` stav kritéria neřídí. Pokud je PM2 pro variantu
+N/A, stejný důvod se z gnomAD větve nepřidává podruhé jako warning.
+
 ```text
 souřadnice + normalizovaná c. notace
                 |
@@ -63,8 +67,9 @@ BA1 / BS1 / PM2 decision
 
 ## Aplikační orchestrace
 
-FastAPI modul `backend/main.py` je kompoziční kořen a transportní vrstva. Při
-startu propojí aplikačně vlastněné služby s provider adaptéry, ale sám neprovádí
+FastAPI modul `backend/main.py` je aplikační kořen a transportní vrstva. Při
+startu si vyžádá produkční vazby providerů z jediného kompozičního modulu
+`backend/classification_dag/provider_wiring.py`, ale sám neprovádí
 normalizaci, lookupy, klasifikační rozhodování, diagnostiku zdrojů ani sestavení
 veřejného klasifikačního modelu.
 
@@ -84,6 +89,24 @@ ani orchestration vrstvu.
 
 ClinVar a ClinGen ERepo nejsou vstupem klasifikace. Běží paralelně s DAGem a
 připojují se až jako externí porovnání vypočteného výsledku.
+
+## Závislosti Python modulů
+
+Projektové importy `backend.*` jsou deklarované na úrovni modulů. Nesmějí být
+skryté uvnitř `evaluate()`, endpointů ani pomocných funkcí. Konkrétní produkční
+implementace providerů se vážou v `provider_wiring.py`; pravidlové uzly přijímají
+jen kontrakt `ProviderDependencies` a typovanou evidenci. Modulové adaptéry ve
+wiringu volají aktuální atribut zdrojového modulu, takže test může provider
+nahradit bez lokálního importu a bez druhé produkční cesty.
+
+`ClassificationInputs` patří do `classification_dag/domain.py`. Runtime i
+provider vrstva závisejí na doméně, ale nezávisí vzájemně na sobě. Tím je
+odstraněn dřívější cyklus `providers -> runtime -> providers`.
+
+Test `tests/test_backend_import_architecture.py` parsuje celý backend pomocí AST
+a odmítne nový projektový import uvnitř funkce nebo metody. Současně ověřuje
+vlastnictví `ClassificationInputs` doménovou vrstvou. Výjimka ani allowlist pro
+skrytý import nejsou zavedeny.
 
 ## Hranice vrstev
 
@@ -182,6 +205,9 @@ stručného klinického výsledku.
     kritérií. Tento stav smí vzniknout pouze z konkrétní rozhodovací větve.
     Chybějící data, nesplněný práh ani pouhá absence výsledku se na
     `not_applicable` nepřevádějí.
+11. Projektové závislosti se importují na úrovni modulů. Produkční vazby
+    providerů vznikají pouze v `provider_wiring.py`; pravidlový uzel si nesmí
+    načíst implementaci lookupu uvnitř `evaluate()`.
 
 ## Implementované uzly
 

@@ -17,6 +17,8 @@ from backend.modules.hgvs import (
     protein_notations_compatible,
     split_combined_hgvs,
 )
+from backend.modules.hgvs_engine import derive_protein_consequence
+from backend.modules.reference_validation import validate_reference_allele
 
 
 _ASSEMBLIES = {"GRCH37": "GRCh37", "GRCH38": "GRCh38"}
@@ -175,9 +177,6 @@ def _genomic_reverse_index() -> dict[tuple[str, str, str, int, str, str], tuple[
 def _from_c_notation(
     gene: str, submitted: str, c_notation: str, supplied_p: str
 ) -> NormalizedVariantInput:
-    from backend.modules.hgvs_engine import derive_protein_consequence
-    from backend.modules.reference_validation import validate_reference_allele
-
     # Validate the stated transcript reference before attempting consequence
     # lookup. This also prevents a wrong-reference SNV from being accepted with
     # a user-supplied protein description.

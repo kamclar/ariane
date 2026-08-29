@@ -209,7 +209,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             ),
         )
         with patch(
-            "backend.population_frequency.criteria.evaluate_frequency_criteria",
+            "backend.classification_dag.nodes.population.evaluate_frequency_criteria",
             return_value=pm2,
         ), patch("backend.main.CLASSIFICATION_ORCHESTRATION", orchestration):
             result = asyncio.run(

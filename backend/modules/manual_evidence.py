@@ -13,6 +13,7 @@ from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.modules.variant_input import normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
 from backend.gene_policy import (
+    active_genes,
     clinical_lr_thresholds,
     implementation_profile,
     policy_name,
@@ -265,8 +266,6 @@ _COMMON_RESOURCE_LINKS = [
 
 def resource_links_for_gene(gene: str | None = None) -> List[Dict[str, str]]:
     """Return VCEP-specific links plus shared interpretation resources."""
-    from backend.gene_policy import active_genes
-
     genes = (resolve_policy_gene(gene),) if gene else active_genes()
     policy_links: List[Dict[str, str]] = []
     seen_urls: set[str] = set()

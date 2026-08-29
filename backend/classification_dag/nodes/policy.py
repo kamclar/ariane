@@ -12,8 +12,18 @@ from backend.classification_dag.nodes.support import (
     criteria_dict,
     excluded_by_policy,
 )
+from backend.classification_dag.policy import (
+    classify_by_enigma_combination,
+    classify_by_points,
+    verify_acmg_combination,
+)
 from backend.classification_dag.types import NodeResult
 from backend.gene_policy import rule_is_applicable
+from backend.modules.evidence_interactions import (
+    apply_automatic_rna_interactions,
+    automatic_functional_interactions,
+    clinical_functional_risk_interactions,
+)
 
 
 @dataclass(frozen=True)
@@ -36,12 +46,6 @@ class EvidenceInteractionNode:
     provides: frozenset[str] = frozenset({"retained_evidence"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.evidence_interactions import (
-            apply_automatic_rna_interactions,
-            automatic_functional_interactions,
-            clinical_functional_risk_interactions,
-        )
-
         ci = inputs["classification_inputs"]
         splice = inputs["splice_context"]
         frequency = inputs["frequency_family"]
@@ -142,12 +146,6 @@ class ClassificationPolicyNode:
     provides: frozenset[str] = frozenset({"classification_without_reviews"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.classification_dag.policy import (
-            classify_by_enigma_combination,
-            classify_by_points,
-            verify_acmg_combination,
-        )
-
         variant = inputs["normalized_variant"]
         ci = inputs["classification_inputs"]
         retained = inputs["retained_evidence"]

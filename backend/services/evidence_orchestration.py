@@ -18,6 +18,7 @@ from backend.classification_dag import (
 )
 from backend.classification_dag.runtime import ClassificationExecution
 from backend.data_health import get_user_warnings
+from backend.lookups import clingen, clinvar
 from backend.lookup_execution import lookup_or_unavailable
 from backend.modules.variant_input import NormalizedVariantInput, normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
@@ -57,12 +58,9 @@ class ExternalEvidenceDependencies:
 
     @classmethod
     def production(cls) -> "ExternalEvidenceDependencies":
-        from backend.lookups.clingen import clingen_erepo_lookup
-        from backend.lookups.clinvar import clinvar_lookup
-
         return cls(
-            clinvar_lookup=clinvar_lookup,
-            clingen_lookup=clingen_erepo_lookup,
+            clinvar_lookup=clinvar.clinvar_lookup,
+            clingen_lookup=clingen.clingen_erepo_lookup,
         )
 
 

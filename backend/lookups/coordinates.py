@@ -39,6 +39,7 @@ import urllib.error
 from backend.runtime_cache import runtime_cache_path
 import logging
 from backend.data_health import clear_issue, register_issue
+from backend.lookups import indels, precomputed
 from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
@@ -127,10 +128,7 @@ def _parse_snapshot_coords(value: object, assembly: str) -> Optional[GenomicCoor
 
 def _resolve_precomputed_snapshot(gene: str, c_notation: str) -> Optional[ResolvedVariant]:
     """Use versioned coding SNV/indel snapshots before network requests."""
-    from backend.lookups.precomputed import lookup_classification_snapshot
-    from backend.lookups.indels import lookup_indel_snapshot
-
-    indel = lookup_indel_snapshot(gene, c_notation)
+    indel = indels.lookup_indel_snapshot(gene, c_notation)
     if indel:
         def convert(value: dict) -> GenomicCoords:
             return GenomicCoords(
@@ -151,7 +149,7 @@ def _resolve_precomputed_snapshot(gene: str, c_notation: str) -> Optional[Resolv
             ],
         )
 
-    snapshot = lookup_classification_snapshot(gene, c_notation)
+    snapshot = precomputed.lookup_classification_snapshot(gene, c_notation)
     if not snapshot:
         return None
     record = snapshot.get("record", {})

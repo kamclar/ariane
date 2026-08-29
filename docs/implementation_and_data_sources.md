@@ -470,7 +470,20 @@ kritické proteinové sekvence v souladu s PVS1 flowchartem. Například `BRCA1
 c.5556_5560del p.(Tyr1853AspfsTer25)` používá řádek PVS1 Very Strong a PM5 PTC
 Strong. Výsledkem je 12 bodů a třída 5.
 
-#### 3.2.1 PVS1 z RNA evidence
+#### 3.2.1 Otevřená metodická otázka PM5 PTC v posledním exonu
+
+Interpretace PM5 PTC uvnitř posledního exonu čeká na metodické potvrzení.
+Appendix D určuje sílu podle exonu nukleotidové změny a uvádí příklad
+frameshiftu, jehož terminační kodon vznikne v následujícím exonu. Neurčuje ale,
+jak vybrat mezi dvěma řádky uvnitř posledního exonu. Table 4 rozlišuje u BRCA1
+`PTC<p.I1855` a `PTC>p.L1854` a u BRCA2 `PTC<p.T3310` a `PTC>p.E3309`.
+Readme Table 4 tento údaj popisuje jako polohu terminačního kodonu, zatímco
+PVS1 Figures 3 a 5 posuzují zachování kritické proteinové sekvence. Je proto
+otevřené, zda se v této větvi mají PVS1 a PM5 posuzovat odděleně. Dotaz byl
+odeslán ke konzultaci. Do obdržení odpovědi se klasifikační logika nemění a
+tato nejistota nesmí být odstraněna nezdokumentovaným předpokladem.
+
+#### 3.2.2 PVS1 z RNA evidence
 
 Automatické `PVS1_RNA` nevychází z ručního seznamu variant. Klasifikátor používá
 úplnou oficiální ENIGMA Supplementary Table 2 a obecnou rozhodovací větev z
@@ -970,7 +983,7 @@ Generátor: `scripts/build_enigma_st2_splice_evidence_snapshot.py`
 Obsahuje všech 220 variant a všech 11 zdrojových sloupců listu
 `ST2 splicing dataset codes`, číslo zdrojového řádku a checksum oficiálního
 Excelu. Používá se ke kontrole známé RNA/splice evidence pro proteinové PS1 a
-jako oficiální vstup obecné automatické větve PVS1 RNA popsané v části 3.2.1.
+jako oficiální vstup obecné automatické větve PVS1 RNA popsané v části 3.2.2.
 ARIANE nemá aktivní registr referencí pro splice PS1. Úplná ST2 se používá
 jen jako definovaný zdroj známé RNA/splice evidence. Samotná přítomnost záznamu
 v ST2 nepřiděluje PS1 splice ani nepředvyplňuje jeho sílu. Pro pohodlnější
@@ -1713,6 +1726,19 @@ DAGu. Každý provider vrací hodnotu, stav dostupnosti a provenance. Teprve uze
 Síťové API, lokální cache a předpočítané datasety zůstávají zdroji providerů,
 nikoli součástí pravidlových uzlů. Nedostupnost se nesmí převést na nulové
 skóre, nesplněné kritérium, první nalezené ID nebo náhradní fixture.
+
+PM2 `NOT_APPLICABLE` se určuje explicitní větví genové VCEP policy podle typu
+varianty a c. alely. Formulace vysvětlujícího textu `reason` nemůže změnit stav
+kritéria. Důvod již uvedený u PM2 N/A se neopakuje v uživatelských warnings.
+
+Konkrétní produkční implementace providerů jsou propojené pouze v
+`backend/classification_dag/provider_wiring.py`. `ClassificationInputs` je
+doménový typ v `backend/classification_dag/domain.py`, takže provider a runtime
+vrstva mezi sebou netvoří importní cyklus. Projektové importy `backend.*` se
+nesmějí provádět uvnitř funkcí ani metod. Tento invariant kontroluje AST test
+`tests/test_backend_import_architecture.py`. Pravidlové uzly proto mají své
+závislosti viditelné na úrovni modulů a načítají pouze předanou typovanou
+evidenci.
 
 ### 15.4 Jediná klasifikační implementace
 

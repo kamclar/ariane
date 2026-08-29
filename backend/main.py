@@ -30,10 +30,20 @@ from backend.config import (
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
     GENE_POLICY_MANIFEST_PATH, GENE_POLICY_METADATA_PATH,
 )
-from backend.gene_policy import active_genes, validate_policy_source_bindings
+from backend.gene_policy import (
+    active_genes,
+    get_gene_policy,
+    not_used_criteria,
+    validate_policy_source_bindings,
+)
 from backend.data_validation import validate_required_datasets
 from backend.data_health import get_data_issues
-from backend.classification_dag import ProviderDependencies, get_configured_engine_mode
+from backend.classification_dag import (
+    DagNodeExecutionError,
+    execute_manual_evidence,
+    get_configured_engine_mode,
+)
+from backend.classification_dag.provider_wiring import production_provider_dependencies
 from backend.models import (
     VariantRequest, ClassificationResult,
     BatchRequest, BatchResponse, BatchItemResult,
@@ -50,6 +60,12 @@ from backend.services import (
     execute_variant_classification,
     resolve_ps1_reference,
 )
+from backend.modules.hgvs_provider import load_panel_provider
+from backend.modules.manual_evidence import (
+    manual_criteria_for_gene,
+    resource_links_for_gene,
+)
+from backend.modules.ps1_splice_evidence import list_splice_ps1_candidate_discovery
 
 validate_required_datasets({
     "table4": TABLE4_PATH,
@@ -88,6 +104,7 @@ from backend.modules.enigma_rules import (  # noqa: E402
     search_table9,
     validate_rule_catalog,
 )
+from backend.cache_registry import clear_runtime_caches  # noqa: E402
 
 _spliceai_data_source._load_api_cache()
 validate_classification_snapshot()
@@ -103,7 +120,7 @@ validate_rule_catalog()
 POPULATION_FREQUENCY_SERVICE = PopulationFrequencyService.load_default()
 CLASSIFICATION_ORCHESTRATION = EvidenceOrchestrationService(
     engine_mode=CLASSIFIER_ENGINE_MODE,
-    provider_dependencies=ProviderDependencies.production(
+    provider_dependencies=production_provider_dependencies(
         population_frequency_lookup=POPULATION_FREQUENCY_SERVICE.get_frequencies,
     ),
 )
@@ -214,7 +231,6 @@ async def index():
 @app.get("/api/health")
 async def health():
     issues = get_data_issues()
-    from backend.modules.hgvs_provider import load_panel_provider
     panel = load_panel_provider()
     return {
         "status": "degraded" if issues else "ok",
@@ -237,15 +253,6 @@ async def health():
 
 @app.get("/api/resources")
 async def resources(gene: Optional[str] = None):
-    from backend.modules.manual_evidence import (
-        manual_criteria_for_gene,
-        resource_links_for_gene,
-    )
-    from backend.gene_policy import active_genes, get_gene_policy, not_used_criteria
-    from backend.modules.ps1_splice_evidence import (
-        list_splice_ps1_candidate_discovery,
-    )
-
     return {
         "version": ARIANE_VERSION,
         "manual_criteria": manual_criteria_for_gene(gene) if gene else {},
@@ -346,8 +353,6 @@ async def evaluate_manual_evidence_endpoint(
     req: ManualEvidenceRequest,
     request: Request,
 ) -> ManualEvidenceResult:
-    from backend.classification_dag import DagNodeExecutionError, execute_manual_evidence
-
     try:
         execution = execute_manual_evidence(
             [criterion.model_dump() for criterion in req.base_criteria],
@@ -611,16 +616,7 @@ async def clear_cache(
         x_ariane_admin_token, admin_token
     ):
         raise HTTPException(status_code=403, detail="Invalid administrative token")
-    from backend.lookups.spliceai import SPLICEAI_CACHE, SPLICEAI_STATUS_CACHE
-    from backend.lookups.bayesdel import BAYESDEL_CACHE
-    from backend.lookups.clinvar import CLINVAR_CACHE
-    from backend.lookups.clingen import EREPO_CACHE
-
-    SPLICEAI_CACHE.clear()
-    SPLICEAI_STATUS_CACHE.clear()
-    BAYESDEL_CACHE.clear()
-    CLINVAR_CACHE.clear()
-    EREPO_CACHE.clear()
+    clear_runtime_caches()
 
     POPULATION_FREQUENCY_SERVICE.reload()
 

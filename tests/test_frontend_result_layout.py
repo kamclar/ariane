@@ -242,7 +242,7 @@ def test_protein_ps1_reference_facts_are_requested_from_backend():
     assert "Assessed protein consequence" in html
     assert "`${result.gene} ${result.c_notation}`" in html
     assert "resolveProteinPs1Reference(item)" in html
-    assert 'fetch("/api/manual-evidence/resolve-ps1-reference"' in javascript
+    assert 'namespace.api.request("/api/manual-evidence/resolve-ps1-reference"' in javascript
     assert "resolved.reference.p_notation" in javascript
     assert "resolved.assessed.spliceai_score" in javascript
     assert "resolved.reference.spliceai_score" in javascript

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from backend.classification_dag.domain import CriterionDecision, CriterionDecisionStatus, CriterionFamilyResult
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
+from backend.modules.pvs1 import evaluate_pvs1
+from backend.modules.pvs1_rna import evaluate_pvs1_rna
 
 
 @dataclass(frozen=True)
@@ -17,9 +19,6 @@ class Pvs1CriteriaNode:
     provides: frozenset[str] = frozenset({"pvs1_family"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.pvs1 import evaluate_pvs1
-        from backend.modules.pvs1_rna import evaluate_pvs1_rna
-
         ci = inputs["classification_inputs"]
         splice = inputs["splice_context"]
         pvs1 = evaluate_pvs1(

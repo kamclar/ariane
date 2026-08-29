@@ -17,6 +17,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import HTMLResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
+from backend.gene_policy import active_genes
+
 
 router = APIRouter()
 security = HTTPBasic()
@@ -227,8 +229,6 @@ async def admin_audit(
     export: str = "",
     admin_user: str = Depends(_require_admin),
 ):
-    from backend.gene_policy import active_genes
-
     configured_genes = active_genes()
     period = period if period in {"today", "7d", "30d", "custom"} else "7d"
     gene = gene if gene in {"", *configured_genes} else ""

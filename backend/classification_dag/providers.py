@@ -15,6 +15,7 @@ import logging
 from typing import Any, Callable, Mapping
 
 from backend.classification_dag.domain import (
+    ClassificationInputs,
     EvidenceBundle,
     EvidenceItem,
     EvidenceStatus,
@@ -22,6 +23,11 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.types import NodeResult
 from backend.lookup_execution import lookup_or_unavailable
+from backend.modules.table9 import (
+    TABLE9_DATA,
+    TABLE9_JSON_PATH,
+    table9_lookup_ps3_bs3,
+)
 
 
 @dataclass(frozen=True)
@@ -60,56 +66,6 @@ class ProviderDependencies:
     splice_source_lookup: Callable[..., Any]
     select_ps1_spliceai: Callable[..., Any]
     ps1_lookup: Callable[..., Any]
-
-    @classmethod
-    def production(
-        cls,
-        *,
-        population_frequency_lookup: Callable[..., Any] | None = None,
-    ) -> "ProviderDependencies":
-        from backend.lookups.bayesdel import (
-            BAYESDEL_STATUS_CACHE,
-            get_bayesdel_and_alphamissense,
-        )
-        from backend.lookups.coordinates import get_grch37, get_grch38, resolve_variant
-        from backend.lookups.spliceai import SPLICEAI_STATUS_CACHE, get_spliceai_score
-        from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
-        from backend.population_frequency import PopulationFrequencyService
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
-        from backend.modules.ps1 import (
-            discover_ps1_reference_variants,
-            evaluate_ps1,
-            select_vua_spliceai_for_ps1,
-        )
-        from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
-        from backend.modules.residues import check_important_residue
-
-        if population_frequency_lookup is None:
-            population_frequency_lookup = (
-                PopulationFrequencyService.load_default().get_frequencies
-            )
-        return cls(
-            resolve_variant=resolve_variant,
-            get_grch37=get_grch37,
-            get_grch38=get_grch38,
-            spliceai_lookup=get_spliceai_score,
-            spliceai_status=lambda gene, c: dict(
-                SPLICEAI_STATUS_CACHE.get(f"{gene}:{c}", {})
-            ),
-            bayesdel_lookup=get_bayesdel_and_alphamissense,
-            bayesdel_status=lambda gene, c: dict(
-                BAYESDEL_STATUS_CACHE.get(f"{gene}:{c}", {})
-            ),
-            gnomad_lookup=population_frequency_lookup,
-            clinical_lr_lookup=evaluate_pp4_bp5,
-            exon_cnv_lookup=lookup_exon_cnv_evidence,
-            residue_lookup=check_important_residue,
-            ps1_candidate_lookup=discover_ps1_reference_variants,
-            splice_source_lookup=evaluate_defined_splice_sources,
-            select_ps1_spliceai=select_vua_spliceai_for_ps1,
-            ps1_lookup=evaluate_ps1,
-        )
-
 
 def _request(inputs) -> ClassificationRequest:
     request = inputs["classification_request"]
@@ -601,8 +557,6 @@ class EvidenceBundleAssemblyNode:
     })
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.classification_dag.runtime import ClassificationInputs
-
         request = _request(inputs)
         variant = request.variant
         items = tuple(inputs[key] for key in (
@@ -696,12 +650,6 @@ class Table9EvidenceNode:
     provides: frozenset[str] = frozenset({"table9_evidence"})
 
     def evaluate(self, context, inputs) -> NodeResult:
-        from backend.modules.table9 import (
-            TABLE9_DATA,
-            TABLE9_JSON_PATH,
-            table9_lookup_ps3_bs3,
-        )
-
         variant = inputs["normalized_variant"]
         if not isinstance(variant, NormalizedVariant):
             raise TypeError("normalized_variant must be a NormalizedVariant")

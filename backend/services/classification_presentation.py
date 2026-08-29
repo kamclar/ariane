@@ -17,7 +17,13 @@ from backend.models import (
     SpliceAIAudit,
     VusExplanation,
 )
+from backend.lookups.clinvar import clinvar_review_stars
+from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.modules.criterion_order import sorted_criterion_items
+from backend.modules.enigma_rules import clinical_annotations_for_variant
+from backend.modules.external import external_comparison
+from backend.modules.narrative import generate_narrative
+from backend.modules.vus_explanation import explain_vus
 from backend.services.evidence_orchestration import OrchestratedEvidence
 
 
@@ -66,9 +72,6 @@ def _external_status_message(source: str, value: dict) -> str:
 
 
 def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
-    from backend.lookups.clinvar import clinvar_review_stars
-    from backend.modules.external import external_comparison
-
     clinvar = evidence.clinvar
     clingen = evidence.clingen
     result = evidence.result
@@ -127,11 +130,6 @@ class ClassificationPresentationService:
     """Build the API model without acquiring evidence or changing classification."""
 
     def build(self, evidence: OrchestratedEvidence) -> ClassificationResult:
-        from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
-        from backend.modules.enigma_rules import clinical_annotations_for_variant
-        from backend.modules.narrative import generate_narrative
-        from backend.modules.vus_explanation import explain_vus
-
         result = evidence.result
         artifacts = evidence.artifacts
         normalized = evidence.normalized_input

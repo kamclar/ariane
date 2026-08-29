@@ -6,6 +6,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
 
+from backend.lookups import clingen, clinvar, spliceai
 from backend.modules.variant_input import normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
 
@@ -45,15 +46,11 @@ class Ps1ReferenceDependencies:
 
     @classmethod
     def production(cls) -> "Ps1ReferenceDependencies":
-        from backend.lookups.clingen import clingen_erepo_lookup
-        from backend.lookups.clinvar import clinvar_lookup
-        from backend.lookups.spliceai import get_spliceai_score, get_spliceai_status
-
         return cls(
-            spliceai_lookup=get_spliceai_score,
-            spliceai_status=get_spliceai_status,
-            clinvar_lookup=clinvar_lookup,
-            clingen_lookup=clingen_erepo_lookup,
+            spliceai_lookup=spliceai.get_spliceai_score,
+            spliceai_status=spliceai.get_spliceai_status,
+            clinvar_lookup=clinvar.clinvar_lookup,
+            clingen_lookup=clingen.clingen_erepo_lookup,
         )
 
 

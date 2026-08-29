@@ -21,6 +21,7 @@ import urllib.parse
 import urllib.request
 
 from backend.data_health import clear_issue, register_issue
+from backend.lookups import coordinates
 from backend.runtime_cache import runtime_cache_path
 from backend.version import ARIANE_VERSION
 
@@ -203,8 +204,7 @@ def get_bayesdel_and_alphamissense(
         }
         return bd, am
 
-    from backend.lookups.coordinates import resolve_variant
-    rv  = resolve_variant(gene, c_notation)
+    rv = coordinates.resolve_variant(gene, c_notation)
     hg37 = None
     if rv and rv.has_grch37():
         hg37 = {"chrom": rv.grch37.chrom, "pos": rv.grch37.pos,

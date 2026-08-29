@@ -12,6 +12,7 @@ from backend.gene_policy import (
     functional_domain_descriptions,
     spliceai_thresholds,
 )
+from backend.modules.vus_explanation import explain_vus
 
 def _parse_intron_offset(c_notation: str) -> Optional[tuple]:
     m = re.match(r"c\.(-?\d+)([+-])(\d+)", c_notation)
@@ -240,8 +241,6 @@ def _classification_sentence(predicted_class: int, predicted_label: str,
 def _vus_explanation_sentence(result: dict) -> Optional[str]:
     if result.get("predicted_class") != 3:
         return None
-    from backend.modules.vus_explanation import explain_vus
-
     explanation = explain_vus(result)
     if not explanation:
         return None

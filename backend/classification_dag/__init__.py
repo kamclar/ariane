@@ -7,6 +7,7 @@ from backend.classification_dag.engine import (
     DagNodeExecutionError,
 )
 from backend.classification_dag.domain import (
+    ClassificationInputs,
     CriterionDecision,
     CriterionDecisionStatus,
     CriterionFamilyResult,
@@ -18,7 +19,6 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.runtime import (
     ClassificationExecution,
-    ClassificationInputs,
     ClassifierEngineMode,
     execute_classification,
     execute_classification_request,

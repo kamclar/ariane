@@ -22,6 +22,7 @@ from backend.classification_dag import (
     get_configured_engine_mode,
 )
 from backend.classification_dag.policy import classify_by_enigma_combination
+from backend.classification_dag.nodes import population as population_nodes
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.population_frequency.policy import classification_policy_for_gene
 
@@ -529,6 +530,7 @@ def test_table4_pvs1_na_is_reported_separately_from_excluded_evidence():
 
 
 def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states():
+    frequency_policy = classification_policy_for_gene("BRCA1")
     execution = execute_classification(
         ClassificationInputs(
             gene="BRCA1",
@@ -536,7 +538,12 @@ def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states()
             c_notation="c.5266dup",
             p_notation="p.(Gln1756ProfsTer74)",
             reference_transcript="NM_007294.4",
-            frequency_policy=classification_policy_for_gene("BRCA1"),
+            frequency_policy=frequency_policy,
+            gnomad_data={
+                "classification_policy": frequency_policy,
+                "policy_id": frequency_policy["policy_id"],
+                "status": "not_queried",
+            },
         ),
         mode="dag",
     )
@@ -546,6 +553,79 @@ def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states()
     assert "not applicable" in pm2["reason"].lower()
     assert "PM2" not in execution.result["excluded_criteria"]
     assert "PM2" not in execution.result["criteria"]
+    assert pm2["reason"] not in execution.result["warnings"]
+
+
+def test_pm2_na_status_does_not_depend_on_reason_wording(monkeypatch):
+    explicit_na = {
+        "applies": False,
+        "strength": None,
+        "points": 0,
+        "reason": "Excluded by the active variant-type policy.",
+        "source": "test-policy",
+    }
+    monkeypatch.setattr(
+        population_nodes,
+        "pm2_not_applicable_decision",
+        lambda *args, **kwargs: explicit_na,
+    )
+    monkeypatch.setattr(
+        population_nodes,
+        "evaluate_frequency_criteria",
+        lambda *args, **kwargs: {"PM2": explicit_na},
+    )
+
+    execution = execute_classification(
+        ClassificationInputs(
+            gene="BRCA1",
+            variant_type="frameshift",
+            c_notation="c.5266dup",
+            p_notation="p.(Gln1756ProfsTer74)",
+            reference_transcript="NM_007294.4",
+            gnomad_data={"status": "test"},
+        ),
+        mode="dag",
+    )
+
+    assert (
+        execution.result["not_applicable_criteria"]["PM2"]["reason"]
+        == explicit_na["reason"]
+    )
+    assert explicit_na["reason"] not in execution.result["warnings"]
+
+
+def test_pm2_unavailable_text_cannot_create_not_applicable_status(monkeypatch):
+    unavailable = {
+        "applies": False,
+        "strength": None,
+        "points": 0,
+        "reason": "PM2 data are not applicable to this unavailable lookup result.",
+    }
+    monkeypatch.setattr(
+        population_nodes,
+        "pm2_not_applicable_decision",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        population_nodes,
+        "evaluate_frequency_criteria",
+        lambda *args, **kwargs: {"PM2": unavailable},
+    )
+
+    execution = execute_classification(
+        ClassificationInputs(
+            gene="BRCA1",
+            variant_type="missense",
+            c_notation="c.5366C>T",
+            p_notation="p.(Ala1789Val)",
+            reference_transcript="NM_007294.4",
+            gnomad_data={"status": "test"},
+        ),
+        mode="dag",
+    )
+
+    assert "PM2" not in execution.result["not_applicable_criteria"]
+    assert unavailable["reason"] in execution.result["warnings"]
 
 
 def test_unknown_runtime_mode_is_rejected(monkeypatch):
