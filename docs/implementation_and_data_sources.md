@@ -412,8 +412,13 @@ ARIANE v takovém případě nepoužije BA1, BS1 ani PM2. Pro BA1 nebo BS1 jsou
 požadována alespoň dvě outbred pozorování v datasetu, který poskytl skórované
 FAF95. Počet pozorování se bere z populačních AC, neodhaduje se z AF.
 
-PM2 se nepoužívá pro malé indely do 50 bp. Vyloučení se kontroluje také přímo
-podle operace v `c.` HGVS, nikoliv pouze podle odvozeného proteinového důsledku.
+PM2 se nepoužívá pro malé indely do 50 bp. Velikost se určuje ze strukturovaně
+parsované `c.` HGVS: u delece a duplikace z celého referenčního intervalu, u
+inserce z explicitně uvedené vložené sekvence. U delins se uchovává délka
+odstraněné i vložené sekvence samostatně. Pokud se liší, ARIANE bez výslovné
+metodické definice nevymýšlí jednu společnou velikost. Neurčité breakpointy,
+symbolická délka a takový delins se nepovažují za malý indel.
+Takový výsledek zůstane nedostupný, dokud jej nerozhodne strukturální provider.
 PTC vytvářející malý indel, například `BRCA1 c.5533_5534insG p.(Tyr1845Ter)`,
 proto může vstoupit do PVS1/PM5 PTC větve, ale nesmí získat PM2.
 
@@ -426,6 +431,10 @@ datasetu hledá deleci zahrnující celý kódující interval exonu. Manifest
 neobsahuje žádné konkrétní varianty ani předem přidělená kritéria.
 Chybějící záznam bez odpovídajícího detekčního rozsahu nebo QC není důkazem
 nepřítomnosti. Fixture ani neúplná cache nemůže vytvořit frekvenční kritérium.
+Běžná gnomAD SNV/short-indel větev velký indel nikdy neskóruje. Současný
+checksumovaný strukturální provider umí automaticky uzavřít Appendix G pouze
+pro úplné exonové delece. Ostatní indely nad 50 bp a indely s neurčitelnou
+velikostí proto vracejí PM2 jako nedostupné, nikoliv jako N/A ani jako splněné.
 
 ENIGMA v1.2 požaduje průměrnou hloubku v oblasti varianty, ale neurčuje počet
 okolních bází. ARIANE proto nepoužívá vlastní pevné okno ±N bp. Oblast je
@@ -1068,8 +1077,9 @@ intervaly z verzované souřadnicové mapy. Manifest neobsahuje c. notace varian
 ani očekávaná kritéria. U každého exonu se ukládají všechny delece, které
 zahrnují celý jeho kódující interval, zvlášť také shody s `FILTER=PASS`.
 
-Za běhu se použije obecný rozhodovací graf Appendix G: typ exonová delece,
-jednoznačná shoda na exon Table 4, dostupný ověřený interval, velikost nad 50 bp
+Za běhu se použije rozhodovací graf Appendix G: strukturované určení velikosti,
+typ exonová delece, jednoznačná shoda na exon Table 4, dostupný ověřený interval,
+velikost nad 50 bp
 a nepřítomnost jak PASS, tak filtrované zahrnující delece. Teprve při splnění
 všech kroků vznikne PM2 Supporting. Přesná shoda breakpointů se nevyžaduje.
 

@@ -13,6 +13,7 @@ from backend.population_frequency.policy import classification_policy_for_gene
 from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.variant_type import infer_variant_type
+from backend.population_frequency.indel_size import is_indel_allele
 
 
 REGRESSION_VARIANTS = (
@@ -31,7 +32,7 @@ REGRESSION_VARIANTS = (
      "PM5_PTC": ("Strong", 4)}, False, ("PM2",)),
     ("BRCA2", "c.(793+1_794-1)_(1909+1_1910-1)del", "p.(?)", None, None,
      "Unknown", 3, 1, {"PM2_Supporting": ("Supporting", 1)}, False,
-     ("PM2", "PVS1")),
+     ("PVS1",)),
     ("BRCA2", "c.6147_6149del", "p.(Val2050del)", 0.01, None, "Unknown",
      2, -4, {"BP1": ("Strong", -4)}, False, ("PM2",)),
     ("BRCA1", "c.3891_3893del", "p.(Ser1298del)", 0.15, None, "Unknown",
@@ -73,7 +74,7 @@ def _inputs(gene, c_notation, p_notation, spliceai, bayesdel, dup_type):
         pp4_bp5_result=evaluate_pp4_bp5(gene, c_notation),
         exon_cnv_result=(
             lookup_exon_cnv_evidence(gene, c_notation)
-            if variant_type in {"exon_deletion", "exon_duplication"}
+            if is_indel_allele(c_notation)
             else None
         ),
         dup_type=dup_type,

@@ -6,11 +6,11 @@ population-frequency provider. It performs no file, network or registry I/O.
 
 from __future__ import annotations
 
-import re
 from typing import Any, Mapping
 
 from backend.population_frequency.coverage import frequency_depth_ok, frequency_qc_ok
 from backend.population_frequency.lookup import scored_frequency_label
+from backend.population_frequency.indel_size import is_indel_allele
 from backend.population_frequency.utils import as_float, as_int
 
 
@@ -20,6 +20,7 @@ def pm2_not_applicable_decision(
     gene: str | None = None,
     c_notation: str | None = None,
     policy: Mapping[str, Any] | None = None,
+    appendix_g_evidence: Mapping[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Return the policy-defined PM2 N/A decision without querying gnomAD."""
     if policy is None:
@@ -29,25 +30,23 @@ def pm2_not_applicable_decision(
     excluded_types = {
         str(value).lower() for value in pm2_policy.get("excluded_variant_types", [])
     }
-    c_allele_is_indel = bool(
-        re.search(r"(?:delins|del|dup|ins)", (c_notation or "").lower())
-    )
+    c_allele_is_indel = is_indel_allele(c_notation)
     if variant_type.lower() not in excluded_types and not c_allele_is_indel:
         return None
-    exclusion_basis = (
-        f"c. HGVS {c_notation} describes an indel"
-        if c_allele_is_indel
-        else f"variant type {variant_type} is excluded"
-    )
+    if (
+        not appendix_g_evidence
+        or appendix_g_evidence.get("pm2_applicability") != "not_applicable"
+    ):
+        return None
     return {
         "applies": False,
         "strength": None,
         "points": 0,
-        "reason": (
-            f"PM2 not applicable because {exclusion_basis} under "
-            f"{policy.get('rule_set') or 'the active VCEP frequency specification'}"
+        "reason": str(appendix_g_evidence.get("reason") or "PM2 is not applicable."),
+        "source": str(
+            appendix_g_evidence.get("source")
+            or frequency_policy.get("source_url", "")
         ),
-        "source": frequency_policy.get("source_url", ""),
     }
 
 
@@ -68,6 +67,7 @@ def evaluate_frequency_criteria(
     gene: str | None = None,
     c_notation: str | None = None,
     policy: Mapping[str, Any] | None = None,
+    appendix_g_evidence: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Evaluate BA1, BS1 and PM2 from validated provider evidence."""
     criteria: dict[str, Any] = {}
@@ -129,6 +129,7 @@ def evaluate_frequency_criteria(
         gene=gene,
         c_notation=c_notation,
         policy=policy,
+        appendix_g_evidence=appendix_g_evidence,
     )
     if pm2_not_applicable:
         criteria["PM2"] = pm2_not_applicable
@@ -316,6 +317,31 @@ def evaluate_frequency_criteria(
         )
 
     if pm2_not_applicable:
+        return criteria
+    is_pm2_indel = (
+        variant_type.lower()
+        in {str(value).lower() for value in pm2_policy.get("excluded_variant_types", [])}
+        or is_indel_allele(c_notation)
+    )
+    if is_pm2_indel:
+        structural_status = str(
+            (appendix_g_evidence or {}).get("pm2_applicability") or "unavailable"
+        )
+        if structural_status == "applied":
+            return criteria
+        criteria["PM2"] = {
+            "applies": False,
+            "strength": None,
+            "points": 0,
+            "reason": str(
+                (appendix_g_evidence or {}).get("reason")
+                or "PM2 is unavailable: the ENIGMA Appendix G indel-size and structural population path was not evaluated."
+            ),
+            "source": str(
+                (appendix_g_evidence or {}).get("source")
+                or frequency_policy.get("source_url", "")
+            ),
+        }
         return criteria
     if gnomad_data.get("pm2_absence_established"):
         datasets_note = gnomad_data.get("pm2_datasets_note", "v2.1.1 + v3.1.2")

@@ -23,6 +23,7 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.types import NodeResult
 from backend.lookup_execution import lookup_or_unavailable
+from backend.population_frequency.indel_size import is_indel_allele
 from backend.modules.table9 import (
     TABLE9_DATA,
     TABLE9_JSON_PATH,
@@ -431,22 +432,20 @@ class ExonCnvEvidenceNode:
 
     def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
-        applicable = variant.variant_type.lower() in {
-            "exon_deletion", "exon_duplication",
-        }
+        applicable = is_indel_allele(variant.c_notation)
         value = (
             self.dependencies.exon_cnv_lookup(variant.gene, variant.c_notation)
             if applicable else None
         )
         evidence = EvidenceItem(
             id="exon_cnv",
-            kind="copy_number",
+            kind="structural_population",
             status=_evidence_status(value, applicable=applicable),
             value=value,
-            source_id="ENIGMA exon-CNV evidence",
+            source_id="ENIGMA Appendix G structural population evidence",
             reason=(
                 str(value.get("reason") or "") if isinstance(value, Mapping)
-                else "Not an exon-level CNV"
+                else "Not an insertion, deletion, duplication, or delins allele"
             ),
         )
         return NodeResult.succeeded(

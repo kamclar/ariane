@@ -49,7 +49,7 @@ class ExonCnvEvidenceTests(unittest.TestCase):
         self.assertEqual(
             [step["step"] for step in result["decision_trace"]],
             [
-                "variant_type",
+                "indel_description",
                 "table4_exon_mapping",
                 "grch37_exon_interval",
                 "appendix_g_size",
@@ -68,6 +68,43 @@ class ExonCnvEvidenceTests(unittest.TestCase):
         self.assertFalse(result["found"])
         self.assertEqual(result["criteria"], [])
         self.assertIn("unambiguously", result["reason"])
+
+    def test_small_indel_is_not_applicable_to_pm2(self):
+        result = lookup_exon_cnv_evidence("BRCA1", "c.5266dup")
+
+        self.assertEqual(result["pm2_applicability"], "not_applicable")
+        self.assertEqual(result["variant_size_bp"], 1)
+        self.assertEqual(result["criteria"], [])
+
+    def test_50_and_51_bp_boundary_uses_appendix_g_threshold(self):
+        fifty = lookup_exon_cnv_evidence("BRCA1", "c.100_149del")
+        fifty_one = lookup_exon_cnv_evidence("BRCA1", "c.100_150del")
+
+        self.assertEqual(fifty["pm2_applicability"], "not_applicable")
+        self.assertEqual(fifty["variant_size_bp"], 50)
+        self.assertEqual(fifty_one["pm2_applicability"], "unavailable")
+        self.assertEqual(fifty_one["variant_size_bp"], 51)
+        self.assertNotIn("not applicable", fifty_one["reason"].lower())
+
+    def test_large_unsupported_indel_is_unavailable_not_not_applicable(self):
+        inserted = "A" * 51
+        result = lookup_exon_cnv_evidence("BRCA1", f"c.100_101ins{inserted}")
+
+        self.assertEqual(result["pm2_applicability"], "unavailable")
+        self.assertEqual(result["variant_size_bp"], 51)
+        self.assertEqual(result["criteria"], [])
+
+    def test_small_delins_is_not_applicable_without_single_size_convention(self):
+        result = lookup_exon_cnv_evidence("BRCA1", "c.100_102delinsAC")
+
+        self.assertEqual(result["pm2_applicability"], "not_applicable")
+
+    def test_delins_spanning_size_boundary_is_unavailable(self):
+        result = lookup_exon_cnv_evidence("BRCA1", "c.100_160delinsAC")
+
+        self.assertEqual(result["pm2_applicability"], "unavailable")
+        self.assertIsNone(result["variant_size_bp"])
+        self.assertIn("event-size convention", result["reason"])
 
     def test_tampered_snapshot_fails_closed(self):
         payload = copy.deepcopy(load_exon_cnv_evidence_snapshot())

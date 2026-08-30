@@ -38,6 +38,7 @@ class FrequencyCriteriaNode:
         not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
         gnomad_data = bundle_value(evidence, "gnomad") or {}
+        appendix_g_evidence = bundle_value(evidence, "exon_cnv") or {}
         policy = ci.frequency_policy
         if policy is None and isinstance(gnomad_data, Mapping):
             policy = gnomad_data.get("classification_policy")
@@ -46,6 +47,7 @@ class FrequencyCriteriaNode:
             gene=ci.gene,
             c_notation=ci.c_notation,
             policy=policy,
+            appendix_g_evidence=appendix_g_evidence,
         )
         if pm2_not_applicable:
             not_applicable.append(
@@ -64,6 +66,7 @@ class FrequencyCriteriaNode:
                 gene=ci.gene,
                 c_notation=ci.c_notation,
                 policy=policy,
+                appendix_g_evidence=appendix_g_evidence,
             )
             for code, value in evaluated.items():
                 if code.startswith("_"):

@@ -17,6 +17,7 @@ from backend.population_frequency.service import PopulationFrequencyService
 from backend.classification_dag.policy import classify_by_enigma_combination
 from tests.dag_test_support import classify_with_dag as evaluate_variant
 from backend.modules.evidence_interactions import clinical_functional_risk_interactions
+from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
@@ -387,11 +388,16 @@ class FrequencyTests(unittest.TestCase):
             evaluate_frequency_criteria(data, "missense", gene="BRCA1"),
         )
 
-    def test_pm2_is_not_used_for_indels(self):
+    def test_pm2_is_not_applicable_for_small_indels(self):
         data = gnomad_data(pm2_absence_established=True)
+        appendix_g = lookup_exon_cnv_evidence("BRCA1", "c.3891_3893del")
         self.assertFalse(
             evaluate_frequency_criteria(
-                data, "inframe_deletion", gene="BRCA1"
+                data,
+                "inframe_deletion",
+                gene="BRCA1",
+                c_notation="c.3891_3893del",
+                appendix_g_evidence=appendix_g,
             )["PM2"]["applies"]
         )
 
@@ -402,10 +408,30 @@ class FrequencyTests(unittest.TestCase):
             "nonsense",
             gene="BRCA1",
             c_notation="c.5533_5534insG",
+            appendix_g_evidence=lookup_exon_cnv_evidence(
+                "BRCA1", "c.5533_5534insG"
+            ),
         )
         self.assertFalse(result["PM2"]["applies"])
         self.assertNotIn("PM2_Supporting", result)
-        self.assertIn("c. HGVS c.5533_5534insG describes an indel", result["PM2"]["reason"])
+        self.assertIn("1 bp", result["PM2"]["reason"])
+        self.assertIn(">50 bp", result["PM2"]["reason"])
+
+    def test_large_indel_never_uses_small_variant_gnomad_pm2(self):
+        data = gnomad_data(pm2_absence_established=True)
+        appendix_g = lookup_exon_cnv_evidence("BRCA1", "c.100_150del")
+
+        result = evaluate_frequency_criteria(
+            data,
+            "deletion",
+            gene="BRCA1",
+            c_notation="c.100_150del",
+            appendix_g_evidence=appendix_g,
+        )
+
+        self.assertNotIn("PM2_Supporting", result)
+        self.assertFalse(result["PM2"]["applies"])
+        self.assertIn("unavailable", result["PM2"]["reason"].lower())
 
     def test_ba1_requires_depth_20(self):
         data = gnomad_data(max_af=0.002, found=True, v2_status="found", v2_depth=19.0)

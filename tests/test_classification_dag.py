@@ -24,6 +24,7 @@ from backend.classification_dag import (
 from backend.classification_dag.policy import classify_by_enigma_combination
 from backend.classification_dag.nodes import population as population_nodes
 from backend.modules.table9 import table9_lookup_ps3_bs3
+from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
 
 
@@ -539,6 +540,7 @@ def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states()
             p_notation="p.(Gln1756ProfsTer74)",
             reference_transcript="NM_007294.4",
             frequency_policy=frequency_policy,
+            exon_cnv_result=lookup_exon_cnv_evidence("BRCA1", "c.5266dup"),
             gnomad_data={
                 "classification_policy": frequency_policy,
                 "policy_id": frequency_policy["policy_id"],

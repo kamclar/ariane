@@ -49,35 +49,68 @@ available when an upstream API is temporarily unavailable.
 
 ## Project structure
 
+This overview lists the main runtime boundaries and entry points. Tests,
+scripts and individual data files are omitted here.
+
 ```
 ariane/
 ├── backend/
-│   ├── main.py              # FastAPI app, routes
-│   ├── config.py            # settings, thresholds
-│   ├── models.py            # Pydantic request/response models
+│   ├── main.py                         # FastAPI application and routes
+│   ├── config.py                       # paths and runtime settings
+│   ├── models.py                       # API request and response models
+│   ├── classification_dag/
+│   │   ├── domain.py                   # typed classification records
+│   │   ├── engine.py                   # DAG validation and execution
+│   │   ├── policy.py                   # ENIGMA point combination policy
+│   │   ├── providers.py                # evidence provider nodes
+│   │   ├── provider_wiring.py          # production provider adapters
+│   │   ├── runtime.py                  # production graph assembly
+│   │   └── nodes/                      # criterion-family rule nodes
+│   ├── services/
+│   │   ├── evidence_orchestration.py   # evidence lookup coordination
+│   │   ├── variant_classification_service.py
+│   │   ├── classification_presentation.py
+│   │   └── ps1_reference_resolution.py
+│   ├── population_frequency/
+│   │   ├── service.py                  # gnomAD lookup service
+│   │   ├── snapshot_repository.py      # validated snapshot loading
+│   │   ├── criteria.py                 # BA1, BS1 and PM2 decisions
+│   │   ├── coverage.py                 # coverage checks
+│   │   ├── indel_size.py               # Appendix G indel sizing
+│   │   ├── lookup.py                   # frequency record lookup
+│   │   ├── policy.py                   # dataset and policy bindings
+│   │   └── models.py                   # population evidence records
 │   ├── modules/
-│   │   ├── classifier.py    # main evaluation with evidence hierarchy
-│   │   ├── pvs1.py          # PVS1/PM5 - Table 4 decision tree
-│   │   ├── table4.py        # Table 4 loading and lookup functions
-│   │   ├── table9.py        # Table 9 PS3/BS3 lookup
-│   │   ├── bp1.py           # BP1 - outside functional domain
-│   │   ├── pp3_bp4.py       # PP3/BP4 - BayesDel + SpliceAI
-│   │   ├── bp7.py           # BP7 - synonymous without splice effect
-│   │   ├── frequency.py     # BA1/BS1/PM2 - gnomAD frequencies
-│   │   ├── external.py      # external comparison logic
-│   │   └── utils.py         # shared helpers (AA position, domains)
+│   │   ├── pvs1.py                     # PVS1 and PM5 evaluation
+│   │   ├── table4.py                   # ENIGMA Table 4 lookup
+│   │   ├── table9.py                   # ENIGMA Table 9 lookup
+│   │   ├── bp1.py                      # BP1 evaluation
+│   │   ├── pp3_bp4.py                  # PP3 and BP4 evaluation
+│   │   ├── bp7.py                      # BP7 evaluation
+│   │   ├── manual_evidence.py          # validated manual evidence forms
+│   │   └── external.py                 # external comparison formatting
 │   ├── lookups/
-│   │   ├── spliceai.py      # Broad SpliceAI API + Drive cache
-│   │   ├── bayesdel.py      # myvariant.info BayesDel lookup
-│   │   ├── clinvar.py       # ClinVar eutils VCV parser
-│   │   ├── clingen.py       # ClinGen Evidence Repository API
-│   │   └── coordinates.py   # HGVS → GRCh37/38 resolution
-│   └── data/                 # immutable, versioned reference datasets
+│   │   ├── spliceai.py                 # SpliceAI API lookup
+│   │   ├── bayesdel.py                 # BayesDel lookup
+│   │   ├── clinvar.py                  # ClinVar comparison lookup
+│   │   ├── clingen.py                  # ClinGen ERepo comparison lookup
+│   │   └── coordinates.py              # HGVS to GRCh37/38 resolution
+│   └── data/                            # immutable reference datasets
 ├── frontend/
 │   ├── index.html
 │   └── static/
-│       ├── css/style.css
-│       └── js/app.js
+│       ├── css/
+│       │   └── style.css
+│       └── js/
+│           ├── app.js                  # Alpine application assembly
+│           ├── api.js                  # backend API calls
+│           ├── batch.js                # batch input and results
+│           ├── classification.js       # classification result state
+│           ├── core.js                 # shared frontend state
+│           ├── formatters.js           # display formatting
+│           ├── graphs.js               # decision graph rendering
+│           ├── manual-review.js        # manual evidence forms
+│           └── rules.js                # rule explorer state
 ├── requirements.txt
 ├── railway.toml
 └── README.md
