@@ -256,6 +256,7 @@ class RnaReviewRecommendation(BaseModel):
     reference_source: str = ""
     source_url: str = ""
     is_evidence_criterion: bool = False
+    manual_review_prefill: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ProteinPs1Candidate(BaseModel):
@@ -432,12 +433,15 @@ class ManualCriterionInput(BaseModel):
     def validate_manual_code(cls, v):
         code = v.strip().upper()
         if code not in {
+            "PS3",
             "PS4",
             "PM3",
             "PP1",
             "PP4",
             "BS2",
+            "BS3",
             "BS4",
+            "BP5",
             "PVS1_RNA",
             "BP7_RNA",
             "PVS1_INIT",

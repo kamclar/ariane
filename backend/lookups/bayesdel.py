@@ -8,7 +8,7 @@
 #
 # Persistent cache: ${ARIANE_RUNTIME_CACHE_DIR}/bayesdel_api_cache.json
 # Cache entry also preserves the lookup status/reason so absence is explainable.
-# Old float-only entries are migrated automatically on load.
+# Cache entries created before transcript-safe selection are ignored.
 
 from typing import Optional, Dict, Tuple
 from pathlib import Path
@@ -21,11 +21,13 @@ import urllib.parse
 import urllib.request
 
 from backend.data_health import clear_issue, register_issue
+from backend.gene_policy import reference_transcript
 from backend.lookups import coordinates
 from backend.runtime_cache import runtime_cache_path
 from backend.version import ARIANE_VERSION
 
 MYVARIANT_BASE_URL = "https://myvariant.info/v1/variant"
+BAYESDEL_SELECTION_POLICY = "unambiguous_variant_score_v1"
 
 # Cache stores dicts: {"bayesdel": ..., "am_score": ..., "am_class": ...}
 BAYESDEL_CACHE: Dict[str, Optional[dict]] = {}
@@ -58,15 +60,17 @@ def _load_cache() -> None:
                     )
                 ):
                     continue
+                if (
+                    val.get("bayesdel") is not None
+                    and val.get("selection_policy") != BAYESDEL_SELECTION_POLICY
+                ):
+                    # Older cache entries may contain a maximum selected from
+                    # divergent upstream values. Their provenance is not safe
+                    # enough for PP3/BP4 and they must be fetched again.
+                    continue
                 BAYESDEL_CACHE[key] = val
-            else:
-                # Migrate old format (float or null) - AM score not available
-                if isinstance(val, (int, float)):
-                    BAYESDEL_CACHE[key] = {
-                        "bayesdel": float(val),
-                        "am_score": None,
-                        "am_class": None,
-                    }
+            # Float-only legacy entries have no selection provenance and are
+            # intentionally ignored.
         print(f"Loaded BayesDel/AM cache: {len(BAYESDEL_CACHE)} entries")
         clear_issue("BayesDel cache")
     except Exception as exc:
@@ -109,11 +113,52 @@ def _save_cache() -> None:
             )
 
 
+def _numeric_values(value) -> list[float]:
+    values = value if isinstance(value, list) else [value]
+    parsed: list[float] = []
+    for item in values:
+        if item is None or isinstance(item, bool):
+            continue
+        try:
+            parsed.append(float(item))
+        except (TypeError, ValueError):
+            continue
+    return parsed
+
+
+def _select_unambiguous_bayesdel(value) -> tuple[Optional[float], str, Optional[str]]:
+    """Accept only a score whose value cannot depend on transcript selection."""
+    values = _numeric_values(value)
+    if not values:
+        return None, "not_available", None
+    unique = sorted(set(values))
+    if len(unique) == 1:
+        basis = "single_value" if len(values) == 1 else "all_returned_values_identical"
+        return unique[0], basis, None
+    return (
+        None,
+        "ambiguous_multiple_values",
+        "MyVariant returned multiple distinct BayesDel_noAF values without an "
+        "explicit value-to-transcript mapping",
+    )
+
+
+def _returned_transcripts(dbnsfp: dict) -> list[str]:
+    ensembl = dbnsfp.get("ensembl", {}) if isinstance(dbnsfp, dict) else {}
+    value = ensembl.get("transcriptid") if isinstance(ensembl, dict) else None
+    values = value if isinstance(value, list) else [value]
+    return [str(item) for item in values if item]
+
+
 def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Optional[dict]) -> dict:
     """Fetch BayesDel + AlphaMissense from myvariant.info in one request."""
     result = {
         "bayesdel": None, "am_score": None, "am_class": None,
         "status": "not_queried", "error": None,
+        "selection_policy": BAYESDEL_SELECTION_POLICY,
+        "selection_basis": "not_available",
+        "reference_transcript": reference_transcript(gene),
+        "returned_transcripts": [],
     }
 
     if hg37_coords is None:
@@ -127,7 +172,7 @@ def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Option
 
     hgvs = f"chr{chrom}:g.{pos}{ref}>{alt}"
     url = (f"{MYVARIANT_BASE_URL}/{urllib.parse.quote(hgvs)}"
-           f"?{urllib.parse.urlencode({'fields': 'dbnsfp.bayesdel,alphamissense'})}")
+           f"?{urllib.parse.urlencode({'fields': 'dbnsfp.bayesdel,dbnsfp.ensembl.transcriptid,alphamissense'})}")
     req = urllib.request.Request(url, headers={"User-Agent": f"ARIANE/{ARIANE_VERSION}"})
 
     try:
@@ -151,17 +196,16 @@ def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Option
 
     # BayesDel
     dbnsfp   = data.get("dbnsfp", {})
+    result["returned_transcripts"] = _returned_transcripts(dbnsfp)
     bayesdel = dbnsfp.get("bayesdel", {}) if isinstance(dbnsfp, dict) else {}
     bd_score = None
     if isinstance(bayesdel, dict):
         no_af = bayesdel.get("no_af", {})
         if isinstance(no_af, dict):
             bd_score = no_af.get("score")
-    if isinstance(bd_score, list):
-        valid = [s for s in bd_score if s is not None]
-        bd_score = max(valid) if valid else None
-    if bd_score is not None:
-        result["bayesdel"] = float(bd_score)
+    selected, basis, selection_error = _select_unambiguous_bayesdel(bd_score)
+    result["bayesdel"] = selected
+    result["selection_basis"] = basis
 
     # AlphaMissense (only available for missense variants)
     am = data.get("alphamissense", {})
@@ -172,7 +216,16 @@ def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Option
             result["am_score"] = float(am_score)
             result["am_class"] = am_class or ""
 
-    result["status"] = "ok" if (result["bayesdel"] is not None or result["am_score"] is not None) else "no_score"
+    if selection_error:
+        result["status"] = "ambiguous_transcript"
+        result["error"] = (
+            f"{selection_error}; configured reference transcript is "
+            f"{result['reference_transcript']}. BayesDel was not used."
+        )
+    else:
+        result["status"] = "ok" if (
+            result["bayesdel"] is not None or result["am_score"] is not None
+        ) else "no_score"
     return result
 
 
@@ -187,6 +240,13 @@ def get_bayesdel_and_alphamissense(
     variant_key = f"{gene}:{c_notation}"
 
     entry = BAYESDEL_CACHE.get(variant_key)
+    if (
+        isinstance(entry, dict)
+        and entry.get("bayesdel") is not None
+        and entry.get("selection_policy") != BAYESDEL_SELECTION_POLICY
+    ):
+        BAYESDEL_CACHE.pop(variant_key, None)
+        entry = None
     if isinstance(entry, dict) and entry.get("status") == "no_score":
         # Defensive migration for a process that obtained a transient empty
         # response before this policy was applied.  Retry instead of treating
@@ -217,19 +277,27 @@ def get_bayesdel_and_alphamissense(
             "no_grch37_coords": "No GRCh37 coordinates available for MyVariant",
             "not_found": "Variant was not found by MyVariant",
             "no_score": "MyVariant response contained no BayesDel or AlphaMissense score",
+            "ambiguous_transcript": (
+                "MyVariant returned multiple distinct BayesDel_noAF values without "
+                "an explicit value-to-transcript mapping"
+            ),
             "ok": "MyVariant response parsed successfully",
         }.get(data["status"], data["status"]),
     }
 
     # Only stable responses belong in the persistent cache. Coordinate and API
     # failures remain retryable instead of being converted to a silent null.
-    if data["status"] in {"ok", "not_found"}:
+    if data["status"] in {"ok", "not_found", "ambiguous_transcript"}:
         BAYESDEL_CACHE[variant_key] = {
             "bayesdel": data["bayesdel"],
             "am_score": data["am_score"],
             "am_class": data["am_class"],
             "status": data["status"],
             "reason": BAYESDEL_STATUS_CACHE[variant_key]["reason"],
+            "selection_policy": data.get("selection_policy"),
+            "selection_basis": data.get("selection_basis"),
+            "reference_transcript": data.get("reference_transcript"),
+            "returned_transcripts": data.get("returned_transcripts", []),
         }
         _save_cache()
 

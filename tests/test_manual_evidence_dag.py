@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from backend.classification_dag import execute_manual_evidence
+from backend.classification_dag.manual import execute_manual_evidence
 from backend.classification_dag.engine import DagNodeExecutionError
 from backend.classification_dag.runtime import compare_classification_results
 from backend.models import ManualCriterionInput, ManualEvidenceRequest
@@ -145,8 +145,6 @@ def test_manual_evidence_dag_has_exact_oracle_parity(base, manual, variant_conte
     assert [entry.node_id for entry in execution.trace] == [
         "contract.manual_evidence_inputs",
         "rule.manual_evidence",
-        "policy.manual_evidence_interactions",
-        "policy.manual_enigma_combination",
     ]
 
 

@@ -243,12 +243,16 @@ def evaluate_frequency_criteria(
                     "founder_exception": founder,
                 }
                 return criteria
-            if founder.get("status") == "unavailable":
+            if not (
+                founder.get("status") == "reviewed_not_found"
+                and founder.get("is_pathogenic_founder") is False
+            ):
                 criteria["_gnomad_info"] = {
                     "applies": False,
                     "reason": (
                         "BA1/BS1 not applied: the pathogenic founder exception "
-                        f"could not be checked; {founder.get('reason')}"
+                        "has not been resolved by an authoritative review; "
+                        f"{founder.get('reason')}"
                     ),
                     "founder_exception": founder,
                 }
@@ -343,6 +347,25 @@ def evaluate_frequency_criteria(
             ),
         }
         return criteria
+    pm2_coverage_method = gnomad_data.get("pm2_coverage_method")
+    if not isinstance(pm2_coverage_method, Mapping) or not (
+        pm2_coverage_method.get("automatic_assignment_allowed") is True
+    ):
+        criteria["PM2"] = {
+            "applies": False,
+            "strength": None,
+            "points": 0,
+            "reason": (
+                "PM2 not applied: the coverage-region method is not approved "
+                "for automatic ENIGMA classification; "
+                + str(
+                    (pm2_coverage_method or {}).get("reason")
+                    or "no explicit coverage-method review is present"
+                )
+            ),
+            "source": str(frequency_policy.get("source_url", "")),
+        }
+        return criteria
     if gnomad_data.get("pm2_absence_established"):
         datasets_note = gnomad_data.get("pm2_datasets_note", "v2.1.1 + v3.1.2")
         founder_only_note = (
@@ -382,6 +405,14 @@ def evaluate_frequency_criteria(
         ),
         "policy_unavailable": (
             "Gene-specific gnomAD policy is unavailable - frequency criteria not applied"
+        ),
+        "coverage_release_incompatible": (
+            "PM2 not applied: at least one coverage source is not proven "
+            "compatible with its frequency callset"
+        ),
+        "pm2_coverage_method_unresolved": (
+            "PM2 not applied: ENIGMA does not define the width of the coverage "
+            "region around the variant"
         ),
     }
     if status in reason_by_status:

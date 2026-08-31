@@ -4,8 +4,8 @@
 from typing import Optional, Dict
 
 from backend.modules.utils import (
-    get_amino_acid_position,
-    is_in_functional_domain,
+    get_amino_acid_interval,
+    overlapping_functional_domains,
 )
 from backend.lookups.spliceai import (
     normalize_variant_type,
@@ -48,11 +48,14 @@ def evaluate_pp3_bp4(
     splice_high = splice_thresholds["pp3"]
     splice_low = splice_thresholds["bp4"]
 
-    aa_pos = get_amino_acid_position(p_notation)
-    in_domain = False
-    domain_name = None
-    if aa_pos:
-        in_domain, domain_name = is_in_functional_domain(gene, aa_pos)
+    protein_interval = get_amino_acid_interval(p_notation)
+    domains = (
+        overlapping_functional_domains(gene, protein_interval)
+        if protein_interval is not None
+        else ()
+    )
+    in_domain = bool(domains)
+    domain_name = ", ".join(domains) or None
 
     protein_prediction_types = {
         "missense",

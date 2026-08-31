@@ -212,13 +212,15 @@ laboratory data support tandem arrangement; the application never infers it
 from copy number alone.
 
 Case-control, Fanconi anemia, family co-segregation, curated RNA evidence,
-curated initiation-codon PVS1 evidence, and curated splice PS1 evidence (`PS4`,
-`PM3`, `PP1`, `BS2`, `BS4`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`,
-`PS1_SPLICE`) are not part of the automatic Module 1 result. After a variant is
-classified, the user can enter these evidence types in a separate manual-review
-panel. ARIANE proposes the strength from the ENIGMA VCEP v1.2 thresholds, and
-the reviewer may select another strength allowed for non-RNA, non-initiation,
-and non-splice-PS1 structured criteria.
+curated functional evidence outside Table 9, curated initiation-codon PVS1
+evidence, and curated splice PS1 evidence (`PS3`, `PS4`, `PM3`, `PP1`, `BS2`,
+`BS3`, `BS4`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`) are not part of
+the automatic Module 1 result. PP4 and BP5 outside the validated clinical LR
+snapshot can also be reviewed manually. After a variant is classified, the
+user can enter these evidence types in a separate manual-review panel. ARIANE
+derives the permitted strength in the backend from ENIGMA VCEP v1.2 thresholds
+or requires a complete documented VCEP calibration review. A manual strength
+override is not accepted. BRCA1/2 VCEP v1.2 permits only Strong for PS3 and BS3.
 
 RNA evidence is accepted only as a structured, reviewer-curated mRNA-only assay
 record. `PVS1_RNA` supports PVS1 (RNA) at Supporting, Moderate, Strong, or Very

@@ -58,24 +58,13 @@ class IntronicCoordinateDatasetTests(unittest.TestCase):
 
 
 class IntronicSpliceAIDatasetTests(unittest.TestCase):
-    @unittest.skipUnless(SPLICEAI.exists() and SPLICEAI_METADATA.exists(), "SpliceAI build is not complete")
-    def test_spliceai_dataset_is_complete_and_checksum_matches(self):
-        cache = json.loads(SPLICEAI.read_text(encoding="utf-8"))
+    def test_legacy_spliceai_dataset_is_rejected_by_runtime_profile(self):
+        self.assertTrue(SPLICEAI.exists())
+        self.assertTrue(SPLICEAI_METADATA.exists())
         metadata = json.loads(SPLICEAI_METADATA.read_text(encoding="utf-8"))
-        self.assertEqual(metadata["coordinate_variants"], 13800)
-        self.assertEqual(metadata["status_ok"], 13800)
-        self.assertEqual(metadata["status_error"], 0)
-        self.assertEqual(len(cache), 13800)
-        self.assertTrue(all(entry.get("status") == "ok" for entry in cache.values()))
-        self.assertEqual(metadata["sha256"], sha256(SPLICEAI))
         profile_errors = validate_scoring_metadata(metadata)
-        if profile_errors:
-            self.skipTest(
-                "Inactive legacy intronic SpliceAI cache awaits an Appendix J "
-                "10 kb rebuild: " + "; ".join(profile_errors)
-            )
-        self.assertTrue(all(entry.get("reference_scores") for entry in cache.values()))
-        self.assertTrue(all(entry.get("alternate_scores") for entry in cache.values()))
+        self.assertTrue(profile_errors)
+        self.assertTrue(any("distance" in error for error in profile_errors))
 
 
 if __name__ == "__main__":

@@ -30,11 +30,8 @@ class ReviewTriageNode:
             gene=ci.gene,
             variant_type=ci.variant_type,
             spliceai_score=ci.spliceai_score,
-            pvs1_result=(
-                retained.metadata["pvs1_rna"]
-                if retained.metadata["pvs1_rna"].get("applies")
-                else retained.metadata["pvs1"]
-            ),
+            pvs1_result=retained.metadata["pvs1"],
+            pvs1_rna_result=retained.metadata["pvs1_rna"],
             criteria=result["criteria"],
         )
         result["splice_ps1_review"] = evaluate_splice_ps1_review(

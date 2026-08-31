@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260827-3">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260830-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -602,10 +602,20 @@
                     <summary>
                         <span>gnomAD population frequency policy</span>
                         <span class="evidence-detail-summary">
-                            Founder populations shown as context only
+                            Frequency, coverage and founder review
                         </span>
                     </summary>
                     <p x-text="result?.population_frequency_audit?.scoring_rule"></p>
+                    <p x-show="result?.population_frequency_audit?.founder_exception">
+                        Founder exception review:
+                        <strong x-text="result?.population_frequency_audit?.founder_exception?.status?.replaceAll('_', ' ') || 'unavailable'"></strong>.
+                        <span x-text="result?.population_frequency_audit?.founder_exception?.reason"></span>
+                    </p>
+                    <p x-show="result?.population_frequency_audit?.pm2_coverage_method">
+                        PM2 coverage method:
+                        <strong x-text="result?.population_frequency_audit?.pm2_coverage_method?.status?.replaceAll('_', ' ') || 'unavailable'"></strong>.
+                        <span x-text="result?.population_frequency_audit?.pm2_coverage_method?.reason"></span>
+                    </p>
                     <p>
                         Scored ENIGMA non-founder populations:
                         <strong x-text="(result?.population_frequency_audit?.scored_non_founder_population_codes || []).map(code => code.toUpperCase()).join(', ')"></strong>.
@@ -617,6 +627,13 @@
                             <p>
                                 <strong x-text="dataset.label"></strong>
                                 <span x-text="`Status: ${dataset.status || 'unknown'}`"></span>
+                            </p>
+                            <p x-show="dataset.coverage">
+                                Coverage mean depth:
+                                <strong x-text="dataset.coverage.mean_depth ?? 'unavailable'"></strong>.
+                                Classification compatible:
+                                <strong x-text="dataset.coverage.classification_compatible === true ? 'yes' : 'no'"></strong>.
+                                <span x-text="dataset.coverage.compatibility_reason"></span>
                             </p>
                             <table class="criteria-table">
                                 <thead>
@@ -831,9 +848,9 @@
                                     </p>
                                 </div>
 
-                                <div class="manual-input-grid" x-show="item.code === 'PP4'">
+                                <div class="manual-input-grid" x-show="item.code === 'PP4' || item.code === 'BP5'">
                                     <label>Reported value
-                                        <input type="number" min="0" step="any" x-model="item.evidence.clinical_lr_value"
+                                        <input type="number" step="any" x-model="item.evidence.clinical_lr_value"
                                             placeholder="e.g. 45.84">
                                     </label>
                                     <label>Reported scale
@@ -853,7 +870,7 @@
                                     <label x-show="item.evidence.source_review_status === 'appendix_b'">ENIGMA publication or dataset
                                         <select x-model="item.evidence.source_pmid">
                                             <option value="">Select publication</option>
-                                            <template x-for="source in (manualDefinition('PP4')?.appendix_b_sources || [])" :key="source.pmid">
+                                            <template x-for="source in (manualDefinition(item.code)?.appendix_b_sources || [])" :key="source.pmid">
                                                 <option :value="source.pmid" x-text="`${source.citation}, PMID:${source.pmid}`"></option>
                                             </template>
                                         </select>
@@ -868,25 +885,106 @@
                                     </label>
                                 </div>
 
-                                <p class="field-hint" x-show="item.code === 'PP4'">
+                                <p class="field-hint" x-show="item.code === 'PP4' || item.code === 'BP5'">
                                     Select the scale exactly as reported. Do not enter a log10 likelihood ratio as an ordinary LR.
                                 </p>
 
-                                <label class="full-width-label" x-show="item.code === 'PP4'">
+                                <label class="full-width-label" x-show="item.code === 'PP4' || item.code === 'BP5'">
                                     Included clinical data and independence review
                                     <textarea rows="3" x-model="item.evidence.clinical_data_summary"
                                         placeholder="Describe segregation, co-occurrence, family history, tumour pathology and/or case-control inputs, and whether overlapping observations were checked."></textarea>
                                 </label>
 
-                                <label class="full-width-label" x-show="item.code === 'PP4' && item.evidence.source_review_status === 'other_reviewed'">
+                                <label class="full-width-label" x-show="(item.code === 'PP4' || item.code === 'BP5') && item.evidence.source_review_status === 'other_reviewed'">
                                     Methodological review rationale
                                     <textarea rows="3" x-model="item.evidence.source_review_rationale"
-                                        placeholder="Explain why the study provides a variant-specific, clinically calibrated LR compatible with ENIGMA PP4 and how overlap or double counting was assessed."></textarea>
+                                        placeholder="Explain why the study provides a variant-specific, clinically calibrated LR compatible with ENIGMA PP4/BP5 and how overlap or double counting was assessed."></textarea>
                                 </label>
 
-                                <p class="curation-warning" x-show="item.code === 'PP4' && item.evidence.source_review_status === 'unreviewed'">
-                                    This source will be retained in the audit record but cannot add PP4 evidence points.
+                                <p class="curation-warning" x-show="(item.code === 'PP4' || item.code === 'BP5') && item.evidence.source_review_status === 'unreviewed'">
+                                    This source will be retained in the audit record but cannot add clinical LR evidence points.
                                 </p>
+
+                                <div x-show="item.code === 'BP5'">
+                                    <p class="field-hint">Clinical evidence types contributing to the combined LR</p>
+                                    <div class="manual-checkbox-grid">
+                                        <label><input type="checkbox" value="family_history" x-model="item.evidence.clinical_evidence_types"> Family history</label>
+                                        <label><input type="checkbox" value="cooccurrence" x-model="item.evidence.clinical_evidence_types"> Co-occurrence</label>
+                                        <label><input type="checkbox" value="segregation" x-model="item.evidence.clinical_evidence_types"> Segregation</label>
+                                        <label><input type="checkbox" value="pathology" x-model="item.evidence.clinical_evidence_types"> Pathology</label>
+                                        <label><input type="checkbox" value="case_control" x-model="item.evidence.clinical_evidence_types"> Case-control</label>
+                                    </div>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.independence_review_confirmed">
+                                        Independence and overlap of the selected clinical evidence types were reviewed
+                                    </label>
+                                    <p class="field-hint">
+                                        This record is required before BP5 Strong can serve as the single Strong route to Likely Benign. BP5 points may still be valid without that single-criterion route.
+                                    </p>
+                                </div>
+
+                                <div x-show="item.code === 'PS3' || item.code === 'BS3'">
+                                    <div class="evidence-prefill-summary">
+                                        <strong>Assessed variant facts</strong>
+                                        <span x-text="`${item.evidence.assessed_gene || ''} ${item.evidence.assessed_c_notation || ''} ${item.evidence.assessed_p_notation || ''}`"></span>
+                                        <span x-text="`Transcript: ${item.evidence.reference_transcript || 'not reported'}; variant type: ${item.evidence.assessed_variant_type || 'unknown'}; SpliceAI: ${item.evidence.spliceai_score === '' ? 'unavailable' : item.evidence.spliceai_score}`"></span>
+                                    </div>
+                                    <div class="manual-input-grid">
+                                        <label>Assay scope
+                                            <select x-model="item.evidence.assay_scope">
+                                                <option value="">Select</option>
+                                                <option value="protein_only">Protein-only assay</option>
+                                                <option value="combined_mrna_protein">Combined mRNA and protein assay</option>
+                                            </select>
+                                        </label>
+                                        <label>Functional conclusion
+                                            <select x-model="item.evidence.functional_conclusion">
+                                                <option value="">Select</option>
+                                                <option value="abnormal" x-show="item.code === 'PS3'">Abnormal function</option>
+                                                <option value="normal" x-show="item.code === 'BS3'">Function similar to benign controls</option>
+                                            </select>
+                                        </label>
+                                        <label>ENIGMA calibration review
+                                            <select x-model="item.evidence.calibration_status">
+                                                <option value="not_reviewed">Not reviewed</option>
+                                                <option value="reviewed_under_enigma_vcep">Reviewed under ENIGMA VCEP specifications</option>
+                                            </select>
+                                        </label>
+                                        <label>Curated strength
+                                            <select x-model="item.evidence.curated_strength">
+                                                <option value="">Select</option>
+                                                <option value="Strong">Strong</option>
+                                            </select>
+                                        </label>
+                                        <label>Assay or study name
+                                            <input type="text" x-model="item.evidence.assay_name" placeholder="Validated assay or study">
+                                        </label>
+                                        <label>Primary source
+                                            <input type="text" x-model="item.evidence.source_citation" placeholder="Publication, PMID or stable source">
+                                        </label>
+                                        <label>Reviewed by
+                                            <input type="text" x-model="item.evidence.functional_reviewed_by" placeholder="Expert reviewer">
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" x-model="item.evidence.pathogenic_and_benign_controls_confirmed">
+                                            Pathogenic and benign control calibration confirmed
+                                        </label>
+                                    </div>
+                                    <label class="full-width-label">Assay calibration summary
+                                        <textarea rows="3" x-model="item.evidence.calibration_summary"
+                                            placeholder="Describe controls, assay performance, calibration and the basis for the selected ENIGMA strength."></textarea>
+                                    </label>
+                                    <label class="full-width-label">Variant-specific functional result
+                                        <textarea rows="3" x-model="item.evidence.variant_result_summary"
+                                            placeholder="Describe the measured result, replicate evidence and relevant assay limitations."></textarea>
+                                    </label>
+                                    <p class="curation-warning" x-show="item.evidence.table9_lookup_status === 'already_applied'">
+                                        This criterion is already present from ENIGMA Table 9 and cannot be counted again manually.
+                                    </p>
+                                    <p class="field-hint">
+                                        Variant identity, transcript, variant type and available SpliceAI context are prefilled. ARIANE does not infer a new functional strength from those facts. The reviewer must document the ENIGMA-compatible assay calibration.
+                                    </p>
+                                </div>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
                                     <label>Assay scope
@@ -940,7 +1038,7 @@
                                 </div>
 
                                 <p class="field-hint" x-show="item.code === 'BP7_RNA'">
-                                    ARIANE checks BP7 Strong (RNA) against the classified variant. A missense variant inside an ENIGMA functional domain must already meet BS3 through calibrated Table 9 evidence. This condition cannot be confirmed by a manual checkbox.
+                                    ARIANE checks BP7 Strong (RNA) against the classified variant. A missense variant inside an ENIGMA functional domain must meet BS3 through calibrated Table 9 evidence or the complete manual BS3 review above. This condition cannot be confirmed by a standalone checkbox.
                                 </p>
                                 <p class="curation-warning" x-show="item.code === 'BP7_RNA' && result?.bp7_rna_context && !result.bp7_rna_context.eligible"
                                     x-text="result?.bp7_rna_context?.reason || ''"></p>
@@ -1871,7 +1969,7 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
     <script src="/static/js/graphs.js?v=20260828-1"></script>
     <script src="/static/js/classification.js?v=20260828-1"></script>
     <script src="/static/js/formatters.js?v=20260828-1"></script>
-    <script src="/static/js/manual-review.js?v=20260828-1"></script>
+    <script src="/static/js/manual-review.js?v=20260830-1"></script>
     <script src="/static/js/batch.js?v=20260828-1"></script>
     <script src="/static/js/app.js?v=20260828-1"></script>
 </body>

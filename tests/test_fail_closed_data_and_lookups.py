@@ -64,7 +64,7 @@ class GnomadFailClosedTests(unittest.TestCase):
         service = PopulationFrequencyService(
             repository,
             founder_lookup=lambda gene, c_notation: {
-                "status": "not_found",
+                "status": "reviewed_not_found",
                 "is_pathogenic_founder": False,
                 "reason": f"checked {gene}:{c_notation}",
             },
@@ -78,6 +78,10 @@ class GnomadFailClosedTests(unittest.TestCase):
         self.assertEqual(
             result["founder_exception"]["reason"],
             "checked BRCA1:c.509G>A",
+        )
+        self.assertEqual(
+            result["population_frequency_audit"]["founder_exception"],
+            result["founder_exception"],
         )
 
     def test_population_service_reload_replaces_repository_for_bound_provider(self):
@@ -94,7 +98,7 @@ class GnomadFailClosedTests(unittest.TestCase):
         service = PopulationFrequencyService(
             repository("missing"),
             founder_lookup=lambda *_args: {
-                "status": "not_found",
+                "status": "reviewed_not_found",
                 "is_pathogenic_founder": False,
                 "reason": "test",
             },
@@ -374,6 +378,49 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn(key, bayesdel.BAYESDEL_CACHE)
         bayesdel.BAYESDEL_CACHE.pop(key, None)
 
+    def test_bayesdel_accepts_only_unambiguous_values(self):
+        from backend.lookups import bayesdel
+
+        self.assertEqual(
+            bayesdel._select_unambiguous_bayesdel(0.31),
+            (0.31, "single_value", None),
+        )
+        self.assertEqual(
+            bayesdel._select_unambiguous_bayesdel([0.31, 0.31]),
+            (0.31, "all_returned_values_identical", None),
+        )
+        score, basis, error = bayesdel._select_unambiguous_bayesdel(
+            [0.31, 0.52]
+        )
+        self.assertIsNone(score)
+        self.assertEqual(basis, "ambiguous_multiple_values")
+        self.assertIn("without an explicit value-to-transcript mapping", error)
+
+    def test_bayesdel_divergent_api_values_fail_closed(self):
+        from backend.lookups import bayesdel
+
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.read.return_value = json.dumps({
+            "dbnsfp": {
+                "bayesdel": {"no_af": {"score": [0.31, 0.52]}},
+                "ensembl": {
+                    "transcriptid": ["ENST00000357654", "ENST00000471181"]
+                },
+            }
+        }).encode("utf-8")
+        with patch("backend.lookups.bayesdel.urllib.request.urlopen", return_value=response):
+            result = bayesdel.fetch_variant_data_myvariant(
+                "BRCA1",
+                "c.1A>G",
+                {"chrom": "17", "pos": 1, "ref": "A", "alt": "G"},
+            )
+
+        self.assertIsNone(result["bayesdel"])
+        self.assertEqual(result["status"], "ambiguous_transcript")
+        self.assertEqual(result["reference_transcript"], "NM_007294.4")
+        self.assertEqual(result["selection_basis"], "ambiguous_multiple_values")
+
     def test_bayesdel_does_not_cache_transient_no_score_response(self):
         from backend.lookups import bayesdel
 
@@ -399,6 +446,10 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
             "am_class": None,
             "status": "ok",
             "error": None,
+            "selection_policy": bayesdel.BAYESDEL_SELECTION_POLICY,
+            "selection_basis": "single_value",
+            "reference_transcript": "NM_007294.4",
+            "returned_transcripts": [],
         }
 
         with patch(
@@ -445,6 +496,13 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
                             "am_score": None,
                             "am_class": None,
                             "status": "ok",
+                            "selection_policy": bayesdel.BAYESDEL_SELECTION_POLICY,
+                        },
+                        "BRCA1:c.4A>G": {
+                            "bayesdel": 0.55,
+                            "am_score": None,
+                            "am_class": None,
+                            "status": "ok",
                         },
                     }),
                     encoding="utf-8",
@@ -458,6 +516,7 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(
                 bayesdel.BAYESDEL_CACHE["BRCA1:c.3A>G"]["bayesdel"], 0.42
             )
+            self.assertNotIn("BRCA1:c.4A>G", bayesdel.BAYESDEL_CACHE)
         finally:
             bayesdel.BAYESDEL_CACHE.clear()
             bayesdel.BAYESDEL_CACHE.update(previous_cache)
@@ -473,6 +532,7 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
             "am_class": None,
             "status": "ok",
             "reason": "Loaded from persistent runtime cache",
+            "selection_policy": bayesdel.BAYESDEL_SELECTION_POLICY,
         }
         try:
             with patch.object(

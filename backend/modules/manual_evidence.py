@@ -7,7 +7,11 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from backend.classification_dag.policy import classify_by_enigma_combination
 from backend.modules.criterion_order import criterion_sort_key
-from backend.modules.evidence_interactions import apply_manual_rna_interactions
+from backend.modules.evidence_interactions import (
+    apply_manual_rna_interactions,
+    automatic_functional_interactions,
+    clinical_functional_risk_interactions,
+)
 from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
 from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.modules.variant_input import normalize_variant_input
@@ -47,6 +51,16 @@ STRENGTH_POINTS = {
 }
 
 MANUAL_CRITERIA = {
+    "PS3": {
+        "direction": "pathogenic",
+        "allowed_strengths": ["Strong"],
+        "title": "Calibrated functional evidence showing abnormal function",
+        "threshold": "Strong only. Use after expert review confirms that the assay satisfies the ENIGMA PS3 functional-evidence specifications.",
+        "check": "Confirm the assay scope, calibration against pathogenic and benign controls, the variant-specific result, the applicable strength, and whether RNA and protein effects are independent of other evidence.",
+        "literature": "Use ENIGMA Specifications Table 9 as the accepted v1.2 lookup. Evidence outside Table 9 requires a documented expert calibration review under the same VCEP specifications.",
+        "source_url": CSPEC_URL,
+        "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PS3, Specifications Table 9 and Appendix E",
+    },
     "PS4": {
         "direction": "pathogenic",
         "allowed_strengths": ["Strong"],
@@ -110,6 +124,30 @@ MANUAL_CRITERIA = {
         "literature": "Review family studies and calculate the likelihood ratio using an accepted co-segregation method.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BS4 and Appendix I",
+    },
+    "BS3": {
+        "direction": "benign",
+        "allowed_strengths": ["Strong"],
+        "title": "Calibrated functional evidence showing normal function",
+        "threshold": "Strong only. Use after expert review confirms that the assay satisfies the ENIGMA BS3 functional-evidence specifications.",
+        "check": "Confirm the assay scope, calibration against pathogenic and benign controls, the variant-specific result, the applicable strength, and whether RNA and protein effects are independent of other evidence.",
+        "literature": "Use ENIGMA Specifications Table 9 as the accepted v1.2 lookup. Evidence outside Table 9 requires a documented expert calibration review under the same VCEP specifications.",
+        "source_url": CSPEC_URL,
+        "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BS3, Specifications Table 9 and Appendix E",
+    },
+    "BP5": {
+        "direction": "benign",
+        "allowed_strengths": ["Supporting", "Moderate", "Strong", "Very Strong"],
+        "title": "Combined benign clinical likelihood ratio",
+        "threshold": "Derived from the configured benign likelihood-ratio thresholds.",
+        "check": "Confirm that the value is a variant-specific combined clinical LR, document the included clinical data types, their independence, and the primary publication or curated source.",
+        "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
+        "source_url": CSPEC_URL,
+        "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BP5, Specifications Table 7 and Appendix B",
+        "appendix_b_sources": [
+            {"pmid": pmid, "citation": citation}
+            for pmid, citation in ENIGMA_PP4_SOURCES.items()
+        ],
     },
     "PVS1_RNA": {
         "direction": "pathogenic",
@@ -198,6 +236,7 @@ def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any
         f"Very Strong at LR <= {bp5['very_strong_max_inclusive']:g}."
     )
     values["PP4"]["threshold"] = pathogenic_text
+    values["BP5"]["threshold"] = benign_text
     values["PP1"]["threshold"] = (
         pathogenic_text[:-1]
         + " Very Strong also requires a predicted or experimentally proven effect on protein or mRNA splicing."
@@ -217,7 +256,8 @@ def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any
     }
 
 STRUCTURED_CURATED_CODES = {
-    "PP4", "PVS1_RNA", "BP7_RNA", "PVS1_INIT", "PS1_SPLICE", "PS1_PROTEIN"
+    "PS3", "PP4", "BS3", "BP5", "PVS1_RNA", "BP7_RNA", "PVS1_INIT",
+    "PS1_SPLICE", "PS1_PROTEIN",
 }
 
 _COMMON_RESOURCE_LINKS = [
@@ -378,6 +418,34 @@ def _pp4_strength(evidence: Dict[str, Any], gene: str) -> Optional[str]:
     return None
 
 
+def _bp5_strength(evidence: Dict[str, Any], gene: str) -> Optional[str]:
+    value, scale = _pp4_value_and_scale(evidence)
+    if value is None or scale not in {"lr", "log10_lr", "acmg_points"}:
+        return None
+    bp5 = clinical_lr_thresholds(gene)["bp5"]
+    lr_thresholds = (
+        bp5["supporting_max_inclusive"],
+        bp5["moderate_max_inclusive"],
+        bp5["strong_max_inclusive"],
+        bp5["very_strong_max_inclusive"],
+    )
+    thresholds = {
+        "lr": lr_thresholds,
+        "log10_lr": tuple(math.log10(item) for item in lr_thresholds),
+        "acmg_points": (-1.0, -2.0, -4.0, -8.0),
+    }[scale]
+    supporting, moderate, strong, very_strong = thresholds
+    if value <= very_strong:
+        return "Very Strong"
+    if value <= strong:
+        return "Strong"
+    if value <= moderate:
+        return "Moderate"
+    if value <= supporting:
+        return "Supporting"
+    return None
+
+
 def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
     status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
     if status == "appendix_b":
@@ -415,11 +483,41 @@ def suggest_strength(
     pp4_thresholds = clinical_thresholds["pp4"]
     bp5_thresholds = clinical_thresholds["bp5"]
     splice_low = spliceai_thresholds(gene)["bp4"]
-    if code == "PP4":
+    if code in {"PP4", "BP5"}:
         data_summary = (evidence.get("clinical_data_summary") or "").strip()
         if not data_summary or not _pp4_source_is_reviewed(evidence):
             return None
-        return _pp4_strength(evidence, gene)
+        return (
+            _pp4_strength(evidence, gene)
+            if code == "PP4"
+            else _bp5_strength(evidence, gene)
+        )
+
+    if code in {"PS3", "BS3"}:
+        expected_conclusion = "abnormal" if code == "PS3" else "normal"
+        required_text_fields = (
+            "assay_name",
+            "source_citation",
+            "calibration_summary",
+            "variant_result_summary",
+            "functional_reviewed_by",
+        )
+        if (
+            evidence.get("assay_scope") not in {
+                "protein_only",
+                "combined_mrna_protein",
+            }
+            or evidence.get("functional_conclusion") != expected_conclusion
+            or evidence.get("calibration_status") != "reviewed_under_enigma_vcep"
+            or evidence.get("pathogenic_and_benign_controls_confirmed") is not True
+            or any(
+                not str(evidence.get(field) or "").strip()
+                for field in required_text_fields
+            )
+        ):
+            return None
+        strength = evidence.get("curated_strength")
+        return strength if strength in MANUAL_CRITERIA[code]["allowed_strengths"] else None
 
     if code in {"PVS1_RNA", "BP7_RNA"}:
         assay_scope = evidence.get("assay_scope")
@@ -676,8 +774,29 @@ def evaluate_manual_evidence(
     results = []
 
     enabled_manual = [item for item in manual_criteria if item.get("enabled")]
+    bp7_context_criteria = list(base_criteria)
+    for item in enabled_manual:
+        if item.get("code") != "BS3":
+            continue
+        manual_bs3_strength = suggest_strength(
+            "BS3",
+            item.get("evidence", {}),
+            variant_context=variant_context,
+            base_criteria=base_criteria,
+        )
+        if manual_bs3_strength:
+            bp7_context_criteria.append({
+                "name": "BS3",
+                "applies": True,
+                "strength": manual_bs3_strength,
+                "decision_path": {
+                    "sources": [{
+                        "source_id": "manual-enigma-vcep-functional-review",
+                    }],
+                },
+            })
     clinical_lr_is_used = any(code in combined for code in {"PP4", "BP5"}) or any(
-        item.get("code") == "PP4" for item in enabled_manual
+        item.get("code") in {"PP4", "BP5"} for item in enabled_manual
     )
     if clinical_lr_is_used:
         for item in enabled_manual:
@@ -708,7 +827,9 @@ def evaluate_manual_evidence(
             code,
             item.get("evidence", {}),
             variant_context=variant_context,
-            base_criteria=base_criteria,
+            base_criteria=(
+                bp7_context_criteria if code == "BP7_RNA" else base_criteria
+            ),
         )
         evidence = item.get("evidence", {})
         pp4_value, pp4_scale = _pp4_value_and_scale(evidence)
@@ -716,23 +837,26 @@ def evaluate_manual_evidence(
             evidence.get("source_review_status") or "unreviewed"
         ).strip().lower()
         pp4_source_recorded = _pp4_source_is_recorded(evidence)
-        pp4_complete = (
+        clinical_lr_complete = (
             pp4_value is not None
-            and pp4_value >= 0
+            and (pp4_value >= 0 if pp4_scale == "lr" else True)
             and pp4_scale in {"lr", "log10_lr", "acmg_points"}
             and pp4_source_status in {"appendix_b", "other_reviewed", "unreviewed"}
             and pp4_source_recorded
             and bool((evidence.get("clinical_data_summary") or "").strip())
         )
-        if code == "PP4" and item.get("enabled") and not pp4_complete:
-            raise ValueError("PP4 requires a clinical LR value and scale, recorded source, and clinical data summary")
+        if code in {"PP4", "BP5"} and item.get("enabled") and not clinical_lr_complete:
+            raise ValueError(
+                f"{code} requires a clinical LR value and scale, recorded source, "
+                "and clinical data summary"
+            )
         if code == "BP7_RNA" and item.get("enabled") and not suggested:
             context_result = evaluate_bp7_rna_variant_context(
-                variant_context, base_criteria
+                variant_context, bp7_context_criteria
             )
             if not context_result["eligible"]:
                 raise ValueError(context_result["reason"])
-        if code in STRUCTURED_CURATED_CODES - {"PP4"} and item.get("enabled") and not suggested:
+        if code in STRUCTURED_CURATED_CODES - {"PP4", "BP5"} and item.get("enabled") and not suggested:
             raise ValueError(
                 f"{code} requires a complete structured curated evidence record"
             )
@@ -742,7 +866,9 @@ def evaluate_manual_evidence(
         if definition["direction"] == "benign":
             points *= -1
         reason = (
-            f"User-provided evidence; ARIANE suggestion: {suggested or 'threshold not met'}"
+            f"Reviewer-curated evidence meets {code} {suggested} requirements"
+            if suggested
+            else f"Reviewer-curated evidence does not meet the structured {code} requirements"
         )
         single_strong_eligible = False
         single_strong_basis = ""
@@ -762,6 +888,26 @@ def evaluate_manual_evidence(
                 reason += "; multiple independent LR components satisfy the ENIGMA Table 3 single-Strong condition"
             elif selected == "Strong":
                 reason += "; BS4 Strong is valid, but the ENIGMA Table 3 single-Strong condition is not documented"
+        if code == "BP5" and applies:
+            evidence_types = {
+                str(item).strip().lower()
+                for item in evidence.get("clinical_evidence_types", [])
+                if str(item).strip()
+            }
+            contribution_count = len(evidence_types)
+            single_strong_eligible = bool(
+                selected == "Strong"
+                and contribution_count >= 2
+                and evidence.get("independence_review_confirmed") is True
+            )
+            if single_strong_eligible:
+                single_strong_basis = (
+                    "At least two independently reviewed clinical evidence types "
+                    "contribute to BP5 Strong"
+                )
+                reason += "; multiple clinical evidence types satisfy the ENIGMA Table 3 single-Strong condition"
+            elif selected == "Strong":
+                reason += "; BP5 Strong is valid, but the ENIGMA Table 3 single-Strong condition is not documented"
         results.append(
             {
                 "code": code,
@@ -783,9 +929,9 @@ def evaluate_manual_evidence(
             if code == "PVS1_INIT":
                 combined.pop("PP3", None)
             output_code = "PS1" if code == "PS1_PROTEIN" else code
-            if output_code == "PS1" and output_code in combined:
+            if output_code in combined:
                 raise ValueError(
-                    "Protein PS1 is already present in the automated result and cannot be counted twice"
+                    f"{output_code} is already present in the automated result and cannot be counted twice"
                 )
             combined[output_code] = {
                 "applies": True,
@@ -803,6 +949,8 @@ def evaluate_manual_evidence(
     evidence_interactions = apply_manual_rna_interactions(
         combined, applied_manual_codes
     )
+    evidence_interactions.extend(automatic_functional_interactions(combined))
+    evidence_interactions.extend(clinical_functional_risk_interactions(combined))
     total_points = sum(c.get("points", 0) for c in combined.values())
     predicted_class, label, note = classify_by_enigma_combination(
         combined, total_points, gene=policy_gene

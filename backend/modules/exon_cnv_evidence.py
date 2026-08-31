@@ -107,6 +107,7 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
     minimum_size = int(policy["minimum_variant_size_bp"])
     size = assess_indel_size(gene, c_notation)
     is_deletion = size.get("operation") == "del"
+    is_duplication = size.get("operation") == "dup"
     trace = [{
         "step": "indel_description",
         "status": "pass" if size.get("is_indel") else "fail",
@@ -171,6 +172,26 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
                 "PM2 is unavailable: the delins deleted and inserted lengths "
                 "fall on opposite sides of the ENIGMA Appendix G >50 bp boundary, "
                 "which does not define a single automated event-size convention."
+            ),
+            "source": policy["source_url"],
+            "snapshot_id": payload["snapshot_id"],
+        }
+    if is_duplication:
+        return {
+            "found": True,
+            "is_indel": True,
+            "criteria": [],
+            "pm2_applicability": "not_met",
+            "variant_size_bp": exact_size,
+            "decision_trace": trace + [{
+                "step": "structural_variant_recall",
+                "status": "fail",
+                "detail": "gnomAD recall is suboptimal for large duplications",
+            }],
+            "reason": (
+                "PM2 Supporting was not applied to this duplication because "
+                "ENIGMA considers population-database recall suboptimal for this "
+                "variant type. Table 4 PVS1 assessment remains separate."
             ),
             "source": policy["source_url"],
             "snapshot_id": payload["snapshot_id"],

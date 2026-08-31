@@ -82,6 +82,7 @@ htmlcov/
 !/docs/
 /docs/*
 !/docs/implementation_and_data_sources.md
+!/docs/open_methodological_and_data_tasks.md
 !/docs/evidence_interaction_matrix.md
 !/docs/enigma_source_data_audit.md
 !/docs/manual_evidence_review.md

@@ -37,8 +37,8 @@ REGRESSION_VARIANTS = (
      2, -4, {"BP1": ("Strong", -4)}, False, ("PM2",)),
     ("BRCA1", "c.3891_3893del", "p.(Ser1298del)", 0.15, None, "Unknown",
      3, -4, {"BS3": ("Strong", -4)}, False, ("PM2",)),
-    ("BRCA1", "c.4185G>A", "p.(Gln1395=)", 0.95, None, "Unknown", 4, 8,
-     {"PVS1_RNA": ("Strong", 4), "PP4": ("Strong", 4)}, False, ()),
+    ("BRCA1", "c.4185G>A", "p.(Gln1395=)", 0.95, None, "Unknown", 3, 5,
+     {"PP3": ("Supporting", 1), "PP4": ("Strong", 4)}, False, ()),
     ("BRCA1", "c.628C>T", "p.(Gln210Ter)", None, None, "Unknown", 3, 0,
      {}, False, ("PVS1",)),
     ("BRCA2", "c.8953+2T>C", "p.(?)", 0.90, None, "Unknown", 3, 0, {},
@@ -185,17 +185,25 @@ def _frequency_input(*, max_af=None, found=False, absent=False):
         "max_af": max_af,
         "frequency_metric": "faf95",
         "pm2_absence_established": absent,
+        "pm2_coverage_method": {
+            "status": "approved_test_fixture",
+            "automatic_assignment_allowed": True,
+            "reason": "explicit approved method fixture",
+        },
         "founder_exception": {
-            "status": "not_found",
+            "status": "reviewed_not_found",
             "is_pathogenic_founder": False,
-            "reason": "regression fixture is not a pathogenic founder variant",
+            "reason": "regression fixture records an authoritative negative review",
             "snapshot_version": "test",
         },
         "datasets": {
             name: {
                 "status": status,
                 "max_af": max_af if found else None,
-                "coverage": {"mean_depth": 30.0},
+                "coverage": {
+                    "mean_depth": 30.0,
+                    "classification_compatible": True,
+                },
                 "quality_filter_passed": True if found else None,
                 "non_founder_allele_count": 4 if found else 0,
             }

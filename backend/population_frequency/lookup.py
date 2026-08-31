@@ -6,7 +6,11 @@ from typing import Any, Mapping, Sequence
 
 from backend.population_frequency.coverage import aggregate_coverage, lookup_coverage_by_position
 from backend.population_frequency.models import GnomadRepository
-from backend.population_frequency.policy import GNOMAD_LOCAL_DATASET_CONFIG, classification_policy_for_gene
+from backend.population_frequency.policy import (
+    GNOMAD_LOCAL_DATASET_CONFIG,
+    PM2_COVERAGE_METHOD_REVIEW,
+    classification_policy_for_gene,
+)
 from backend.population_frequency.utils import as_float, as_int, coordinate_value, strip_chr, variant_id_from_coords
 
 
@@ -106,6 +110,7 @@ def population_frequency_audit(gnomad_data: Mapping[str, Any]) -> dict[str, Any]
     for dataset_key, result in gnomad_data.get("datasets", {}).items():
         config = GNOMAD_LOCAL_DATASET_CONFIG.get(dataset_key, {})
         callset = result.get(config.get("callset", "")) or {}
+        coverage = result.get("coverage") or {}
         scored_faf = callset.get("faf95_by_ancestry") or {}
         scored_ac = callset.get("non_founder_ac_by_ancestry") or {}
         scored_an = callset.get("non_founder_an_by_ancestry") or {}
@@ -124,6 +129,18 @@ def population_frequency_audit(gnomad_data: Mapping[str, Any]) -> dict[str, Any]
             "excluded_population_context": [
                 {"code": code, **value} for code, value in excluded.items()
             ],
+            "coverage": {
+                "mean_depth": coverage.get("mean_depth"),
+                "measurement_passes_threshold": coverage.get(
+                    "measurement_passes_threshold"
+                ),
+                "classification_compatible": coverage.get(
+                    "classification_compatible"
+                ),
+                "compatibility_status": coverage.get("compatibility_status"),
+                "compatibility_reason": coverage.get("compatibility_reason"),
+                "coverage_scope": coverage.get("coverage_scope"),
+            },
         })
     return {
         "status": gnomad_data.get("status"),
@@ -137,6 +154,7 @@ def population_frequency_audit(gnomad_data: Mapping[str, Any]) -> dict[str, Any]
             item.get("status") == "absent_in_non_founder_populations"
             for item in gnomad_data.get("datasets", {}).values()
         ),
+        "pm2_coverage_method": gnomad_data.get("pm2_coverage_method") or {},
         "datasets": datasets,
     }
 
@@ -247,7 +265,14 @@ def query_gnomad_dataset(
         result["status"], result["found"] = "absent", False
         result["dataset"] = config["dataset_names"][0]
     result["coverage"] = lookup_coverage_by_position(
-        repository, coords, config["coverage_dataset_key"], config["assembly"], coverage_threshold
+        repository,
+        coords,
+        config["coverage_dataset_key"],
+        config["assembly"],
+        coverage_threshold,
+        classification_compatible=config["coverage_classification_compatible"],
+        compatibility_status=config["coverage_frequency_compatibility"],
+        compatibility_reason=config["coverage_compatibility_reason"],
     )
     return result
 
@@ -265,6 +290,7 @@ def get_gnomad_frequencies(
         "coverage": {"status": "not_evaluated", "passes_pm2": False, "datasets": {}},
         "max_af": None, "frequency_metric": None, "pm2_absence_established": False,
         "pm2_coverage_ok": False, "errors": [],
+        "pm2_coverage_method": dict(PM2_COVERAGE_METHOD_REVIEW),
         "source": str(repository.frequency_path) if repository.frequency_path else None,
         "cache_mode": repository.frequency_status,
     }
@@ -317,7 +343,14 @@ def get_gnomad_frequencies(
     if frequencies:
         result["max_af"], result["frequency_metric"] = max(frequencies, key=lambda item: item[0])
     result["found"] = any_found
-    result["pm2_coverage_ok"] = result["coverage"]["passes_pm2"]
+    method_allows_automatic_pm2 = (
+        PM2_COVERAGE_METHOD_REVIEW.get("automatic_assignment_allowed") is True
+        and pm2_policy.get("coverage_scope")
+        == PM2_COVERAGE_METHOD_REVIEW.get("scope")
+    )
+    result["pm2_coverage_ok"] = (
+        result["coverage"]["passes_pm2"] and method_allows_automatic_pm2
+    )
     v2_status = result["datasets"].get("v2_1_non_cancer", {}).get("status", "")
     v3_status = result["datasets"].get("v3_1_non_cancer", {}).get("status", "")
     v3_not_in_cache = v3_status in {"outside_cached_region", "dataset_not_available", "cache_missing"}
@@ -330,7 +363,16 @@ def get_gnomad_frequencies(
     if any_found:
         result["status"] = "found"
     elif all_absent:
-        result["status"] = "absent_with_coverage" if result["pm2_coverage_ok"] else "absent_without_sufficient_coverage"
+        if not method_allows_automatic_pm2:
+            result["status"] = "pm2_coverage_method_unresolved"
+        elif not result["coverage"].get("all_sources_classification_compatible"):
+            result["status"] = "coverage_release_incompatible"
+        else:
+            result["status"] = (
+                "absent_with_coverage"
+                if result["pm2_coverage_ok"]
+                else "absent_without_sufficient_coverage"
+            )
     elif v2_status == "absent" and v3_not_in_cache:
         result["status"] = "absent_v2_only"
     elif any_cache_missing:
@@ -351,9 +393,22 @@ def gnomad_status_summary(gnomad_data: Mapping[str, Any]) -> str:
     if gnomad_data.get("max_af") is not None:
         parts.append(f"max_{gnomad_data.get('frequency_metric') or 'af'}={gnomad_data['max_af']:.6g}")
     coverage = gnomad_data.get("coverage", {})
-    parts.extend((f"coverage={coverage.get('status')}", f"cache={gnomad_data.get('cache_mode')}"))
+    method = gnomad_data.get("pm2_coverage_method") or {}
+    parts.extend(
+        (
+            f"coverage={coverage.get('status')}",
+            f"pm2_method={method.get('status') or 'missing'}",
+            f"cache={gnomad_data.get('cache_mode')}",
+        )
+    )
     for key, dataset in gnomad_data.get("datasets", {}).items():
         mean_depth = ((coverage.get("datasets") or {}).get(key, {})).get("mean_depth")
         depth = f",depth={mean_depth:.1f}" if mean_depth is not None else ""
-        parts.append(f"{key}:{dataset.get('status')}[{dataset.get('dataset')}]{depth}")
+        compatibility = (dataset.get("coverage") or {}).get(
+            "compatibility_status"
+        )
+        parts.append(
+            f"{key}:{dataset.get('status')}[{dataset.get('dataset')}]"
+            f"{depth},coverage_compatibility={compatibility or 'missing'}"
+        )
     return "; ".join(parts)

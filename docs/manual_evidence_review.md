@@ -71,17 +71,19 @@ the browser states that the strength will be calculated by the backend. After
 submission it displays `suggested_strength`, `selected_strength`, points and
 validation errors returned by the backend.
 
-`PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`, and `PS1_PROTEIN` require structured
-curated records. Their allowed strength is derived only after all required
-supporting fields have been validated.
+`PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`, `PS1_PROTEIN`, `PS3`, `BS3`,
+and `BP5` require structured curated records. Their allowed strength is derived
+only after all required supporting fields have been validated.
 
 The BP7 RNA form does not contain a general eligibility checkbox. The server
 derives the variant type from the classified c. and p. notation, checks the
 complete affected protein interval against the ENIGMA domains and reads BS3
-from the original automated result. For a domain missense variant, only an
-applied BS3 with ENIGMA Table 9 provenance satisfies the prerequisite. Missing
-variant context, an unresolved protein position or missing BS3 fails closed and
-adds no BP7 RNA points.
+from either the automated result or the submitted manual evidence. For a domain
+missense variant, the prerequisite is satisfied by applied BS3 with ENIGMA
+Table 9 provenance or by a complete manual BS3 record whose VCEP calibration,
+controls, variant-specific result, source and reviewer pass backend validation.
+Missing variant context, an unresolved protein position, a standalone checkbox
+or incomplete BS3 fails closed and adds no BP7 RNA points.
 
 For Met1/start-loss variants, ARIANE can show an initiation-codon review
 recommendation and prefill `met1_loss_confirmed` in the `PVS1_INIT` manual

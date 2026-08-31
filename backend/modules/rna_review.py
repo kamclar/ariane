@@ -21,15 +21,18 @@ def evaluate_rna_review(
     variant_type: str,
     spliceai_score: Optional[float],
     pvs1_result: Optional[Dict] = None,
+    pvs1_rna_result: Optional[Dict] = None,
     criteria: Optional[Dict] = None,
 ) -> Dict:
     """Identify cases in which RNA evidence may clarify a splice effect."""
     variant_type = (variant_type or "").lower()
     pvs1_result = pvs1_result or {}
+    pvs1_rna_result = pvs1_rna_result or {}
     criteria = criteria or {}
     reasons: List[str] = []
     potential_branches: List[str] = []
     priority = "none"
+    manual_review_prefill: Dict = {}
     splice_high = spliceai_thresholds(gene)["pp3"]
     source_url = vcep_specification(gene)["url"]
 
@@ -45,7 +48,18 @@ def evaluate_rna_review(
             "limitations": "",
             "source_url": source_url,
             "is_evidence_criterion": False,
+            "manual_review_prefill": {},
         }
+
+    if pvs1_rna_result.get("review_required"):
+        priority = "high"
+        reasons.append(pvs1_rna_result.get("reason") or (
+            "An exact official RNA-evidence record requires curator review."
+        ))
+        potential_branches.append("PVS1 (RNA)")
+        manual_review_prefill = dict(
+            pvs1_rna_result.get("manual_review_prefill") or {}
+        )
 
     if pvs1_result.get("requires_rna"):
         priority = "high"
@@ -113,6 +127,7 @@ def evaluate_rna_review(
             "limitations": "",
             "source_url": source_url,
             "is_evidence_criterion": False,
+            "manual_review_prefill": {},
         }
 
     if "BP7 (RNA)" not in potential_branches:
@@ -143,4 +158,5 @@ def evaluate_rna_review(
         ),
         "source_url": source_url,
         "is_evidence_criterion": False,
+        "manual_review_prefill": manual_review_prefill,
     }

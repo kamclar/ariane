@@ -1,9 +1,9 @@
-"""Automatic ENIGMA PVS1 (RNA) from structured, official RNA evidence.
+"""Prepare ENIGMA PVS1 (RNA) review from structured official RNA evidence.
 
-This module contains no variant allowlist. It applies the qualitative patient
-mRNA branch of ENIGMA v1.2 Appendix E Table 9 to exact records from
-Supplementary Table 2, then obtains the baseline loss-of-function weight from
-Specifications Table 4.
+Supplementary Table 2 can identify an exact RNA-evidence candidate and Table 4
+can provide its loss-of-function context. An unquantified ST2 result does not,
+however, identify the Appendix E Table 9 branch or criterion strength. Those
+records therefore prefill expert review and never create automatic points.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional
 
 from backend.modules.ps1_splice_evidence import get_st2_splice_record
 from backend.modules.table4 import TABLE4_DATA, table4_lookup_deletion
-from backend.gene_policy import policy_name, policy_version, vcep_specification
+from backend.gene_policy import reference_transcript, vcep_specification
 
 
 APPENDIX_URL = (
@@ -24,12 +24,6 @@ APPENDIX_URL = (
 _PATIENT_UNQUANTIFIED_LOF = (
     "patient not allele-specific; aberrant transcripts consistent with loss of function"
 )
-_RNA_DOWNWEIGHT = {
-    "Very Strong": ("Strong", 4),
-    "Strong": ("Moderate", 2),
-    "Moderate": ("Supporting", 1),
-    "Supporting": ("Supporting", 1),
-}
 
 
 def _normalized_text(value: Any) -> str:
@@ -56,20 +50,7 @@ def _table4_exon_for_reported_number(gene: str, exon_number: int) -> Optional[st
 
 
 def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
-    """Apply the ENIGMA qualitative patient-mRNA PVS1 (RNA) branch.
-
-    Automatic scoring is intentionally limited to information explicitly
-    represented by the official datasets:
-
-    * an exact ST2 variant row;
-    * patient mRNA without allele-specific quantitation;
-    * an abnormal transcript categorised by ENIGMA as loss-of-function;
-    * one unambiguous whole-exon deletion outcome;
-    * a matching Table 4 deletion row with an applicable baseline PVS1 weight.
-
-    Other RNA records remain unscored because ST2 does not retain the numerical
-    transcript proportions needed by the quantitative Appendix E branches.
-    """
+    """Return a non-scoring PVS1 (RNA) review candidate from exact ST2 data."""
     specification = vcep_specification(gene)
     result: Dict[str, Any] = {
         "applies": False,
@@ -81,6 +62,9 @@ def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
         "source_record": None,
         "table4_exon": None,
         "appendix_branch": None,
+        "application_status": "not_applied",
+        "review_required": False,
+        "manual_review_prefill": {},
     }
 
     record = get_st2_splice_record(gene, c_notation)
@@ -127,69 +111,43 @@ def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
 
     baseline = table4_lookup_deletion(gene, table4_exon)
     baseline_strength = baseline.get("pvs1_strength")
-    if not baseline.get("found") or baseline_strength not in _RNA_DOWNWEIGHT:
+    if not baseline.get("found") or not baseline_strength:
         result["reason"] = (
             f"PVS1 (RNA) was not applied because the {gene} {table4_exon} "
             "transcript deletion has no applicable baseline PVS1 weight in Table 4."
         )
         return result
 
-    strength, points = _RNA_DOWNWEIGHT[baseline_strength]
     result.update({
-        "applies": True,
-        "strength": strength,
-        "points": points,
-        "appendix_branch": "patient_mrna_without_allele_specific_quantitation",
+        "application_status": "review_required",
+        "review_required": True,
+        "appendix_branch": "unquantified_patient_mrna_requires_consensus_review",
         "reason": (
             f"ENIGMA Supplementary Table 2 row {record.get('source_row')} reports "
-            f"patient mRNA without allele-specific quantitation and a loss-of-function "
-            f"transcript ({record.get('result')}). Table 4 assigns baseline "
-            f"{baseline.get('pvs1_code')} to {gene} {table4_exon}; Appendix E Table 9 "
-            f"downweights the qualitative apparent near-complete patient-mRNA branch "
-            f"to PVS1 {strength} (RNA)."
+            f"patient mRNA without allele-specific quantitation and an aberrant "
+            f"transcript consistent with loss of function ({record.get('result')}). "
+            f"Table 4 supplies the {baseline.get('pvs1_code')} loss-of-function "
+            f"context for {gene} {table4_exon}, but ST2 does not establish whether "
+            "the unquantified result is apparent near-complete or incomplete. "
+            "Appendix E Table 9 requires consensus curator judgement, so PVS1 "
+            "(RNA) was not applied automatically."
         ),
         "source": APPENDIX_URL,
-        "decision_path": {
-            "tree_id": "figure-1b",
-            "tree_version": "ENIGMA VCEP 1.2.0",
-            "branch_id": "other-nucleotide-position",
-            "criterion": "PVS1_RNA",
-            "outcome": "applied",
-            "outcome_node": "rna-other-aberrant",
-            "steps": [
-                {
-                    "node_id": "rna-other-quality",
-                    "question": "Review assay design, wild-type aberration and transcripts",
-                    "result": "reviewed",
-                    "observed": (
-                        f"ENIGMA Supplementary Table 2 row {record.get('source_row')}; "
-                        f"{record.get('splicing_assay_result_category')}"
-                    ),
-                },
-                {
-                    "node_id": "rna-other-result",
-                    "question": "Observed mRNA result?",
-                    "result": "aberrant",
-                    "observed": str(record.get("result") or "aberrant transcript"),
-                },
-            ],
-            "sources": [
-                {
-                    "source_id": "enigma-v1.2-specifications",
-                    "label": (
-                        f"{policy_name(gene)} v{policy_version(gene)} Specifications"
-                    ),
-                    "url": specification["url"],
-                    "location": "Figure 1B",
-                    "figure_url": "/static/enigma/figure-1b-rna.jpg",
-                },
-                {
-                    "source_id": "enigma-v1.2-appendix",
-                    "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
-                    "url": APPENDIX_URL,
-                    "location": "Appendix E Table 9",
-                },
-            ],
+        "manual_review_prefill": {
+            "assay_scope": "mrna_only",
+            "rna_conclusion": "damaging",
+            "transcript_accession": reference_transcript(gene),
+            "transcript_result_summary": (
+                f"ENIGMA Supplementary Table 2 row {record.get('source_row')}: "
+                f"{record.get('result')}. Assay category: "
+                f"{record.get('splicing_assay_result_category')}. "
+                "The RNA result is not allele-specific and is not quantified; "
+                "the curator must determine the applicable Appendix E Table 9 branch."
+            ),
+            "source_citation": "ENIGMA Supplementary Table 2 v1.2",
+            "table4_context": (
+                f"{gene} {table4_exon}: {baseline.get('pvs1_code')}"
+            ),
         },
     })
     return result

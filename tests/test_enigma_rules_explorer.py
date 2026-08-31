@@ -19,9 +19,41 @@ from backend.modules.pvs1_rna import evaluate_pvs1_rna
 from backend.modules.pvs1 import evaluate_pvs1
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
+from backend.modules.utils import get_amino_acid_interval
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_multi_residue_interval_overlapping_domain_does_not_receive_bp1():
+    p_notation = "p.(Arg1649_Ser1651del)"
+
+    assert get_amino_acid_interval(p_notation) == (1649, 1651)
+    bp1 = evaluate_bp1(
+        "BRCA1", "inframe_deletion", p_notation, spliceai_score=0.03
+    )
+
+    assert bp1["applies"] is False
+    assert bp1["points"] == 0
+    assert "1649-1651" in bp1["reason"]
+    assert "BRCT" in bp1["reason"]
+
+
+def test_multi_residue_interval_uses_domain_branch_for_protein_prediction():
+    result = evaluate_pp3_bp4(
+        "BRCA1",
+        "inframe_deletion",
+        "p.(Arg1649_Ser1651del)",
+        bayesdel_score=0.50,
+        spliceai_score=0.03,
+    )
+
+    assert result["PP3"]["applies"] is True
+    assert "BRCT" in result["PP3"]["reason"]
+
+
+def test_frameshift_termination_distance_is_not_parsed_as_absolute_coordinate():
+    assert get_amino_acid_interval("p.(Leu167AlafsTer20)") == (167, 167)
 
 
 def test_catalog_is_valid_and_exposes_no_local_paths():
@@ -348,11 +380,12 @@ def test_missing_spliceai_produces_explicit_figure1a_unavailable_warning():
     assert "PP3, BP4, BP1 and BP7 were not applied" in warning
 
 
-def test_rna_and_functional_evidence_link_to_their_official_figures():
+def test_unquantified_rna_requires_review_and_functional_evidence_links_to_figure():
     rna = evaluate_pvs1_rna("BRCA1", "c.4185G>A")
-    assert rna["applies"] is True
-    assert rna["decision_path"]["tree_id"] == "figure-1b"
-    assert rna["decision_path"]["outcome_node"] == "rna-other-aberrant"
+    assert rna["applies"] is False
+    assert rna["application_status"] == "review_required"
+    assert rna["source"].endswith("/data")
+    assert "consensus curator judgement" in rna["reason"]
 
     functional = table9_lookup_ps3_bs3("BRCA1", "c.509G>A")
     result = evaluate_variant(

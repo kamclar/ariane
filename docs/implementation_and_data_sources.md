@@ -330,7 +330,10 @@ revize.
 
 ### 3.1 BA1, BS1 a PM2 Supporting
 
-Zdroj: lokální snapshoty gnomAD v2.1.1 exomes non-cancer a gnomAD v3.1.2 genomes non-cancer včetně pokrytí.
+Zdroj frekvencí: lokální snapshoty gnomAD v2.1.1 exomes non-cancer a gnomAD
+v3.1.2 genomes non-cancer. Coverage je samostatný verzovaný vstup: gnomAD
+exomes r2.1 a genomes r3.0.1. Přesná kompatibilita v3.1.2 frekvencí s r3.0.1
+coverage zůstává otevřeným metodickým bodem popsaným v části 10.2.
 
 Populační vrstva je rozdělena v `backend/population_frequency/` podle jedné
 odpovědnosti na modul:
@@ -436,6 +439,12 @@ checksumovaný strukturální provider umí automaticky uzavřít Appendix G pou
 pro úplné exonové delece. Ostatní indely nad 50 bp a indely s neurčitelnou
 velikostí proto vracejí PM2 jako nedostupné, nikoliv jako N/A ani jako splněné.
 
+Velké exonové duplikace mají explicitní výsledek `PM2 not met`. ENIGMA u
+kurátorované velké duplikace BRCA1 PM2 Supporting nepoužila, přestože varianta
+nebyla v gnomAD pozorována, protože záchyt tohoto typu varianty je suboptimální.
+ARIANE proto absenci duplikace v populační databázi neinterpretuje jako PM2.
+Toto rozhodnutí se netýká samostatné Table 4 větve pro PVS1 a PM5 PTC.
+
 ENIGMA v1.2 požaduje průměrnou hloubku v oblasti varianty, ale neurčuje počet
 okolních bází. ARIANE proto nepoužívá vlastní pevné okno ±N bp. Oblast je
 definována jako úplný genomový rozsah referenční alely varianty. U SNV jde o
@@ -494,33 +503,34 @@ tato nejistota nesmí být odstraněna nezdokumentovaným předpokladem.
 
 #### 3.2.2 PVS1 z RNA evidence
 
-Automatické `PVS1_RNA` nevychází z ručního seznamu variant. Klasifikátor používá
-úplnou oficiální ENIGMA Supplementary Table 2 a obecnou rozhodovací větev z
-Appendix E Table 9. Kritérium se přidělí pouze tehdy, když jsou současně splněny
-všechny následující podmínky:
+Supplementary Table 2 se používá jako úplný oficiální zdroj známé RNA evidence,
+nikoli jako automatický seznam pro `PVS1_RNA`. U pacientské mRNA bez alelově
+specifické kvantifikace ST2 neříká, zda výsledek patří do větve apparent
+near-complete nebo apparent incomplete v Appendix E Table 9. Poznámka k této
+tabulce výslovně vyžaduje u nekvantifikovaných výsledků konsenzuální kurátorské
+posouzení.
 
-- přesná normalizovaná varianta je obsažena v Supplementary Table 2;
-- ENIGMA ji zařadila do kategorie pacientské mRNA bez alelově specifické
-  kvantifikace s aberantními transkripty odpovídajícími ztrátě funkce;
-- výsledek jednoznačně popisuje deleci jednoho celého exonu;
-- uvedený exon se jednoznačně mapuje na deleční řádek Table 4;
-- Table 4 pro tento transkriptový důsledek uvádí aplikovatelnou základní PVS1
-  sílu.
+ARIANE proto u přesné shody v ST2:
 
-Kvalitativní větev pacientské mRNA bez alelově specifické kvantifikace snižuje
-základní sílu podle Appendix E: Very Strong na Strong, Strong na Moderate a
-Moderate na Supporting. Komplexní nebo částečné transkriptové následky se
-neodhadují. Stejně tak se bez uloženého procenta funkčního transkriptu
-nepoužijí kvantitativní větve Appendixu.
+- nepřidělí automaticky žádné body `PVS1_RNA`;
+- zobrazí důvod, zdrojový řádek ST2 a odpovídající kontext Table 4;
+- předvyplní referenční transkript, RNA závěr, popis výsledku a zdroj do
+  formuláře odborné revize;
+- ponechá nevyplněný podíl funkčního transkriptu a výslednou sílu kritéria.
+
+Kritérium lze přijmout až po úplné manuální revizi podle Appendix E. Backend
+vyžaduje mRNA-only assay, transkript, tkáň nebo buněčný typ, posouzení NMD,
+závěr o poškozujícím RNA efektu, údaj o zbývajícím funkčním transkriptu a
+kurátorem určenou podporovanou sílu.
 
 Při přijetí `PVS1_RNA` se podle Figure 1B odstraní slabší predikční evidence pro
 stejný splice mechanismus, například PP3, BP4, BP7, BP1 nebo predikční PS1.
 Proteinová funkční evidence PS3/BS3 se automaticky nemaže, protože může
 popisovat jiný mechanismus; případná kombinace se označí k odborné kontrole.
 
-Například `BRCA1 c.4185G>A` má v oficiální Supplementary Table 2 pacientskou
-mRNA s delecí exonu 12. Table 4 uvádí pro deleci BRCA1 E11(12) základní PVS1.
-Kvalitativní RNA větev proto vrátí `PVS1 Strong (RNA)`.
+Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
+pacientskou mRNA s delecí exonu 12. ARIANE tento záznam předvyplní k revizi,
+ale sama z něj neurčí `PVS1 Strong (RNA)` ani jinou sílu.
 
 ### 3.3 PS3 a BS3
 
@@ -564,7 +574,7 @@ Zdroj automatických kritérií: verzovaný snapshot variantově specifických c
 | PP4 | LR >= 2,08 | LR >= 4,3 | LR >= 18,7 | LR >= 350 |
 | BP5 | LR <= 0,48 | LR <= 0,23 | LR <= 0,05 | LR <= 0,00285 |
 
-PP4 a BP5 se automaticky vyhodnocují z lokálního verzovaného snapshotu variantově specifických klinických LR. Manuální revize zůstává dostupná pro varianty nebo zdroje, které snapshot neobsahuje. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 nelze ručně přepsat a neúplný záznam nelze aplikovat.
+PP4 a BP5 se automaticky vyhodnocují z lokálního verzovaného snapshotu variantově specifických klinických LR. Manuální revize zůstává dostupná pro varianty nebo zdroje, které snapshot neobsahuje. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 ani BP5 nelze ručně přepsat a neúplný záznam nelze aplikovat.
 
 ENIGMA v1.2 požaduje pro PP4/BP5 combined LR klinických dat. Historická
 multifaktoriální posterior probability ani IARC třída se nepoužívají přímo jako
@@ -635,9 +645,9 @@ Zdrojový manifest eviduje všechny studie vyjmenované v ENIGMA Appendix B a na
 
 Status zdroje se zpracovává fail-closed:
 
-- `ENIGMA recognised source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
-- `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4. Po splnění ostatních požadavků může PP4 vstoupit do amended klasifikace.
-- `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 se neaplikuje a nepřidají se body.
+- `ENIGMA recognised source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 nebo BP5 vstoupit do amended klasifikace.
+- `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4/BP5. Po splnění ostatních požadavků může kritérium vstoupit do amended klasifikace.
+- `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 ani BP5 se neaplikuje a nepřidají se body.
 
 Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sekundární databáze, například CANVarUK, může sloužit k nalezení a zobrazení hodnoty, ale nenahrazuje citaci primárního zdroje. Pokud amended výsledek kombinuje PP1 nebo PS4 s automatickým či manuálním PP4/BP5, backend vyžaduje explicitní potvrzení nezávislosti pozorování a textové zdůvodnění. Bez nich požadavek odmítne. Samotné zaškrtnutí nenahrazuje kontrolu zdrojových kohort a klinických LR komponent.
 
@@ -762,6 +772,13 @@ RNA větev BP7 Strong vyžaduje manuální strukturovanou revizi.
 
 BP1 Strong se používá pro missense, synonymous a in-frame varianty mimo klinicky významnou funkční doménu, pokud je SpliceAI potvrzeně nejvýše 0,1.
 
+U víceaminokyselinových in-frame variant se poloha neurčuje pouze z prvního
+rezidua. Parser zachová celý explicitní proteinový interval a doménová větev
+Figure 1A kontroluje jeho překryv se všemi funkčními doménami. Pokud kterákoli
+část intervalu doménu překrývá, varianta se nepovažuje za variantu mimo doménu
+a BP1 Strong se nepřidělí. Stejný intervalový výpočet používají také větve
+PP3/BP4 a kontrola BP7 Strong (RNA).
+
 Použité domény:
 
 | Gen | Doména | Aminokyselinový rozsah |
@@ -785,12 +802,23 @@ Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. PP4 a B
 
 Strukturovaná manuální část dále podporuje:
 
-- PP4 z variantově specifického combined clinical LR,
+- PS3 a BS3 pro funkční evidenci mimo Table 9 po úplné odborné kontrole
+  kalibrace podle stejných VCEP specifications; pro oba kódy je ve v1.2
+  použitelná pouze síla Strong,
+- PP4 a BP5 z variantově specifického combined clinical LR,
 - PVS1 RNA pro další publikovanou nebo komplexní RNA evidenci, kterou nelze
   jednoznačně vyhodnotit z úplné ST2 a Table 4,
 - BP7 RNA,
 - PVS1 pro iniciační kodon,
 - PS1 pro stejný splice efekt.
+
+Formuláře PS3 a BS3 předvyplní identitu varianty, proteinový následek, typ
+varianty, referenční transkript, dostupný SpliceAI kontext a informaci, zda už
+Table 9 stejné kritérium přidělila. Formuláře PP4 a BP5 předvyplní dostupný
+kandidátní LR, zdrojové balíky a typy klinické evidence, pokud automatický
+provider zastavil bodování kvůli neověřené nezávislosti. Předvyplnění samo
+kritérium nepovolí. Sílu i úplnost záznamu kontroluje backend a již automaticky
+přidělené kritérium nelze započítat podruhé.
 
 Manuálně doplněná kritéria vytvářejí oddělený amended working result. Původní automatická Module 1 klasifikace zůstává zachována.
 
@@ -979,9 +1007,11 @@ Obsah:
 - IARC třída,
 - populační a referenční údaje.
 
-P/LP missense záznamy ST7 se používají jako referenční klasifikační základ
-proteinového PS1. O automatickém použití rozhoduje až explicitní stav v
-proteinovém PS1 registru po kontrole SpliceAI, Table 9 a úplné ST2.
+P/LP missense záznamy ST7 se používají k nalezení kandidátů pro proteinové PS1.
+ST7 sama nepotvrzuje, že klasifikace každé reference byla vytvořena podle VCEP
+specifications. Automatický stav `eligible` proto navíc vyžaduje samostatně
+ověřenou VCEP assertion nebo doloženou lokální reklasifikaci a úplnou kontrolu
+splice podmínek.
 
 ### 6.3.1 Supplementary Table 2, PVS1 RNA a proteinové PS1
 
@@ -992,7 +1022,7 @@ Generátor: `scripts/build_enigma_st2_splice_evidence_snapshot.py`
 Obsahuje všech 220 variant a všech 11 zdrojových sloupců listu
 `ST2 splicing dataset codes`, číslo zdrojového řádku a checksum oficiálního
 Excelu. Používá se ke kontrole známé RNA/splice evidence pro proteinové PS1 a
-jako oficiální vstup obecné automatické větve PVS1 RNA popsané v části 3.2.2.
+k předvyplnění odborné revize PVS1 RNA popsané v části 3.2.2.
 ARIANE nemá aktivní registr referencí pro splice PS1. Úplná ST2 se používá
 jen jako definovaný zdroj známé RNA/splice evidence. Samotná přítomnost záznamu
 v ST2 nepřiděluje PS1 splice ani nepředvyplňuje jeho sílu. Pro pohodlnější
@@ -1458,21 +1488,31 @@ předchozí numerické implementace a nesmí publikovat runtime data.
 
 BA1 a BS1 vyžadují průměrnou hloubku alespoň 20. PM2 vyžaduje prokázanou
 nepřítomnost v obou požadovaných non-cancer datasetech a průměrnou hloubku
-alespoň 25. Samotná absence varianty v JSON není dostačující. PM2 se podle
-ENIGMA v1.2 nepoužívá pro indely.
+alespoň 25. Samotná absence varianty v JSON není dostačující. PM2 se nepoužívá
+pro malé indely do 50 bp. Pro větší varianty se použije pouze příslušná
+strukturální větev Appendix G, kterou runtime aktuálně podporuje pro úplné
+exonové delece.
 
 Coverage lookup agreguje všechny pozice genomového rozsahu `REF`. ENIGMA v1.2
 neuvádí šířku flanking okna, proto se okolní báze mimo vlastní variantu
 nepřidávají. Tato definice je uvedena v diagnostických polích jako
 `coverage_scope: variant_reference_span`. Pro SNV je výsledek shodný s mean
 depth na lokusu, který zobrazuje gnomAD. Pro vícebázový rozsah musí být v cache
-všechny pozice, jinak se vyhodnocení uzavře bez PM2.
+všechny pozice. Naměřená hloubka a její klasifikační způsobilost jsou oddělené
+údaje. Pole `measurement_passes_threshold` popisuje pouze číselný výsledek.
+Pole `classification_compatible` určuje, zda lze daný coverage zdroj použít pro
+kritérium. Současná metoda `variant_reference_span` má stav
+`methodologically_unresolved`, takže automatické PM2 nepřiděluje.
 
 ### 10.1 Otevřené implementační body
 
+Souhrnný a průběžně udržovaný seznam je v
+[`open_methodological_and_data_tasks.md`](open_methodological_and_data_tasks.md).
+
 1. ENIGMA v1.2 pro PM2 požaduje průměrnou hloubku alespoň 25 v oblasti kolem
    varianty, ale neurčuje šířku této oblasti. Současná reprodukovatelná definice
-   ARIANE používá genomový rozsah alely `REF`. Pro SNV je to jedna pozice.
+   ARIANE používá genomový rozsah alely `REF` pouze jako auditní měření. Pro SNV
+   je to jedna pozice. Toto měření samo automatické PM2 nepovoluje.
    Případná změna na flanking okno se nesmí provést odhadem. Vyžaduje potvrzení
    ENIGMA, verzovanou změnu politiky a nové regresní testy.
 
@@ -1480,8 +1520,17 @@ všechny pozice, jinak se vyhodnocení uzavře bez PM2.
    ale neposkytuje jejich úplný strojově čitelný seznam. Lokální kurátorovaný
    soubor proto obsahuje pouze varianty s doloženým zdrojem. Nepřítomnost
    varianty v tomto souboru sama o sobě nedokazuje, že nejde o founder variantu.
+   Runtime proto používá tři stavy: `pathogenic_founder`,
+   `reviewed_not_found` a `unresolved`. Jen první dva jsou rozhodnuté. Stav
+   `unresolved` vede k odborné revizi a nepřiděluje BA1 ani BS1.
    Rozšíření seznamu musí obsahovat kanonickou HGVS notaci, používaný transkript,
    founder populaci, tvrzení o patogenitě, zdroj, datum přístupu a checksum.
+
+3. Nezávislý validační soubor očekávaných ENIGMA klasifikací se připravuje
+   externě. Po jeho získání musí být připnuta verze a původ každého záznamu,
+   oddělena automatizovatelná a manuální evidence a porovnána nejen výsledná
+   třída, ale také kritéria, síly a rozhodovací cesta. Interní regresní testy
+   tento nezávislý validační krok nenahrazují.
 
 ### 10.2 Kompatibilita coverage pro gnomAD v3
 
@@ -1500,7 +1549,9 @@ kolem varianty, ale neuvádí konkrétní coverage release. Z toho nelze odvodit
 
 Do získání potvrzení od ENIGMA je stav veden jako doložený provozní zdroj s
 nepotvrzenou přesnou kompatibilitou. Zdroj a verze se vždy zobrazují v auditu a
-nesmí být přepsány na `v3.1.2 coverage`. Podklady:
+nesmí být přepsány na `v3.1.2 coverage`. Naměřená hloubka je dostupná pro audit,
+ale má `classification_compatible: false` a nemůže automaticky splnit požadavek
+pokrytí pro BA1, BS1 ani PM2. Podklady:
 
 - [gnomAD v3.1 release](https://gnomad.broadinstitute.org/news/2020-10-gnomad-v3-1-new-content-methods-annotations-and-data-availability/),
 - [gnomAD v3.1.2 minor release](https://gnomad.broadinstitute.org/news/2021-10-gnomad-v3-1-2-minor-release/),
@@ -1568,11 +1619,21 @@ patogenních founder variant není v ENIGMA publikován jako úplný strojově
 
 BayesDel_noAF a AlphaMissense se získávají jedním dotazem nad genomovou variantou přes MyVariant.info a ukládají se do lokální cache.
 
-Do trvalé cache se ukládá pouze úspěšná anotace nebo explicitní odpověď, že
+Do trvalé cache se ukládá pouze úspěšná anotace, stabilní nejednoznačný výsledek
+nebo explicitní odpověď, že
 varianta v MyVariant nebyla nalezena. Odpověď `no_score`, při které služba
 variantu vrátí bez BayesDel i AlphaMissense anotace, se považuje za opakovatelný
 neúplný výsledek. Neukládá se a následující požadavek provede nový dotaz. Při
-načtení cache se ignorují také starší prázdné a `no_score` záznamy.
+načtení cache se ignorují také starší prázdné a `no_score` záznamy. Ignorují se
+i staré BayesDel záznamy bez verze politiky výběru, protože mohly vzniknout
+výběrem maxima z několika rozdílných hodnot.
+
+Skalární BayesDel_noAF hodnota se přijme jako jednoznačná variantní anotace.
+Pokud MyVariant vrátí více hodnot, přijmou se pouze tehdy, když jsou všechny
+číselně shodné. Rozdílné hodnoty bez explicitní vazby hodnoty na transkript
+vrátí stav `ambiguous_transcript`; BayesDel se v takovém případě nepoužije pro
+PP3 ani BP4. Seznam transkriptů vrácený samostatným polem dbNSFP se s hodnotami
+nespojuje podle pořadí, protože API takovou indexovou vazbu negarantuje.
 
 BayesDel se používá pouze v rozhodovacích větvích PP3 a BP4 popsaných výše. AlphaMissense se vrací jako doplňující anotace a samo o sobě nevytváří samostatné ENIGMA kritérium.
 
@@ -1632,7 +1693,7 @@ RNA-dependent canonical splice-site a initiation-codon větve samostatně ověř
 
 ARIANE nepoužívá plošné potlačení podle příznaku `has_functional_evidence`. Interakce se vyhodnocují podle mechanismu a hierarchie důkazů z ENIGMA v1.2 Figure 1A, Figure 1B, Figure 1C a Appendix E.
 
-Přijaté PVS1 (RNA) nahrazuje slabší bioinformatické kódy pro stejný experimentálně potvrzený splice důsledek. Přijaté BP7 Strong (RNA) nahrazuje BP7 Supporting, ale podle Figure 1B obecně zachovává ostatní použitelné bioinformatické kódy. Před přijetím BP7 Strong (RNA) se samostatně kontroluje typ varianty a funkční doména. Missense varianta uvnitř ENIGMA funkční domény musí mít v původním automatickém výsledku aplikované BS3 s Table 9 provenance. Ruční potvrzení tuto podmínku nemůže nahradit. PS3 nebo BS3 bez PVS1 automaticky nepotlačuje PP3, BP4, BP7 ani BP1, protože Figure 1C výslovně požaduje zachování relevantních bioinformatických kódů.
+Přijaté PVS1 (RNA) nahrazuje slabší bioinformatické kódy pro stejný experimentálně potvrzený splice důsledek. Přijaté BP7 Strong (RNA) nahrazuje BP7 Supporting, ale podle Figure 1B obecně zachovává ostatní použitelné bioinformatické kódy. Před přijetím BP7 Strong (RNA) se samostatně kontroluje typ varianty a funkční doména. Missense varianta uvnitř ENIGMA funkční domény musí mít aplikované BS3. Podmínku může splnit automatické BS3 z Table 9 nebo úplný ruční BS3 záznam, u kterého backend ověřil ENIGMA VCEP kalibraci, patogenní i benigní kontroly, variantově specifický výsledek, zdroj a reviewera. Samostatný příznak nebo neúplný ruční záznam nestačí. PS3 nebo BS3 bez PVS1 automaticky nepotlačuje PP3, BP4, BP7 ani BP1, protože Figure 1C výslovně požaduje zachování relevantních bioinformatických kódů.
 
 Každé nahrazení, zachovaná potenciální interakce nebo konflikt se vrací ve strukturovaném poli `evidence_interactions`. Ve webovém rozhraní je zobrazeno v rozbalovací části `Evidence interaction warnings`. Přesná matice je v `docs/evidence_interaction_matrix.md`.
 
@@ -1699,14 +1760,12 @@ evidence.
 ### 15.2 Graf pro ručně doplněnou evidenci
 
 Přepočet po ručně doplněné odborné evidenci používá samostatný graf
-`ariane.vcep.manual-evidence`, verze `2.0.0-gene-policy-dag`.
+`ariane.vcep.manual-evidence`, verze `3.0.0-single-rule-owner`.
 
 | Uzel | Úloha |
 | --- | --- |
 | `contract.manual_evidence_inputs` | Kontrola struktury automatických a ručních kritérií |
-| `rule.manual_evidence` | Kontrola povinných podkladů a výpočet povolené síly |
-| `policy.manual_evidence_interactions` | RNA a proteinová deduplikace podle mechanismu |
-| `policy.manual_enigma_combination` | Review-adjusted ENIGMA klasifikace |
+| `rule.manual_evidence` | Jediný vlastník kontroly podkladů, síly, interakcí a review-adjusted ENIGMA klasifikace |
 
 Frontend ruční evidence neobsahuje kopii prahů ani funkci pro odvození síly.
 Odesílá původní automatická kritéria, kontext varianty a surová pole formuláře

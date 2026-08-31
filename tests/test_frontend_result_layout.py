@@ -99,6 +99,16 @@ def test_clinical_lr_overlap_audit_is_visible_and_backend_driven():
     assert "result.clinical_lr_audit.overlap_assessment_sources" in html
 
 
+def test_population_audit_shows_founder_and_coverage_eligibility():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+
+    assert "Founder exception review" in html
+    assert "PM2 coverage method" in html
+    assert "Coverage mean depth" in html
+    assert "Classification compatible" in html
+    assert "dataset.coverage.compatibility_reason" in html
+
+
 def test_variant_input_can_synchronise_the_explicit_gene_selector():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
     javascript = frontend_javascript()

@@ -142,8 +142,8 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
             "Required ENIGMA Table 9 dataset is not the complete lossless v1.2 snapshot"
         )
     allowed_functional = {
-        ("PS3", "Strong"), ("PS3", "Moderate"), ("PS3", "Supporting"),
-        ("BS3", "Strong"), ("BS3", "Moderate"), ("BS3", "Supporting"),
+        ("PS3", "Strong"),
+        ("BS3", "Strong"),
         ("None", "N/A"),
     }
     required_table9_fields = {

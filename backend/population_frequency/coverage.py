@@ -20,8 +20,17 @@ def lookup_coverage_by_position(
     dataset_key: str,
     build: str,
     threshold: float,
+    *,
+    classification_compatible: bool,
+    compatibility_status: str,
+    compatibility_reason: str,
 ) -> dict[str, Any]:
-    """Average depth across every genomic base represented by the REF allele."""
+    """Measure depth while keeping source compatibility explicit."""
+    compatibility = {
+        "classification_compatible": classification_compatible,
+        "compatibility_status": compatibility_status,
+        "compatibility_reason": compatibility_reason,
+    }
     chrom, span_start, span_end = reference_span_from_coords(coords)
     if chrom is None or span_start is None or span_end is None:
         return {
@@ -36,6 +45,7 @@ def lookup_coverage_by_position(
             "span_end": None,
             "positions_expected": 0,
             "positions_available": 0,
+            **compatibility,
         }
 
     found: list[tuple[str, Mapping[str, Any]]] = []
@@ -86,7 +96,8 @@ def lookup_coverage_by_position(
             "over_20": over_20,
             "over_25": over_25,
             "threshold": threshold,
-            "passes": mean_depth >= threshold,
+            "passes": mean_depth >= threshold and classification_compatible,
+            "measurement_passes_threshold": mean_depth >= threshold,
             "source": ", ".join(sources),
             "position_key": found[0][1].get("position_key") or found[0][0],
             "position_keys": [cov.get("position_key") or key for key, cov in found],
@@ -96,11 +107,13 @@ def lookup_coverage_by_position(
             "positions_expected": expected,
             "positions_available": len(found),
             "missing_positions": [],
+            **compatibility,
         }
     return {
         "mean_depth": None,
         "threshold": threshold,
         "passes": False,
+        "measurement_passes_threshold": False,
         "source": "not_found_in_coverage_snapshot",
         "position_key": None,
         "position_keys": [cov.get("position_key") or key for key, cov in found],
@@ -110,6 +123,7 @@ def lookup_coverage_by_position(
         "positions_expected": expected,
         "positions_available": len(found),
         "missing_positions": missing_positions,
+        **compatibility,
     }
 
 
@@ -122,19 +136,27 @@ def aggregate_coverage(
     for key, dataset in dataset_results.items():
         coverage = dataset.get("coverage") or {}
         mean_depth = as_float(coverage.get("mean_depth"))
+        classification_compatible = (
+            coverage.get("classification_compatible") is True
+        )
         dataset_threshold = as_float(coverage.get("threshold"))
-        passes = (
-            bool(coverage.get("passes"))
-            if coverage.get("passes") is not None
+        measurement_passes = (
+            bool(coverage.get("measurement_passes_threshold"))
+            if coverage.get("measurement_passes_threshold") is not None
             else (
                 mean_depth is not None
                 and dataset_threshold is not None
                 and mean_depth >= dataset_threshold
             )
         )
+        passes = measurement_passes and classification_compatible
         datasets[key] = {
             "available": mean_depth is not None,
             "passes": passes,
+            "measurement_passes_threshold": measurement_passes,
+            "classification_compatible": classification_compatible,
+            "compatibility_status": coverage.get("compatibility_status"),
+            "compatibility_reason": coverage.get("compatibility_reason"),
             "mean_depth": mean_depth,
             "threshold": dataset_threshold,
             "source": coverage.get("source"),
@@ -150,16 +172,31 @@ def aggregate_coverage(
                 GNOMAD_LOCAL_DATASET_CONFIG[key]["callset"]: {
                     "mean_depth": mean_depth,
                     "passes": passes,
+                    "measurement_passes_threshold": measurement_passes,
+                    "classification_compatible": classification_compatible,
                     "source": coverage.get("source"),
                 }
             },
         }
     required = list(required_dataset_keys)
     all_available = all(datasets.get(key, {}).get("available") for key in required)
+    all_compatible = all(
+        datasets.get(key, {}).get("classification_compatible") is True
+        for key in required
+    )
     all_pass = all(datasets.get(key, {}).get("passes") for key in required)
     return {
-        "status": "ok" if all_pass else ("missing" if not all_available else "insufficient"),
+        "status": (
+            "ok"
+            if all_pass
+            else (
+                "missing"
+                if not all_available
+                else ("incompatible" if not all_compatible else "insufficient")
+            )
+        ),
         "passes_pm2": all_pass,
+        "all_sources_classification_compatible": all_compatible,
         "min_required_mean_depth": threshold,
         "datasets": datasets,
     }
@@ -176,7 +213,12 @@ def frequency_depth_ok(
         if max_af is not None and as_float(dataset.get("max_af")) != max_af:
             continue
         mean_depth = as_float((dataset.get("coverage") or {}).get("mean_depth"))
-        if mean_depth is not None and mean_depth >= minimum_mean_depth:
+        coverage = dataset.get("coverage") or {}
+        if (
+            coverage.get("classification_compatible") is True
+            and mean_depth is not None
+            and mean_depth >= minimum_mean_depth
+        ):
             return True
     return False
 

@@ -14,9 +14,10 @@ variant spaces are not classification sources and cannot be activated by an
 environment variable. Existing files remain only as historical validation and
 audit material.
 
-Both coding and intronic caches are built with
-`scripts/build_spliceai_reference_caches.py` against local instances of the
-container image pinned by digest in the profile.
+Historical coding and intronic comparison datasets can be rebuilt with
+`scripts/build_spliceai_reference_caches.py` against a local instance of the
+container image pinned by digest in the profile. They are not required for
+runtime classification.
 
 Companion metadata:
 

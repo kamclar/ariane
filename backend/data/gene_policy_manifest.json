@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "manifest_id": "ariane_gene_policy_registry",
-  "manifest_version": "2026.08.27",
+  "manifest_version": "2026.08.30",
   "status": "active",
   "policies": {
     "enigma_brca_vcep_1_2": {
@@ -172,7 +172,7 @@
       ],
       "required_rule_data": {
         "PVS1": ["enigma_table4"],
-        "PVS1_RNA": ["enigma_table9"],
+        "PVS1_RNA": ["enigma_table4", "enigma_st2"],
         "PS3": ["enigma_table9"],
         "BS3": ["enigma_table9"],
         "PS1": ["ps1_reference_registry", "spliceai"],
@@ -238,7 +238,7 @@
       ],
       "required_rule_data": {
         "PVS1": ["enigma_table4"],
-        "PVS1_RNA": ["enigma_table9"],
+        "PVS1_RNA": ["enigma_table4", "enigma_st2"],
         "PS3": ["enigma_table9"],
         "BS3": ["enigma_table9"],
         "PS1": ["ps1_reference_registry", "spliceai"],

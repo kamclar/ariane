@@ -8,9 +8,12 @@ the assessed variant is still ineligible for BP7 Strong (RNA).
 from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
-import re
 
 from backend.config import FUNCTIONAL_DOMAINS
+from backend.modules.utils import (
+    get_amino_acid_interval,
+    overlapping_functional_domains,
+)
 from backend.modules.variant_type import infer_variant_type
 
 
@@ -22,31 +25,8 @@ _INFRAME_TYPES = {
 }
 
 
-def _protein_interval(p_notation: str) -> tuple[int, int] | None:
-    """Return the complete affected amino-acid interval when it is explicit."""
-    positions = [
-        int(value)
-        for value in re.findall(r"[A-Z][a-z]{2}(\d+)", p_notation or "")
-    ]
-    if not positions:
-        return None
-    return min(positions), max(positions)
-
-
-def _overlapping_domains(
-    gene: str,
-    protein_interval: tuple[int, int],
-) -> tuple[str, ...]:
-    start, end = protein_interval
-    return tuple(
-        name
-        for name, (domain_start, domain_end) in FUNCTIONAL_DOMAINS.get(gene, {}).items()
-        if start <= domain_end and end >= domain_start
-    )
-
-
-def _has_table9_bs3(base_criteria: Sequence[Mapping[str, Any]]) -> bool:
-    """Accept only an applied BS3 carrying ENIGMA Table 9 provenance."""
+def _has_calibrated_bs3(base_criteria: Sequence[Mapping[str, Any]]) -> bool:
+    """Accept only an applied BS3 with Table 9 or reviewed VCEP provenance."""
     for criterion in base_criteria:
         if (
             str(criterion.get("name") or "").upper() != "BS3"
@@ -62,7 +42,10 @@ def _has_table9_bs3(base_criteria: Sequence[Mapping[str, Any]]) -> bool:
             continue
         if any(
             isinstance(source, Mapping)
-            and source.get("source_id") == "enigma-v1.2-table9"
+            and source.get("source_id") in {
+                "enigma-v1.2-table9",
+                "manual-enigma-vcep-functional-review",
+            }
             for source in sources
         ):
             return True
@@ -120,7 +103,7 @@ def evaluate_bp7_rna_variant_context(
         )
         return details
 
-    protein_interval = _protein_interval(p_notation)
+    protein_interval = get_amino_acid_interval(p_notation)
     if protein_interval is None:
         details.update(
             status="unavailable",
@@ -131,7 +114,7 @@ def evaluate_bp7_rna_variant_context(
         )
         return details
 
-    domains = _overlapping_domains(gene, protein_interval)
+    domains = overlapping_functional_domains(gene, protein_interval)
     details["protein_interval"] = list(protein_interval)
     details["functional_domains"] = list(domains)
     if not domains:
@@ -154,20 +137,22 @@ def evaluate_bp7_rna_variant_context(
         return details
 
     details["requires_bs3"] = True
-    details["bs3_met"] = _has_table9_bs3(base_criteria)
+    details["bs3_met"] = _has_calibrated_bs3(base_criteria)
     if details["bs3_met"]:
         details.update(
             eligible=True,
             status="eligible",
             reason=(
                 "The missense variant is inside an ENIGMA functional domain and "
-                "BS3 is met by calibrated ENIGMA Table 9 evidence."
+                "BS3 is met by calibrated ENIGMA Table 9 evidence or a complete "
+                "expert review under the same VCEP specifications."
             ),
         )
     else:
         details["reason"] = (
             "The missense variant is inside an ENIGMA functional domain "
             f"({', '.join(domains)}), but BS3 is not met by calibrated ENIGMA "
-            "Table 9 evidence. BP7 Strong (RNA) cannot be applied."
+            "Table 9 evidence or a complete expert review under the same VCEP "
+            "specifications. BP7 Strong (RNA) cannot be applied."
         )
     return details

@@ -44,6 +44,13 @@ výjimky. Teprve čistý uzel `rule.population_frequency` z předané evidence
 vyhodnotí BA1, BS1 a PM2. Pravidlový uzel neotevírá soubory a nevolá founder
 registr. Chybějící výsledek founder kontroly vede k nedostupnému BA1/BS1, nikoli
 k předpokladu, že varianta founder výjimkou není.
+Stejně se zachází s nenalezením v neúplném registru. Takový výsledek má stav
+`unresolved`. Kód BA1 nebo BS1 může pokračovat pouze po pozitivním founder nálezu,
+který kritérium vyloučí, nebo po doloženém stavu `reviewed_not_found`.
+
+Coverage evidence odděluje naměřenou hloubku od klasifikační kompatibility
+zdroje. Numericky dostatečné pokrytí z nekompatibilního release zůstává v auditu,
+ale pravidlový uzel je nesmí použít jako splněnou podmínku kritéria.
 
 Stav PM2 `NOT_APPLICABLE` vzniká výhradně z explicitní genové VCEP policy a
 typu alely. Text pole `reason` stav kritéria neřídí. Pokud je PM2 pro variantu

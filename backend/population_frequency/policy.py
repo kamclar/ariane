@@ -22,6 +22,14 @@ GNOMAD_LOCAL_DATASET_CONFIG = {
         "dataset_names": ["gnomad_v2_1_1_exomes_grch37"],
         "coverage_dataset_key": "gnomad_v2_1_1_exomes_grch37",
         "callset": "exomes",
+        "frequency_release": "2.1.1",
+        "coverage_release": "2.1",
+        "coverage_frequency_compatibility": "approved_same_v2_callset",
+        "coverage_classification_compatible": True,
+        "coverage_compatibility_reason": (
+            "The official gnomAD v2.1 coverage product is the approved "
+            "coverage source for the v2.1.1 non-cancer exome callset."
+        ),
     },
     "v3_1_non_cancer": {
         "label": "gnomAD v3.1.2 genomes GRCh38",
@@ -30,7 +38,29 @@ GNOMAD_LOCAL_DATASET_CONFIG = {
         "dataset_names": ["gnomad_v3_1_2_genomes_grch38"],
         "coverage_dataset_key": "gnomad_v3_1_2_genomes_grch38",
         "callset": "genomes",
+        "frequency_release": "3.1.2",
+        "coverage_release": "3.0.1",
+        "coverage_frequency_compatibility": "unresolved_release_mismatch",
+        "coverage_classification_compatible": False,
+        "coverage_compatibility_reason": (
+            "The public genome coverage product is gnomAD r3.0.1, while "
+            "the frequency callset is v3.1.2. Exact sample compatibility "
+            "has not been established."
+        ),
     },
+}
+
+
+PM2_COVERAGE_METHOD_REVIEW = {
+    "scope": "variant_reference_span",
+    "status": "methodologically_unresolved",
+    "automatic_assignment_allowed": False,
+    "reason": (
+        "ENIGMA v1.2 requires average read depth in the region around the "
+        "variant but does not define the width of that region. The REF span "
+        "is retained as an auditable measurement and is not treated as a "
+        "confirmed ENIGMA coverage method."
+    ),
 }
 
 
@@ -125,6 +155,10 @@ def runtime_dataset_binding_error(
             or item.get("callset") != config["callset"]
             or item.get("subset") != "non_cancer"
             or item.get("dataset_key") != config["coverage_dataset_key"]
+            or str(item.get("release")) != config["frequency_release"]
+            or f"release/{config['coverage_release']}/" not in str(
+                item.get("coverage_hail_uri") or ""
+            )
         ):
             return f"runtime dataset {runtime_key!r} differs from the manifest"
     return None

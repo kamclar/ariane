@@ -94,6 +94,15 @@ class ExonCnvEvidenceTests(unittest.TestCase):
         self.assertEqual(result["variant_size_bp"], 51)
         self.assertEqual(result["criteria"], [])
 
+    def test_large_duplication_does_not_receive_pm2_because_recall_is_suboptimal(self):
+        result = lookup_exon_cnv_evidence("BRCA1", "c.100_150dup")
+
+        self.assertEqual(result["pm2_applicability"], "not_met")
+        self.assertEqual(result["variant_size_bp"], 51)
+        self.assertEqual(result["criteria"], [])
+        self.assertIn("recall is suboptimal", result["decision_trace"][-1]["detail"])
+        self.assertIn("Table 4 PVS1 assessment remains separate", result["reason"])
+
     def test_small_delins_is_not_applicable_without_single_size_convention(self):
         result = lookup_exon_cnv_evidence("BRCA1", "c.100_102delinsAC")
 

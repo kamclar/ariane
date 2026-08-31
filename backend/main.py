@@ -40,9 +40,9 @@ from backend.data_validation import validate_required_datasets
 from backend.data_health import get_data_issues
 from backend.classification_dag import (
     DagNodeExecutionError,
-    execute_manual_evidence,
     get_configured_engine_mode,
 )
+from backend.classification_dag.manual import execute_manual_evidence
 from backend.classification_dag.provider_wiring import production_provider_dependencies
 from backend.models import (
     VariantRequest, ClassificationResult,

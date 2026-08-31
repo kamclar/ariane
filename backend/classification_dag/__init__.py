@@ -29,11 +29,6 @@ from backend.classification_dag.providers import (
     ProviderDependencies,
     Table9EvidenceNode,
 )
-from backend.classification_dag.manual import (
-    ManualEvidenceExecution,
-    ManualEvidenceInputs,
-    execute_manual_evidence,
-)
 from backend.classification_dag.types import (
     DagExecutionContext,
     DagRun,
@@ -65,11 +60,8 @@ __all__ = [
     "NodeStatus",
     "Table9EvidenceNode",
     "ProviderDependencies",
-    "ManualEvidenceExecution",
-    "ManualEvidenceInputs",
     "VariantAssertion",
     "execute_classification",
     "execute_classification_request",
-    "execute_manual_evidence",
     "get_configured_engine_mode",
 ]

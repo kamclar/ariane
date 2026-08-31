@@ -12,7 +12,10 @@ from backend.modules.bp1 import evaluate_bp1
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.evidence_interactions import pvs1_prediction_deduplication
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-from backend.modules.utils import get_amino_acid_position, is_in_functional_domain
+from backend.modules.utils import (
+    get_amino_acid_interval,
+    overlapping_functional_domains,
+)
 
 
 @dataclass(frozen=True)
@@ -61,10 +64,12 @@ class BioinformaticCriteriaNode:
                     )
                 )
         if ci.variant_type.lower() in {"synonymous", "silent", "intronic"}:
-            aa_pos = get_amino_acid_position(ci.p_notation)
-            in_domain = False
-            if aa_pos:
-                in_domain, _ = is_in_functional_domain(ci.gene, aa_pos)
+            protein_interval = get_amino_acid_interval(ci.p_notation)
+            in_domain = bool(
+                overlapping_functional_domains(ci.gene, protein_interval)
+                if protein_interval is not None
+                else ()
+            )
             bp4_met = any(item.code == "BP4" for item in decisions)
             bp7 = evaluate_bp7(
                 ci.variant_type,

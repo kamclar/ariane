@@ -170,7 +170,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             {"31131967", "31853058"},
         )
 
-    def test_c4185_full_path_applies_official_rna_pvs1_and_pp4_strong(self):
+    def test_c4185_full_path_routes_unquantified_rna_to_review(self):
         from backend.classification_dag import ClassifierEngineMode
         from backend.main import CLASSIFICATION_ORCHESTRATION, _classify_one
         from backend.services import EvidenceOrchestrationService, ExternalEvidenceDependencies
@@ -217,14 +217,17 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
-        self.assertEqual(set(criteria), {"PVS1_RNA", "PM2_Supporting", "PP4"})
-        self.assertEqual(criteria["PVS1_RNA"].strength, "Strong")
+        self.assertEqual(set(criteria), {"PP3", "PM2_Supporting", "PP4"})
+        self.assertEqual(criteria["PP3"].strength, "Supporting")
         self.assertEqual(criteria["PP4"].strength, "Strong")
-        self.assertEqual(result.total_points, 9)
+        self.assertEqual(result.total_points, 6)
         self.assertEqual(result.predicted_class, 4)
-        self.assertTrue(any(
-            "PP3" in item.suppressed for item in result.evidence_interactions
-        ))
+        self.assertTrue(result.rna_review.recommended)
+        self.assertEqual(result.rna_review.priority, "high")
+        self.assertEqual(
+            result.rna_review.manual_review_prefill["transcript_accession"],
+            "NM_007294.4",
+        )
 
     def test_pp4_snapshot_missing_metadata_fails_closed(self):
         from backend.modules import pp4_bp5
@@ -318,8 +321,11 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         criteria = {criterion.name: criterion for criterion in result.criteria}
         self.assertEqual(criteria["PVS1"].strength, "Very Strong")
         self.assertEqual(criteria["PP4"].strength, "Very Strong")
-        self.assertEqual(criteria["PM2_Supporting"].strength, "Supporting")
-        self.assertEqual(result.total_points, 17)
+        self.assertNotIn("PM2_Supporting", criteria)
+        self.assertTrue(
+            any("coverage-region method" in warning for warning in result.warnings)
+        )
+        self.assertEqual(result.total_points, 16)
         self.assertEqual(result.predicted_class, 5)
         self.assertEqual(result.predicted_label, "Pathogenic")
 

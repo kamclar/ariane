@@ -3,7 +3,9 @@
 ENIGMA VCEP v1.2 prohibits BA1 and BS1 for well-established pathogenic
 founder variants, but does not publish a machine-readable exhaustive list.
 ARIANE therefore uses a small, provenance-bearing policy snapshot and never
-falls back to an inferred or free-text runtime classification.
+falls back to an inferred or free-text runtime classification. Absence from
+this non-exhaustive snapshot is an unresolved review state, not evidence that
+the variant is not a pathogenic founder variant.
 """
 
 from __future__ import annotations
@@ -128,13 +130,18 @@ def lookup_pathogenic_founder_variant(gene: str, c_notation: str) -> Dict[str, A
     record = FOUNDER_VARIANT_INDEX.get(key)
     if record is None:
         return {
-            "status": "not_found",
-            "is_pathogenic_founder": False,
-            "reason": "variant is not present in the approved pathogenic-founder snapshot",
+            "status": "unresolved",
+            "is_pathogenic_founder": None,
+            "review_required": True,
+            "reason": (
+                "variant is not present in the curated pathogenic-founder "
+                "snapshot; because the snapshot is non-exhaustive, this does "
+                "not establish that the variant is not a pathogenic founder variant"
+            ),
             "snapshot_version": FOUNDER_VARIANT_METADATA.get("snapshot_version"),
         }
     return {
-        "status": "found",
+        "status": "pathogenic_founder",
         "is_pathogenic_founder": True,
         "reason": record.get("founder_context") or "well-established pathogenic founder variant",
         "record": record,

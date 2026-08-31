@@ -174,6 +174,58 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             "source_review_rationale": "Compatible multifactorial model and independent cohort.",
         }), "Very Strong")
 
+    def test_bp5_uses_benign_clinical_lr_thresholds_and_reviewed_provenance(self):
+        common = {
+            "clinical_lr_scale": "lr",
+            "source_review_status": "appendix_b",
+            "source_pmid": "31853058",
+            "clinical_data_summary": "Segregation and pathology contributions; overlap reviewed.",
+        }
+        self.assertEqual(
+            suggest_strength("BP5", {**common, "clinical_lr_value": 0.48}),
+            "Supporting",
+        )
+        self.assertEqual(
+            suggest_strength("BP5", {**common, "clinical_lr_value": 0.05}),
+            "Strong",
+        )
+        self.assertIsNone(suggest_strength("BP5", {
+            **common,
+            "clinical_lr_value": 0.05,
+            "source_review_status": "unreviewed",
+            "source_citation": "PMID:31853058",
+        }))
+
+    def test_manual_ps3_bs3_require_complete_enigma_calibration_review(self):
+        common = {
+            "assay_scope": "protein_only",
+            "calibration_status": "reviewed_under_enigma_vcep",
+            "pathogenic_and_benign_controls_confirmed": True,
+            "curated_strength": "Strong",
+            "assay_name": "Saturation functional assay",
+            "source_citation": "PMID:99999999",
+            "calibration_summary": "OddsPath calibration reviewed against pathogenic and benign controls.",
+            "variant_result_summary": "Three replicates support the reported functional category.",
+            "functional_reviewed_by": "Expert reviewer",
+        }
+        self.assertEqual(
+            suggest_strength("PS3", {**common, "functional_conclusion": "abnormal"}),
+            "Strong",
+        )
+        self.assertEqual(
+            suggest_strength("BS3", {**common, "functional_conclusion": "normal"}),
+            "Strong",
+        )
+        incomplete = {**common, "functional_conclusion": "abnormal"}
+        incomplete["pathogenic_and_benign_controls_confirmed"] = False
+        self.assertIsNone(suggest_strength("PS3", incomplete))
+        unsupported_strength = {
+            **common,
+            "functional_conclusion": "abnormal",
+            "curated_strength": "Moderate",
+        }
+        self.assertIsNone(suggest_strength("PS3", unsupported_strength))
+
     def test_bs4_likelihood_ratio_thresholds(self):
         self.assertEqual(
             suggest_strength("BS4", {"likelihood_ratio": 0.48}), "Supporting"
@@ -261,6 +313,48 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             ),
             "Strong",
         )
+
+    def test_complete_manual_bs3_can_satisfy_bp7_rna_domain_stipulation(self):
+        manual_bs3 = {
+            "code": "BS3",
+            "enabled": True,
+            "evidence": {
+                "assay_scope": "protein_only",
+                "functional_conclusion": "normal",
+                "calibration_status": "reviewed_under_enigma_vcep",
+                "pathogenic_and_benign_controls_confirmed": True,
+                "curated_strength": "Strong",
+                "assay_name": "Calibrated functional assay",
+                "source_citation": "PMID:99999999",
+                "calibration_summary": "Reviewed against pathogenic and benign controls.",
+                "variant_result_summary": "Variant result is similar to benign controls.",
+                "functional_reviewed_by": "Expert reviewer",
+            },
+        }
+        manual_bp7 = {
+            "code": "BP7_RNA",
+            "enabled": True,
+            "evidence": {
+                "assay_scope": "mrna_only",
+                "rna_conclusion": "no_damaging_effect",
+                "transcript_accession": "NM_007294.4",
+                "tissue_or_cell_type": "blood",
+                "nmd_assessed": "not_applicable",
+            },
+        }
+        result = evaluate_manual_evidence(
+            [],
+            [manual_bp7, manual_bs3],
+            {
+                "gene": "BRCA1",
+                "c_notation": "c.5123C>T",
+                "p_notation": "p.(Ala1708Val)",
+            },
+        )
+        applied = {
+            item["code"] for item in result["manual_criteria"] if item["applies"]
+        }
+        self.assertEqual(applied, {"BS3", "BP7_RNA"})
 
     def test_bp7_rna_does_not_accept_unproven_bs3_for_domain_missense(self):
         evidence = {
@@ -421,6 +515,40 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                     "evidence": {"combined_clinical_lr": 350},
                 }],
             )
+
+    def test_bp5_strong_single_criterion_route_requires_multiple_reviewed_types(self):
+        evidence = {
+            "clinical_lr_value": 0.05,
+            "clinical_lr_scale": "lr",
+            "source_review_status": "appendix_b",
+            "source_pmid": "31853058",
+            "clinical_data_summary": "Segregation and pathology LR; overlap reviewed.",
+            "clinical_evidence_types": ["segregation", "pathology"],
+            "independence_review_confirmed": True,
+        }
+        result = evaluate_manual_evidence([], [{
+            "code": "BP5",
+            "enabled": True,
+            "evidence": evidence,
+            "references": ["PMID:31853058"],
+        }])
+        criterion = result["manual_criteria"][0]
+        self.assertEqual(criterion["selected_strength"], "Strong")
+        self.assertTrue(criterion["single_strong_likely_benign_eligible"])
+        self.assertEqual(result["predicted_class"], 2)
+
+        without_independence = evaluate_manual_evidence([], [{
+            "code": "BP5",
+            "enabled": True,
+            "evidence": {**evidence, "independence_review_confirmed": False},
+            "references": ["PMID:31853058"],
+        }])
+        self.assertFalse(
+            without_independence["manual_criteria"][0][
+                "single_strong_likely_benign_eligible"
+            ]
+        )
+        self.assertEqual(without_independence["predicted_class"], 3)
 
     def test_pp1_with_automatic_pp4_requires_independence_review(self):
         base = [{

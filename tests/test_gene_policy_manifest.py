@@ -35,7 +35,7 @@ def _modified_manifest():
 def test_checked_manifest_and_source_bindings_are_valid():
     manifest = load_gene_policy_manifest()
     assert active_genes() == ("BRCA1", "BRCA2")
-    assert manifest["manifest_version"] == "2026.08.27"
+    assert manifest["manifest_version"] == "2026.08.30"
     assert reference_transcript("BRCA1") == "NM_007294.4"
     assert runtime_policy_id("BRCA2") == "ENIGMA_BRCA_VCEP_1.2"
     assert manifest["genes"]["BRCA1"]["decision_assets"]["PVS1"][

@@ -109,9 +109,10 @@ class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
             "c": "c.4185G>A",
             "p": "p.(Gln1395=)",
             "spliceai": 0.05,
-            "required": {"PVS1_RNA"},
-            "forbidden": {"PVS1", "PM5_PTC", "PP3", "BP1", "BP4", "BP7"},
-            "class": 3,
+            "required": {"BP4", "BP7"},
+            "forbidden": {"PVS1", "PVS1_RNA", "PM5_PTC", "PP3", "BP1"},
+            "class": 2,
+            "rna_review": True,
         },
         {
             "label": "synonymous outside functional domains",

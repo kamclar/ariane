@@ -57,7 +57,11 @@ class PopulationFrequencyService:
             grch37=grch37,
             grch38=grch38,
         )
-        result["founder_exception"] = dict(
+        founder_exception = dict(
             self._founder_lookup(gene or "", c_notation or "")
         )
+        result["founder_exception"] = founder_exception
+        audit = result.get("population_frequency_audit")
+        if isinstance(audit, dict):
+            audit["founder_exception"] = founder_exception
         return result
