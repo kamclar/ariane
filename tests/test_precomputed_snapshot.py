@@ -25,10 +25,16 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         records = json.loads(index_path.read_text(encoding="utf-8"))
         self.assertEqual(metadata["status"], "validated_derived_snapshot")
-        self.assertEqual(metadata["source_manifest"]["schema_version"], 2)
+        self.assertEqual(metadata["source_manifest"]["schema_version"], 3)
         self.assertEqual(
             metadata["automatic_application_statuses"],
-            {"eligible": 4175, "review_required": 972},
+            {"eligible": 12656, "review_required": 294},
+        )
+        self.assertEqual(metadata["rows_seen"], 13481)
+        self.assertEqual(metadata["records"], 12950)
+        self.assertEqual(
+            metadata["criteria"],
+            {"BP5": 5497, "PP4": 1720, "not_informative": 5733},
         )
         self.assertEqual(metadata["records"], len(records))
         self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
@@ -36,9 +42,9 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             metadata["source_manifest_sha256"],
             hashlib.sha256(source_manifest_path.read_bytes()).hexdigest(),
         )
-        self.assertEqual(metadata["case_control_records_selected"], 1710)
+        self.assertEqual(metadata["excluded"]["no_reference_transcript_hgvsc"], 210)
         self.assertEqual(
-            metadata["case_control_selected_by_gene"], {"BRCA1": 681, "BRCA2": 1029}
+            metadata["excluded"]["reference_transcript_hgvs_not_validated"], 26
         )
         self.assertEqual(
             metadata["normalization"]["normalized_indel_dependency"]["index_sha256"],
@@ -49,7 +55,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             "biocommons.hgvs",
         )
 
-    def test_cross_bundle_c5266_alias_requires_overlap_review(self):
+    def test_conflicting_normalized_c5266_alias_requires_source_review(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         canonical = evaluate_pp4_bp5("BRCA1", "c.5266dup")
@@ -59,40 +65,107 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertTrue(canonical["double_counting_risk"])
         self.assertFalse(canonical["automatic_combination_allowed"])
         self.assertIsNone(canonical["likelihood_ratio"])
-        self.assertAlmostEqual(
-            canonical["candidate_likelihood_ratio"], 1.3618122912956548e90
-        )
+        self.assertIsNone(canonical["candidate_likelihood_ratio"])
         self.assertEqual(
             alias["candidate_likelihood_ratio"],
             canonical["candidate_likelihood_ratio"],
         )
+        self.assertEqual(canonical["overlap_status"], "conflicting_normalized_source_rows")
         self.assertEqual(
-            {item["pmid"] for item in canonical["source_components"]},
+            {pmid for item in canonical["source_components"] for pmid in item["pmids"]},
             {"31853058", "40413188"},
         )
 
-    def test_cross_bundle_c509_is_reviewed_without_automatic_bp5(self):
+    def test_c509_uses_publisher_combined_lr_as_bp5_strong(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.509G>A")
-        self.assertFalse(result["applies"])
-        self.assertEqual(result["application_status"], "review_required")
-        self.assertEqual(result["overlap_status"], "unknown")
-        self.assertTrue(result["double_counting_risk"])
-        self.assertAlmostEqual(
-            result["candidate_likelihood_ratio"], 0.03946874736088844
-        )
-        self.assertIn("independence of the underlying clinical observations", result["reason"])
-        self.assertIn("avoid counting the same observations twice", result["reason"])
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "BP5")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["application_status"], "applied")
+        self.assertEqual(result["overlap_status"], "source_curated_combination")
+        self.assertFalse(result["double_counting_risk"])
+        self.assertAlmostEqual(result["likelihood_ratio"], 0.03947)
+        self.assertTrue(result["source_reported_overlap_caveat"])
         self.assertEqual(
-            {item["pmid"] for item in result["source_components"]},
+            set(result["source_components"][0]["pmids"]),
             {"31131967", "31853058", "40413188"},
         )
         self.assertNotIn("local", result["reason"].lower())
         self.assertNotIn("snapshot", result["reason"].lower())
-        self.assertFalse(result["single_strong_likely_benign_eligible"])
+        self.assertTrue(result["single_strong_likely_benign_eligible"])
         self.assertGreaterEqual(result["likelihood_ratio_contribution_count"], 2)
         self.assertGreaterEqual(len(result["clinical_evidence_types"]), 2)
+        comparison = result["threshold_comparison"]
+        self.assertEqual(comparison["status"], "match")
+        self.assertEqual(comparison["source_label"], "BP5 - Benign - Strong")
+        self.assertEqual(comparison["vcep_label"], "BP5 Strong")
+        self.assertEqual(comparison["threshold_operator"], "<=")
+        self.assertEqual(comparison["threshold_value"], 0.05)
+
+    def test_source_label_difference_is_compared_with_vcep_threshold_generically(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.4675+3A>T")
+
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "PP4")
+        self.assertEqual(result["strength"], "Moderate")
+        comparison = result["threshold_comparison"]
+        self.assertEqual(comparison["status"], "different")
+        self.assertEqual(
+            comparison["source_label"],
+            "PP4 - Pathogenic - Supporting",
+        )
+        self.assertEqual(comparison["vcep_label"], "PP4 Moderate")
+        self.assertEqual(comparison["threshold_operator"], ">=")
+        self.assertEqual(comparison["threshold_value"], 4.3)
+        self.assertIn("combined LR=4.31493", comparison["reason"])
+        self.assertIn("VCEP threshold result", result["reason"])
+
+    def test_unknown_source_acmg_label_fails_closed(self):
+        from backend.modules.pp4_bp5 import _parse_source_acmg_label
+
+        with self.assertRaisesRegex(RuntimeError, "Unsupported PP4/BP5 source ACMG label"):
+            _parse_source_acmg_label("Probably moderate")
+
+    def test_every_eligible_snapshot_record_uses_the_same_label_comparison_rule(self):
+        from backend.modules.pp4_bp5 import (
+            _threshold_comparison,
+            load_pp4_bp5_snapshot,
+            lr_to_bp5_strength,
+            lr_to_pp4_strength,
+        )
+
+        snapshot, _aliases = load_pp4_bp5_snapshot()
+        comparisons = []
+        for entry in snapshot.values():
+            lr = entry.get("combined_lr")
+            if lr is None:
+                continue
+            gene = entry["gene"]
+            pp4_strength = lr_to_pp4_strength(gene, lr)
+            bp5_strength = lr_to_bp5_strength(gene, lr)
+            code = "PP4" if pp4_strength else "BP5" if bp5_strength else None
+            strength = pp4_strength or bp5_strength
+            comparisons.append(_threshold_comparison(
+                gene,
+                lr,
+                code,
+                strength,
+                entry["source_acmg_label"],
+            ))
+
+        self.assertTrue(comparisons)
+        self.assertEqual(
+            {item["status"] for item in comparisons},
+            {"match", "different"},
+        )
+        self.assertEqual(
+            sum(item["status"] == "different" for item in comparisons),
+            39,
+        )
 
     def test_single_lr_bp5_strong_is_not_single_strong_class2_eligible(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
@@ -125,38 +198,36 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(canonical["points"], -1)
         self.assertAlmostEqual(canonical["likelihood_ratio"], 0.41018)
         self.assertEqual(source_spelling["likelihood_ratio"], canonical["likelihood_ratio"])
-        self.assertEqual(
-            {item["pmid"] for item in canonical["source_components"]}, {"31853058"}
-        )
+        self.assertEqual(set(canonical["source_components"][0]["pmids"]), {"31853058"})
 
-    def test_pp4_snapshot_combines_independent_rows_after_hgvs_normalization(self):
+    def test_conflicting_normalized_c475_del_rows_require_source_review(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA2", "c.475+4del")
-        self.assertTrue(result["applies"])
-        self.assertEqual(result["code"], "PP4")
-        self.assertEqual(result["strength"], "Strong")
-        self.assertAlmostEqual(result["likelihood_ratio"], 73.38448758438403)
+        self.assertFalse(result["applies"])
+        self.assertEqual(result["application_status"], "review_required")
+        self.assertEqual(result["overlap_status"], "conflicting_normalized_source_rows")
+        self.assertIsNone(result["likelihood_ratio"])
         self.assertEqual(
-            {item["pmid"] for item in result["source_components"]},
-            {"31131967", "31853058"},
+            {pmid for item in result["source_components"] for pmid in item["pmids"]},
+            {"31131967", "31853058", "40413188"},
         )
 
-    def test_caputo_and_case_control_components_require_overlap_review(self):
+    def test_c3891_del_uses_publisher_combined_lr_as_bp5_strong(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.3891_3893del")
-        self.assertFalse(result["applies"])
-        self.assertEqual(result["application_status"], "review_required")
-        self.assertAlmostEqual(
-            result["candidate_likelihood_ratio"], 0.02896079544190584
-        )
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["code"], "BP5")
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["application_status"], "applied")
+        self.assertAlmostEqual(result["likelihood_ratio"], 0.02896)
         self.assertEqual(
-            {item["pmid"] for item in result["source_components"]},
+            set(result["source_components"][0]["pmids"]),
             {"31131967", "34597585", "40413188"},
         )
 
-    def test_pp4_combines_available_appendix_b_clinical_lr_components(self):
+    def test_pp4_uses_publisher_combined_clinical_lr(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.4185G>A")
@@ -164,9 +235,9 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(result["code"], "PP4")
         self.assertEqual(result["strength"], "Strong")
         self.assertEqual(result["points"], 4)
-        self.assertAlmostEqual(result["likelihood_ratio"], 328.183625413548)
+        self.assertAlmostEqual(result["likelihood_ratio"], 328.18363)
         self.assertEqual(
-            {item["pmid"] for item in result["source_components"]},
+            set(result["source_components"][0]["pmids"]),
             {"31131967", "31853058"},
         )
 
@@ -410,7 +481,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "\n".join(result.warnings),
         )
 
-    def test_c5266_cross_bundle_clinical_lr_requires_review(self):
+    def test_c5266_conflicting_clinical_lr_rows_require_review(self):
         from backend.main import _classify_one
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
@@ -426,10 +497,10 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.clinical_lr_audit.application_status, "review_required")
         self.assertTrue(result.clinical_lr_audit.double_counting_risk)
         self.assertTrue(
-            any("expert review is required" in item.lower() for item in result.warnings)
+            any("expert source review is required" in item.lower() for item in result.warnings)
         )
 
-    def test_c509_full_classification_does_not_score_unverified_cross_bundle_lr(self):
+    def test_c509_full_classification_scores_publisher_combined_bp5(self):
         from backend.main import _classify_one
 
         with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
@@ -449,11 +520,12 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
         self.assertNotIn("PP4", criteria)
-        self.assertNotIn("BP5", criteria)
-        self.assertEqual(result.clinical_lr_audit.application_status, "review_required")
+        self.assertEqual(criteria["BP5"].strength, "Strong")
+        self.assertEqual(criteria["BP5"].points, -4)
+        self.assertEqual(result.clinical_lr_audit.application_status, "applied")
         self.assertAlmostEqual(
-            result.clinical_lr_audit.candidate_likelihood_ratio,
-            0.03946874736088844,
+            result.clinical_lr_audit.likelihood_ratio,
+            0.03947,
         )
 
     def test_c3247a_to_c_receives_bp1_and_variant_specific_pp4(self):
@@ -479,8 +551,8 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(criteria["BP1"].points, -4)
         self.assertEqual(criteria["PP4"].strength, "Moderate")
         self.assertEqual(criteria["PP4"].points, 2)
-        self.assertIn("combined LR=7.38132", criteria["PP4"].reason)
-        self.assertIn("PMID 31853058", criteria["PP4"].reason)
+        self.assertIn("combined LR=8.9313", criteria["PP4"].reason)
+        self.assertIn("PMID 31853058, 40413188", criteria["PP4"].reason)
         self.assertEqual(result.total_points, -2)
         self.assertEqual(result.predicted_class, 2)
 

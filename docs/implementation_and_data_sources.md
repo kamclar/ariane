@@ -567,89 +567,111 @@ nevytváří náhradní BS3.
 
 ### 3.4 PP4 a BP5
 
-Zdroj automatických kritérií: verzovaný snapshot variantově specifických combined clinical LR odvozený ze dvou veřejných ENIGMA zdrojů. Multifaktoriální klinické LR pocházejí z UCSC ENIGMA `BRCAmfa` tracku. Case-control LR pocházejí ze Supplementary Data 5 studie Zanti et al. 2025, která vznikla v ENIGMA Analytical Working Group. Supplementary Table 7 ani její posterior probability se pro PP4/BP5 nepoužívají.
+Pravidla a variantová data mají oddělené verze. ENIGMA VCEP v1.2 určuje
+způsob aplikace PP4/BP5 a přesné LR prahy:
 
 | Kritérium | Supporting | Moderate | Strong | Very Strong |
 | --- | ---: | ---: | ---: | ---: |
 | PP4 | LR >= 2,08 | LR >= 4,3 | LR >= 18,7 | LR >= 350 |
 | BP5 | LR <= 0,48 | LR <= 0,23 | LR <= 0,05 | LR <= 0,00285 |
 
-PP4 a BP5 se automaticky vyhodnocují z lokálního verzovaného snapshotu variantově specifických klinických LR. Manuální revize zůstává dostupná pro varianty nebo zdroje, které snapshot neobsahuje. Reviewer zadá variantově specifickou klinickou hodnotu, její škálu, citaci zdroje a souhrn zahrnutých klinických dat včetně kontroly jejich nezávislosti. Podporované škály jsou běžný LR, `log10(LR)` a ACMG evidence points. ARIANE určí sílu výhradně podle ekvivalentních prahů. Jedna publikace stačí, pokud poskytuje metodicky přijatelný variantově specifický klinický LR. Není nutné kombinovat více publikací. Sílu PP4 ani BP5 nelze ručně přepsat a neúplný záznam nelze aplikovat.
+Variantově specifická data pocházejí z UCSC ENIGMA tracku `BRCA1/BRCA2
+likelihood for PP4 and BP5`, vydaného 18. srpna 2026. Track je průběžně
+aktualizován odděleně od verze specifikace. Aktuální release obsahuje
+publikovaně kombinované klinické LR z Easton 2007, Parsons 2019, Li 2020,
+Caputo 2021 a Zanti 2025. Podle záznamu sestavení UCSC byla aktualizace
+provedena na žádost spolupracovníků ENIGMA. Parsons iCOGS case-control
+příspěvek byl nahrazen Zanti ccLR kvůli překryvu kohort. Zdroj současně uvádí,
+že u reziduálních Parsons a Easton dat nelze vyloučit částečný překryv.
 
-ENIGMA v1.2 požaduje pro PP4/BP5 combined LR klinických dat. Historická
-multifaktoriální posterior probability ani IARC třída se nepoužívají přímo jako
-PP4/BP5 a nepřevádějí se pomocí pevného obecného prioru. Tutorialový nebo starší
-výsledek založený na posterior probability se proto může lišit od aplikace
-současných v1.2 LR prahů.
+ARIANE používá zdrojové `combinedLR` jako jeden vydavatelem kombinovaný celek.
+Jednotlivé publikační komponenty zachovává pro audit, ale znovu je nenásobí.
+Sílu kritéria vždy odvodí z `combinedLR` pomocí přesných prahů v1.2. Nepřebírá
+zaokrouhlený ACMG štítek z tracku a nepřevádí posterior probability ani IARC
+třídu na PP4/BP5.
 
-Automatický snapshot je uložen v souborech:
+Připnuté vstupy a odvozený snapshot jsou:
 
+- `data/sources/enigma/BRCAmfa.hg38.2026-08-18.bb`,
+- `data/sources/enigma/BRCAmfa.hg38.2026-08-18.bed`,
+- `data/sources/enigma/clinical_lr_sources.manifest.json`,
 - `data/precomputed/brca_pp4_clinical_lr_snapshot.index.json`,
 - `data/precomputed/brca_pp4_clinical_lr_snapshot.metadata.json`.
 
-Builder `scripts/build_pp4_clinical_lr_snapshot.py` používá všechny čtyři variantově specifické komponenty, ze kterých oficiální UCSC ENIGMA `BRCAmfa` track verze 1.1.0 přepočítává combined LR: Easton et al. 2007, PMID 17924331; Parsons et al. 2019, PMID 31131967; Li et al. 2020, PMID 31853058; a Caputo et al. 2021, PMID 34597585. K nim přidává case-control LR ze studie Zanti et al. 2025, PMID 40413188, DOI `10.1038/s41467-025-59979-6`.
+BigBed i textový BED mají samostatný SHA-256 checksum. Manifest rozlišuje
+`target_specification` a `clinical_lr_data_release`, popisuje přesných 26 polí
+`bed9+17`, očekává 13 481 zdrojových řádků a zakazuje runtime síťový lookup i
+automatickou aktivaci nové verze.
 
-Ze Zanti Supplementary Data 5 se přijímá publikovaný finální soubor 1 710 variant: 681 BRCA1 a 1 029 BRCA2. Builder vyžaduje oblast CDS ±5 bp, non-founder FAF nejvýše 0,001, alespoň tři nositele v kombinovaných datech a u BRCA2 evidence alespoň ze dvou datasetů. Dvě další BRCA2 varianty mají v publikaci LR `N/A`, protože výpočet nekonvergoval. Nejsou bodovány a zůstávají výslovně uvedené v metadatech. Snapshot používá přímo klinické LR. Posteriorní pravděpodobnost se nepřevádí pomocí obecného prioru.
+Každá zdrojová `c.` notace před uložením projde stejným lokálním
+`biocommons.hgvs` enginem jako uživatelský vstup. Builder vyřadil 210 řádků
+bez transkriptové `c.` notace a 26 řádků, které neprošly lokálním ověřením
+reference. Snapshot obsahuje 12 950 normalizovaných variantových záznamů.
+Z nich je 12 656 způsobilých pro automatické použití. U 294 alel vedlo více
+zdrojových řádků po normalizaci ke stejnému klíči, ale s rozdílným
+`combinedLR`. Tyto záznamy mají stav `review_required`, nepřidávají body a
+ARIANE si žádnou hodnotu sama nevybírá.
 
-Před uložením snapshotu projde každá zdrojová `c.` notace stejným lokálním
-`biocommons.hgvs` enginem jako uživatelský vstup. Uvedená sekvence delece nebo
-duplikace se ověří proti checksumovanému referenčnímu transkriptu a uloží se
-kanonická notace i ověřené zdrojové aliasy. Známé indely se navíc křížově
-kontrolují proti normalizovanému indelovému snapshotu. Nejde o runtime fallback
-ani o ruční slovník. Nevalidní notace a konflikt normalizovaných zdrojů se
-nezařadí a důvod zůstane v metadatech.
+Například `BRCA1 c.509G>A` nyní používá vydané kombinované LR `0,03947`, takže
+splňuje BP5 Strong. `BRCA1 c.4185G>A` používá LR `328,18363`, tedy PP4 Strong.
+`BRCA2 c.9891_9894dup` používá LR `0,41018`, tedy BP5 Supporting. Naproti tomu
+`BRCA1 c.5266dup` zůstává bez automatického PP4/BP5, protože normalizované
+zdrojové řádky obsahují vzájemně neslučitelné hodnoty.
 
-Pokud více řádků po normalizaci popisuje stejnou alelu, builder spojí její přijaté komponenty. Kritérium jednotlivé komponenty se samostatně neboduje. Komponenty uvnitř jednoho publikovaného zdrojového balíku se zachovají jako jeden zdrojem poskytnutý kombinovaný celek. Hodnoty z různých zdrojových balíků se smí násobit pouze tehdy, když verzovaná matice překryvu označí každou dvojici jako `verified_independent` a výslovně povolí automatickou kombinaci. Chybějící, neznámé nebo možné překrytí vede k `review_required` bez PP4/BP5 bodů. Kandidátní součin zůstane pouze v auditu a klasifikace jej nepoužije.
+Síla BP5 a její použití v konečné klasifikační kombinaci jsou dvě oddělená
+rozhodnutí. ENIGMA Table 3 dovoluje Class 2 z jediného Strong benigního kódu
+jen při více typech evidence. ARIANE proto u BP5 Strong zachovává agregované
+typy klinické evidence. Samotné BP5 Strong vede k Class 2 pouze tehdy, když
+zdroj dokládá více typů evidence.
 
-ENIGMA Appendix B výslovně stanovuje, že se mají zahrnout pouze nezávislé linie evidence. Neurčuje však konkrétní datovou strukturu ani pojem `source_bundle_overlap_matrix`. Matice je verzovaná implementační kontrola ARIANE, která prokazatelně uplatňuje tento požadavek fail-closed. Není novým klinickým kritériem, nemění ENIGMA LR prahy a nevydává neznámý překryv za prokázanou závislost. Při neúplných podkladech pouze odmítne automatické bodování a předá záznam k revizi.
+Veřejný výsledek obsahuje audit `clinical_lr_audit`. Zobrazuje použité nebo
+nepoužité LR, data release, publikační komponenty, klinické typy evidence,
+zdrojem hlášené omezení překryvu a důvod případné manuální revize.
 
-Normativním zdrojem je [ENIGMA BRCA1/2 VCEP v1.2](https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0), část PP4/BP5 a Appendix B v lokálně checksumovaném souboru `docs/enigma/v1.2/source/Appendix_V1.2.docx`.
+Pro každý záznam se obecně porovnává také zdrojový štítek `ACMGcode` s
+výsledkem získaným aplikací prahů aktivní VCEP politiky na numerické
+`combinedLR`. Porovnání nepoužívá seznam variant ani výjimky. Pokud se výsledky
+liší, veřejný výstup ukáže zdrojový štítek, výsledek podle VCEP, použitou
+číselnou hranici a informaci, že klasifikace používá výsledek VCEP. Zdrojový
+štítek zůstává auditním údajem a nemění body. Neznámý formát zdrojového štítku
+je porušením datového kontraktu a načtení snapshotu zastaví.
 
-Stejný `source_id` ani stejná skupina nezávislosti se nesmí započítat dvakrát. Duplicita je fatální chyba buildu. Rozdílné hodnoty pod stejným zdrojem jsou konflikt a daná alela se automaticky nepoužije. Zdrojový manifest `data/sources/enigma/clinical_lr_sources.manifest.json` obsahuje verzi politiky, identifikátory zdrojových balíků a párovou matici překryvu. Nejde o variantový allowlist ani o fallback.
+Ruční PP4/BP5 rozlišuje tři stavy zdroje:
 
-Metadata obsahují zdrojový manifest, URL a checksum obou zdrojových datasetů, checksum indexu, verzi pravidel,
-provenance HGVS enginu a referenčního balíku, checksum závislého indelového
-snapshotu, počty záznamů a seznam konfliktů. Chybějící metadata, nesprávný
-checksum indexu nebo zdrojového manifestu, nesprávný počet záznamů nebo nejednoznačný alias zastaví spuštění aplikace. Pro `BRCA1 c.5266dup` a alias `c.5266dupC` je kandidátní součin LR z Li et al. 2020 a Zanti et al. 2025 `1,36181 × 10^90`. Protože nezávislost těchto dvou zdrojových balíků není ve verzované matici doložena, hodnota se pouze zobrazí v auditu a PP4 se automaticky nepřidělí. Pro
-`BRCA2 c.9891_9894dup` a zdrojový zápis `c.9891_9894dupATTT` obsahuje LR
-`0,41018` ze studie Li et al. 2020, což odpovídá BP5 Supporting.
+- `ENIGMA recognised source`: uživatel vybere publikaci nebo dataset uvedený
+  v ENIGMA podkladech nebo v aktuálním ENIGMA tracku.
+- `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické
+  zdůvodnění kompatibility s ENIGMA PP4/BP5.
+- `Unreviewed source`: hodnota se zachová v auditu, ale kritérium se nepoužije.
 
-Pro `BRCA1 c.509G>A` je multifaktoriální LR `6,1764` a case-control LR `0,00639025`. Jejich kandidátní součin je `0,0394687`. Multifaktoriální data a Zanti case-control data však patří do dvou zdrojových balíků s neověřenou nezávislostí. ARIANE proto nepřidělí ani BP5 Strong, ani dílčí PP4 Moderate. Zobrazí obě komponenty, kandidátní součin, stav překryvu a požadavek na odbornou revizi.
+Toto označení záměrně nepoužívá název `Appendix B` pro Caputo 2021 a Zanti
+2025. Tyto novější zdroje jsou součástí aktuálního ENIGMA tracku, ale nejsou
+součástí původního seznamu publikací v Appendix B v1.2. Sekundární databáze,
+například CANVarUK, může pomoci hodnotu najít, ale nenahrazuje primární zdroj.
+Při kombinaci PP1 nebo PS4 s PP4/BP5 backend vyžaduje potvrzení nezávislosti
+pozorování a textové zdůvodnění.
 
-Síla BP5 a použití této síly v klasifikační kombinaci jsou dvě oddělená
-rozhodnutí. ENIGMA Table 3 dovoluje přiřadit Likely Benign z jediného Strong
-benigního kódu pouze tehdy, když do něj přispělo více typů evidence. ARIANE
-proto u každého automaticky přijatého BP5 Strong zachovává počet LR příspěvků,
-seznam klinických typů evidence, počet zdrojových balíků a počet skupin s
-doloženou nezávislostí. Jediné BP5 Strong může samo vést ke Class 2 pouze při
-více typech klinické evidence. Záznam z více balíků s nedoloženou nezávislostí
-se do této kombinace vůbec nedostane.
+Aktualizace zdroje se kontroluje příkazem:
 
-Aktuální snapshot obsahuje 5 147 jednoznačných variantových záznamů. Zanti case-control komponentu obsahuje 1 710 záznamů. Automatické použití je povoleno u 4 175 záznamů. U 972 záznamů obsahujících oba zdrojové balíky je vyžadována revize překryvu a automatické PP4/BP5 je zablokováno.
+```powershell
+.\venv\Scripts\python.exe scripts\check_enigma_clinical_lr_update.py
+```
 
-Veřejný výsledek obsahuje samostatný audit `clinical_lr_audit`. V rozbalovací položce `Evidence details > PP4/BP5 clinical likelihood ratios` ukazuje použité nebo nepoužité LR, jednotlivé komponenty, zdrojové balíky, stav překryvu, riziko dvojího započítání a důvod případné manuální revize. Technický název lokálního úložiště se v klinickém odůvodnění nezobrazuje.
+Návratový kód `0` znamená, že vzdálený BigBed odpovídá připnutému checksumu.
+Kód `2` znamená dostupnou změnu. Volba `--candidate-dir <adresar>` uloží nový
+soubor a auditní JSON pouze jako neaktivní kandidát. Detekce nikdy sama
+nezmění manifest ani produkční snapshot.
 
-Zdrojový manifest eviduje všechny studie vyjmenované v ENIGMA Appendix B a navíc Caputo 2021 a Zanti 2025, jejichž variantově specifická data používá automatický výpočet:
+Kontrola se provádí nejméně jednou měsíčně a před každým releasem ARIANE.
+Aktivace nové datové verze vyžaduje kontrolu changelogu a schématu, převod
+BigBed na BED, nový checksum, rebuild snapshotu, diff počtů a variant, kontrolu
+přechodů přes LR prahy, cílené regresní testy, kompletní test suite a zapsané
+odborné schválení. Teprve potom se v jednom commitu aktualizuje manifest,
+zdrojový soubor, snapshot, testy a dokumentace.
 
-| Zdroj | PMID |
-| --- | --- |
-| Goldgar et al. | 15290653 |
-| Thompson et al. | 12900794 |
-| Easton et al. | 17924331 |
-| Spurdle et al. | 25857409 |
-| de la Hoya et al. | 27008870 |
-| Parsons et al. | 31131967 |
-| Li et al. | 31853058 |
-| Caputo et al. | 34597585 |
-| Zanti et al. | 40413188 |
-
-Status zdroje se zpracovává fail-closed:
-
-- `ENIGMA recognised source`: musí být vybrán jeden z uvedených PMID. Po splnění ostatních požadavků může PP4 nebo BP5 vstoupit do amended klasifikace.
-- `Other reviewed source`: vyžaduje citaci, jméno reviewera a metodické zdůvodnění kompatibility s ENIGMA PP4/BP5. Po splnění ostatních požadavků může kritérium vstoupit do amended klasifikace.
-- `Unreviewed source`: hodnota a zdroj se zachovají v auditním záznamu, ale PP4 ani BP5 se neaplikuje a nepřidají se body.
-
-Za primární zdroj evidence se považuje publikace nebo verzovaný dataset. Sekundární databáze, například CANVarUK, může sloužit k nalezení a zobrazení hodnoty, ale nenahrazuje citaci primárního zdroje. Pokud amended výsledek kombinuje PP1 nebo PS4 s automatickým či manuálním PP4/BP5, backend vyžaduje explicitní potvrzení nezávislosti pozorování a textové zdůvodnění. Bez nich požadavek odmítne. Samotné zaškrtnutí nenahrazuje kontrolu zdrojových kohort a klinických LR komponent.
+Normativním zdrojem pravidel je [ENIGMA BRCA1/2 VCEP v1.2](https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0).
+Provenance aktuálních dat je uvedena na [UCSC ENIGMA track page](https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html)
+a v [záznamu sestavení UCSC](https://github.com/ucscGenomeBrowser/kent/blob/master/src/hg/makeDb/doc/enigma.txt).
 
 ### 3.5 PS1 na proteinové úrovni
 

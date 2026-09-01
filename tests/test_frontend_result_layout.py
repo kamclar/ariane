@@ -86,17 +86,22 @@ def test_external_comparison_remains_visible_for_not_found_or_failed_sources():
     assert "result?.external?.erepo_evidence_codes" in html
 
 
-def test_clinical_lr_overlap_audit_is_visible_and_backend_driven():
+def test_clinical_lr_source_audit_is_visible_and_backend_driven():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
 
     assert "result?.clinical_lr_audit" in html
     assert "PP4/BP5 clinical likelihood ratios" in html
-    assert "Overlap status" in html
-    assert "Automatic combination" in html
-    assert "Unadmitted product for audit" in html
-    assert "Verified independent source groups" in html
+    assert "Source combination" in html
+    assert "used as one evidence item" in html
+    assert "Published combined LR" in html
+    assert "ENIGMA data release" in html
     assert "result?.clinical_lr_audit?.source_components" in html
     assert "result.clinical_lr_audit.overlap_assessment_sources" in html
+    assert "Source label and VCEP threshold result differ" in html
+    assert "result?.clinical_lr_audit?.threshold_comparison?.status === 'different'" in html
+    assert "Source track label" in html
+    assert "VCEP threshold result" in html
+    assert "VCEP rule used" in html
 
 
 def test_population_audit_shows_founder_and_coverage_eligibility():

@@ -105,7 +105,7 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         def evidence(lr):
             return {
                 "combined_clinical_lr": lr,
-                "source_review_status": "appendix_b",
+                "source_review_status": "enigma_recognised",
                 "source_pmid": "31853058",
                 "clinical_data_summary": "Family history and case-control data; overlap reviewed.",
             }
@@ -122,7 +122,7 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         self.assertEqual(
             suggest_strength("PP4", {
                 "combined_clinical_lr": 18.7,
-                "source_review_status": "appendix_b",
+                "source_review_status": "enigma_recognised",
                 "source_pmid": "40413188",
                 "clinical_data_summary": (
                     "Zanti 2025 BRIDGES, CARRIERS and UK Biobank case-control LR."
@@ -133,7 +133,7 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
 
     def test_pp4_accepts_canvar_log10_lr_and_acmg_point_scales(self):
         common = {
-            "source_review_status": "appendix_b",
+            "source_review_status": "enigma_recognised",
             "source_pmid": "31853058",
             "clinical_data_summary": "Personal and family history model; one published study.",
         }
@@ -177,7 +177,7 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
     def test_bp5_uses_benign_clinical_lr_thresholds_and_reviewed_provenance(self):
         common = {
             "clinical_lr_scale": "lr",
-            "source_review_status": "appendix_b",
+            "source_review_status": "enigma_recognised",
             "source_pmid": "31853058",
             "clinical_data_summary": "Segregation and pathology contributions; overlap reviewed.",
         }
@@ -493,7 +493,7 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 "enabled": True,
                 "evidence": {
                     "combined_clinical_lr": 350,
-                    "source_review_status": "appendix_b",
+                    "source_review_status": "enigma_recognised",
                     "source_pmid": "31853058",
                     "clinical_data_summary": "Variant-specific combined clinical evidence; overlap reviewed.",
                 },
@@ -520,7 +520,7 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
         evidence = {
             "clinical_lr_value": 0.05,
             "clinical_lr_scale": "lr",
-            "source_review_status": "appendix_b",
+            "source_review_status": "enigma_recognised",
             "source_pmid": "31853058",
             "clinical_data_summary": "Segregation and pathology LR; overlap reviewed.",
             "clinical_evidence_types": ["segregation", "pathology"],
@@ -584,7 +584,7 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
                 "code": "PP4", "enabled": True,
                 "evidence": {
                     "combined_clinical_lr": 350,
-                    "source_review_status": "appendix_b",
+                    "source_review_status": "enigma_recognised",
                     "source_pmid": "31853058",
                     "clinical_data_summary": "Family-history LR; cohort recorded.",
                 },

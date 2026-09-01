@@ -1,6 +1,6 @@
 # ENIGMA VCEP v1.2 source-data audit
 
-Audit date: 2026-08-20
+Audit date: 2026-09-01
 
 Official sources: ClinGen CSpec GN092 for BRCA1 and GN097 for BRCA2,
 ENIGMA BRCA1/2 VCEP v1.2.0, released 2025-01-09.
@@ -17,6 +17,7 @@ ENIGMA BRCA1/2 VCEP v1.2.0, released 2025-01-09.
 | `ps1_protein_reference_registry.json` | ST7 v1.2, Table 9 v1.2 and complete ST2 v1.2 | 60 P/LP missense references: 40 guided-review candidates and 20 excluded by known RNA/splice evidence. ST7 alone does not create automatic PS1 eligibility. SpliceAI is computed on demand and is not embedded in the registry. |
 | `ps1_protein_reference_extensions.json` | Curated official VCEP assertions outside ST7 or documented local ENIGMA VCEP reclassifications | Currently empty. It is a build-time extension source, not a runtime fallback. |
 | `exon_cnv_evidence.json` | ENIGMA Table 4, Appendix G and gnomAD-SV v2.1 | Generic, fail-closed population index for all 50 BRCA1/2 Table 4 exons. Exons and coordinates are generated from versioned sources; the manifest contains no variant allowlist or preassigned criterion. Runtime assigns PM2 Supporting only after every Appendix G decision step passes. Functional criteria are not stored here; PS3/BS3 comes only from Table 9. |
+| `brca_pp4_clinical_lr_snapshot.index.json` | UCSC ENIGMA BRCAmfa track, data release 2026-08-18 | 13,481 source rows yield 12,950 normalized records. Of these, 12,656 are eligible and 294 require review because multiple source rows normalize to the same allele but report different combined LR values. Runtime uses the publisher-combined LR as one evidence item and does not multiply publication components again. The source release and VCEP v1.2 rule version are pinned separately. |
 
 ## Rule tables implemented in code
 
@@ -34,6 +35,13 @@ official downloaded workbooks. Startup validation rejects truncated snapshots,
 wrong row/column counts, missing required fields, unknown codes and inconsistent
 exon references. The application does not silently continue with an incomplete
 core ENIGMA table.
+
+The PP4/BP5 source has an additional update check because the UCSC ENIGMA
+track can change independently of the VCEP specification. The checker compares
+the remote BigBed checksum with the pinned release. A changed file can only be
+stored as an inactive candidate. Activation requires source and schema review,
+a snapshot diff, review of threshold crossings, the complete test suite and
+recorded expert approval.
 
 Protein-level PS1 uses official ST7 P/LP records only to discover candidate
 references. ST7 alone does not prove that a reference classification was

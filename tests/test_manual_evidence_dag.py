@@ -128,7 +128,7 @@ def test_manual_request_backend_accepts_complete_auditable_record():
                 "enabled": True,
                 "evidence": {
                     "combined_clinical_lr": 350,
-                    "source_review_status": "appendix_b",
+                    "source_review_status": "enigma_recognised",
                     "source_pmid": "31853058",
                     "clinical_data_summary": "Variant-specific combined clinical evidence; overlap reviewed.",
                 },

@@ -184,6 +184,22 @@ class SpliceAIAudit(BaseModel):
     reason: str = ""
 
 
+class ClinicalLrThresholdComparison(BaseModel):
+    status: str = "not_available"
+    source_label: str = ""
+    source_code: Optional[str] = None
+    source_strength: Optional[str] = None
+    vcep_policy: str = ""
+    vcep_label: str = ""
+    vcep_code: Optional[str] = None
+    vcep_strength: Optional[str] = None
+    combined_lr: Optional[float] = None
+    threshold_operator: str = ""
+    threshold_value: Optional[float] = None
+    threshold_rule: str = ""
+    reason: str = ""
+
+
 class ClinicalLrAudit(BaseModel):
     application_status: str = "not_found"
     likelihood_ratio: Optional[float] = None
@@ -198,10 +214,15 @@ class ClinicalLrAudit(BaseModel):
     likelihood_ratio_contribution_count: int = 0
     overlap_status: str = "not_assessed"
     double_counting_risk: bool = False
+    source_reported_overlap_caveat: bool = False
     automatic_combination_allowed: bool = False
+    data_release: str = ""
     overlap_assessment_note: str = ""
     overlap_assessment_sources: List[str] = Field(default_factory=list)
     source_components: List[Dict[str, Any]] = Field(default_factory=list)
+    threshold_comparison: ClinicalLrThresholdComparison = Field(
+        default_factory=ClinicalLrThresholdComparison
+    )
     reason: str = ""
 
 

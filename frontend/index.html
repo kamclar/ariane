@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260830-1">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260901-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -530,12 +530,17 @@
                               x-text="result?.clinical_lr_audit?.application_status === 'review_required' ? 'Expert review required' : (result?.clinical_lr_audit?.code ? `${result.clinical_lr_audit.code} ${result.clinical_lr_audit.strength}` : 'Not informative')"></span>
                     </summary>
                     <div class="evidence-interaction-list">
+                        <article class="evidence-interaction interaction-info"
+                                 x-show="result?.clinical_lr_audit?.threshold_comparison?.status === 'different'">
+                            <p><strong>Source label and VCEP threshold result differ</strong></p>
+                            <p x-text="result?.clinical_lr_audit?.threshold_comparison?.reason"></p>
+                        </article>
                         <article class="evidence-interaction"
-                                 :class="result?.clinical_lr_audit?.double_counting_risk ? 'interaction-review_required' : 'interaction-deduplicated'">
+                                 :class="result?.clinical_lr_audit?.double_counting_risk ? 'interaction-review_required' : (result?.clinical_lr_audit?.source_reported_overlap_caveat ? 'interaction-info' : 'interaction-deduplicated')">
                             <p><strong x-text="result?.clinical_lr_audit?.reason"></strong></p>
                             <p class="evidence-interaction-meta">
-                                Overlap status: <span x-text="result?.clinical_lr_audit?.overlap_status?.replaceAll('_', ' ')"></span>.
-                                Automatic combination: <span x-text="result?.clinical_lr_audit?.automatic_combination_allowed ? 'allowed' : 'not allowed'"></span>.
+                                Source combination: <span x-text="result?.clinical_lr_audit?.overlap_status?.replaceAll('_', ' ')"></span>.
+                                Published combined LR: <span x-text="result?.clinical_lr_audit?.automatic_combination_allowed ? 'used as one evidence item' : 'not used'"></span>.
                             </p>
                             <p class="evidence-interaction-meta" x-show="result?.clinical_lr_audit?.overlap_assessment_note"
                                x-text="result?.clinical_lr_audit?.overlap_assessment_note"></p>
@@ -548,10 +553,13 @@
                             </p>
                         </article>
                         <dl class="evidence-detail-grid">
+                            <div><dt>ENIGMA data release</dt><dd x-text="result?.clinical_lr_audit?.data_release || 'Not reported'"></dd></div>
                             <div><dt>LR used for classification</dt><dd x-text="result?.clinical_lr_audit?.likelihood_ratio ?? 'Not used'"></dd></div>
-                            <div><dt>Unadmitted product for audit</dt><dd x-text="result?.clinical_lr_audit?.candidate_likelihood_ratio ?? 'Not available'"></dd></div>
-                            <div><dt>Source bundles</dt><dd x-text="result?.clinical_lr_audit?.source_bundle_count ?? 0"></dd></div>
-                            <div><dt>Verified independent source groups</dt><dd x-text="result?.clinical_lr_audit?.independent_source_group_count ?? 0"></dd></div>
+                            <div><dt>Published combined LR</dt><dd x-text="result?.clinical_lr_audit?.candidate_likelihood_ratio ?? 'Not available'"></dd></div>
+                            <div><dt>Source track label</dt><dd x-text="result?.clinical_lr_audit?.threshold_comparison?.source_label || 'Not available'"></dd></div>
+                            <div><dt>VCEP threshold result</dt><dd x-text="result?.clinical_lr_audit?.threshold_comparison?.vcep_label || 'Not assessed'"></dd></div>
+                            <div><dt>VCEP rule used</dt><dd x-text="result?.clinical_lr_audit?.threshold_comparison?.threshold_rule || 'Not assessed'"></dd></div>
+                            <div><dt>Publisher-combined source bundles</dt><dd x-text="result?.clinical_lr_audit?.source_bundle_count ?? 0"></dd></div>
                         </dl>
                         <table class="criteria-table">
                             <thead><tr><th>Source</th><th>Clinical data</th><th>Component LR</th><th>PMID</th></tr></thead>
@@ -862,20 +870,20 @@
                                     </label>
                                     <label>Source review status
                                         <select x-model="item.evidence.source_review_status">
-                                            <option value="appendix_b">ENIGMA recognised source</option>
+                                            <option value="enigma_recognised">ENIGMA recognised source</option>
                                             <option value="other_reviewed">Other reviewed source</option>
                                             <option value="unreviewed">Unreviewed source, audit only</option>
                                         </select>
                                     </label>
-                                    <label x-show="item.evidence.source_review_status === 'appendix_b'">ENIGMA publication or dataset
+                                    <label x-show="item.evidence.source_review_status === 'enigma_recognised'">ENIGMA publication or dataset
                                         <select x-model="item.evidence.source_pmid">
                                             <option value="">Select publication</option>
-                                            <template x-for="source in (manualDefinition(item.code)?.appendix_b_sources || [])" :key="source.pmid">
+                                            <template x-for="source in (manualDefinition(item.code)?.recognised_sources || [])" :key="source.pmid">
                                                 <option :value="source.pmid" x-text="`${source.citation}, PMID:${source.pmid}`"></option>
                                             </template>
                                         </select>
                                     </label>
-                                    <label x-show="item.evidence.source_review_status !== 'appendix_b'">Primary source or citation
+                                    <label x-show="item.evidence.source_review_status !== 'enigma_recognised'">Primary source or citation
                                         <input type="text" x-model="item.evidence.source_citation"
                                             placeholder="Publication, PMID or stable dataset identifier">
                                     </label>
@@ -1870,13 +1878,14 @@
                 <pre class="batch-example">BRCA1, c.509G>A                          &lt;-- gene and reference-transcript c. HGVS
 BRCA1, NM_007294.4:c.303T&gt;G             &lt;-- transcript-qualified HGVS
 BRCA1, chr17:43099813:C&gt;T, GRCh38       &lt;-- genomic variant requires assembly
-BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remains accepted</pre>
+BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- comma-separated input
+BRCA1 NM_007294.4:c.509G&gt;A p.(Arg170Gln) &lt;-- space-separated input</pre>
                 <p>A header row starting with <code>gene</code> or <code>#</code> is skipped automatically.</p>
             </div>
 
             <textarea class="batch-input" x-model="batchText"
                 @input="parseBatch()" rows="8"
-                placeholder="BRCA1, c.509G>A, p.(Arg170Gln)&#10;BRCA1, c.5551_5552insT p.(Asp1851ValfsTer29)&#10;BRCA2, c.5351T>A"></textarea>
+                placeholder="BRCA1 NM_007294.4:c.509G>A p.(Arg170Gln)&#10;BRCA1, c.5551_5552insT, p.(Asp1851ValfsTer29)&#10;BRCA2 c.5351T>A"></textarea>
 
             <div class="batch-controls">
                 <span class="batch-count" x-text="batchParsed.length > 0 ? batchParsed.length + ' variants parsed' : ''"></span>
@@ -1969,8 +1978,8 @@ BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- legacy verified p. input remai
     <script src="/static/js/graphs.js?v=20260828-1"></script>
     <script src="/static/js/classification.js?v=20260828-1"></script>
     <script src="/static/js/formatters.js?v=20260828-1"></script>
-    <script src="/static/js/manual-review.js?v=20260830-1"></script>
-    <script src="/static/js/batch.js?v=20260828-1"></script>
+    <script src="/static/js/manual-review.js?v=20260901-1"></script>
+    <script src="/static/js/batch.js?v=20260901-1"></script>
     <script src="/static/js/app.js?v=20260828-1"></script>
 </body>
 </html>

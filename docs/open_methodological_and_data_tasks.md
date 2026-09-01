@@ -57,6 +57,26 @@ strukturovaný zdroj, který výslovně zachytí konsenzuální kurátorské za�
 větve Appendix E Table 9 a výslednou sílu. Bez takového zdroje zůstává tato část
 manuální.
 
+## 7. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
+
+U 39 variant se síla vypočtená z nezkráceného `combined LR` podle publikovaných
+prahových hodnot ENIGMA VCEP v1.2 liší od štítku `ACMGcode` v UCSC ENIGMA
+tracku. Jde o 27 variant u hranice BP5 Strong `0,05`, 8 variant u hranice BP5
+Moderate `0,23` a 4 varianty u hranice PP4 Moderate `4,3`. U posledních čtyř je
+výpočet ARIANE o jeden stupeň silnější než štítek zdroje.
+
+ARIANE nyní používá numerické LR a přesné publikované prahy CSpec v1.2. Štítek
+zdroje je zachován pouze pro audit. Tento postup odpovídá doslovnému znění
+CSpec, ale je třeba potvrdit, zda byly štítky UCSC vytvořeny z jiných
+nezaokrouhlených prahů, z převrácených bayesovských hranic nebo jinou výslovně
+schválenou politikou ENIGMA. Do získání potvrzení se prahy ani výsledné body
+nemají měnit odhadem.
+
+Dotaz k metodickému potvrzení: Má se při dostupném přesném combined LR použít
+doslovný práh CSpec v1.2, například PP4 Moderate od `4,3`, BP5 Strong do `0,05`
+a BP5 Moderate do `0,23`, i když se výsledná síla liší od štítku publikovaného
+u stejné varianty v UCSC ENIGMA tracku?
+
 ## Již opravené auditní body
 
 - ST7 sama nevytváří automaticky způsobilou proteinovou PS1 referenci.

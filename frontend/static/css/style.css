@@ -199,6 +199,11 @@ header .version {
     border-left-color: var(--color-success);
 }
 
+.evidence-interaction.interaction-info {
+    border-left-color: var(--color-primary);
+    background: #f5f8ff;
+}
+
 .evidence-interaction.interaction-review_required,
 .evidence-interaction.interaction-conflict {
     border-left-color: var(--color-warning);

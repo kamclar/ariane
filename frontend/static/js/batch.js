@@ -1,6 +1,103 @@
 (function registerBatch(namespace) {
     "use strict";
 
+    const ASSEMBLY_PATTERN = /^(?:GRCh3[78]|hg(?:19|38))$/i;
+    const PROTEIN_PATTERN = /^\(?p\..+\)?$/i;
+
+    function normalizeAssembly(value) {
+        if (/^hg19$/i.test(value)) return "GRCh37";
+        if (/^hg38$/i.test(value)) return "GRCh38";
+        return value.replace(/^grch/i, "GRCh");
+    }
+
+    function unwrapMarkdownLine(value) {
+        let line = value.trim().replace(/\\$/, "").trim();
+        if (line.startsWith("*") && line.endsWith("*") && line.length > 2) {
+            line = line.substring(1, line.length - 1).trim();
+        }
+        return line.replace(/\\([_*])/g, "$1");
+    }
+
+    function splitBatchLine(value) {
+        const line = unwrapMarkdownLine(value);
+        if (line.includes(",")) {
+            return line.split(",").map(item => item.trim());
+        }
+        return line.split(/\s+/).filter(Boolean);
+    }
+
+    namespace.parseBatchInput = function parseBatchInput(text, configuredGenes) {
+        const lines = text.trim().split(/\r?\n/).filter(line => line.trim());
+        const parsed = [];
+        const errors = [];
+        const allowedGenes = configuredGenes.map(item => item.symbol.toUpperCase());
+
+        for (let i = 0; i < lines.length; i++) {
+            const cleanedLine = unwrapMarkdownLine(lines[i]);
+            if (/^(?:gene(?:\s|,|$)|#)/i.test(cleanedLine)) continue;
+
+            const parts = splitBatchLine(lines[i]);
+            if (parts.length < 2) {
+                errors.push(`Line ${i + 1}: need at least gene and c. notation`);
+                continue;
+            }
+            const gene = parts[0].toUpperCase();
+            if (!allowedGenes.includes(gene)) {
+                errors.push(`Line ${i + 1}: gene must be one of ${allowedGenes.join(", ")}`);
+                continue;
+            }
+
+            let cRaw = parts[1];
+            let pRaw = "";
+            let assemblyRaw = "";
+            let dupRaw = "Unknown";
+            const remaining = parts.slice(2);
+
+            while (remaining.length && !remaining[remaining.length - 1]) {
+                remaining.pop();
+            }
+            if (remaining.length && !remaining[0]) {
+                remaining.shift();
+            }
+
+            if (remaining.length && PROTEIN_PATTERN.test(remaining[0])) {
+                pRaw = remaining.shift();
+            }
+            if (remaining.length && ASSEMBLY_PATTERN.test(remaining[0])) {
+                assemblyRaw = normalizeAssembly(remaining.shift());
+            }
+            if (remaining.length) {
+                dupRaw = remaining.join(" ");
+            }
+
+            // Preserve the established comma format where the protein notation
+            // may be appended to the variant field instead of using its own column.
+            if (!pRaw) {
+                const combined = cRaw.match(/^(\S+)\s+(\(?p\..+\)?)$/i);
+                if (combined) {
+                    cRaw = combined[1];
+                    pRaw = combined[2];
+                }
+            }
+            if (pRaw.startsWith("(p.") && pRaw.endsWith(")")) {
+                pRaw = pRaw.substring(1, pRaw.length - 1);
+            }
+            if (pRaw.startsWith("p.") && !pRaw.startsWith("p.(")) {
+                pRaw = `p.(${pRaw.substring(2)})`;
+            }
+
+            parsed.push({
+                gene,
+                c_notation: cRaw,
+                p_notation: pRaw,
+                assembly: assemblyRaw,
+                dup_type: dupRaw,
+            });
+        }
+
+        return { parsed, errors };
+    };
+
     namespace.batchState = function batchState() {
         return {
         batchText: "",
@@ -19,65 +116,14 @@
             this.batchParsed = [];
             if (!this.batchText.trim()) return;
 
-            const lines = this.batchText.trim().split("\n").filter(l => l.trim());
-            const parsed = [];
-            const errors = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                // Skip header lines
-                if (lines[i].toLowerCase().startsWith("gene") || lines[i].toLowerCase().startsWith("#")) continue;
-
-                const parts = lines[i].split(",").map(s => s.trim());
-                if (parts.length < 2) {
-                    errors.push(`Line ${i + 1}: need at least gene and c. notation`);
-                    continue;
-                }
-                const gene = parts[0].toUpperCase();
-                const allowedGenes = this.configuredGenes.map(item => item.symbol);
-                if (!allowedGenes.includes(gene)) {
-                    errors.push(`Line ${i + 1}: gene must be one of ${allowedGenes.join(", ")}`);
-                    continue;
-                }
-
-                let cRaw = parts[1];
-                let pRaw = parts[2] || "";
-                let assemblyRaw = "";
-                if (/^(?:GRCh3[78]|hg(?:19|38))$/i.test(pRaw)) {
-                    assemblyRaw = /^hg19$/i.test(pRaw) ? "GRCh37"
-                        : /^hg38$/i.test(pRaw) ? "GRCh38"
-                        : pRaw.replace(/^grch/i, "GRCh");
-                    pRaw = "";
-                }
-                const dupRaw = parts[3] || "Unknown";
-
-                // Handle appended protein notation, including "(p.Val2050del)".
-                if (!pRaw) {
-                    const combined = cRaw.match(/^(c\.\S+)\s+(\(?p\..+\)?)$/i);
-                    if (combined) {
-                        cRaw = combined[1];
-                        pRaw = combined[2];
-                    }
-                }
-                if (pRaw.startsWith("(p.") && pRaw.endsWith(")")) {
-                    pRaw = pRaw.substring(1, pRaw.length - 1);
-                }
-                if (pRaw.startsWith("p.") && !pRaw.startsWith("p.(")) {
-                    pRaw = `p.(${pRaw.substring(2)})`;
-                }
-
-                parsed.push({
-                    gene,
-                    c_notation: cRaw,
-                    p_notation: pRaw,
-                    assembly: assemblyRaw,
-                    dup_type: dupRaw,
-                });
+            const outcome = namespace.parseBatchInput(
+                this.batchText,
+                this.configuredGenes,
+            );
+            if (outcome.errors.length > 0) {
+                this.batchParseError = outcome.errors.join("; ");
             }
-
-            if (errors.length > 0) {
-                this.batchParseError = errors.join("; ");
-            }
-            this.batchParsed = parsed;
+            this.batchParsed = outcome.parsed;
         },
 
         // â”€â”€ Batch: classify all parsed variants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -268,4 +314,3 @@
         },
     };
 })(window.ArianeFrontend = window.ArianeFrontend || {});
-

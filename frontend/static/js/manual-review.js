@@ -32,7 +32,7 @@
             if (code === "BS4") return { likelihood_ratio_components: [] };
             if (code === "PP4" || code === "BP5") return {
                 clinical_lr_scale: "lr",
-                source_review_status: "appendix_b",
+                source_review_status: "enigma_recognised",
                 clinical_evidence_types: [],
                 independence_review_confirmed: false,
             };

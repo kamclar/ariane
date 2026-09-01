@@ -31,7 +31,7 @@ from backend.gene_policy import (
 
 CSPEC_URL = ""
 
-ENIGMA_PP4_SOURCES = {
+ENIGMA_RECOGNISED_PP4_SOURCES = {
     "15290653": "Goldgar et al. 2004",
     "12900794": "Thompson et al. 2003",
     "17924331": "Easton et al. 2007",
@@ -100,9 +100,9 @@ MANUAL_CRITERIA = {
         "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, PP4, Specifications Table 7 and Appendix B",
-        "appendix_b_sources": [
+        "recognised_sources": [
             {"pmid": pmid, "citation": citation}
-            for pmid, citation in ENIGMA_PP4_SOURCES.items()
+            for pmid, citation in ENIGMA_RECOGNISED_PP4_SOURCES.items()
         ],
     },
     "BS2": {
@@ -144,9 +144,9 @@ MANUAL_CRITERIA = {
         "literature": "Review ENIGMA Appendix B and Specifications Table 7. Eligible inputs may include co-segregation, co-occurrence, family history, tumour pathology, and case-control data.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, BP5, Specifications Table 7 and Appendix B",
-        "appendix_b_sources": [
+        "recognised_sources": [
             {"pmid": pmid, "citation": citation}
-            for pmid, citation in ENIGMA_PP4_SOURCES.items()
+            for pmid, citation in ENIGMA_RECOGNISED_PP4_SOURCES.items()
         ],
     },
     "PVS1_RNA": {
@@ -448,8 +448,11 @@ def _bp5_strength(evidence: Dict[str, Any], gene: str) -> Optional[str]:
 
 def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
     status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
-    if status == "appendix_b":
-        return str(evidence.get("source_pmid") or "").strip() in ENIGMA_PP4_SOURCES
+    if status == "enigma_recognised":
+        return (
+            str(evidence.get("source_pmid") or "").strip()
+            in ENIGMA_RECOGNISED_PP4_SOURCES
+        )
     if status == "other_reviewed":
         return all(
             bool((evidence.get(field) or "").strip())
@@ -460,8 +463,11 @@ def _pp4_source_is_reviewed(evidence: Dict[str, Any]) -> bool:
 
 def _pp4_source_is_recorded(evidence: Dict[str, Any]) -> bool:
     status = str(evidence.get("source_review_status") or "unreviewed").strip().lower()
-    if status == "appendix_b":
-        return str(evidence.get("source_pmid") or "").strip() in ENIGMA_PP4_SOURCES
+    if status == "enigma_recognised":
+        return (
+            str(evidence.get("source_pmid") or "").strip()
+            in ENIGMA_RECOGNISED_PP4_SOURCES
+        )
     if status == "other_reviewed":
         return _pp4_source_is_reviewed(evidence)
     if status == "unreviewed":
@@ -841,7 +847,8 @@ def evaluate_manual_evidence(
             pp4_value is not None
             and (pp4_value >= 0 if pp4_scale == "lr" else True)
             and pp4_scale in {"lr", "log10_lr", "acmg_points"}
-            and pp4_source_status in {"appendix_b", "other_reviewed", "unreviewed"}
+            and pp4_source_status
+            in {"enigma_recognised", "other_reviewed", "unreviewed"}
             and pp4_source_recorded
             and bool((evidence.get("clinical_data_summary") or "").strip())
         )

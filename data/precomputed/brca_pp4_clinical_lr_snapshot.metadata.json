@@ -1,201 +1,1145 @@
 {
   "automatic_application_statuses": {
-    "eligible": 4175,
-    "review_required": 972
+    "eligible": 12656,
+    "review_required": 294
   },
-  "case_control_quantitative_records": 1710,
-  "case_control_quantitative_records_by_gene": {
-    "BRCA1": 681,
-    "BRCA2": 1029
+  "clinical_evidence_type_records": {
+    "case_control": 10724,
+    "cooccurrence": 1307,
+    "family_history": 4054,
+    "pathology": 493,
+    "segregation": 559
   },
-  "case_control_records_selected": 1710,
-  "case_control_selected_by_gene": {
-    "BRCA1": 681,
-    "BRCA2": 1029
-  },
-  "case_control_source_rows": 6909,
-  "case_control_unavailable_records": [
-    {
-      "c_notation": "c.10094_10095insGAATTATAT",
-      "carriers": "150",
-      "dataset_direction": "'/NN'",
-      "gene": "BRCA2",
-      "published_evidence_label": "N/A",
-      "published_lr": "N/A"
-    },
-    {
-      "c_notation": "c.10095_10096insT",
-      "carriers": "150",
-      "dataset_direction": "'/NN'",
-      "gene": "BRCA2",
-      "published_evidence_label": "N/A",
-      "published_lr": "N/A"
-    }
-  ],
+  "clinical_lr_data_release": "UCSC ENIGMA BRCAmfa 2026-08-18",
   "combination_policy": {
     "component_codes_scored_separately": false,
-    "duplicate_independence_groups": "fatal",
-    "duplicate_source_ids": "fatal",
-    "method": "multiply source bundles only after versioned overlap assessment",
+    "external_source_multiplication": "not allowed",
+    "method": "use publisher-combined LR without recomputing publication components",
     "single_final_code": true,
-    "unknown_overlap": "manual review without automatic PP4/BP5",
-    "zanti_admission": "Supplementary Data 5; CDS +/-5 bp; non-founder FAF <=0.001; >=3 combined carriers; BRCA2 evidence from >=2 datasets"
+    "source_reported_residual_overlap_caveat": true
   },
-  "conflicting_canonical_keys": [
-    "BRCA1:c.815_824dup"
-  ],
-  "conflicting_canonical_records": {
-    "BRCA1:c.815_824dup": {
-      "existing_input_c_notations": [
-        "c.815_824dup"
-      ],
-      "existing_source_components": [
-        {
-          "citation": "Li et al. 2020",
-          "clinical_data": [
-            {
-              "data_type": "personal_and_family_history",
-              "lr": 1.31324
-            }
-          ],
-          "component_lr": 1.31324,
-          "doi": "10.1038/s41436-019-0729-3",
-          "evidence_family": "published_multifactorial_clinical_lr",
-          "independence_group": "li_2020_ambry_testing_cohort",
-          "pmid": "31853058",
-          "source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
-          "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
-          "source_id": "li_2020_personal_family_history"
-        }
-      ],
-      "incoming_input_c_notations": [
-        "c.815_824dup",
-        "c.815_824dupAGCCATGTGG"
-      ],
-      "incoming_source_components": [
-        {
-          "citation": "Li et al. 2020",
-          "clinical_data": [
-            {
-              "data_type": "personal_and_family_history",
-              "lr": 1.91608e+18
-            }
-          ],
-          "component_lr": 1.91608e+18,
-          "doi": "10.1038/s41436-019-0729-3",
-          "evidence_family": "published_multifactorial_clinical_lr",
-          "independence_group": "li_2020_ambry_testing_cohort",
-          "pmid": "31853058",
-          "source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
-          "source_dataset": "UCSC ENIGMA BRCAmfa track 1.1.0",
-          "source_id": "li_2020_personal_family_history"
-        }
-      ],
-      "reason": "different clinical LR components under the same source ID"
-    }
-  },
-  "created_utc": "2026-08-27T18:35:03.788155+00:00",
+  "created_utc": "2026-09-01T07:40:46.791296+00:00",
   "criteria": {
-    "BP5": 1441,
-    "PP4": 813,
-    "not_informative": 2893
+    "BP5": 5497,
+    "PP4": 1720,
+    "not_informative": 5733
   },
   "dataset": "BRCA1/2 combined clinical likelihood-ratio snapshot",
   "excluded": {
-    "conflicting_canonical_record": 1,
-    "hgvs_normalization_failed:VariantNormalizationError": 1,
-    "zanti_below_carrier_or_dataset_requirement": 5050,
-    "zanti_faf_above_0_001": 147,
-    "zanti_lr_not_estimable": 2
+    "conflicting_normalized_source_rows": 295,
+    "no_reference_transcript_hgvsc": 210,
+    "reference_transcript_hgvs_not_validated": 26
   },
-  "included_case_control_source": {
-    "citation": "Zanti et al. 2025",
-    "cohorts": [
-      "BRIDGES/BCAC",
-      "CARRIERS",
-      "UK Biobank"
-    ],
-    "data_types": [
-      "case_control"
-    ],
-    "doi": "10.1038/s41467-025-59979-6",
-    "independence_group": "zanti_2025_bridges_carriers_ukb",
-    "pmid": "40413188",
-    "source_id": "zanti_2025_case_control"
-  },
-  "included_multifactorial_sources": {
-    "caputoLRs": {
-      "citation": "Caputo et al. 2021",
-      "data_types": [
-        "family_history",
-        "cooccurrence",
-        "segregation",
-        "pathology"
-      ],
-      "doi": "10.1016/j.ajhg.2021.09.003",
-      "independence_group": "caputo_2021_clinical_cohort",
-      "pmid": "34597585",
-      "source_id": "caputo_2021_cosegregation"
+  "excluded_source_records": [
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314431:T>C"
     },
-    "eastonLRs": {
-      "citation": "Easton et al. 2007",
-      "data_types": [
-        "family_history",
-        "cooccurrence",
-        "segregation",
-        "pathology",
-        "case_control"
-      ],
-      "doi": "10.1086/521032",
-      "independence_group": "easton_2007_multifactorial_dataset",
-      "pmid": "17924331",
-      "source_id": "easton_2007_multifactorial"
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314437:G>C"
     },
-    "liLRs": {
-      "citation": "Li et al. 2020",
-      "data_types": [
-        "personal_and_family_history"
-      ],
-      "doi": "10.1038/s41436-019-0729-3",
-      "independence_group": "li_2020_ambry_testing_cohort",
-      "pmid": "31853058",
-      "source_id": "li_2020_personal_family_history"
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314455:T>C"
     },
-    "parsonsLRs": {
-      "citation": "Parsons et al. 2019",
-      "data_types": [
-        "family_history",
-        "cooccurrence",
-        "segregation",
-        "pathology",
-        "case_control"
-      ],
-      "doi": "10.1002/humu.23818",
-      "independence_group": "parsons_2019_multifactorial_dataset",
-      "pmid": "31131967",
-      "source_id": "parsons_2019_multifactorial"
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314457:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314461:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314470:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314471:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314484:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314489:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314490:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314490:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314524:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314529:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314533:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314538:GGT>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314538:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314540:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314545:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314546:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314548:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314550:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314580:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314598:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314604:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314611:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314628:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314648:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314650:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314783:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314799:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314858:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314860:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314860:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314861:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314865:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314884:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314888:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314906:T>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314907:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314907:T>TC"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314909:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314911:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314916:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314921:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314926:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314928:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314943:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314952:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314954:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314963:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314965:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314968:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314971:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314975:CT>AC"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314983:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314985:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314986:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314989:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314991:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314998:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32314999:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315001:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315004:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315007:T>TA"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315011:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315013:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315013:CCT>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315033:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315034:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315036:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315040:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315043:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315049:T>TAAGTGAAGTCATCCACAACC"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315052:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315056:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315061:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315062:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315071:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315075:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315076:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315076:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315078:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315080:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315084:CTA>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315090:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315094:G>GT"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315101:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315102:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315109:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315115:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315121:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315127:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315134:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315145:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315148:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315157:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315158:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315159:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315160:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315165:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315166:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315168:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315171:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315173:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315182:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315195:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315201:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315209:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315225:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315228:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315229:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315232:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315236:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315240:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315243:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315258:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315267:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315272:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315286:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315289:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315291:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315294:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315304:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315311:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315312:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315315:T>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315318:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315334:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315347:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315350:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315355:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315367:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315369:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315369:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315375:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315376:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315381:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315383:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315385:CTG>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315386:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315388:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315389:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315395:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315398:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315399:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315401:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315403:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315403:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315405:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315406:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315406:C>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315407:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315409:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315409:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315410:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315422:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315425:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315426:G>GGTGGTGCGTGTGCTGC"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315426:G>GGTGGTGCGT"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315427:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315430:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315432:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315438:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315440:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315443:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315444:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315444:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315445:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315448:G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315449:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315451:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315451:T>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315467:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA2:chr13:32315468:C>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-223C>A: HGVSInvalidIntervalError: c.-223 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-223C>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-222G>A: HGVSInvalidIntervalError: c.-222 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-222G>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-220G>T: HGVSInvalidIntervalError: c.-220 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-220G>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-217C>T: HGVSInvalidIntervalError: c.-217 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-217C>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-214C>A: HGVSInvalidIntervalError: c.-214 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-214C>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-214C>T: HGVSInvalidIntervalError: c.-214 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-214C>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-213T>G: HGVSInvalidIntervalError: c.-213 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-213T>G"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-208C>G: HGVSInvalidIntervalError: c.-208 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-208C>G"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-205G>A: HGVSInvalidIntervalError: c.-205 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-205G>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-204G>T: HGVSInvalidIntervalError: c.-204 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-204G>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-203C>T: HGVSInvalidIntervalError: c.-203 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-203C>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-202G>A: HGVSInvalidIntervalError: c.-202 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-202G>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_000059.4:c.-200C>T: HGVSInvalidIntervalError: c.-200 coordinate is out of bounds",
+      "source_name": "NM_000059.4:c.-200C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43044290:C>A"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1382_*1383insC: Sequence interval 7086:7107 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1382_*1383insC"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1378C>T: Sequence interval 7082:7103 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1378C>T"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1376C>T: Sequence interval 7080:7101 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1376C>T"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1375A>G: Sequence interval 7079:7100 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1375A>G"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1372C>A: Sequence interval 7076:7097 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1372C>A"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1370A>G: Sequence interval 7074:7095 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1370A>G"
+    },
+    {
+      "error_code": "reference_data_unavailable",
+      "reason": "Required local reference data are unavailable for NM_007294.4:c.*1364C>T: Sequence interval 7068:7089 is outside NM_007294.4 length 7088",
+      "source_name": "NM_007294.4:c.*1364C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43074231:<CNV>><CNV>"
+    },
+    {
+      "error_code": "RuntimeError",
+      "reason": "HGVS normalization conflicts with normalized indel snapshot: BRCA1 c.70_80del -> c.71_81del, snapshot -> c.70_80del",
+      "source_name": "NM_007294.4:c.70_80del"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_007294.4:c.-114C>A: HGVSInvalidIntervalError: c.-114 coordinate is out of bounds",
+      "source_name": "NM_007294.4:c.-114C>A"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_007294.4:c.-116C>T: HGVSInvalidIntervalError: c.-116 coordinate is out of bounds",
+      "source_name": "NM_007294.4:c.-116C>T"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_007294.4:c.-119del: HGVSInvalidIntervalError: c.-119 coordinate is out of bounds",
+      "source_name": "NM_007294.4:c.-119del"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_007294.4:c.-119G>C: HGVSInvalidIntervalError: c.-119 coordinate is out of bounds",
+      "source_name": "NM_007294.4:c.-119G>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125371:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125372:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125373:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125376:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125380:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125384:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125384:GCAGT>CCGG"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125386:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125387:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125388:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125389:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125393:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125394:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125396:T>GA"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125396:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125396:T>TA"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125397:A>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125397:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125398:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125399:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125400:T>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125405:T>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125439:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125443:A>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125444:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125446:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125452:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125470:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125470:C>G"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125471:G>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125487:C>T"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125495:G>A"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125504:A>C"
+    },
+    {
+      "reason": "The source row has genomic coordinates but no reference-transcript c. HGVS.",
+      "source_name": "BRCA1:chr17:43125515:A>C"
+    },
+    {
+      "error_code": "normalization_engine_failure",
+      "reason": "Local HGVS normalization failed for NM_007294.4:c.-676T>A: HGVSInvalidIntervalError: c.-676 coordinate is out of bounds",
+      "source_name": "NM_007294.4:c.-676T>A"
     }
-  },
-  "index_sha256": "b9504bdf87390b1f15ece7f48c3ca9b65b891f4807615d1513f497d131b64ab7",
+  ],
+  "index_sha256": "4dce5e262d27b1cd27fe044de8553febbf9bb86b2e91a313ee2ef71cd2b883c6",
   "normalization": {
     "counts": {
-      "canonical_source_rows_merged": 24,
-      "duplicate_source_components_deduplicated": 0,
-      "indels_not_in_reference_snapshot": 2,
-      "independent_source_components_merged": 26,
-      "known_indels_cross_checked": 859,
-      "notations_canonicalized": 712,
-      "source_records_normalized": 4435,
-      "zanti_indels_not_in_reference_snapshot": 1,
-      "zanti_known_indels_cross_checked": 162,
-      "zanti_notations_canonicalized": 9,
-      "zanti_records_normalized": 1710
+      "indels_not_in_reference_snapshot": 236,
+      "known_indels_cross_checked": 1664,
+      "notations_canonicalized": 758,
+      "source_records_normalized": 13245
     },
     "failures": [
       {
         "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-223C>A: HGVSInvalidIntervalError: c.-223 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-223C>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-222G>A: HGVSInvalidIntervalError: c.-222 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-222G>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-220G>T: HGVSInvalidIntervalError: c.-220 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-220G>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-217C>T: HGVSInvalidIntervalError: c.-217 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-217C>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-214C>A: HGVSInvalidIntervalError: c.-214 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-214C>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-214C>T: HGVSInvalidIntervalError: c.-214 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-214C>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-213T>G: HGVSInvalidIntervalError: c.-213 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-213T>G"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-208C>G: HGVSInvalidIntervalError: c.-208 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-208C>G"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-205G>A: HGVSInvalidIntervalError: c.-205 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-205G>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-204G>T: HGVSInvalidIntervalError: c.-204 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-204G>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-203C>T: HGVSInvalidIntervalError: c.-203 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-203C>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-202G>A: HGVSInvalidIntervalError: c.-202 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-202G>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_000059.4:c.-200C>T: HGVSInvalidIntervalError: c.-200 coordinate is out of bounds",
+        "source_name": "NM_000059.4:c.-200C>T"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1382_*1383insC: Sequence interval 7086:7107 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1382_*1383insC"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1378C>T: Sequence interval 7082:7103 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1378C>T"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1376C>T: Sequence interval 7080:7101 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1376C>T"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1375A>G: Sequence interval 7079:7100 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1375A>G"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1372C>A: Sequence interval 7076:7097 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1372C>A"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1370A>G: Sequence interval 7074:7095 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1370A>G"
+      },
+      {
+        "error_code": "reference_data_unavailable",
+        "reason": "Required local reference data are unavailable for NM_007294.4:c.*1364C>T: Sequence interval 7068:7089 is outside NM_007294.4 length 7088",
+        "source_name": "NM_007294.4:c.*1364C>T"
+      },
+      {
+        "error_code": "RuntimeError",
+        "reason": "HGVS normalization conflicts with normalized indel snapshot: BRCA1 c.70_80del -> c.71_81del, snapshot -> c.70_80del",
+        "source_name": "NM_007294.4:c.70_80del"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_007294.4:c.-114C>A: HGVSInvalidIntervalError: c.-114 coordinate is out of bounds",
+        "source_name": "NM_007294.4:c.-114C>A"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_007294.4:c.-116C>T: HGVSInvalidIntervalError: c.-116 coordinate is out of bounds",
+        "source_name": "NM_007294.4:c.-116C>T"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_007294.4:c.-119del: HGVSInvalidIntervalError: c.-119 coordinate is out of bounds",
+        "source_name": "NM_007294.4:c.-119del"
+      },
+      {
+        "error_code": "normalization_engine_failure",
+        "reason": "Local HGVS normalization failed for NM_007294.4:c.-119G>C: HGVSInvalidIntervalError: c.-119 coordinate is out of bounds",
+        "source_name": "NM_007294.4:c.-119G>C"
+      },
+      {
+        "error_code": "normalization_engine_failure",
         "reason": "Local HGVS normalization failed for NM_007294.4:c.-676T>A: HGVSInvalidIntervalError: c.-676 coordinate is out of bounds",
-        "variant": "NM_007294.4:c.-676T>A"
+        "source_name": "NM_007294.4:c.-676T>A"
       }
     ],
     "method": "biocommons.hgvs with checksum-pinned cdot panel provider",
@@ -215,178 +1159,170 @@
       "reference_manifest_sha256": "5d889b264f8494d5163ad91268fd7ec7d0ccfee19777d2716a87cd6caea9a8c6"
     }
   },
-  "records": 5147,
-  "records_by_source_id": {
-    "caputo_2021_cosegregation": 93,
-    "easton_2007_multifactorial": 151,
-    "li_2020_personal_family_history": 3378,
-    "parsons_2019_multifactorial": 1389,
-    "zanti_2025_case_control": 1710
-  },
+  "records": 12950,
   "reference_transcripts": {
     "NM_000059.4": "BRCA2",
     "NM_007294.4": "BRCA1"
   },
-  "rows_seen": 4436,
+  "rows_seen": 13481,
   "source_files": {
-    "ucsc_enigma_brcamfa_v1_1": {
+    "ucsc_enigma_brcamfa_2026_08_18": {
+      "combination_status": "publisher_combined",
       "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-      "file": "BRCAmfa.hg38.v1.1.bed",
-      "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
-      "track_version": "ENIGMA specifications 1.1.0",
+      "file": "BRCAmfa.hg38.2026-08-18.bed",
+      "sha256": "40729f95aff57c879f6d46f013ea2f2d1b0eab63d0fc92562c14454c702d85d0",
+      "track_release": "2026-08-18",
       "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb"
-    },
-    "zanti_2025_case_control": {
-      "doi": "10.1038/s41467-025-59979-6",
-      "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
-      "pmid": "40413188",
-      "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
-      "sheet": "Supplementary Data 5",
-      "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx"
     }
   },
   "source_manifest": {
     "appendix_b_bibliography": [
       {
         "citation": "Goldgar et al. 2004",
-        "pmid": "15290653",
-        "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track",
-        "role": "multifactorial likelihood methodology and component evidence",
-        "separate_runtime_component": false
+        "pmid": "15290653"
       },
       {
         "citation": "Thompson et al. 2003",
-        "pmid": "12900794",
-        "reason": "methodological source; segregation LRs are represented in the admitted aggregate datasets",
-        "role": "quantitative cosegregation methodology",
-        "separate_runtime_component": false
+        "pmid": "12900794"
       },
       {
         "citation": "Easton et al. 2007",
-        "component_id": "easton_2007_multifactorial",
-        "pmid": "17924331",
-        "role": "variant-specific multifactorial clinical LR",
-        "separate_runtime_component": true
+        "pmid": "17924331"
       },
       {
         "citation": "Spurdle et al. 2015",
-        "pmid": "25857409",
-        "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track",
-        "role": "multifactorial likelihood methodology and calibration",
-        "separate_runtime_component": false
+        "pmid": "25857409"
       },
       {
         "citation": "de la Hoya et al. 2016",
-        "pmid": "27008870",
-        "reason": "methodological source; pathology LRs are represented in the admitted aggregate datasets",
-        "role": "tumour pathology likelihood methodology",
-        "separate_runtime_component": false
+        "pmid": "27008870"
       },
       {
         "citation": "Parsons et al. 2019",
-        "component_id": "parsons_2019_multifactorial",
-        "pmid": "31131967",
-        "role": "variant-specific multifactorial clinical LR",
-        "separate_runtime_component": true
+        "pmid": "31131967"
       },
       {
         "citation": "Li et al. 2020",
-        "component_id": "li_2020_personal_family_history",
-        "pmid": "31853058",
-        "role": "variant-specific personal and family history LR",
-        "separate_runtime_component": true
+        "pmid": "31853058"
+      }
+    ],
+    "clinical_lr_data_release": {
+      "build_record_url": "https://github.com/ucscGenomeBrowser/kent/blob/master/src/hg/makeDb/doc/enigma.txt",
+      "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+      "independent_of_specification_version": true,
+      "name": "UCSC ENIGMA BRCA1/BRCA2 likelihood for PP4 and BP5",
+      "release_date": "2026-08-18",
+      "role": "Provides variant-specific publisher-combined clinical LR values"
+    },
+    "combination_policy": {
+      "case_control_update": "The source replaced the Parsons iCOGS case-control component with Zanti 2025 ccLR because the cohorts overlap.",
+      "criterion_assignment": "Recalculate PP4/BP5 strength from combinedLR using ENIGMA VCEP v1.2 thresholds rather than trusting the rounded source label.",
+      "external_source_multiplication": "not_allowed",
+      "publication_components": "Retain for audit and display. Do not multiply them again in ARIANE.",
+      "runtime_input": "Use the publisher-combined LR exactly as supplied by the pinned UCSC ENIGMA track.",
+      "source_caveat": "UCSC reports that some residual overlap between Parsons 2019 and Easton 2007 may remain and recommends reviewing component values."
+    },
+    "conversion": {
+      "output_sha256_required": "40729f95aff57c879f6d46f013ea2f2d1b0eab63d0fc92562c14454c702d85d0",
+      "tool": "UCSC bigBedToBed linux.x86_64",
+      "tool_download_url": "https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigBedToBed",
+      "tool_sha256_used_for_pinned_bed": "f69501853a8966afce2d473ae2185e682173ba43c252eb754a564f962eba5afb"
+    },
+    "current_track_publications": [
+      {
+        "citation": "Easton et al. 2007",
+        "pmid": "17924331"
       },
       {
-        "basis": "included by the official UCSC ENIGMA BRCAmfa track",
+        "citation": "Parsons et al. 2019",
+        "pmid": "31131967"
+      },
+      {
+        "citation": "Li et al. 2020",
+        "pmid": "31853058"
+      },
+      {
         "citation": "Caputo et al. 2021",
-        "component_id": "caputo_2021_cosegregation",
-        "pmid": "34597585",
-        "role": "variant-specific cosegregation and clinical LR",
-        "separate_runtime_component": true
+        "pmid": "34597585"
       },
       {
-        "basis": "ENIGMA Analytical Working Group dataset implementing the ccLR approach preferred by the VCEP specification",
         "citation": "Zanti et al. 2025",
-        "component_id": "zanti_2025_case_control",
-        "pmid": "40413188",
-        "role": "variant-specific BRIDGES/CARRIERS/UKB case-control LR",
-        "separate_runtime_component": true
+        "pmid": "40413188"
       }
     ],
-    "combination_rules": {
-      "component_level_codes": "not scored",
-      "duplicate_independence_group": "fatal",
-      "duplicate_source_id": "fatal",
-      "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
-      "missing_overlap_assessment": "manual_review_without_automatic_code",
-      "posterior_probability_prior": "not used",
-      "source_bundle_policy": "A published combined result within one admitted source bundle may be used as supplied. Results from different source bundles may be multiplied only when every pair is explicitly marked verified_independent in this manifest.",
-      "unknown_or_potential_overlap": "manual_review_without_automatic_code"
-    },
     "datasets": {
-      "ucsc_enigma_brcamfa_v1_1": {
-        "admitted_components": [
-          "easton_2007_multifactorial",
-          "parsons_2019_multifactorial",
-          "li_2020_personal_family_history",
-          "caputo_2021_cosegregation"
+      "ucsc_enigma_brcamfa_2026_08_18": {
+        "assembly": "GRCh38",
+        "columns": [
+          "chrom",
+          "chromStart",
+          "chromEnd",
+          "name",
+          "score",
+          "strand",
+          "thickStart",
+          "thickEnd",
+          "reserved",
+          "combinedLR",
+          "ACMGcode",
+          "familyHistoryCombinedLR",
+          "cooccurrenceCombinedLR",
+          "segregationCombinedLR",
+          "pathologyCombinedLR",
+          "caseControlLR",
+          "bridgesLR",
+          "carriersLR",
+          "ukbLR",
+          "zantiSuggestedCode",
+          "caputoLRs",
+          "parsonsLRs",
+          "liLRs",
+          "eastonLRs",
+          "HGVSp",
+          "mouseOver"
         ],
-        "deduplication": "UCSC removed duplicate Parsons/Easton variants before recomputing the track",
-        "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-        "file": "BRCAmfa.hg38.v1.1.bed",
-        "role": "variant-specific multifactorial clinical LR components",
-        "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
-        "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
-        "version": "ENIGMA UCSC track 1.1.0"
-      },
-      "zanti_2025_case_control": {
-        "admission_filters": {
-          "brca2_minimum_datasets": 2,
-          "maximum_non_founder_faf": 0.001,
-          "minimum_combined_carriers": 3,
-          "region": "CDS +/-5 bp"
-        },
-        "cohorts": [
-          "BRIDGES/BCAC",
-          "CARRIERS",
-          "UK Biobank"
-        ],
-        "doi": "10.1038/s41467-025-59979-6",
-        "expected_admitted_records": {
-          "BRCA1": 681,
-          "BRCA2": 1029,
-          "total": 1710
-        },
-        "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
-        "pmid": "40413188",
-        "role": "variant-specific combined case-control LR",
-        "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
-        "sheet": "Supplementary Data 5",
-        "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx",
-        "version": "Nature Communications version of record, 2025-05-25"
+        "combination_status": "publisher_combined",
+        "derived_from_bigbed_file": "BRCAmfa.hg38.2026-08-18.bb",
+        "derived_from_bigbed_sha256": "853289298f01b2d8831066cba4c7ba7c3c7b5ae8dab78412fdf8376a6e628152",
+        "expected_rows": 13481,
+        "expected_rows_without_transcript_hgvsc": 210,
+        "file": "BRCAmfa.hg38.2026-08-18.bed",
+        "remote_content_length": 665599,
+        "remote_last_modified": "2026-08-18T22:07:46Z",
+        "schema": "bed9+17",
+        "sha256": "40729f95aff57c879f6d46f013ea2f2d1b0eab63d0fc92562c14454c702d85d0",
+        "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb"
       }
     },
-    "schema_version": 2,
+    "schema_version": 3,
     "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
-    "source_bundle_overlap_matrix": [
-      {
-        "assessment_note": "The versioned source material currently curated by ARIANE does not contain a documented assessment establishing that the UCSC ENIGMA BRCAmfa clinical LR bundle and the Zanti et al. 2025 case-control LR bundle can be combined as independent lines of evidence.",
-        "assessment_sources": [
-          "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-          "https://doi.org/10.1038/s41467-025-59979-6"
-        ],
-        "automatic_combination_allowed": false,
-        "double_counting_risk": true,
-        "left_source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
-        "overlap_status": "unknown",
-        "right_source_bundle_id": "zanti_2025_case_control"
-      }
-    ],
     "status": "validated_source_manifest",
-    "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2"
+    "target_specification": {
+      "name": "ClinGen ENIGMA BRCA1/2 VCEP",
+      "role": "Defines PP4/BP5 LR thresholds and application rules",
+      "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
+      "version": "1.2"
+    },
+    "update_policy": {
+      "automatic_release_activation": false,
+      "check_command": "python scripts/check_enigma_clinical_lr_update.py",
+      "failure_behavior": "Keep using the last checksum-validated release. Never activate a remote change automatically.",
+      "recommended_check_cadence": "monthly and before every ARIANE release",
+      "required_before_activation": [
+        "archive the downloaded candidate with source identity and checksum",
+        "review the UCSC dataVersion, changelog and build record",
+        "convert BigBed with the official UCSC tool and validate the declared schema",
+        "review added, removed and changed variant-level combined LR values",
+        "review every threshold crossing and every change of evidence direction",
+        "rebuild the derived snapshot and run the complete test suite",
+        "record expert approval and update the pinned manifest"
+      ],
+      "runtime_network_lookup": false,
+      "update_detected_when": "The remote BigBed SHA-256 differs from the pinned derived_from_bigbed_sha256."
+    }
   },
   "source_manifest_file": "clinical_lr_sources.manifest.json",
-  "source_manifest_sha256": "53b71c5a039b67a28dd67069de715e5a75c3ddc77d9d8b099f2d8deaca883904",
+  "source_manifest_sha256": "43784cfbb3d7a7d7216872138c9d6b20f1491b54c38d346246eab05c725ddacd",
   "status": "validated_derived_snapshot",
   "target_rule_version": "ENIGMA BRCA1/2 VCEP 1.2 PP4/BP5 thresholds"
 }

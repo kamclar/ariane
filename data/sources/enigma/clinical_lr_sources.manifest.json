@@ -1,140 +1,110 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "status": "validated_source_manifest",
   "scope": "ENIGMA BRCA1/2 combined clinical likelihood ratios for PP4/BP5",
-  "target_specification": "ClinGen ENIGMA BRCA1/2 VCEP v1.2",
+  "target_specification": {
+    "name": "ClinGen ENIGMA BRCA1/2 VCEP",
+    "version": "1.2",
+    "role": "Defines PP4/BP5 LR thresholds and application rules",
+    "url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0"
+  },
+  "clinical_lr_data_release": {
+    "name": "UCSC ENIGMA BRCA1/BRCA2 likelihood for PP4 and BP5",
+    "release_date": "2026-08-18",
+    "role": "Provides variant-specific publisher-combined clinical LR values",
+    "independent_of_specification_version": true,
+    "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+    "build_record_url": "https://github.com/ucscGenomeBrowser/kent/blob/master/src/hg/makeDb/doc/enigma.txt"
+  },
   "datasets": {
-    "ucsc_enigma_brcamfa_v1_1": {
-      "file": "BRCAmfa.hg38.v1.1.bed",
-      "sha256": "16bcc441b203e62d7aeb1ba3f4733280da12d6252a02e9e8d9e5b7b6a7cf117a",
+    "ucsc_enigma_brcamfa_2026_08_18": {
+      "file": "BRCAmfa.hg38.2026-08-18.bed",
+      "sha256": "40729f95aff57c879f6d46f013ea2f2d1b0eab63d0fc92562c14454c702d85d0",
+      "derived_from_bigbed_file": "BRCAmfa.hg38.2026-08-18.bb",
+      "derived_from_bigbed_sha256": "853289298f01b2d8831066cba4c7ba7c3c7b5ae8dab78412fdf8376a6e628152",
       "url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/hg38/BRCAmfa.bb",
-      "description_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-      "version": "ENIGMA UCSC track 1.1.0",
-      "role": "variant-specific multifactorial clinical LR components",
-      "admitted_components": [
-        "easton_2007_multifactorial",
-        "parsons_2019_multifactorial",
-        "li_2020_personal_family_history",
-        "caputo_2021_cosegregation"
-      ],
-      "deduplication": "UCSC removed duplicate Parsons/Easton variants before recomputing the track"
-    },
-    "zanti_2025_case_control": {
-      "file": "Zanti_2025_NatCommun_Supplementary_Data.xlsx",
-      "sha256": "4cc2bb3226ae59dfade69c2b8e729cdf19fbba971e091d6a06c79c85a6319b1a",
-      "url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-025-59979-6/MediaObjects/41467_2025_59979_MOESM4_ESM.xlsx",
-      "version": "Nature Communications version of record, 2025-05-25",
-      "sheet": "Supplementary Data 5",
-      "pmid": "40413188",
-      "doi": "10.1038/s41467-025-59979-6",
-      "role": "variant-specific combined case-control LR",
-      "cohorts": [
-        "BRIDGES/BCAC",
-        "CARRIERS",
-        "UK Biobank"
-      ],
-      "admission_filters": {
-        "region": "CDS +/-5 bp",
-        "maximum_non_founder_faf": 0.001,
-        "minimum_combined_carriers": 3,
-        "brca2_minimum_datasets": 2
-      },
-      "expected_admitted_records": {
-        "BRCA1": 681,
-        "BRCA2": 1029,
-        "total": 1710
-      }
-    }
-  },
-  "appendix_b_bibliography": [
-    {
-      "pmid": "15290653",
-      "citation": "Goldgar et al. 2004",
-      "role": "multifactorial likelihood methodology and component evidence",
-      "separate_runtime_component": false,
-      "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track"
-    },
-    {
-      "pmid": "12900794",
-      "citation": "Thompson et al. 2003",
-      "role": "quantitative cosegregation methodology",
-      "separate_runtime_component": false,
-      "reason": "methodological source; segregation LRs are represented in the admitted aggregate datasets"
-    },
-    {
-      "pmid": "17924331",
-      "citation": "Easton et al. 2007",
-      "role": "variant-specific multifactorial clinical LR",
-      "separate_runtime_component": true,
-      "component_id": "easton_2007_multifactorial"
-    },
-    {
-      "pmid": "25857409",
-      "citation": "Spurdle et al. 2015",
-      "role": "multifactorial likelihood methodology and calibration",
-      "separate_runtime_component": false,
-      "reason": "no separate non-overlapping normalized variant-level table is exposed by the admitted ENIGMA track"
-    },
-    {
-      "pmid": "27008870",
-      "citation": "de la Hoya et al. 2016",
-      "role": "tumour pathology likelihood methodology",
-      "separate_runtime_component": false,
-      "reason": "methodological source; pathology LRs are represented in the admitted aggregate datasets"
-    },
-    {
-      "pmid": "31131967",
-      "citation": "Parsons et al. 2019",
-      "role": "variant-specific multifactorial clinical LR",
-      "separate_runtime_component": true,
-      "component_id": "parsons_2019_multifactorial"
-    },
-    {
-      "pmid": "31853058",
-      "citation": "Li et al. 2020",
-      "role": "variant-specific personal and family history LR",
-      "separate_runtime_component": true,
-      "component_id": "li_2020_personal_family_history"
-    },
-    {
-      "pmid": "34597585",
-      "citation": "Caputo et al. 2021",
-      "role": "variant-specific cosegregation and clinical LR",
-      "separate_runtime_component": true,
-      "component_id": "caputo_2021_cosegregation",
-      "basis": "included by the official UCSC ENIGMA BRCAmfa track"
-    },
-    {
-      "pmid": "40413188",
-      "citation": "Zanti et al. 2025",
-      "role": "variant-specific BRIDGES/CARRIERS/UKB case-control LR",
-      "separate_runtime_component": true,
-      "component_id": "zanti_2025_case_control",
-      "basis": "ENIGMA Analytical Working Group dataset implementing the ccLR approach preferred by the VCEP specification"
-    }
-  ],
-  "combination_rules": {
-    "source_bundle_policy": "A published combined result within one admitted source bundle may be used as supplied. Results from different source bundles may be multiplied only when every pair is explicitly marked verified_independent in this manifest.",
-    "duplicate_source_id": "fatal",
-    "duplicate_independence_group": "fatal",
-    "missing_overlap_assessment": "manual_review_without_automatic_code",
-    "unknown_or_potential_overlap": "manual_review_without_automatic_code",
-    "component_level_codes": "not scored",
-    "final_code": "one PP4 or BP5 strength calculated from the combined LR using ENIGMA v1.2 thresholds",
-    "posterior_probability_prior": "not used"
-  },
-  "source_bundle_overlap_matrix": [
-    {
-      "left_source_bundle_id": "ucsc_enigma_brcamfa_v1_1",
-      "right_source_bundle_id": "zanti_2025_case_control",
-      "overlap_status": "unknown",
-      "double_counting_risk": true,
-      "automatic_combination_allowed": false,
-      "assessment_note": "The versioned source material currently curated by ARIANE does not contain a documented assessment establishing that the UCSC ENIGMA BRCAmfa clinical LR bundle and the Zanti et al. 2025 case-control LR bundle can be combined as independent lines of evidence.",
-      "assessment_sources": [
-        "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
-        "https://doi.org/10.1038/s41467-025-59979-6"
+      "remote_last_modified": "2026-08-18T22:07:46Z",
+      "remote_content_length": 665599,
+      "assembly": "GRCh38",
+      "schema": "bed9+17",
+      "expected_rows": 13481,
+      "expected_rows_without_transcript_hgvsc": 210,
+      "combination_status": "publisher_combined",
+      "columns": [
+        "chrom",
+        "chromStart",
+        "chromEnd",
+        "name",
+        "score",
+        "strand",
+        "thickStart",
+        "thickEnd",
+        "reserved",
+        "combinedLR",
+        "ACMGcode",
+        "familyHistoryCombinedLR",
+        "cooccurrenceCombinedLR",
+        "segregationCombinedLR",
+        "pathologyCombinedLR",
+        "caseControlLR",
+        "bridgesLR",
+        "carriersLR",
+        "ukbLR",
+        "zantiSuggestedCode",
+        "caputoLRs",
+        "parsonsLRs",
+        "liLRs",
+        "eastonLRs",
+        "HGVSp",
+        "mouseOver"
       ]
     }
-  ]
+  },
+  "combination_policy": {
+    "runtime_input": "Use the publisher-combined LR exactly as supplied by the pinned UCSC ENIGMA track.",
+    "publication_components": "Retain for audit and display. Do not multiply them again in ARIANE.",
+    "external_source_multiplication": "not_allowed",
+    "criterion_assignment": "Recalculate PP4/BP5 strength from combinedLR using ENIGMA VCEP v1.2 thresholds rather than trusting the rounded source label.",
+    "case_control_update": "The source replaced the Parsons iCOGS case-control component with Zanti 2025 ccLR because the cohorts overlap.",
+    "source_caveat": "UCSC reports that some residual overlap between Parsons 2019 and Easton 2007 may remain and recommends reviewing component values."
+  },
+  "appendix_b_bibliography": [
+    {"pmid": "15290653", "citation": "Goldgar et al. 2004"},
+    {"pmid": "12900794", "citation": "Thompson et al. 2003"},
+    {"pmid": "17924331", "citation": "Easton et al. 2007"},
+    {"pmid": "25857409", "citation": "Spurdle et al. 2015"},
+    {"pmid": "27008870", "citation": "de la Hoya et al. 2016"},
+    {"pmid": "31131967", "citation": "Parsons et al. 2019"},
+    {"pmid": "31853058", "citation": "Li et al. 2020"}
+  ],
+  "current_track_publications": [
+    {"pmid": "17924331", "citation": "Easton et al. 2007"},
+    {"pmid": "31131967", "citation": "Parsons et al. 2019"},
+    {"pmid": "31853058", "citation": "Li et al. 2020"},
+    {"pmid": "34597585", "citation": "Caputo et al. 2021"},
+    {"pmid": "40413188", "citation": "Zanti et al. 2025"}
+  ],
+  "conversion": {
+    "tool": "UCSC bigBedToBed linux.x86_64",
+    "tool_download_url": "https://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigBedToBed",
+    "tool_sha256_used_for_pinned_bed": "f69501853a8966afce2d473ae2185e682173ba43c252eb754a564f962eba5afb",
+    "output_sha256_required": "40729f95aff57c879f6d46f013ea2f2d1b0eab63d0fc92562c14454c702d85d0"
+  },
+  "update_policy": {
+    "automatic_release_activation": false,
+    "recommended_check_cadence": "monthly and before every ARIANE release",
+    "check_command": "python scripts/check_enigma_clinical_lr_update.py",
+    "update_detected_when": "The remote BigBed SHA-256 differs from the pinned derived_from_bigbed_sha256.",
+    "required_before_activation": [
+      "archive the downloaded candidate with source identity and checksum",
+      "review the UCSC dataVersion, changelog and build record",
+      "convert BigBed with the official UCSC tool and validate the declared schema",
+      "review added, removed and changed variant-level combined LR values",
+      "review every threshold crossing and every change of evidence direction",
+      "rebuild the derived snapshot and run the complete test suite",
+      "record expert approval and update the pinned manifest"
+    ],
+    "runtime_network_lookup": false,
+    "failure_behavior": "Keep using the last checksum-validated release. Never activate a remote change automatically."
+  }
 }

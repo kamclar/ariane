@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, Optional
-from backend.gene_policy import clinical_lr_thresholds
+from backend.gene_policy import (
+    clinical_lr_thresholds,
+    policy_name,
+    policy_version,
+)
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +26,18 @@ BP5_POINTS = {"Very Strong": -8, "Strong": -4, "Moderate": -2, "Supporting": -1}
 
 _SNAPSHOT: dict[str, dict[str, Any]] | None = None
 _ALIASES: dict[str, str] | None = None
+
+_SOURCE_LABEL_PATTERN = re.compile(
+    r"^(PP4|BP5)\s*-\s*(Pathogenic|Benign)\s*-\s*"
+    r"(Supporting|Moderate|Strong|Very strong)$",
+    re.IGNORECASE,
+)
+_CANONICAL_STRENGTHS = {
+    "supporting": "Supporting",
+    "moderate": "Moderate",
+    "strong": "Strong",
+    "very strong": "Very Strong",
+}
 
 
 def _sha256(path: Path) -> str:
@@ -57,6 +74,110 @@ def lr_to_bp5_strength(gene: str, lr: float) -> Optional[str]:
     return None
 
 
+def _parse_source_acmg_label(label: str) -> tuple[Optional[str], Optional[str]]:
+    """Parse the pinned track label or reject an unsupported source schema."""
+    value = str(label or "").strip()
+    if value.casefold() == "not informative":
+        return None, None
+    match = _SOURCE_LABEL_PATTERN.fullmatch(value)
+    if not match:
+        raise RuntimeError(f"Unsupported PP4/BP5 source ACMG label: {value!r}")
+    code, direction, strength = match.groups()
+    expected_direction = "Pathogenic" if code.upper() == "PP4" else "Benign"
+    if direction.casefold() != expected_direction.casefold():
+        raise RuntimeError(
+            f"PP4/BP5 source ACMG label has an invalid direction: {value!r}"
+        )
+    return code.upper(), _CANONICAL_STRENGTHS[strength.casefold()]
+
+
+def _threshold_rule(
+    gene: str,
+    code: Optional[str],
+    strength: Optional[str],
+) -> dict[str, Any]:
+    thresholds = clinical_lr_thresholds(gene)
+    if code == "PP4" and strength:
+        key = {
+            "Supporting": "supporting_min_inclusive",
+            "Moderate": "moderate_min_inclusive",
+            "Strong": "strong_min_inclusive",
+            "Very Strong": "very_strong_min_inclusive",
+        }[strength]
+        boundary = thresholds["pp4"][key]
+        return {
+            "operator": ">=",
+            "boundary": boundary,
+            "text": f"{code} {strength} applies at combined LR >= {boundary:g}",
+        }
+    if code == "BP5" and strength:
+        key = {
+            "Supporting": "supporting_max_inclusive",
+            "Moderate": "moderate_max_inclusive",
+            "Strong": "strong_max_inclusive",
+            "Very Strong": "very_strong_max_inclusive",
+        }[strength]
+        boundary = thresholds["bp5"][key]
+        return {
+            "operator": "<=",
+            "boundary": boundary,
+            "text": f"{code} {strength} applies at combined LR <= {boundary:g}",
+        }
+    return {
+        "operator": "between",
+        "boundary": None,
+        "text": (
+            "PP4/BP5 is not informative when combined LR is greater than 0.48 "
+            "and less than 2.08"
+        ),
+    }
+
+
+def _threshold_comparison(
+    gene: str,
+    lr: float,
+    calculated_code: Optional[str],
+    calculated_strength: Optional[str],
+    source_label: str,
+) -> dict[str, Any]:
+    source_code, source_strength = _parse_source_acmg_label(source_label)
+    status = (
+        "match"
+        if (source_code, source_strength) == (calculated_code, calculated_strength)
+        else "different"
+    )
+    vcep_label = (
+        f"{calculated_code} {calculated_strength}"
+        if calculated_code and calculated_strength
+        else "Not informative"
+    )
+    threshold = _threshold_rule(gene, calculated_code, calculated_strength)
+    policy_label = f"{policy_name(gene)} v{policy_version(gene)}"
+    reason = ""
+    if status == "different":
+        reason = (
+            f"The source track labels this record {source_label}, while {policy_label} "
+            f"maps combined LR={lr:.6g} to {vcep_label}. {threshold['text']}. "
+            "ARIANE uses the VCEP threshold result for classification and retains "
+            "the source label for audit."
+        )
+    return {
+        "status": status,
+        "source_label": source_label,
+        "source_code": source_code,
+        "source_strength": source_strength,
+        "vcep_policy": policy_label,
+        "vcep_label": vcep_label,
+        "vcep_code": calculated_code,
+        "vcep_strength": calculated_strength,
+        "combined_lr": lr,
+        "threshold_operator": threshold["operator"],
+        "threshold_value": threshold["boundary"],
+        "threshold_rule": threshold["text"],
+        "reason": reason,
+    }
+
+
 def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     """Load and validate the snapshot. Missing or corrupted data is fatal."""
     global _SNAPSHOT, _ALIASES
@@ -75,10 +196,13 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     if metadata.get("source_manifest_sha256") != _sha256(SOURCE_MANIFEST_PATH):
         raise RuntimeError("PP4/BP5 clinical LR source manifest checksum mismatch")
     source_manifest = json.loads(SOURCE_MANIFEST_PATH.read_text(encoding="utf-8"))
-    if source_manifest.get("schema_version") != 2:
+    if source_manifest.get("schema_version") != 3:
         raise RuntimeError("PP4/BP5 clinical LR source manifest schema is unsupported")
-    if not isinstance(source_manifest.get("source_bundle_overlap_matrix"), list):
-        raise RuntimeError("PP4/BP5 source-bundle overlap matrix is missing")
+    datasets = source_manifest.get("datasets")
+    if not isinstance(datasets, dict) or len(datasets) != 1:
+        raise RuntimeError("PP4/BP5 clinical LR source manifest must pin one active dataset")
+    if source_manifest.get("update_policy", {}).get("automatic_release_activation") is not False:
+        raise RuntimeError("PP4/BP5 clinical LR source updates must not activate automatically")
     normalization = metadata.get("normalization")
     if not isinstance(normalization, dict) or not normalization.get("provenance"):
         raise RuntimeError("PP4/BP5 clinical LR snapshot normalization provenance is missing")
@@ -95,6 +219,8 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     if metadata.get("records") != len(snapshot):
         raise RuntimeError("PP4/BP5 clinical LR snapshot record count does not match metadata")
+    for record in snapshot.values():
+        _parse_source_acmg_label(record.get("source_acmg_label", ""))
 
     aliases: dict[str, str] = {key: key for key in snapshot}
     ambiguous: set[str] = set()
@@ -130,6 +256,8 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "candidate_likelihood_ratio": None,
         "overlap_status": "not_assessed",
         "double_counting_risk": False,
+        "source_reported_overlap_caveat": False,
+        "data_release": "",
         "overlap_assessment_note": "",
         "overlap_assessment_sources": [],
         "automatic_combination_allowed": False,
@@ -140,6 +268,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "independent_evidence_contribution_count": 0,
         "single_strong_likely_benign_eligible": False,
         "single_strong_likely_benign_basis": "",
+        "threshold_comparison": {"status": "not_available"},
     }
     if entry is None:
         result["reason"] = (
@@ -157,6 +286,10 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "candidate_likelihood_ratio": entry.get("candidate_combined_lr"),
         "overlap_status": entry.get("overlap_status", "unknown"),
         "double_counting_risk": entry.get("double_counting_risk", True),
+        "source_reported_overlap_caveat": entry.get(
+            "source_reported_overlap_caveat", False
+        ),
+        "data_release": entry.get("source", {}).get("track_release", ""),
         "overlap_assessment_note": entry.get("assessment_note", ""),
         "overlap_assessment_sources": entry.get("assessment_sources", []),
         "automatic_combination_allowed": entry.get(
@@ -165,6 +298,10 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "application_status": entry.get(
             "automatic_application_status", "review_required"
         ),
+        "threshold_comparison": {
+            "status": "not_assessed",
+            "source_label": entry.get("source_acmg_label", ""),
+        },
     })
     lr = entry.get("combined_lr")
     result["likelihood_ratio"] = lr
@@ -187,11 +324,9 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "independent_source_group_count"
     ]
     if not result["automatic_combination_allowed"]:
-        result["reason"] = (
-            "Clinical LR evidence is available from more than one source, but "
-            "independence of the underlying clinical observations has not been "
-            "established. To avoid counting the same observations twice, ARIANE "
-            "did not apply PP4/BP5 automatically. Expert review is required."
+        result["reason"] = result["overlap_assessment_note"] or (
+            "The published clinical LR record requires expert source review, so "
+            "ARIANE did not apply PP4/BP5 automatically."
         )
         return result
     if lr is None:
@@ -202,6 +337,13 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     bp5_strength = lr_to_bp5_strength(gene, lr)
     code = "PP4" if pp4_strength else "BP5" if bp5_strength else None
     strength = pp4_strength or bp5_strength
+    result["threshold_comparison"] = _threshold_comparison(
+        gene,
+        lr,
+        code,
+        strength,
+        entry["source_acmg_label"],
+    )
     if not code:
         result["reason"] = f"Combined clinical LR={lr:.6g} is not informative for PP4 or BP5"
         return result
@@ -224,10 +366,21 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
             "Multiple recorded clinical evidence types and likelihood-ratio "
             "contributions support the BP5 Strong code"
         )
-    pmids = sorted({component["pmid"] for component in result["source_components"]})
+    pmids = sorted({
+        str(pmid)
+        for component in result["source_components"]
+        for pmid in (
+            component.get("pmids")
+            or ([component.get("pmid")] if component.get("pmid") else [])
+        )
+        if str(pmid).strip()
+    })
     result["reason"] = (
-        f"ENIGMA v1.2 combined clinical evidence: "
+        f"ENIGMA v1.2 combined clinical evidence from the UCSC ENIGMA "
+        f"data release {result['data_release']}: "
         f"combined LR={lr:.6g}; {code} {strength}; "
         f"PMID {', '.join(pmids)}"
     )
+    if result["threshold_comparison"]["status"] == "different":
+        result["reason"] += ". " + result["threshold_comparison"]["reason"]
     return result
