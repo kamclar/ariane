@@ -78,6 +78,12 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _write_json_lf(path: Path, value: dict) -> None:
+    """Write canonical UTF-8 JSON with LF endings on every operating system."""
+    payload = json.dumps(value, indent=2, sort_keys=True) + "\n"
+    path.write_bytes(payload.encode("utf-8"))
+
+
 def _load_json_object(path: Path, description: str) -> dict:
     if not path.is_file():
         raise RuntimeError(f"{description} is missing: {path}")
@@ -483,10 +489,7 @@ def build(
 
     records = dict(sorted(records.items()))
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(records, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    _write_json_lf(output, records)
     criteria = Counter(record["criterion"] or "not_informative" for record in records.values())
     application_statuses = Counter(
         record["automatic_application_status"] for record in records.values()
@@ -544,10 +547,7 @@ def build(
         "excluded_source_records": excluded_records,
         "index_sha256": sha256(output),
     }
-    metadata_path.write_text(
-        json.dumps(metadata, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    _write_json_lf(metadata_path, metadata)
     return metadata
 
 

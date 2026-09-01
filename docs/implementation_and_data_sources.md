@@ -603,6 +603,10 @@ BigBed i textový BED mají samostatný SHA-256 checksum. Manifest rozlišuje
 `bed9+17`, očekává 13 481 zdrojových řádků a zakazuje runtime síťový lookup i
 automatickou aktivaci nové verze.
 
+Odvozený JSON snapshot i jeho metadata se zapisují jako UTF-8 s konci řádků
+LF bez ohledu na operační systém, na kterém probíhá sestavení. Checksum je proto
+shodný po Git checkoutu na Windows i Linuxu.
+
 Každá zdrojová `c.` notace před uložením projde stejným lokálním
 `biocommons.hgvs` enginem jako uživatelský vstup. Builder vyřadil 210 řádků
 bez transkriptové `c.` notace a 26 řádků, které neprošly lokálním ověřením

@@ -2,6 +2,7 @@ import unittest
 import asyncio
 import json
 import hashlib
+import tempfile
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -16,6 +17,17 @@ from backend.modules.reference_validation import validate_reference_allele
 
 
 class PrecomputedSnapshotTests(unittest.TestCase):
+    def test_pp4_snapshot_json_writer_uses_lf_on_every_platform(self):
+        from scripts.build_pp4_clinical_lr_snapshot import _write_json_lf
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "snapshot.json"
+            _write_json_lf(path, {"one": 1, "two": 2})
+            payload = path.read_bytes()
+
+        self.assertNotIn(b"\r\n", payload)
+        self.assertTrue(payload.endswith(b"\n"))
+
     def test_pp4_snapshot_metadata_matches_index(self):
         root = Path(__file__).resolve().parents[1]
         index_path = root / "data/precomputed/brca_pp4_clinical_lr_snapshot.index.json"
@@ -164,7 +176,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(
             sum(item["status"] == "different" for item in comparisons),
-            39,
+            40,
         )
 
     def test_single_lr_bp5_strong_is_not_single_strong_class2_eligible(self):

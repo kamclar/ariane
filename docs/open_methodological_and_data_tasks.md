@@ -59,11 +59,13 @@ manuální.
 
 ## 7. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
 
-U 39 variant se síla vypočtená z nezkráceného `combined LR` podle publikovaných
+U 40 variant se síla vypočtená z nezkráceného `combined LR` podle publikovaných
 prahových hodnot ENIGMA VCEP v1.2 liší od štítku `ACMGcode` v UCSC ENIGMA
-tracku. Jde o 27 variant u hranice BP5 Strong `0,05`, 8 variant u hranice BP5
-Moderate `0,23` a 4 varianty u hranice PP4 Moderate `4,3`. U posledních čtyř je
-výpočet ARIANE o jeden stupeň silnější než štítek zdroje.
+tracku. Jde o 1 variantu u hranice BP5 Very Strong `0,00285`, 27 variant u
+hranice BP5 Strong `0,05`, 8 variant u hranice BP5 Moderate `0,23` a 4 varianty
+u hranice PP4 Moderate `4,3`. U posledních čtyř je výpočet ARIANE o jeden
+stupeň silnější než štítek zdroje. U ostatních 36 je výpočet ARIANE o jeden
+stupeň slabší.
 
 ARIANE nyní používá numerické LR a přesné publikované prahy CSpec v1.2. Štítek
 zdroje je zachován pouze pro audit. Tento postup odpovídá doslovnému znění

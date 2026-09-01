@@ -18,7 +18,7 @@
     "single_final_code": true,
     "source_reported_residual_overlap_caveat": true
   },
-  "created_utc": "2026-09-01T07:40:46.791296+00:00",
+  "created_utc": "2026-09-01T08:28:16.432880+00:00",
   "criteria": {
     "BP5": 5497,
     "PP4": 1720,
@@ -1002,7 +1002,7 @@
       "source_name": "NM_007294.4:c.-676T>A"
     }
   ],
-  "index_sha256": "4dce5e262d27b1cd27fe044de8553febbf9bb86b2e91a313ee2ef71cd2b883c6",
+  "index_sha256": "21ded7d244326907a1f73f402076ba9512b264f660fcce3afffc471accf4810b",
   "normalization": {
     "counts": {
       "indels_not_in_reference_snapshot": 236,
