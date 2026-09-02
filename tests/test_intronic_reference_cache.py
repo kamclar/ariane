@@ -3,14 +3,14 @@ import json
 import re
 import unittest
 from pathlib import Path
-from unittest.mock import patch
-
 from backend.spliceai_profile import validate_scoring_metadata
 
 
 ROOT = Path(__file__).resolve().parents[1]
 COORDINATES = ROOT / "data/coordinates/brca_intronic_snv_coordinates.json"
 COORDINATE_METADATA = ROOT / "data/coordinates/brca_intronic_snv_coordinates.metadata.json"
+SOURCE_MANIFEST = ROOT / "data/coordinates/coordinate_sources.manifest.json"
+SOURCE_MANIFEST_METADATA = ROOT / "data/coordinates/coordinate_sources.manifest.metadata.json"
 SPLICEAI = ROOT / "data/spliceai/spliceai_brca_intronic_snv_reference_cache.json"
 SPLICEAI_METADATA = ROOT / "data/spliceai/spliceai_brca_intronic_snv_reference_cache.metadata.json"
 
@@ -31,6 +31,21 @@ class IntronicCoordinateDatasetTests(unittest.TestCase):
         self.assertEqual(len(self.coordinates), 13800)
         self.assertEqual(self.metadata["sha256"], sha256(COORDINATES))
 
+    def test_coordinate_source_manifest_is_approved_and_checksum_valid(self):
+        manifest = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
+        metadata = json.loads(SOURCE_MANIFEST_METADATA.read_text(encoding="utf-8"))
+        self.assertEqual(metadata["validation_status"], "approved")
+        self.assertEqual(metadata["manifest_sha256"], sha256(SOURCE_MANIFEST))
+        self.assertFalse(manifest["runtime_policy"]["network_resolution_allowed"])
+        self.assertEqual(
+            [source["id"] for source in manifest["sources"]],
+            [
+                "brca_normalized_indel_snapshot",
+                "brca_coding_snv_snapshot",
+                "brca_intronic_snv_map",
+            ],
+        )
+
     def test_every_site_has_three_alternatives_and_both_builds(self):
         sites = {}
         for key, entry in self.coordinates.items():
@@ -44,15 +59,14 @@ class IntronicCoordinateDatasetTests(unittest.TestCase):
         self.assertEqual(len(sites), 4600)
         self.assertTrue(all(len(alternatives) == 3 for alternatives in sites.values()))
 
-    def test_runtime_uses_generated_map_without_network(self):
+    def test_runtime_uses_generated_map(self):
         from backend.lookups import coordinates
 
         key = next(key for key in self.coordinates if key.startswith("BRCA2:c.67+50"))
         c_notation = key.split(":", 1)[1]
         coordinates._RESOLVER_CACHE.pop(key, None)
-        coordinates._load_coords_cache()
-        with patch.object(coordinates, "_resolve_variantvalidator", side_effect=AssertionError("network called")):
-            result = coordinates.resolve_variant("BRCA2", c_notation)
+        coordinates.load_local_coordinate_sources()
+        result = coordinates.resolve_variant("BRCA2", c_notation)
         self.assertEqual(result.status, "ok")
         self.assertEqual(result.source, "versioned_intronic_coordinate_map")
 

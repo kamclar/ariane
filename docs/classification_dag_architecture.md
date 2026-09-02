@@ -281,7 +281,7 @@ Použité architektonické reference:
   <https://va-spec.ga4gh.org/en/stable/core-information-model/entities/information-entities/evidence-line.html>
 - biocommons hgvs:
   <https://pmc.ncbi.nlm.nih.gov/articles/PMC6282708/>
-- VariantValidator:
+- VariantValidator, použitelný při offline sestavení a kontrole souřadnicových map:
   <https://github.com/openvar/variantValidator>
 
 ## Společná vrstva pravidel a uživatelský audit

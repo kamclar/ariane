@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional
 from backend.gene_policy import (
@@ -221,6 +222,40 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         raise RuntimeError("PP4/BP5 clinical LR snapshot record count does not match metadata")
     for record in snapshot.values():
         _parse_source_acmg_label(record.get("source_acmg_label", ""))
+        lr = record.get("combined_lr")
+        lr_status = record.get("likelihood_ratio_status")
+        expected_lr_status = (
+            "unavailable_conflict"
+            if lr is None
+            else "source_reported_zero"
+            if lr == 0
+            else "available"
+        )
+        if lr_status != expected_lr_status:
+            raise RuntimeError(
+                "PP4/BP5 clinical LR snapshot has an inconsistent likelihood-ratio status"
+            )
+    lr_status_counts = Counter(
+        record["likelihood_ratio_status"] for record in snapshot.values()
+    )
+    if metadata.get("likelihood_ratio_statuses") != dict(sorted(lr_status_counts.items())):
+        raise RuntimeError("PP4/BP5 likelihood-ratio status counts do not match metadata")
+    conflict_records = [
+        record
+        for record in snapshot.values()
+        if record.get("overlap_status") == "conflicting_normalized_source_rows"
+    ]
+    conflict_source_row_count = sum(
+        len(record.get("conflicting_source_rows", []))
+        for record in conflict_records
+    )
+    expected_conflict_counts = {
+        "variant_count": len(conflict_records),
+        "source_row_count": conflict_source_row_count,
+        "excess_source_row_count": conflict_source_row_count - len(conflict_records),
+    }
+    if metadata.get("normalization_conflicts") != expected_conflict_counts:
+        raise RuntimeError("PP4/BP5 normalization conflict counts do not match metadata")
 
     aliases: dict[str, str] = {key: key for key in snapshot}
     ambiguous: set[str] = set()
@@ -249,6 +284,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
     result = {
         "applies": False, "code": None, "strength": None, "points": 0,
         "reason": "", "likelihood_ratio": None,
+        "likelihood_ratio_status": "not_found",
         "source_components": [],
         "source_bundle_ids": [],
         "source_bundle_count": 0,
@@ -298,6 +334,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "application_status": entry.get(
             "automatic_application_status", "review_required"
         ),
+        "likelihood_ratio_status": entry["likelihood_ratio_status"],
         "threshold_comparison": {
             "status": "not_assessed",
             "source_label": entry.get("source_acmg_label", ""),

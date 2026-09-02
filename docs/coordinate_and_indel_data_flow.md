@@ -20,16 +20,13 @@ potom potřebují další části aplikace, zejména:
 - přijetí varianty zadané genomovou souřadnicí a její převod zpět na c. notaci,
 - kontrola referenční báze intronického SNV.
 
-Mapa umožňuje provést základní převod bez dostupnosti VariantValidatoru nebo
-Mutalyzeru. Její výsledek je reprodukovatelný a nemění se mezi jednotlivými
-požadavky.
+Mapa je jedním z validovaných lokálních zdrojů produkčního resolveru. Její
+výsledek je reprodukovatelný a nemění se mezi jednotlivými požadavky.
 
-V současné implementaci se verzovaná intronická mapa načítá před průběžnou
-`coordinates_api_cache.json` v runtime adresáři, takže průběžná cache nemůže
-přepsat její stejné klíče. Runtime soubor není verzovaný v Gitu.
-Loader aplikace však zatím nekontroluje metadata a checksum intronické mapy.
-Checksum kontrolují testy a validační příkaz builderu. Tuto kontrolu je vhodné
-doplnit také při startu aplikace.
+Soubor `data/coordinates/coordinate_sources.manifest.json` určuje prioritu,
+formát, geny, transkripty a assembly všech souřadnicových zdrojů. Manifest i
+intronická mapa se při startu ověřují proti checksumům. Produkční resolver
+nečte runtime coordinate cache a nevolá síťový resolver.
 
 ## Jak byla intronická mapa vytvořena
 
@@ -187,9 +184,7 @@ flowchart TD
     REV --> R
     SAIR --> E[Splicing evidence]
 
-    T -->|varianta není lokálně pokryta| EXT[VariantValidator a Mutalyzer<br/>externí resolver s viditelným stavem]
-    EXT -->|úspěch| R
-    EXT -->|selhání| W[Uživatelské hlášení<br/>souřadnice nejsou dostupné]
+    T -->|varianta není lokálně pokryta| W[Uživatelské hlášení<br/>souřadnice nejsou dostupné]
 
     R --> DS[Navazující datové zdroje<br/>gnomAD, ClinVar, BayesDel]
     R --> CL[ENIGMA klasifikace]
@@ -207,9 +202,6 @@ Intronická SNV mapa
 
 Mapa známých indelů
   = katalog indelů nalezených ve vybraných zdrojích
-
-Runtime coordinate cache
-  = průběžně uložené výsledky externích resolverů, nikoli referenční dataset
 
 SpliceAI runtime cache
   = profilově vázané výsledky variant, které byly skutečně dotázány

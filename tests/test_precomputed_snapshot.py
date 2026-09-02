@@ -48,6 +48,22 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             metadata["criteria"],
             {"BP5": 5497, "PP4": 1720, "not_informative": 5733},
         )
+        self.assertEqual(
+            metadata["likelihood_ratio_statuses"],
+            {
+                "available": 12285,
+                "source_reported_zero": 371,
+                "unavailable_conflict": 294,
+            },
+        )
+        self.assertEqual(
+            metadata["normalization_conflicts"],
+            {
+                "variant_count": 294,
+                "source_row_count": 589,
+                "excess_source_row_count": 295,
+            },
+        )
         self.assertEqual(metadata["records"], len(records))
         self.assertEqual(metadata["index_sha256"], hashlib.sha256(index_path.read_bytes()).hexdigest())
         self.assertEqual(
@@ -58,6 +74,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(
             metadata["excluded"]["reference_transcript_hgvs_not_validated"], 26
         )
+        self.assertNotIn("conflicting_normalized_source_rows", metadata["excluded"])
         self.assertEqual(
             metadata["normalization"]["normalized_indel_dependency"]["index_sha256"],
             hashlib.sha256(indel_index_path.read_bytes()).hexdigest(),
@@ -77,6 +94,9 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertTrue(canonical["double_counting_risk"])
         self.assertFalse(canonical["automatic_combination_allowed"])
         self.assertIsNone(canonical["likelihood_ratio"])
+        self.assertEqual(
+            canonical["likelihood_ratio_status"], "unavailable_conflict"
+        )
         self.assertIsNone(canonical["candidate_likelihood_ratio"])
         self.assertEqual(
             alias["candidate_likelihood_ratio"],
@@ -99,6 +119,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(result["overlap_status"], "source_curated_combination")
         self.assertFalse(result["double_counting_risk"])
         self.assertAlmostEqual(result["likelihood_ratio"], 0.03947)
+        self.assertEqual(result["likelihood_ratio_status"], "available")
         self.assertTrue(result["source_reported_overlap_caveat"])
         self.assertEqual(
             set(result["source_components"][0]["pmids"]),
@@ -115,6 +136,17 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(comparison["vcep_label"], "BP5 Strong")
         self.assertEqual(comparison["threshold_operator"], "<=")
         self.assertEqual(comparison["threshold_value"], 0.05)
+
+    def test_source_reported_zero_lr_is_distinct_from_unavailable_lr(self):
+        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+
+        result = evaluate_pp4_bp5("BRCA1", "c.1534C>T")
+
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["likelihood_ratio"], 0.0)
+        self.assertEqual(result["likelihood_ratio_status"], "source_reported_zero")
+        self.assertEqual(result["code"], "BP5")
+        self.assertEqual(result["strength"], "Very Strong")
 
     def test_source_label_difference_is_compared_with_vcep_threshold_generically(self):
         from backend.modules.pp4_bp5 import evaluate_pp4_bp5

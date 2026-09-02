@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260901-1">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260902-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -555,6 +555,7 @@
                         <dl class="evidence-detail-grid">
                             <div><dt>ENIGMA data release</dt><dd x-text="result?.clinical_lr_audit?.data_release || 'Not reported'"></dd></div>
                             <div><dt>LR used for classification</dt><dd x-text="result?.clinical_lr_audit?.likelihood_ratio ?? 'Not used'"></dd></div>
+                            <div><dt>LR data status</dt><dd x-text="likelihoodRatioStatusLabel(result?.clinical_lr_audit?.likelihood_ratio_status)"></dd></div>
                             <div><dt>Published combined LR</dt><dd x-text="result?.clinical_lr_audit?.candidate_likelihood_ratio ?? 'Not available'"></dd></div>
                             <div><dt>Source track label</dt><dd x-text="result?.clinical_lr_audit?.threshold_comparison?.source_label || 'Not available'"></dd></div>
                             <div><dt>VCEP threshold result</dt><dd x-text="result?.clinical_lr_audit?.threshold_comparison?.vcep_label || 'Not assessed'"></dd></div>
@@ -739,21 +740,70 @@
                     working result.
                 </p>
                 <div x-show="open" x-transition>
-                    <template x-for="item in manualItems" :key="item.code">
+                    <section class="manual-review-recommendations"
+                        x-show="manualReviewRecommendations().length">
+                        <div>
+                            <strong>Recommended reviews for this variant</strong>
+                            <p>ARIANE found variant-specific evidence that can be carried into expert review.</p>
+                        </div>
+                        <div class="manual-recommendation-list">
+                            <template x-for="recommendation in manualReviewRecommendations()"
+                                :key="recommendation.code">
+                                <button type="button" class="manual-recommendation"
+                                    @click="enableManualCriterion(recommendation.code)">
+                                    <span class="criterion-badge" x-text="recommendation.code"></span>
+                                    <span>
+                                        <strong x-text="manualDefinition(recommendation.code)?.title"></strong>
+                                        <small x-text="recommendation.reason"></small>
+                                    </span>
+                                    <span class="manual-recommendation-action">Open form</span>
+                                </button>
+                            </template>
+                        </div>
+                    </section>
+
+                    <p class="manual-status-error" x-show="manualStatusError"
+                        x-text="manualStatusError"></p>
+
+                    <template x-for="group in manualReviewGroups()" :key="group.id">
+                        <details class="manual-evidence-group"
+                            :open="manualGroupRecommendedCount(group) > 0">
+                            <summary>
+                                <span x-text="group.title"></span>
+                                <span class="manual-group-counts">
+                                    <span x-show="manualGroupRecommendedCount(group)"
+                                        x-text="`${manualGroupRecommendedCount(group)} recommended`"></span>
+                                    <span x-show="manualGroupEnabledCount(group)"
+                                        x-text="`${manualGroupEnabledCount(group)} selected`"></span>
+                                </span>
+                            </summary>
+                    <template x-for="item in group.items" :key="item.code">
                         <div class="manual-criterion-card">
                             <div class="manual-card-heading">
                                 <label>
-                                    <input type="checkbox" x-model="item.enabled">
+                                    <input type="checkbox" x-model="item.enabled"
+                                        @change="refreshManualFormStatuses()">
                                     <span class="criterion-badge" x-text="item.code"></span>
                                     <strong x-text="manualDefinition(item.code)?.title"></strong>
+                                    <span class="manual-recommended-badge"
+                                        x-show="isManualReviewRecommended(item.code)">Recommended</span>
+                                    <span class="manual-completion-badge"
+                                        x-show="item.enabled"
+                                        :class="`status-${manualCriterionStatus(item.code).status}`"
+                                        x-text="manualCriterionStatusLabel(item.code)"></span>
                                 </label>
                             </div>
 
-                            <div x-show="item.enabled" class="manual-card-body">
+                            <div x-show="item.enabled" class="manual-card-body"
+                                @input.debounce.500ms="refreshManualFormStatuses()"
+                                @change.debounce.300ms="refreshManualFormStatuses()">
                                 <p class="threshold-note">
                                     <strong>ARIANE threshold:</strong>
                                     <span x-text="manualDefinition(item.code)?.threshold"></span>
                                 </p>
+                                <p class="manual-completion-message"
+                                    :class="`status-${manualCriterionStatus(item.code).status}`"
+                                    x-text="manualCriterionStatus(item.code).message"></p>
 
                                 <div class="manual-input-grid" x-show="item.code === 'PS4'">
                                     <label>p-value
@@ -1356,6 +1406,8 @@
                                 </label>
                             </div>
                         </div>
+                    </template>
+                        </details>
                     </template>
 
                     <div class="audit-grid">
@@ -1978,7 +2030,7 @@ BRCA1 NM_007294.4:c.509G&gt;A p.(Arg170Gln) &lt;-- space-separated input</pre>
     <script src="/static/js/graphs.js?v=20260828-1"></script>
     <script src="/static/js/classification.js?v=20260828-1"></script>
     <script src="/static/js/formatters.js?v=20260828-1"></script>
-    <script src="/static/js/manual-review.js?v=20260901-1"></script>
+    <script src="/static/js/manual-review.js?v=20260902-1"></script>
     <script src="/static/js/batch.js?v=20260901-1"></script>
     <script src="/static/js/app.js?v=20260828-1"></script>
 </body>

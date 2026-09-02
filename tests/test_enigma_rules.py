@@ -19,6 +19,11 @@ from tests.dag_test_support import classify_with_dag as evaluate_variant
 from backend.modules.evidence_interactions import clinical_functional_risk_interactions
 from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.modules.table9 import table9_lookup_ps3_bs3
+from backend.modules.table4 import (
+    TABLE4_DATA,
+    parse_pvs1_code_strength,
+    table4_lookup_splice,
+)
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
@@ -243,22 +248,27 @@ class VariantTypeTests(unittest.TestCase):
 
 
 class CoordinateResolverTests(unittest.TestCase):
-    def test_coding_snv_uses_precomputed_coordinates_before_network(self):
+    def test_coding_snv_uses_validated_local_coordinates(self):
         from backend.lookups import coordinates
 
         key = "BRCA1:c.5366C>T"
         coordinates._RESOLVER_CACHE.pop(key, None)
-        with patch.object(
-            coordinates,
-            "_resolve_variantvalidator",
-            side_effect=AssertionError("network resolver must not be called"),
-        ):
-            result = coordinates.resolve_variant("BRCA1", "c.5366C>T")
+        result = coordinates.resolve_variant("BRCA1", "c.5366C>T")
 
         self.assertEqual(result.status, "ok")
         self.assertEqual(result.source, "precomputed_snapshot")
         self.assertEqual(result.grch37.variant_id(), "17-41201178-G-A")
         self.assertEqual(result.grch38.variant_id(), "17-43049161-G-A")
+
+    def test_runtime_coordinate_policy_disables_network_resolution(self):
+        from backend.lookups import coordinates
+
+        manifest = coordinates.validate_coordinate_source_manifest()
+        self.assertFalse(manifest["runtime_policy"]["network_resolution_allowed"])
+        source = Path(coordinates.__file__).read_text(encoding="utf-8")
+        self.assertNotIn("urllib.request", source)
+        self.assertNotIn("VariantValidator", source)
+        self.assertNotIn("Mutalyzer", source)
 
     def test_reviewed_intronic_variants_use_versioned_coordinate_cache(self):
         from backend.lookups import coordinates
@@ -1608,6 +1618,124 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertEqual(result["criteria"]["BP1"]["strength"], "Strong")
         self.assertEqual(result["predicted_class"], 2)
         self.assertEqual(result["predicted_label"], "Likely Benign")
+
+
+class Table4RareSpliceBranchTests(unittest.TestCase):
+    def _assert_branch(
+        self,
+        *,
+        gene,
+        c_notation,
+        source_code,
+        source_count,
+        strength,
+        points,
+        requires_rna,
+    ):
+        observed_count = sum(
+            entry.get("pvs1_code") == source_code
+            for gene_rules in TABLE4_DATA["splice_rules"].values()
+            for entry in gene_rules.values()
+        )
+        self.assertEqual(observed_count, source_count)
+
+        lookup = table4_lookup_splice(gene, c_notation)
+        self.assertTrue(lookup["found"])
+        self.assertEqual(lookup["pvs1_code"], source_code)
+        self.assertEqual(
+            parse_pvs1_code_strength(source_code),
+            (strength, points, requires_rna),
+        )
+
+        module_result = evaluate_pvs1(
+            gene,
+            "splice_site",
+            "p.(?)",
+            c_notation=c_notation,
+        )
+        self.assertEqual(module_result["pvs1_code"], source_code)
+
+        result = evaluate_variant(
+            gene=gene,
+            variant_type="splice_site",
+            p_notation="p.(?)",
+            c_notation=c_notation,
+        )
+        if strength is None:
+            self.assertFalse(module_result["applies"])
+            self.assertNotIn("PVS1", result["criteria"])
+            self.assertEqual(
+                result["not_applicable_criteria"]["PVS1"]["strength"],
+                "N/A",
+            )
+        elif requires_rna:
+            self.assertFalse(module_result["applies"])
+            self.assertTrue(module_result["requires_rna"])
+            self.assertNotIn("PVS1", result["criteria"])
+            self.assertNotIn("PVS1_RNA", result["criteria"])
+            self.assertTrue(result["rna_review"]["recommended"])
+            self.assertIn("PVS1 (RNA)", result["rna_review"]["potential_branches"])
+        else:
+            self.assertTrue(module_result["applies"])
+            self.assertEqual(module_result["strength"], strength)
+            self.assertEqual(module_result["points"], points)
+            self.assertEqual(result["criteria"]["PVS1"]["strength"], strength)
+            self.assertEqual(result["criteria"]["PVS1"]["points"], points)
+
+    def test_pvs1_moderate_splice_branch(self):
+        self._assert_branch(
+            gene="BRCA1",
+            c_notation="c.671-2A>G",
+            source_code="PVS1_Moderate",
+            source_count=10,
+            strength="Moderate",
+            points=2,
+            requires_rna=False,
+        )
+
+    def test_pvs1_supporting_rna_splice_branch(self):
+        self._assert_branch(
+            gene="BRCA1",
+            c_notation="c.301+1G>C",
+            source_code="PVS1_Supporting (RNA)",
+            source_count=11,
+            strength="Supporting",
+            points=1,
+            requires_rna=True,
+        )
+
+    def test_pvs1_strong_splice_branch(self):
+        self._assert_branch(
+            gene="BRCA2",
+            c_notation="c.8331+1G>C",
+            source_code="PVS1_Strong",
+            source_count=3,
+            strength="Strong",
+            points=4,
+            requires_rna=False,
+        )
+
+    def test_pvs1_strong_rna_splice_branch(self):
+        self._assert_branch(
+            gene="BRCA2",
+            c_notation="c.8331+1G>A",
+            source_code="PVS1_Strong (RNA)",
+            source_count=3,
+            strength="Strong",
+            points=4,
+            requires_rna=True,
+        )
+
+    def test_pvs1_not_applicable_rna_splice_branch(self):
+        self._assert_branch(
+            gene="BRCA1",
+            c_notation="c.594-2A>C",
+            source_code="PVS1_N/A (RNA)",
+            source_count=2,
+            strength=None,
+            points=0,
+            requires_rna=True,
+        )
 
 
 class VusExplanationTests(unittest.TestCase):

@@ -48,7 +48,8 @@ from backend.models import (
     VariantRequest, ClassificationResult,
     BatchRequest, BatchResponse, BatchItemResult,
     ManualEvidenceRequest, ManualEvidenceResult,
-    ManualCriterionResult, EvidenceInteractionWarning,
+    ManualEvidenceStatusRequest, ManualEvidenceStatusResponse,
+    ManualCriterionStatus, ManualCriterionResult, EvidenceInteractionWarning,
     ClientValidationRequest, VariantNormalizationResponse,
     Ps1ReferenceResolutionRequest, Ps1ReferenceResolutionResponse,
 )
@@ -62,6 +63,7 @@ from backend.services import (
 )
 from backend.modules.hgvs_provider import load_panel_provider
 from backend.modules.manual_evidence import (
+    manual_criterion_statuses,
     manual_criteria_for_gene,
     resource_links_for_gene,
 )
@@ -92,8 +94,6 @@ from backend.population_frequency import PopulationFrequencyService  # noqa: E40
 from backend.lookups import coordinates as _coordinate_data_source  # noqa: E402,F401
 from backend.lookups import bayesdel as _bayesdel_data_source  # noqa: E402,F401
 from backend.lookups import spliceai as _spliceai_data_source  # noqa: E402
-from backend.lookups.indels import load_indel_snapshot  # noqa: E402
-from backend.lookups.precomputed import validate_classification_snapshot  # noqa: E402
 from backend.modules.pp4_bp5 import load_pp4_bp5_snapshot  # noqa: E402
 from backend.modules.residues import initialize_residue_data  # noqa: E402
 from backend.modules.hgvs_engine import validate_hgvs_engine  # noqa: E402
@@ -107,8 +107,6 @@ from backend.modules.enigma_rules import (  # noqa: E402
 from backend.cache_registry import clear_runtime_caches  # noqa: E402
 
 _spliceai_data_source._load_api_cache()
-validate_classification_snapshot()
-load_indel_snapshot()
 load_pp4_bp5_snapshot()
 initialize_residue_data()
 validate_hgvs_engine()
@@ -412,6 +410,20 @@ async def evaluate_manual_evidence_endpoint(
         },
     )
     return response
+
+
+@app.post("/api/manual-evidence/status")
+async def manual_evidence_status_endpoint(
+    req: ManualEvidenceStatusRequest,
+) -> ManualEvidenceStatusResponse:
+    statuses = manual_criterion_statuses(
+        [criterion.model_dump() for criterion in req.base_criteria],
+        [criterion.model_dump() for criterion in req.manual_criteria],
+        req.variant_context.model_dump() if req.variant_context else None,
+    )
+    return ManualEvidenceStatusResponse(
+        criteria=[ManualCriterionStatus(**status) for status in statuses]
+    )
 
 
 @app.post("/api/manual-evidence/resolve-ps1-reference")

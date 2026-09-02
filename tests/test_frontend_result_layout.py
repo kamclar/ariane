@@ -1,8 +1,10 @@
+import re
 from pathlib import Path
 
 
 FRONTEND_HTML = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
 FRONTEND_JS_DIR = Path(__file__).resolve().parents[1] / "frontend" / "static" / "js"
+BACKEND_MODELS = Path(__file__).resolve().parents[1] / "backend" / "models.py"
 
 
 def frontend_javascript() -> str:
@@ -94,6 +96,8 @@ def test_clinical_lr_source_audit_is_visible_and_backend_driven():
     assert "Source combination" in html
     assert "used as one evidence item" in html
     assert "Published combined LR" in html
+    assert "LR data status" in html
+    assert "result?.clinical_lr_audit?.likelihood_ratio_status" in html
     assert "ENIGMA data release" in html
     assert "result?.clinical_lr_audit?.source_components" in html
     assert "result.clinical_lr_audit.overlap_assessment_sources" in html
@@ -102,6 +106,26 @@ def test_clinical_lr_source_audit_is_visible_and_backend_driven():
     assert "Source track label" in html
     assert "VCEP threshold result" in html
     assert "VCEP rule used" in html
+
+
+def test_clinical_lr_statuses_have_user_facing_labels():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    formatters = (FRONTEND_JS_DIR / "formatters.js").read_text(encoding="utf-8")
+    models = BACKEND_MODELS.read_text(encoding="utf-8")
+    status_literal = re.search(
+        r"likelihood_ratio_status:\s*Literal\[(.*?)\]", models, re.DOTALL
+    )
+    assert status_literal
+    backend_statuses = re.findall(r'"([a-z_]+)"', status_literal.group(1))
+
+    assert "likelihoodRatioStatusLabel(result?.clinical_lr_audit?.likelihood_ratio_status)" in html
+    assert "likelihood_ratio_status?.replaceAll" not in html
+    assert backend_statuses
+    for status in backend_statuses:
+        assert f'{status}:' in formatters
+
+    assert 'source_reported_zero: "The source reports a combined LR of zero."' in formatters
+    assert "LR data status was not reported." in formatters
 
 
 def test_population_audit_shows_founder_and_coverage_eligibility():
@@ -246,6 +270,22 @@ def test_frontend_does_not_calculate_manual_criterion_strength_or_eligibility():
     assert "Criterion strength is calculated by the backend" in html
     assert "criterion.suggested_strength" in html
     assert "criterion.selected_strength" in html
+
+
+def test_manual_review_navigation_uses_backend_groups_and_statuses():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
+
+    assert "Recommended reviews for this variant" in html
+    assert "manualReviewGroups()" in html
+    assert "this.manualDefinition(left.code).criterion_order" in javascript
+    assert 'namespace.api.request("/api/manual-evidence/status"' in javascript
+    assert "manualCriterionStatuses" in javascript
+    assert "Ready: ${status.suggested_strength}" in javascript
+    assert "case_control_country_matched" not in javascript[
+        javascript.index("async refreshManualFormStatuses()"):
+        javascript.index("async resolveProteinPs1Reference(item)")
+    ]
 
 
 def test_protein_ps1_reference_facts_are_requested_from_backend():

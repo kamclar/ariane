@@ -723,18 +723,15 @@ class RemainingFallbackTests(unittest.TestCase):
         self.assertEqual(parse_exon_from_duplication_notation(exact, "BRCA1"), "E3")
         self.assertIsNone(parse_exon_from_duplication_notation(shifted, "BRCA1"))
 
-    def test_total_coordinate_failure_remains_retryable(self):
+    def test_missing_local_coordinates_fail_closed(self):
         from backend.lookups import coordinates
 
         key = "BRCA1:c.99998A>G"
         coordinates._RESOLVER_CACHE.pop(key, None)
-        with patch.object(coordinates, "_resolve_precomputed_snapshot", return_value=None), patch.object(
-            coordinates, "_resolve_variantvalidator", return_value=None
-        ), patch.object(coordinates, "_resolve_mutalyzer", return_value=None), patch.object(
-            coordinates.time, "sleep"
-        ):
-            result = coordinates.resolve_variant("BRCA1", "c.99998A>G")
+        result = coordinates.resolve_variant("BRCA1", "c.99998A>G")
         self.assertEqual(result.status, "failed")
+        self.assertEqual(result.source, "validated_local_sources")
+        self.assertIn("Coordinate-dependent evidence was not evaluated", result.warnings[0])
         self.assertNotIn(key, coordinates._RESOLVER_CACHE)
 
     def test_clingen_api_failure_remains_retryable(self):

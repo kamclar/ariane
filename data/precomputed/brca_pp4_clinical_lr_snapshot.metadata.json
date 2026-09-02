@@ -18,7 +18,7 @@
     "single_final_code": true,
     "source_reported_residual_overlap_caveat": true
   },
-  "created_utc": "2026-09-01T08:28:16.432880+00:00",
+  "created_utc": "2026-09-01T08:37:15.566500+00:00",
   "criteria": {
     "BP5": 5497,
     "PP4": 1720,
@@ -26,7 +26,6 @@
   },
   "dataset": "BRCA1/2 combined clinical likelihood-ratio snapshot",
   "excluded": {
-    "conflicting_normalized_source_rows": 295,
     "no_reference_transcript_hgvsc": 210,
     "reference_transcript_hgvs_not_validated": 26
   },
@@ -1002,7 +1001,12 @@
       "source_name": "NM_007294.4:c.-676T>A"
     }
   ],
-  "index_sha256": "21ded7d244326907a1f73f402076ba9512b264f660fcce3afffc471accf4810b",
+  "index_sha256": "5523eef1dc0df43326605477e5bdee1fec64880891f694be17e52d7c0dd9af9a",
+  "likelihood_ratio_statuses": {
+    "available": 12285,
+    "source_reported_zero": 371,
+    "unavailable_conflict": 294
+  },
   "normalization": {
     "counts": {
       "indels_not_in_reference_snapshot": 236,
@@ -1158,6 +1162,11 @@
       "reference_bundle": "ariane-brca12-reference-v1",
       "reference_manifest_sha256": "5d889b264f8494d5163ad91268fd7ec7d0ccfee19777d2716a87cd6caea9a8c6"
     }
+  },
+  "normalization_conflicts": {
+    "excess_source_row_count": 295,
+    "source_row_count": 589,
+    "variant_count": 294
   },
   "records": 12950,
   "reference_transcripts": {

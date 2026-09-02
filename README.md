@@ -42,10 +42,11 @@ mutable files below `ariane-runtime-cache/`. Outside Railway, set
 `ARIANE_RUNTIME_CACHE_DIR` to a writable persistent directory. Precomputed
 snapshots remain in the repository and are never modified at runtime.
 Without either deployment setting, local development uses the ignored
-`.runtime-cache/` directory. The mutable files are
-`coordinates_api_cache.json`, `bayesdel_api_cache.json` and
-`spliceai_api_cache.json`. They are read before a network request and remain
-available when an upstream API is temporarily unavailable.
+`.runtime-cache/` directory. The mutable files are `bayesdel_api_cache.json`
+and `spliceai_api_cache.json`. They are read before a network request and
+remain available when an upstream API is temporarily unavailable. Genomic
+coordinates come only from checksum-validated local sources registered in
+`data/coordinates/coordinate_sources.manifest.json`.
 
 ## Project structure
 
@@ -94,7 +95,7 @@ ariane/
 │   │   ├── bayesdel.py                 # BayesDel lookup
 │   │   ├── clinvar.py                  # ClinVar comparison lookup
 │   │   ├── clingen.py                  # ClinGen ERepo comparison lookup
-│   │   └── coordinates.py              # HGVS to GRCh37/38 resolution
+│   │   └── coordinates.py              # validated local GRCh37/38 resolution
 │   └── data/                            # immutable reference datasets
 ├── frontend/
 │   ├── index.html

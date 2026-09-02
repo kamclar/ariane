@@ -6,9 +6,46 @@ ARIANE Module 1 produces an automatic result from automatable ACMG/AMP and
 ENIGMA BRCA1/2 VCEP criteria. Evidence requiring review of patients, families,
 study design, or literature is intentionally excluded from that result.
 
-The manual-review panel supports `PS4`, `PM3`, `PP1`, `BS2`, `BS4`,
-`PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`, and `PS1_PROTEIN`. It creates a separate
-amended working result and never replaces the original Module 1 classification.
+The manual-review panel supports `PS3`, `PS4`, `PM3`, `PP1`, `PP4`, `BS2`,
+`BS3`, `BS4`, `BP5`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`, and
+`PS1_PROTEIN`. It creates a separate amended working result and never replaces
+the original Module 1 classification.
+
+## Form navigation and assistance
+
+The interface groups the forms by evidence family: RNA and splicing, prior
+variant evidence, functional evidence, clinical and case-control evidence,
+family and segregation evidence, and co-occurrence evidence. Groups are used
+only for navigation. They do not alter criterion eligibility or strength.
+
+When the classification backend returns an explicit RNA, initiation-codon,
+splice PS1, or protein PS1 review recommendation, the corresponding form is
+shown under `Recommended reviews for this variant`. The recommendation opens
+the existing expert-review form and never assigns the criterion.
+
+ARIANE prefills objective facts that are already available from the classified
+variant and pinned evidence sources. These include variant identity, transcript,
+protein consequence, variant type, available SpliceAI context, exact Table 4,
+Table 9, ST2 or ST7 records, and recorded source references where applicable.
+An automatically filled field remains part of the submitted audit record.
+
+Expert conclusions are not filled automatically. The reviewer must still
+confirm matters such as cohort independence, VCEP applicability, assay
+calibration, the same splice event, prediction comparability, and the relevance
+of the tested tissue or biological system.
+
+Each selected form displays one of three backend-derived states:
+
+- `Not started`: the criterion has not been selected;
+- `Needs information`: required evidence, notes, references, threshold data, or
+  an ENIGMA stipulation is missing;
+- `Ready`: the submitted fields meet the backend completeness rules and the
+  backend can derive a criterion strength.
+
+The browser requests these states from `/api/manual-evidence/status`. It does
+not maintain a second list of required fields or calculate criterion strength.
+The final amended result is still calculated separately by
+`/api/manual-evidence/evaluate`.
 
 ## Criterion Thresholds
 

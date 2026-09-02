@@ -8,6 +8,16 @@
             return points > 0 ? `+${points}` : String(points).replace("-", "\u2212");
         },
 
+        likelihoodRatioStatusLabel(value) {
+            const labels = {
+                not_found: "No matching clinical LR record was found.",
+                available: "A combined LR is available.",
+                source_reported_zero: "The source reports a combined LR of zero.",
+                unavailable_conflict: "Combined LR is unavailable because normalized source records conflict.",
+            };
+            return labels[value] || "LR data status was not reported.";
+        },
+
         pointMeterPosition(value) {
             const points = Number(value);
             if (!Number.isFinite(points)) return 50;
@@ -82,4 +92,3 @@
         },
     };
 })(window.ArianeFrontend = window.ArianeFrontend || {});
-

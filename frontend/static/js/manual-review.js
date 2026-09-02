@@ -12,6 +12,10 @@
         ps1ReferenceLoading: false,
         ps1ReferenceError: "",
         ps1ReferenceMessage: "",
+        manualStatusLoading: false,
+        manualStatusError: "",
+        manualCriterionStatuses: {},
+        manualStatusRequestId: 0,
         };
     };
 
@@ -84,10 +88,95 @@
             this.manualError = "";
             this.ps1ReferenceError = "";
             this.ps1ReferenceMessage = "";
+            this.manualStatusError = "";
+            this.manualCriterionStatuses = {};
+            this.manualStatusLoading = false;
+            this.manualStatusRequestId += 1;
         },
 
         manualDefinition(code) {
             return this.manualDefinitions[code] || {};
+        },
+
+        manualReviewRecommendations() {
+            const recommendations = [];
+            const add = (code, review, fallback) => {
+                if (!review?.recommended || recommendations.some(item => item.code === code)) return;
+                recommendations.push({
+                    code,
+                    priority: review.priority || "review",
+                    reason: review.summary || review.title || fallback,
+                });
+            };
+            add("PVS1_RNA", this.result?.rna_review, "RNA evidence is available for expert review.");
+            add("PVS1_INIT", this.result?.initiation_review, "Complete the initiation-codon review.");
+            add("PS1_SPLICE", this.result?.splice_ps1_review, "A splice PS1 candidate requires expert review.");
+            add("PS1_PROTEIN", this.result?.protein_ps1_review, "A protein PS1 candidate requires expert review.");
+            return recommendations;
+        },
+
+        isManualReviewRecommended(code) {
+            return this.manualReviewRecommendations().some(item => item.code === code);
+        },
+
+        manualReviewGroups() {
+            const groups = new Map();
+            for (const item of this.manualItems) {
+                const definition = this.manualDefinition(item.code);
+                const id = definition.group_id || "other";
+                if (!groups.has(id)) {
+                    groups.set(id, {
+                        id,
+                        title: definition.group_title || "Other evidence",
+                        order: Number(definition.group_order ?? 999),
+                        items: [],
+                    });
+                }
+                groups.get(id).items.push(item);
+            }
+            return Array.from(groups.values())
+                .map(group => ({
+                    ...group,
+                    items: group.items.sort((left, right) =>
+                        Number(this.manualDefinition(left.code).criterion_order ?? 999) -
+                        Number(this.manualDefinition(right.code).criterion_order ?? 999)
+                    ),
+                }))
+                .sort((left, right) => left.order - right.order);
+        },
+
+        manualGroupRecommendedCount(group) {
+            return group.items.filter(item => this.isManualReviewRecommended(item.code)).length;
+        },
+
+        manualGroupEnabledCount(group) {
+            return group.items.filter(item => item.enabled).length;
+        },
+
+        manualCriterionStatus(code) {
+            return this.manualCriterionStatuses[code] || {
+                status: "not_started",
+                message: "Select this criterion to review its evidence.",
+                suggested_strength: null,
+            };
+        },
+
+        manualCriterionStatusLabel(code) {
+            const status = this.manualCriterionStatus(code);
+            if (status.status === "ready") {
+                return status.suggested_strength
+                    ? `Ready: ${status.suggested_strength}`
+                    : "Ready";
+            }
+            if (status.status === "incomplete") return "Needs information";
+            return "Not started";
+        },
+
+        enableManualCriterion(code) {
+            const item = this.manualItems.find(value => value.code === code);
+            if (!item) return;
+            item.enabled = true;
+            void this.refreshManualFormStatuses();
         },
 
         splicePs1CandidatesForCurrentGene() {
@@ -184,6 +273,63 @@
                     // Check official ENIGMA/ClinGen assertion sources in the background.
                     // The result is already visible and an unavailable service does not block it.
                     void this.resolveProteinPs1Reference(item);
+                }
+            }
+            void this.refreshManualFormStatuses();
+        },
+
+        manualCriteriaPayload() {
+            return this.manualItems.map(item => ({
+                code: item.code,
+                enabled: item.enabled,
+                evidence: item.evidence,
+                notes: item.notes,
+                references: item.references
+                    .split(/\r?\n/)
+                    .map(value => value.trim())
+                    .filter(Boolean),
+            }));
+        },
+
+        async refreshManualFormStatuses() {
+            if (!this.result) return;
+            const requestId = ++this.manualStatusRequestId;
+            this.manualStatusLoading = true;
+            this.manualStatusError = "";
+            try {
+                const response = await namespace.api.request("/api/manual-evidence/status", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        base_criteria: this.result.criteria,
+                        variant_context: {
+                            gene: this.result.gene,
+                            c_notation: this.result.c_notation,
+                            p_notation: this.result.p_notation,
+                        },
+                        manual_criteria: this.manualCriteriaPayload(),
+                    }),
+                });
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    if (requestId === this.manualStatusRequestId) {
+                        this.manualStatusError = this.formatApiError(error, response.status);
+                    }
+                    return;
+                }
+                const payload = await response.json();
+                if (requestId === this.manualStatusRequestId) {
+                    this.manualCriterionStatuses = Object.fromEntries(
+                        (payload.criteria || []).map(item => [item.code, item])
+                    );
+                }
+            } catch (e) {
+                if (requestId === this.manualStatusRequestId) {
+                    this.manualStatusError = "Form status could not be checked.";
+                }
+            } finally {
+                if (requestId === this.manualStatusRequestId) {
+                    this.manualStatusLoading = false;
                 }
             }
         },
@@ -295,16 +441,7 @@
                             c_notation: this.result.c_notation,
                             p_notation: this.result.p_notation,
                         },
-                        manual_criteria: this.manualItems.map(item => ({
-                            code: item.code,
-                            enabled: item.enabled,
-                            evidence: item.evidence,
-                            notes: item.notes,
-                            references: item.references
-                                .split(/\r?\n/)
-                                .map(value => value.trim())
-                                .filter(Boolean),
-                        })),
+                        manual_criteria: this.manualCriteriaPayload(),
                         assessor: this.manualAssessor.trim(),
                         assessed_at: this.manualAssessedAt,
                     }),

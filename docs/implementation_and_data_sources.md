@@ -85,6 +85,18 @@ se pro jiný gen nesmí použít bez odpovídajícího provideru a validace prov
 
 Automatický výsledek není úplnou expertní klasifikací. Kritéria PS4, PM3, PP1, BS2 a BS4 vyžadují klinická, rodinná nebo literární data a automaticky se nepřidávají. Aplikace pro ně podporuje oddělenou strukturovanou manuální revizi. Uživatel zadává podklady, ale nemůže zvolit sílu kritéria. Backend ji vždy odvodí z prahů ENIGMA BRCA1/2 VCEP v1.2. Nenulové `override_strength` API výslovně odmítá a podprahové podklady nezískají kritérium ani body.
 
+Rozhraní manuální revize seskupuje formuláře podle rodiny evidence a zvýrazňuje
+pouze takové doporučené revize, pro které klasifikační backend vrátil explicitní
+variantově specifický review signál. Objektivní údaje se předvyplňují z výsledku
+klasifikace a z připnutých zdrojů. Odborná potvrzení, například nezávislost
+kohort, kalibrace testu nebo shoda splice události, zůstávají prázdná.
+
+Stav `Not started`, `Needs information` nebo `Ready` vrací endpoint
+`/api/manual-evidence/status`. Používá stejné backendové funkce pro prahy a
+povinné stipulace jako finální manuální vyhodnocení. Frontend neobsahuje vlastní
+seznam klinických podmínek ani výpočet síly. Endpoint slouží pouze jako průběžná
+kontrola formuláře a nepřiděluje kritérium ani body.
+
 Manuální vyhodnocení kontroluje také povinné stipulace CSpec v1.2. PS4 vyžaduje shodu země a etnicity případů a kontrol. PM3 a BS2 vyžadují ověření, že koexistující P/LP varianta byla klasifikována podle VCEP specifications. PM3 navíc vyžaduje potvrzení, že hodnocená varianta nesplňuje benigní populační kritérium. PP1 Very Strong vyžaduje zaznamenaný predikovaný nebo experimentálně prokázaný účinek na protein nebo mRNA sestřih. Pokud poslední podmínka chybí, LR nejméně 350 vede nejvýše k PP1 Strong.
 
 Produkční klasifikace je v `backend/classification_dag/`. Automatický výpočet
@@ -616,6 +628,20 @@ zdrojových řádků po normalizaci ke stejnému klíči, ale s rozdílným
 `combinedLR`. Tyto záznamy mají stav `review_required`, nepřidávají body a
 ARIANE si žádnou hodnotu sama nevybírá.
 
+Metadata konfliktů uvádějí tři samostatné počty. `variant_count` je počet
+dotčených alel, `source_row_count` je počet všech zdrojových řádků v těchto
+konfliktech a `excess_source_row_count` je počet řádků nad rámec jednoho řádku
+na alelu. Aktuální hodnoty jsou 294 variant, 589 zdrojových řádků a 295
+přebytečných řádků. Stav `conflicting_normalized_source_rows` zůstává u
+jednotlivých variant, kde popisuje důvod požadované revize.
+
+Každý záznam má také `likelihood_ratio_status`. Hodnota `available` označuje
+kladné číselné LR, `source_reported_zero` označuje LR 0 uvedené přímo zdrojem a
+`unavailable_conflict` označuje LR, které nelze použít kvůli konfliktním
+normalizovaným řádkům. Pole `log10_combined_lr` je u nuly i nedostupného LR
+prázdné, ale tyto případy se podle strukturovaného stavu nezaměňují. Snapshot
+obsahuje 12 285 kladných LR, 371 zdrojem uvedených nul a 294 nedostupných LR.
+
 Například `BRCA1 c.509G>A` nyní používá vydané kombinované LR `0,03947`, takže
 splňuje BP5 Strong. `BRCA1 c.4185G>A` používá LR `328,18363`, tedy PP4 Strong.
 `BRCA2 c.9891_9894dup` používá LR `0,41018`, tedy BP5 Supporting. Naproti tomu
@@ -630,7 +656,7 @@ zdroj dokládá více typů evidence.
 
 Veřejný výsledek obsahuje audit `clinical_lr_audit`. Zobrazuje použité nebo
 nepoužité LR, data release, publikační komponenty, klinické typy evidence,
-zdrojem hlášené omezení překryvu a důvod případné manuální revize.
+stav LR, zdrojem hlášené omezení překryvu a důvod případné manuální revize.
 
 Pro každý záznam se obecně porovnává také zdrojový štítek `ACMGcode` s
 výsledkem získaným aplikací prahů aktivní VCEP politiky na numerické
@@ -1320,8 +1346,8 @@ cache:
 - `${ARIANE_RUNTIME_CACHE_DIR}/spliceai_api_cache.json`,
 - na Railway `${RAILWAY_VOLUME_MOUNT_PATH}/ariane-runtime-cache/spliceai_api_cache.json`.
 
-Stejný runtime adresář obsahuje také `bayesdel_api_cache.json` a
-`coordinates_api_cache.json`. Tyto tři dynamické cache nejsou verzované v Gitu.
+Stejný runtime adresář obsahuje také `bayesdel_api_cache.json`. Tyto dvě
+dynamické cache nejsou verzované v Gitu.
 Načítají se před síťovým dotazem, takže dříve získaný výsledek zůstává dostupný
 i při dočasném výpadku příslušného API. Klíč záznamu obsahuje identitu profilu.
 Záznam s jiným profilem nebo neúplnou auditní stopou se nepoužije.
@@ -1381,8 +1407,8 @@ Převod není prosté přičtení coding pozice ke genomové pozici. Musí respe
 - normalizaci REF a ALT alely u inzercí, delecí a duplikací,
 - rozdíly mezi GRCh37 a GRCh38.
 
-Runtime proto souřadnice ručně nepočítá. Čte již normalizované souřadnice z
-verzovaných dat nebo použije specializovaný HGVS resolver.
+Runtime proto souřadnice ručně nepočítá. Čte již normalizované souřadnice pouze
+z verzovaných a checksumem ověřených lokálních dat.
 
 ### 9.2 Lokální souřadnicové zdroje
 
@@ -1392,27 +1418,35 @@ Intronické SNV v podporovaném okně používají rozšířenou lokální souř
 mapu. Její referenční báze pocházejí z UCSC Genome Browser sequence API pro hg19
 a hg38 a jsou navázány na stejné referenční transkripty jako ostatní snapshoty.
 
-Při startu se intronická mapa a persistentní read-through cache načtou do
-in-memory resolver cache. Aktuální implementace kontroluje tuto cache před
-přímým lookupem coding SNV a indel snapshotu. Intronická mapa je při načítání
-první a read-through cache nepřepisuje již existující klíč. Coding a indel
-snapshot se použijí následně, pokud klíč nebyl nalezen v načtené resolver cache.
+Registr `data/coordinates/coordinate_sources.manifest.json` určuje zdroje, jejich
+pořadí, datový formát, podporované geny, referenční transkripty a genomové
+sestavy. Manifest i intronická mapa se při startu kontrolují proti checksumům.
+Coding SNV a indel snapshoty mají vlastní povinnou kontrolu checksumu, počtu
+záznamů a stavu validace. Mutable coordinate cache se nenačítá.
 
-### 9.3 Síťové resolvery
+### 9.3 Chybějící souřadnice a další geny
 
-Pro variantu, která nemá použitelné lokální souřadnice, je pořadí:
+Pokud varianta není v žádném registrovaném lokálním zdroji, resolver vrátí stav
+`failed` a vysvětlení, že souřadnicově závislá evidence nebyla vyhodnocena.
+VariantValidator ani Mutalyzer se za běhu klasifikace nevolají. Chybějící
+souřadnice se nenahrazují starým výsledkem z runtime cache ani prvním výsledkem
+externí služby.
 
-1. VariantValidator s referenčním transkriptem `NM_007294.4` nebo `NM_000059.4`,
-2. Mutalyzer samostatně pro GRCh37 a GRCh38.
+Další gen se připojuje datově. Jeho aktivace vyžaduje záznam v gene policy,
+validovaný lokální souřadnicový zdroj pro deklarovaný referenční transkript a
+obě požadované assembly a registraci tohoto zdroje v manifestu. Resolver ani
+klasifikační DAG se kvůli novému genu nemění. Externí HGVS nástroje lze použít
+při samostatném sestavení kandidátní mapy. Výstup se do produkčního manifestu
+zařadí až po validaci, vytvoření metadat, checksumu a regresních testů.
 
-Výsledek má stav `ok`, pokud jsou dostupné obě sestavy, `partial`, pokud je
-dostupná pouze jedna, a `failed`, pokud není dostupná žádná. Úspěšný síťový
-výsledek se ukládá do read-through cache. Úplné přechodné selhání se necachuje,
-aby mohl pozdější dotaz resolver zopakovat.
-
-Nejednoznačný výsledek se nesmí převést na první nalezené ID. Exonová CNV s
-neurčitými breakpointy síťové resolvery vůbec nevolá, protože nemá jednu
-konkrétní VCF alelu.
+Pro větší počet dalších genů bude dlouhodobě vhodnější lokální HGVS mapper
+s genomovými sekvencemi a transkriptovými alignmenty pro GRCh37 i GRCh38.
+Současný checksumovaný referenční balík tuto funkci zatím neposkytuje. Obsahuje
+pouze alignment pro GRCh38 a neobsahuje genomové sekvence. Proto se používá pro
+lokální převod `c.` na `p.`, nikoli jako obecný zdroj genomových souřadnic.
+Souřadnicový manifest odděluje rozhraní resolveru od konkrétního způsobu
+mapování. Později tak umožní připojit lokální HGVS provider bez změny
+klasifikačního DAGu.
 
 Souřadnice jsou verzovaná vlastnost kombinace referenčního transkriptu,
 genomového sestavení a normalizační politiky. Nemění se při každém dotazu, ale

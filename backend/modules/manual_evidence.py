@@ -201,6 +201,23 @@ MANUAL_CRITERIA = {
     },
 }
 
+MANUAL_CRITERION_PRESENTATION = {
+    "PVS1_RNA": ("rna_splicing", "RNA and splicing", 10, 10),
+    "BP7_RNA": ("rna_splicing", "RNA and splicing", 10, 20),
+    "PVS1_INIT": ("rna_splicing", "RNA and splicing", 10, 30),
+    "PS1_SPLICE": ("rna_splicing", "RNA and splicing", 10, 40),
+    "PS1_PROTEIN": ("prior_variant", "Prior variant evidence", 20, 10),
+    "PS3": ("functional", "Functional evidence", 30, 10),
+    "BS3": ("functional", "Functional evidence", 30, 20),
+    "PS4": ("clinical", "Clinical and case-control evidence", 40, 10),
+    "PP4": ("clinical", "Clinical and case-control evidence", 40, 20),
+    "BP5": ("clinical", "Clinical and case-control evidence", 40, 30),
+    "PP1": ("segregation", "Family and segregation evidence", 50, 10),
+    "BS4": ("segregation", "Family and segregation evidence", 50, 20),
+    "PM3": ("cooccurrence", "Co-occurrence evidence", 60, 10),
+    "BS2": ("cooccurrence", "Co-occurrence evidence", 60, 20),
+}
+
 
 def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any]]:
     """Return policy-bound form definitions for one active gene."""
@@ -211,6 +228,16 @@ def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any
             f"No manual-evidence form profile is implemented for {profile!r}"
         )
     values = deepcopy(MANUAL_CRITERIA)
+    for code, definition in values.items():
+        group_id, group_title, group_order, criterion_order = (
+            MANUAL_CRITERION_PRESENTATION[code]
+        )
+        definition.update({
+            "group_id": group_id,
+            "group_title": group_title,
+            "group_order": group_order,
+            "criterion_order": criterion_order,
+        })
     specification = vcep_specification(policy_gene)
     source_prefix = f"{policy_name(policy_gene)} v{policy_version(policy_gene)}"
     for definition in values.values():
@@ -750,6 +777,151 @@ def suggest_strength(
     return None
 
 
+def _clinical_lr_record_is_complete(evidence: Mapping[str, Any]) -> bool:
+    value, scale = _pp4_value_and_scale(evidence)
+    source_status = str(
+        evidence.get("source_review_status") or "unreviewed"
+    ).strip().lower()
+    return bool(
+        value is not None
+        and (value >= 0 if scale == "lr" else True)
+        and scale in {"lr", "log10_lr", "acmg_points"}
+        and source_status
+        in {"enigma_recognised", "other_reviewed", "unreviewed"}
+        and _pp4_source_is_recorded(evidence)
+        and str(evidence.get("clinical_data_summary") or "").strip()
+    )
+
+
+def manual_criterion_statuses(
+    base_criteria: List[Dict[str, Any]],
+    manual_criteria: List[Dict[str, Any]],
+    variant_context: Mapping[str, Any] | None = None,
+) -> List[Dict[str, Any]]:
+    """Return backend-derived form readiness without assigning a criterion."""
+    policy_gene = resolve_policy_gene(
+        str((variant_context or {}).get("gene") or "").strip().upper() or None
+    )
+    enabled = [item for item in manual_criteria if item.get("enabled")]
+    bp7_context_criteria = list(base_criteria)
+    for item in enabled:
+        if item.get("code") != "BS3":
+            continue
+        strength = suggest_strength(
+            "BS3",
+            item.get("evidence", {}),
+            variant_context=variant_context,
+            base_criteria=base_criteria,
+        )
+        if strength:
+            bp7_context_criteria.append({
+                "name": "BS3",
+                "applies": True,
+                "strength": strength,
+                "decision_path": {
+                    "sources": [{"source_id": "manual-enigma-vcep-functional-review"}],
+                },
+            })
+
+    clinical_lr_is_used = any(
+        criterion.get("name") in {"PP4", "BP5"}
+        and criterion.get("applies", True)
+        for criterion in base_criteria
+    ) or any(item.get("code") in {"PP4", "BP5"} for item in enabled)
+
+    statuses = []
+    for item in manual_criteria:
+        code = item["code"]
+        if not item.get("enabled"):
+            statuses.append({
+                "code": code,
+                "status": "not_started",
+                "message": "Select this criterion to review its evidence.",
+                "suggested_strength": None,
+            })
+            continue
+
+        evidence = item.get("evidence", {})
+        issues = []
+        if not rule_is_applicable(policy_gene, code):
+            issues.append(
+                f"{code} is not applicable under the configured VCEP policy for {policy_gene}."
+            )
+        if not str(item.get("notes") or "").strip():
+            issues.append("Add evidence notes.")
+        references = item.get("references", [])
+        if not any(str(reference).strip() for reference in references):
+            issues.append("Add at least one evidence reference.")
+
+        if (
+            clinical_lr_is_used
+            and code in {"PP1", "PS4"}
+            and (
+                evidence.get("independent_from_pp4_bp5") is not True
+                or not str(evidence.get("independence_rationale") or "").strip()
+            )
+        ):
+            issues.append(
+                "Confirm independence from PP4/BP5 and record the rationale."
+            )
+
+        context_criteria = (
+            bp7_context_criteria if code == "BP7_RNA" else base_criteria
+        )
+        suggested = suggest_strength(
+            code,
+            evidence,
+            variant_context=variant_context,
+            base_criteria=context_criteria,
+        )
+        if code in {"PP4", "BP5"} and not _clinical_lr_record_is_complete(evidence):
+            issues.append(
+                "Add the clinical LR value and scale, source, and clinical data summary."
+            )
+        elif code == "BP7_RNA" and not suggested:
+            context_result = evaluate_bp7_rna_variant_context(
+                variant_context, bp7_context_criteria
+            )
+            if not context_result["eligible"]:
+                issues.append(context_result["reason"])
+            else:
+                issues.append("Complete the structured BP7 RNA evidence record.")
+        elif code in STRUCTURED_CURATED_CODES and not suggested:
+            issues.append(f"Complete the structured {code} evidence record.")
+        elif not suggested:
+            issues.append(
+                "The entered evidence does not yet meet the configured ENIGMA threshold and stipulations."
+            )
+
+        output_code = "PS1" if code == "PS1_PROTEIN" else code
+        if any(
+            criterion.get("name") == output_code and criterion.get("applies", True)
+            for criterion in base_criteria
+        ):
+            issues.append(
+                f"{output_code} is already present in the automated result and cannot be counted twice."
+            )
+
+        if issues:
+            statuses.append({
+                "code": code,
+                "status": "incomplete",
+                "message": " ".join(dict.fromkeys(issues)),
+                "suggested_strength": suggested,
+            })
+        else:
+            statuses.append({
+                "code": code,
+                "status": "ready",
+                "message": (
+                    f"Required evidence is complete. The backend derives {code} "
+                    f"{suggested}."
+                ),
+                "suggested_strength": suggested,
+            })
+    return statuses
+
+
 def evaluate_manual_evidence(
     base_criteria: List[Dict[str, Any]],
     manual_criteria: List[Dict[str, Any]],
@@ -838,21 +1010,11 @@ def evaluate_manual_evidence(
             ),
         )
         evidence = item.get("evidence", {})
-        pp4_value, pp4_scale = _pp4_value_and_scale(evidence)
-        pp4_source_status = str(
-            evidence.get("source_review_status") or "unreviewed"
-        ).strip().lower()
-        pp4_source_recorded = _pp4_source_is_recorded(evidence)
-        clinical_lr_complete = (
-            pp4_value is not None
-            and (pp4_value >= 0 if pp4_scale == "lr" else True)
-            and pp4_scale in {"lr", "log10_lr", "acmg_points"}
-            and pp4_source_status
-            in {"enigma_recognised", "other_reviewed", "unreviewed"}
-            and pp4_source_recorded
-            and bool((evidence.get("clinical_data_summary") or "").strip())
-        )
-        if code in {"PP4", "BP5"} and item.get("enabled") and not clinical_lr_complete:
+        if (
+            code in {"PP4", "BP5"}
+            and item.get("enabled")
+            and not _clinical_lr_record_is_complete(evidence)
+        ):
             raise ValueError(
                 f"{code} requires a clinical LR value and scale, recorded source, "
                 "and clinical data summary"

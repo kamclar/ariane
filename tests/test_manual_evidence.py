@@ -3,8 +3,86 @@ import unittest
 from backend.lookups.clinvar import clinvar_review_stars
 from backend.modules.manual_evidence import (
     evaluate_manual_evidence,
+    manual_criteria_for_gene,
+    manual_criterion_statuses,
     suggest_strength,
 )
+
+
+class ManualFormGuidanceTests(unittest.TestCase):
+    context = {
+        "gene": "BRCA1",
+        "c_notation": "c.5366C>T",
+        "p_notation": "p.(Ala1789Val)",
+    }
+
+    def test_manual_definitions_include_backend_owned_navigation_groups(self):
+        definitions = manual_criteria_for_gene("BRCA1")
+        self.assertEqual(definitions["PVS1_RNA"]["group_id"], "rna_splicing")
+        self.assertEqual(definitions["PS1_PROTEIN"]["group_title"], "Prior variant evidence")
+        self.assertLess(definitions["PS3"]["group_order"], definitions["PS4"]["group_order"])
+
+    def test_disabled_form_is_not_started(self):
+        status = manual_criterion_statuses(
+            [],
+            [{"code": "PP1", "enabled": False, "evidence": {}, "notes": "", "references": []}],
+            self.context,
+        )[0]
+        self.assertEqual(status["status"], "not_started")
+        self.assertIsNone(status["suggested_strength"])
+
+    def test_enabled_form_reports_missing_audit_fields(self):
+        status = manual_criterion_statuses(
+            [],
+            [{
+                "code": "PP1",
+                "enabled": True,
+                "evidence": {"likelihood_ratio": 2.08},
+                "notes": "",
+                "references": [],
+            }],
+            self.context,
+        )[0]
+        self.assertEqual(status["status"], "incomplete")
+        self.assertIn("Add evidence notes", status["message"])
+        self.assertIn("Add at least one evidence reference", status["message"])
+        self.assertEqual(status["suggested_strength"], "Supporting")
+
+    def test_complete_form_is_ready_with_backend_strength(self):
+        status = manual_criterion_statuses(
+            [],
+            [{
+                "code": "PP1",
+                "enabled": True,
+                "evidence": {"likelihood_ratio": 2.08},
+                "notes": "Quantitative segregation LR reviewed.",
+                "references": ["PMID:12345678"],
+            }],
+            self.context,
+        )[0]
+        self.assertEqual(status["status"], "ready")
+        self.assertEqual(status["suggested_strength"], "Supporting")
+
+    def test_ps4_remains_incomplete_when_enigma_stipulation_is_missing(self):
+        status = manual_criterion_statuses(
+            [],
+            [{
+                "code": "PS4",
+                "enabled": True,
+                "evidence": {
+                    "p_value": 0.01,
+                    "odds_ratio": 5,
+                    "lower_ci": 2.1,
+                    "case_control_country_matched": True,
+                    "case_control_ethnicity_matched": False,
+                },
+                "notes": "Case-control study reviewed.",
+                "references": ["PMID:12345678"],
+            }],
+            self.context,
+        )[0]
+        self.assertEqual(status["status"], "incomplete")
+        self.assertIsNone(status["suggested_strength"])
 
 
 class ManualStrengthSuggestionTests(unittest.TestCase):

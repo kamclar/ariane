@@ -319,6 +319,9 @@ def _record_from_row(
         "independent_source_group_count": 1,
         "candidate_combined_lr": combined_lr,
         "combined_lr": combined_lr,
+        "likelihood_ratio_status": (
+            "source_reported_zero" if combined_lr == 0 else "available"
+        ),
         "log10_combined_lr": math.log10(combined_lr) if combined_lr > 0 else None,
         "criterion": code,
         "strength": strength,
@@ -445,6 +448,7 @@ def build(
                     previous.update({
                         "candidate_combined_lr": None,
                         "combined_lr": None,
+                        "likelihood_ratio_status": "unavailable_conflict",
                         "log10_combined_lr": None,
                         "criterion": None,
                         "strength": None,
@@ -461,7 +465,6 @@ def build(
                             "choose or combine them automatically. Expert source review is required."
                         ),
                     })
-                    excluded["conflicting_normalized_source_rows"] += 1
                     continue
                 previous["input_c_notations"] = sorted(set(
                     previous["input_c_notations"] + record["input_c_notations"]
@@ -494,6 +497,23 @@ def build(
     application_statuses = Counter(
         record["automatic_application_status"] for record in records.values()
     )
+    likelihood_ratio_statuses = Counter(
+        record["likelihood_ratio_status"] for record in records.values()
+    )
+    conflict_records = [
+        record
+        for record in records.values()
+        if record["overlap_status"] == "conflicting_normalized_source_rows"
+    ]
+    conflict_source_row_count = sum(
+        len(record.get("conflicting_source_rows", []))
+        for record in conflict_records
+    )
+    normalization_conflicts = {
+        "variant_count": len(conflict_records),
+        "source_row_count": conflict_source_row_count,
+        "excess_source_row_count": conflict_source_row_count - len(conflict_records),
+    }
     evidence_type_counts = Counter(
         item["data_type"]
         for record in records.values()
@@ -528,7 +548,9 @@ def build(
         "records": len(records),
         "criteria": dict(sorted(criteria.items())),
         "automatic_application_statuses": dict(sorted(application_statuses.items())),
+        "likelihood_ratio_statuses": dict(sorted(likelihood_ratio_statuses.items())),
         "clinical_evidence_type_records": dict(sorted(evidence_type_counts.items())),
+        "normalization_conflicts": normalization_conflicts,
         "combination_policy": {
             "method": "use publisher-combined LR without recomputing publication components",
             "single_final_code": True,

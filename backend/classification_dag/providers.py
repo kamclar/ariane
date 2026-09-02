@@ -142,7 +142,7 @@ class CoordinateEvidenceNode:
             resolved[variant.variant_key] = resolved_variant
             source = str(getattr(resolved_variant, "source", "") or "")
             status = str(getattr(resolved_variant, "status", "") or "unavailable")
-            if status != "ok" or source == "Mutalyzer":
+            if status != "ok":
                 diagnostics.extend(
                     f"Coordinate resolver: {warning}"
                     for warning in getattr(resolved_variant, "warnings", ())

@@ -203,6 +203,9 @@ class ClinicalLrThresholdComparison(BaseModel):
 class ClinicalLrAudit(BaseModel):
     application_status: str = "not_found"
     likelihood_ratio: Optional[float] = None
+    likelihood_ratio_status: Literal[
+        "not_found", "available", "source_reported_zero", "unavailable_conflict"
+    ] = "not_found"
     candidate_likelihood_ratio: Optional[float] = None
     code: Optional[str] = None
     strength: Optional[str] = None
@@ -493,6 +496,23 @@ class ManualVariantContext(BaseModel):
         if not value.strip():
             raise ValueError("Manual evidence variant context must not be empty")
         return value.strip()
+
+
+class ManualEvidenceStatusRequest(BaseModel):
+    base_criteria: List[CriterionResult]
+    manual_criteria: List[ManualCriterionInput]
+    variant_context: Optional[ManualVariantContext] = None
+
+
+class ManualCriterionStatus(BaseModel):
+    code: str
+    status: Literal["not_started", "incomplete", "ready"]
+    message: str = ""
+    suggested_strength: Optional[str] = None
+
+
+class ManualEvidenceStatusResponse(BaseModel):
+    criteria: List[ManualCriterionStatus] = Field(default_factory=list)
 
 
 class ManualEvidenceRequest(BaseModel):

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "manifest_id": "ariane_local_coordinate_sources",
+  "manifest_version": "2026.09.01",
+  "status": "active",
+  "runtime_policy": {
+    "network_resolution_allowed": false,
+    "missing_coordinate_status": "failed"
+  },
+  "sources": [
+    {
+      "id": "brca_normalized_indel_snapshot",
+      "priority": 10,
+      "source_type": "normalized_indel_snapshot",
+      "path": "data/precomputed/brca_normalized_indel_snapshot.index.json",
+      "metadata_path": "data/precomputed/brca_normalized_indel_snapshot.metadata.json",
+      "runtime_source_label": "normalized_indel_snapshot",
+      "assemblies": ["GRCh37", "GRCh38"],
+      "genes": {
+        "BRCA1": "NM_007294.4",
+        "BRCA2": "NM_000059.4"
+      }
+    },
+    {
+      "id": "brca_coding_snv_snapshot",
+      "priority": 20,
+      "source_type": "classification_snapshot",
+      "path": "data/precomputed/brca_module1_snv_classification_snapshot.index.json",
+      "metadata_path": "data/precomputed/brca_module1_snv_classification_snapshot.metadata.json",
+      "runtime_source_label": "precomputed_snapshot",
+      "assemblies": ["GRCh37", "GRCh38"],
+      "genes": {
+        "BRCA1": "NM_007294.4",
+        "BRCA2": "NM_000059.4"
+      }
+    },
+    {
+      "id": "brca_intronic_snv_map",
+      "priority": 30,
+      "source_type": "coordinate_map",
+      "path": "data/coordinates/brca_intronic_snv_coordinates.json",
+      "metadata_path": "data/coordinates/brca_intronic_snv_coordinates.metadata.json",
+      "runtime_source_label": "versioned_intronic_coordinate_map",
+      "assemblies": ["GRCh37", "GRCh38"],
+      "genes": {
+        "BRCA1": "NM_007294.4",
+        "BRCA2": "NM_000059.4"
+      }
+    }
+  ]
+}
