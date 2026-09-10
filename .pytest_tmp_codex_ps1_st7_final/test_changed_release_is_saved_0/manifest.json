@@ -1,1 +1,0 @@
-{"schema_version": 3, "clinical_lr_data_release": {"release_date": "2026-08-18"}, "datasets": {"active": {"url": "https://example.test/BRCAmfa.bb", "derived_from_bigbed_sha256": "4553a57e9a04d904ac810cc106ed9e655fb0b31f6db5305f61d1d5335e727df0"}}, "update_policy": {"automatic_release_activation": false, "required_before_activation": ["expert review"]}}
