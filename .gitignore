@@ -45,6 +45,7 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+ARIANE app chyby a návrhy.pdf
 
 # Editor directories
 .vscode/
