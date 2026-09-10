@@ -28,6 +28,7 @@ build/
 *.sqlite3
 /tmp/
 /.runtime-cache/
+/.runtime-data/
 /backend/data/bayesdel_cache.json
 /backend/data/coordinates_cache.json
 /data/spliceai/spliceai_api_cache.json
@@ -87,6 +88,8 @@ htmlcov/
 !/docs/enigma_source_data_audit.md
 !/docs/manual_evidence_review.md
 !/docs/ps1_protein_semiautomation.md
+!/docs/ps1_reference_validation_request.md
+!/docs/ps1_reference_review_candidates.tsv
 !/docs/tutorial_variant_comparison.tsv
 !/docs/navrh_mapy_normalizovanych_brca_indelu.txt
 !/docs/coordinate_and_indel_data_flow.md

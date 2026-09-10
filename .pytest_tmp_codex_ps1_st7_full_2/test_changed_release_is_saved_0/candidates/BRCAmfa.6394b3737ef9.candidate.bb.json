@@ -1,0 +1,20 @@
+{
+  "status": "update_available",
+  "checked_utc": "2026-09-07T13:47:00.367293+00:00",
+  "source_url": "https://example.test/BRCAmfa.bb",
+  "pinned_release_date": "2026-08-18",
+  "pinned_bigbed_sha256": "4553a57e9a04d904ac810cc106ed9e655fb0b31f6db5305f61d1d5335e727df0",
+  "remote_bigbed_sha256": "6394b3737ef9a294d8f424bf46e99b5bbd1547536b2884fa31ea3296e595caca",
+  "remote_content_length": 20,
+  "remote_headers": {
+    "content_length": "20",
+    "last_modified": "Tue, 18 Aug 2026 15:07:00 GMT",
+    "etag": "\"test\""
+  },
+  "remote_data_version": "2026-08-18",
+  "automatic_activation": false,
+  "review_required": true,
+  "activation_requirements": [
+    "expert review"
+  ]
+}

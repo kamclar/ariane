@@ -13,6 +13,7 @@ from backend.modules.evidence_interactions import (
     clinical_functional_risk_interactions,
 )
 from backend.modules.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
+from backend.modules.ps1 import lookup_ps1_reference_variant
 from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.modules.variant_input import normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
@@ -195,7 +196,7 @@ MANUAL_CRITERIA = {
         "title": "Same missense substitution as a VCEP-classified P/LP reference",
         "threshold": "Strong for a Pathogenic reference and Moderate for a Likely Pathogenic reference, after the complete ENIGMA protein-level PS1 reference and splice review.",
         "check": "Confirm the VCEP classification source, same normalized missense substitution, different nucleotide change, SpliceAI <= 0.1 for both variants, and no damaging splice effect in the defined reviewed sources.",
-        "literature": "ST7 supplies a trusted P/LP reference candidate. Automatic protein PS1 requires a separately verified ENIGMA/ClinGen VCEP assertion or documented local VCEP reclassification, plus the complete ENIGMA splice checks. Review ENIGMA BRCA1/2 VCEP v1.2 PS1 and Appendix J.",
+        "literature": "An ENIGMA ST7 v1.2 P/LP record is accepted as the reference classification basis following expert methodological review on 2026-09-07. Protein PS1 still requires the complete identity, protein-mechanism, splice and dependency checks. Review ENIGMA BRCA1/2 VCEP v1.2 PS1 and Appendix J.",
         "source_url": CSPEC_URL,
         "source_detail": "ENIGMA BRCA1/2 VCEP v1.2, protein-level PS1 and Appendix J",
     },
@@ -274,7 +275,8 @@ def manual_criteria_for_gene(gene: str | None = None) -> Dict[str, Dict[str, Any
         "Confirm the VCEP classification source, same normalized missense "
         "substitution, different nucleotide change, "
         f"SpliceAI <= {splice_low} for both variants, and no damaging splice "
-        "effect in the defined reviewed sources."
+        "effect in the defined reviewed sources. Confirm whether the reference "
+        "classification used PS1; an unknown dependency status cannot be scored."
     )
     return {
         code: definition
@@ -668,11 +670,42 @@ def suggest_strength(
             "Pathogenic", "Likely Pathogenic"
         }:
             return None
-        if evidence.get("classification_verification") not in {
+        classification_verification = evidence.get("classification_verification")
+        if classification_verification not in {
             "external_vcep_assertion",
             "locally_recurated_under_enigma_vcep",
+            "enigma_st7_v1_2_reference_set",
         }:
             return None
+        if classification_verification == "enigma_st7_v1_2_reference_set":
+            try:
+                normalized_reference = normalize_variant_input(
+                    gene,
+                    str(evidence.get("reference_variant") or ""),
+                    p_notation=str(evidence.get("reference_p_notation") or ""),
+                )
+                registry_reference = lookup_ps1_reference_variant(
+                    gene,
+                    normalized_reference.c_notation,
+                )
+            except ValueError:
+                return None
+            if not registry_reference:
+                return None
+            registry_conditions = (
+                registry_reference.get("classification_basis")
+                == "enigma_st7_v1_2_reference_set"
+                and registry_reference.get("reference_status") == "approved"
+                and registry_reference.get("classification")
+                == evidence.get("reference_classification")
+                and registry_reference.get("p_notation")
+                == normalized_reference.p_notation
+                and registry_reference.get("reference_splice_evidence_status")
+                in {"none_identified", "normal"}
+                and registry_reference.get("classification_ps1_dependency_used") is False
+            )
+            if not registry_conditions:
+                return None
         if (
             evidence.get("same_missense_confirmed") is not True
             or evidence.get("different_nucleotide_change_confirmed") is not True
@@ -700,7 +733,10 @@ def suggest_strength(
             or vua_score > splice_low or reference_score > splice_low
         ):
             return None
-        if evidence.get("reference_classification_used_ps1") == "yes":
+        dependency_status = evidence.get("reference_classification_used_ps1")
+        if dependency_status not in {"no", "yes"}:
+            return None
+        if dependency_status == "yes":
             if (
                 not str(evidence.get("reference_ps1_dependency_reference") or "").strip()
                 or evidence.get("direct_reciprocal_dependency_excluded") is not True

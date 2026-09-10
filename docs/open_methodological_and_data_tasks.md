@@ -42,12 +42,16 @@ Externě se připravuje soubor očekávaných ENIGMA klasifikací. Po jeho získ
 třeba připnout verzi a původ, oddělit automatizovatelnou a manuální evidenci a
 porovnat jednotlivá kritéria, síly, body, výslednou třídu a důvody rozdílů.
 
-## 5. Data pro automatické proteinové PS1
+## 5. Data pro automatické proteinové PS1, vyřešeno 2026-09-07
 
-ST7 je bezpečně používána jen jako zdroj kandidátů. Automatické PS1 bude možné
-rozšířit, až bude pro konkrétní reference dostupná samostatně ověřená
-ENIGMA/ClinGen VCEP assertion nebo úplná lokální reklasifikace podle uvedené
-verze VCEP pravidel. Samotný záznam ST7 nestačí.
+Odborná metodická konzultace potvrdila, že P/LP zařazení v ENIGMA ST7 v1.2 lze
+považovat za splnění klasifikačního požadavku reference pro proteinové PS1.
+Registr proto obsahuje 40 záznamů `eligible` a 20 záznamů `excluded` kvůli
+známému splice efektu. Způsobilá reference přidá body pouze při stejné
+normalizované missense substituci z jiné nukleotidové změny, SpliceAI nejvýše
+0,1 u obou variant a splnění všech zaznamenaných proteinových a splice
+podmínek. Původní otázka a rozhodnutí jsou popsány v
+[`ps1_reference_validation_request.md`](ps1_reference_validation_request.md).
 
 ## 6. Nekvantifikovaná RNA evidence
 
@@ -120,12 +124,74 @@ souřadnicový manifest bez změny klasifikačního DAGu.
 
 ## Již opravené auditní body
 
-- ST7 sama nevytváří automaticky způsobilou proteinovou PS1 referenci.
+- ST7 P/LP je přijatý klasifikační základ proteinové PS1 reference; body se
+  přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
 - Nekvantifikovaná ST2 sama nepřiděluje PVS1 RNA.
 - Rozdílné vícenásobné BayesDel hodnoty se neslučují maximem.
 - Malé indely do 50 bp jsou odděleny od strukturální větve Appendix G.
 - Nenalezení v neúplném founder registru se nepovažuje za negativní výsledek.
 - Coverage s nepotvrzenou kompatibilitou zůstává auditní údaj a nepřiděluje body.
+- Povolené typy PP3, BP4, BP7 a BP1 odpovídají Figure 1A. Nepotvrzený in-frame
+  indel ani intronická pozice bez ověřitelného vyloučení `+/-1,2` nevstupují do
+  bodování. Hranice `+7/-21` a interakce s RNA a funkční evidencí mají úplnou
+  regresní matici.
+
+## 9. Současné použití PS3 nebo BS3 a PVS1 RNA, čeká se na VCEP
+
+U variant na posledním nukleotidu exonu, například `BRCA1 c.5074G>A/C` nebo
+`BRCA2 c.7976G>A/C`, může Specifications Table 9 uvádět PS3 Strong z assay
+hodnotícího mRNA i protein a Supplementary Table 2 současně obsahovat samostatný
+RNA výsledek. Není potvrzeno, kdy lze PS3 nebo BS3 a PVS1 RNA použít současně,
+ani jak ENIGMA požaduje doložit nezávislost studií a assayů, aby se stejný
+mechanismus nezapočítal dvakrát.
+
+Dotaz pro odbornou konzultaci:
+
+> U variant na poslednim nukleotidu exonu, napriklad BRCA1 c.5074G>A/C nebo
+> BRCA2 c.7976G>A/C, uvadi Specifications Table 9 PS3 Strong z assay
+> zachycujiciho mRNA i protein a ST2 samostatnou RNA evidenci. Lze PS3 Strong a
+> PVS1 RNA zapocitat soucasne, pokud pochazeji z odlisnych studii nebo assayu?
+> Pokud kombinovany funkcni assay zachycuje oba mechanismy, ma se PVS1 RNA
+> pouzit pouze ze samostatne nezavisle mRNA evidence? Jakou minimalni
+> dokumentaci nezavislosti ENIGMA vyzaduje, aby nedoslo k dvojimu zapocteni?
+
+### Odpověď Jany, 9. září 2026
+
+Jana uvedla:
+
+- u `BRCA1 c.5074G>A/C` je PVS1 určeno pouze pro mRNA evidenci, například RNA
+  z pacientského materiálu nebo minigene assay;
+- PS3 je u těchto variant použitelné podle Findlay et al., protože assay
+  prokázal ztrátu buněčné funkce BRCA1;
+- pokud by assay prokázal pouze aberantní sestřih, použila by pouze PVS1;
+- u `BRCA2 c.7976G>A/C` platí stejný postup. PS3 vychází z Biswas et al., kde
+  byl hodnocen rescue lethality u BRCA2-null myší;
+- PVS1 u `BRCA1 c.5074G>A` vychází z podkladů ST2 a ST3;
+- současné použití PVS1 a PS3 považuje za biologicky neintuitivní, ale za
+  odpovídající současným podkladům, pokud PS3 dokládá funkční dopad produktu
+  aberantního sestřihu. Otázku předá VCEP k potvrzení.
+
+Z odpovědi pro ARIANE vyplývá následující pracovní postup:
+
+- PVS1 RNA se používá pouze pro mRNA evidenci, například RNA z pacientského
+  materiálu nebo minigene assay;
+- pokud assay pouze prokáže aberrantní sestřih, použije se PVS1 RNA bez PS3;
+- PS3 lze zachovat, pokud další assay prokáže funkční dopad nad rámec pouhé
+  detekce sestřihu, například ztrátu buněčné funkce nebo rescue lethality;
+- u `BRCA1 c.5074G>A/C` tento funkční podklad představuje Findlay et al.;
+- u `BRCA2 c.7976G>A/C` jej představuje Biswas et al.
+
+Jana současně uvedla, že biologická interpretace kombinace není intuitivní a
+zařadí otázku k vyjasnění směrem k VCEP. Bod proto zůstává otevřený. Do odpovědi
+VCEP se přesný ST2 záznam pouze předvyplní k odborné revizi a automaticky
+nepřidělí PVS1 RNA ani body. Explicitní PS3 z Specifications Table 9 zůstává
+zachováno. Pokud odborník přijme PVS1 RNA současně s PS3, ARIANE ponechá obě
+kritéria a zobrazí povinné upozornění na rozsah assay, funkční výsledek a
+nezávislost evidence.
+
+Do předvyplnění se přenášejí také všechny odpovídající publikace a assay údaje
+ze Supplementary Table 3. ST3 slouží k dohledání podkladů a sama nepřiděluje
+PVS1 RNA ani jeho sílu.
 
 Podrobnosti implementace jsou v
 [`implementation_and_data_sources.md`](implementation_and_data_sources.md).

@@ -38,7 +38,7 @@ def evaluate_bp1(
     applicable_types = [
         "missense",
         "synonymous", "silent",  # silent is an alias for synonymous
-        "inframe_deletion", "inframe_insertion", "inframe_delins", "delins"
+        "inframe_deletion", "inframe_insertion", "inframe_delins"
     ]
     if variant_type not in applicable_types:
         result["reason"] = f"BP1 not applicable for {variant_type} variants"

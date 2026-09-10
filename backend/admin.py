@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from backend.gene_policy import active_genes
+from backend.classification_runtime.usage import ClassificationUsageRepository
 
 
 router = APIRouter()
@@ -51,7 +52,7 @@ def _log_admin(request: Request, event: str, **fields) -> None:
     logger.info(json.dumps(record, ensure_ascii=True, separators=(",", ":")))
 
 
-def _require_admin(
+def require_admin(
     request: Request,
     credentials: HTTPBasicCredentials = Depends(security),
 ) -> str:
@@ -72,6 +73,9 @@ def _require_admin(
         )
     _log_admin(request, "admin_login_succeeded", admin_user=expected_user)
     return credentials.username
+
+
+_require_admin = require_admin
 
 
 def _iter_log_paths():
@@ -278,6 +282,18 @@ async def admin_audit(
     )[:10]
     login_success = sum(record.get("event") == "admin_login_succeeded" for record in filtered)
     login_failed = sum(record.get("event") == "admin_login_failed" for record in filtered)
+    try:
+        usage_summary = ClassificationUsageRepository().summary(start=start, end=end)
+    except Exception:
+        logger.exception("Classification usage statistics could not be loaded")
+        usage_summary = {
+            "searches": 0,
+            "actors": 0,
+            "cache_hits": 0,
+            "errors": 0,
+            "top_variants": [],
+            "top_actors": [],
+        }
 
     total_pages = max(1, (len(filtered) + page_size - 1) // page_size)
     page = min(page, total_pages)
@@ -319,8 +335,14 @@ async def admin_audit(
         f"<div class='card'><span>Class {number}</span><strong>{class_counts.get(str(number), 0)}</strong></div>"
         for number in range(1, 6)
     )
+    persistent_variants = usage_summary["top_variants"]
     top_variants = "".join(
-        f"<li>{html.escape(variant)} <strong>{count}</strong></li>" for variant, count in variants.most_common(10)
+        f"<li>{html.escape(str(item['variant_key']))} <strong>{int(item['searches'])}</strong></li>"
+        for item in persistent_variants
+    ) or "<li>No data</li>"
+    top_actors = "".join(
+        f"<li>{html.escape(str(item['actor_id']) if item['actor_type'] == 'account' else 'visitor ' + str(item['actor_id'])[:8])} <strong>{int(item['searches'])}</strong></li>"
+        for item in usage_summary["top_actors"]
     ) or "<li>No data</li>"
     slow_rows = "".join(
         f"<tr><td>{html.escape(str(record.get('request_id', '')))}</td><td>{html.escape(str((record.get('input') or {}).get('gene', '')))} {html.escape(str((record.get('input') or {}).get('c_notation', '')))}</td><td>{durations.get(record.get('request_id'), 0):.1f} ms</td></tr>"
@@ -357,9 +379,9 @@ table{{border-collapse:collapse;width:100%;background:white;margin-top:10px}} th
 <label>Search<input name="q" value="{html.escape(q)}" placeholder="variant, gene, IP, request ID"></label>
 <label>Gene<select name="gene"><option value="">All genes</option>{gene_options}</select></label>
 <label>Event<select name="event">{event_select}</select></label><label>Rows<select name="page_size"><option>25</option><option{' selected' if page_size == 50 else ''}>50</option><option{' selected' if page_size == 100 else ''}>100</option></select></label><button type="submit">Apply</button></form>
-<div class="grid"><div class="card"><span>Requests</span><strong>{len(request_records)}</strong></div><div class="card"><span>Errors</span><strong>{len(error_records)}</strong></div><div class="card"><span>Unique IPs</span><strong>{unique_ips}</strong></div><div class="card"><span>Average duration</span><strong>{average_duration:.1f} ms</strong></div><div class="card"><span>Maximum duration</span><strong>{maximum_duration:.1f} ms</strong></div><div class="card"><span>Authenticated admin access</span><strong>{login_success}</strong></div><div class="card"><span>Failed logins</span><strong>{login_failed}</strong></div></div>
+<div class="grid"><div class="card"><span>Stored searches</span><strong>{usage_summary['searches']}</strong></div><div class="card"><span>Distinct accounts or browsers</span><strong>{usage_summary['actors']}</strong></div><div class="card"><span>Classification cache hits</span><strong>{usage_summary['cache_hits']}</strong></div><div class="card"><span>Stored classification errors</span><strong>{usage_summary['errors']}</strong></div><div class="card"><span>Audit requests</span><strong>{len(request_records)}</strong></div><div class="card"><span>Audit errors</span><strong>{len(error_records)}</strong></div><div class="card"><span>Unique IPs in audit log</span><strong>{unique_ips}</strong></div><div class="card"><span>Average duration</span><strong>{average_duration:.1f} ms</strong></div><div class="card"><span>Maximum duration</span><strong>{maximum_duration:.1f} ms</strong></div><div class="card"><span>Authenticated admin access</span><strong>{login_success}</strong></div><div class="card"><span>Failed logins</span><strong>{login_failed}</strong></div></div>
 <h2>Classification results</h2><div class="grid">{class_cards}</div>
-<div class="columns"><section><h2>Top variants</h2><ol>{top_variants}</ol></section><section><h2>Slow requests</h2><table><tr><th>Request ID</th><th>Variant</th><th>Duration</th></tr>{slow_rows}</table></section></div>
+<div class="columns"><section><h2>Most searched variants</h2><ol>{top_variants}</ol><h2>Most active accounts or browsers</h2><ol>{top_actors}</ol></section><section><h2>Slow requests</h2><table><tr><th>Request ID</th><th>Variant</th><th>Duration</th></tr>{slow_rows}</table></section></div>
 {detail_html}<section><h2>Events</h2><nav><a href="{html.escape(export_csv)}">Export CSV</a><a href="{html.escape(export_json)}">Export JSON</a></nav>
 <table><thead><tr><th>Time UTC</th><th>Request ID</th><th>Source IP</th><th>Event</th><th>Input</th><th>Result</th><th>Error</th></tr></thead><tbody>{''.join(rows)}</tbody></table>
 <nav><a href="{html.escape(prev_link)}">Previous</a><span>Page {page} of {total_pages}</span><a href="{html.escape(next_link)}">Next</a></nav></section></body></html>"""

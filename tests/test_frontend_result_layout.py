@@ -198,6 +198,17 @@ def test_decision_path_stays_inside_applied_criteria_details():
     assert 'class="criterion-summary-grid"' in fragment
 
 
+def test_complete_table9_audit_is_available_below_the_criterion():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+
+    assert 'class="table9-audit-details"' in html
+    assert "Show complete Table 9 evidence" in html
+    assert "c.table9_audit?.standardised_text" in html
+    assert "c.table9_audit?.assay_results" in html
+    assert "Published RNA result" in html
+    assert "Predicted or observed splicing" in html
+
+
 def test_embedded_decision_path_uses_full_width_without_horizontal_scrollbar():
     css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
     javascript = frontend_javascript()
@@ -286,6 +297,36 @@ def test_manual_review_navigation_uses_backend_groups_and_statuses():
         javascript.index("async refreshManualFormStatuses()"):
         javascript.index("async resolveProteinPs1Reference(item)")
     ]
+
+
+def test_manual_review_persistence_is_authenticated_and_versioned():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
+
+    assert "Save immutable review draft" in html
+    assert "Approval creates a new immutable version" in html
+    assert "Do not enter names, dates of birth" in html
+    assert 'namespace.api.request("/api/review-records"' in javascript
+    assert "/approve`" in javascript
+    assert "attestation_confirmed" in javascript
+    assert "persisted_review_record" in javascript
+
+
+def test_recommended_manual_criterion_is_offered_without_automatic_assignment():
+    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    javascript = frontend_javascript()
+
+    assert "Review possible PVS1 RNA assignment" in html
+    assert "enableManualCriterion('PVS1_RNA')" in html
+    assert "manualReviewRecommendations().length} suggested" in html
+    assert 'manualReviewOpen: false' in javascript
+    assert "this.manualReviewOpen = true" in javascript
+    assert "manual-criterion-${code}" in javascript
+
+    prefill_start = javascript.index("prefillManualReviewFromResult() {")
+    prefill_end = javascript.index("manualCriteriaPayload()", prefill_start)
+    prefill = javascript[prefill_start:prefill_end]
+    assert "item.enabled = true" not in prefill
 
 
 def test_protein_ps1_reference_facts_are_requested_from_backend():

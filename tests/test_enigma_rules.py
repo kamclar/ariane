@@ -781,6 +781,27 @@ class FrequencyTests(unittest.TestCase):
 
 
 class CriticalPtcBoundaryTests(unittest.TestCase):
+    def test_missing_termination_does_not_infer_nmd_from_variant_position(self):
+        complete = evaluate_pvs1(
+            "BRCA1", "frameshift", "p.(Arg1737LysfsTer93)", "c.5209dup"
+        )
+        unavailable = evaluate_pvs1(
+            "BRCA1", "frameshift", "p.?", "c.5209dup"
+        )
+
+        self.assertTrue(complete["applies"])
+        self.assertEqual(complete["points"], 8)
+        self.assertEqual(
+            complete["decision_path"]["steps"][0]["result"], "no"
+        )
+        self.assertEqual(unavailable["points"], complete["points"])
+        self.assertNotIn("decision_path", unavailable)
+        self.assertIn("NMD decision path is unavailable", unavailable["reason"])
+        self.assertIn(
+            "nucleotide-change position was not used as a substitute",
+            unavailable["reason"],
+        )
+
     def test_brca1_tyr1845ter_insertion_gets_pvs1_pm5_but_not_pm2(self):
         c_notation = "c.5533_5534insG"
         p_notation = "p.(Tyr1845Ter)"
@@ -874,6 +895,39 @@ class SpliceTests(unittest.TestCase):
         self.assertFalse(result["applies"])
         self.assertIn("complex or partial", result["reason"])
 
+    def test_all_last_exon_base_rna_records_are_prefilled_without_scoring(self):
+        variants = (
+            ("BRCA1", "c.4185G>A"),
+            ("BRCA1", "c.4484G>C"),
+            ("BRCA1", "c.4484G>T"),
+            ("BRCA1", "c.4675G>A"),
+            ("BRCA1", "c.5074G>A"),
+            ("BRCA1", "c.5074G>C"),
+            ("BRCA2", "c.7976G>A"),
+            ("BRCA2", "c.7976G>C"),
+            ("BRCA2", "c.9117G>A"),
+        )
+
+        for gene, c_notation in variants:
+            with self.subTest(gene=gene, c_notation=c_notation):
+                result = evaluate_pvs1_rna(gene, c_notation)
+                self.assertFalse(result["applies"])
+                self.assertEqual(result["points"], 0)
+                self.assertTrue(result["review_required"])
+                self.assertEqual(result["application_status"], "review_required")
+                self.assertEqual(
+                    result["source_record"]["position_category"], "last base"
+                )
+                self.assertEqual(
+                    result["source_record"]["evidence_mechanism"], "rna_splicing"
+                )
+                self.assertEqual(
+                    result["manual_review_prefill"]["assay_scope"], "mrna_only"
+                )
+                self.assertNotIn(
+                    "curated_strength", result["manual_review_prefill"]
+                )
+
     def test_c4185_keeps_prediction_and_routes_unquantified_rna_to_review(self):
         result = evaluate_variant(
             gene="BRCA1",
@@ -940,7 +994,13 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["points"], 0)
 
     def test_intronic_splice_prediction_creates_pp3(self):
-        result = evaluate_pp3_bp4("BRCA1", "intronic", "p.(?)", spliceai_score=0.9)
+        result = evaluate_pp3_bp4(
+            "BRCA1",
+            "intronic",
+            "p.(?)",
+            spliceai_score=0.9,
+            c_notation="c.548-9A>G",
+        )
         self.assertEqual(result["PP3"]["points"], 1)
 
     def test_table4_rna_rule_is_outside_automated_scope(self):
@@ -982,8 +1042,17 @@ class SpliceTests(unittest.TestCase):
         self.assertFalse(result["applies"])
         self.assertTrue(result["review_required"])
         self.assertIn("SpliceAI is unavailable", result["reason"])
+        from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
 
-    def test_st7_reference_prefills_review_but_does_not_score_ps1(self):
+        display = evaluate_protein_ps1_review(result, gene="BRCA1")
+        prefill = display["manual_review_prefill"]
+        self.assertEqual(
+            prefill["classification_verification"],
+            "enigma_st7_v1_2_reference_set",
+        )
+        self.assertEqual(prefill["reference_classification_used_ps1"], "no")
+
+    def test_st7_reference_scores_ps1_after_all_runtime_checks(self):
         result = evaluate_ps1(
             gene="BRCA1",
             c_notation="c.123A>G",
@@ -994,28 +1063,14 @@ class SpliceTests(unittest.TestCase):
             vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
             reference_spliceai_scores={"c.122A>G": 0.01},
         )
-        self.assertFalse(result["applies"])
-        self.assertEqual(result["points"], 0)
-        self.assertTrue(result["review_required"])
-        self.assertEqual(result["application_status"], "manual_review_required")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["points"], 4)
+        self.assertFalse(result["review_required"])
+        self.assertEqual(result["application_status"], "auto_applied")
         self.assertEqual(result["candidates"][0]["c_notation"], "c.122A>G")
-        self.assertEqual(result["candidates"][0]["reference_status"], "review_required")
-        self.assertIn("no separate ENIGMA/ClinGen VCEP assertion", result["reason"])
-        from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
-
-        display = evaluate_protein_ps1_review(result, gene="BRCA1")
-        prefill = display["manual_review_prefill"]
-        self.assertEqual(prefill["reference_variant"], "BRCA1 c.122A>G")
-        self.assertEqual(prefill["reference_p_notation"], "p.(His41Arg)")
-        self.assertEqual(prefill["reference_classification"], "Pathogenic")
-        self.assertEqual(
-            prefill["classification_verification"],
-            "historical_classification_only",
-        )
-        self.assertTrue(prefill["same_missense_confirmed"])
-        self.assertTrue(prefill["different_nucleotide_change_confirmed"])
-        self.assertEqual(prefill["vua_spliceai_score"], 0.01)
-        self.assertEqual(prefill["reference_spliceai_score"], 0.01)
+        self.assertEqual(result["candidates"][0]["reference_status"], "approved")
+        self.assertIn("ENIGMA protein-level PS1 splice conditions", result["reason"])
 
     def test_ps1_fails_closed_when_reference_spliceai_is_unavailable(self):
         result = evaluate_ps1(
@@ -1211,9 +1266,16 @@ class SpliceTests(unittest.TestCase):
             return value
 
         registry = {
-            "schema_version": 4,
+            "schema_version": 5,
             "registry_version": "test",
             "status": "active",
+            "methodological_decision": {
+                "id": "test",
+                "date": "2026-09-07",
+                "status": "accepted_project_interpretation",
+                "decision": "Synthetic test decision.",
+                "scope": "Synthetic test scope.",
+            },
             "defined_splice_sources": ["ENIGMA Table 9", "ENIGMA ST2"],
             "reference_source_policy": {
                 "accepted_classification_bases": [
@@ -1237,6 +1299,23 @@ class SpliceTests(unittest.TestCase):
         }
         with self.assertRaisesRegex(RuntimeError, "circular dependency"):
             validate_ps1_reference_registry(registry)
+
+        unresolved = record("C", "c.124A>G", "unused")
+        unresolved["classification_ps1_dependency"] = {
+            "used": "unknown",
+            "reference_ids": [],
+        }
+        unresolved["approval_basis_checksum"] = compute_approval_basis_checksum(
+            unresolved
+        )
+        unresolved_registry = {
+            **registry,
+            "reference_count": 1,
+            "status_counts": {"eligible": 1},
+            "references": [unresolved],
+        }
+        with self.assertRaisesRegex(RuntimeError, "resolved PS1 dependency review"):
+            validate_ps1_reference_registry(unresolved_registry)
 
     def test_splice_ps1_candidate_discovery_comes_directly_from_complete_st2(self):
         from backend.modules.ps1_splice_evidence import (

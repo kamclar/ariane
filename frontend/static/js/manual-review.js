@@ -4,7 +4,9 @@
     namespace.manual_reviewState = function manual_reviewState() {
         return {
         manualItems: [],
+        manualReviewOpen: false,
         manualAssessor: "",
+        manualReviewerRole: "",
         manualAssessedAt: new Date().toISOString().slice(0, 10),
         manualLoading: false,
         manualError: "",
@@ -16,6 +18,13 @@
         manualStatusError: "",
         manualCriterionStatuses: {},
         manualStatusRequestId: 0,
+        manualRecordLoading: false,
+        manualRecordError: "",
+        manualSavedRecord: null,
+        manualApprovalName: "",
+        manualApprovalRole: "",
+        manualApprovalComment: "",
+        manualApprovalAttested: false,
         };
     };
 
@@ -61,6 +70,7 @@
                 splice_sources_checked: [
                     "ENIGMA Specifications Table 9 v1.2",
                     "ENIGMA Supplementary Table 2 v1.2",
+                    "ENIGMA Supplementary Table 3 v1.2",
                 ],
                 vua_confirmed_splice_status: "not_assessed",
                 reference_confirmed_splice_status: "not_assessed",
@@ -85,6 +95,7 @@
                 references: "",
             }));
             this.manualResult = null;
+            this.manualReviewOpen = false;
             this.manualError = "";
             this.ps1ReferenceError = "";
             this.ps1ReferenceMessage = "";
@@ -92,6 +103,13 @@
             this.manualCriterionStatuses = {};
             this.manualStatusLoading = false;
             this.manualStatusRequestId += 1;
+            this.manualRecordLoading = false;
+            this.manualRecordError = "";
+            this.manualSavedRecord = null;
+            this.manualApprovalName = "";
+            this.manualApprovalRole = "";
+            this.manualApprovalComment = "";
+            this.manualApprovalAttested = false;
         },
 
         manualDefinition(code) {
@@ -175,8 +193,15 @@
         enableManualCriterion(code) {
             const item = this.manualItems.find(value => value.code === code);
             if (!item) return;
+            this.manualReviewOpen = true;
             item.enabled = true;
             void this.refreshManualFormStatuses();
+            window.requestAnimationFrame(() => {
+                document.getElementById(`manual-criterion-${code}`)?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            });
         },
 
         splicePs1CandidatesForCurrentGene() {
@@ -203,6 +228,7 @@
                     item.notes = prefill.table4_context || item.notes;
                     item.references = [
                         prefill.source_citation,
+                        ...(prefill.source_references || []),
                         rnaReview.source_url,
                     ].filter(Boolean).join("\n");
                 }
@@ -275,6 +301,9 @@
                     void this.resolveProteinPs1Reference(item);
                 }
             }
+            if (this.manualReviewRecommendations().length) {
+                this.manualReviewOpen = true;
+            }
             void this.refreshManualFormStatuses();
         },
 
@@ -289,6 +318,20 @@
                     .map(value => value.trim())
                     .filter(Boolean),
             }));
+        },
+
+        manualEvidenceRequestPayload() {
+            return {
+                base_criteria: this.result?.criteria || [],
+                variant_context: this.result ? {
+                    gene: this.result.gene,
+                    c_notation: this.result.c_notation,
+                    p_notation: this.result.p_notation,
+                } : null,
+                manual_criteria: this.manualCriteriaPayload(),
+                assessor: this.manualAssessor.trim(),
+                assessed_at: this.manualAssessedAt,
+            };
         },
 
         async refreshManualFormStatuses() {
@@ -363,29 +406,37 @@
                     return;
                 }
                 const resolved = await response.json();
-                const hasVerifiedAssertion =
-                    resolved.classification_verification === "external_vcep_assertion";
+                const hasAcceptedClassificationBasis = [
+                    "external_vcep_assertion",
+                    "enigma_st7_v1_2_reference_set",
+                ].includes(resolved.classification_verification);
                 item.evidence = {
                     ...item.evidence,
                     reference_variant: `${resolved.reference.gene} ${resolved.reference.c_notation}`,
                     reference_p_notation: resolved.reference.p_notation,
-                    reference_classification: hasVerifiedAssertion
+                    reference_classification: hasAcceptedClassificationBasis
                         ? resolved.classification
                         : item.evidence.reference_classification,
-                    classification_verification: hasVerifiedAssertion
+                    classification_verification: hasAcceptedClassificationBasis
                         ? resolved.classification_verification
                         : item.evidence.classification_verification,
-                    classification_source: hasVerifiedAssertion
+                    classification_source: hasAcceptedClassificationBasis
                         ? resolved.classification_source
                         : item.evidence.classification_source,
                     same_missense_confirmed: resolved.same_missense_substitution === true,
                     different_nucleotide_change_confirmed: resolved.different_nucleotide_change === true,
                     vua_spliceai_score: resolved.assessed.spliceai_score ?? "",
                     reference_spliceai_score: resolved.reference.spliceai_score ?? "",
-                    ps1_protein_rationale: hasVerifiedAssertion
+                    reference_confirmed_splice_status:
+                        resolved.reference_confirmed_splice_status ||
+                        item.evidence.reference_confirmed_splice_status,
+                    reference_classification_used_ps1:
+                        resolved.reference_classification_used_ps1 ||
+                        item.evidence.reference_classification_used_ps1,
+                    ps1_protein_rationale: hasAcceptedClassificationBasis
                         ? `ARIANE verified ${resolved.classification_source}. The variants have the same ` +
-                          "normalized missense consequence and different nucleotide changes. Complete or confirm " +
-                          "the recorded RNA/splice source review and PS1 dependency review before submission."
+                          "normalized missense consequence and different nucleotide changes. Confirm any " +
+                          "remaining assessed-variant RNA/splice facts before submission."
                         : item.evidence.ps1_protein_rationale,
                 };
                 this.ps1ReferenceMessage = resolved.review_message || "Reference facts resolved.";
@@ -424,6 +475,8 @@
         async evaluateManualEvidence() {
             this.manualError = "";
             this.manualResult = null;
+            this.manualSavedRecord = null;
+            this.manualRecordError = "";
             if (!this.result) {
                 this.manualError = "Classify a variant first.";
                 return;
@@ -434,17 +487,7 @@
                 const response = await namespace.api.request("/api/manual-evidence/evaluate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        base_criteria: this.result.criteria,
-                        variant_context: {
-                            gene: this.result.gene,
-                            c_notation: this.result.c_notation,
-                            p_notation: this.result.p_notation,
-                        },
-                        manual_criteria: this.manualCriteriaPayload(),
-                        assessor: this.manualAssessor.trim(),
-                        assessed_at: this.manualAssessedAt,
-                    }),
+                    body: JSON.stringify(this.manualEvidenceRequestPayload()),
                 });
                 if (!response.ok) {
                     const error = await response.json().catch(() => ({}));
@@ -456,6 +499,74 @@
                 this.manualError = "Network error - amended result could not be calculated.";
             } finally {
                 this.manualLoading = false;
+            }
+        },
+
+        async saveManualReviewDraft() {
+            if (!this.manualResult || !this.result) return;
+            this.manualRecordLoading = true;
+            this.manualRecordError = "";
+            try {
+                const response = await namespace.api.request("/api/review-records", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        module1_result: this.result,
+                        manual_evidence: this.manualEvidenceRequestPayload(),
+                        reviewer_role: this.manualReviewerRole.trim(),
+                    }),
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        this.manualRecordError = "Saving requires an authenticated reviewer account. Open the admin audit page, sign in, and try again.";
+                        return;
+                    }
+                    const error = await response.json().catch(() => ({}));
+                    this.manualRecordError = this.formatApiError(error, response.status);
+                    return;
+                }
+                this.manualSavedRecord = await response.json();
+                this.manualApprovalName = this.manualAssessor;
+                this.manualApprovalRole = this.manualReviewerRole;
+            } catch (e) {
+                this.manualRecordError = "The review draft could not be saved.";
+            } finally {
+                this.manualRecordLoading = false;
+            }
+        },
+
+        async approveManualReviewRecord() {
+            if (!this.manualSavedRecord || this.manualSavedRecord.status !== "draft") return;
+            this.manualRecordLoading = true;
+            this.manualRecordError = "";
+            try {
+                const response = await namespace.api.request(
+                    `/api/review-records/${encodeURIComponent(this.manualSavedRecord.record_id)}/approve`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            approver_name: this.manualApprovalName.trim(),
+                            approver_role: this.manualApprovalRole.trim(),
+                            approval_comment: this.manualApprovalComment.trim(),
+                            attestation_confirmed: this.manualApprovalAttested,
+                        }),
+                    }
+                );
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        this.manualRecordError = "Approval requires an authenticated reviewer account.";
+                        return;
+                    }
+                    const error = await response.json().catch(() => ({}));
+                    this.manualRecordError = this.formatApiError(error, response.status);
+                    return;
+                }
+                this.manualSavedRecord = await response.json();
+            } catch (e) {
+                this.manualRecordError = "The review record could not be approved.";
+            } finally {
+                this.manualRecordLoading = false;
             }
         },
 
@@ -476,6 +587,7 @@
                     criteria: this.result.criteria,
                 },
                 amended_working_result: this.manualResult,
+                persisted_review_record: this.manualSavedRecord,
                 submitted_manual_evidence: this.manualItems
                     .filter(item => item.enabled)
                     .map(item => ({

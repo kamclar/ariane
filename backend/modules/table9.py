@@ -49,6 +49,7 @@ def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
         "splice_result_published": None,
         "spliceai_prediction": None,
         "predicted_or_observed_splicing": None,
+        "source_record": None,
     }
 
     key = f"{gene}:{c_notation}"
@@ -66,10 +67,31 @@ def table9_lookup_ps3_bs3(gene: str, c_notation: str) -> Dict:
             "predicted_or_observed_splicing"
         )
 
+        assay_results = [
+            value
+            for index in range(1, 5)
+            if (value := entry.get(f"result_{index}"))
+        ]
+        result["source_record"] = {
+            "gene": entry.get("gene"),
+            "c_notation": entry.get("c_notation"),
+            "p_notation": entry.get("p_notation"),
+            "assigned_code": code,
+            "code_weight": strength,
+            "standardised_text": text,
+            "splice_result_published": entry.get("splice_result_published"),
+            "spliceai_prediction": entry.get("spliceai_prediction"),
+            "predicted_or_observed_splicing": entry.get(
+                "predicted_or_observed_splicing"
+            ),
+            "publication_count": entry.get("publication_count"),
+            "assay_results": assay_results,
+        }
+
         result["code"] = code
         result["strength"] = strength
         result["applies"] = code in {"PS3", "BS3"}
-        result["reason"] = f"Table 9: {text[:100]}..." if len(text) > 100 else f"Table 9: {text}"
+        result["reason"] = f"Table 9: {text}"
 
         if code == "PS3":
             if strength == "Strong":

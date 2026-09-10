@@ -21,7 +21,6 @@ _INFRAME_TYPES = {
     "inframe_deletion",
     "inframe_insertion",
     "inframe_delins",
-    "delins",
 }
 
 

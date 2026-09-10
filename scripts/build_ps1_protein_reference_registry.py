@@ -1,9 +1,9 @@
 """Build the protein-PS1 reference registry from versioned source data.
 
-ST7 supplies P/LP missense reference candidates. Table 9 functional/RNA
-evidence and complete ST2 determine whether each candidate can enter the
-protein branch. SpliceAI is deliberately not embedded in this registry. It is
-computed on demand for both variants when PS1 is evaluated.
+ST7 supplies accepted P/LP missense reference classifications. Table 9
+functional/RNA evidence and complete ST2 determine whether each reference can
+enter the protein branch. SpliceAI is deliberately not embedded in this
+registry. It is computed on demand for both variants when PS1 is evaluated.
 """
 
 from __future__ import annotations
@@ -72,9 +72,9 @@ def _status(splice_status: str) -> tuple[str, str, str]:
             "The defined RNA/splice source review is incomplete.",
         )
     return (
-        "review_required",
+        "eligible",
         "missense_runtime_spliceai_check_required",
-        "ST7 is a trusted ENIGMA candidate source, but a separate ENIGMA/ClinGen VCEP assertion is not recorded. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed on demand.",
+        "The ST7 P/LP classification is accepted as the reference classification basis. Known RNA/splice sources do not exclude the protein branch; SpliceAI <= 0.1 must still be confirmed for both variants at classification time.",
     )
 
 
@@ -141,8 +141,13 @@ def build() -> Dict[str, Any]:
                 },
             },
             "classification_ps1_dependency": {
-                "used": "unknown",
+                "used": False,
                 "reference_ids": [],
+                "basis": (
+                    "ST7 records an IARC class derived from the historical ENIGMA "
+                    "multifactorial likelihood reference set, not an application of "
+                    "protein-level PS1."
+                ),
             },
         }
         record["approval_basis_checksum"] = _record_checksum(record)
@@ -166,13 +171,12 @@ def build() -> Dict[str, Any]:
     records.sort(key=lambda item: (item["gene"], item["c_notation"]))
     counts = Counter(record["status"] for record in records)
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "registry_version": date.today().isoformat() + ".1",
         "status": "active",
         "description": (
-            "ENIGMA ST7 v1.2 P/LP missense candidates for guided protein-level "
-            "PS1 review, plus separately verified VCEP references from curated "
-            "extensions. The "
+            "ENIGMA ST7 v1.2 P/LP missense references accepted for protein-level "
+            "PS1, plus separately verified VCEP references from curated extensions. The "
             "reference and assessed-variant SpliceAI scores are computed on demand."
         ),
         "rule_source": {
@@ -183,22 +187,37 @@ def build() -> Dict[str, Any]:
         "candidate_source": {
             "name": "ClinGen ENIGMA BRCA1/2 VCEP Supplementary Table 7",
             "version": "1.2.0",
-            "usage": "trusted_candidate_discovery_and_guided_review",
+            "usage": "accepted_ps1_classification_basis_with_runtime_checks",
+        },
+        "methodological_decision": {
+            "id": "ps1_st7_classification_basis_2026-09-07",
+            "date": "2026-09-07",
+            "status": "accepted_project_interpretation",
+            "decision": (
+                "A Pathogenic or Likely Pathogenic IARC classification in ENIGMA "
+                "Supplementary Table 7 v1.2 satisfies the PS1 requirement that the "
+                "reference classification was assigned using VCEP specifications."
+            ),
+            "scope": (
+                "This decision establishes only the reference classification basis. "
+                "All protein-level PS1 identity, mechanism, splice and runtime "
+                "SpliceAI requirements remain mandatory."
+            ),
         },
         "classification_policy": (
-            "Official ENIGMA ST7 v1.2 P/LP records identify trusted PS1 candidates "
-            "but do not establish the separate VCEP-assertion requirement for "
-            "automatic scoring. Automatic protein-level PS1 additionally requires "
-            "a versioned ENIGMA/ClinGen VCEP assertion or documented local "
-            "reclassification, a missense consequence, SpliceAI <= 0.1 and no "
-            "damaging splice evidence in the defined sources."
+            "Official ENIGMA ST7 v1.2 P/LP records are accepted as the reference "
+            "classification basis for protein-level PS1 following expert "
+            "methodological review on 2026-09-07. Automatic scoring still requires "
+            "a matching missense consequence caused by a different nucleotide "
+            "change, an eligible protein mechanism, SpliceAI <= 0.1 for both "
+            "variants and no damaging splice evidence in the defined sources."
         ),
         "reference_source_policy": {
             "accepted_classification_bases": [
                 {
                     "id": "enigma_st7_v1_2_reference_set",
                     "source": "ENIGMA Supplementary Table 7 v1.2",
-                    "use": "Trusted candidate discovery and guided review only; it does not by itself permit automatic PS1 scoring."
+                    "use": "Accepted P/LP reference classification basis. Automatic PS1 remains conditional on identity, mechanism and splice checks."
                 },
                 {
                     "id": "external_vcep_assertion",
@@ -221,6 +240,7 @@ def build() -> Dict[str, Any]:
             "supporting_and_exclusion_sources": [
                 "ENIGMA Specifications Table 9 v1.2",
                 "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
                 "versioned SpliceAI result with reference genome, transcript and model provenance",
                 "canonical RefSeq transcript and normalized protein consequence"
             ]

@@ -5,12 +5,43 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from backend.config import (
+    EXON_CNV_EVIDENCE_MANIFEST_PATH,
+    EXON_CNV_EVIDENCE_PATH,
+    PS1_PROTEIN_REGISTRY_PATH,
+    ST2_SPLICE_EVIDENCE_PATH,
+    ST7_PATH,
+    TABLE4_PATH,
+    TABLE9_PATH,
+)
 from backend.data_validation import validate_required_datasets
 from backend.data_health import clear_issue, get_data_issues, get_user_warnings, register_issue
+from backend.gene_policy import GENE_POLICY_MANIFEST_PATH, GENE_POLICY_METADATA_PATH
 from backend.lookup_execution import lookup_or_unavailable
 
 
 class RequiredDatasetValidationTests(unittest.TestCase):
+    def test_every_classification_dataset_is_required_at_startup(self):
+        required = {
+            "table4": TABLE4_PATH,
+            "table9": TABLE9_PATH,
+            "st7": ST7_PATH,
+            "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH,
+            "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH,
+            "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH,
+            "exon_cnv_evidence_manifest": EXON_CNV_EVIDENCE_MANIFEST_PATH,
+            "gene_policy_manifest": GENE_POLICY_MANIFEST_PATH,
+            "gene_policy_metadata": GENE_POLICY_METADATA_PATH,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing.json"
+            for dataset_name in required:
+                with self.subTest(dataset=dataset_name):
+                    paths = dict(required)
+                    paths[dataset_name] = missing
+                    with self.assertRaisesRegex(RuntimeError, "missing|cannot be read"):
+                        validate_required_datasets(paths)
+
     def test_missing_required_dataset_stops_startup(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -772,6 +803,44 @@ class RemainingFallbackTests(unittest.TestCase):
             result = clingen.clingen_erepo_lookup("BRCA1", "c.300A>G")
         self.assertEqual(result["status"], "ambiguous")
         self.assertEqual(result["candidate_caids"], ["CA1", "CA2"])
+
+    def test_clingen_reads_evidence_codes_from_current_agent_schema(self):
+        from backend.lookups import clingen
+
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps({
+            "variantInterpretations": [{
+                "@id": "CG:VCV-test",
+                "caid": "CA123",
+                "guidelines": [{
+                    "cspecId": "GN092",
+                    "version": "1.2.0",
+                    "outcome": {"label": "Pathogenic"},
+                    "agents": [{
+                        "evidenceCodes": [
+                            {"label": "PS3", "status": "Met"},
+                            {"label": "PP4_Strong", "status": "Met"},
+                        ]
+                    }],
+                }],
+            }]
+        }).encode()
+        clingen.EREPO_CACHE.clear()
+        with patch.object(clingen.urllib.request, "urlopen", return_value=response):
+            result = clingen.clingen_erepo_lookup("BRCA1", "c.191G>A")
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["classification"], "Pathogenic")
+        self.assertEqual(result["guideline_versions"], ["1.2.0"])
+        self.assertEqual(result["cspec_ids"], ["GN092"])
+        self.assertEqual(result["assertion_id"], "CG:VCV-test")
+        self.assertEqual(
+            result["evidence_codes"],
+            [
+                {"code": "PS3", "status": "Met"},
+                {"code": "PP4_Strong", "status": "Met"},
+            ],
+        )
 
     def test_failed_pvs1_evaluation_is_visible_for_frameshift(self):
         from tests.dag_test_support import classify_with_dag

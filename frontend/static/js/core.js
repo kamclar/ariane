@@ -5,6 +5,8 @@
         return {
         mode: "single",
         appVersion: "",
+        buildRevision: "",
+        issueTrackerUrl: "",
         configuredGenes: [],
         transcriptByGene: {},
         policyByGene: {},
@@ -23,6 +25,8 @@
                 if (response.ok) {
                     const resources = await response.json();
                     this.setAppVersion(resources.version);
+                    this.buildRevision = String(resources.build_revision || "").trim();
+                    this.issueTrackerUrl = String(resources.issue_tracker_url || "").trim();
                     this.configuredGenes = resources.genes || [];
                     this.transcriptByGene = Object.fromEntries(
                         this.configuredGenes.map(item => [item.symbol, item.reference_transcript])
@@ -76,15 +80,41 @@
             return `${policy.name} v${policy.version}`;
         },
 
+        issueReportUrl() {
+            if (!this.issueTrackerUrl) return "#";
+            const url = new URL(this.issueTrackerUrl, window.location.href);
+            const lines = [
+                "What happened and what did you expect?",
+                "",
+                "Technical context added by ARIANE",
+                `ARIANE version: ${this.appVersion || "not reported"}`,
+            ];
+            if (this.buildRevision) lines.push(`Build revision: ${this.buildRevision}`);
+            lines.push(`Page: ${this.mode === "batch" ? "Batch" : "Single variant"}`);
+            const policy = this.currentPolicyInfo();
+            if (policy) lines.push(`Policy: ${policy.name} v${policy.version}`);
+            if (this.result) {
+                lines.push(`Variant: ${this.result.variant || `${this.result.gene} ${this.result.c_notation}`}`);
+                lines.push(`Module 1 result: Class ${this.result.predicted_class} ${this.result.predicted_label}; ${this.result.total_points} points`);
+            } else if (this.gene || this.c_notation) {
+                lines.push(`Current input: ${[this.gene, this.c_notation].filter(Boolean).join(" ")}`);
+            }
+            lines.push(`Browser: ${navigator.userAgent}`);
+            lines.push(`Created: ${new Date().toISOString()}`);
+            url.searchParams.set("description", lines.join("\n"));
+            return url.toString();
+        },
+
         async loadManualDefinitions() {
             if (!this.gene) return;
             const response = await namespace.api.request(`/api/resources?gene=${encodeURIComponent(this.gene)}`);
             if (!response.ok) throw new Error(`Manual evidence resources HTTP ${response.status}`);
             const resources = await response.json();
             this.setAppVersion(resources.version);
+            this.buildRevision = String(resources.build_revision || "").trim();
+            this.issueTrackerUrl = String(resources.issue_tracker_url || "").trim();
             this.manualDefinitions = resources.manual_criteria || {};
             this.resetManualItems();
         },
     };
 })(window.ArianeFrontend = window.ArianeFrontend || {});
-

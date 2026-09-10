@@ -69,7 +69,7 @@ sudo bash setup-admin.sh admin
 
 The script prints a new password once and keeps it on later runs. Store it in a password manager. Run `sudo bash setup-admin.sh admin --rotate` over SSH to generate a replacement. The page is available at `https://ariane-app.duckdns.org/admin/audit` and uses browser Basic Auth. Audit files are stored in `/var/log/ariane/audit.jsonl`, readable only by the service account and administrators, and rotated daily for 30 days.
 
-The dashboard is read-only. It provides time, text, gene, and event filters; request and error statistics; class counts; common variants; performance data; request details; pagination; CSV and JSON export; login history; and service, certificate, disk, and backup status. It does not provide restart, deploy, restore, cache, or password actions.
+The dashboard is read-only. It provides time, text, gene, and event filters; persistent search and cache statistics; class counts; common variants; account or browser counts; performance data; request details; pagination; CSV and JSON export; login history; and service, certificate, disk, and backup status. It does not provide restart, deploy, restore, cache, or password actions.
 
 ## Backups
 
@@ -81,13 +81,40 @@ sudo systemctl start ariane-backup.service
 systemctl list-timers ariane-backup.timer
 sudo /usr/local/sbin/ariane-restore --list
 sudo /usr/local/sbin/ariane-restore --data /backup/ariane-full-YYYYMMDD_HHMMSS.tar.gz
+sudo /usr/local/sbin/ariane-review-restore /backup/ariane-reviews-YYYYMMDD_HHMMSS.sqlite3.gz
+sudo /usr/local/sbin/ariane-usage-restore /backup/ariane-usage-YYYYMMDD_HHMMSS.sqlite3.gz
 ```
 
 The local `/backup` directory is root-only. Off-site backup is optional and is not configured by these scripts. Local backups do not protect against loss of the VM or its disk. Test restore procedures regularly.
 
+Manual-review drafts and approvals are stored separately from replaceable API
+caches in `/var/lib/ariane/runtime-data/review_records.sqlite3`. The backup job
+uses the SQLite online-backup API, verifies database integrity, compresses the
+copy and writes a SHA-256 checksum. Review-record backups follow the same
+retention period as the application backups.
+
+Classification usage events are stored in
+`/var/lib/ariane/runtime-data/classification_usage.sqlite3` and are included in
+the same backup job. Replaceable classification results are stored in
+`/var/lib/ariane/runtime-cache/classification_results.sqlite3` and are not
+backed up. The result cache has no time-based expiration. Its implementation and data
+fingerprint invalidates it after a relevant update. An optional maximum age can
+be configured with `ARIANE_CLASSIFICATION_CACHE_MAX_AGE_SECONDS`. The default
+usage retention is 365 days.
+
 ## Configuration
 
 Service secrets are stored in `/etc/ariane/ariane.env` with restricted permissions. Backup settings are stored in `/etc/ariane/backup.env`.
+
+`ARIANE_RUNTIME_DATA_DIR` must point to persistent storage writable only by the
+ARIANE service account. It must not point to the runtime-cache directory.
+
+Without user authentication, usage records identify only a persistent browser
+visitor. To store authenticated account names, the reverse proxy must remove
+any client-supplied identity header, set its own header after authentication,
+and `ARIANE_TRUSTED_USER_HEADER` must name that header. Do not enable this
+setting for a header that can be supplied directly by an unauthenticated
+client.
 
 The `/api/clear-cache` endpoint requires the `X-ARIANE-Admin-Token` header and is blocked by the public Nginx site. Use it only through a trusted local administrative channel.
 

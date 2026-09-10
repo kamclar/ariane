@@ -4,6 +4,7 @@ from backend.lookups.bayesdel import BAYESDEL_CACHE
 from backend.lookups.clingen import EREPO_CACHE
 from backend.lookups.clinvar import CLINVAR_CACHE
 from backend.lookups.spliceai import SPLICEAI_CACHE, SPLICEAI_STATUS_CACHE
+from backend.classification_runtime.cache import ClassificationCacheRepository
 
 
 def clear_runtime_caches() -> None:
@@ -13,3 +14,4 @@ def clear_runtime_caches() -> None:
     BAYESDEL_CACHE.clear()
     CLINVAR_CACHE.clear()
     EREPO_CACHE.clear()
+    ClassificationCacheRepository().clear()

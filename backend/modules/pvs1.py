@@ -262,42 +262,51 @@ def evaluate_pvs1(
             result["pm5_exon"] = table4_result.get("pm5_exon")
 
         if result["applies"]:
-            nmd_boundary = pvs1_thresholds(gene)["nmd_boundary_c_first_not_predicted"]
-            estimated_ptc_c = (
-                (termination_aa * 3 - 2) if termination_aa is not None else cds_pos
-            )
-            nmd_predicted = estimated_ptc_c < nmd_boundary
-            branch_steps: List[Dict[str, str]] = [
-                {
-                    "node_id": "pvs-ptc-nmd",
-                    "question": "Is nonsense-mediated decay predicted?",
-                    "result": "yes" if nmd_predicted else "no",
-                    "observed": (
-                        f"Predicted termination near c.{estimated_ptc_c}; "
-                        f"gene-specific NMD boundary c.{nmd_boundary - 1}_c.{nmd_boundary}"
-                    ),
-                }
-            ]
-            if nmd_predicted:
-                branch_steps.append({
-                    "node_id": "pvs-ptc-transcript",
-                    "question": "Variant present in a biologically relevant transcript?",
-                    "result": "present",
-                    "observed": f"Table 4 {gene} {table4_result['exon']} -> {table4_result['pvs1_code']}",
-                })
+            if termination_aa is None:
+                result["reason"] += (
+                    "; NMD decision path is unavailable because the predicted "
+                    "termination position could not be determined from the "
+                    "normalized protein consequence. The nucleotide-change "
+                    "position was not used as a substitute."
+                )
             else:
-                branch_steps.append({
-                    "node_id": "pvs-ptc-critical",
-                    "question": "Is the truncated or altered region critical to protein function?",
-                    "result": "yes",
-                    "observed": table4_result["reason"],
-                })
-            result["decision_path"] = _pvs1_path(
-                gene=gene,
-                branch_id="nonsense-frameshift",
-                outcome_node="pvs-ptc-table4",
-                steps=branch_steps,
-            )
+                nmd_boundary = pvs1_thresholds(gene)[
+                    "nmd_boundary_c_first_not_predicted"
+                ]
+                predicted_ptc_codon_start = termination_aa * 3 - 2
+                nmd_predicted = predicted_ptc_codon_start < nmd_boundary
+                branch_steps: List[Dict[str, str]] = [
+                    {
+                        "node_id": "pvs-ptc-nmd",
+                        "question": "Is nonsense-mediated decay predicted?",
+                        "result": "yes" if nmd_predicted else "no",
+                        "observed": (
+                            f"Predicted termination p.{termination_aa}, near "
+                            f"c.{predicted_ptc_codon_start}; gene-specific NMD "
+                            f"boundary c.{nmd_boundary - 1}_c.{nmd_boundary}"
+                        ),
+                    }
+                ]
+                if nmd_predicted:
+                    branch_steps.append({
+                        "node_id": "pvs-ptc-transcript",
+                        "question": "Variant present in a biologically relevant transcript?",
+                        "result": "present",
+                        "observed": f"Table 4 {gene} {table4_result['exon']} -> {table4_result['pvs1_code']}",
+                    })
+                else:
+                    branch_steps.append({
+                        "node_id": "pvs-ptc-critical",
+                        "question": "Is the truncated or altered region critical to protein function?",
+                        "result": "yes",
+                        "observed": table4_result["reason"],
+                    })
+                result["decision_path"] = _pvs1_path(
+                    gene=gene,
+                    branch_id="nonsense-frameshift",
+                    outcome_node="pvs-ptc-table4",
+                    steps=branch_steps,
+                )
 
         return result
 

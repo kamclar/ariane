@@ -1,7 +1,7 @@
 # ============================================================
 # ARIANE data models
 # ============================================================
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, SkipValidation, field_validator, model_validator
 from typing import Optional, List, Dict, Any, Literal
 import re
 
@@ -117,6 +117,7 @@ class CriterionResult(BaseModel):
     reason: str = ""
     source: str = ""
     decision_path: Optional[Dict[str, Any]] = None
+    table9_audit: Optional[Dict[str, Any]] = None
     single_strong_likely_benign_eligible: bool = False
     single_strong_likely_benign_basis: str = ""
     independent_evidence_contribution_count: int = 0
@@ -152,6 +153,9 @@ class ExternalComparison(BaseModel):
     enigma_ep_class: str = ""
     enigma_ep_source: str = ""
     erepo_evidence_codes: List[str] = []
+    erepo_guideline_versions: List[str] = []
+    erepo_cspec_ids: List[str] = []
+    erepo_assertion_id: str = ""
 
 
 class AlphaMissenseResult(BaseModel):
@@ -596,7 +600,10 @@ class BatchItemResult(BaseModel):
 
 
 class BatchRequest(BaseModel):
-    variants: List[VariantRequest]
+    # Keep the VariantRequest schema in OpenAPI, but validate each item inside
+    # the batch handler. Otherwise one invalid variant prevents every valid
+    # item in the same request from being classified.
+    variants: List[SkipValidation[VariantRequest]]
 
     @field_validator("variants")
     @classmethod

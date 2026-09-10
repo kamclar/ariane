@@ -504,16 +504,57 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             "splice_sources_checked": [
                 "ENIGMA Specifications Table 9 v1.2",
                 "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
             ],
             "vua_confirmed_splice_status": "none_identified",
             "reference_confirmed_splice_status": "normal",
-            "reference_classification_used_ps1": "unknown",
+            "reference_classification_used_ps1": "no",
             "ps1_protein_rationale": "VCEP classification and both splice checks reviewed.",
         }
         self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Strong")
         evidence["reference_classification"] = "Likely Pathogenic"
         self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Moderate")
+        evidence["classification_verification"] = "enigma_st7_v1_2_reference_set"
+        evidence["reference_classification"] = "Pathogenic"
+        self.assertEqual(suggest_strength("PS1_PROTEIN", evidence), "Strong")
+        evidence["reference_variant"] = "BRCA1 c.5217T>G"
+        evidence["reference_p_notation"] = "p.(Asp1739Glu)"
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+        evidence["reference_variant"] = "BRCA1 c.122A>G"
+        evidence["reference_p_notation"] = "p.(His41Arg)"
         evidence["classification_verification"] = "historical_classification_only"
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+
+    def test_ps1_protein_requires_resolved_dependency_and_protein_mechanism(self):
+        evidence = {
+            "reference_variant": "BRCA1 c.122A>G",
+            "reference_p_notation": "p.(His41Arg)",
+            "reference_classification": "Pathogenic",
+            "classification_verification": "external_vcep_assertion",
+            "classification_source": "ClinGen ENIGMA expert panel assertion",
+            "same_missense_confirmed": True,
+            "different_nucleotide_change_confirmed": True,
+            "vua_spliceai_score": 0.01,
+            "reference_spliceai_score": 0.02,
+            "splice_source_check_completed": True,
+            "splice_sources_checked": [
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
+            ],
+            "vua_confirmed_splice_status": "none_identified",
+            "reference_confirmed_splice_status": "normal",
+            "reference_classification_used_ps1": "unknown",
+            "ps1_protein_rationale": "VCEP classification and mechanism reviewed.",
+        }
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+
+        evidence["reference_classification_used_ps1"] = "no"
+        evidence["reference_confirmed_splice_status"] = "abnormal"
+        self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
+
+        evidence["reference_confirmed_splice_status"] = "normal"
+        evidence["reference_spliceai_score"] = 0.101
         self.assertIsNone(suggest_strength("PS1_PROTEIN", evidence))
 
     def test_ps1_protein_known_dependency_requires_reciprocal_check(self):
@@ -531,6 +572,7 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
             "splice_sources_checked": [
                 "ENIGMA Specifications Table 9 v1.2",
                 "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
             ],
             "vua_confirmed_splice_status": "none_identified",
             "reference_confirmed_splice_status": "none_identified",
@@ -974,10 +1016,11 @@ class ManualEvidenceClassificationTests(unittest.TestCase):
             "splice_sources_checked": [
                 "ENIGMA Specifications Table 9 v1.2",
                 "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
             ],
             "vua_confirmed_splice_status": "none_identified",
             "reference_confirmed_splice_status": "none_identified",
-            "reference_classification_used_ps1": "unknown",
+            "reference_classification_used_ps1": "no",
             "ps1_protein_rationale": "Complete ENIGMA protein PS1 review.",
         }
         result = evaluate_manual_evidence(

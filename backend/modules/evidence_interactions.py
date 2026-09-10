@@ -159,9 +159,13 @@ def apply_automatic_rna_interactions(
                 criteria=["PVS1_RNA"] + functional,
                 retained=["PVS1_RNA"] + functional,
                 reason=(
-                    "PVS1 (RNA) and protein-functional PS3/BS3 evidence are "
-                    "retained as potentially distinct mechanisms. Confirm assay "
-                    "scope and independence of the protein result."
+                    "PVS1 (RNA) and PS3/BS3 are retained because the functional "
+                    "code represents a reviewed protein or cellular-function "
+                    "result beyond merely detecting an aberrant transcript. If "
+                    "the functional assay only documents aberrant splicing, use "
+                    "PVS1 (RNA) without PS3/BS3. Confirm the assay scope and "
+                    "independence of the functional result. VCEP clarification "
+                    "of this combination is pending."
                 ),
                 source="ENIGMA v1.2 Figure 1C and Appendix E",
                 source_url=APPENDIX_URL,
@@ -210,10 +214,13 @@ def apply_manual_rna_interactions(
                     criteria=["PVS1_RNA"] + functional,
                     retained=["PVS1_RNA"] + functional,
                     reason=(
-                        "PVS1 (RNA) and protein-functional PS3/BS3 evidence are "
-                        "retained as potentially distinct mechanisms. Confirm assay "
-                        "scope and whether the protein result is independent of the "
-                        "RNA effect."
+                        "PVS1 (RNA) and PS3/BS3 are retained because the "
+                        "functional code represents a reviewed protein or "
+                        "cellular-function result beyond merely detecting an "
+                        "aberrant transcript. If the functional assay only "
+                        "documents aberrant splicing, use PVS1 (RNA) without "
+                        "PS3/BS3. Confirm assay scope and independence. VCEP "
+                        "clarification of this combination is pending."
                     ),
                     source="ENIGMA v1.2 Figure 1C and Appendix E",
                     source_url=APPENDIX_URL,
@@ -257,6 +264,25 @@ def apply_manual_rna_interactions(
                     source="ENIGMA v1.2 Figure 1B and Appendix E",
                     source_url=SPECIFICATIONS_URL,
                     review_required=True,
+                )
+            )
+
+        retained_bioinformatic = sorted({"BP1", "BP4"} & set(combined))
+        if retained_bioinformatic:
+            warnings.append(
+                interaction(
+                    status="info",
+                    mechanism="experimentally_excluded_splicing_effect",
+                    criteria=["BP7_RNA"] + retained_bioinformatic,
+                    retained=["BP7_RNA"] + retained_bioinformatic,
+                    reason=(
+                        "Applicable BP1 or BP4 evidence is retained with BP7 "
+                        "Strong (RNA). ENIGMA Figure 1B instructs applying the "
+                        "relevant bioinformatic code in the no-aberration RNA "
+                        "branch."
+                    ),
+                    source="ENIGMA v1.2 Figure 1B and Appendix E",
+                    source_url=SPECIFICATIONS_URL,
                 )
             )
 

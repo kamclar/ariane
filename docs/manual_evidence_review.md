@@ -156,18 +156,19 @@ The ST2 prefill therefore leaves same-event confirmation, prediction comparison
 and criterion strength unset.
 
 `PS1_PROTEIN` is prefilled when ARIANE finds a matching P/LP missense reference
-whose registry status is `review_required`. A reference marked `excluded` is
+but a runtime or splice condition remains unresolved. A reference marked `excluded` is
 shown with its exclusion reason but cannot be manually confirmed as protein PS1.
 The prefill includes the normalized reference variant and protein consequence,
 the ST7 class and source, objective variant comparison, available SpliceAI
 results, and recorded checks of the defined RNA/splice sources. ARIANE then
-checks ClinVar and ClinGen ERepo for a separate ENIGMA VCEP assertion in the
-background. Fields that cannot be established remain explicitly unresolved.
-It requires a qualifying VCEP classification verification, the same normalized
+checks ClinVar and ClinGen ERepo for a current ENIGMA VCEP assertion in the
+background. An ST7 P/LP record is an accepted classification basis. Fields that
+cannot be established remain explicitly unresolved. It requires the same normalized
 missense substitution, a different nucleotide change, SpliceAI at most 0.1 for
 both variants, and a completed check of named RNA/splice sources for both
 variants. The strength is derived from the reference class and cannot be freely
-overridden. If the reference classification is known to use PS1, the reviewer
+overridden. The reviewer must establish whether the reference classification
+used PS1. An unresolved answer does not add points. If PS1 was used, the reviewer
 must identify that dependency and exclude a direct reciprocal dependency.
 
 The protein PS1 form also accepts a reference c. HGVS description. The backend
@@ -199,7 +200,51 @@ Each enabled criterion requires:
 The browser can export the original Module 1 result, submitted evidence,
 the backend-derived strengths, and amended working result as JSON. Raw submitted
 manual evidence does not contain a separate frontend-derived strength.
-The server does not currently persist these records.
+
+An authenticated reviewer can also save the review as an immutable server-side
+draft. ARIANE recomputes the amended result before saving and does not trust a
+classification submitted by the browser. The record contains the complete
+Module 1 result, enabled manual evidence, amended result, reviewer identity and
+role, application and policy versions, and SHA-256 hashes of all three content
+sections.
+
+Approval creates a new immutable record version that references the saved draft.
+The draft is not updated or deleted. New evidence must be evaluated and saved as
+a new draft. Records are stored in `review_records.sqlite3` below the directory
+configured by `ARIANE_RUNTIME_DATA_DIR`. The Railway default is
+`${RAILWAY_VOLUME_MOUNT_PATH}/ariane-runtime-data`; local development uses
+`.runtime-data/`. This storage is separate from replaceable API caches and is
+excluded from Git.
+
+The current beta uses the existing protected administrator account as the
+authenticated account and separately records the stated reviewer name and
+professional role. This provides authenticated, versioned beta records but is
+not a substitute for institutional user management, role assignment or an
+electronic-signature system. A production laboratory deployment should connect
+the same record API to its identity provider and authorization policy.
+
+Evidence notes must not contain direct patient identifiers unless the deployment
+has an approved protected-data environment and an applicable retention policy.
+
+## Development-only amended-result walkthrough
+
+The following input tests the form workflow and must not be treated as clinical
+evidence or saved as an approved review:
+
+1. Classify `BRCA1 c.5366C>T p.(Ala1789Val)`.
+2. Confirm that the Module 1 result is `Class 3`, 5 points, with `PS3 Strong`
+   and `PP3 Supporting`. Stop the walkthrough if the current source bundle gives
+   a different starting result.
+3. Open `Family and segregation evidence` and select `PP1`.
+4. Enter LR `2.08`, notes `Synthetic UI test only. No clinical evidence
+   asserted.`, and reference `TEST:manual-review-demo`.
+5. Enter assessor `Test reviewer` and role `Test only`.
+6. Calculate the amended result. The backend should derive `PP1 Supporting`,
+   add 1 point, and return `Class 4, Likely Pathogenic`, 6 points.
+
+Do not use `Save immutable review draft` or `Approve saved version` for this
+synthetic walkthrough. Persistent records are intended only for real evidence
+reviewed under the applicable local governance process.
 
 ## ClinVar Display
 

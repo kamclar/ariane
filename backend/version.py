@@ -4,5 +4,4 @@ This module is the single source of truth for the version exposed by the API
 and displayed in the browser.
 """
 
-ARIANE_VERSION = "1.8.1"
-
+ARIANE_VERSION = "1.8.9"

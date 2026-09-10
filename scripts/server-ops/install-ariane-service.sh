@@ -73,6 +73,7 @@ echo -e "\n${YELLOW}[2] Creating systemd service...${NC}"
 install -d -m 0750 -o root -g "$ARIANE_USER" /etc/ariane
 install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" /var/log/ariane
 install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" /var/lib/ariane/runtime-cache
+install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" /var/lib/ariane/runtime-data
 touch /var/log/ariane/audit.jsonl
 chown "$ARIANE_USER:$ARIANE_USER" /var/log/ariane/audit.jsonl
 chmod 0640 /var/log/ariane/audit.jsonl
@@ -81,6 +82,12 @@ if [ ! -f /etc/ariane/ariane.env ]; then
 fi
 if ! grep -q '^ARIANE_RUNTIME_CACHE_DIR=' /etc/ariane/ariane.env; then
     printf 'ARIANE_RUNTIME_CACHE_DIR=/var/lib/ariane/runtime-cache\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^ARIANE_RUNTIME_DATA_DIR=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_RUNTIME_DATA_DIR=/var/lib/ariane/runtime-data\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
@@ -114,7 +121,7 @@ PrivateTmp=true
 PrivateDevices=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/var/lib/ariane/runtime-cache
+ReadWritePaths=/var/lib/ariane/runtime-cache /var/lib/ariane/runtime-data
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

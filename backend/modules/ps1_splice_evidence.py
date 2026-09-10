@@ -13,6 +13,7 @@ ST2_EVIDENCE_PATH = (
 DEFINED_SOURCES = [
     "ENIGMA Specifications Table 9 v1.2",
     "ENIGMA Supplementary Table 2 v1.2",
+    "ENIGMA Supplementary Table 3 v1.2",
 ]
 
 _ST2_BY_VARIANT: Optional[Dict[Tuple[str, str], Dict[str, Any]]] = None
@@ -29,9 +30,11 @@ def _load_st2_payload() -> Dict[str, Any]:
         )
     data = json.loads(ST2_EVIDENCE_PATH.read_text(encoding="utf-8"))
     if (
-        data.get("schema_version") != 1
+        data.get("schema_version") != 2
         or data.get("source_columns") != 11
+        or data.get("reference_source_columns") != 16
         or data.get("total_variants") != 220
+        or data.get("total_reference_rows") != 383
         or len(data.get("variants", [])) != 220
     ):
         raise RuntimeError("ENIGMA ST2 splice evidence snapshot is incomplete")
@@ -56,6 +59,12 @@ def _load_st2_evidence() -> Dict[Tuple[str, str], Dict[str, Any]]:
 def get_st2_splice_record(gene: str, c_notation: str) -> Optional[Dict[str, Any]]:
     """Return the exact official ST2 row for a normalized BRCA variant."""
     return _load_st2_evidence().get((gene, c_notation))
+
+
+def get_st3_splice_references(gene: str, c_notation: str) -> list[Dict[str, Any]]:
+    """Return all official ST3 source rows attached to the exact ST2 variant."""
+    record = get_st2_splice_record(gene, c_notation)
+    return list((record or {}).get("st3_references") or [])
 
 
 def list_splice_ps1_candidate_discovery(gene: Optional[str] = None) -> Dict[str, Any]:

@@ -22,10 +22,13 @@ fi
 install -d -m 0700 -o root -g root "$BACKUP_DIR"
 install -m 0750 -o root -g root "$SCRIPT_DIR/backup-ariane.sh" /usr/local/sbin/ariane-backup
 install -m 0750 -o root -g root "$SCRIPT_DIR/restore-ariane.sh" /usr/local/sbin/ariane-restore
+install -m 0750 -o root -g root "$SCRIPT_DIR/restore-review-records.sh" /usr/local/sbin/ariane-review-restore
+install -m 0750 -o root -g root "$SCRIPT_DIR/restore-usage-records.sh" /usr/local/sbin/ariane-usage-restore
 install -d -m 0750 -o root -g root /etc/ariane
 
 cat > /etc/ariane/backup.env <<EOF
 ARIANE_HOME=$ARIANE_HOME
+ARIANE_RUNTIME_DATA_DIR=/var/lib/ariane/runtime-data
 BACKUP_DIR=$BACKUP_DIR
 BACKUP_RETENTION_DAYS=$BACKUP_RETENTION_DAYS
 EOF

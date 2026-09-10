@@ -73,23 +73,44 @@ def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:
     guidelines = item.get('guidelines', [])
     classification = ''
     evidence_codes = []
-    summary_text = ''
+    guideline_versions = []
+    cspec_ids = []
 
     for g in guidelines:
         classification = g.get('outcome', {}).get('label', '')
-        for code in g.get('evidenceCodes', []):
-            evidence_codes.append({
-                'code':   code.get('label', ''),
-                'status': code.get('status', ''),
-            })
-        summary_text = g.get('description', '')
+        if g.get('version'):
+            guideline_versions.append(str(g['version']))
+        if g.get('cspecId'):
+            cspec_ids.append(str(g['cspecId']))
+        agents = g.get('agents', [])
+        if not isinstance(agents, list):
+            return {
+                'status': 'schema_error',
+                'error': 'ClinGen ERepo guideline agents field is not a list',
+            }
+        for agent in agents:
+            codes = agent.get('evidenceCodes', []) if isinstance(agent, dict) else []
+            if not isinstance(codes, list):
+                return {
+                    'status': 'schema_error',
+                    'error': 'ClinGen ERepo evidenceCodes field is not a list',
+                }
+            for code in codes:
+                if not isinstance(code, dict):
+                    continue
+                evidence_codes.append({
+                    'code': code.get('label', ''),
+                    'status': code.get('status', ''),
+                })
 
     result = {
         'status':         'ok',
         'caid':           item.get('caid', ''),
         'classification': classification,
         'evidence_codes': evidence_codes,
-        'summary_text':   summary_text,
+        'guideline_versions': list(dict.fromkeys(guideline_versions)),
+        'cspec_ids': list(dict.fromkeys(cspec_ids)),
+        'assertion_id': item.get('@id', ''),
     }
     EREPO_CACHE[key] = result
     return result

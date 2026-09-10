@@ -97,6 +97,26 @@ povinné stipulace jako finální manuální vyhodnocení. Frontend neobsahuje v
 seznam klinických podmínek ani výpočet síly. Endpoint slouží pouze jako průběžná
 kontrola formuláře a nepřiděluje kritérium ani body.
 
+Dokončený pracovní výsledek lze uložit přes autentizované API
+`/api/review-records`. Backend před uložením manuální DAG znovu spustí a ověří,
+že kontext varianty i automatická kritéria odpovídají přiloženému Module 1
+výsledku. Prohlížeč tedy nemůže uložit vlastní podvrženou třídu jako výsledek
+backendu.
+
+Záznamy jsou pouze přidávány. Uložení vytvoří stav `draft`; schválení vytvoří
+novou verzi `approved` s odkazem na původní draft. Starší řádek se nemění.
+Součástí jsou SHA-256 otisky Module 1 výsledku, manuální evidence, amended
+výsledku a celého obsahového svazku. Databáze `review_records.sqlite3` je v
+`ARIANE_RUNTIME_DATA_DIR`, na Railway ve svazku
+`${RAILWAY_VOLUME_MOUNT_PATH}/ariane-runtime-data` a lokálně v `.runtime-data/`.
+Nejde o cache a soubor se nesmí verzovat v Gitu.
+
+Beta provoz chrání toto API stejným Basic Auth účtem jako administrátorský audit
+a ukládá zvlášť autentizovaný účet, jméno hodnotitele a profesní roli. Pro
+laboratorní produkci je stále potřeba napojení na institucionální identity,
+role a retenční politiku. Formuláře upozorňují, že do poznámek nepatří přímé
+identifikátory pacientů.
+
 Manuální vyhodnocení kontroluje také povinné stipulace CSpec v1.2. PS4 vyžaduje shodu země a etnicity případů a kontrol. PM3 a BS2 vyžadují ověření, že koexistující P/LP varianta byla klasifikována podle VCEP specifications. PM3 navíc vyžaduje potvrzení, že hodnocená varianta nesplňuje benigní populační kritérium. PP1 Very Strong vyžaduje zaznamenaný predikovaný nebo experimentálně prokázaný účinek na protein nebo mRNA sestřih. Pokud poslední podmínka chybí, LR nejméně 350 vede nejvýše k PP1 Strong.
 
 Produkční klasifikace je v `backend/classification_dag/`. Automatický výpočet
@@ -479,6 +499,12 @@ PVS1 se vyhodnocuje pro:
 
 Table 4 obsahuje pravidla pro jednotlivé exony, kritické C-terminální hranice, splice varianty a exonové přestavby. Výsledná síla může být Very Strong, Strong, Moderate, Supporting nebo N/A.
 
+NMD větev v zobrazovaném rozhodovacím grafu se určí pouze tehdy, když lze z
+normalizovaného proteinového následku určit polohu predikovaného terminačního
+kodonu. Poloha nukleotidové změny se jako náhrada nepoužívá. Pokud poloha
+terminačního kodonu není dostupná, ARIANE větev NMD nezobrazí a uvede důvod u
+kritéria. PVS1 a PM5 PTC převzaté z Table 4 se tím nemění.
+
 U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Větve závislé na RNA se automaticky použijí jen při přesné shodě s úplnou ENIGMA Supplementary Table 2 a při jednoznačném průchodu pravidly Appendix E. Ostatní RNA větve zůstávají bez bodů a jsou označeny k odborné revizi.
 
 U iniciačního kodonu se automatické PVS1 nepoužívá. Aplikace vytvoří doporučení pro strukturovanou revizi podle iniciačního flowchartu.
@@ -530,6 +556,12 @@ ARIANE proto u přesné shody v ST2:
   formuláře odborné revize;
 - ponechá nevyplněný podíl funkčního transkriptu a výslednou sílu kritéria.
 
+Pokud backend doporučí manuální kritérium, rozhraní otevře sekci odborné
+evidence a zobrazí návrh s přímým odkazem na předvyplněný formulář. U RNA
+evidence je stejné tlačítko také přímo v RNA upozornění. Návrh kritérium sám
+nezaškrtne. Síla, body a amended výsledek vzniknou až po aktivním výběru
+uživatelem, doplnění povinných údajů a úspěšné backendové kontrole.
+
 Kritérium lze přijmout až po úplné manuální revizi podle Appendix E. Backend
 vyžaduje mRNA-only assay, transkript, tkáň nebo buněčný typ, posouzení NMD,
 závěr o poškozujícím RNA efektu, údaj o zbývajícím funkčním transkriptu a
@@ -540,9 +572,30 @@ stejný splice mechanismus, například PP3, BP4, BP7, BP1 nebo predikční PS1.
 Proteinová funkční evidence PS3/BS3 se automaticky nemaže, protože může
 popisovat jiný mechanismus; případná kombinace se označí k odborné kontrole.
 
+Pracovní odborná interpretace z 9. září 2026 rozlišuje samotný průkaz
+aberrantního sestřihu od dalšího funkčního výsledku. Assay, který pouze ukazuje
+aberrantní RNA, podporuje PVS1 RNA a nesmí současně vytvořit PS3. PS3 lze
+zachovat, pokud ENIGMA Specifications Table 9 výslovně doporučuje PS3 po
+zohlednění sestřihu nebo pokud úplná odborná revize doloží proteinový či buněčný
+funkční dopad nad rámec pouhé detekce aberrantního transkriptu.
+
+U `BRCA1 c.5074G>A/C` Table 9 uvádí PS3 Strong podle funkčního výsledku Findlay
+et al. a ST2 obsahuje samostatnou RNA evidenci. U `BRCA2 c.7976G>A/C` Table 9
+uvádí PS3 Strong podle funkčního výsledku Biswas et al. a ST2 opět popisuje RNA
+evidenci. ARIANE proto ponechá explicitní PS3 z Table 9 a PVS1 RNA připraví k
+odbornému zvážení. Při jejich současném přijetí zobrazí upozornění na kontrolu
+rozsahu assay a nezávislosti. Obecné potvrzení této kombinace bylo předáno k
+vyjasnění VCEP, takže nejde o uzavřené nové pravidlo ENIGMA.
+
 Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
 pacientskou mRNA s delecí exonu 12. ARIANE tento záznam předvyplní k revizi,
 ale sama z něj neurčí `PVS1 Strong (RNA)` ani jinou sílu.
+
+Stejný postup se používá pro přesné záznamy ST2 označené jako `last base`.
+Poslední nukleotid exonu se neposuzuje jako kanonická donorová nebo akceptorová
+pozice `+/-1,2`. Pokud ST2 uvádí poškozující RNA výsledek, ARIANE přenese celý
+záznam do formuláře PVS1 RNA, označí jej k odborné revizi a nepředvyplní sílu.
+Tím se RNA informace neztratí, ale ST2 se nezmění na automatický zdroj bodů.
 
 ### 3.3 PS3 a BS3
 
@@ -551,6 +604,25 @@ Zdroj: ENIGMA Specifications Table 9 v1.2.
 Vyhledávání používá přesný klíč `gene:c_notation`. Automaticky se použijí pouze řádky s přiřazeným PS3 nebo BS3 a podporovanou silou.
 
 Table 9 obsahuje také řádky, ve kterých PS3 ani BS3 nebylo splněno. Tyto řádky zůstávají součástí lossless snapshotu, ale nevytvářejí kritérium.
+
+Specifications Table 9 obsahuje pouze doporučení `PS3 Strong`, `BS3 Strong`
+nebo žádný použitelný kód. ARIANE z ní neodvozuje jiné síly. U každého nalezeného
+řádku zachovává a v API i v rozhraní zpřístupňuje celý standardizovaný text,
+publikovaný RNA výsledek, Table 9 SpliceAI, příznak predikovaného nebo
+pozorovaného sestřihu a všechny uvedené výsledky assayů. Důvod kritéria se
+nezkracuje.
+
+Figure 1C určuje, jaký typ assay je pro danou větev použitelný. U intronických,
+synonymních a exonic variant s predikovaným nebo pozorovaným splice efektem je
+způsobilý pouze assay hodnotící mRNA i protein. U exonic variant bez splice
+efektu je způsobilý proteinový assay nebo kombinovaný assay mRNA a proteinu.
+Rozhodovací graf zobrazuje tento požadovaný rozsah. Netvrdí, že konkrétní
+publikace použila určitý mechanismus, pokud to zdrojový řádek výslovně
+nedokládá.
+
+`Specifications Table 9` není totéž jako `Appendix E Table 9`. První je
+variantový seznam doporučení PS3 a BS3. Druhá popisuje vážení RNA evidence pro
+PVS1 RNA. ARIANE je vede jako dva oddělené zdroje a nepřenáší sílu mezi nimi.
 
 Sloupec `Splicing Prediction` v Table 9 zaznamenává nejvyšší ze čtyř delta
 skóre SpliceAI s oknem 10 kb, které ENIGMA použila jako kontext při posouzení
@@ -708,17 +780,18 @@ a v [záznamu sestavení UCSC](https://github.com/ucscGenomeBrowser/kent/blob/ma
 Proteinové PS1 používá oficiální ENIGMA Supplementary Table 7 jako referenční
 P/LP klasifikační dataset. Z jeho 146 P/LP variant je 60 normalizovaných
 missense referencí zařazeno do proteinového PS1 registru. Každý záznam má
-samostatný stav `eligible`, `excluded` nebo `review_required`, protože samotná
-P/LP klasifikace ještě nenahrazuje PS1-specifickou splice kontrolu.
+samostatný stav `eligible`, `excluded` nebo `review_required`. P/LP třída ve
+ST7 je přijatým klasifikačním základem reference, ale nenahrazuje
+PS1-specifickou kontrolu identity, mechanismu a splice efektu.
 
 PS1 vyžaduje:
 
 - missense variantu,
 - stejnou normalizovanou missense substituci jako známá P/LP varianta,
 - jinou nukleotidovou změnu,
-- samostatně ověřenou oficiální ENIGMA/ClinGen VCEP assertion nebo úplnou
-  lokální reklasifikaci podle uvedené verze ENIGMA VCEP; ST7 slouží k nalezení
-  důvěryhodného kandidáta, ale sama tuto podmínku neuzavírá,
+- P/LP klasifikaci v ENIGMA ST7 v1.2, samostatně ověřenou aktuální
+  ENIGMA/ClinGen VCEP assertion nebo úplnou lokální reklasifikaci podle uvedené
+  verze ENIGMA VCEP,
 - SpliceAI nejvýše 0,1 u reference i hodnocené varianty,
 - žádný potvrzený škodlivý splice efekt u obou variant po kontrole definovaných
   verzovaných ENIGMA zdrojů.
@@ -734,10 +807,13 @@ predikčními pásmy vyžaduje odbornou kontrolu provenance.
 
 Automatické body lze přidat pouze ze záznamu se stavem `eligible` v
 `backend/data/ps1_protein_reference_registry.json`. Registr nyní obsahuje 60
-ST7 missense referencí: 40 `review_required` a 20 `excluded`. Každý záznam obsahuje
+ST7 missense referencí: 40 `eligible` a 20 `excluded`. Každý záznam obsahuje
 původ klasifikace, splice stav reference, SpliceAI provenance, kontrolované
 zdroje, datum, checksum podkladu a známé PS1 závislosti. Validátor odmítá přímou
-i delší známou kruhovou závislost.
+i delší známou kruhovou závislost. U ST7 je závislost nastavena na `false`,
+protože IARC klasifikace pochází z historického multifaktoriálního likelihood
+referenčního souboru, nikoliv z aplikace proteinového PS1. Neznámý stav u nové
+assertion nepřidělí body a zůstává pouze podkladem pro odbornou revizi.
 
 Záznam `review_required` se zobrazí jako předvyplněný kandidát pro
 strukturovanou manuální revizi `PS1_PROTEIN`, bez bodů. Záznam `excluded` se
@@ -750,6 +826,10 @@ zdroj, shodu proteinového následku, odlišnost nukleotidové změny, dostupné
 SpliceAI výsledky a kontrolu definovaných RNA/splice zdrojů. ClinVar a ClinGen
 ERepo se na pozadí kontrolují na samostatnou ENIGMA VCEP assertion. Nedoložené
 podmínky zůstávají viditelně neuzavřené.
+
+Parser ERepo používá aktuální strukturu odpovědi
+`guideline.agents[].evidenceCodes`. Vrácené CSpec ID, verze pravidel,
+identifikátor assertion a použité evidence codes se zachovávají pro audit.
 
 Stav `none_identified` neznamená, že splice efekt neexistuje. Znamená pouze, že
 nebyl nalezen při kontrole přesně uvedených verzí ENIGMA Table 9 a
@@ -781,6 +861,12 @@ SpliceAI větev:
 - SpliceAI alespoň 0,2,
 - pouze pro povolené typy, například synonymous, missense, in-frame a intronic,
 - nepoužívá se jako obecné PVS1 pro nonsense, frameshift, exonové CNV nebo canonical splice-site varianty.
+
+Povolené typy jsou uzavřený seznam. Obecné `deletion`, `insertion`, `duplication`
+nebo `delins` bez potvrzeného in-frame proteinového následku do Figure 1A
+nevstupují. U intronické varianty musí být z `c.` notace ověřitelné, že nejde o
+donorovou nebo akceptorovou pozici `+/-1,2`. Neznámý proteinový následek ani
+chybějící intronická pozice se nepovažují za splněnou podmínku.
 
 BayesDel_noAF větev:
 
@@ -815,6 +901,10 @@ Pro synonymous variantu uvnitř domény a pro podporovanou intronickou variantu 
 BP7 Supporting se používá společně s BP4.
 
 U synonymous variant uvnitř funkční domény vyžaduje aplikované BP4 a SpliceAI nejvýše 0,1. U intronických variant se navíc kontroluje, že pozice neleží v konzervovaném donorovém nebo akceptorovém motivu.
+
+Hraniční intronické pozice jsou testovány doslovně. BP7 Supporting začíná na
+donorové pozici `+7` a akceptorové pozici `-21`. Pozice `+6` a `-20` mohou při
+nízkém SpliceAI splnit BP4, ale nikoli BP7.
 
 Synonymous varianta mimo funkční doménu je řešena přes BP1, nikoli přidáním BP7.
 
@@ -1059,22 +1149,29 @@ Obsah:
 - IARC třída,
 - populační a referenční údaje.
 
-P/LP missense záznamy ST7 se používají k nalezení kandidátů pro proteinové PS1.
-ST7 sama nepotvrzuje, že klasifikace každé reference byla vytvořena podle VCEP
-specifications. Automatický stav `eligible` proto navíc vyžaduje samostatně
-ověřenou VCEP assertion nebo doloženou lokální reklasifikaci a úplnou kontrolu
-splice podmínek.
+P/LP missense záznamy ST7 se používají jako přijatý klasifikační základ
+referencí pro proteinové PS1. Toto metodické rozhodnutí bylo potvrzeno odbornou
+konzultací 7. září 2026. Automatický stav `eligible` dále vyžaduje úplnou
+kontrolu známé splice evidence. SpliceAI reference i hodnocené varianty se
+kontroluje při každém použití.
 
-### 6.3.1 Supplementary Table 2, PVS1 RNA a proteinové PS1
+### 6.3.1 Supplementary Tables 2 a 3, PVS1 RNA a proteinové PS1
 
 Úplný runtime soubor: `backend/data/enigma_st2_splice_evidence.json`
 
 Generátor: `scripts/build_enigma_st2_splice_evidence_snapshot.py`
 
 Obsahuje všech 220 variant a všech 11 zdrojových sloupců listu
-`ST2 splicing dataset codes`, číslo zdrojového řádku a checksum oficiálního
-Excelu. Používá se ke kontrole známé RNA/splice evidence pro proteinové PS1 a
-k předvyplnění odborné revize PVS1 RNA popsané v části 3.2.2.
+`ST2 splicing dataset codes`. Ke každé variantě ukládá také všechny odpovídající
+řádky z `ST3 Splicing refs`, celkem 383 řádků a 16 zdrojových sloupců. Soubor
+zachovává čísla zdrojových řádků a checksum oficiálního Excelu. Používá se ke
+kontrole známé RNA/splice evidence pro proteinové PS1 a k předvyplnění odborné
+revize PVS1 RNA popsané v části 3.2.2.
+
+ST2 shrnuje variantu a RNA výsledek. ST3 uvádí jednotlivé publikace, typ vzorku
+nebo minigene assay a popsaný transkriptový výsledek. ARIANE tyto citace a PMID
+automaticky vloží do formuláře PVS1 RNA. ST3 je auditní a dokumentační podklad.
+Sama neurčuje kód, sílu ani body.
 ARIANE nemá aktivní registr referencí pro splice PS1. Úplná ST2 se používá
 jen jako definovaný zdroj známé RNA/splice evidence. Samotná přítomnost záznamu
 v ST2 nepřiděluje PS1 splice ani nepředvyplňuje jeho sílu. Pro pohodlnější
@@ -1102,13 +1199,12 @@ Registr proteinových referencí:
 Generátor: `scripts/build_ps1_protein_reference_registry.py`.
 
 Registr obsahuje 60 P/LP missense referencí z ST7. Aktuální sestavení obsahuje
-40 záznamů `review_required` a 20 `excluded`; žádný samotný ST7 záznam není
-`eligible`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
+40 záznamů `eligible` a 20 `excluded`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
 aplikace.
 
 Povolené klasifikační zdroje registru jsou:
 
-- oficiální P/LP reference ENIGMA ST7 v1.2 jako důvěryhodní kandidáti k revizi;
+- oficiální P/LP reference ENIGMA ST7 v1.2 jako přijatý klasifikační základ;
 - verzované oficiální ENIGMA/ClinGen VCEP assertions mimo ST7;
 - úplné lokální reklasifikace podle deklarované verze ENIGMA VCEP pravidel,
   jasně označené jako lokální.
@@ -1125,24 +1221,24 @@ reference. Mohou sloužit k nalezení kandidáta nebo jako podklady následné �
 VCEP reklasifikace.
 
 Identita a klasifikace současných 60 záznamů pochází ze ST7. Známá RNA evidence
-se kontroluje proti úplné Table 9 a úplné ST2. SpliceAI skóre není součástí
+se kontroluje proti úplné Table 9 a úplným ST2 a ST3. SpliceAI skóre není součástí
 registru. Při použití PS1 se vypočítá na požádání pro hodnocenou i referenční
 variantu stejnou verzovanou službou. Transkript a normalizovaný proteinový
 následek se vážou na kanonické ENIGMA RefSeq transkripty. Registr ukládá
-checksum ST7, Table 9, ST2 i kurátorovaného extension souboru.
+checksum ST7, Table 9, společného snapshotu ST2/ST3 i kurátorovaného extension souboru.
 
 Každý záznam ukládá také podklad proteinového mechanismu. Ze 40 současných
-`review_required` referencí má 35 PS3 Strong funkční evidenci v Table 9. U pěti je
+`eligible` referencí má 35 PS3 Strong funkční evidenci v Table 9. U pěti je
 podkladem patogenní missense klasifikace spolu s absencí predikovaného a
 potvrzeného splice efektu. Nový externí nebo lokálně reklasifikovaný záznam musí
 mít odpovídající mechanismus výslovně kurátorovaný.
 
-Nález ST7 shody vytvoří vedenou revizi bez bodů. Formulář automaticky předvyplní
-identitu reference, proteinový následek, ST7 klasifikaci a zdroj, objektivní
-porovnání variant, dostupná SpliceAI skóre a kontrolu definovaných RNA/splice
-zdrojů. ClinVar a ClinGen ERepo se následně kontrolují na samostatnou ENIGMA
-VCEP assertion. Běžná ClinVar P/LP klasifikace ani počet hvězdiček stav
-`eligible` nevytvářejí.
+Nález způsobilé ST7 shody může přidělit PS1 až po splnění všech runtime
+podmínek. Při chybějícím výsledku formulář předvyplní identitu reference,
+proteinový následek, ST7 klasifikaci a zdroj, objektivní porovnání variant,
+dostupná SpliceAI skóre a kontrolu definovaných RNA/splice zdrojů. ClinVar a
+ClinGen ERepo se kontrolují na aktuální ENIGMA VCEP assertion. Běžná ClinVar
+P/LP klasifikace ani počet hvězdiček stav `eligible` nevytvářejí.
 
 ### 6.4 Velké exonové CNV
 
@@ -1357,6 +1453,52 @@ Veřejný výsledek obsahuje oddělený strukturovaný `spliceai_audit`. Hlavní
 Zápis dynamické cache je atomický. Bez nakonfigurovaného runtime adresáře nebo
 Railway volume se při lokálním vývoji používá neveřejný adresář
 `.runtime-cache/` v kořeni projektu.
+
+### 8.2.1 Cache hotových automatických klasifikací
+
+Každá úspěšná automatická Module 1 klasifikace se ukládá také do SQLite cache
+`${ARIANE_RUNTIME_CACHE_DIR}/classification_results.sqlite3`. Výchozí doba
+platnosti není časově omezená. Záznam přestane být použitelný při změně otisku
+implementace nebo dat. Volitelný maximální věk lze nastavit proměnnou
+`ARIANE_CLASSIFICATION_CACHE_MAX_AGE_SECONDS`. Cache lze úplně vypnout pomocí
+`ARIANE_CLASSIFICATION_CACHE_ENABLED=0`.
+
+Klíč neobsahuje jen variantu. Zahrnuje gen, referenční transkript, normalizovanou
+c. a p. notaci, typ duplikace a otisk aktivní implementace. Otisk zahrnuje verzi
+ARIANE, build revision, klasifikační engine, VCEP policy, zdrojový kód DAGu a
+providerů a identity verzovaných runtime datasetů. Změna kterékoliv z těchto
+složek vytvoří jiný prostor cache.
+
+Cache není náhradní klasifikační zdroj. Záznam s jiným otiskem, prošlou dobou
+platnosti, neplatným JSON nebo nesouhlasícím SHA-256 se nepoužije. Po takovém
+miss se provede běžný provider DAG. Pokud provider selže, starý výsledek se
+nevrátí. Selhání zápisu pomocné cache naopak nesmí změnit právě vypočtený
+výsledek.
+
+Manuální evidence a amended working result se do této cache neukládají. Patří
+do verzovaných review records v `ARIANE_RUNTIME_DATA_DIR`.
+
+### 8.2.2 Evidence použití a statistiky
+
+Každý pokus o klasifikaci vytváří samostatný řádek v
+`${ARIANE_RUNTIME_DATA_DIR}/classification_usage.sqlite3`, a to i při cache
+hitu nebo chybě. Záznam obsahuje čas, normalizovaný klíč varianty, gen,
+referenční transkript, single nebo batch režim, stav výsledku, cache hit nebo
+miss, výslednou třídu a body, dobu zpracování, verzi aplikace, VCEP policy a
+otisk klasifikátoru. Neukládá p. notaci, volný text, IP adresu ani user-agent.
+
+Bez přihlášení lze rozlišit pouze prohlížeče pomocí náhodného identifikátoru v
+HttpOnly cookie. Tento identifikátor není ověřená totožnost člověka. Pokud
+reverse proxy provede autentizaci, může ARIANE převzít účet z hlavičky uvedené v
+`ARIANE_TRUSTED_USER_HEADER`. Proxy musí vstupní hlavičku od klienta odstranit a
+nastavit vlastní hodnotu až po úspěšném přihlášení. Jinak by uživatel mohl
+identitu podvrhnout.
+
+Výchozí retenční doba statistických událostí je 365 dní a řídí ji
+`ARIANE_USAGE_RETENTION_DAYS`. Databáze je součástí serverového backupu. Cache
+hotových výsledků je nahraditelná a nezálohuje se. Administrátorský audit
+zobrazuje počty hledání, cache hitů, chyb, nejčastější varianty a nejaktivnější
+účty nebo prohlížeče.
 
 ### 8.3 Výpočet a selhání zdroje
 
@@ -1755,6 +1897,14 @@ ARIANE nepoužívá plošné potlačení podle příznaku `has_functional_eviden
 
 Přijaté PVS1 (RNA) nahrazuje slabší bioinformatické kódy pro stejný experimentálně potvrzený splice důsledek. Přijaté BP7 Strong (RNA) nahrazuje BP7 Supporting, ale podle Figure 1B obecně zachovává ostatní použitelné bioinformatické kódy. Před přijetím BP7 Strong (RNA) se samostatně kontroluje typ varianty a funkční doména. Missense varianta uvnitř ENIGMA funkční domény musí mít aplikované BS3. Podmínku může splnit automatické BS3 z Table 9 nebo úplný ruční BS3 záznam, u kterého backend ověřil ENIGMA VCEP kalibraci, patogenní i benigní kontroly, variantově specifický výsledek, zdroj a reviewera. Samostatný příznak nebo neúplný ruční záznam nestačí. PS3 nebo BS3 bez PVS1 automaticky nepotlačuje PP3, BP4, BP7 ani BP1, protože Figure 1C výslovně požaduje zachování relevantních bioinformatických kódů.
 
+Kombinační regresní matice samostatně ověřuje nahrazení PP3, BP4, BP7 a BP1
+při přijetí PVS1 RNA, nahrazení BP7 Supporting pomocí BP7 Strong RNA,
+zachování použitelných BP1 a BP4 u benigní RNA větve a všechny směrové
+kombinace PS3 nebo BS3 s PP3, BP4, BP7 a BP1. Konfliktní směry zůstávají ve
+výsledku a vyžadují revizi. Shodné směry zůstávají jako auditní informace.
+Samostatný test čtyř variant na posledním nukleotidu exonu ověřuje, že PS3
+Strong pochází z Table 9, zatímco ST2 vede jen k nebodované revizi PVS1 RNA.
+
 Každé nahrazení, zachovaná potenciální interakce nebo konflikt se vrací ve strukturovaném poli `evidence_interactions`. Ve webovém rozhraní je zobrazeno v rozbalovací části `Evidence interaction warnings`. Přesná matice je v `docs/evidence_interaction_matrix.md`.
 
 Appendix Table 11 se používá jen pro variantově specifické klinické anotace.
@@ -1884,6 +2034,32 @@ Table 9, proteinové PS1, exonové CNV, klinické LR, BA1 terminální větev, B
 mixed evidence, PM2 a manuální RNA interakce. Výsledek se neporovnává s druhou
 implementací klasifikátoru. Změna klinického výstupu proto vyžaduje vědomou
 úpravu schváleného regresního očekávání.
+
+Závěrečná regresní sada je rozdělena podle účelu:
+
+| Oblast | Regresní kontrakt |
+|---|---|
+| Tutorialové varianty | `tests/test_dag_regression_corpus.py` kontroluje očekávaná kritéria, síly, body, třídu, mixed evidence a N/A větve jednotlivých variant. |
+| Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA a u každého vyžaduje nulové body, stav `review_required` a nepředvyplněnou sílu. `BRCA1 c.4185G>A` navíc ověřuje automatický a odborně revidovaný tutorialový scénář. Po doloženém přijetí `PVS1 RNA Strong` se obecnou interakční logikou potlačí PP3 a amended výsledek se přepočítá. |
+| Founder varianty | Test načte všechny varianty z aktuálního připnutého founder registru a každou nechá projít plným DAGem s frekvencí nad prahy BA1/BS1. U každého záznamu požaduje, aby se BA1 ani BS1 nepřidělilo a důvod zůstal v auditní stopě. Přidání dalšího záznamu do registru jej automaticky přidá do regrese. |
+| Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Testy připínají současnou interpretaci Table 4. Otevřená metodická otázka k poslednímu exonu zůstává popsána v `docs/open_methodological_and_data_tasks.md`. |
+| Typy variant | `tests/test_variant_type_regression_matrix.py` a `tests/test_bioinformatic_rule_matrix.py` pokrývají rozpoznání typů, větve Figure 1A a interakce s RNA a funkční evidencí. |
+| Chybějící zdroje | Startup test odmítá chybějící Table 4, Table 9, ST7, proteinový PS1 registr, ST2, exonový CNV snapshot nebo manifest a gene policy soubory. Provider testy rozlišují nedostupné SpliceAI, BayesDel a souřadnice. Chybějící hodnota se nesmí převést na nulu, nepřítomnost varianty ani náhradní skóre. |
+
+Klasifikační kód neobsahuje větev podle identity `BRCA1 c.4185G>A`. Obecná
+RNA logika vychází z kategorie a struktury záznamu ST2, Table 4 a Appendix E.
+Stejný fail-closed postup se regresně ověřuje u všech aktuálních
+nekvantifikovaných pacientských RNA záznamů v ST2.
+
+U `BRCA1 c.4185G>A` historický tutorial a automatický Module 1 výsledek nejsou
+stejným typem výsledku. Tutorial obsahuje kurátorské posouzení nekvantifikované
+pacientské RNA jako `PVS1 RNA Strong`. Strukturovaný ST2/ST3 záznam tuto sílu
+sám neurčuje. ARIANE proto nejprve vydá automatický výsledek 5 bodů, Class 3,
+s `PP3 Supporting` a `PP4 Strong`. Pokud odborník přijme tutorialový RNA závěr,
+amended výsledek má `PVS1 RNA Strong` a `PP4 Strong`, 8 bodů a Class 4. PP3 se
+odstraní jako slabší predikce stejného splice mechanismu. Rozdíl proti
+tutorialové Class 5 souvisí také s novějšími klinickými LR podklady a s tím, že
+PM2 bez potvrzené coverage metody není automatické.
 
 Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.

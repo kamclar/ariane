@@ -1,9 +1,8 @@
 """ENIGMA v1.2 protein-level PS1 evaluation.
 
-ST7 is an official, trusted ENIGMA source for discovering candidate reference
-variants.  It is not treated as an automatic PS1 allowlist.  Automatic scoring
-uses only the separate, versioned registry whose records document the VCEP
-classification and PS1-specific splice review required by ENIGMA.
+ST7 P/LP records are accepted as the reference classification basis. The
+versioned registry records the independent protein-mechanism and splice checks
+that remain mandatory before a reference can be used for automatic scoring.
 """
 
 from __future__ import annotations
@@ -35,6 +34,7 @@ KNOWN_CLASSIFICATION_VERIFICATIONS = {
 AUTOMATIC_CLASSIFICATION_VERIFICATIONS = {
     "external_vcep_assertion",
     "locally_recurated_under_enigma_vcep",
+    "enigma_st7_v1_2_reference_set",
 }
 NO_DAMAGING_SPLICE_STATUSES = {"none_identified", "normal"}
 _ST7_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
@@ -71,29 +71,6 @@ def select_vua_spliceai_for_ps1(
     return service_or_cache_score, "configured SpliceAI source"
 
 
-def _candidate_from_st7(record: Dict[str, Any]) -> Dict[str, Any]:
-    iarc_class = record.get("iarc_class")
-    classification = "Pathogenic" if iarc_class == 5 else "Likely Pathogenic"
-    return {
-        "key": f"ST7|{record['gene']}|{record['c_notation']}",
-        "reference_id": "",
-        "gene": record["gene"],
-        "transcript": reference_transcript(record["gene"]),
-        "c_notation": record["c_notation"],
-        "p_notation": record.get("p_notation") or "",
-        "classification": classification,
-        "iarc_class": iarc_class,
-        "classification_basis": "enigma_multifactorial_likelihood_reference_set",
-        "classification_source": record.get("source") or "",
-        "reference_status": "review_required",
-        "status_reason": (
-            "Official ENIGMA ST7 candidate. A qualifying VCEP classification "
-            "and completed PS1 splice review are not recorded in ST7."
-        ),
-        "source_dataset": "ENIGMA Supplementary Table 7 v1.2",
-    }
-
-
 def _validate_sha256(value: Any, label: str) -> None:
     if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
         raise RuntimeError(f"PS1 reference registry has invalid {label}")
@@ -117,7 +94,7 @@ def compute_approval_basis_checksum(record: Dict[str, Any]) -> str:
 
 def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
     """Validate the curated automatic-scoring registry and known dependencies."""
-    if data.get("schema_version") != 4 or data.get("status") != "active":
+    if data.get("schema_version") != 5 or data.get("status") != "active":
         raise RuntimeError("PS1 protein reference registry has unsupported metadata")
     if not str(data.get("registry_version") or "").strip():
         raise RuntimeError("PS1 protein reference registry has no registry_version")
@@ -134,6 +111,12 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         item.get("id") for item in accepted_bases if isinstance(item, dict)
     } != KNOWN_CLASSIFICATION_VERIFICATIONS:
         raise RuntimeError("PS1 protein reference registry has invalid reference source policy")
+    decision = data.get("methodological_decision")
+    if not isinstance(decision, dict) or any(
+        not str(decision.get(field) or "").strip()
+        for field in ("id", "date", "status", "decision", "scope")
+    ):
+        raise RuntimeError("PS1 protein reference registry lacks its methodological decision")
     source_checksums = data.get("source_checksums")
     required_checksum_keys = {
         "st7_sha256",
@@ -189,14 +172,7 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
             raise RuntimeError(f"{prefix} has an unknown classification verification")
         if status == "eligible" and verification not in AUTOMATIC_CLASSIFICATION_VERIFICATIONS:
             raise RuntimeError(
-                f"{prefix} is eligible without a separately verified VCEP classification"
-            )
-        if (
-            verification == "enigma_st7_v1_2_reference_set"
-            and status not in {"review_required", "excluded"}
-        ):
-            raise RuntimeError(
-                f"{prefix} treats ST7 candidate status as automatic PS1 eligibility"
+                f"{prefix} is eligible without an accepted reference classification basis"
             )
         if not str(record.get("classification_source") or "").strip():
             raise RuntimeError(f"{prefix} lacks classification_source")
@@ -257,8 +233,16 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         dependencies = dependency.get("reference_ids", [])
         if used not in {True, False, "unknown"} or not isinstance(dependencies, list):
             raise RuntimeError(f"{prefix} has invalid PS1 dependency metadata")
+        if status == "eligible" and used not in {True, False}:
+            raise RuntimeError(
+                f"{prefix} is eligible without a resolved PS1 dependency review"
+            )
         if used is True and not dependencies:
             raise RuntimeError(f"{prefix} used PS1 but does not identify its reference")
+        if used is not True and dependencies:
+            raise RuntimeError(
+                f"{prefix} lists PS1 dependencies without recording that PS1 was used"
+            )
         if reference_id in dependencies:
             raise RuntimeError(f"{prefix} directly depends on itself")
         by_id[reference_id] = record
@@ -415,7 +399,20 @@ def _public_registry_candidate(record: Dict[str, Any]) -> Dict[str, Any]:
         "reference_splice_sources_checked": (
             record.get("reference_splice_evidence", {}).get("sources_checked", [])
         ),
+        "classification_ps1_dependency_used": (
+            record.get("classification_ps1_dependency", {}).get("used", "unknown")
+        ),
     }
+
+
+def lookup_ps1_reference_variant(gene: str, c_notation: str) -> Optional[Dict[str, Any]]:
+    """Return one exact registry reference for guided manual PS1 review."""
+    _load_references()
+    for records_by_change in _ST7_LOOKUP.get(gene, {}).values():
+        for record in records_by_change:
+            if record.get("c_notation") == c_notation:
+                return dict(record)
+    return None
 
 
 def _public_approved_candidate(record: Dict[str, Any]) -> Dict[str, Any]:
@@ -433,7 +430,7 @@ def evaluate_ps1(
     vua_splice_sources_checked: Optional[List[str]] = None,
     reference_spliceai_scores: Optional[Dict[str, Optional[float]]] = None,
 ) -> Dict[str, Any]:
-    """Apply PS1 only from an approved reference; otherwise return a review candidate."""
+    """Apply PS1 only after every recorded and runtime condition is satisfied."""
     _load_references()
     result: Dict[str, Any] = {
         "applies": False,
@@ -564,8 +561,8 @@ def evaluate_ps1(
             )
             return result
         result["blocking_reasons"].append(
-            "A matching ST7 reference was found, but no separate ENIGMA/ClinGen "
-            "VCEP assertion has been verified for automatic protein-level PS1"
+            "A matching ST7 reference was found, but its recorded protein or "
+            "splice evidence remains unresolved"
         )
         if review_unavailable:
             result["blocking_reasons"].append(

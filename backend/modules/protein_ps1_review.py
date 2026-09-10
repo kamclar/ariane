@@ -90,11 +90,7 @@ def evaluate_protein_ps1_review(
         and assessed.get("c_notation") != first_candidate.get("c_notation")
     )
     classification_basis = first_candidate.get("classification_basis", "")
-    classification_verification = (
-        "historical_classification_only"
-        if classification_basis == "enigma_st7_v1_2_reference_set"
-        else classification_basis or "unresolved"
-    )
+    classification_verification = classification_basis or "unresolved"
     reference_label = (
         f"{first_candidate.get('gene', '')} {first_candidate.get('c_notation', '')}"
     ).strip()
@@ -103,8 +99,9 @@ def evaluate_protein_ps1_review(
         f"as a matching {first_candidate.get('classification') or 'P/LP'} candidate "
         f"in {first_candidate.get('source_dataset') or 'ENIGMA ST7'}. "
         "The normalized missense consequence and nucleotide change were compared "
-        "against the assessed variant. A separate ENIGMA/ClinGen VCEP assertion "
-        "must be verified before PS1 can be scored."
+        "against the assessed variant. The ST7 P/LP classification is accepted as "
+        "the reference classification basis. Any remaining splice requirement must "
+        "be completed before PS1 can be scored."
     )
     manual_review_prefill = {
         "reference_variant": reference_label,
@@ -128,7 +125,13 @@ def evaluate_protein_ps1_review(
         "reference_confirmed_splice_status": first_candidate.get(
             "reference_splice_evidence_status", "not_assessed"
         ),
-        "reference_classification_used_ps1": "unknown",
+        "reference_classification_used_ps1": (
+            "no"
+            if first_candidate.get("classification_ps1_dependency_used") is False
+            else "yes"
+            if first_candidate.get("classification_ps1_dependency_used") is True
+            else "unknown"
+        ),
         "reference_ps1_dependency_reference": "",
         "direct_reciprocal_dependency_excluded": False,
         "ps1_protein_rationale": rationale,
@@ -140,12 +143,12 @@ def evaluate_protein_ps1_review(
         "title": "Protein PS1 review candidate",
         "summary": (
             "ST7 contains a different P/LP reference variant with the same missense "
-            "substitution; it does not classify the variant under assessment. The "
-            "complete ENIGMA PS1 eligibility record is unavailable, so PS1 was not scored."
+            "substitution; it does not classify the variant under assessment. A "
+            "required runtime or splice condition is unavailable, so PS1 was not scored."
         ),
         "reasons": reasons,
         "what_to_check": [
-            "Confirm that the reference P/LP classification was assigned using ENIGMA/ClinGen VCEP specifications.",
+            "Confirm the recorded ENIGMA ST7 or current ENIGMA/ClinGen VCEP classification basis.",
             "Confirm the same normalized missense substitution and a different nucleotide change.",
             f"Confirm SpliceAI <= {splice_low} for both variants.",
             "Check the defined RNA/splice evidence sources and confirm that no damaging splice effect is recorded for either variant.",
@@ -153,9 +156,8 @@ def evaluate_protein_ps1_review(
         ],
         "potential_branches": ["PS1 (protein)"],
         "limitations": (
-            "ST7 is an official ENIGMA reference dataset and a trusted candidate "
-            "source, but it does not itself record every PS1-specific VCEP and "
-            "splice eligibility field. This recommendation adds no points."
+            "ST7 supplies the accepted P/LP reference classification. A missing "
+            "runtime SpliceAI result or unresolved splice condition prevents scoring."
         ),
         "reference_source": "ENIGMA Supplementary Table 7 v1.2 candidate reference set",
         "source_url": vcep_specification(policy_gene)["url"],

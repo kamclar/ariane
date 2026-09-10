@@ -29,7 +29,7 @@ from backend.modules.evidence_interactions import (
 @dataclass(frozen=True)
 class EvidenceInteractionNode:
     id: str = "policy.evidence_interactions"
-    version: str = "1"
+    version: str = "3"
     requires: frozenset[str] = frozenset(
         {
             "classification_inputs",

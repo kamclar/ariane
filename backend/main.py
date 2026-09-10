@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, Response
+from pydantic import ValidationError
 from pathlib import Path
 from datetime import datetime, timezone
 import json
@@ -20,7 +21,14 @@ import uuid
 from typing import Optional
 from fastapi import Header
 from backend.admin import router as admin_router
+from backend.review_api import router as review_router
 from backend.version import ARIANE_VERSION
+from backend.classification_runtime import (
+    ClassificationCacheRepository,
+    ClassificationUsageRepository,
+    classification_fingerprint,
+    resolve_usage_identity,
+)
 
 from backend.config import (
     TABLE4_PATH, TABLE9_PATH, ST7_PATH,
@@ -122,6 +130,8 @@ CLASSIFICATION_ORCHESTRATION = EvidenceOrchestrationService(
         population_frequency_lookup=POPULATION_FREQUENCY_SERVICE.get_frequencies,
     ),
 )
+CLASSIFICATION_CACHE: ClassificationCacheRepository | None = None
+CLASSIFICATION_USAGE: ClassificationUsageRepository | None = None
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -130,6 +140,7 @@ app = FastAPI(
     version=ARIANE_VERSION,
 )
 app.include_router(admin_router)
+app.include_router(review_router)
 
 AUDIT_LOGGER = logging.getLogger("ariane.audit")
 AUDIT_LOGGER.setLevel(logging.INFO)
@@ -147,6 +158,19 @@ try:
         AUDIT_LOGGER.addHandler(audit_file_handler)
 except OSError:
     AUDIT_LOGGER.exception("Failed to open the audit log file")
+
+try:
+    CLASSIFICATION_CACHE = ClassificationCacheRepository()
+except Exception:
+    logging.getLogger("ariane.classification_cache").exception(
+        "Classification cache could not be initialized"
+    )
+try:
+    CLASSIFICATION_USAGE = ClassificationUsageRepository()
+except Exception:
+    logging.getLogger("ariane.classification_usage").exception(
+        "Classification usage storage could not be initialized"
+    )
 
 def _request_context(request: Request) -> dict:
     return {
@@ -253,6 +277,8 @@ async def health():
 async def resources(gene: Optional[str] = None):
     return {
         "version": ARIANE_VERSION,
+        "build_revision": os.getenv("ARIANE_BUILD_REVISION", "").strip(),
+        "issue_tracker_url": os.getenv("ARIANE_ISSUE_TRACKER_URL", "").strip(),
         "manual_criteria": manual_criteria_for_gene(gene) if gene else {},
         "genes": [
             {
@@ -465,6 +491,30 @@ async def resolve_ps1_reference_endpoint(
 # Semaphore limits concurrent external API calls during batch processing
 BATCH_SEMAPHORE = asyncio.Semaphore(3)
 
+
+def _batch_variant_label(index: int, raw_item: object) -> str:
+    if isinstance(raw_item, dict):
+        gene = str(raw_item.get("gene", "")).strip().upper()
+        notation = str(raw_item.get("c_notation", "")).strip()
+        label = " ".join(value for value in (gene, notation) if value)
+        if label:
+            return label
+    return f"Batch item {index + 1}"
+
+
+def _batch_validation_message(exc: ValidationError) -> str:
+    messages: list[str] = []
+    for error in exc.errors(include_url=False):
+        location = ".".join(str(value) for value in error.get("loc", ()))
+        message = str(error.get("msg", "Invalid variant input"))
+        if message.startswith("Value error, "):
+            message = message[len("Value error, "):]
+        rendered = f"{location}: {message}" if location else message
+        if rendered not in messages:
+            messages.append(rendered)
+    return "; ".join(messages) or "Invalid variant input"
+
+
 async def _classify_one(
     gene: str,
     c_notation: str,
@@ -487,6 +537,66 @@ async def _classify_one(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except EvidenceExecutionError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+async def _classify_one_cached(
+    gene: str,
+    c_notation: str,
+    p_notation: str = "",
+    dup_type: str = "Unknown",
+    reference_transcript: str = "",
+) -> tuple[ClassificationResult, str, str]:
+    """Return a current, fingerprint-bound result and its cache status."""
+    fingerprint = classification_fingerprint(gene, CLASSIFIER_ENGINE_MODE.value)
+    cache_read_status = "disabled" if CLASSIFICATION_CACHE is None else "miss"
+    try:
+        cached = CLASSIFICATION_CACHE.get(
+            gene=gene,
+            transcript=reference_transcript,
+            c_notation=c_notation,
+            p_notation=p_notation,
+            dup_type=dup_type,
+            fingerprint=fingerprint,
+        ) if CLASSIFICATION_CACHE is not None else None
+        if cached is not None:
+            cache_read_status = cached.status
+    except Exception:
+        logging.getLogger("ariane.classification_cache").exception(
+            "Classification cache read failed for %s:%s", gene, c_notation
+        )
+        cached = None
+        cache_read_status = "read_error"
+    if cached is not None and cached.result is not None:
+        return cached.result, cached.status, fingerprint
+
+    response = await _classify_one(gene, c_notation, p_notation, dup_type)
+    cache_status = cache_read_status
+    try:
+        if CLASSIFICATION_CACHE is not None:
+            CLASSIFICATION_CACHE.put(
+                response,
+                transcript=reference_transcript,
+                dup_type=dup_type,
+                fingerprint=fingerprint,
+            )
+    except Exception:
+        logging.getLogger("ariane.classification_cache").exception(
+            "Classification cache write failed for %s:%s", gene, c_notation
+        )
+        cache_status = "write_error"
+    return response, cache_status, fingerprint
+
+
+def _record_classification_usage(**values) -> None:
+    """Keep statistics auxiliary so storage failure cannot change a result."""
+    if CLASSIFICATION_USAGE is None:
+        return
+    try:
+        CLASSIFICATION_USAGE.record(**values)
+    except Exception:
+        logging.getLogger("ariane.classification_usage").exception(
+            "Classification usage event could not be stored"
+        )
 
 
 @app.post("/api/normalize")
@@ -515,11 +625,25 @@ async def normalize_variant(
 
 
 @app.post("/api/classify")
-async def classify_variant(req: VariantRequest, request: Request) -> ClassificationResult:
+async def classify_variant(
+    req: VariantRequest,
+    request: Request,
+    http_response: Response,
+) -> ClassificationResult:
     input_data = req.model_dump(mode="json")
+    identity = resolve_usage_identity(request)
+    identity.set_cookie(http_response)
+    policy = get_gene_policy(req.gene)["policy"]
+    started = time.monotonic()
+    cache_status = "not_attempted"
+    fingerprint = classification_fingerprint(req.gene, CLASSIFIER_ENGINE_MODE.value)
     try:
-        response = await _classify_one(
-            req.gene, req.c_notation, req.p_notation or "", req.dup_type
+        response, cache_status, fingerprint = await _classify_one_cached(
+            req.gene,
+            req.c_notation,
+            req.p_notation or "",
+            req.dup_type,
+            req.reference_transcript,
         )
         response.reference_transcript = req.reference_transcript
         response.submitted_notation = req.submitted_notation
@@ -528,6 +652,23 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
         response.normalization_provenance = req.normalization_provenance
         response.protein_consequence_explanation = req.protein_consequence_explanation
     except Exception as exc:
+        _record_classification_usage(
+            actor_id=identity.actor_id,
+            actor_type=identity.actor_type,
+            request_id=request.state.request_id,
+            request_mode="single",
+            gene=req.gene,
+            transcript=req.reference_transcript,
+            c_notation=req.c_notation,
+            status="error",
+            cache_status=cache_status,
+            predicted_class=None,
+            total_points=None,
+            duration_ms=(time.monotonic() - started) * 1000,
+            policy_id=policy["runtime_policy_id"],
+            policy_version=policy["version"],
+            classifier_fingerprint=fingerprint,
+        )
         _audit(
             request,
             "classification_error",
@@ -537,6 +678,23 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
             error=str(exc)[:2000],
         )
         raise
+    _record_classification_usage(
+        actor_id=identity.actor_id,
+        actor_type=identity.actor_type,
+        request_id=request.state.request_id,
+        request_mode="single",
+        gene=req.gene,
+        transcript=req.reference_transcript,
+        c_notation=req.c_notation,
+        status="completed",
+        cache_status=cache_status,
+        predicted_class=response.predicted_class,
+        total_points=response.total_points,
+        duration_ms=(time.monotonic() - started) * 1000,
+        policy_id=policy["runtime_policy_id"],
+        policy_version=policy["version"],
+        classifier_fingerprint=fingerprint,
+    )
     _audit(
         request,
         "classification_completed",
@@ -549,6 +707,7 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
             "mixed_evidence": response.mixed_evidence,
             "pathogenic_points": response.pathogenic_points,
             "benign_points": response.benign_points,
+            "classification_cache": cache_status,
             "evidence_interactions": [
                 warning.model_dump(mode="json")
                 for warning in response.evidence_interactions
@@ -561,17 +720,31 @@ async def classify_variant(req: VariantRequest, request: Request) -> Classificat
 
 
 @app.post("/api/classify/batch")
-async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
+async def classify_batch(
+    req: BatchRequest,
+    request: Request,
+    http_response: Response,
+) -> BatchResponse:
     """
     Classify multiple variants. Up to 200 per request.
     Results preserve input order. Per-variant errors are reported inline.
     Concurrency is limited to avoid overwhelming external APIs.
     """
-    async def _one(idx: int, item: VariantRequest) -> BatchItemResult:
+    identity = resolve_usage_identity(request)
+    identity.set_cookie(http_response)
+
+    async def _one(idx: int, item: VariantRequest):
+        started = time.monotonic()
+        cache_status = "not_attempted"
+        fingerprint = classification_fingerprint(item.gene, CLASSIFIER_ENGINE_MODE.value)
         async with BATCH_SEMAPHORE:
             try:
-                res = await _classify_one(
-                    item.gene, item.c_notation, item.p_notation or "", item.dup_type
+                res, cache_status, fingerprint = await _classify_one_cached(
+                    item.gene,
+                    item.c_notation,
+                    item.p_notation or "",
+                    item.dup_type,
+                    item.reference_transcript,
                 )
                 res.reference_transcript = item.reference_transcript
                 res.submitted_notation = item.submitted_notation
@@ -579,22 +752,85 @@ async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
                 res.consequence_status = item.consequence_status
                 res.normalization_provenance = item.normalization_provenance
                 res.protein_consequence_explanation = item.protein_consequence_explanation
-                return BatchItemResult(
+                output = BatchItemResult(
                     index=idx, status="ok",
                     variant=f"{item.gene} {item.c_notation}",
                     result=res,
                 )
             except Exception as exc:
-                return BatchItemResult(
+                output = BatchItemResult(
                     index=idx, status="error",
                     variant=f"{item.gene} {item.c_notation}",
                     error=str(exc),
                 )
+            return (
+                item,
+                output,
+                cache_status,
+                fingerprint,
+                (time.monotonic() - started) * 1000,
+            )
 
-    items = await asyncio.gather(*[_one(i, v) for i, v in enumerate(req.variants)])
-    items = sorted(items, key=lambda r: r.index)
+    valid_items: list[tuple[int, VariantRequest]] = []
+    validation_errors: list[BatchItemResult] = []
+    for idx, raw_item in enumerate(req.variants):
+        try:
+            item = VariantRequest.model_validate(raw_item)
+        except ValidationError as exc:
+            error = _batch_validation_message(exc)
+            validation_errors.append(BatchItemResult(
+                index=idx,
+                status="error",
+                variant=_batch_variant_label(idx, raw_item),
+                error=error,
+            ))
+            if isinstance(raw_item, dict):
+                safe_input = {
+                    "gene": str(raw_item.get("gene", ""))[:40],
+                    "c_notation": str(raw_item.get("c_notation", ""))[:200],
+                }
+            else:
+                safe_input = {"input_type": type(raw_item).__name__}
+            _audit(
+                request,
+                "batch_item_validation_error",
+                level="warning",
+                item_index=idx,
+                input=safe_input,
+                error=error,
+            )
+        else:
+            valid_items.append((idx, item))
+
+    executions = await asyncio.gather(*[
+        _one(idx, item) for idx, item in valid_items
+    ])
+    items = sorted(
+        validation_errors + [execution[1] for execution in executions],
+        key=lambda value: value.index,
+    )
     success = sum(1 for r in items if r.status == "ok")
-    for input_item, output_item in zip(req.variants, items):
+    for input_item, output_item, cache_status, fingerprint, duration_ms in executions:
+        policy = get_gene_policy(input_item.gene)["policy"]
+        _record_classification_usage(
+            actor_id=identity.actor_id,
+            actor_type=identity.actor_type,
+            request_id=request.state.request_id,
+            request_mode="batch",
+            gene=input_item.gene,
+            transcript=input_item.reference_transcript,
+            c_notation=input_item.c_notation,
+            status="completed" if output_item.status == "ok" else "error",
+            cache_status=cache_status,
+            predicted_class=(
+                output_item.result.predicted_class if output_item.result else None
+            ),
+            total_points=(output_item.result.total_points if output_item.result else None),
+            duration_ms=duration_ms,
+            policy_id=policy["runtime_policy_id"],
+            policy_version=policy["version"],
+            classifier_fingerprint=fingerprint,
+        )
         _audit(
             request,
             "batch_item_completed" if output_item.status == "ok" else "batch_item_error",
@@ -605,6 +841,7 @@ async def classify_batch(req: BatchRequest, request: Request) -> BatchResponse:
                 "predicted_class": output_item.result.predicted_class,
                 "predicted_label": output_item.result.predicted_label,
                 "total_points": output_item.result.total_points,
+                "classification_cache": cache_status,
             } if output_item.result else None,
             error=output_item.error,
         )

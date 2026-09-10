@@ -21,7 +21,7 @@ from backend.modules.utils import (
 @dataclass(frozen=True)
 class BioinformaticCriteriaNode:
     id: str = "rule.bioinformatic.figure1a"
-    version: str = "1"
+    version: str = "2"
     requires: frozenset[str] = frozenset(
         {"classification_inputs", "evidence_bundle", "splice_context", "pvs1_family"}
     )
@@ -110,7 +110,6 @@ class BioinformaticCriteriaNode:
             "inframe_deletion",
             "inframe_insertion",
             "inframe_delins",
-            "delins",
             "synonymous",
             "silent",
             "intronic",
@@ -131,7 +130,6 @@ class BioinformaticCriteriaNode:
             "inframe_deletion",
             "inframe_insertion",
             "inframe_delins",
-            "delins",
         }
         if bayesdel_score is None and ci.variant_type.lower() in bayesdel_types:
             warnings.append(

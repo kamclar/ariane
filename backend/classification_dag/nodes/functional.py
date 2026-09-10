@@ -24,10 +24,14 @@ def functional_decision_path(
     if branch == "intronic-silent":
         steps = [
             {
-                "node_id": "func-rna-assay",
-                "question": "Does the assay measure effects via both mRNA and protein?",
-                "result": "yes",
-                "observed": table9["reason"],
+                "node_id": "func-assay-scope-combined",
+                "question": "Which assay scope is eligible under Figure 1C?",
+                "result": "combined_mRNA_and_protein_only",
+                "observed": (
+                    "For intronic and silent variants, ENIGMA considers only "
+                    "functional assays that measure effects via both mRNA and "
+                    f"protein. Reviewed Table 9 recommendation: {table9['reason']}"
+                ),
             }
         ]
         outcome = "func-rna-code"
@@ -42,14 +46,18 @@ def functional_decision_path(
                 "observed": f"Table 9 predicted/observed splicing: {flag or 'not reported'}",
             },
             {
-                "node_id": "func-protein-combined" if present else "func-protein-only",
-                "question": (
-                    "Assay measures both mRNA and protein effects"
+                "node_id": (
+                    "func-assay-scope-combined"
                     if present
-                    else "Assay measures protein-only effect"
+                    else "func-assay-scope-protein"
                 ),
-                "result": "eligible",
-                "observed": table9["reason"],
+                "question": "Which assay scope is eligible under Figure 1C?",
+                "result": (
+                    "combined_mRNA_and_protein_only"
+                    if present
+                    else "protein_only_or_combined_mRNA_and_protein"
+                ),
+                "observed": f"Reviewed Table 9 recommendation: {table9['reason']}",
             },
         ]
         outcome = "func-protein-code"
@@ -101,6 +109,7 @@ class FunctionalCriteriaNode:
                 "points": table9["points"],
                 "reason": table9["reason"],
                 "decision_path": functional_decision_path(variant, table9),
+                "table9_audit": table9.get("source_record"),
             }
             decisions = (
                 decision(

@@ -8,11 +8,13 @@ from backend.services.ps1_reference_resolution import (
 
 class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
     @staticmethod
-    def dependencies(*, clinvar, clingen=None):
+    def dependencies(*, clinvar, clingen=None, registry=None):
         scores = {
             "c.5217T>A": 0.03,
             "c.5217T>G": 0.00,
             "c.5216A>T": 0.01,
+            "c.123A>G": 0.01,
+            "c.122A>G": 0.01,
         }
         statuses = {
             key: {"status": "ok", "reason": "test score"}
@@ -23,6 +25,7 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             spliceai_status=lambda gene, c_notation: statuses.get(c_notation, {}),
             clinvar_lookup=lambda gene, c_notation: clinvar,
             clingen_lookup=lambda gene, c_notation: clingen or {"status": "not_found"},
+            registry_lookup=lambda gene, c_notation: registry,
         )
 
     async def test_one_star_clinvar_prefills_facts_but_is_not_vcep_verified(self):
@@ -101,6 +104,7 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             spliceai_status=dependencies.spliceai_status,
             clinvar_lookup=unavailable,
             clingen_lookup=unavailable,
+            registry_lookup=lambda gene, c_notation: None,
         )
         result = await resolve_ps1_reference(
             "BRCA1",
@@ -114,6 +118,36 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["clingen_status"], "api_error")
         self.assertIn("TimeoutError", result["clinvar_error"])
         self.assertIn("ClinVar was unavailable", result["review_message"])
+
+    async def test_st7_reference_is_an_accepted_prefilled_classification_basis(self):
+        result = await resolve_ps1_reference(
+            "BRCA1",
+            "c.5217T>A",
+            "c.5217T>G",
+            dependencies=self.dependencies(
+                clinvar={"status": "not_found"},
+                registry={
+                    "classification": "Pathogenic",
+                    "classification_basis": "enigma_st7_v1_2_reference_set",
+                    "classification_source": "Parsons et al. 2019",
+                    "reference_status": "approved",
+                    "reference_splice_evidence_status": "normal",
+                    "reference_splice_sources_checked": [
+                        "ENIGMA Specifications Table 9 v1.2",
+                        "ENIGMA Supplementary Table 2 v1.2",
+                    ],
+                    "classification_ps1_dependency_used": False,
+                },
+            ),
+        )
+
+        self.assertEqual(result["classification"], "Pathogenic")
+        self.assertEqual(
+            result["classification_verification"],
+            "enigma_st7_v1_2_reference_set",
+        )
+        self.assertEqual(result["reference_classification_used_ps1"], "no")
+        self.assertTrue(result["objective_ps1_checks_pass"])
 
 
 if __name__ == "__main__":

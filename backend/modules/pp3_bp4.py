@@ -40,6 +40,11 @@ def evaluate_pp3_bp4(
     results = {}
 
     vtype = normalize_variant_type(variant_type)
+    intron_info = get_intron_offset_from_c_notation(c_notation)
+    outside_canonical_splice_sites = (
+        vtype != "intronic"
+        or (intron_info is not None and abs(intron_info[1]) > 2)
+    )
 
     thresholds = bayesdel_thresholds(gene)
     splice_thresholds = spliceai_thresholds(gene)
@@ -59,13 +64,14 @@ def evaluate_pp3_bp4(
 
     protein_prediction_types = {
         "missense",
-        "inframe_deletion", "inframe_insertion", "inframe_delins", "delins",
+        "inframe_deletion", "inframe_insertion", "inframe_delins",
     }
 
     # ---- PP3 ----
     # SpliceAI branch. This must not be "any variant type".
     if (
         variant_type_allows_spliceai_pp3(vtype)
+        and outside_canonical_splice_sites
         and spliceai_score is not None
         and spliceai_score >= splice_high
     ):
@@ -82,7 +88,6 @@ def evaluate_pp3_bp4(
         }.get(vtype, ("missense-inframe", "mi-splice-pp3"))
         trace_steps = []
         if branch_id == "intronic":
-            intron_info = get_intron_offset_from_c_notation(c_notation)
             if intron_info is not None:
                 _, offset = intron_info
                 trace_steps.append(step(
@@ -222,7 +227,7 @@ def evaluate_pp3_bp4(
                 ],
             )
 
-    elif vtype == "intronic":
+    elif vtype == "intronic" and outside_canonical_splice_sites:
         if spliceai_score is not None and spliceai_score <= splice_low:
             results["BP4"] = {
                 "applies": True,

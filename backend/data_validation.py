@@ -218,9 +218,11 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         paths["st2_splice_evidence"],
     )
     if (
-        st2.get("schema_version") != 1
+        st2.get("schema_version") != 2
         or st2.get("source_columns") != 11
+        or st2.get("reference_source_columns") != 16
         or st2.get("total_variants") != 220
+        or st2.get("total_reference_rows") != 383
         or len(st2.get("variants", [])) != 220
     ):
         raise RuntimeError(
@@ -235,7 +237,7 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
     )
     seen_st2 = set()
     for index, record in enumerate(st2["variants"]):
-        if len(record) != 12:
+        if len(record) != 13:
             raise RuntimeError(
                 f"Required ENIGMA Supplementary Table 2 is lossy at record #{index}"
             )
@@ -245,3 +247,17 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                 f"Required ENIGMA Supplementary Table 2 has duplicate variant: {key}"
             )
         seen_st2.add(key)
+        references = record.get("st3_references")
+        if not isinstance(references, list) or not references:
+            raise RuntimeError(
+                f"Required ENIGMA Supplementary Table 3 references are missing for: {key}"
+            )
+        for reference in references:
+            if len(reference) != 17:
+                raise RuntimeError(
+                    f"Required ENIGMA Supplementary Table 3 is lossy for: {key}"
+                )
+            if (reference.get("gene"), reference.get("c_notation")) != key:
+                raise RuntimeError(
+                    f"Required ENIGMA Supplementary Table 3 reference mismatch for: {key}"
+                )

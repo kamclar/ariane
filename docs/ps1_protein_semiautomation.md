@@ -4,14 +4,16 @@
 
 ST7 je oficiální ENIGMA referenční dataset. Jeho P/LP missense varianty jsou
 zařazeny do proteinového PS1 registru. Aktuální registr obsahuje 60 referencí:
-40 `review_required` a 20 `excluded` podle známé RNA a splice evidence.
-Samotná ST7 není považována za automatický PS1 allowlist. SpliceAI skóre není
-v registru uloženo.
+40 `eligible` a 20 `excluded` podle známé RNA a splice evidence. P/LP třída ve
+ST7 je přijata jako klasifikační základ reference. Nejde o bezpodmínečný PS1
+allowlist. SpliceAI skóre není v registru uloženo a kontroluje se při každém
+použití reference.
 
 Automatické proteinové PS1 vyžaduje:
 
 1. stejnou normalizovanou missense substituci a jinou nukleotidovou změnu;
-2. P/LP klasifikaci reference ověřenou podle ENIGMA/ClinGen VCEP;
+2. P/LP klasifikaci reference v ENIGMA ST7 v1.2, aktuální ENIGMA/ClinGen VCEP
+   assertion nebo úplné lokální reklasifikaci podle uvedené verze pravidel;
 3. SpliceAI nejvýše 0,1 u reference i hodnocené varianty;
 4. žádný známý škodlivý splice efekt po kontrole uvedených verzovaných zdrojů;
 5. stav `eligible` v proteinovém PS1 registru.
@@ -21,9 +23,11 @@ nakonfigurované služby. Chybějící skóre se nepovažuje za nulu a PS1 se
 automaticky nepřidělí.
 
 Implementační politika ARIANE používá oficiální P/LP klasifikaci v ENIGMA ST7
-v1.2 jako důvěryhodný zdroj kandidátů. Pro automatický stav `eligible` je navíc
-nutná samostatně ověřená ENIGMA/ClinGen VCEP assertion nebo úplná lokální
-reklasifikace podle uvedené verze ENIGMA VCEP pravidel.
+v1.2 jako přijatý klasifikační základ reference. Toto rozhodnutí bylo potvrzeno
+odbornou metodickou konzultací 7. září 2026. ST7 klasifikace vznikly v
+historickém ENIGMA multifaktoriálním likelihood referenčním souboru. Nešlo o
+aplikaci proteinového PS1, proto je u těchto záznamů závislost na PS1 vedena
+jako `false`.
 
 P reference dává PS1 Strong. LP reference dává PS1 Moderate. Síly z více
 referencí se nesčítají.
@@ -35,24 +39,24 @@ ST7 kandidát
 stejný missense následek + jiná c. změna
           |
           v
-ověřená ENIGMA/ClinGen VCEP assertion?
+přijatá P/LP reference ze ST7 nebo VCEP?
      |                         |
     ne                        ano
      |                         |
-předvyplněná revize       splice podmínky splněny?
-bez bodů                    |             |
-                           ne            ano
-                           |              |
-                     bez PS1 / revize  automatické PS1
-                                       P: Strong
-                                       LP: Moderate
+bez PS1                  splice podmínky splněny?
+                          |             |
+                         ne            ano
+                          |              |
+                    bez PS1 / revize  automatické PS1
+                                      P: Strong
+                                      LP: Moderate
 ```
 
 ## Datasety
 
 - `st7_reference_set.json`: úplný oficiální zdroj kandidátů;
-- `enigma_st2_splice_evidence.json`: úplných 220 řádků ENIGMA ST2 pro
-  kontrolu známých RNA výsledků;
+- `enigma_st2_splice_evidence.json`: úplných 220 řádků ENIGMA ST2 a všech 383
+  navázaných referencí ST3 pro kontrolu a doložení známých RNA výsledků;
 - `enigma_table9.json`: funkční a publikovaná splice evidence;
 - `ps1_protein_reference_registry.json`: všech 60 P/LP missense referencí ST7
   s explicitním stavem a auditními podklady;
@@ -78,12 +82,14 @@ Nové oficiální nebo lokálně reklasifikované reference mimo ST7 se zapisuj�
 ST7 a vytvoří jediný runtime registr. Prázdný extension soubor znamená, že
 aktuální registr obsahuje pouze oficiální ST7 reference.
 
-Při nálezu ST7 kandidáta ARIANE předvyplní referenční c. a p. notaci, ST7
+Při nálezu ST7 reference ARIANE předvyplní referenční c. a p. notaci, ST7
 klasifikaci a zdroj, shodu proteinového následku, rozdílnou nukleotidovou změnu,
 dostupná SpliceAI skóre a výsledky kontroly definovaných RNA/splice zdrojů.
-Současně na pozadí ověří ClinVar a ClinGen ERepo. Pokud najde samostatnou
-ENIGMA VCEP assertion, doplní její klasifikaci a zdroj. Uživatel potvrzuje jen
+Současně na pozadí ověří ClinVar a ClinGen ERepo. Aktuální ENIGMA VCEP assertion
+má při zobrazení přednost před historickým zdrojem ST7. Uživatel potvrzuje jen
 podmínky, které nebylo možné doložit automaticky. Neúplná revize nepřidá body.
+ERepo evidence codes se čtou z aktuální struktury `guideline.agents[].evidenceCodes`
+a zobrazují se jako auditní podklad použité VCEP klasifikace.
 
 Samotný záznam v ClinVar bez ENIGMA/ClinGen expert-panel assertion, CANVarUK,
 BRCA Exchange, jednotlivá publikace nebo výpočetní predikce nestačí k vytvoření
@@ -109,15 +115,23 @@ ENIGMA/ClinGen VCEP nebo úplnou lokální reklasifikaci.
 | podklad proteinového mechanismu | PS3 funkční evidence z Table 9, nebo u patogenní missense reference doložená absence predikovaného a potvrzeného splice efektu |
 | SpliceAI reference | výpočet na požádání stejnou profilově připnutou službou jako u hodnocené varianty |
 | známá RNA/splice evidence | úplná ENIGMA Table 9 v1.2 a úplná Supplementary Table 2 v1.2 |
-| stav `eligible`, `excluded`, `review_required` | ST7 je `review_required` nebo `excluded`; `eligible` vyžaduje samostatně ověřenou VCEP klasifikaci a úplné PS1 podmínky; predikční podmínka se ověřuje za běhu |
-| případná PS1 závislost klasifikace reference | oficiální assertion nebo úplný lokální evidenční záznam |
+| stav `eligible`, `excluded`, `review_required` | ST7 je `eligible`, pokud definované zdroje nevylučují proteinovou větev; známý škodlivý splice efekt vede k `excluded`; konflikt nebo neúplný podklad vede k `review_required`; predikční podmínka se ověřuje za běhu |
+| případná PS1 závislost klasifikace reference | u ST7 historický multifaktoriální klasifikační postup; u nové assertion nebo lokální reklasifikace úplný evidenční záznam |
 | provenance a checksumy | generátor registru ze všech použitých verzovaných vstupních souborů |
 
-Z 40 současných `eligible` referencí má 35 v Table 9 PS3 Strong funkční
-evidenci. U zbývajících pěti je proteinový mechanismus zaznamenán jako
-patogenní missense reference bez predikovaného nebo potvrzeného splice efektu.
-Přímý proteinový funkční test tedy není povinný pro každý záznam, ale použitý
-mechanistický podklad musí být v registru explicitní.
+Registr nyní obsahuje 40 referencí se stavem `eligible`. Z nich má 35 v Table 9
+PS3 Strong funkční evidenci. U zbývajících
+pěti je proteinový mechanismus zaznamenán jako patogenní missense reference bez
+predikovaného nebo potvrzeného splice efektu. Přímý proteinový funkční test tedy
+není povinný pro každý záznam, ale použitý mechanistický podklad musí být v
+registru explicitní.
+
+Stav `eligible` vyžaduje uzavřenou kontrolu závislosti klasifikace reference na
+PS1. U ST7 je uvedeno `false`, protože zaznamenaná IARC klasifikace pochází z
+multifaktoriálního likelihood referenčního souboru, nikoliv z aplikace
+proteinového PS1. U novějších assertions musí evidenční záznam uvést, zda bylo
+PS1 použito. Pokud ano, musí uvést použité reference a validátor vyloučí přímou
+i delší známou kruhovou závislost.
 
 Runtime SpliceAI záznam ukládá profil, referenční genom, transkript, vstupní
 variantu, parametry výpočtu a zdroj. Změna modelu nebo anotace vytváří nový
@@ -159,5 +173,6 @@ Přepočítání checksumu samo nenahrazuje odborné schválení obsahu.
 
 Pokud je známo, že klasifikace reference použila PS1, musí být uložena použitá
 reference. Bez ní záznam nelze schválit. Validátor odmítá přímou závislost na
-sobě a známé cykly. Není však nutné u každé klasifikace dokazovat, že PS1
-nepoužila, pokud použití PS1 není známé.
+sobě a známé cykly. Způsobilá nová assertion musí mít stav závislosti `true`
+nebo `false`; neznámý stav zůstává k revizi. U ST7 je `false` odvozeno z
+multifaktoriálního klasifikačního postupu zaznamenaného v oficiálním Appendixu.

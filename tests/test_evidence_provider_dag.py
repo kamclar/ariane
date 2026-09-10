@@ -126,6 +126,47 @@ def test_unavailable_spliceai_remains_unavailable_and_does_not_enable_bayesdel_p
     assert any("SpliceAI is unavailable" in warning for warning in execution.result["warnings"])
 
 
+def test_unavailable_bayesdel_is_audited_and_does_not_create_protein_prediction():
+    execution = asyncio.run(execute_classification_request(
+        _request(), dependencies=_dependencies(bayesdel_score=None)
+    ))
+
+    assert "PP3" not in execution.result["criteria"]
+    assert "BP4" not in execution.result["criteria"]
+    assert execution.provider_artifacts["bayesdel_score"] is None
+    assert (
+        execution.audit_record()["provider_evidence"]["bayesdel"]["status"]
+        == EvidenceStatus.UNAVAILABLE.value
+    )
+    assert any(
+        "BayesDel_noAF not available" in warning
+        for warning in execution.result["warnings"]
+    )
+
+
+def test_unavailable_coordinates_do_not_query_population_as_if_variant_were_absent():
+    dependencies = replace(
+        _dependencies(),
+        resolve_variant=lambda gene, c_notation: None,
+        get_grch37=lambda resolved, gene, c_notation: None,
+        get_grch38=lambda resolved, gene, c_notation: None,
+    )
+    execution = asyncio.run(execute_classification_request(
+        _request(), dependencies=dependencies
+    ))
+
+    assert execution.provider_artifacts["coordinate_status"] == "unavailable"
+    assert execution.provider_artifacts["grch37"] is None
+    assert execution.provider_artifacts["grch38"] is None
+    population = execution.audit_record()["provider_evidence"]["gnomad"]
+    assert population["status"] == EvidenceStatus.NOT_APPLICABLE.value
+    assert "coordinates are unavailable" in population["reason"]
+    assert not any(
+        code.startswith(("BA1", "BS1", "PM2"))
+        for code in execution.result["criteria"]
+    )
+
+
 def test_independent_remote_providers_run_concurrently():
     barrier = Barrier(2, timeout=2)
     dependencies = _dependencies()

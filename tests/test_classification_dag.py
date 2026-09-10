@@ -463,6 +463,71 @@ def test_table9_provider_records_version_and_runtime_checksum():
     assert provider_trace.provenance["reviewed"] is True
 
 
+@pytest.mark.parametrize(
+    ("variant_type", "c_notation", "p_notation", "expected_scope"),
+    (
+        (
+            "missense",
+            "c.100C>G",
+            "p.(Pro34Ala)",
+            "protein_only_or_combined_mRNA_and_protein",
+        ),
+        (
+            "missense",
+            "c.5074G>A",
+            "p.(Asp1692Asn)",
+            "combined_mRNA_and_protein_only",
+        ),
+        (
+            "synonymous",
+            "c.102T>A",
+            "p.(=)",
+            "combined_mRNA_and_protein_only",
+        ),
+    ),
+)
+def test_table9_decision_path_reports_eligible_assay_scope_without_guessing(
+    variant_type, c_notation, p_notation, expected_scope
+):
+    execution = execute_classification(
+        ClassificationInputs(
+            gene="BRCA1",
+            variant_type=variant_type,
+            c_notation=c_notation,
+            p_notation=p_notation,
+            reference_transcript="NM_007294.4",
+        ),
+        mode="dag",
+    )
+    criterion = next(
+        value
+        for value in execution.result["criteria"].values()
+        if value.get("table9_audit")
+    )
+    scope_step = next(
+        step
+        for step in criterion["decision_path"]["steps"]
+        if step["node_id"].startswith("func-assay-scope")
+    )
+
+    assert scope_step["result"] == expected_scope
+    assert "Reviewed Table 9 recommendation" in scope_step["observed"]
+    assert criterion["table9_audit"]["standardised_text"]
+    assert criterion["table9_audit"]["assay_results"]
+
+
+def test_table9_lookup_preserves_complete_source_record_without_reason_truncation():
+    result = table9_lookup_ps3_bs3("BRCA1", "c.5074G>A")
+
+    assert result["reason"] == (
+        "Table 9: " + result["source_record"]["standardised_text"]
+    )
+    assert not result["reason"].endswith("...")
+    assert result["source_record"]["assigned_code"] == "PS3"
+    assert result["source_record"]["code_weight"] == "Strong"
+    assert len(result["source_record"]["assay_results"]) == 3
+
+
 def test_table9_provider_rejects_conflicting_pre_dag_value():
     inputs = ClassificationInputs(
         gene="BRCA1",

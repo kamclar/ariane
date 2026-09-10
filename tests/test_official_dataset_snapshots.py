@@ -308,21 +308,25 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         protein_ps1 = json.loads(
             (DATA / "ps1_protein_reference_registry.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(protein_ps1["schema_version"], 4)
+        self.assertEqual(protein_ps1["schema_version"], 5)
         self.assertEqual(
             protein_ps1["candidate_source"]["usage"],
-            "trusted_candidate_discovery_and_guided_review",
+            "accepted_ps1_classification_basis_with_runtime_checks",
         )
         self.assertEqual(protein_ps1["reference_count"], 60)
         self.assertEqual(
             protein_ps1["status_counts"],
-            {"excluded": 20, "review_required": 40},
+            {"eligible": 40, "excluded": 20},
         )
-        self.assertFalse(any(
+        self.assertEqual(sum(
             record["classification_verification"] == "enigma_st7_v1_2_reference_set"
             and record["status"] == "eligible"
             for record in protein_ps1["references"]
-        ))
+        ), 40)
+        self.assertEqual(
+            protein_ps1["methodological_decision"]["id"],
+            "ps1_st7_classification_basis_2026-09-07",
+        )
         self.assertTrue(all(
             record["reference_splice_evidence"]["prediction_policy"]
             == "runtime_required"
@@ -356,11 +360,22 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         st2 = json.loads(
             (DATA / "enigma_st2_splice_evidence.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(st2["schema_version"], 1)
+        self.assertEqual(st2["schema_version"], 2)
         self.assertEqual(st2["source_columns"], 11)
+        self.assertEqual(st2["reference_source_columns"], 16)
         self.assertEqual(st2["total_variants"], 220)
+        self.assertEqual(st2["total_reference_rows"], 383)
         self.assertEqual(len(st2["source_file_sha256"]), 64)
-        self.assertTrue(all(len(record) == 12 for record in st2["variants"]))
+        self.assertTrue(all(len(record) == 13 for record in st2["variants"]))
+        self.assertEqual(
+            sum(len(record["st3_references"]) for record in st2["variants"]),
+            383,
+        )
+        self.assertTrue(all(
+            len(reference) == 17
+            for record in st2["variants"]
+            for reference in record["st3_references"]
+        ))
 
 
 if __name__ == "__main__":

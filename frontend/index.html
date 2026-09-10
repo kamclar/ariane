@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260902-1">
+    <link rel="icon" type="image/svg+xml" href="/static/images/ariane-icon-v1.svg">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260909-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -32,6 +33,8 @@
             <button class="tab-btn" :class="{ active: mode === 'batch' }" @click="mode = 'batch'">Batch</button>
             <button class="tab-btn" :class="{ active: mode === 'rules' }"
                     @click="openRules((result?.criteria || []).find(c => c.decision_path)?.decision_path || null)">ENIGMA rules</button>
+            <a class="issue-tracker-link" x-show="issueTrackerUrl" :href="issueReportUrl()"
+               target="_blank" rel="noopener">Report an issue</a>
         </div>
 
         <!-- Search form (single mode) -->
@@ -235,6 +238,31 @@
                                             <button type="button" class="link-button" @click="openRules(c.decision_path)">Open full decision tree</button>
                                         </div>
                                     </details>
+                                    <details class="table9-audit-details" x-show="c.table9_audit">
+                                        <summary>Show complete Table 9 evidence</summary>
+                                        <p x-text="c.table9_audit?.standardised_text"></p>
+                                        <dl>
+                                            <dt>Source variant</dt>
+                                            <dd x-text="`${c.table9_audit?.gene || ''} ${c.table9_audit?.c_notation || ''} ${c.table9_audit?.p_notation || ''}`"></dd>
+                                            <dt>Assigned code</dt>
+                                            <dd x-text="`${c.table9_audit?.assigned_code || ''} ${c.table9_audit?.code_weight || ''}`"></dd>
+                                            <dt>Published RNA result</dt>
+                                            <dd x-text="c.table9_audit?.splice_result_published || 'Not reported'"></dd>
+                                            <dt>Table 9 SpliceAI</dt>
+                                            <dd x-text="c.table9_audit?.spliceai_prediction ?? 'Not reported'"></dd>
+                                            <dt>Predicted or observed splicing</dt>
+                                            <dd x-text="c.table9_audit?.predicted_or_observed_splicing || 'Not reported'"></dd>
+                                        </dl>
+                                        <div x-show="c.table9_audit?.assay_results?.length">
+                                            <strong>Reviewed assay results</strong>
+                                            <ul>
+                                                <template x-for="(assay, index) in c.table9_audit?.assay_results || []"
+                                                          :key="`${c.name}-table9-assay-${index}`">
+                                                    <li x-text="assay"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </details>
                                 </td>
                             </tr>
                         </template>
@@ -365,9 +393,15 @@
                     <strong x-text="result?.rna_review?.potential_branches?.join(', ')"></strong>
                 </p>
                 <p class="rna-limitations" x-text="result?.rna_review?.limitations"></p>
-                <a :href="result?.rna_review?.source_url" target="_blank" rel="noopener">
-                    Open ENIGMA specification
-                </a>
+                <div class="rna-review-actions">
+                    <button type="button" class="btn-secondary"
+                        @click="enableManualCriterion('PVS1_RNA')">
+                        Review possible PVS1 RNA assignment
+                    </button>
+                    <a :href="result?.rna_review?.source_url" target="_blank" rel="noopener">
+                        Open ENIGMA specification
+                    </a>
+                </div>
             </div>
 
             <!-- Splice PS1 review -->
@@ -729,17 +763,20 @@
             </section>
 
             <!-- Manual evidence review -->
-            <div class="manual-evidence-section" x-data="{ open: false }">
-                <h3 @click="open = !open" class="collapsible">
+            <div class="manual-evidence-section">
+                <h3 @click="manualReviewOpen = !manualReviewOpen" class="collapsible">
                     Manually reviewed criteria
-                    <span x-text="open ? '&#9660;' : '&#9654;'"></span>
+                    <span class="manual-heading-summary"
+                        x-show="manualReviewRecommendations().length"
+                        x-text="`${manualReviewRecommendations().length} suggested`"></span>
+                    <span x-text="manualReviewOpen ? '&#9660;' : '&#9654;'"></span>
                 </h3>
                 <p class="panel-intro">
                     Add evidence that cannot be automated. The original Module 1
                     result remains unchanged; ARIANE calculates a separate amended
                     working result.
                 </p>
-                <div x-show="open" x-transition>
+                <div x-show="manualReviewOpen" x-transition>
                     <section class="manual-review-recommendations"
                         x-show="manualReviewRecommendations().length">
                         <div>
@@ -778,7 +815,8 @@
                                 </span>
                             </summary>
                     <template x-for="item in group.items" :key="item.code">
-                        <div class="manual-criterion-card">
+                        <div class="manual-criterion-card"
+                            :id="`manual-criterion-${item.code}`">
                             <div class="manual-card-heading">
                                 <label>
                                     <input type="checkbox" x-model="item.enabled"
@@ -1285,6 +1323,7 @@
                                         <select x-model="item.evidence.classification_verification">
                                             <option value="">Select</option>
                                             <option value="external_vcep_assertion">Official ENIGMA/ClinGen VCEP assertion</option>
+                                            <option value="enigma_st7_v1_2_reference_set">ENIGMA ST7 v1.2 P/LP reference set</option>
                                             <option value="locally_recurated_under_enigma_vcep">Locally recurated under ENIGMA VCEP</option>
                                             <option value="historical_classification_only">Historical classification only</option>
                                             <option value="unresolved">Unresolved</option>
@@ -1332,10 +1371,11 @@
                                     </label>
                                     <label>Did the reference classification use PS1?
                                         <select x-model="item.evidence.reference_classification_used_ps1">
-                                            <option value="unknown">Unknown</option>
+                                            <option value="unknown">Not yet verified</option>
                                             <option value="no">No</option>
                                             <option value="yes">Yes</option>
                                         </select>
+                                        <span class="field-hint">This must be verified before PS1 can be applied.</span>
                                     </label>
                                 </div>
                                 <p class="field-hint ps1-resolution-message"
@@ -1353,9 +1393,9 @@
                                     <strong>Prefilled facts:</strong> Variant identity, protein consequence,
                                     ST7 candidate classification, available SpliceAI results and recorded
                                     ENIGMA RNA/splice source checks are completed automatically where data
-                                    are available. A historical ST7 classification remains non-scoring until
-                                    an ENIGMA/ClinGen VCEP assertion or a documented local reclassification
-                                    is selected and supported.
+                                    are available. An ST7 P/LP classification is accepted as the reference
+                                    classification basis. Identity, protein mechanism, splice evidence and
+                                    SpliceAI requirements remain mandatory.
                                 </p>
                                 <p class="curation-warning" x-show="item.code === 'PS1_PROTEIN'">
                                     ClinVar review stars describe the review status of a submitted classification.
@@ -1414,10 +1454,17 @@
                         <label>Assessor
                             <input type="text" x-model="manualAssessor" placeholder="Name or identifier">
                         </label>
+                        <label>Reviewer role
+                            <input type="text" x-model="manualReviewerRole"
+                                placeholder="e.g. Clinical geneticist or variant curator">
+                        </label>
                         <label>Assessment date
                             <input type="date" x-model="manualAssessedAt">
                         </label>
                     </div>
+                    <p class="field-hint">
+                        Do not enter names, dates of birth or other direct patient identifiers in evidence notes.
+                    </p>
                     <button class="btn-primary" @click="evaluateManualEvidence()"
                         :disabled="manualLoading">
                         <span x-show="!manualLoading">Calculate amended result</span>
@@ -1502,9 +1549,69 @@
                             Assessor: <strong x-text="manualResult?.assessor"></strong>;
                             date: <strong x-text="manualResult?.assessed_at"></strong>
                         </p>
-                        <button class="btn-secondary" @click="downloadManualAuditJson()">
-                            Download audit record
-                        </button>
+                        <div class="manual-record-actions">
+                            <button class="btn-secondary" @click="downloadManualAuditJson()">
+                                Download audit record
+                            </button>
+                            <button class="btn-primary" @click="saveManualReviewDraft()"
+                                :disabled="manualRecordLoading">
+                                <span x-text="manualRecordLoading ? 'Saving...' : 'Save immutable review draft'"></span>
+                            </button>
+                            <a href="/admin/audit" target="_blank" rel="noopener">
+                                Reviewer sign-in
+                            </a>
+                        </div>
+                        <p class="field-hint">
+                            Saving and approval require the authenticated reviewer account configured for this ARIANE installation.
+                            The current beta uses the protected administrator account and records both the account and the stated reviewer identity.
+                        </p>
+                        <p class="manual-status-error" x-show="manualRecordError"
+                            x-text="manualRecordError"></p>
+
+                        <section class="manual-record-summary" x-show="manualSavedRecord">
+                            <div>
+                                <strong x-text="manualSavedRecord?.status === 'approved' ? 'Approved review version' : 'Saved review draft'"></strong>
+                                <span>
+                                    Version <span x-text="manualSavedRecord?.version"></span>;
+                                    record <code x-text="manualSavedRecord?.record_id"></code>
+                                </span>
+                            </div>
+                            <p>Content SHA-256: <code x-text="manualSavedRecord?.hashes?.content_sha256"></code></p>
+                        </section>
+
+                        <section class="manual-approval-panel"
+                            x-show="manualSavedRecord?.status === 'draft'">
+                            <h4>Approve this saved version</h4>
+                            <p>
+                                Approval creates a new immutable version. The saved draft is retained unchanged.
+                            </p>
+                            <div class="audit-grid">
+                                <label>Approver
+                                    <input type="text" x-model="manualApprovalName">
+                                </label>
+                                <label>Professional role
+                                    <input type="text" x-model="manualApprovalRole">
+                                </label>
+                            </div>
+                            <label class="full-width-label">Approval comment
+                                <textarea rows="2" x-model="manualApprovalComment"
+                                    placeholder="Record the scope of review, limitations and any required follow-up."></textarea>
+                            </label>
+                            <label class="manual-approval-attestation">
+                                <input type="checkbox" x-model="manualApprovalAttested">
+                                I confirm that I reviewed the variant identity, evidence, ENIGMA conditions,
+                                evidence interactions and resulting classification shown in this saved version.
+                            </label>
+                            <button class="btn-primary" @click="approveManualReviewRecord()"
+                                :disabled="manualRecordLoading">
+                                Approve saved version
+                            </button>
+                        </section>
+
+                        <p class="manual-approved-message"
+                            x-show="manualSavedRecord?.status === 'approved'">
+                            This review version is approved and immutable. New evidence must be saved as a new draft.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -1622,6 +1729,12 @@
                         <p class="external-evidence-codes"
                            x-show="result?.external?.erepo_evidence_codes?.length"
                            x-text="'ClinGen evidence codes: ' + result.external.erepo_evidence_codes.join(', ')"></p>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_guideline_versions?.length"
+                           x-text="'Guideline version: ' + result.external.erepo_guideline_versions.join(', ')"></p>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_cspec_ids?.length"
+                           x-text="'CSpec record: ' + result.external.erepo_cspec_ids.join(', ')"></p>
                     </div>
 
                 </div>
@@ -2021,16 +2134,17 @@ BRCA1 NM_007294.4:c.509G&gt;A p.(Arg170Gln) &lt;-- space-separated input</pre>
             <p>ARIANE <span id="ariane-footer-version">version loading</span> - Classification follows ENIGMA VCEP v1.2 (2024-11-18).
                External comparison is read-only and does not influence the predicted class.</p>
             <p>This tool is a research prototype. Do not use for clinical decisions without expert review.</p>
+            <p>Usage statistics record the normalized variant, result status, application version, and an authenticated account or anonymous browser identifier. They do not include free text, IP addresses, or user-agent data.</p>
         </div>
     </footer>
 
     <script src="/static/js/api.js?v=20260828-1"></script>
-    <script src="/static/js/core.js?v=20260828-1"></script>
+    <script src="/static/js/core.js?v=20260904-1"></script>
     <script src="/static/js/rules.js?v=20260828-1"></script>
     <script src="/static/js/graphs.js?v=20260828-1"></script>
     <script src="/static/js/classification.js?v=20260828-1"></script>
     <script src="/static/js/formatters.js?v=20260828-1"></script>
-    <script src="/static/js/manual-review.js?v=20260902-1"></script>
+    <script src="/static/js/manual-review.js?v=20260902-2"></script>
     <script src="/static/js/batch.js?v=20260901-1"></script>
     <script src="/static/js/app.js?v=20260828-1"></script>
 </body>

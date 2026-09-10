@@ -37,6 +37,7 @@ def _criterion_models(values: dict, *, applies: bool) -> list[CriterionResult]:
             reason=criterion.get("reason", ""),
             source=criterion.get("source", ""),
             decision_path=criterion.get("decision_path"),
+            table9_audit=criterion.get("table9_audit"),
             single_strong_likely_benign_eligible=criterion.get(
                 "single_strong_likely_benign_eligible", False
             ),
@@ -123,6 +124,13 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
             for item in clingen.get("evidence_codes", [])
             if item.get("code")
         ],
+        erepo_guideline_versions=[
+            str(value) for value in clingen.get("guideline_versions", []) if value
+        ],
+        erepo_cspec_ids=[
+            str(value) for value in clingen.get("cspec_ids", []) if value
+        ],
+        erepo_assertion_id=str(clingen.get("assertion_id") or ""),
     )
 
 

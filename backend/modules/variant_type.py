@@ -39,14 +39,20 @@ def infer_variant_type(c_notation: str, p_notation: str) -> str:
         return "initiation_codon"
     if p and "=" in p:
         return "synonymous"
+    protein_confirms_inframe = bool(
+        p
+        and "?" not in p
+        and "fs" not in p
+        and re.search(r"(?:delins|del|dup|ins)", p)
+    )
     if "delins" in c:
-        return "inframe_delins" if p else "delins"
+        return "inframe_delins" if protein_confirms_inframe else "delins"
     if "del" in c:
-        return "inframe_deletion" if p else "deletion"
+        return "inframe_deletion" if protein_confirms_inframe else "deletion"
     if "ins" in c:
-        return "inframe_insertion" if p else "insertion"
+        return "inframe_insertion" if protein_confirms_inframe else "insertion"
     if "dup" in c:
-        return "inframe_insertion" if p else "duplication"
+        return "inframe_insertion" if protein_confirms_inframe else "duplication"
     if p and "=" not in p and "?" not in p and "fs" not in p and "ter" not in p:
         return "missense"
     return "unknown"

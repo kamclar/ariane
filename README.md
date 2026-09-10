@@ -255,6 +255,25 @@ protein-level PS1 implementation. It indicates that a reviewer should look for
 a known P/LP reference variant with the same documented or confidently
 predicted splice consequence.
 
+### API status and batch responses
+
+The API contract is currently beta and primarily supports the web interface.
+It has not yet been declared a stable public interface for large external
+integrations.
+
+`POST /api/classify/batch` accepts at most 200 items and preserves their input
+order. Each item is validated separately. An invalid variant is returned as an
+item with `status: "error"`; it does not prevent valid items in the same batch
+from being classified. HTTP 422 is reserved for an invalid top-level request,
+an empty list, or a batch exceeding the item limit. Clients should not retry a
+422 response without correcting the request.
+
+Classification responses may contain `rna_review`, `splice_ps1_review`,
+`protein_ps1_review`, or `initiation_review`. These objects are review aids.
+`is_evidence_criterion: false` means that the recommendation adds no criterion,
+points, or automatic class change. A separate, documented manual-evidence
+request is required to calculate an amended working result.
+
 `PS1_SPLICE` can then be added manually as a structured curated record when a
 reviewer confirms the reference variant, P/LP classification source, same splice
 event, similar or stronger prediction evidence, and Appendix J/Table 17

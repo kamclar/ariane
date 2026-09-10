@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from backend.services.classification_presentation import _external_model
+from backend.services.classification_presentation import _criterion_models, _external_model
 
 
 def evidence(*, clinvar, clingen):
@@ -19,6 +19,9 @@ def test_clingen_result_remains_visible_when_clinvar_has_no_record():
             "status": "ok",
             "classification": "Likely pathogenic",
             "evidence_codes": [{"code": "PS3", "status": "Met"}],
+            "guideline_versions": ["1.2.0"],
+            "cspec_ids": ["GN092"],
+            "assertion_id": "CG:test",
         },
     ))
 
@@ -26,6 +29,9 @@ def test_clingen_result_remains_visible_when_clinvar_has_no_record():
     assert result.enigma_ep_class == "Likely pathogenic"
     assert result.enigma_ep_source == "ClinGen ERepo"
     assert result.erepo_evidence_codes == ["PS3"]
+    assert result.erepo_guideline_versions == ["1.2.0"]
+    assert result.erepo_cspec_ids == ["GN092"]
+    assert result.erepo_assertion_id == "CG:test"
 
 
 def test_external_section_has_explicit_status_when_both_services_fail():
@@ -54,3 +60,27 @@ def test_ambiguous_clinvar_candidates_are_reported_without_selecting_one():
     assert result.clinvar_status == "ambiguous"
     assert "123, 456" in result.clinvar_message
     assert not result.clinvar_classification
+
+
+def test_table9_audit_is_preserved_in_public_criterion_model():
+    audit = {
+        "gene": "BRCA1",
+        "c_notation": "c.5074G>A",
+        "standardised_text": "Complete reviewed Table 9 text.",
+        "assay_results": ["Protein and mRNA assay result."],
+    }
+    criteria = _criterion_models(
+        {
+            "PS3": {
+                "code": "PS3",
+                "strength": "Strong",
+                "points": 4,
+                "applies": True,
+                "table9_audit": audit,
+            }
+        },
+        applies=True,
+    )
+
+    assert len(criteria) == 1
+    assert criteria[0].table9_audit == audit

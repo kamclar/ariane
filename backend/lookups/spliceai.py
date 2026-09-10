@@ -616,14 +616,14 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
 SPLICEAI_PP3_ALLOWED_TYPES = {
     "synonymous", "silent",
     "missense",
-    "inframe_deletion", "inframe_insertion", "inframe_delins", "delins",
+    "inframe_deletion", "inframe_insertion", "inframe_delins",
     "intronic",
 }
 
 SPLICEAI_BP4_ALLOWED_TYPES = {
     "synonymous", "silent",
     "missense",
-    "inframe_deletion", "inframe_insertion", "inframe_delins", "delins",
+    "inframe_deletion", "inframe_insertion", "inframe_delins",
     "intronic",
 }
 

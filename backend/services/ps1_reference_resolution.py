@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
 
 from backend.lookups import clingen, clinvar, spliceai
+from backend.modules.ps1 import lookup_ps1_reference_variant
 from backend.modules.variant_input import normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
 
@@ -43,6 +44,7 @@ class Ps1ReferenceDependencies:
     spliceai_status: Callable[[str, str], Dict[str, Any]]
     clinvar_lookup: Callable[[str, str], Dict[str, Any]]
     clingen_lookup: Callable[[str, str], Dict[str, Any]]
+    registry_lookup: Callable[[str, str], Optional[Dict[str, Any]]]
 
     @classmethod
     def production(cls) -> "Ps1ReferenceDependencies":
@@ -51,6 +53,7 @@ class Ps1ReferenceDependencies:
             spliceai_status=spliceai.get_spliceai_status,
             clinvar_lookup=clinvar.clinvar_lookup,
             clingen_lookup=clingen.clingen_erepo_lookup,
+            registry_lookup=lookup_ps1_reference_variant,
         )
 
 
@@ -118,12 +121,16 @@ async def resolve_ps1_reference(
 
     clinvar = dict(clinvar or {})
     clingen = dict(clingen or {})
+    registry_reference = dict(
+        deps.registry_lookup(reference.gene, reference.c_notation) or {}
+    )
     aggregate = dict(clinvar.get("aggregate") or {})
     stars = _clinvar_review_stars(str(aggregate.get("review_status") or ""))
     aggregate_class = _classification_label(aggregate.get("classification"))
     enigma_submission = dict(clinvar.get("enigma_submission") or {})
     enigma_class = _classification_label(enigma_submission.get("class"))
     erepo_class = _classification_label(clingen.get("classification"))
+    registry_class = _classification_label(registry_reference.get("classification"))
 
     classification = ""
     verification = "unresolved"
@@ -140,6 +147,17 @@ async def resolve_ps1_reference(
         source = "ClinGen Evidence Repository ENIGMA assertion"
         if clingen.get("caid"):
             source += f" {clingen['caid']}"
+    elif (
+        registry_reference.get("classification_basis")
+        == "enigma_st7_v1_2_reference_set"
+        and registry_class in P_LP
+    ):
+        classification = registry_class
+        verification = "enigma_st7_v1_2_reference_set"
+        source = "ENIGMA Supplementary Table 7 v1.2"
+        original_source = str(registry_reference.get("classification_source") or "").strip()
+        if original_source:
+            source += f"; source recorded in ST7: {original_source}"
     elif aggregate_class in P_LP:
         # An aggregate ClinVar conclusion is candidate-discovery context only.
         # It is not the underlying VCEP evidence record and must not prefill
@@ -150,19 +168,37 @@ async def resolve_ps1_reference(
 
     same_missense = assessed.p_notation == reference.p_notation
     different_nucleotide = assessed.c_notation != reference.c_notation
+    registry_conditions_pass = (
+        verification != "enigma_st7_v1_2_reference_set"
+        or (
+            registry_reference.get("reference_status") == "approved"
+            and registry_reference.get("reference_splice_evidence_status")
+            in {"none_identified", "normal"}
+            and registry_reference.get("classification_ps1_dependency_used") is False
+        )
+    )
     objective_checks_pass = (
         verification == "external_vcep_assertion"
-        and same_missense
+        or verification == "enigma_st7_v1_2_reference_set"
+    ) and (
+        same_missense
         and different_nucleotide
         and assessed_score is not None
         and reference_score is not None
         and assessed_score <= 0.1
         and reference_score <= 0.1
+        and registry_conditions_pass
     )
     if verification == "external_vcep_assertion":
         review_message = (
             "An ENIGMA VCEP P/LP assertion was found. Complete the defined RNA/splice "
             "source check and reciprocal PS1 dependency review before submitting PS1."
+        )
+    elif verification == "enigma_st7_v1_2_reference_set":
+        review_message = (
+            "An ENIGMA ST7 v1.2 P/LP reference classification was found and is "
+            "accepted as the classification basis. ARIANE also checked its recorded "
+            "protein branch and defined RNA/splice sources."
         )
     elif aggregate_class in P_LP:
         review_message = (
@@ -213,6 +249,22 @@ async def resolve_ps1_reference(
         "classification": classification,
         "classification_verification": verification,
         "classification_source": source,
+        "reference_registry_status": str(
+            registry_reference.get("reference_status") or "not_found"
+        ),
+        "reference_confirmed_splice_status": str(
+            registry_reference.get("reference_splice_evidence_status") or "not_assessed"
+        ),
+        "reference_splice_sources_checked": list(
+            registry_reference.get("reference_splice_sources_checked") or []
+        ),
+        "reference_classification_used_ps1": (
+            "no"
+            if registry_reference.get("classification_ps1_dependency_used") is False
+            else "yes"
+            if registry_reference.get("classification_ps1_dependency_used") is True
+            else "unknown"
+        ),
         "objective_ps1_checks_pass": objective_checks_pass,
         "review_message": review_message,
         "references": references,

@@ -5,12 +5,22 @@ used as an oracle, so a change in clinical output requires a deliberate review
 of this corpus.
 """
 
+import json
+
 import pytest
 
 from backend.classification_dag import ClassificationInputs, execute_classification
+from backend.classification_dag.manual import execute_manual_evidence
+from backend.config import ST2_SPLICE_EVIDENCE_PATH
+from backend.lookups.founder_variants import (
+    FOUNDER_VARIANT_SNAPSHOT,
+    lookup_pathogenic_founder_variant,
+)
 from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
 from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+from backend.modules.pvs1 import evaluate_pvs1
+from backend.modules.pvs1_rna import evaluate_pvs1_rna
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.variant_type import infer_variant_type
 from backend.population_frequency.indel_size import is_indel_allele
@@ -60,6 +70,33 @@ REGRESSION_VARIANTS = (
      "Unknown", 5, 11, {"PVS1": ("Very Strong", 8),
      "PM5_PTC": ("Strong", 4), "BP5": ("Supporting", -1)}, True,
      ("PM2",)),
+)
+
+
+FOUNDER_REGRESSION_VARIANTS = tuple(
+    (
+        record["gene"],
+        record["canonical_c_notation"],
+        record["protein_notation"],
+    )
+    for record in json.loads(
+        FOUNDER_VARIANT_SNAPSHOT.read_text(encoding="utf-8")
+    )["variants"]
+)
+
+
+UNQUANTIFIED_PATIENT_RNA_VARIANTS = tuple(
+    (record["gene"], record["c_notation"])
+    for record in json.loads(
+        ST2_SPLICE_EVIDENCE_PATH.read_text(encoding="utf-8")
+    )["variants"]
+    if " ".join(
+        str(record.get("splicing_assay_result_category") or "").split()
+    ).lower()
+    == (
+        "patient not allele-specific; aberrant transcripts consistent with "
+        "loss of function"
+    )
 )
 
 
@@ -176,9 +213,9 @@ def test_protein_ps1_applied_and_review_paths_are_explicit_regressions(
     assert result["protein_ps1_review"]["recommended"] is review_required
 
 
-def _frequency_input(*, max_af=None, found=False, absent=False):
+def _frequency_input(*, gene="BRCA1", max_af=None, found=False, absent=False):
     status = "found" if found else "absent"
-    policy = classification_policy_for_gene("BRCA1")
+    policy = classification_policy_for_gene(gene)
     return {
         "policy_id": policy["policy_id"],
         "classification_policy": policy,
@@ -253,3 +290,171 @@ def test_population_terminal_mixed_and_absent_paths_are_explicit_regressions(
     assert result["total_points"] == expected_points
     assert _criterion_summary(result) == expected_criteria
     assert result["mixed_evidence"] is expected_mixed
+
+
+def test_c4185_automatic_and_expert_reviewed_rna_results_are_distinct():
+    automatic = execute_classification(
+        _inputs(
+            "BRCA1",
+            "c.4185G>A",
+            "p.(Gln1395=)",
+            0.95,
+            None,
+            "Unknown",
+        )
+    ).result
+
+    assert automatic["predicted_class"] == 3
+    assert automatic["total_points"] == 5
+    assert _criterion_summary(automatic) == {
+        "PP3": ("Supporting", 1),
+        "PP4": ("Strong", 4),
+    }
+    assert automatic["rna_review"]["recommended"] is True
+    assert "curated_strength" not in automatic["rna_review"][
+        "manual_review_prefill"
+    ]
+
+    base_criteria = [
+        {"name": code, **criterion}
+        for code, criterion in automatic["criteria"].items()
+    ]
+    reviewed = execute_manual_evidence(
+        base_criteria,
+        [{
+            "code": "PVS1_RNA",
+            "enabled": True,
+            "evidence": {
+                "assay_scope": "mrna_only",
+                "rna_conclusion": "damaging",
+                "functional_transcript_remaining": "absent_or_minimal",
+                "curated_strength": "Strong",
+                "transcript_accession": "NM_007294.4",
+                "tissue_or_cell_type": "patient-derived RNA",
+                "nmd_assessed": "no",
+            },
+        }],
+        {
+            "gene": "BRCA1",
+            "c_notation": "c.4185G>A",
+            "p_notation": "p.(Gln1395=)",
+        },
+    ).result
+
+    assert reviewed["predicted_class"] == 4
+    assert reviewed["total_points"] == 8
+    assert reviewed["manual_criteria"][0]["code"] == "PVS1_RNA"
+    assert reviewed["manual_criteria"][0]["selected_strength"] == "Strong"
+    assert reviewed["manual_criteria"][0]["points"] == 4
+    assert reviewed["evidence_interactions"] == [{
+        "status": "deduplicated",
+        "mechanism": "experimentally_confirmed_splicing",
+        "criteria": ["PVS1_RNA", "PP3"],
+        "retained": ["PVS1_RNA"],
+        "suppressed": ["PP3"],
+        "reason": (
+            "Accepted damaging mRNA evidence replaces weaker bioinformatic "
+            "or predictive evidence for the same splicing consequence."
+        ),
+        "source": "ENIGMA v1.2 Figure 1B and Appendix E",
+        "source_url": (
+            "https://cspec.genome.network/cspec/File/id/"
+            "11e62fec-23b0-4a3e-b2df-751855301746/data"
+        ),
+        "review_required": False,
+    }]
+
+
+@pytest.mark.parametrize("gene,c_notation", UNQUANTIFIED_PATIENT_RNA_VARIANTS)
+def test_unquantified_patient_rna_never_assigns_automatic_pvs1_rna(
+    gene,
+    c_notation,
+):
+    result = evaluate_pvs1_rna(gene, c_notation)
+
+    assert result["applies"] is False
+    assert result["points"] == 0
+    assert result["review_required"] is True
+    assert result["application_status"] == "review_required"
+    assert result["appendix_branch"] == (
+        "unquantified_patient_mrna_requires_consensus_review"
+    )
+    assert "curated_strength" not in result["manual_review_prefill"]
+
+
+@pytest.mark.parametrize(
+    "gene,c_notation,p_notation",
+    FOUNDER_REGRESSION_VARIANTS,
+)
+def test_all_registered_pathogenic_founders_suppress_ba1_and_bs1(
+    gene,
+    c_notation,
+    p_notation,
+):
+    frequency = _frequency_input(gene=gene, max_af=0.002, found=True)
+    frequency["founder_exception"] = lookup_pathogenic_founder_variant(
+        gene, c_notation
+    )
+
+    result = execute_classification(
+        ClassificationInputs(
+            gene=gene,
+            variant_type=infer_variant_type(c_notation, p_notation),
+            c_notation=c_notation,
+            p_notation=p_notation,
+            gnomad_data=frequency,
+            frequency_policy=classification_policy_for_gene(gene),
+        )
+    ).result
+
+    assert frequency["founder_exception"]["status"] == "pathogenic_founder"
+    assert "BA1" not in result["criteria"]
+    assert not any(code.startswith("BS1") for code in result["criteria"])
+    assert result["excluded_criteria"]["BA1"]["applies"] is False
+    assert "pathogenic founder" in result["excluded_criteria"]["BA1"][
+        "reason"
+    ]
+
+
+@pytest.mark.parametrize(
+    (
+        "gene,c_notation,p_notation,expected_applies,"
+        "expected_pvs1_code,expected_pm5_code"
+    ),
+    (
+        (
+            "BRCA1", "c.5560C>T", "p.(Leu1854Ter)", True,
+            "PVS1", "PM5_Strong (PTC)",
+        ),
+        (
+            "BRCA1", "c.5563C>T", "p.(Ile1855Ter)", False,
+            "PVS1_N/A", None,
+        ),
+        (
+            "BRCA2", "c.9925G>T", "p.(Glu3309Ter)", True,
+            "PVS1", "PM5_Strong (PTC)",
+        ),
+        (
+            "BRCA2", "c.9928A>T", "p.(Lys3310Ter)", False,
+            "PVS1_N/A", None,
+        ),
+    ),
+)
+def test_last_exon_ptc_boundaries_are_pinned_for_both_genes(
+    gene,
+    c_notation,
+    p_notation,
+    expected_applies,
+    expected_pvs1_code,
+    expected_pm5_code,
+):
+    result = evaluate_pvs1(
+        gene,
+        "nonsense",
+        p_notation,
+        c_notation,
+    )
+
+    assert result["applies"] is expected_applies
+    assert result["pvs1_code"] == expected_pvs1_code
+    assert result["pm5_code"] == expected_pm5_code
