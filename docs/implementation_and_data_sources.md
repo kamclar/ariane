@@ -862,11 +862,36 @@ SpliceAI větev:
 - pouze pro povolené typy, například synonymous, missense, in-frame a intronic,
 - nepoužívá se jako obecné PVS1 pro nonsense, frameshift, exonové CNV nebo canonical splice-site varianty.
 
+Runtime používá profil `enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1`:
+GRCh38, `distance=10000`, `mask=0`, `basic` anotaci a referenční transkript
+daného genu. Skóre je maximum `DS_AG`, `DS_AL`, `DS_DG` a `DS_DL` pouze v
+jednom přesně odpovídajícím řádku referenčního transkriptu. Není to maximum přes
+všechny transkripty. Pro BRCA1 musí řádek současně obsahovat
+`ENST00000357654.9` a `NM_007294.4`, pro BRCA2 `ENST00000380152.8` a
+`NM_000059.4`. Jiná verze accessionu se nepovažuje za shodu. Stejné podmínky
+platí pro živou odpověď i runtime cache.
+
+Kontrolní dotaz pro `BRCA2 c.7805+9T>G` dne 10. září 2026 vrátil v referenčním
+řádku `DS_AG=0,030`, `DS_AL=0,016`, `DS_DG=0,206` a `DS_DL=0,049`. Hodnota
+použitá ARIANE je proto `0,206`, v UI zaokrouhleně `0,21`. Vyšší hodnota z
+jiného transkriptu by tuto hodnotu nepřepsala.
+
 Povolené typy jsou uzavřený seznam. Obecné `deletion`, `insertion`, `duplication`
 nebo `delins` bez potvrzeného in-frame proteinového následku do Figure 1A
 nevstupují. U intronické varianty musí být z `c.` notace ověřitelné, že nejde o
 donorovou nebo akceptorovou pozici `+/-1,2`. Neznámý proteinový následek ani
 chybějící intronická pozice se nepovažují za splněnou podmínku.
+
+Operace v `c.` notaci sama neurčuje proteinovou větev. DNA `delins`, který podle
+lokálního referenčního transkriptu způsobí jednu aminokyselinovou substituci, se
+pro rozhodování klasifikuje jako `missense`. Proteinová delece, inserce,
+duplikace nebo skutečný proteinový `delins` vstoupí do odpovídající in-frame
+větve. Frameshift, synonymous a jednoduchý nonsense následek zůstávají ve svých
+vlastních větvích. Zdrojové pole typu varianty z BRCA Exchange snapshotu je
+auditní údaj a runtime typování nepřebíjí.
+Pokud u coding DNA `delins` nelze proteinový následek určit, ARIANE nevrátí
+klasifikaci. Odpověď vysvětlí, že bez následku nelze vybrat PTC nebo Figure 1A
+větev.
 
 BayesDel_noAF větev:
 
@@ -877,8 +902,10 @@ BayesDel_noAF větev:
 BayesDel se vyhodnocuje pouze po skutečném výsledku SpliceAI a průchodu
 příslušnou větví Figure 1A. Chybějící SpliceAI není pásmo `no impact` ani
 `not informative`. Při nedostupném SpliceAI se výsledek Figure 1A označí jako
-nedostupný a nepoužije se PP3, BP4, BP1 ani BP7. Skutečně naměřené SpliceAI
-větší než 0,1 a menší než 0,2 zůstává oficiálním pásmem `not informative`.
+nedostupný a automatická klasifikace se nevrátí. Timeout nebo dočasná síťová
+chyba se vrací jako `spliceai_temporarily_unavailable` s `retryable: true` a
+konkrétním důvodem zdroje. Skutečně naměřené SpliceAI větší než 0,1 a menší než
+0,2 zůstává oficiálním pásmem `not informative`.
 U missense nebo in-frame varianty může tato větev podle Figure 1A pokračovat
 přes funkční doménu k BayesDel.
 
@@ -940,7 +967,12 @@ splňuje BP1 Strong.
 
 ## 4. Kritéria vyžadující manuální revizi
 
-Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 a BS4. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem klinických LR. PVS1 RNA může přidat z přesného oficiálního ST2 záznamu a obecného rozhodovacího pravidla popsaného výše. Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z HGVS varianty.
+Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2, BS4 ani PVS1
+RNA. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem
+klinických LR. Přesný oficiální záznam ST2 slouží jen k předvyplnění PVS1 RNA
+revize. Síla a body vzniknou až po úplné odborné kontrole v manuálním DAGu.
+Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z
+HGVS varianty.
 
 Strukturovaná manuální část dále podporuje:
 
@@ -985,6 +1017,31 @@ důvodem a provenance. `EvidenceBundle` vznikne až po dokončení provider vrst
 Nedostupná hodnota zůstává `UNAVAILABLE` a nepřevádí se na nulu ani na negativní
 výsledek pravidla. ClinVar a ClinGen ERepo jsou pouze externí porovnání a nejsou
 vstupem klasifikace.
+
+Před vydáním výsledku proběhne centrální kontrola úplnosti v
+`backend/services/classification_completeness.py`. Kontrola je závislá na
+skutečné větvi varianty:
+
+- Figure 1A vyžaduje úspěšný SpliceAI výsledek hodnocené varianty a všech
+  potřebných kandidátních PS1 referencí,
+- běžná populační větev vyžaduje dokončený lookup obou gnomAD datasetů
+  uvedených v aktivní policy,
+- indely v rozsahu Appendix G vyžadují dokončené strukturální populační
+  rozhodnutí,
+- missense nebo in-frame varianta uvnitř funkční domény vyžaduje BayesDel_noAF,
+  pokud SpliceAI samo neukončilo větev hodnotou alespoň 0,2.
+První chybějící povinný vstup ukončí požadavek bez klasifikace a vrátí zdroj,
+stav, důvod a informaci, zda má opakování smysl. Platné `absent`,
+`filtered_record`, výsledek pod prahem a explicitní `not_applicable` nejsou
+selhání zdroje. Metodicky dosud nepotvrzená šířka PM2 coverage zůstává zvlášť
+označeným dokončeným stavem bez automatického PM2. Není vydávána za technické
+selhání ani za splněné kritérium.
+
+Stav founder kontroly `unresolved` není technické selhání provideru. Je to
+explicitní požadavek na odbornou revizi kvůli neúplnému founder registru.
+Automatická část v tomto stavu fail-closed nepřidá BA1 ani BS1 a zobrazí důvod,
+ale ostatní nezávisle dokončená kritéria mohou vytvořit automatický Module 1
+výsledek.
 
 Kritéria se po sestavení evidence vyhodnocují v tomto logickém pořadí:
 
@@ -1988,7 +2045,7 @@ evidence.
 | `rule.population_frequency` | BA1, BS1 a PM2 z předané gnomAD evidence |
 | `rule.exon_cnv.population` | Populační větev pro exonové delece a duplikace |
 | `rule.functional.table9` | PS3 nebo BS3 a Figure 1C decision path |
-| `rule.pvs1_pm5` | PVS1, PVS1 RNA a PM5 PTC |
+| `rule.pvs1_pm5` | PVS1 a PM5 PTC; PVS1 RNA pouze jako nebodované podklady pro odbornou revizi |
 | `rule.clinical_lr` | PP4 nebo BP5 z validované kombinované klinické LR evidence |
 | `rule.protein_ps1` | Proteinové PS1 ze schváleného registru referencí |
 | `rule.bioinformatic.figure1a` | PP3, BP4, BP7 a BP1 podle Figure 1A |

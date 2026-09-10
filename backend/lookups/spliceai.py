@@ -223,7 +223,7 @@ def _score_entry_is_complete(entry: object) -> bool:
     return score == max(delta_scores.values()) and score == delta_scores[max_field]
 
 
-def _runtime_entry_matches_profile(entry: object) -> bool:
+def _runtime_entry_matches_profile(entry: object, gene: str) -> bool:
     if not isinstance(entry, dict):
         return False
     if any(
@@ -236,6 +236,8 @@ def _runtime_entry_matches_profile(entry: object) -> bool:
             entry.get("annotation_subset") != SPLICEAI_ANNOTATION_SUBSET,
             entry.get("aggregation") != SPLICEAI_AGGREGATION,
             entry.get("transcript_policy") != SPLICEAI_TRANSCRIPT_POLICY,
+            entry.get("selected_transcript")
+            != REFERENCE_TRANSCRIPTS.get(gene, {}).get("ensembl"),
         )
     ):
         return False
@@ -285,38 +287,17 @@ def _row_matches_reference_transcript(gene: str, row: dict) -> bool:
     reference = REFERENCE_TRANSCRIPTS.get(gene)
     if not reference:
         return False
-
-    ensembl = reference["ensembl"]
-    ensembl_no_version = ensembl.split(".")[0]
-    t_id = str(row.get("t_id") or "")
-    if t_id == ensembl or t_id.split(".")[0] == ensembl_no_version:
-        return True
-
-    refseq = reference["refseq"]
-    refseq_no_version = refseq.split(".")[0]
-    for item in row.get("t_refseq_ids") or []:
-        item = str(item)
-        if item == refseq or item.split(".")[0] == refseq_no_version:
-            return True
-    return False
+    return (
+        str(row.get("t_id") or "") == reference["ensembl"]
+        and reference["refseq"]
+        in {str(value) for value in row.get("t_refseq_ids") or []}
+    )
 
 
 def _reference_transcript_match_rank(gene: str, row: dict) -> int:
-    reference = REFERENCE_TRANSCRIPTS.get(gene)
-    if not reference:
-        return 0
-    t_id = str(row.get("t_id") or "")
-    if t_id == reference["ensembl"]:
-        return 4
-    if t_id.split(".")[0] == reference["ensembl"].split(".")[0]:
-        return 3
-    refseq_ids = [str(value) for value in row.get("t_refseq_ids") or []]
-    if reference["refseq"] in refseq_ids:
-        return 2
-    refseq_base = reference["refseq"].split(".")[0]
-    if any(value.split(".")[0] == refseq_base for value in refseq_ids):
-        return 1
-    return 0
+    # The active profile pins transcript versions. A versionless match would
+    # make a later annotation release look equivalent to the reviewed source.
+    return 1 if _row_matches_reference_transcript(gene, row) else 0
 
 
 def _select_spliceai_score(gene: str, scores: list[dict]) -> dict:
@@ -352,6 +333,17 @@ def _select_spliceai_score(gene: str, scores: list[dict]) -> dict:
                 "error": "Ambiguous SpliceAI records for the required reference transcript",
             }
         _, reference_row, reference_audit = best_matches[0]
+
+    if SPLICEAI_TRANSCRIPT_POLICY == "reference_transcript" and reference_row is None:
+        reference = REFERENCE_TRANSCRIPTS.get(gene) or {}
+        return {
+            "score": None,
+            "error": (
+                "SpliceAI response has no complete score row for the exact "
+                f"reference transcript {reference.get('ensembl') or 'unknown'} / "
+                f"{reference.get('refseq') or 'unknown'}"
+            ),
+        }
 
     max_any_score = max_audit["score"]
     max_any_transcript = str(max_row.get("t_id") or "")
@@ -541,7 +533,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
     api_cache = _load_api_cache()
     if cache_key in api_cache:
         entry = api_cache[cache_key]
-        if _runtime_entry_matches_profile(entry):
+        if _runtime_entry_matches_profile(entry, gene):
             score = float(entry["score"])
             SPLICEAI_CACHE[cache_key] = score
             SPLICEAI_STATUS_CACHE[variant_key] = {

@@ -120,61 +120,6 @@ def pvs1_prediction_deduplication() -> Dict[str, Any]:
     )
 
 
-def apply_automatic_rna_interactions(
-    criteria: Dict[str, Dict[str, Any]],
-) -> List[Dict[str, Any]]:
-    """Apply Figure 1B deduplication to automatically accepted PVS1 (RNA)."""
-    if "PVS1_RNA" not in criteria:
-        return []
-
-    warnings: List[Dict[str, Any]] = []
-    replaceable = BIOINFORMATIC_CODES | {"PS1", "PS1_SPLICE"}
-    suppressed = sorted(code for code in replaceable if code in criteria)
-    for code in suppressed:
-        criteria.pop(code, None)
-    if suppressed:
-        warnings.append(
-            interaction(
-                status="deduplicated",
-                mechanism="experimentally_confirmed_splicing",
-                criteria=["PVS1_RNA"] + suppressed,
-                retained=["PVS1_RNA"],
-                suppressed=suppressed,
-                reason=(
-                    "PVS1 (RNA) from ENIGMA-curated mRNA evidence replaces "
-                    "weaker bioinformatic or predictive evidence for the same "
-                    "splicing consequence."
-                ),
-                source="ENIGMA v1.2 Figure 1B and Appendix E",
-                source_url=APPENDIX_URL,
-            )
-        )
-
-    functional = sorted(PROTEIN_FUNCTION_CODES & set(criteria))
-    if functional:
-        warnings.append(
-            interaction(
-                status="review_required",
-                mechanism="splicing_and_protein_function",
-                criteria=["PVS1_RNA"] + functional,
-                retained=["PVS1_RNA"] + functional,
-                reason=(
-                    "PVS1 (RNA) and PS3/BS3 are retained because the functional "
-                    "code represents a reviewed protein or cellular-function "
-                    "result beyond merely detecting an aberrant transcript. If "
-                    "the functional assay only documents aberrant splicing, use "
-                    "PVS1 (RNA) without PS3/BS3. Confirm the assay scope and "
-                    "independence of the functional result. VCEP clarification "
-                    "of this combination is pending."
-                ),
-                source="ENIGMA v1.2 Figure 1C and Appendix E",
-                source_url=APPENDIX_URL,
-                review_required=True,
-            )
-        )
-    return warnings
-
-
 def apply_manual_rna_interactions(
     combined: Dict[str, Dict[str, Any]],
     applied_manual_codes: set[str],

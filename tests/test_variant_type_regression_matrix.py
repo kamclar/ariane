@@ -1,5 +1,8 @@
 """Regression matrix for variant-type routing through ENIGMA Module 1."""
 
+import json
+from pathlib import Path
+import re
 import unittest
 
 from tests.dag_test_support import classify_with_dag as evaluate_variant
@@ -19,6 +22,30 @@ class VariantTypeInferenceMatrixTests(unittest.TestCase):
         ("intronic SNV", "c.548-9A>G", "p.(?)", "intronic"),
         ("canonical splice site", "c.8953+2T>C", "p.(?)", "splice_site"),
         ("in-frame deletion", "c.3891_3893del", "p.(Ser1298del)", "inframe_deletion"),
+        (
+            "DNA delins encoding one amino-acid substitution",
+            "c.131_132delinsCT",
+            "p.(Cys44Ser)",
+            "missense",
+        ),
+        (
+            "DNA delins encoding a protein deletion",
+            "c.8034_8046delinsA",
+            "p.(Asp2679_Ala2682del)",
+            "inframe_deletion",
+        ),
+        (
+            "DNA delins encoding a protein delins",
+            "c.3789_3790delinsTT",
+            "p.(Leu1263_Lys1264delinsPheTer)",
+            "inframe_delins",
+        ),
+        (
+            "DNA delins with unresolved protein consequence",
+            "c.922_923delinsGC",
+            "p.(?)",
+            "delins",
+        ),
         (
             "exon deletion",
             "c.(793+1_794-1)_(1909+1_1910-1)del",
@@ -45,6 +72,35 @@ class VariantTypeInferenceMatrixTests(unittest.TestCase):
                     infer_variant_type(c_notation, p_notation),
                     expected_type,
                 )
+
+    def test_all_pinned_dna_delins_protein_substitutions_route_as_missense(self):
+        snapshot_path = (
+            Path(__file__).resolve().parents[1]
+            / "data"
+            / "precomputed"
+            / "brca_normalized_indel_snapshot.index.json"
+        )
+        records = json.loads(snapshot_path.read_text(encoding="utf-8")).values()
+        simple_substitution = re.compile(
+            r"^p\.\(?[A-Z][a-z]{2}\d+[A-Z][a-z]{2}\)?$"
+        )
+        candidates = [
+            record
+            for record in records
+            if "delins" in record["canonical_c_notation"]
+            and "Ter" not in record.get("p_notation", "")
+            and simple_substitution.fullmatch(record.get("p_notation", ""))
+        ]
+
+        self.assertEqual(len(candidates), 136)
+        self.assertTrue(all(record.get("grch38") for record in candidates))
+        self.assertTrue(all(
+            infer_variant_type(
+                record["canonical_c_notation"],
+                record["p_notation"],
+            ) == "missense"
+            for record in candidates
+        ))
 
 
 class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
@@ -77,6 +133,17 @@ class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
             "gene": "BRCA1",
             "c": "c.5366C>T",
             "p": "p.(Ala1789Val)",
+            "spliceai": 0.05,
+            "bayesdel": 0.50,
+            "required": {"PP3"},
+            "forbidden": {"PVS1", "PM5_PTC", "BP1", "BP4", "BP7"},
+            "class": 3,
+        },
+        {
+            "label": "DNA delins encoding missense enters Figure 1A",
+            "gene": "BRCA1",
+            "c": "c.131_132delinsCT",
+            "p": "p.(Cys44Ser)",
             "spliceai": 0.05,
             "bayesdel": 0.50,
             "required": {"PP3"},

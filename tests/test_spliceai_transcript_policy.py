@@ -53,6 +53,62 @@ class SpliceAITranscriptPolicyTests(unittest.TestCase):
         self.assertEqual(selected["max_any_transcript_score"], 0.31)
         self.assertEqual(selected["max_any_transcript"], "ENST00000634433.2")
 
+    def test_reference_transcript_policy_rejects_a_different_transcript_version(self):
+        records = [
+            score_row("ENST00000357654.10", "NM_007294.4", ds_al=0.23),
+        ]
+
+        selected = spliceai._select_spliceai_score("BRCA1", records)
+
+        self.assertIsNone(selected["score"])
+        self.assertIn("exact reference transcript", selected["error"])
+        self.assertIn("ENST00000357654.9", selected["error"])
+
+    def test_runtime_cache_requires_the_exact_profile_transcript(self):
+        row = score_row("ENST00000357654.9", "NM_007294.4", ds_al=0.23)
+        audit = spliceai._row_score_audit(row)
+        entry = {
+            **audit,
+            "scoring_profile_id": spliceai.SPLICEAI_PROFILE_ID,
+            "scoring_profile_sha256": spliceai.SPLICEAI_PROFILE_SHA256,
+            "genome_assembly": spliceai.SPLICEAI_GENOME_ASSEMBLY,
+            "distance": spliceai.SPLICEAI_MAX_DISTANCE,
+            "mask": spliceai.SPLICEAI_MASK,
+            "annotation_subset": spliceai.SPLICEAI_ANNOTATION_SUBSET,
+            "aggregation": spliceai.SPLICEAI_AGGREGATION,
+            "transcript_policy": "reference_transcript",
+            "selected_transcript": "ENST00000357654.9",
+        }
+
+        self.assertTrue(spliceai._runtime_entry_matches_profile(entry, "BRCA1"))
+        entry["selected_transcript"] = "ENST00000357654.10"
+        self.assertFalse(spliceai._runtime_entry_matches_profile(entry, "BRCA1"))
+
+    def test_brca2_7805_plus_9_current_api_components_select_0206(self):
+        records = [
+            score_row(
+                "ENST00000380152.8",
+                "NM_000059.4",
+                ds_al=0.016,
+                ds_dl=0.049,
+            ),
+            score_row(
+                "ENST00000700202.2",
+                "NM_001406720.1",
+                ds_al=0.90,
+            ),
+        ]
+        records[0]["DS_AG"] = "0.030"
+        records[0]["DS_DG"] = "0.206"
+
+        selected = spliceai._select_spliceai_score("BRCA2", records)
+
+        self.assertEqual(selected["selected_transcript"], "ENST00000380152.8")
+        self.assertEqual(selected["reference_transcript"], "ENST00000380152.8")
+        self.assertEqual(selected["max_delta_field"], "DS_DG")
+        self.assertEqual(selected["score"], 0.206)
+        self.assertEqual(selected["max_any_transcript_score"], 0.9)
+
     def test_max_any_transcript_policy_uses_highest_record(self):
         spliceai.SPLICEAI_TRANSCRIPT_POLICY = "max_any_transcript"
         records = [
@@ -92,6 +148,24 @@ class SpliceAITranscriptPolicyTests(unittest.TestCase):
         self.assertEqual(result["score"], 0.23)
         self.assertEqual(result["reference_scores"]["DS_AL_REF"], 0.2)
         self.assertEqual(result["alternate_scores"]["DS_AL_ALT"], 0.2)
+
+    def test_api_request_preserves_multi_nucleotide_ref_and_alt_alleles(self):
+        payload = {
+            "hg": "38",
+            "genomeVersion": "38",
+            "distance": 10000,
+            "mask": 0,
+            "source": "test SpliceAI",
+            "scores": [score_row("ENST00000357654.9", "NM_007294.4", ds_al=0.23)],
+        }
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(payload).encode()
+        with patch.object(spliceai.urllib.request, "urlopen", return_value=response) as mocked:
+            result = spliceai._query_spliceai_api("BRCA1", "17", 100, "TG", "GC")
+
+        requested_url = mocked.call_args.args[0].full_url
+        self.assertIn("variant=chr17-100-TG-GC", requested_url)
+        self.assertEqual(result["score"], 0.23)
 
     def test_api_response_with_wrong_distance_is_rejected(self):
         payload = {

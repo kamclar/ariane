@@ -20,7 +20,6 @@ from backend.classification_dag.policy import (
 from backend.classification_dag.types import NodeResult
 from backend.gene_policy import rule_is_applicable
 from backend.modules.evidence_interactions import (
-    apply_automatic_rna_interactions,
     automatic_functional_interactions,
     clinical_functional_risk_interactions,
 )
@@ -107,7 +106,6 @@ class EvidenceInteractionNode:
             inputs["bioinformatic_family"].evidence_interactions
         )
         public = criteria_dict(tuple(criteria.values()))
-        interactions.extend(apply_automatic_rna_interactions(public))
         interactions.extend(automatic_functional_interactions(public))
         interactions.extend(clinical_functional_risk_interactions(public))
         retained_codes = set(public)

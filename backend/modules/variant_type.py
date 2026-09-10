@@ -1,6 +1,36 @@
+import re
+
+
+_SIMPLE_PROTEIN_SUBSTITUTION = re.compile(
+    r"^p\.\(?[a-z]{3}\d+[a-z]{3}\)?$",
+    re.IGNORECASE,
+)
+
+
+def _delins_protein_type(p_notation: str) -> str:
+    """Return the rule-facing type of a coding DNA delins consequence.
+
+    HGVS DNA and protein operations are independent. A multi-nucleotide DNA
+    delins can encode a single amino-acid substitution, deletion, insertion,
+    duplication, or a protein delins. ENIGMA Figure 1A routing therefore uses
+    the normalized protein consequence instead of the DNA operation name.
+    """
+    p = (p_notation or "").lower()
+    if not p or "?" in p:
+        return "delins"
+    if "delins" in p:
+        return "inframe_delins"
+    if "del" in p:
+        return "inframe_deletion"
+    if "dup" in p or "ins" in p:
+        return "inframe_insertion"
+    if _SIMPLE_PROTEIN_SUBSTITUTION.fullmatch(p):
+        return "missense"
+    return "delins"
+
+
 def infer_variant_type(c_notation: str, p_notation: str) -> str:
     """Infer the normalized variant type used by ENIGMA rule modules."""
-    import re
     c = (c_notation or "").lower()
     p = (p_notation or "").lower()
 
@@ -46,7 +76,7 @@ def infer_variant_type(c_notation: str, p_notation: str) -> str:
         and re.search(r"(?:delins|del|dup|ins)", p)
     )
     if "delins" in c:
-        return "inframe_delins" if protein_confirms_inframe else "delins"
+        return _delins_protein_type(p)
     if "del" in c:
         return "inframe_deletion" if protein_confirms_inframe else "deletion"
     if "ins" in c:

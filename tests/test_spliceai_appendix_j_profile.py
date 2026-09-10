@@ -49,10 +49,11 @@ class SpliceAIAppendixJProfileTests(unittest.TestCase):
             "annotation_subset": "basic",
             "aggregation": "maximum_raw_delta",
             "transcript_policy": "reference_transcript",
+            "selected_transcript": "ENST00000357654.9",
         })
-        self.assertTrue(spliceai._runtime_entry_matches_profile(entry))
+        self.assertTrue(spliceai._runtime_entry_matches_profile(entry, "BRCA1"))
         entry.pop("alternate_scores")
-        self.assertFalse(spliceai._runtime_entry_matches_profile(entry))
+        self.assertFalse(spliceai._runtime_entry_matches_profile(entry, "BRCA1"))
 
 
 if __name__ == "__main__":

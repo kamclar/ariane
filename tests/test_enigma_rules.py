@@ -1072,6 +1072,32 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["candidates"][0]["reference_status"], "approved")
         self.assertIn("ENIGMA protein-level PS1 splice conditions", result["reason"])
 
+    def test_dna_delins_missense_can_automatically_score_ps1(self):
+        variant_type = infer_variant_type(
+            "c.131_132delinsCT",
+            "p.(Cys44Ser)",
+        )
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.131_132delinsCT",
+            p_notation="p.(Cys44Ser)",
+            variant_type=variant_type,
+            spliceai_score=0.01,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=[
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
+            ],
+            reference_spliceai_scores={"c.130T>A": 0.01},
+        )
+
+        self.assertEqual(variant_type, "missense")
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["reference_variant"]["c_notation"], "c.130T>A")
+        self.assertEqual(result["application_status"], "auto_applied")
+
     def test_ps1_fails_closed_when_reference_spliceai_is_unavailable(self):
         result = evaluate_ps1(
             gene="BRCA1",

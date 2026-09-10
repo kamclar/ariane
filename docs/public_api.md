@@ -103,6 +103,12 @@ Temporary source failures use `spliceai_temporarily_unavailable` with
 methodologically incomplete source responses use `spliceai_result_unavailable`
 with `retryable: false`.
 
+The applicable type is determined from the normalized consequence on the
+configured reference transcript. A DNA-level `delins` that encodes one amino
+acid substitution is therefore a missense variant for Figure 1A and requires
+SpliceAI. A `delins` that produces a frameshift or a simple nonsense consequence
+uses the corresponding PTC branch instead.
+
 Variant types whose automatic path does not require SpliceAI are not sent to
 the SpliceAI service. Their classification remains complete without a score,
 and the audit records `required_for_classification: false`.
@@ -110,6 +116,27 @@ and the audit records `required_for_classification: false`.
 When a protein PS1 reference candidate exists, the SpliceAI comparison of the
 assessed and reference variants is part of the required evidence. A temporary
 failure for either variant makes the classification retryable and incomplete.
+
+The same publication gate covers the other required upstream inputs. Both
+gene-policy gnomAD datasets must complete. An applicable Appendix G structural
+population path must reach an explicit decision. BayesDel_noAF must be
+available for a missense or in-frame variant inside a functional domain when
+SpliceAI is below 0.2.
+Failures use `population_evidence_unavailable`,
+`structural_population_evidence_unavailable`,
+`bayesdel_temporarily_unavailable`, `bayesdel_result_unavailable`,
+or `protein_interval_unavailable`. These responses contain no classification.
+
+A completed negative observation does not count as a failure. Examples include
+a score below a criterion threshold, an absent variant in a successfully
+queried dataset, a filtered gnomAD record, and a policy-defined not-applicable
+branch. ClinVar and ClinGen ERepo remain external comparisons, so their failure
+does not invalidate the automatic classification.
+
+An unresolved pathogenic-founder check is a declared expert-review state, not
+a provider failure. The automatic result contains no BA1 or BS1 from that
+frequency value and records the reason. Other independently completed evidence
+may still produce the Module 1 result.
 
 ## Request and traffic limits
 

@@ -22,10 +22,7 @@ from backend.lookups import clingen, clinvar
 from backend.lookup_execution import lookup_or_unavailable
 from backend.modules.variant_input import NormalizedVariantInput, normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
-from backend.modules.spliceai_policy import (
-    spliceai_failure_is_retryable,
-    spliceai_required_for_classification,
-)
+from backend.services.classification_completeness import first_required_evidence_gap
 
 
 LOGGER = logging.getLogger("ariane.evidence_orchestration")
@@ -68,6 +65,16 @@ class RequiredEvidenceUnavailableError(RuntimeError):
             self.code = "spliceai_temporarily_unavailable"
         elif source == "SpliceAI":
             self.code = "spliceai_result_unavailable"
+        elif source == "BayesDel_noAF" and retryable:
+            self.code = "bayesdel_temporarily_unavailable"
+        elif source == "BayesDel_noAF":
+            self.code = "bayesdel_result_unavailable"
+        elif source == "gnomAD":
+            self.code = "population_evidence_unavailable"
+        elif source == "ENIGMA Appendix G population evidence":
+            self.code = "structural_population_evidence_unavailable"
+        elif source == "protein consequence":
+            self.code = "protein_interval_unavailable"
         else:
             self.code = "required_evidence_unavailable"
         super().__init__(
@@ -145,6 +152,13 @@ class EvidenceOrchestrationService:
             normalized.c_notation,
             normalized.p_notation,
         )
+        if variant_type == "delins":
+            raise VariantPreparationError(
+                f"The protein consequence of {normalized.gene} "
+                f"{normalized.c_notation} could not be determined. The applicable "
+                "ENIGMA PTC or Figure 1A branch cannot be selected. No "
+                "classification was returned."
+            )
         variant = NormalizedVariant(
             gene=normalized.gene,
             reference_transcript=normalized.reference_transcript,
@@ -246,52 +260,21 @@ class EvidenceOrchestrationService:
         variant: NormalizedVariant,
         artifacts: Mapping[str, Any],
     ) -> None:
-        if not spliceai_required_for_classification(variant.variant_type):
+        gap = first_required_evidence_gap(variant, artifacts)
+        if gap is None:
             return
-        splice_status = dict(artifacts.get("spliceai_status") or {})
-        score = artifacts.get("spliceai_score")
-        status = str(splice_status.get("status") or "unavailable")
-        assessed_complete = status == "ok" and score is not None
-        reference_required = bool(splice_status.get("reference_lookup_required"))
-        reference_complete = bool(
-            splice_status.get("reference_lookup_complete", True)
-        )
-        if assessed_complete and (not reference_required or reference_complete):
-            return
-        if assessed_complete:
-            failed_references = {
-                c_notation: item_status
-                for c_notation, item_status in dict(
-                    splice_status.get("reference_variant_statuses") or {}
-                ).items()
-                if str(item_status.get("status") or "") != "ok"
-                or item_status.get("score") is None
-            }
-            first_status = next(iter(failed_references.values()), {})
-            status = str(first_status.get("status") or "unavailable")
-            reason = str(
-                first_status.get("reason")
-                or "A candidate protein PS1 reference has no SpliceAI result"
-            )
-        else:
-            reason = str(
-                splice_status.get("reason")
-                or "The configured SpliceAI source returned no score"
-            )
-        retryable = bool(splice_status.get("retryable")) or (
-            spliceai_failure_is_retryable(status, reason)
-        )
         LOGGER.warning(
-            "Required SpliceAI evidence unavailable for %s: status=%s; reason=%s",
+            "Required evidence unavailable for %s: source=%s; status=%s; reason=%s",
             variant.variant_key,
-            status,
-            reason,
+            gap.source,
+            gap.status,
+            gap.reason,
         )
         raise RequiredEvidenceUnavailableError(
-            source="SpliceAI",
-            status=status,
-            reason=reason,
-            retryable=retryable,
+            source=gap.source,
+            status=gap.status,
+            reason=gap.reason,
+            retryable=gap.retryable,
         )
 
     @staticmethod

@@ -302,12 +302,32 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             "chrom": "17", "pos": 43090944, "ref": "C", "alt": "T",
             "assembly": "GRCh38",
         }
+        population_policy = {
+            "policy_id": "enigma_brca_v1_2",
+            "frequency_criteria": {
+                "pm2": {
+                    "required_absence_dataset_runtime_keys": [
+                        "v2_1_non_cancer",
+                        "v3_1_non_cancer",
+                    ]
+                }
+            },
+        }
+        population = {
+            "status": "absent_with_coverage",
+            "policy_id": "enigma_brca_v1_2",
+            "classification_policy": population_policy,
+            "datasets": {
+                "v2_1_non_cancer": {"status": "absent"},
+                "v3_1_non_cancer": {"status": "absent"},
+            },
+        }
         dependencies = replace(
             CLASSIFICATION_ORCHESTRATION.provider_dependencies,
             resolve_variant=lambda *_args, **_kwargs: None,
             get_grch37=lambda *_args, **_kwargs: coordinates,
             get_grch38=lambda *_args, **_kwargs: coordinates,
-            gnomad_lookup=lambda **_kwargs: {"available": True},
+            gnomad_lookup=lambda **_kwargs: population,
             spliceai_lookup=lambda *_args, **_kwargs: 0.95,
             spliceai_status=lambda *_args, **_kwargs: {
                 "status": "ok", "score": 0.95, "source": "test"
@@ -557,7 +577,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
                 }
             },
             clear=True,
-        ), patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+        ), patch(
             "backend.lookups.spliceai.get_spliceai_score", return_value=0.02
         ), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
@@ -595,7 +615,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
                 }
             },
             clear=True,
-        ), patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+        ), patch(
             "backend.lookups.spliceai.get_spliceai_score", return_value=0.0
         ), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
@@ -672,9 +692,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
     def test_c_only_nonsense_derives_protein_consequence(self):
         from backend.main import _classify_one
 
-        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
-            "backend.lookups.spliceai.get_spliceai_score", return_value=None
-        ), patch(
+        with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
         ), patch(
             "backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}

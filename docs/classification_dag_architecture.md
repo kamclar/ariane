@@ -20,7 +20,7 @@ Pravidlové uzly jsou rozdělené podle odpovědnosti v
 | `context.py` | SpliceAI kontext a porovnání provenance s Table 9 |
 | `population.py` | BA1, BS1, PM2 a populační větev exonových CNV |
 | `functional.py` | Kalibrovaná funkční evidence PS3 a BS3 z Table 9 |
-| `pvs1.py` | PVS1, PVS1 RNA a PM5 PTC |
+| `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA pouze jako nebodované podklady pro odbornou revizi |
 | `clinical.py` | Klinické LR PP4/BP5 a proteinové PS1 |
 | `bioinformatic.py` | Figure 1A, PP3, BP4, BP1 a BP7 |
 | `policy.py` | Interakce evidence a výsledná ENIGMA kombinace |
@@ -85,6 +85,7 @@ Tyto odpovědnosti jsou rozdělené v `backend/services/`:
 | Služba | Odpovědnost |
 | --- | --- |
 | `evidence_orchestration.py` | `ClassificationCommand`, normalizace, typ varianty, sestavení `ClassificationRequest`, paralelní provider DAG a externí porovnání, diagnostika dostupnosti |
+| `classification_completeness.py` | Jediná publikační brána, která rozliší dokončený negativní výsledek od selhání povinného zdroje a nepovolí neúplnou klasifikaci |
 | `classification_presentation.py` | Převod strukturovaného výsledku a artefaktů na stabilní `ClassificationResult`, bez změny kritérií nebo třídy |
 | `variant_classification_service.py` | Funkce `execute_variant_classification()`, jediný aplikační use case pro klasifikaci jedné varianty, který spojuje orchestraci a prezentaci |
 
@@ -96,6 +97,16 @@ ani orchestration vrstvu.
 
 ClinVar a ClinGen ERepo nejsou vstupem klasifikace. Běží paralelně s DAGem a
 připojují se až jako externí porovnání vypočteného výsledku.
+
+Po dokončení provider DAGu a před sestavením veřejné odpovědi volá orchestrátor
+`classification_completeness.py`. Brána kontroluje všechny zdroje, které jsou
+pro konkrétní rozhodovací větev povinné. Patří sem SpliceAI pro Figure 1A a
+potřebné PS1 reference, oba policy-defined gnomAD datasety, strukturální
+populační větev Appendix G a podmíněně BayesDel_noAF. Selhání vrátí
+strukturovanou chybu bez
+klasifikace. Platný výsledek pod prahem, nenalezený záznam v úplném zdroji nebo
+výslovné `not_applicable` zůstávají dokončenými rozhodnutími a klasifikaci
+neblokují.
 
 ## Závislosti Python modulů
 
@@ -215,6 +226,9 @@ stručného klinického výsledku.
 11. Projektové závislosti se importují na úrovni modulů. Produkční vazby
     providerů vznikají pouze v `provider_wiring.py`; pravidlový uzel si nesmí
     načíst implementaci lookupu uvnitř `evaluate()`.
+12. Veřejná klasifikace smí vzniknout jen po průchodu jedinou publikační bránou.
+    Chybějící povinný vstup se nesmí zaměnit za negativní výsledek kritéria ani
+    skrýt pouze ve warningu.
 
 ## Implementované uzly
 
@@ -229,7 +243,7 @@ stručného klinického výsledku.
 9. sestavení a validace `EvidenceBundle`;
 10. populační BA1, BS1 a PM2;
 11. Table 9 PS3 a BS3;
-12. PVS1, PVS1 RNA a PM5 PTC;
+12. PVS1 a PM5 PTC, včetně nebodovaných podkladů pro manuální PVS1 RNA revizi;
 13. klinické LR PP4 a BP5;
 14. proteinové PS1;
 15. Figure 1A PP3, BP4, BP7 a BP1;

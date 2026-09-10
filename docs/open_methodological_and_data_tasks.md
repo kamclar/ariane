@@ -193,5 +193,36 @@ Do předvyplnění se přenášejí také všechny odpovídající publikace a a
 ze Supplementary Table 3. ST3 slouží k dohledání podkladů a sama nepřiděluje
 PVS1 RNA ani jeho sílu.
 
+## 10. Proteinový delins s terminačním kodonem
+
+V připnutém indelovém snapshotu je 22 coding DNA `delins` variant, jejichž
+normalizovaný proteinový následek je proteinový `delins` obsahující `Ter`,
+například `BRCA1 c.3789_3790delinsTT`
+`p.(Leu1263_Lys1264delinsPheTer)`. HGVS takový zápis připouští, pokud je
+terminační kodon součástí vložené proteinové sekvence. Nejde o jednoduchou
+nonsense substituci.
+
+ENIGMA Table 4 popisuje PTC váhy pro protein termination variants, ale její
+přehled automatických větví uvádí nonsense a frameshift. Není výslovně určeno,
+zda se proteinový delins s `Ter` má posoudit v PVS1 a PM5 PTC větvi, nebo jako
+in-frame delins ve Figure 1A. ARIANE tyto varianty bez metodického potvrzení
+nepřeklápí do PTC větve. Bod vyžaduje konzultaci s VCEP.
+
+## 11. Strojově ověřitelná verze veřejné služby SpliceAI
+
+ARIANE připíná scoring profil, kontroluje GRCh38, `distance=10000`, `mask=0`,
+úplnost všech skórovacích komponent a přesnou verzi referenčního transkriptu.
+Veřejná odpověď Broad SpliceAI Lookup však neobsahuje neměnný identifikátor
+verze modelu, anotace ani image digestu. Z odpovědi proto nelze strojově
+prokázat, že provozovatel veřejného endpointu nezměnil interní release při
+zachování stejné URL.
+
+Pro dlouhodobě reprodukovatelný provoz je potřeba buď verze vracená přímo
+providerem, nebo vlastní on-demand služba připnutá na schválený image digest.
+Nejde o předpočítávání variant. Varianta by se stále skórovala až při požadavku.
+Případná změna provideru musí zachovat stejný API kontrakt, projít srovnávacím
+validačním souborem a vytvořit novou verzi scoring profilu. Veřejný a připnutý
+provider se nesmějí používat jako tiché vzájemné fallbacky.
+
 Podrobnosti implementace jsou v
 [`implementation_and_data_sources.md`](implementation_and_data_sources.md).

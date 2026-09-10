@@ -15,6 +15,8 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             "c.5216A>T": 0.01,
             "c.123A>G": 0.01,
             "c.122A>G": 0.01,
+            "c.131_132delinsCT": 0.01,
+            "c.130T>A": 0.01,
         }
         statuses = {
             key: {"status": "ok", "reason": "test score"}
@@ -147,6 +149,34 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             "enigma_st7_v1_2_reference_set",
         )
         self.assertEqual(result["reference_classification_used_ps1"], "no")
+        self.assertTrue(result["objective_ps1_checks_pass"])
+
+    async def test_dna_delins_missense_can_use_a_separately_approved_ps1_reference(self):
+        result = await resolve_ps1_reference(
+            "BRCA1",
+            "c.131_132delinsCT",
+            "c.130T>A",
+            dependencies=self.dependencies(
+                clinvar={"status": "not_found"},
+                registry={
+                    "classification": "Pathogenic",
+                    "classification_basis": "enigma_st7_v1_2_reference_set",
+                    "classification_source": "ENIGMA Supplementary Table 7 v1.2",
+                    "reference_status": "approved",
+                    "reference_splice_evidence_status": "normal",
+                    "reference_splice_sources_checked": [
+                        "ENIGMA Specifications Table 9 v1.2",
+                        "ENIGMA Supplementary Table 2 v1.2",
+                    ],
+                    "classification_ps1_dependency_used": False,
+                },
+            ),
+        )
+
+        self.assertEqual(result["assessed"]["p_notation"], "p.(Cys44Ser)")
+        self.assertEqual(result["reference"]["p_notation"], "p.(Cys44Ser)")
+        self.assertTrue(result["same_missense_substitution"])
+        self.assertTrue(result["different_nucleotide_change"])
         self.assertTrue(result["objective_ps1_checks_pass"])
 
 

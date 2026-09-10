@@ -162,6 +162,9 @@ def test_public_api_marks_required_spliceai_timeout_as_retryable_item_error(
     assert item["status"] == "error"
     assert item["error"]["code"] == "spliceai_temporarily_unavailable"
     assert item["error"]["retryable"] is True
+    assert item["error"]["message"] == (
+        "SpliceAI is required but temporarily unavailable"
+    )
     assert "classification" not in item
 
 
