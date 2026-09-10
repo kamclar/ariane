@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIANE - BRCA1/2 Variant Classification</title>
     <link rel="icon" type="image/svg+xml" href="/static/images/ariane-icon-v1.svg">
-    <link rel="stylesheet" href="/static/css/style.css?v=20260909-1">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260910-1">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
@@ -187,6 +187,32 @@
                     </a>
                 </div>
             </div>
+
+            <section class="manual-review-callout"
+                     x-show="manualReviewRecommendations().length"
+                     role="status"
+                     aria-live="polite">
+                <div class="manual-review-callout-icon" aria-hidden="true">!</div>
+                <div class="manual-review-callout-content">
+                    <h3>Manual review recommended</h3>
+                    <p>
+                        ARIANE found variant-specific evidence for
+                        <strong x-text="manualReviewRecommendations().length === 1 ? 'one expert review' : `${manualReviewRecommendations().length} expert reviews`"></strong>.
+                        The review form is ready below. No criterion or points have been added automatically.
+                    </p>
+                    <div class="manual-review-callout-actions">
+                        <template x-for="recommendation in manualReviewRecommendations()"
+                                  :key="`result-${recommendation.code}`">
+                            <button type="button"
+                                    class="btn-primary manual-review-callout-button"
+                                    @click="enableManualCriterion(recommendation.code)">
+                                <span x-text="`Open ${recommendation.code.replaceAll('_', ' ')} review`"></span>
+                                <small x-text="manualDefinition(recommendation.code)?.title"></small>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </section>
 
             <!-- Criteria table -->
             <div class="criteria-section" x-show="result?.criteria?.length > 0">
@@ -763,9 +789,10 @@
             </section>
 
             <!-- Manual evidence review -->
-            <div class="manual-evidence-section">
+            <div class="manual-evidence-section" id="manual-evidence-section"
+                 :class="{ 'manual-evidence-section-recommended': manualReviewRecommendations().length }">
                 <h3 @click="manualReviewOpen = !manualReviewOpen" class="collapsible">
-                    Manually reviewed criteria
+                    Manual review and amended result
                     <span class="manual-heading-summary"
                         x-show="manualReviewRecommendations().length"
                         x-text="`${manualReviewRecommendations().length} suggested`"></span>

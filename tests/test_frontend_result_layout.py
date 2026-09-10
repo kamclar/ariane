@@ -316,6 +316,12 @@ def test_recommended_manual_criterion_is_offered_without_automatic_assignment():
     html = FRONTEND_HTML.read_text(encoding="utf-8")
     javascript = frontend_javascript()
 
+    assert "Manual review recommended" in html
+    assert "No criterion or points have been added automatically" in html
+    assert "Open ${recommendation.code.replaceAll('_', ' ')} review" in html
+    assert html.index("manual-review-callout") < html.index("<!-- Criteria table -->")
+    assert "manual-evidence-section-recommended" in html
+    assert "Manual review and amended result" in html
     assert "Review possible PVS1 RNA assignment" in html
     assert "enableManualCriterion('PVS1_RNA')" in html
     assert "manualReviewRecommendations().length} suggested" in html
