@@ -1998,6 +1998,18 @@ evidence.
 | `contract.variant_assertion` | Kontrola úplnosti a vnitřní konzistence výsledku |
 | `projection.public_result` | Převod typovaného výsledku do veřejného API kontraktu |
 
+Verzované klasifikační endpointy `/api/v1/classify` a
+`/api/v1/classify/batch` vyžadují individuální klíč v hlavičce
+`X-ARIANE-API-Key`. Server uchovává pouze SHA-256 otisk klíče v chráněném
+registru mimo Git. Při chybějícím nebo neplatném klíči vrací HTTP 401. Pokud
+registr chybí nebo je poškozený, API selže uzavřeně s HTTP 503. ID klíče se
+použije jako technická identita ve statistikách, tajná hodnota se neloguje.
+
+Endpoint `/api/v1/capabilities` zůstává veřejný a zveřejňuje pouze požadovaný
+způsob autentizace. Interní kompatibilní endpoint webového rozhraní nelze
+chránit tajemstvím vloženým do klientského JavaScriptu. Je proto nadále omezen
+na úrovni reverse proxy podle IP adresy.
+
 ### 15.2 Graf pro ručně doplněnou evidenci
 
 Přepočet po ručně doplněné odborné evidenci používá samostatný graf

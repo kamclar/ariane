@@ -256,6 +256,22 @@ def test_identity_uses_cookie_without_storing_ip_and_supports_trusted_header(mon
     assert account.json() == {"actor_id": "jana@example.org", "actor_type": "account"}
 
 
+def test_usage_identity_prefers_authenticated_api_key_id():
+    app = FastAPI()
+
+    @app.get("/identity")
+    async def identity(request: Request):
+        request.state.api_key_id = "batch-client-01"
+        value = resolve_usage_identity(request)
+        return {"actor_id": value.actor_id, "actor_type": value.actor_type}
+
+    response = TestClient(app).get("/identity")
+    assert response.json() == {
+        "actor_id": "batch-client-01",
+        "actor_type": "api_key",
+    }
+
+
 def test_classification_endpoint_caches_result_but_counts_both_searches(tmp_path, monkeypatch):
     from backend import main
 

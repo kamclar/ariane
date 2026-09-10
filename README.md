@@ -262,6 +262,12 @@ external integrations and uses the same production classification DAG as the
 web interface. See [docs/public_api.md](docs/public_api.md) for requests,
 responses, limits and a reference client.
 
+The classification routes under `/api/v1` require an individual API key.
+Only its SHA-256 digest is stored on the server. The public capabilities route
+does not require a key. Browser-facing compatibility routes remain protected
+by the deployment request limit because the public web interface cannot hold
+a secret credential.
+
 `POST /api/v1/classify/batch` accepts at most 10 items and preserves their input
 order. Five items are recommended for uncached work. Each item is validated
 separately. An invalid variant is returned as an item with `status: "error"`;

@@ -298,6 +298,7 @@ async def http_error_handler(request: Request, exc: HTTPException):
             headers=exc.headers,
         )
     code_by_status = {
+        401: "authentication_required",
         404: "not_found",
         422: "variant_not_classifiable",
         429: "rate_limited",

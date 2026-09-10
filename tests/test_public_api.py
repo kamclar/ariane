@@ -4,6 +4,9 @@ from fastapi.testclient import TestClient
 from backend.models import ClassificationResult, RnaReviewRecommendation
 
 
+API_HEADERS = {"X-ARIANE-API-Key": "test-api-key"}
+
+
 def _result_with_review() -> ClassificationResult:
     return ClassificationResult(
         variant="BRCA1 c.4185G>A p.(Gln1395=)",
@@ -27,6 +30,7 @@ def _result_with_review() -> ClassificationResult:
 
 def _client(monkeypatch) -> TestClient:
     from backend import main
+    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     async def classify_cached(*args, **kwargs):
         return _result_with_review(), "hit", "test-fingerprint"
@@ -34,6 +38,11 @@ def _client(monkeypatch) -> TestClient:
     monkeypatch.setattr(main, "_classify_one_cached", classify_cached)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        PUBLIC_API_KEY_AUTHENTICATOR,
+        "authenticate",
+        lambda value: "test-client" if value == "test-api-key" else None,
+    )
     return TestClient(main.app)
 
 
@@ -43,7 +52,7 @@ def test_public_api_classification_has_versioned_metadata_and_separate_review(
     response = _client(monkeypatch).post(
         "/api/v1/classify",
         json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
-        headers={"X-Request-ID": "public-api-test"},
+        headers={**API_HEADERS, "X-Request-ID": "public-api-test"},
     )
 
     assert response.status_code == 200
@@ -68,6 +77,7 @@ def test_public_api_validation_error_is_machine_readable(monkeypatch):
     response = _client(monkeypatch).post(
         "/api/v1/classify",
         json={"gene": "BRCA1", "c_notation": "not-hgvs"},
+        headers=API_HEADERS,
     )
 
     assert response.status_code == 422
@@ -81,7 +91,7 @@ def test_public_api_replaces_unsafe_request_id(monkeypatch):
     response = _client(monkeypatch).post(
         "/api/v1/classify",
         json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
-        headers={"X-Request-ID": "unsafe request id for logs"},
+        headers={**API_HEADERS, "X-Request-ID": "unsafe request id for logs"},
     )
 
     assert response.status_code == 200
@@ -100,6 +110,7 @@ def test_public_api_batch_keeps_valid_items_and_codes_invalid_items(monkeypatch)
                 {"gene": "BRCA1", "c_notation": "not-hgvs"},
             ]
         },
+        headers=API_HEADERS,
     )
 
     assert response.status_code == 200
@@ -117,6 +128,7 @@ def test_public_api_marks_required_spliceai_timeout_as_retryable_item_error(
     monkeypatch,
 ):
     from backend import main
+    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     async def unavailable(*args, **kwargs):
         raise HTTPException(
@@ -132,11 +144,17 @@ def test_public_api_marks_required_spliceai_timeout_as_retryable_item_error(
     monkeypatch.setattr(main, "_classify_one_cached", unavailable)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        PUBLIC_API_KEY_AUTHENTICATOR,
+        "authenticate",
+        lambda value: "test-client" if value == "test-api-key" else None,
+    )
     response = TestClient(main.app).post(
         "/api/v1/classify/batch",
         json={
             "variants": [{"gene": "BRCA1", "c_notation": "c.5366C>T"}],
         },
+        headers=API_HEADERS,
     )
 
     assert response.status_code == 200
@@ -157,14 +175,36 @@ def test_public_api_capabilities_publish_limits_and_policy():
     assert payload["status"] == "beta"
     assert payload["limits"]["maximum_batch_items"] == 10
     assert payload["limits"]["recommended_uncached_batch_items"] == 5
+    assert payload["authentication_required"] is True
+    assert payload["authentication_header"] == "X-ARIANE-API-Key"
     assert {gene["symbol"] for gene in payload["supported_genes"]} == {
         "BRCA1",
         "BRCA2",
     }
 
 
-def test_public_api_rejects_more_than_synchronous_batch_limit():
+def test_openapi_documents_api_key_on_classification_routes():
     from backend import main
+
+    schema = main.app.openapi()
+    assert schema["paths"]["/api/v1/classify"]["post"]["security"] == [
+        {"ArianeApiKey": []}
+    ]
+    assert "security" not in schema["paths"]["/api/v1/capabilities"]["get"]
+    security_scheme = schema["components"]["securitySchemes"]["ArianeApiKey"]
+    assert security_scheme["in"] == "header"
+    assert security_scheme["name"] == "X-ARIANE-API-Key"
+
+
+def test_public_api_rejects_more_than_synchronous_batch_limit(monkeypatch):
+    from backend import main
+    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+
+    monkeypatch.setattr(
+        PUBLIC_API_KEY_AUTHENTICATOR,
+        "authenticate",
+        lambda value: "test-client" if value == "test-api-key" else None,
+    )
 
     response = TestClient(main.app).post(
         "/api/v1/classify/batch",
@@ -174,8 +214,51 @@ def test_public_api_rejects_more_than_synchronous_batch_limit():
                 for _ in range(11)
             ]
         },
+        headers=API_HEADERS,
     )
 
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "invalid_request"
     assert "at most 10 variants" in response.json()["error"]["message"]
+
+
+def test_public_api_requires_key_for_classification(monkeypatch):
+    response = _client(monkeypatch).post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "api_key_required"
+
+
+def test_public_api_rejects_invalid_key(monkeypatch):
+    response = _client(monkeypatch).post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers={"X-ARIANE-API-Key": "wrong-key"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "invalid_api_key"
+
+
+def test_public_api_fails_closed_when_key_registry_is_missing(
+    tmp_path,
+    monkeypatch,
+):
+    from backend import main
+
+    monkeypatch.setenv(
+        "ARIANE_API_KEYS_FILE",
+        str(tmp_path / "missing-api-keys.json"),
+    )
+    response = TestClient(main.app).post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers={"X-ARIANE-API-Key": "unverifiable-key"},
+    )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "api_authentication_unavailable"
+    assert response.json()["error"]["retryable"] is False

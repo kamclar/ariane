@@ -14,6 +14,23 @@ https://ariane-app.duckdns.org/api/v1
 The current contract version is `1.0`. Compatible additions may be made within
 v1. Breaking request or response changes require a new API path.
 
+## Authentication
+
+Classification endpoints require an individual API key in the
+`X-ARIANE-API-Key` header. The capabilities endpoint is public and reports the
+authentication requirement without exposing registered key IDs.
+
+Store the key in an environment variable instead of a script or repository:
+
+```bash
+export ARIANE_API_KEY='value-provided-by-the-administrator'
+```
+
+The server stores only a SHA-256 digest of each high-entropy key. A key can be
+disabled independently. Missing, invalid and disabled keys receive HTTP 401.
+If the protected registry is missing or malformed, classification fails closed
+with HTTP 503.
+
 ## Capabilities
 
 Read the active application version, supported genes, transcripts, policies and
@@ -32,6 +49,7 @@ v1 batch. Five variants are recommended when the results may not yet be cached.
 ```bash
 curl -X POST https://ariane-app.duckdns.org/api/v1/classify \
   -H "Content-Type: application/json" \
+  -H "X-ARIANE-API-Key: $ARIANE_API_KEY" \
   -H "X-Request-ID: local-run-0001" \
   -d '{"gene":"BRCA1","c_notation":"c.4185G>A"}'
 ```
@@ -53,6 +71,7 @@ manual evidence and backend evaluation.
 ```bash
 curl -X POST https://ariane-app.duckdns.org/api/v1/classify/batch \
   -H "Content-Type: application/json" \
+  -H "X-ARIANE-API-Key: $ARIANE_API_KEY" \
   -d '{"variants":[
     {"gene":"BRCA1","c_notation":"c.4185G>A"},
     {"gene":"BRCA2","c_notation":"c.7805+9T>G"}
@@ -106,6 +125,10 @@ The proxy returns HTTP 429 when the request rate is exceeded. Respect
 The server returns `X-Request-ID`, `X-ARIANE-API-Version` and `X-ARIANE-Version`
 headers. A client may supply an `X-Request-ID` containing a short local run ID.
 Record the returned request ID with each result for troubleshooting.
+
+The reference client reads the key from `ARIANE_API_KEY`. The command-line
+`--api-key` option is available, but the environment variable is preferred
+because command arguments may be retained in shell history or process lists.
 
 ## Input policy
 

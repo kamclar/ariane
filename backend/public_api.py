@@ -11,7 +11,7 @@ from collections.abc import Awaitable, Callable
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from backend.gene_policy import active_genes, get_gene_policy
@@ -25,6 +25,7 @@ from backend.models import (
     VariantRequest,
 )
 from backend.version import ARIANE_VERSION
+from backend.api_auth import API_KEY_HEADER_NAME, require_public_api_key
 
 
 PUBLIC_API_VERSION = "1.0"
@@ -144,6 +145,8 @@ class PublicApiCapabilities(BaseModel):
     limits: PublicApiLimits
     endpoints: list[str]
     manual_review_semantics: str
+    authentication_required: Literal[True] = True
+    authentication_header: str = API_KEY_HEADER_NAME
 
 
 def utc_timestamp() -> str:
@@ -328,6 +331,7 @@ def create_public_api_router(
         response_model=PublicApiClassificationResponse,
         response_model_exclude_none=True,
         responses={
+            401: {"model": PublicApiErrorResponse},
             422: {"model": PublicApiErrorResponse},
             503: {"model": PublicApiErrorResponse},
         },
@@ -336,6 +340,7 @@ def create_public_api_router(
         req: VariantRequest,
         request: Request,
         http_response: Response,
+        _api_key_id: str = Depends(require_public_api_key),
     ) -> PublicApiClassificationResponse:
         try:
             result = await classify_single(req, request, http_response)
@@ -361,12 +366,17 @@ def create_public_api_router(
         "/classify/batch",
         response_model=PublicApiBatchResponse,
         response_model_exclude_none=True,
-        responses={422: {"model": PublicApiErrorResponse}},
+        responses={
+            401: {"model": PublicApiErrorResponse},
+            422: {"model": PublicApiErrorResponse},
+            503: {"model": PublicApiErrorResponse},
+        },
     )
     async def classify_many(
         req: BatchRequest,
         request: Request,
         http_response: Response,
+        _api_key_id: str = Depends(require_public_api_key),
     ) -> PublicApiBatchResponse:
         if len(req.variants) > PUBLIC_API_MAXIMUM_BATCH_ITEMS:
             raise HTTPException(

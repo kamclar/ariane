@@ -29,6 +29,40 @@ bash health-monitor.sh 30
 
 The application service is `ariane`. Application logs are stored in the systemd journal. Nginx logs are stored under `/var/log/nginx`.
 
+## Public API keys
+
+Configure the protected registry on an existing server, then create one key
+for each external integration:
+
+```bash
+sudo bash /home/ubuntu/ariane/scripts/server-ops/enable-public-api-auth.sh
+sudo /home/ubuntu/ariane/venv/bin/python \
+  /home/ubuntu/ariane/scripts/manage_api_keys.py \
+  --file /etc/ariane/api-keys.json create \
+  --id external-batch-01 \
+  --description "External batch testing"
+sudo bash /home/ubuntu/ariane/scripts/server-ops/restart-ariane.sh
+```
+
+The create command prints the key once. Send it through a suitable private
+channel and do not add it to Git, issue reports or application logs. The server
+stores only its SHA-256 digest.
+
+List IDs or disable a key without changing other clients:
+
+```bash
+sudo /home/ubuntu/ariane/venv/bin/python \
+  /home/ubuntu/ariane/scripts/manage_api_keys.py \
+  --file /etc/ariane/api-keys.json list
+sudo /home/ubuntu/ariane/venv/bin/python \
+  /home/ubuntu/ariane/scripts/manage_api_keys.py \
+  --file /etc/ariane/api-keys.json disable --id external-batch-01
+```
+
+Registry updates are read on each authenticated request. Disabling a key does
+not require a service restart. The key ID, never the secret, identifies API
+usage in classification statistics.
+
 Structured audit events include the request ID, source IP, endpoint, submitted values, predicted class, class label, total points, and error details. Tokens and request headers are not logged.
 
 ```bash
@@ -105,6 +139,10 @@ usage retention is 365 days.
 ## Configuration
 
 Service secrets are stored in `/etc/ariane/ariane.env` with restricted permissions. Backup settings are stored in `/etc/ariane/backup.env`.
+
+Public API key digests are stored in `/etc/ariane/api-keys.json`, owned by root
+and readable by the ARIANE service group. Plaintext keys cannot be recovered
+from this file.
 
 `ARIANE_RUNTIME_DATA_DIR` must point to persistent storage writable only by the
 ARIANE service account. It must not point to the runtime-cache directory.

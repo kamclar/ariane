@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 from pathlib import Path
 import time
 import uuid
@@ -135,11 +136,24 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="Output JSONL file")
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--batch-size", type=int, default=5)
+    parser.add_argument(
+        "--api-key",
+        default=os.getenv("ARIANE_API_KEY", ""),
+        help="API key, preferably supplied through ARIANE_API_KEY",
+    )
     args = parser.parse_args()
+
+    if not args.api_key:
+        raise ValueError(
+            "Provide an API key with ARIANE_API_KEY or --api-key"
+        )
 
     base_url = args.base_url.rstrip("/")
     session = requests.Session()
-    session.headers.update({"User-Agent": "ariane-public-api-client/1.0"})
+    session.headers.update({
+        "User-Agent": "ariane-public-api-client/1.0",
+        "X-ARIANE-API-Key": args.api_key,
+    })
     capabilities = request_json(
         session,
         "GET",

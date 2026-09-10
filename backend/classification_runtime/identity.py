@@ -36,6 +36,10 @@ class UsageIdentity:
 
 def resolve_usage_identity(request: Request) -> UsageIdentity:
     """Prefer a proxy-authenticated account, otherwise use a browser identifier."""
+    api_key_id = str(getattr(request.state, "api_key_id", "") or "").strip()
+    if _ACCOUNT_RE.fullmatch(api_key_id):
+        return UsageIdentity(actor_id=api_key_id, actor_type="api_key")
+
     trusted_header = os.getenv("ARIANE_TRUSTED_USER_HEADER", "").strip().lower()
     if trusted_header:
         value = request.headers.get(trusted_header, "").strip()

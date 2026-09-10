@@ -86,6 +86,14 @@ fi
 if ! grep -q '^ARIANE_RUNTIME_DATA_DIR=' /etc/ariane/ariane.env; then
     printf 'ARIANE_RUNTIME_DATA_DIR=/var/lib/ariane/runtime-data\n' >> /etc/ariane/ariane.env
 fi
+if [ ! -f /etc/ariane/api-keys.json ]; then
+    printf '{"schema_version":1,"keys":[]}\n' > /etc/ariane/api-keys.json
+fi
+chown root:"$ARIANE_USER" /etc/ariane/api-keys.json
+chmod 0640 /etc/ariane/api-keys.json
+if ! grep -q '^ARIANE_API_KEYS_FILE=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_API_KEYS_FILE=/etc/ariane/api-keys.json\n' >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
     printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
@@ -93,10 +101,22 @@ if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_TIMEOUT=25\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_TIMEOUT=20\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_LOOKUP_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_LOOKUP_TIMEOUT=30\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_LOOKUP_TIMEOUT=55\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_ATTEMPTS=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_ATTEMPTS=2\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_RETRY_DELAY=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_RETRY_DELAY=2\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_MAX_CONCURRENT=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_MAX_CONCURRENT=2\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_RATE_SLEEP=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_RATE_SLEEP=1.5\n' >> /etc/ariane/ariane.env
 fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
