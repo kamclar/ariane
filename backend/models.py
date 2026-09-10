@@ -9,6 +9,9 @@ from backend.modules.variant_input import normalize_variant_input
 from backend.gene_policy import active_genes
 
 
+MAXIMUM_BATCH_ITEMS = 200
+
+
 class VariantRequest(BaseModel):
     gene: str
     c_notation: str
@@ -166,6 +169,11 @@ class AlphaMissenseResult(BaseModel):
 class SpliceAIAudit(BaseModel):
     status: str = ""
     score: Optional[float] = None
+    required_for_classification: bool = False
+    retryable: bool = False
+    reference_lookup_required: bool = False
+    reference_lookup_complete: bool = True
+    reference_variant_statuses: Dict[str, Any] = Field(default_factory=dict)
     scoring_profile_id: str = ""
     scoring_profile_sha256: str = ""
     genome_assembly: str = ""
@@ -596,6 +604,13 @@ class BatchItemResult(BaseModel):
     status: str                          # "ok" or "error"
     variant: str
     error: Optional[str] = None
+    error_code: str = ""
+    error_retryable: bool = False
+    cache_status: str = ""
+    classifier_fingerprint: str = ""
+    policy_id: str = ""
+    policy_version: str = ""
+    duration_ms: Optional[float] = None
     result: Optional[ClassificationResult] = None
 
 
@@ -610,8 +625,10 @@ class BatchRequest(BaseModel):
     def validate_count(cls, v: list) -> list:
         if not v:
             raise ValueError("At least one variant required")
-        if len(v) > 200:
-            raise ValueError("Maximum 200 variants per batch")
+        if len(v) > MAXIMUM_BATCH_ITEMS:
+            raise ValueError(
+                f"Maximum {MAXIMUM_BATCH_ITEMS} variants per batch"
+            )
         return v
 
 

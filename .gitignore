@@ -98,6 +98,7 @@ htmlcov/
 !/docs/tutorial_transcript_criteria_audit.md
 !/docs/navrh_doplnovani_proteinove_notace.md
 !/docs/classification_dag_architecture.md
+!/docs/public_api.md
 !/docs/enigma/
 !/docs/enigma/**
 data/spliceai/build/

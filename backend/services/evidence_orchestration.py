@@ -22,6 +22,10 @@ from backend.lookups import clingen, clinvar
 from backend.lookup_execution import lookup_or_unavailable
 from backend.modules.variant_input import NormalizedVariantInput, normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
+from backend.modules.spliceai_policy import (
+    spliceai_failure_is_retryable,
+    spliceai_required_for_classification,
+)
 
 
 LOGGER = logging.getLogger("ariane.evidence_orchestration")
@@ -40,6 +44,35 @@ class EvidenceExecutionError(RuntimeError):
         super().__init__(
             f"Classification could not complete at internal step {node_id}. "
             "No classification was returned; the failure was recorded for review."
+        )
+
+
+class RequiredEvidenceUnavailableError(RuntimeError):
+    """A required evidence source could not produce a complete result."""
+
+    def __init__(
+        self,
+        *,
+        source: str,
+        status: str,
+        reason: str,
+        retryable: bool,
+    ) -> None:
+        self.source = source
+        self.status = status
+        self.reason = reason
+        self.retryable = retryable
+        if source == "SpliceAI" and status == "no_grch38_coords":
+            self.code = "spliceai_coordinates_unavailable"
+        elif source == "SpliceAI" and retryable:
+            self.code = "spliceai_temporarily_unavailable"
+        elif source == "SpliceAI":
+            self.code = "spliceai_result_unavailable"
+        else:
+            self.code = "required_evidence_unavailable"
+        super().__init__(
+            f"{source} is required for this automatic classification but is "
+            f"unavailable ({status}): {reason}. No classification was returned."
         )
 
 
@@ -183,6 +216,7 @@ class EvidenceOrchestrationService:
             raise EvidenceExecutionError(exc.node_id, exc.trace) from exc
 
         artifacts = dict(execution.provider_artifacts)
+        self._require_complete_classification_evidence(variant, artifacts)
         result = dict(execution.result)
         result["warnings"] = list(result.get("warnings", []))
         self._record_diagnostics(variant, execution, external_diagnostics)
@@ -205,6 +239,59 @@ class EvidenceOrchestrationService:
             clinvar=dict(clinvar),
             clingen=dict(clingen),
             external_diagnostics=tuple(external_diagnostics),
+        )
+
+    @staticmethod
+    def _require_complete_classification_evidence(
+        variant: NormalizedVariant,
+        artifacts: Mapping[str, Any],
+    ) -> None:
+        if not spliceai_required_for_classification(variant.variant_type):
+            return
+        splice_status = dict(artifacts.get("spliceai_status") or {})
+        score = artifacts.get("spliceai_score")
+        status = str(splice_status.get("status") or "unavailable")
+        assessed_complete = status == "ok" and score is not None
+        reference_required = bool(splice_status.get("reference_lookup_required"))
+        reference_complete = bool(
+            splice_status.get("reference_lookup_complete", True)
+        )
+        if assessed_complete and (not reference_required or reference_complete):
+            return
+        if assessed_complete:
+            failed_references = {
+                c_notation: item_status
+                for c_notation, item_status in dict(
+                    splice_status.get("reference_variant_statuses") or {}
+                ).items()
+                if str(item_status.get("status") or "") != "ok"
+                or item_status.get("score") is None
+            }
+            first_status = next(iter(failed_references.values()), {})
+            status = str(first_status.get("status") or "unavailable")
+            reason = str(
+                first_status.get("reason")
+                or "A candidate protein PS1 reference has no SpliceAI result"
+            )
+        else:
+            reason = str(
+                splice_status.get("reason")
+                or "The configured SpliceAI source returned no score"
+            )
+        retryable = bool(splice_status.get("retryable")) or (
+            spliceai_failure_is_retryable(status, reason)
+        )
+        LOGGER.warning(
+            "Required SpliceAI evidence unavailable for %s: status=%s; reason=%s",
+            variant.variant_key,
+            status,
+            reason,
+        )
+        raise RequiredEvidenceUnavailableError(
+            source="SpliceAI",
+            status=status,
+            reason=reason,
+            retryable=retryable,
         )
 
     @staticmethod

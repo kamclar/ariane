@@ -13,6 +13,7 @@ import sqlite3
 from typing import Iterator
 
 from backend.models import ClassificationResult
+from backend.modules.spliceai_policy import spliceai_result_is_complete
 from backend.runtime_cache import runtime_cache_path
 
 
@@ -26,6 +27,20 @@ def _utc_now() -> datetime:
 
 def _canonical_json(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def _is_complete(result: ClassificationResult) -> bool:
+    audit = result.spliceai_audit
+    assessed_complete = spliceai_result_is_complete(
+        result.variant_type,
+        status=audit.status if audit is not None else "",
+        score=audit.score if audit is not None else None,
+    )
+    if not assessed_complete:
+        return False
+    if audit is None:
+        return True
+    return not audit.reference_lookup_required or audit.reference_lookup_complete
 
 
 def _cache_key(
@@ -167,6 +182,8 @@ class ClassificationCacheRepository:
                 result = ClassificationResult.model_validate_json(result_json)
             except Exception:
                 return ClassificationCacheResult("invalid")
+            if not _is_complete(result):
+                return ClassificationCacheResult("incomplete")
             connection.execute(
                 """
                 UPDATE classification_results
@@ -187,6 +204,8 @@ class ClassificationCacheRepository:
         fingerprint: str,
     ) -> None:
         if not self.enabled:
+            return
+        if not _is_complete(result):
             return
         now = _utc_now()
         expires_at = (

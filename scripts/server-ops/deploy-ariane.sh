@@ -136,7 +136,7 @@ User=$ARIANE_USER
 WorkingDirectory=$ARIANE_HOME
 Environment="PATH=$ARIANE_HOME/venv/bin"
 EnvironmentFile=-/etc/ariane/ariane.env
-ExecStart=$ARIANE_HOME/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 8000 --workers 4 --proxy-headers --forwarded-allow-ips=127.0.0.1
+ExecStart=$ARIANE_HOME/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always
 RestartSec=10
 TimeoutStopSec=30
@@ -186,6 +186,7 @@ server {
 
     server_name ARIANE_SERVER_NAME_PLACEHOLDER;
     server_tokens off;
+    limit_req_status 429;
 
     # Limit request size
     client_max_body_size 50M;
@@ -193,7 +194,7 @@ server {
     # Timeouts
     proxy_connect_timeout 60s;
     proxy_send_timeout 60s;
-    proxy_read_timeout 60s;
+    proxy_read_timeout 180s;
 
     location / {
         limit_req zone=ariane_api burst=20 nodelay;

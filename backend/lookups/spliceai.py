@@ -18,7 +18,10 @@ from typing import Optional, Dict, List, Tuple
 from pathlib import Path
 import json
 import re
+import socket
+import threading
 import time
+import urllib.error
 import urllib.request
 import urllib.parse
 import json as _json
@@ -44,6 +47,7 @@ from backend.spliceai_profile import (
 )
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
+from backend.modules.spliceai_policy import FIGURE_1A_SPLICEAI_TYPES
 
 
 def choose_project_root() -> Path:
@@ -93,18 +97,27 @@ def _normalize_api_url(value: str) -> str:
 
 
 SPLICEAI_API_URL = _normalize_api_url(os.environ.get("SPLICEAI_API_URL", DEFAULT_SPLICEAI_API_URL))
-# Interactive requests are proxied by nginx with a 60-second read timeout. A
-# non-critical SpliceAI lookup must fail closed early enough for the classifier
-# to return a result with an explicit unavailable-source warning. Offline cache
-# builders do not use this web-request deadline.
-SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 25)
+# Interactive requests are proxied by nginx with a 180-second read timeout.
+# Required Figure 1A evidence must complete within the bounded lookup deadline
+# or the classifier returns no classification. Offline cache builders do not
+# use this web-request deadline.
+SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 20)
 SPLICEAI_API_RATE_SLEEP = _env_float("SPLICEAI_API_RATE_SLEEP", 1.5)
+SPLICEAI_API_ATTEMPTS = max(1, _env_int("SPLICEAI_API_ATTEMPTS", 2))
+SPLICEAI_API_RETRY_DELAY = _env_float("SPLICEAI_API_RETRY_DELAY", 2.0)
+SPLICEAI_API_MAX_CONCURRENT = max(
+    1, _env_int("SPLICEAI_API_MAX_CONCURRENT", 2)
+)
 SPLICEAI_API_SOURCE = os.environ.get(
     "SPLICEAI_API_SOURCE",
     "Local Broad SpliceAI API" if "localhost" in SPLICEAI_API_URL else "Broad SpliceAI API",
 )
 
 REFERENCE_TRANSCRIPTS = SPLICEAI_PROFILE["reference_transcripts"]
+
+_API_REQUEST_GATE = threading.BoundedSemaphore(SPLICEAI_API_MAX_CONCURRENT)
+_API_RATE_LOCK = threading.Lock()
+_API_NEXT_REQUEST_AT = 0.0
 
 _requested_transcript_policy = os.environ.get(
     "SPLICEAI_TRANSCRIPT_POLICY", SPLICEAI_TRANSCRIPT_POLICY_REQUIRED
@@ -375,7 +388,13 @@ def _select_spliceai_score(gene: str, scores: list[dict]) -> dict:
     }
 
 
-def _query_spliceai_api(gene: str, chrom: str, pos: int, ref: str, alt: str) -> Optional[dict]:
+def _query_spliceai_api_once(
+    gene: str,
+    chrom: str,
+    pos: int,
+    ref: str,
+    alt: str,
+) -> Optional[dict]:
     """
     Query Broad SpliceAI API for a single variant.
     Returns selected SpliceAI score details, or None on failure.
@@ -441,8 +460,62 @@ def _query_spliceai_api(gene: str, chrom: str, pos: int, ref: str, alt: str) -> 
         })
         return selected
 
-    except Exception as e:
-        return {"score": None, "error": f"{type(e).__name__}: {e}"}
+    except urllib.error.HTTPError as exc:
+        return {
+            "score": None,
+            "error": f"HTTP Error {exc.code}: {exc.reason}",
+            "http_status": exc.code,
+            "retryable": exc.code in {429, 500, 502, 503, 504},
+        }
+    except (TimeoutError, socket.timeout) as exc:
+        return {
+            "score": None,
+            "error": f"{type(exc).__name__}: {exc}",
+            "retryable": True,
+        }
+    except urllib.error.URLError as exc:
+        return {
+            "score": None,
+            "error": f"URLError: {exc.reason}",
+            "retryable": True,
+        }
+    except Exception as exc:
+        return {
+            "score": None,
+            "error": f"{type(exc).__name__}: {exc}",
+            "retryable": False,
+        }
+
+
+def _wait_for_api_rate_slot() -> None:
+    global _API_NEXT_REQUEST_AT
+    with _API_RATE_LOCK:
+        now = time.monotonic()
+        delay = max(0.0, _API_NEXT_REQUEST_AT - now)
+        if delay:
+            time.sleep(delay)
+        _API_NEXT_REQUEST_AT = time.monotonic() + SPLICEAI_API_RATE_SLEEP
+
+
+def _query_spliceai_api(
+    gene: str,
+    chrom: str,
+    pos: int,
+    ref: str,
+    alt: str,
+) -> Optional[dict]:
+    """Query the configured source with bounded transient retries."""
+    last_result: Optional[dict] = None
+    for attempt in range(SPLICEAI_API_ATTEMPTS):
+        with _API_REQUEST_GATE:
+            _wait_for_api_rate_slot()
+            last_result = _query_spliceai_api_once(gene, chrom, pos, ref, alt)
+        if last_result is None or last_result.get("score") is not None:
+            return last_result
+        if not last_result.get("retryable") or attempt + 1 == SPLICEAI_API_ATTEMPTS:
+            return last_result
+        time.sleep(SPLICEAI_API_RETRY_DELAY * (2 ** attempt))
+    return last_result
 
 
 def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
@@ -522,7 +595,6 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         return None
 
     # 4. live API call
-    time.sleep(SPLICEAI_API_RATE_SLEEP)
     selected = _query_spliceai_api(
         gene, coords["chrom"], coords["pos"], coords["ref"], coords["alt"]
     )
@@ -541,6 +613,11 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "scoring_profile_id": SPLICEAI_PROFILE_ID,
             "distance": SPLICEAI_MAX_DISTANCE,
             "mask": SPLICEAI_MASK,
+            "retryable": bool(
+                selected.get("retryable")
+                if isinstance(selected, dict)
+                else False
+            ),
         }
         return None
 
@@ -613,19 +690,8 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
 # SpliceAI criterion helper functions
 # ============================================================
 
-SPLICEAI_PP3_ALLOWED_TYPES = {
-    "synonymous", "silent",
-    "missense",
-    "inframe_deletion", "inframe_insertion", "inframe_delins",
-    "intronic",
-}
-
-SPLICEAI_BP4_ALLOWED_TYPES = {
-    "synonymous", "silent",
-    "missense",
-    "inframe_deletion", "inframe_insertion", "inframe_delins",
-    "intronic",
-}
+SPLICEAI_PP3_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
+SPLICEAI_BP4_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
 
 
 def normalize_variant_type(variant_type: str) -> str:

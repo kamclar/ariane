@@ -9,10 +9,9 @@ import os
 LOGGER = logging.getLogger(__name__)
 EXTERNAL_LOOKUP_TIMEOUT = 12
 SERVICE_LOOKUP_TIMEOUTS = {
-    # The lower-level API call defaults to 25 seconds. This margin covers rate
-    # limiting and still keeps the complete request below nginx's 60-second
-    # proxy timeout. Offline cache builders do not use this wrapper.
-    "SpliceAI": int(os.environ.get("SPLICEAI_LOOKUP_TIMEOUT", "30")),
+    # This covers two bounded 20-second source attempts, rate scheduling and
+    # one retry delay. Nginx allows 180 seconds for the complete request.
+    "SpliceAI": int(os.environ.get("SPLICEAI_LOOKUP_TIMEOUT", "55")),
 }
 
 

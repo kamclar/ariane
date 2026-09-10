@@ -12,6 +12,66 @@ from typing import Any, Mapping
 from backend.gene_policy import spliceai_thresholds
 
 
+FIGURE_1A_SPLICEAI_TYPES = frozenset({
+    "missense",
+    "inframe_deletion",
+    "inframe_insertion",
+    "inframe_delins",
+    "synonymous",
+    "silent",
+    "intronic",
+})
+
+
+def spliceai_required_for_classification(variant_type: str) -> bool:
+    """Return whether the automatic ENIGMA path requires SpliceAI."""
+    return (variant_type or "").strip().lower() in FIGURE_1A_SPLICEAI_TYPES
+
+
+def spliceai_failure_is_retryable(status: str, reason: str = "") -> bool:
+    """Classify source failures without treating input failures as transient."""
+    normalized_status = (status or "").strip().lower()
+    normalized_reason = (reason or "").lower()
+    if normalized_status != "api_error":
+        return False
+    non_retryable_markers = (
+        "http error 400",
+        "bad request",
+        "profile mismatch",
+        "lacks complete",
+        "no transcript scores",
+        "required reference transcript",
+        "ambiguous spliceai records",
+    )
+    if any(marker in normalized_reason for marker in non_retryable_markers):
+        return False
+    retryable_markers = (
+        "timeout",
+        "timed out",
+        "urlerror",
+        "connection",
+        "temporarily unavailable",
+        "http error 429",
+        "http error 500",
+        "http error 502",
+        "http error 503",
+        "http error 504",
+    )
+    return any(marker in normalized_reason for marker in retryable_markers)
+
+
+def spliceai_result_is_complete(
+    variant_type: str,
+    *,
+    status: str,
+    score: float | None,
+) -> bool:
+    """Validate the SpliceAI part of a completed automatic result."""
+    if not spliceai_required_for_classification(variant_type):
+        return True
+    return (status or "").strip().lower() == "ok" and score is not None
+
+
 def enigma_spliceai_band(gene: str, score: float | None) -> str:
     """Return the configured VCEP prediction band for a SpliceAI score."""
     if score is None:

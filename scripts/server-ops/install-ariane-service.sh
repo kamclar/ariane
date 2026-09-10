@@ -111,7 +111,7 @@ User=$ARIANE_USER
 WorkingDirectory=$ARIANE_HOME
 Environment="PATH=$ARIANE_HOME/venv/bin"
 EnvironmentFile=-/etc/ariane/ariane.env
-ExecStart=$ARIANE_HOME/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port $ARIANE_PORT --workers 4 --proxy-headers --forwarded-allow-ips=127.0.0.1
+ExecStart=$ARIANE_HOME/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port $ARIANE_PORT --workers 1 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=always
 RestartSec=10
 TimeoutStopSec=30

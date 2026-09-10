@@ -7,6 +7,7 @@ from backend.services.evidence_orchestration import (
     EvidenceOrchestrationService,
     ExternalEvidenceDependencies,
     OrchestratedEvidence,
+    RequiredEvidenceUnavailableError,
     VariantPreparationError,
 )
 from backend.services.ps1_reference_resolution import resolve_ps1_reference
@@ -18,6 +19,7 @@ __all__ = [
     "EvidenceOrchestrationService",
     "ExternalEvidenceDependencies",
     "OrchestratedEvidence",
+    "RequiredEvidenceUnavailableError",
     "execute_variant_classification",
     "resolve_ps1_reference",
     "VariantPreparationError",

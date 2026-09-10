@@ -126,6 +126,66 @@ def test_unavailable_spliceai_remains_unavailable_and_does_not_enable_bayesdel_p
     assert any("SpliceAI is unavailable" in warning for warning in execution.result["warnings"])
 
 
+def test_provider_does_not_query_spliceai_when_automatic_path_does_not_require_it():
+    calls = []
+    dependencies = replace(
+        _dependencies(),
+        spliceai_lookup=lambda gene, c: calls.append((gene, c)),
+    )
+    request = ClassificationRequest(
+        variant=replace(
+            _request().variant,
+            p_notation="p.(Ala1789Ter)",
+            variant_type="nonsense",
+        )
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request,
+        dependencies=dependencies,
+    ))
+
+    assert calls == []
+    assert execution.provider_artifacts["spliceai_score"] is None
+    assert execution.provider_artifacts["spliceai_status"]["status"] == "not_applicable"
+    assert execution.provider_artifacts["spliceai_status"][
+        "required_for_classification"
+    ] is False
+
+
+def test_provider_audits_incomplete_ps1_reference_spliceai_lookup():
+    assessed = "c.5366C>T"
+    reference = "c.5366C>G"
+
+    def score(gene, c_notation):
+        return 0.03 if c_notation == assessed else None
+
+    def status(gene, c_notation):
+        if c_notation == assessed:
+            return {"status": "ok", "score": 0.03, "source": "test-spliceai"}
+        return {
+            "status": "api_error",
+            "score": None,
+            "reason": "TimeoutError: The read operation timed out",
+        }
+
+    dependencies = replace(
+        _dependencies(),
+        spliceai_lookup=score,
+        spliceai_status=status,
+        ps1_candidate_lookup=lambda *args: [reference],
+    )
+    execution = asyncio.run(execute_classification_request(
+        _request(), dependencies=dependencies
+    ))
+    audit = execution.provider_artifacts["spliceai_status"]
+
+    assert audit["status"] == "ok"
+    assert audit["reference_lookup_required"] is True
+    assert audit["reference_lookup_complete"] is False
+    assert audit["reference_variant_statuses"][reference]["retryable"] is True
+
+
 def test_unavailable_bayesdel_is_audited_and_does_not_create_protein_prediction():
     execution = asyncio.run(execute_classification_request(
         _request(), dependencies=_dependencies(bayesdel_score=None)

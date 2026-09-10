@@ -61,10 +61,18 @@ from backend.models import (
     ClientValidationRequest, VariantNormalizationResponse,
     Ps1ReferenceResolutionRequest, Ps1ReferenceResolutionResponse,
 )
+from backend.public_api import (
+    PUBLIC_API_VERSION,
+    PublicApiError,
+    PublicApiErrorResponse,
+    build_metadata,
+    create_public_api_router,
+)
 from backend.services import (
     ClassificationCommand,
     EvidenceOrchestrationService,
     EvidenceExecutionError,
+    RequiredEvidenceUnavailableError,
     VariantPreparationError,
     execute_variant_classification,
     resolve_ps1_reference,
@@ -194,9 +202,21 @@ def _audit(request: Request, event: str, level: str = "info", **fields) -> None:
     getattr(AUDIT_LOGGER, level)(message)
 
 
+def _request_id(value: str | None) -> str:
+    """Accept a compact log-safe client ID or generate a server ID."""
+    if value:
+        candidate = value.strip()
+        if (
+            1 <= len(candidate) <= 128
+            and all(char.isalnum() or char in "-._:" for char in candidate)
+        ):
+            return candidate
+    return uuid.uuid4().hex
+
+
 @app.middleware("http")
 async def audit_request(request: Request, call_next):
-    request.state.request_id = request.headers.get("x-request-id") or uuid.uuid4().hex
+    request.state.request_id = _request_id(request.headers.get("x-request-id"))
     started = time.monotonic()
     try:
         response = await call_next(request)
@@ -211,6 +231,9 @@ async def audit_request(request: Request, call_next):
         )
         raise
     response.headers["X-Request-ID"] = request.state.request_id
+    if request.url.path.startswith("/api/v1/"):
+        response.headers["X-ARIANE-API-Version"] = PUBLIC_API_VERSION
+        response.headers["X-ARIANE-Version"] = ARIANE_VERSION
     log_completion = (
         request.url.path.startswith("/admin/")
         or request.url.path.startswith("/api/") and request.url.path != "/api/health"
@@ -235,9 +258,85 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
         input=jsonable_encoder(exc.body),
         errors=jsonable_encoder(exc.errors()),
     )
+    if request.url.path.startswith("/api/v1/"):
+        messages = []
+        for error in exc.errors():
+            location = ".".join(str(value) for value in error.get("loc", ()))
+            message = str(error.get("msg", "Invalid request"))
+            if message.startswith("Value error, "):
+                message = message[len("Value error, "):]
+            rendered = f"{location}: {message}" if location else message
+            if rendered not in messages:
+                messages.append(rendered)
+        response = PublicApiErrorResponse(
+            metadata=build_metadata(
+                request_id=request.state.request_id,
+                engine=CLASSIFIER_ENGINE_MODE.value,
+            ),
+            error=PublicApiError(
+                code="invalid_request",
+                message="; ".join(messages) or "Invalid request",
+                retryable=False,
+            ),
+        )
+        return JSONResponse(
+            status_code=422,
+            content=response.model_dump(mode="json", exclude_none=True),
+        )
     return JSONResponse(
         status_code=422,
         content={"detail": jsonable_encoder(exc.errors())},
+    )
+
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(request: Request, exc: HTTPException):
+    if not request.url.path.startswith("/api/v1/"):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": jsonable_encoder(exc.detail)},
+            headers=exc.headers,
+        )
+    code_by_status = {
+        404: "not_found",
+        422: "variant_not_classifiable",
+        429: "rate_limited",
+        503: "evidence_unavailable",
+    }
+    error_headers = exc.headers or {}
+    if isinstance(exc.detail, dict):
+        error_code = str(exc.detail.get("code") or code_by_status.get(
+            exc.status_code, "request_failed"
+        ))
+        error_message = str(exc.detail.get("message") or "Request failed")
+        retryable = bool(exc.detail.get("retryable", False))
+    else:
+        error_code = error_headers.get(
+            "X-ARIANE-Error-Code",
+            code_by_status.get(exc.status_code, "request_failed"),
+        )
+        error_message = str(exc.detail)
+        retryable_header = error_headers.get("X-ARIANE-Retryable")
+        retryable = (
+            retryable_header.lower() == "true"
+            if retryable_header is not None
+            else exc.status_code in {429, 502, 503, 504}
+        )
+    response = PublicApiErrorResponse(
+        metadata=build_metadata(
+            request_id=request.state.request_id,
+            engine=CLASSIFIER_ENGINE_MODE.value,
+        ),
+        error=PublicApiError(
+            code=error_code,
+            message=error_message,
+            retryable=retryable,
+        ),
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=response.model_dump(mode="json", exclude_none=True),
+        headers=exc.headers,
     )
 
 
@@ -489,7 +588,8 @@ async def resolve_ps1_reference_endpoint(
 
 
 # Semaphore limits concurrent external API calls during batch processing
-BATCH_SEMAPHORE = asyncio.Semaphore(3)
+BATCH_CONCURRENCY = 3
+BATCH_SEMAPHORE = asyncio.Semaphore(BATCH_CONCURRENCY)
 
 
 def _batch_variant_label(index: int, raw_item: object) -> str:
@@ -515,6 +615,47 @@ def _batch_validation_message(exc: ValidationError) -> str:
     return "; ".join(messages) or "Invalid variant input"
 
 
+def _execution_error(exc: Exception) -> tuple[str, str, bool]:
+    if isinstance(exc, HTTPException):
+        message = str(exc.detail)
+        headers = exc.headers or {}
+        explicit_code = headers.get("X-ARIANE-Error-Code")
+        retryable_header = headers.get("X-ARIANE-Retryable")
+        explicit_retryable = (
+            retryable_header.lower() == "true"
+            if retryable_header is not None
+            else None
+        )
+        if exc.status_code == 422:
+            return explicit_code or "variant_not_classifiable", message, False
+        if exc.status_code == 503:
+            return (
+                explicit_code or "evidence_unavailable",
+                message,
+                True if explicit_retryable is None else explicit_retryable,
+            )
+        return (
+            explicit_code or "request_failed",
+            message,
+            (
+                exc.status_code in {429, 502, 504}
+                if explicit_retryable is None
+                else explicit_retryable
+            ),
+        )
+    return "internal_error", str(exc) or type(exc).__name__, False
+
+
+def _policy_metadata(gene: str) -> dict[str, str]:
+    configured = get_gene_policy(gene)
+    return {
+        "gene": gene,
+        "policy_id": configured["policy"]["runtime_policy_id"],
+        "policy_version": configured["policy"]["version"],
+        "reference_transcript": configured["gene_config"]["reference_transcript"],
+    }
+
+
 async def _classify_one(
     gene: str,
     c_notation: str,
@@ -535,6 +676,18 @@ async def _classify_one(
         )
     except VariantPreparationError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RequiredEvidenceUnavailableError as exc:
+        headers = {
+            "X-ARIANE-Error-Code": exc.code,
+            "X-ARIANE-Retryable": str(exc.retryable).lower(),
+        }
+        if exc.retryable:
+            headers["Retry-After"] = "5"
+        raise HTTPException(
+            status_code=503,
+            detail=str(exc),
+            headers=headers,
+        ) from exc
     except EvidenceExecutionError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -695,6 +848,15 @@ async def classify_variant(
         policy_version=policy["version"],
         classifier_fingerprint=fingerprint,
     )
+    duration_ms = (time.monotonic() - started) * 1000
+    request.state.classification_execution = {
+        "policy": _policy_metadata(req.gene),
+        "classifier_fingerprint": fingerprint,
+        "cache_status": cache_status,
+        "duration_ms": duration_ms,
+    }
+    http_response.headers["X-ARIANE-Cache-Status"] = cache_status
+    http_response.headers["X-ARIANE-Classifier-Fingerprint"] = fingerprint
     _audit(
         request,
         "classification_completed",
@@ -730,6 +892,7 @@ async def classify_batch(
     Results preserve input order. Per-variant errors are reported inline.
     Concurrency is limited to avoid overwhelming external APIs.
     """
+    batch_started = time.monotonic()
     identity = resolve_usage_identity(request)
     identity.set_cookie(http_response)
 
@@ -758,17 +921,27 @@ async def classify_batch(
                     result=res,
                 )
             except Exception as exc:
+                error_code, error_message, retryable = _execution_error(exc)
                 output = BatchItemResult(
                     index=idx, status="error",
                     variant=f"{item.gene} {item.c_notation}",
-                    error=str(exc),
+                    error=error_message,
+                    error_code=error_code,
+                    error_retryable=retryable,
                 )
+            policy = get_gene_policy(item.gene)["policy"]
+            duration_ms = (time.monotonic() - started) * 1000
+            output.cache_status = cache_status
+            output.classifier_fingerprint = fingerprint
+            output.policy_id = policy["runtime_policy_id"]
+            output.policy_version = policy["version"]
+            output.duration_ms = duration_ms
             return (
                 item,
                 output,
                 cache_status,
                 fingerprint,
-                (time.monotonic() - started) * 1000,
+                duration_ms,
             )
 
     valid_items: list[tuple[int, VariantRequest]] = []
@@ -783,6 +956,8 @@ async def classify_batch(
                 status="error",
                 variant=_batch_variant_label(idx, raw_item),
                 error=error,
+                error_code="invalid_variant",
+                error_retryable=False,
             ))
             if isinstance(raw_item, dict):
                 safe_input = {
@@ -845,12 +1020,22 @@ async def classify_batch(
             } if output_item.result else None,
             error=output_item.error,
         )
-    return BatchResponse(
+    response = BatchResponse(
         total=len(items),
         success_count=success,
         error_count=len(items) - success,
         results=list(items),
     )
+    request.state.batch_duration_ms = (time.monotonic() - batch_started) * 1000
+    return response
+
+
+app.include_router(create_public_api_router(
+    classify_single=classify_variant,
+    classify_batch=classify_batch,
+    engine=CLASSIFIER_ENGINE_MODE.value,
+    batch_concurrency=BATCH_CONCURRENCY,
+))
 
 
 @app.post("/api/clear-cache")

@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+import hashlib
+import json
 from pathlib import Path
 import sqlite3
 
@@ -8,7 +10,7 @@ from fastapi.testclient import TestClient
 from backend.classification_runtime.cache import ClassificationCacheRepository
 from backend.classification_runtime.identity import resolve_usage_identity
 from backend.classification_runtime.usage import ClassificationUsageRepository
-from backend.models import ClassificationResult
+from backend.models import ClassificationResult, SpliceAIAudit
 
 
 def _result() -> ClassificationResult:
@@ -19,6 +21,25 @@ def _result() -> ClassificationResult:
         p_notation="p.(Gln1395=)",
         predicted_class=3,
         predicted_label="Uncertain significance",
+    )
+
+
+def _incomplete_figure1a_result() -> ClassificationResult:
+    return ClassificationResult(
+        variant="BRCA1 c.5366C>T p.(Ala1789Val)",
+        gene="BRCA1",
+        c_notation="c.5366C>T",
+        p_notation="p.(Ala1789Val)",
+        variant_type="missense",
+        predicted_class=3,
+        predicted_label="Uncertain significance",
+        spliceai_audit=SpliceAIAudit(
+            status="api_error",
+            score=None,
+            required_for_classification=True,
+            retryable=True,
+            reason="TimeoutError: The read operation timed out",
+        ),
     )
 
 
@@ -85,6 +106,101 @@ def test_classification_cache_has_no_default_time_expiration(tmp_path: Path, mon
         ).fetchone()[0]
     assert expires_at == ""
     assert repository.get(**_cache_arguments()).status == "hit"
+
+
+def test_classification_cache_does_not_store_incomplete_required_spliceai(tmp_path: Path):
+    repository = ClassificationCacheRepository(
+        tmp_path / "cache.sqlite3", max_age_seconds=3600
+    )
+    result = _incomplete_figure1a_result()
+    repository.put(
+        result,
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+
+    hit = repository.get(
+        gene="BRCA1",
+        transcript="NM_007294.4",
+        c_notation="c.5366C>T",
+        p_notation="p.(Ala1789Val)",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+    assert hit.status == "miss"
+
+
+def test_classification_cache_does_not_store_incomplete_ps1_reference_lookup(
+    tmp_path: Path,
+):
+    repository = ClassificationCacheRepository(
+        tmp_path / "cache.sqlite3", max_age_seconds=3600
+    )
+    result = _result().model_copy(
+        update={
+            "variant_type": "synonymous",
+            "spliceai_audit": SpliceAIAudit(
+                status="ok",
+                score=0.01,
+                required_for_classification=True,
+                reference_lookup_required=True,
+                reference_lookup_complete=False,
+                reference_variant_statuses={
+                    "c.4185G>C": {
+                        "status": "api_error",
+                        "score": None,
+                        "retryable": True,
+                    }
+                },
+            ),
+        }
+    )
+    repository.put(
+        result,
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+
+    assert repository.get(**_cache_arguments()).status == "miss"
+
+
+def test_classification_cache_rejects_preexisting_incomplete_result(tmp_path: Path):
+    database = tmp_path / "cache.sqlite3"
+    repository = ClassificationCacheRepository(database, max_age_seconds=3600)
+    repository.put(
+        _result(),
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+    incomplete = _incomplete_figure1a_result()
+    serialized = json.dumps(
+        incomplete.model_dump(mode="json"),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    checksum = hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            """
+            UPDATE classification_results
+            SET gene = ?, c_notation = ?, p_notation = ?,
+                result_json = ?, result_sha256 = ?
+            """,
+            (
+                incomplete.gene,
+                incomplete.c_notation,
+                incomplete.p_notation,
+                serialized,
+                checksum,
+            ),
+        )
+        connection.commit()
+
+    assert repository.get(**_cache_arguments()).status == "incomplete"
 
 
 def test_usage_events_count_every_search_separately(tmp_path: Path):

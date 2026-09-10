@@ -1,8 +1,10 @@
 import unittest
 import json
+import urllib.error
 from unittest.mock import MagicMock, patch
 
 from backend.lookups import spliceai
+from backend.modules.spliceai_policy import spliceai_failure_is_retryable
 
 
 def score_row(transcript, refseq, *, ds_al, ds_dl=0.0):
@@ -102,6 +104,64 @@ class SpliceAITranscriptPolicyTests(unittest.TestCase):
             result = spliceai._query_spliceai_api("BRCA1", "17", 1, "A", "G")
         self.assertIsNone(result["score"])
         self.assertIn("profile mismatch", result["error"])
+
+    def test_transient_timeout_is_retried_once(self):
+        payload = {
+            "hg": "38",
+            "genomeVersion": "38",
+            "distance": 10000,
+            "mask": 0,
+            "source": "test SpliceAI",
+            "scores": [score_row(
+                "ENST00000357654.9",
+                "NM_007294.4",
+                ds_al=0.23,
+            )],
+        }
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(payload).encode()
+        with patch.object(
+            spliceai.urllib.request,
+            "urlopen",
+            side_effect=[TimeoutError("temporary timeout"), response],
+        ) as mocked, patch.object(spliceai.time, "sleep"):
+            result = spliceai._query_spliceai_api("BRCA1", "17", 1, "A", "G")
+
+        self.assertEqual(result["score"], 0.23)
+        self.assertEqual(mocked.call_count, 2)
+
+    def test_http_400_is_not_retried(self):
+        error = urllib.error.HTTPError(
+            "https://example.test",
+            400,
+            "Bad Request",
+            None,
+            None,
+        )
+        with patch.object(
+            spliceai.urllib.request,
+            "urlopen",
+            side_effect=error,
+        ) as mocked, patch.object(spliceai.time, "sleep"):
+            result = spliceai._query_spliceai_api("BRCA1", "17", 1, "A", "G")
+
+        self.assertIsNone(result["score"])
+        self.assertFalse(result["retryable"])
+        self.assertEqual(mocked.call_count, 1)
+
+    def test_only_transient_api_failures_are_retryable(self):
+        self.assertTrue(spliceai_failure_is_retryable(
+            "api_error", "TimeoutError: The read operation timed out"
+        ))
+        self.assertTrue(spliceai_failure_is_retryable(
+            "api_error", "HTTP Error 503: Service Unavailable"
+        ))
+        self.assertFalse(spliceai_failure_is_retryable(
+            "api_error", "HTTP Error 404: Not Found"
+        ))
+        self.assertFalse(spliceai_failure_is_retryable(
+            "api_error", "RuntimeError: unexpected response"
+        ))
 
 
 if __name__ == "__main__":

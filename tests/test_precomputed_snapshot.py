@@ -547,7 +547,17 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
     def test_c509_full_classification_scores_publisher_combined_bp5(self):
         from backend.main import _classify_one
 
-        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+        with patch.dict(
+            "backend.lookups.spliceai.SPLICEAI_STATUS_CACHE",
+            {
+                "BRCA1:c.509G>A": {
+                    "status": "ok",
+                    "score": 0.02,
+                    "source": "test-spliceai",
+                }
+            },
+            clear=True,
+        ), patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
             "backend.lookups.spliceai.get_spliceai_score", return_value=0.02
         ), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",
@@ -575,7 +585,17 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
     def test_c3247a_to_c_receives_bp1_and_variant_specific_pp4(self):
         from backend.main import _classify_one
 
-        with patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
+        with patch.dict(
+            "backend.lookups.spliceai.SPLICEAI_STATUS_CACHE",
+            {
+                "BRCA1:c.3247A>C": {
+                    "status": "ok",
+                    "score": 0.0,
+                    "source": "test-spliceai",
+                }
+            },
+            clear=True,
+        ), patch("backend.lookups.coordinates.resolve_variant", return_value=None), patch(
             "backend.lookups.spliceai.get_spliceai_score", return_value=0.0
         ), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense",

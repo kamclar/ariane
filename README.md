@@ -199,7 +199,7 @@ pathogenic founder variants are checked separately and cannot receive BA1/BS1.
 
 ## Disclaimer
 
-This tool is a research prototype. Do not use for clinical decisions without expert review.
+ARIANE is under expert validation. Do not use it for clinical decisions without expert review.
 
 ## Automated scope and manual review
 
@@ -257,22 +257,23 @@ predicted splice consequence.
 
 ### API status and batch responses
 
-The API contract is currently beta and primarily supports the web interface.
-It has not yet been declared a stable public interface for large external
-integrations.
+The versioned public API is available under `/api/v1`. It is a beta contract for
+external integrations and uses the same production classification DAG as the
+web interface. See [docs/public_api.md](docs/public_api.md) for requests,
+responses, limits and a reference client.
 
-`POST /api/classify/batch` accepts at most 200 items and preserves their input
-order. Each item is validated separately. An invalid variant is returned as an
-item with `status: "error"`; it does not prevent valid items in the same batch
-from being classified. HTTP 422 is reserved for an invalid top-level request,
-an empty list, or a batch exceeding the item limit. Clients should not retry a
-422 response without correcting the request.
+`POST /api/v1/classify/batch` accepts at most 10 items and preserves their input
+order. Five items are recommended for uncached work. Each item is validated
+separately. An invalid variant is returned as an item with `status: "error"`;
+it does not prevent valid items in the same batch from being classified. HTTP
+422 is reserved for an invalid top-level request, an empty list, or a batch
+exceeding the item limit. Clients should not retry a 422 response without
+correcting the request.
 
-Classification responses may contain `rna_review`, `splice_ps1_review`,
-`protein_ps1_review`, or `initiation_review`. These objects are review aids.
-`is_evidence_criterion: false` means that the recommendation adds no criterion,
-points, or automatic class change. A separate, documented manual-evidence
-request is required to calculate an amended working result.
+The v1 response places review aids in a separate `manual_review` object.
+`affects_automatic_classification: false` means that a recommendation adds no
+criterion, points, or automatic class change. A separate, documented
+manual-evidence request is required to calculate an amended working result.
 
 `PS1_SPLICE` can then be added manually as a structured curated record when a
 reviewer confirms the reference variant, P/LP classification source, same splice

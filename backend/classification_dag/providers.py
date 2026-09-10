@@ -23,6 +23,10 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.types import NodeResult
 from backend.lookup_execution import lookup_or_unavailable
+from backend.modules.spliceai_policy import (
+    spliceai_failure_is_retryable,
+    spliceai_required_for_classification,
+)
 from backend.population_frequency.indel_size import is_indel_allele
 from backend.modules.table9 import (
     TABLE9_DATA,
@@ -198,7 +202,7 @@ class Ps1CandidateEvidenceNode:
 class SpliceAiEvidenceNode:
     dependencies: ProviderDependencies
     id: str = "provider.spliceai"
-    version: str = "1"
+    version: str = "2"
     requires: frozenset[str] = frozenset(
         {"classification_request", "normalized_variant", "ps1_reference_candidates"}
     )
@@ -209,41 +213,92 @@ class SpliceAiEvidenceNode:
     async def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
         candidates = tuple(inputs["ps1_reference_candidates"])
-        is_exon_cnv = variant.variant_type.lower() in {
-            "exon_deletion", "exon_duplication",
-        }
-        if is_exon_cnv:
+        required = spliceai_required_for_classification(variant.variant_type)
+        if not required:
+            reason = (
+                "SpliceAI is not required by the automatic ENIGMA path for "
+                f"variant type {variant.variant_type}."
+            )
             evidence = EvidenceItem(
                 id="spliceai",
                 kind="splice_prediction",
                 status=EvidenceStatus.NOT_APPLICABLE,
-                reason="Exact genomic breakpoints are unavailable for this exon-level CNV.",
+                reason=reason,
+                provenance={
+                    "status": "not_applicable",
+                    "required_for_classification": False,
+                    "retryable": False,
+                    "reason": reason,
+                },
             )
             return NodeResult.succeeded(
                 {
                     "spliceai_evidence": evidence,
                     "ps1_reference_spliceai_scores": {},
                 },
-                provenance={"evidence_status": evidence.status.value},
+                provenance={
+                    "evidence_status": evidence.status.value,
+                    "required_for_classification": False,
+                },
             )
 
-        diagnostics: list[str] = []
-        results = await asyncio.gather(*(
-            lookup_or_unavailable(
+        async def lookup(c_notation: str):
+            local_diagnostics: list[str] = []
+            score = await lookup_or_unavailable(
                 self.dependencies.spliceai_lookup,
                 None,
                 "SpliceAI",
-                diagnostics,
+                local_diagnostics,
                 variant.gene,
                 c_notation,
             )
-            for c_notation in (variant.c_notation, *candidates)
+            item_status = dict(self.dependencies.spliceai_status(
+                variant.gene, c_notation
+            ))
+            if score is None and not item_status.get("status"):
+                item_status = {
+                    "status": "api_error",
+                    "reason": (
+                        local_diagnostics[0]
+                        if local_diagnostics
+                        else "SpliceAI score is unavailable"
+                    ),
+                }
+            explicit_retryable = item_status.get("retryable")
+            item_status["retryable"] = (
+                explicit_retryable
+                if isinstance(explicit_retryable, bool)
+                else spliceai_failure_is_retryable(
+                    str(item_status.get("status") or ""),
+                    str(item_status.get("reason") or ""),
+                )
+            )
+            item_status["score"] = score
+            return score, item_status, tuple(local_diagnostics)
+
+        lookups = await asyncio.gather(*(
+            lookup(c_notation) for c_notation in (variant.c_notation, *candidates)
         ))
-        score = results[0]
-        reference_scores = dict(zip(candidates, results[1:]))
-        status = dict(self.dependencies.spliceai_status(
-            variant.gene, variant.c_notation
-        ))
+        score, status, assessed_diagnostics = lookups[0]
+        reference_scores = {
+            c_notation: result[0]
+            for c_notation, result in zip(candidates, lookups[1:])
+        }
+        reference_statuses = {
+            c_notation: result[1]
+            for c_notation, result in zip(candidates, lookups[1:])
+        }
+        diagnostics = list(assessed_diagnostics)
+        for result in lookups[1:]:
+            diagnostics.extend(result[2])
+        status["required_for_classification"] = True
+        status["reference_lookup_required"] = bool(candidates)
+        status["reference_lookup_complete"] = all(
+            reference_scores[c_notation] is not None
+            and str(reference_statuses[c_notation].get("status") or "") == "ok"
+            for c_notation in candidates
+        )
+        status["reference_variant_statuses"] = reference_statuses
         evidence = EvidenceItem(
             id="spliceai",
             kind="splice_prediction",
@@ -272,6 +327,7 @@ class SpliceAiEvidenceNode:
                 "evidence_status": evidence.status.value,
                 "source_id": evidence.source_id,
                 "reference_lookup_count": len(candidates),
+                "required_for_classification": True,
             },
             warnings=tuple(dict.fromkeys(diagnostics)),
         )

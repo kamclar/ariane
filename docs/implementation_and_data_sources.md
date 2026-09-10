@@ -1475,6 +1475,17 @@ miss se provede běžný provider DAG. Pokud provider selže, starý výsledek s
 nevrátí. Selhání zápisu pomocné cache naopak nesmí změnit právě vypočtený
 výsledek.
 
+Do cache hotových klasifikací se neukládá výsledek varianty procházející
+Figure 1A, pokud nemá úspěšně získané povinné SpliceAI skóre. Stejná kontrola
+probíhá při čtení, takže ani starší neúplný záznam se nepoužije. Další dotaz
+proto znovu spustí získání evidence. Výsledek varianty, pro jejíž automatickou
+větev SpliceAI není potřeba, zůstává úplný a lze jej uložit.
+
+Stejné pravidlo platí pro kandidátní referenční varianty proteinového PS1.
+Pokud je pro hodnocenou variantu nalezen kandidát, musí být dostupný SpliceAI
+výsledek hodnocené i referenční varianty. Neúplná kontrola reference nesmí vést
+k výsledku bez PS1 ani k uložení takového výsledku do cache.
+
 Manuální evidence a amended working result se do této cache neukládají. Patří
 do verzovaných review records v `ARIANE_RUNTIME_DATA_DIR`.
 
@@ -1519,11 +1530,31 @@ Veřejný `spliceai_audit` je v hlavním výsledku sbalený pod
 maskování, sestavu, transkript, použitou delta hodnotu, všechna delta skóre,
 REF a ALT hodnoty, zdroj, GRCh38 dotaz a cache klíč.
 
-Interaktivní cesta používá pro Broad SpliceAI vnitřní limit 25
-sekund a vnější limit 30 sekund. Pokud zdroj včas neodpoví, ARIANE dokončí
-klasifikaci, označí SpliceAI jako nedostupný, nepoužije kritéria vyžadující jeho
-skóre a omezení zobrazí uživateli. Požadavek tak skončí před 60sekundovým
-timeoutem nginx. Obecný 12sekundový limit ostatních externích lookupů se nemění.
+Volání Broad SpliceAI používá nejvýše dva pokusy po 20 sekundách. Druhý pokus
+se provede pouze po timeoutu, síťové chybě, HTTP 429 nebo HTTP 5xx. HTTP 400,
+nesouhlas profilu, chybějící referenční transkript a chybějící GRCh38 souřadnice
+se automaticky neopakují. Celý SpliceAI lookup má vnější limit 55 sekund a
+reverse proxy dovoluje dokončení celého požadavku do 180 sekund.
+
+Produkční služba používá jeden aplikační proces. Uvnitř něj mohou běžet nejvýše
+dva souběžné SpliceAI požadavky a jejich zahájení odděluje společný časový
+interval. Tím se limit neuplatňuje zvlášť v několika procesech. Úspěšný výsledek
+se uloží do profilově vázané runtime cache.
+
+Pokud SpliceAI zůstane nedostupný pro missense, potvrzenou in-frame,
+synonymous nebo relevantní intronickou variantu, automatická klasifikace se
+ukončí jako nedostupná. Nevrátí třídu a nevytvoří cache záznam hotové
+klasifikace. Dočasná síťová chyba má příznak `retryable=true`. Chybějící
+souřadnice a odmítnutý nebo metodicky nevyhovující výsledek mají
+`retryable=false`. Pro nonsense, frameshift, exonové CNV a další větve, které
+SpliceAI pro automatickou klasifikaci nepotřebují, se síťový dotaz neprovádí.
+Obecný 12sekundový limit ostatních externích lookupů se nemění.
+
+Je-li nalezena kandidátní reference proteinového PS1, kontrola úplnosti zahrnuje
+také její SpliceAI výsledek. Stav každé reference je součástí strukturovaného
+auditu. Dočasné selhání reference se vrací jako opakovatelná chyba celé
+klasifikace, protože jinak by dočasná nedostupnost mohla změnit přidělená
+kritéria a výslednou třídu.
 
 ### 8.4 Priorita zdrojů
 

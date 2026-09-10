@@ -12,6 +12,7 @@ from backend.modules.bp1 import evaluate_bp1
 from backend.modules.bp7 import evaluate_bp7
 from backend.modules.evidence_interactions import pvs1_prediction_deduplication
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
+from backend.modules.spliceai_policy import spliceai_required_for_classification
 from backend.modules.utils import (
     get_amino_acid_interval,
     overlapping_functional_domains,
@@ -105,18 +106,9 @@ class BioinformaticCriteriaNode:
                     evidence_item_ids=("spliceai",),
                 )
             )
-        figure1a_types = {
-            "missense",
-            "inframe_deletion",
-            "inframe_insertion",
-            "inframe_delins",
-            "synonymous",
-            "silent",
-            "intronic",
-        }
         figure1a_unavailable = (
             splice.effective_score is None
-            and ci.variant_type.lower() in figure1a_types
+            and spliceai_required_for_classification(ci.variant_type)
         )
         if figure1a_unavailable:
             warnings.append(
