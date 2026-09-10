@@ -126,6 +126,8 @@ class PublicApiLimits(BaseModel):
     batch_concurrency: int
     requests_per_second: int
     request_burst: int
+    per_key_requests_per_minute: int
+    per_key_request_burst: int
 
 
 class PublicApiGene(BaseModel):
@@ -286,6 +288,8 @@ def create_public_api_router(
     batch_concurrency: int,
     requests_per_second: int = 5,
     request_burst: int = 20,
+    per_key_requests_per_minute: int = 30,
+    per_key_request_burst: int = 3,
 ) -> APIRouter:
     """Create the versioned transport router around shared handlers."""
     router = APIRouter(prefix="/api/v1", tags=["Public API v1"])
@@ -313,6 +317,8 @@ def create_public_api_router(
                 batch_concurrency=batch_concurrency,
                 requests_per_second=requests_per_second,
                 request_burst=request_burst,
+                per_key_requests_per_minute=per_key_requests_per_minute,
+                per_key_request_burst=per_key_request_burst,
             ),
             endpoints=[
                 "/api/v1/capabilities",

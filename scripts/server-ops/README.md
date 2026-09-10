@@ -63,6 +63,13 @@ Registry updates are read on each authenticated request. Disabling a key does
 not require a service restart. The key ID, never the secret, identifies API
 usage in classification statistics.
 
+The same key is required by the legacy `/api/classify/batch` endpoint to prevent
+an authentication bypass. The single `/api/classify` endpoint remains available
+to the public browser interface and is limited to 30 requests per minute per IP
+with a burst of 3. Authenticated routes are also limited to 30 HTTP requests per
+minute for each key with a burst of 3. The browser batch tool and reference API
+client space or sequence requests accordingly.
+
 Structured audit events include the request ID, source IP, endpoint, submitted values, predicted class, class label, total points, and error details. Tokens and request headers are not logged.
 
 ```bash

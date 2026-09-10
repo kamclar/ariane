@@ -2004,11 +2004,18 @@ Verzované klasifikační endpointy `/api/v1/classify` a
 registru mimo Git. Při chybějícím nebo neplatném klíči vrací HTTP 401. Pokud
 registr chybí nebo je poškozený, API selže uzavřeně s HTTP 503. ID klíče se
 použije jako technická identita ve statistikách, tajná hodnota se neloguje.
+Každý klíč má na reverse proxy limit 30 HTTP požadavků za minutu s krátkým
+burst limitem 3. Jeden klíč proto nemůže neomezeně násobit paralelní batch
+požadavky.
 
 Endpoint `/api/v1/capabilities` zůstává veřejný a zveřejňuje pouze požadovaný
 způsob autentizace. Interní kompatibilní endpoint webového rozhraní nelze
 chránit tajemstvím vloženým do klientského JavaScriptu. Je proto nadále omezen
-na úrovni reverse proxy podle IP adresy.
+na úrovni reverse proxy na 30 požadavků za minutu pro jednu IP adresu s krátkým
+burst limitem 3. Batch ve webovém rozhraní používá jednu souběžnou klasifikaci
+a mezi zahájením požadavků zachovává alespoň 2,1 sekundy. Starý endpoint
+`/api/classify/batch` není webovým rozhraním používán a vyžaduje stejný API klíč
+jako verze v1.
 
 ### 15.2 Graf pro ručně doplněnou evidenci
 

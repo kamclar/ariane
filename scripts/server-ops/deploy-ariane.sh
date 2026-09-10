@@ -191,6 +191,12 @@ echo -e "${GREEN}OK Service configured${NC}"
 echo -e "\n${YELLOW}[7] Configuring Nginx...${NC}"
 cat > /etc/nginx/sites-available/ariane << 'EOF'
 limit_req_zone $binary_remote_addr zone=ariane_api:10m rate=5r/s;
+limit_req_zone $http_x_ariane_api_key zone=ariane_keyed_api:10m rate=30r/m;
+map $uri $ariane_web_classify_key {
+    default "";
+    /api/classify $binary_remote_addr;
+}
+limit_req_zone $ariane_web_classify_key zone=ariane_web_classify:10m rate=30r/m;
 
 # Reject direct IP access and unknown hostnames.
 server {
@@ -218,6 +224,8 @@ server {
 
     location / {
         limit_req zone=ariane_api burst=20 nodelay;
+        limit_req zone=ariane_keyed_api burst=3 nodelay;
+        limit_req zone=ariane_web_classify burst=3 nodelay;
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

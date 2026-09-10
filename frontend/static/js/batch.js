@@ -144,8 +144,10 @@
             this.batchTotal = this.batchParsed.length;
             this.batchResults = new Array(this.batchParsed.length).fill(null);
 
-            // Run up to 3 classify calls concurrently for rate-limit safety
-            const CONCURRENCY = 3;
+            // Browser batch uses the rate-limited interactive endpoint.
+            const CONCURRENCY = 1;
+            const MINIMUM_REQUEST_INTERVAL_MS = 2100;
+            let lastRequestStartedAt = 0;
             const queue = [...this.batchParsed.entries()];
             const active = new Set();
 
@@ -154,6 +156,15 @@
                 const [idx, item] = queue.shift();
                 const task = (async () => {
                     try {
+                        const waitMs = Math.max(
+                            0,
+                            MINIMUM_REQUEST_INTERVAL_MS
+                                - (Date.now() - lastRequestStartedAt),
+                        );
+                        if (waitMs > 0) {
+                            await new Promise(resolve => setTimeout(resolve, waitMs));
+                        }
+                        lastRequestStartedAt = Date.now();
                         const resp = await namespace.api.request("/api/classify", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },

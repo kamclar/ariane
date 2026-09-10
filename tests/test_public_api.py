@@ -175,6 +175,8 @@ def test_public_api_capabilities_publish_limits_and_policy():
     assert payload["status"] == "beta"
     assert payload["limits"]["maximum_batch_items"] == 10
     assert payload["limits"]["recommended_uncached_batch_items"] == 5
+    assert payload["limits"]["per_key_requests_per_minute"] == 30
+    assert payload["limits"]["per_key_request_burst"] == 3
     assert payload["authentication_required"] is True
     assert payload["authentication_header"] == "X-ARIANE-API-Key"
     assert {gene["symbol"] for gene in payload["supported_genes"]} == {

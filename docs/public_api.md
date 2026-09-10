@@ -115,8 +115,9 @@ failure for either variant makes the classification retryable and incomplete.
 
 The reference deployment currently permits 5 HTTP requests per second from one
 client IP with a temporary burst of 20 requests. This is a safety ceiling, not a
-recommended sustained rate. Clients should send batches sequentially and wait
-for each response.
+recommended sustained rate. Authenticated requests are additionally limited to
+30 HTTP requests per minute for each API key with a burst of 3. Clients should
+send batches sequentially and wait for each response.
 
 The proxy returns HTTP 429 when the request rate is exceeded. Respect
 `Retry-After` when present. Use bounded retries only for HTTP 429, 502, 503 and
@@ -141,10 +142,15 @@ birth, sample identifiers or clinical notes.
 
 ## Legacy endpoints
 
-The unversioned `/api/classify` and `/api/classify/batch` routes remain available
-for the current web interface and compatibility. External integrations should
-use `/api/v1`. Only the versioned route has the documented public response
-contract.
+The unversioned `/api/classify` route remains available for the public web
+interface. It has a separate limit of 30 requests per minute per client IP with
+a burst of 3. The browser batch tool sends one request at a time with at least
+2.1 seconds between starts.
+
+The unversioned `/api/classify/batch` route requires the same API key as v1, so
+it cannot bypass authentication. It remains only for compatibility and does
+not have the documented v1 response contract. External integrations must use
+`/api/v1`.
 
 ## Python example
 

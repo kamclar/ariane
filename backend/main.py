@@ -2,7 +2,7 @@
 # ARIANE - FastAPI application
 # Automated ACMG Rule-based Interpretation and Annotation ENgine
 # ============================================================
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
@@ -23,6 +23,7 @@ from fastapi import Header
 from backend.admin import router as admin_router
 from backend.review_api import router as review_router
 from backend.version import ARIANE_VERSION
+from backend.api_auth import require_public_api_key
 from backend.classification_runtime import (
     ClassificationCacheRepository,
     ClassificationUsageRepository,
@@ -882,7 +883,10 @@ async def classify_variant(
     return response
 
 
-@app.post("/api/classify/batch")
+@app.post(
+    "/api/classify/batch",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def classify_batch(
     req: BatchRequest,
     request: Request,

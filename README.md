@@ -266,7 +266,9 @@ The classification routes under `/api/v1` require an individual API key.
 Only its SHA-256 digest is stored on the server. The public capabilities route
 does not require a key. Browser-facing compatibility routes remain protected
 by the deployment request limit because the public web interface cannot hold
-a secret credential.
+a secret credential. The interactive classification route permits 30 requests
+per minute per client IP with a burst of 3. The legacy batch route requires an
+API key.
 
 `POST /api/v1/classify/batch` accepts at most 10 items and preserves their input
 order. Five items are recommended for uncached work. Each item is validated
