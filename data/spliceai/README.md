@@ -103,6 +103,12 @@ The expected outcome is zero numeric mismatches among successful public API
 responses. Transient public API failures should be retried before interpreting
 them.
 
+The active image was built on 2026-09-03 and declares SpliceAI commit
+`7f36ca847e1b1885167dab79681dbb75c09c6743`. It returns three-decimal scores
+that match the versioned Broad API reference cases. The previous image from
+2026-07-03 used an unpinned checkout of the model and returned older
+two-decimal scores. It is not an approved runtime source.
+
 Example command from the repository root:
 
 ```powershell

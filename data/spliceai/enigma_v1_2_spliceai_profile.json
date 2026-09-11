@@ -50,6 +50,6 @@
     "model_commit": "7f36ca847e1b1885167dab79681dbb75c09c6743",
     "lookup_server": "Broad Institute SpliceAI Lookup, self-hosted",
     "lookup_annotation": "GENCODE v49 basic",
-    "docker_image": "docker.io/weisburd/spliceai-38@sha256:1bbd1735122086995ad3d05238d674ff8b2a3336f489d11985aeb5abe67f5e4b"
+    "docker_image": "docker.io/weisburd/spliceai-38@sha256:c2bb3d5c65eee01087b5dd130d72233fc812d158dce9779ae63117e826ec8399"
   }
 }

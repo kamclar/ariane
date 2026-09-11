@@ -61,7 +61,7 @@ def _load_profile() -> dict[str, Any]:
         "lookup_annotation": "GENCODE v49 basic",
         "docker_image": (
             "docker.io/weisburd/spliceai-38@sha256:"
-            "1bbd1735122086995ad3d05238d674ff8b2a3336f489d11985aeb5abe67f5e4b"
+            "c2bb3d5c65eee01087b5dd130d72233fc812d158dce9779ae63117e826ec8399"
         ),
     }:
         mismatches.append("approved_engine")

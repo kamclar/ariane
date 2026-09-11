@@ -1584,6 +1584,13 @@ anotaci `basic`, přesný referenční transkript a úplná delta, REF a ALT sk�
 Konfigurace ARIANE se změní pouze po úspěšném ověření. Tag `latest` se v provozu
 nepoužívá.
 
+Aktivní digest byl sestaven 3. září 2026 a uvnitř image deklaruje SpliceAI
+commit `7f36ca847e1b1885167dab79681dbb75c09c6743`. Referenční případy potvrzují
+shodu delta, REF a ALT hodnot uváděných na tři desetinná místa s veřejným Broad
+API. Starší image
+z 3. července 2026 instaloval tehdejší nepřipnutou větev modelu a vracel starší
+hodnoty uváděné na dvě desetinná místa. Do provozu se nepoužívá.
+
 Dynamická API cache používá klíč obsahující ID závazného profilu. Staré runtime
 záznamy proto nejsou znovu použity. I jednotlivá odpověď API musí výslovně
 potvrdit GRCh38, vzdálenost 10 000 a `mask=0` a musí obsahovat kompletní delta,
