@@ -2124,6 +2124,11 @@ používá jednu souběžnou klasifikaci a mezi zahájením požadavků zachová
 Git v `/etc/ariane/ariane.env`.
 Instalační a restartovací skripty existující hodnotu nemění. Její vědomá rotace
 zneplatní dříve vydané cookies a uživatel musí znovu načíst hlavní stránku.
+Hlavní HTML odpověď se neposílá z cache. Všechny lokální CSS, JavaScript a ikona
+používají v URL `ARIANE_VERSION` doplněnou otiskem skutečného obsahu souborů.
+Změna frontendového souboru proto vynutí novou URL i tehdy, kdyby při vývoji
+nebyla zvýšena verze aplikace. Prohlížeč po nasazení nemůže spojit nový backend
+se starým cachovaným klasifikačním modulem.
 
 ### 15.2 Graf pro ručně doplněnou evidenci
 

@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 import pytest
+import re
 
 from backend.models import ClassificationResult
 from backend.ui_session import (
@@ -81,6 +82,24 @@ def test_root_issues_httponly_same_site_ui_session():
     assert f"{UI_SESSION_COOKIE}=" in cookie
     assert "HttpOnly" in cookie
     assert "SameSite=strict" in cookie
+
+
+def test_root_prevents_stale_html_and_versions_all_local_assets():
+    from backend import main
+
+    response = TestClient(main.app).get("/")
+
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "no-store, max-age=0"
+    assert response.headers["Pragma"] == "no-cache"
+    assert "__ARIANE_ASSET_VERSION__" not in response.text
+    assets = re.findall(r'(?:src|href)="(/static/[^"]+)"', response.text)
+    assert assets
+    assert all(
+        asset.endswith(f"?v={main.FRONTEND_ASSET_VERSION}")
+        for asset in assets
+    )
+    assert main.FRONTEND_ASSET_VERSION.startswith(f"{main.ARIANE_VERSION}-")
 
 
 def test_ui_classification_requires_session_even_with_api_key(monkeypatch):

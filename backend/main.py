@@ -6,11 +6,12 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import ValidationError
 from pathlib import Path
 from datetime import datetime, timezone
 import json
+import hashlib
 import logging
 import os
 import secrets
@@ -350,12 +351,41 @@ async def http_error_handler(request: Request, exc: HTTPException):
 
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+INDEX_HTML_TEMPLATE = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+
+def _frontend_asset_version() -> str:
+    """Bind browser asset URLs to the release and their actual contents."""
+    static_dir = FRONTEND_DIR / "static"
+    asset_paths = [
+        static_dir / "css" / "style.css",
+        static_dir / "images" / "ariane-icon-v1.svg",
+        *sorted((static_dir / "js").glob("*.js")),
+    ]
+    digest = hashlib.sha256()
+    for path in asset_paths:
+        digest.update(path.relative_to(static_dir).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+    return f"{ARIANE_VERSION}-{digest.hexdigest()[:12]}"
+
+
+FRONTEND_ASSET_VERSION = _frontend_asset_version()
 app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    response = FileResponse(FRONTEND_DIR / "index.html")
+    response = HTMLResponse(
+        INDEX_HTML_TEMPLATE.replace(
+            "__ARIANE_ASSET_VERSION__",
+            FRONTEND_ASSET_VERSION,
+        ),
+        headers={
+            "Cache-Control": "no-store, max-age=0",
+            "Pragma": "no-cache",
+        },
+    )
     issue_ui_session(request, response)
     return response
 
