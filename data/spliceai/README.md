@@ -6,6 +6,13 @@ Appendix J with GRCh38, maximum distance 10,000, unmasked output, the reference
 transcript, and the maximum of DS_AG, DS_AL, DS_DG, and DS_DL. Every accepted
 record also retains the four REF and four ALT component scores.
 
+The local service mounts the checksum-pinned
+`gencode_v49_basic_reference_transcripts.tsv` over the image's SpliceAI
+annotation. It contains the exact GENCODE v49 basic rows for the reference
+transcripts declared in the profile. This prevents the model from computing
+other overlapping transcripts that ARIANE must not use. The validator requires
+one response row and verifies its transcript and all delta, REF and ALT scores.
+
 ## Runtime mode
 
 ARIANE computes SpliceAI on demand. Runtime uses the profile-pinned result cache
@@ -45,6 +52,9 @@ stops startup.
 Old runtime records use a different key and are ignored. A response that does
 not echo GRCh38, distance 10,000 and mask 0, or lacks delta/REF/ALT fields, is
 rejected. Missing scores remain unavailable and are never converted to zero.
+Entries belonging to retired profiles are removed from the in-memory cache map
+before the next successful cache write, so they do not make the active JSON
+cache grow indefinitely.
 
 ## Historical validation datasets
 
@@ -78,6 +88,8 @@ starts it temporarily on a private port and runs
 `scripts/validate_spliceai_service.py`. It changes the ARIANE environment only
 after the response matches the versioned validation case. The permanent service
 binds only to `127.0.0.1:8082` and does not use the optional server-side database.
+The mounted annotation is generated from the versioned TSV only after its
+SHA-256 checksum matches the active profile.
 
 An update starts with a candidate digest. It must pass the validation case,
 classification regression suite and a representative BRCA comparison before the

@@ -161,7 +161,8 @@ chmod 0640 /etc/ariane/ariane.env
 cat > /etc/systemd/system/ariane.service << EOF
 [Unit]
 Description=ARIANE FastAPI Application
-After=network.target
+After=network.target ariane-spliceai.service
+Requires=ariane-spliceai.service
 
 [Service]
 Type=simple

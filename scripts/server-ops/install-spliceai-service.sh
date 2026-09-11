@@ -7,9 +7,14 @@ set -euo pipefail
 ARIANE_HOME="${ARIANE_HOME:-/home/ubuntu/ariane}"
 ARIANE_ENV_FILE="${ARIANE_ENV_FILE:-/etc/ariane/ariane.env}"
 SPLICEAI_PORT="${SPLICEAI_PORT:-8082}"
+SPLICEAI_WORKERS="${SPLICEAI_WORKERS:-3}"
 ARIANE_PORT="${ARIANE_PORT:-8000}"
 PROFILE_FILE="$ARIANE_HOME/data/spliceai/enigma_v1_2_spliceai_profile.json"
 VALIDATOR="$ARIANE_HOME/scripts/validate_spliceai_service.py"
+STARTUP_VALIDATOR="$ARIANE_HOME/scripts/server-ops/wait-and-validate-spliceai-service.sh"
+REFERENCE_ANNOTATION_SOURCE="$ARIANE_HOME/data/spliceai/gencode_v49_basic_reference_transcripts.tsv"
+REFERENCE_ANNOTATION_DIR="/var/lib/ariane/spliceai"
+REFERENCE_ANNOTATION_GZIP="$REFERENCE_ANNOTATION_DIR/gencode.v49.basic.reference-transcripts.annotation.txt.gz"
 SERVICE_FILE="/etc/systemd/system/ariane-spliceai.service"
 VALIDATION_CONTAINER="ariane-spliceai-validation-$$"
 VALIDATION_PORT="${SPLICEAI_VALIDATION_PORT:-18081}"
@@ -18,16 +23,17 @@ if [ "$EUID" -ne 0 ]; then
     echo "Run this script as root" >&2
     exit 1
 fi
-for command_name in docker python3 curl systemctl ss; do
+for command_name in docker python3 curl systemctl ss gzip sha256sum; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         echo "Required command is missing: $command_name" >&2
         exit 1
     fi
 done
-if [ ! -f "$PROFILE_FILE" ] || [ ! -f "$VALIDATOR" ]; then
+if [ ! -f "$PROFILE_FILE" ] || [ ! -f "$VALIDATOR" ] || [ ! -f "$STARTUP_VALIDATOR" ] || [ ! -f "$REFERENCE_ANNOTATION_SOURCE" ]; then
     echo "ARIANE SpliceAI profile or validator is missing" >&2
     exit 1
 fi
+
 if [ ! -f "$ARIANE_ENV_FILE" ]; then
     echo "ARIANE environment file is missing: $ARIANE_ENV_FILE" >&2
     exit 1
@@ -44,6 +50,10 @@ if ! [[ "$ARIANE_PORT" =~ ^[0-9]+$ ]] || [ "$ARIANE_PORT" -lt 1024 ] || [ "$ARIA
     echo "Invalid ARIANE_PORT: $ARIANE_PORT" >&2
     exit 1
 fi
+if ! [[ "$SPLICEAI_WORKERS" =~ ^[0-9]+$ ]] || [ "$SPLICEAI_WORKERS" -lt 1 ] || [ "$SPLICEAI_WORKERS" -gt 8 ]; then
+    echo "Invalid SPLICEAI_WORKERS: $SPLICEAI_WORKERS" >&2
+    exit 1
+fi
 if [ "$SPLICEAI_PORT" = "$ARIANE_PORT" ] || [ "$SPLICEAI_PORT" = "$VALIDATION_PORT" ]; then
     echo "SpliceAI port conflicts with another ARIANE port: $SPLICEAI_PORT" >&2
     exit 1
@@ -54,6 +64,19 @@ if ! [[ "$SPLICEAI_IMAGE" =~ ^docker\.io/weisburd/spliceai-38@sha256:[0-9a-f]{64
     echo "The active profile does not contain an immutable SpliceAI GRCh38 image: $SPLICEAI_IMAGE" >&2
     exit 1
 fi
+
+EXPECTED_ANNOTATION_SHA256="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["approved_engine"]["reference_transcript_annotation_sha256"])' "$PROFILE_FILE")"
+ACTUAL_ANNOTATION_SHA256="$(sha256sum "$REFERENCE_ANNOTATION_SOURCE" | awk '{print $1}')"
+if [ "$ACTUAL_ANNOTATION_SHA256" != "$EXPECTED_ANNOTATION_SHA256" ]; then
+    echo "Reference-transcript SpliceAI annotation checksum does not match the active profile" >&2
+    exit 1
+fi
+install -d -m 0755 -o root -g root "$REFERENCE_ANNOTATION_DIR"
+ANNOTATION_TEMP="$(mktemp /tmp/ariane-spliceai-annotation.XXXXXX)"
+gzip -n -9 -c "$REFERENCE_ANNOTATION_SOURCE" > "$ANNOTATION_TEMP"
+install -m 0644 -o root -g root "$ANNOTATION_TEMP" "${REFERENCE_ANNOTATION_GZIP}.new"
+mv "${REFERENCE_ANNOTATION_GZIP}.new" "$REFERENCE_ANNOTATION_GZIP"
+rm -f "$ANNOTATION_TEMP"
 
 cleanup_validation_container() {
     docker rm -f "$VALIDATION_CONTAINER" >/dev/null 2>&1 || true
@@ -72,7 +95,9 @@ docker run --detach \
     --security-opt no-new-privileges:true \
     --pids-limit 512 \
     --publish "127.0.0.1:${VALIDATION_PORT}:8080" \
+    --mount "type=bind,src=${REFERENCE_ANNOTATION_GZIP},dst=/gencode.v49.basic.annotation.txt.gz,readonly" \
     --env GENE_SET=basic \
+    --env WORKERS=1 \
     --env DATABASE_ENABLED=0 \
     --env DISABLE_RATE_LIMIT=1 \
     "$SPLICEAI_IMAGE" >/dev/null
@@ -167,7 +192,8 @@ Requires=docker.service
 [Service]
 Type=simple
 ExecStartPre=-/usr/bin/docker rm -f ariane-spliceai
-ExecStart=/usr/bin/docker run --name ariane-spliceai --init --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 512 --publish 127.0.0.1:${SPLICEAI_PORT}:8080 --env GENE_SET=basic --env DATABASE_ENABLED=0 --env DISABLE_RATE_LIMIT=1 ${SPLICEAI_IMAGE}
+ExecStart=/usr/bin/docker run --name ariane-spliceai --init --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 512 --publish 127.0.0.1:${SPLICEAI_PORT}:8080 --mount type=bind,src=${REFERENCE_ANNOTATION_GZIP},dst=/gencode.v49.basic.annotation.txt.gz,readonly --env GENE_SET=basic --env WORKERS=${SPLICEAI_WORKERS} --env DATABASE_ENABLED=0 --env DISABLE_RATE_LIMIT=1 ${SPLICEAI_IMAGE}
+ExecStartPost=/usr/bin/env ARIANE_HOME=${ARIANE_HOME} SPLICEAI_PORT=${SPLICEAI_PORT} SPLICEAI_WORKERS=${SPLICEAI_WORKERS} SPLICEAI_REFERENCE_ANNOTATION_GZIP=${REFERENCE_ANNOTATION_GZIP} /bin/bash ${STARTUP_VALIDATOR}
 ExecStop=/usr/bin/docker stop --time 60 ariane-spliceai
 ExecStopPost=-/usr/bin/docker rm -f ariane-spliceai
 Restart=on-failure
@@ -184,28 +210,6 @@ rm -f "$TEMP_SERVICE"
 systemctl daemon-reload
 systemctl enable ariane-spliceai.service
 systemctl restart ariane-spliceai.service
-
-READY=0
-for _ in $(seq 1 180); do
-    if curl --silent --output /dev/null --max-time 2 \
-        "http://127.0.0.1:${SPLICEAI_PORT}/"; then
-        READY=1
-        break
-    fi
-    if ! systemctl is-active --quiet ariane-spliceai.service; then
-        echo "ARIANE SpliceAI service stopped during startup" >&2
-        journalctl -u ariane-spliceai.service -n 100 --no-pager >&2 || true
-        exit 1
-    fi
-    sleep 2
-done
-if [ "$READY" -ne 1 ]; then
-    echo "ARIANE SpliceAI service did not become ready" >&2
-    exit 1
-fi
-python3 "$VALIDATOR" \
-    --url "http://127.0.0.1:${SPLICEAI_PORT}/spliceai/" \
-    --timeout 180
 
 trap - ERR
 if [ -n "$SERVICE_BACKUP" ]; then

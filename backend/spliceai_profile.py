@@ -15,7 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROFILE_PATH = PROJECT_ROOT / "data" / "spliceai" / "enigma_v1_2_spliceai_profile.json"
 
 _EXPECTED = {
-    "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2",
+    "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v3",
     "genome_assembly": "GRCh38",
     "max_distance": 10000,
     "mask": 0,
@@ -58,7 +58,13 @@ def _load_profile() -> dict[str, Any]:
         "python_package_version": "1.3.4",
         "model_commit": "7f36ca847e1b1885167dab79681dbb75c09c6743",
         "lookup_server": "Broad Institute SpliceAI Lookup, self-hosted",
-        "lookup_annotation": "GENCODE v49 basic",
+        "lookup_annotation": "GENCODE v49 basic, restricted to the pinned reference transcripts",
+        "reference_transcript_annotation": (
+            "data/spliceai/gencode_v49_basic_reference_transcripts.tsv"
+        ),
+        "reference_transcript_annotation_sha256": (
+            "932290cb981fad001ba03b08aecdb7d961e88101f2d6bd686ab5afff3bc14faf"
+        ),
         "docker_image": (
             "docker.io/weisburd/spliceai-38@sha256:"
             "c2bb3d5c65eee01087b5dd130d72233fc812d158dce9779ae63117e826ec8399"

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "captured_at": "2026-09-11",
   "source": "Broad Institute SpliceAI Lookup GRCh38 API",
-  "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2",
+  "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v3",
   "cases": [
     {
       "id": "BRCA1_c.4185G>A",

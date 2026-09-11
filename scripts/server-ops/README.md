@@ -48,6 +48,11 @@ The test requires the Appendix J parameters, the BRCA1 and BRCA2 reference
 transcripts and the exact delta, REF and ALT scores in the versioned validation cases. A failed
 validation leaves ARIANE on its previous configuration.
 
+The production container runs three model workers. Installation validates them
+concurrently so that every worker loads and traces the model before user traffic
+is accepted. The first request handled by an uninitialized worker can otherwise
+take much longer than subsequent requests.
+
 Useful checks:
 
 ```bash
@@ -66,6 +71,13 @@ case together, running the test suite and then running the installer.
 before restarting the application. If a repository update contains a new
 SpliceAI profile, run `install-spliceai-service.sh`. It installs and verifies the
 new image before restarting ARIANE.
+
+ARIANE itself runs as one application worker. Its in-memory request gate and the
+JSON SpliceAI runtime cache are process-local, so multiple application workers
+would bypass the configured concurrency bound and could overwrite concurrent
+cache updates. `restart-ariane.sh` rejects an older service definition with more
+workers or missing persistent runtime directories and points to
+`install-ariane-service.sh` for the one-time service migration.
 
 The Broad SpliceAI Lookup wrapper is MIT licensed. The pinned SpliceAI commit is
 GPLv3 and its model weights are CC BY-NC 4.0. The current deployment is intended

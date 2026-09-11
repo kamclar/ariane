@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import json
 import sys
 import urllib.parse
@@ -102,6 +103,10 @@ def validate_payload(
     rows = payload.get("scores")
     if not isinstance(rows, list) or not rows:
         raise ValidationError("Response has no transcript score rows")
+    if profile.get("transcript_policy") == "reference_transcript" and len(rows) != 1:
+        raise ValidationError(
+            "Reference-transcript service returned scores for more than one transcript"
+        )
     matching_rows = [
         row
         for row in rows
@@ -171,15 +176,56 @@ def validate_service(
     }
 
 
+def validate_service_copies(
+    base_url: str,
+    *,
+    copies: int,
+    profile_path: Path = PROFILE_PATH,
+    cases_path: Path = CASES_PATH,
+    timeout: float = 180.0,
+) -> dict[str, Any]:
+    """Validate concurrent service worker slots and warm their model state."""
+    if copies < 1:
+        raise ValidationError("Concurrent validation copies must be at least 1")
+    if copies == 1:
+        result = validate_service(base_url, profile_path, cases_path, timeout)
+        result["concurrent_validation_copies"] = 1
+        return result
+
+    def run_validation(_: int) -> dict[str, Any]:
+        return validate_service(base_url, profile_path, cases_path, timeout)
+
+    with ThreadPoolExecutor(max_workers=copies) as executor:
+        results = list(executor.map(run_validation, range(copies)))
+
+    canonical = json.dumps(results[0], sort_keys=True, separators=(",", ":"))
+    if any(
+        json.dumps(result, sort_keys=True, separators=(",", ":")) != canonical
+        for result in results[1:]
+    ):
+        raise ValidationError("Concurrent SpliceAI validations returned different results")
+    return {
+        **results[0],
+        "concurrent_validation_copies": copies,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="http://127.0.0.1:8082/spliceai/")
     parser.add_argument("--profile", type=Path, default=PROFILE_PATH)
     parser.add_argument("--cases", type=Path, default=CASES_PATH)
     parser.add_argument("--timeout", type=float, default=180.0)
+    parser.add_argument("--concurrent-copies", type=int, default=1)
     args = parser.parse_args()
     try:
-        result = validate_service(args.url, args.profile, args.cases, args.timeout)
+        result = validate_service_copies(
+            args.url,
+            copies=args.concurrent_copies,
+            profile_path=args.profile,
+            cases_path=args.cases,
+            timeout=args.timeout,
+        )
     except Exception as exc:
         print(f"SpliceAI validation failed: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1

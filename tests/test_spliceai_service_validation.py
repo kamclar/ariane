@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -74,7 +75,7 @@ def test_service_validation_uses_versioned_cases_without_network():
     with patch.object(validator, "fetch_json", side_effect=payloads) as fetch:
         result = validator.validate_service("http://127.0.0.1:8082/spliceai/")
     assert result["status"] == "ok"
-    assert result["profile_id"].endswith("-v2")
+    assert result["profile_id"].endswith("-v3")
     assert "@sha256:" in result["docker_image"]
     assert len(result["cases"]) == 2
     requested_url = fetch.call_args_list[0].args[0]
@@ -82,6 +83,48 @@ def test_service_validation_uses_versioned_cases_without_network():
     assert "mask=0" in requested_url
     assert "bc=basic" in requested_url
     assert "show-ref-alt=1" in requested_url
+
+
+def test_validator_rejects_additional_transcript_rows():
+    profile, case = load_inputs()
+    payload = valid_payload(profile, case)
+    payload["scores"].append({**payload["scores"][0], "t_id": "ENST_OTHER.1"})
+    with pytest.raises(validator.ValidationError, match="more than one transcript"):
+        validator.validate_payload(payload, profile, case)
+
+
+def test_reference_transcript_annotation_matches_profile_and_checksum():
+    profile = validator.load_json_object(validator.PROFILE_PATH)
+    engine = profile["approved_engine"]
+    annotation_path = PROJECT_ROOT / engine["reference_transcript_annotation"]
+    assert hashlib.sha256(annotation_path.read_bytes()).hexdigest() == engine[
+        "reference_transcript_annotation_sha256"
+    ]
+    transcript_ids = {
+        line.split("\t", 1)[0]
+        for line in annotation_path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+    assert transcript_ids == {
+        transcript["ensembl"]
+        for transcript in profile["reference_transcripts"].values()
+    }
+
+
+def test_concurrent_validation_checks_every_configured_worker_slot():
+    expected = {
+        "status": "ok",
+        "profile_id": "profile",
+        "docker_image": "image",
+        "cases": [],
+    }
+    with patch.object(validator, "validate_service", return_value=expected) as validate:
+        result = validator.validate_service_copies(
+            "http://127.0.0.1:8082/spliceai/",
+            copies=3,
+        )
+    assert validate.call_count == 3
+    assert result["concurrent_validation_copies"] == 3
 
 
 def test_local_service_image_and_operational_scripts_are_pinned():
@@ -100,12 +143,31 @@ def test_local_service_image_and_operational_scripts_are_pinned():
     assert "SpliceAI port is already used by another service" in installer
     assert "restore_service()" in installer
     assert "DATABASE_ENABLED=0" in installer
+    assert "--env WORKERS=${SPLICEAI_WORKERS}" in installer
+    assert "reference_transcript_annotation_sha256" in installer
+    assert "dst=/gencode.v49.basic.annotation.txt.gz,readonly" in installer
+    assert "ExecStartPost=" in installer
+    assert "wait-and-validate-spliceai-service.sh" in installer
     assert "python3 \"$VALIDATOR\"" in installer
     restart = (
         PROJECT_ROOT / "scripts" / "server-ops" / "restart-ariane.sh"
     ).read_text(encoding="utf-8")
     assert "validate_spliceai_service.py" in restart
     assert "systemctl is-active --quiet ariane-spliceai.service" in restart
+    assert "ARIANE_RUNTIME_DATA_DIR" in restart
+    assert "--concurrent-copies 3" in restart
+    assert "--workers 1" in restart
+    assert "install-ariane-service.sh" in restart
+
+    startup_validator = (
+        PROJECT_ROOT
+        / "scripts"
+        / "server-ops"
+        / "wait-and-validate-spliceai-service.sh"
+    ).read_text(encoding="utf-8")
+    assert '--concurrent-copies "$SPLICEAI_WORKERS"' in startup_validator
+    assert "http://127.0.0.1:${SPLICEAI_PORT}/" in startup_validator
+    assert "Installed reference-transcript SpliceAI annotation checksum" in startup_validator
 
 
 def test_local_runtime_health_checks_only_the_configured_private_service():

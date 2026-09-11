@@ -27,6 +27,16 @@ def score_row(transcript, refseq, *, ds_al, ds_dl=0.0):
 
 
 class SpliceAITranscriptPolicyTests(unittest.TestCase):
+    def test_runtime_cache_discards_retired_profile_entries(self):
+        current_key = (
+            f"{spliceai.SPLICEAI_PROFILE_ID}:reference_transcript:BRCA1:c.1A>G"
+        )
+        cache = spliceai._current_profile_cache_entries({
+            current_key: {"score": 0.2},
+            "retired-profile:reference_transcript:BRCA1:c.2A>G": {"score": 0.3},
+        })
+        self.assertEqual(cache, {current_key: {"score": 0.2}})
+
     def setUp(self):
         self._old_policy = spliceai.SPLICEAI_TRANSCRIPT_POLICY
         self._old_score_cache = dict(spliceai.SPLICEAI_CACHE)

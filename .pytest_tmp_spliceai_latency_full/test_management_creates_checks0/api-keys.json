@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "keys": [
+    {
+      "id": "batch-client",
+      "secret_sha256": "1d8df9f16cec4abec3c58e12872741b8aeee8e2d7b235453461cfb8c69a84d56",
+      "enabled": false,
+      "description": "Batch testing",
+      "created_at": "2026-09-11T16:31:46.255347+00:00"
+    }
+  ]
+}

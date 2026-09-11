@@ -1,2 +1,3 @@
 /data/precomputed/*.json text eol=lf
 *.sh text eol=lf
+/data/spliceai/gencode_v49_basic_reference_transcripts.tsv text eol=lf

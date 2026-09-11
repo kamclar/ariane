@@ -862,7 +862,7 @@ SpliceAI větev:
 - pouze pro povolené typy, například synonymous, missense, in-frame a intronic,
 - nepoužívá se jako obecné PVS1 pro nonsense, frameshift, exonové CNV nebo canonical splice-site varianty.
 
-Runtime používá profil `enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2`:
+Runtime používá profil `enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v3`:
 GRCh38, `distance=10000`, `mask=0`, `basic` anotaci a referenční transkript
 daného genu. Skóre je maximum `DS_AG`, `DS_AL`, `DS_DG` a `DS_DL` pouze v
 jednom přesně odpovídajícím řádku referenčního transkriptu. Není to maximum přes
@@ -870,6 +870,13 @@ všechny transkripty. Pro BRCA1 musí řádek současně obsahovat
 `ENST00000357654.9` a `NM_007294.4`, pro BRCA2 `ENST00000380152.8` a
 `NM_000059.4`. Jiná verze accessionu se nepovažuje za shodu. Stejné podmínky
 platí pro živou odpověď i runtime cache.
+
+Lokální služba používá z GENCODE v49 basic pouze checksumované řádky těchto
+závazných referenčních transkriptů. Plná GENCODE anotace dávala stejné
+referenční skóre, ale před jeho výběrem zbytečně počítala všechny překrývající
+se transkripty. U některých pozic to znamenalo desítky modelových predikcí a
+timeout. Instalační kontrola vyžaduje přesný checksum omezené anotace a pro
+každou validační variantu přijme právě jeden výsledkový řádek.
 
 Kontrolní dotaz pro `BRCA2 c.7805+9T>G` dne 10. září 2026 vrátil v referenčním
 řádku `DS_AG=0,030`, `DS_AL=0,016`, `DS_DG=0,206` a `DS_DL=0,049`. Hodnota
@@ -1589,6 +1596,12 @@ anotaci `basic`, přesný referenční transkript a úplná delta, REF a ALT sk�
 Konfigurace ARIANE se změní pouze po úspěšném ověření. Tag `latest` se v provozu
 nepoužívá.
 
+Produkční SpliceAI kontejner používá tři modelové procesy. Každý proces má
+vlastní inicializaci TensorFlow. Instalační a restartovací kontrola proto spouští
+tři validace souběžně. Model se tím načte a připraví ve všech procesech před
+první klasifikací uživatele. Kontrola zároveň ověří, že souběžné požadavky
+vracejí shodné referenční výsledky.
+
 Aktivní digest byl sestaven 3. září 2026 a uvnitř image deklaruje SpliceAI
 commit `7f36ca847e1b1885167dab79681dbb75c09c6743`. Referenční případy potvrzují
 shodu delta, REF a ALT hodnot uváděných na tři desetinná místa s veřejným Broad
@@ -1617,6 +1630,13 @@ Produkční služba používá jeden aplikační proces. Uvnitř něj mohou bě�
 dva souběžné SpliceAI požadavky. Lokální služba nepoužívá umělé prodlevy mezi
 požadavky. Tím se limit neuplatňuje zvlášť v několika procesech. Úspěšný výsledek
 se uloží do profilově vázané runtime cache.
+
+Služba ARIANE vyžaduje samostatné zapisovatelné adresáře
+`/var/lib/ariane/runtime-cache` a `/var/lib/ariane/runtime-data`. Restartovací
+skript jejich konfiguraci doplní a odmítne spustit starou systemd definici,
+která adresáře nezpřístupňuje nebo pouští více aplikačních procesů. Takový stav
+by vypnul statistiky, obešel limit souběžných SpliceAI dotazů a umožnil souběžný
+zápis několika procesů do stejné JSON cache.
 
 Pokud SpliceAI zůstane nedostupný pro missense, potvrzenou in-frame,
 synonymous nebo relevantní intronickou variantu, automatická klasifikace se

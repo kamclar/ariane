@@ -168,6 +168,9 @@ def _load_api_cache() -> dict:
         try:
             with open(SPLICEAI_API_CACHE_PATH) as f:
                 result = _json.load(f)
+            if not isinstance(result, dict):
+                raise ValueError("runtime cache root must be a JSON object")
+            result = _current_profile_cache_entries(result)
             clear_issue("SpliceAI API cache")
             return result
         except Exception as exc:
@@ -176,6 +179,16 @@ def _load_api_cache() -> dict:
                 f"could not load {SPLICEAI_API_CACHE_PATH}: {type(exc).__name__}: {exc}",
             )
     return {}
+
+
+def _current_profile_cache_entries(cache: dict) -> dict:
+    """Discard entries from retired profiles before the next cache write."""
+    prefix = f"{SPLICEAI_PROFILE_ID}:{SPLICEAI_TRANSCRIPT_POLICY}:"
+    return {
+        key: value
+        for key, value in cache.items()
+        if isinstance(key, str) and key.startswith(prefix)
+    }
 
 
 def _save_api_cache(cache: dict) -> bool:

@@ -135,7 +135,8 @@ chmod 0640 /etc/ariane/ariane.env
 cat > /etc/systemd/system/ariane.service << EOF
 [Unit]
 Description=ARIANE FastAPI Application
-After=network.target
+After=network.target ariane-spliceai.service
+Requires=ariane-spliceai.service
 
 [Service]
 Type=simple
@@ -189,7 +190,7 @@ if ! systemctl is-active --quiet ariane-spliceai.service; then
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
     exit 1
 fi
-systemctl start ariane
+systemctl restart ariane
 sleep 2
 
 # 8. Check status

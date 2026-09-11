@@ -8,6 +8,8 @@ ARIANE_PORT="${ARIANE_PORT:-8000}"
 ARIANE_HOME="${ARIANE_HOME:-/home/ubuntu/ariane}"
 ARIANE_USER="${ARIANE_USER:-ubuntu}"
 ARIANE_ENV_FILE="${ARIANE_ENV_FILE:-/etc/ariane/ariane.env}"
+ARIANE_RUNTIME_CACHE_DIR="${ARIANE_RUNTIME_CACHE_DIR:-/var/lib/ariane/runtime-cache}"
+ARIANE_RUNTIME_DATA_DIR="${ARIANE_RUNTIME_DATA_DIR:-/var/lib/ariane/runtime-data}"
 
 if [ "$EUID" -ne 0 ]; then
     echo "Run this script as root" >&2
@@ -29,6 +31,35 @@ if ! command -v pg_config > /dev/null 2>&1; then
 fi
 if [ ! -f "$ARIANE_ENV_FILE" ]; then
     echo "ARIANE environment file is missing: $ARIANE_ENV_FILE" >&2
+    exit 1
+fi
+install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" "$ARIANE_RUNTIME_CACHE_DIR"
+install -d -m 0750 -o "$ARIANE_USER" -g "$ARIANE_USER" "$ARIANE_RUNTIME_DATA_DIR"
+
+set_value() {
+    local name="$1"
+    local value="$2"
+    if grep -q "^${name}=" "$ARIANE_ENV_FILE"; then
+        sed -i "s|^${name}=.*$|${name}=${value}|" "$ARIANE_ENV_FILE"
+    else
+        printf '%s=%s\n' "$name" "$value" >> "$ARIANE_ENV_FILE"
+    fi
+}
+
+set_value ARIANE_RUNTIME_CACHE_DIR "$ARIANE_RUNTIME_CACHE_DIR"
+set_value ARIANE_RUNTIME_DATA_DIR "$ARIANE_RUNTIME_DATA_DIR"
+chown root:"$ARIANE_USER" "$ARIANE_ENV_FILE"
+chmod 0640 "$ARIANE_ENV_FILE"
+
+SERVICE_DEFINITION="$(systemctl cat ariane.service 2>/dev/null || true)"
+if ! grep -Fq "ReadWritePaths=/var/lib/ariane/runtime-cache /var/lib/ariane/runtime-data" <<<"$SERVICE_DEFINITION"; then
+    echo "ARIANE service does not expose both persistent runtime directories" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-ariane-service.sh" >&2
+    exit 1
+fi
+if ! grep -Eq 'ExecStart=.*uvicorn .*--workers 1([[:space:]]|$)' <<<"$SERVICE_DEFINITION"; then
+    echo "ARIANE service must use one application worker with the shared runtime caches" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-ariane-service.sh" >&2
     exit 1
 fi
 if ! grep -q '^ARIANE_UI_SESSION_SECRET=' "$ARIANE_ENV_FILE"; then
@@ -56,7 +87,8 @@ if ! [[ "$SPLICEAI_SERVICE_URL" =~ ^http://127\.0\.0\.1:[0-9]+/spliceai/$ ]]; th
 fi
 if ! python3 "$ARIANE_HOME/scripts/validate_spliceai_service.py" \
     --url "$SPLICEAI_SERVICE_URL" \
-    --timeout 180; then
+    --timeout 180 \
+    --concurrent-copies 3; then
     echo "The running SpliceAI service does not match the active ARIANE profile" >&2
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
     exit 1
