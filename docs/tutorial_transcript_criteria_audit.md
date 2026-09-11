@@ -28,17 +28,17 @@ jako produkční klasifikační cesta.
 
 | Varianta | ARIANE kritéria | ARIANE třída | Porovnání s tutorialem |
 |---|---|---:|---|
-| BRCA1 c.509G>A | BS3 Strong; BP5 Strong; BP1 Strong | 1 | Třída sedí. ARIANE používá vydané combined LR 0,03947 z ENIGMA tracku 2026-08-18 jako jeden celek. BS1 bez potvrzené populační způsobilosti automaticky nepřidělí. |
-| BRCA1 c.1534C>T | BS3 Strong; BP5 Very Strong; BP1 Strong | 1 | Třída sedí. Aktuální ENIGMA track uvádí combined LR 0, tedy BP5 Very Strong. BS1 bez potvrzené populační způsobilosti automaticky nepřidělí. |
+| BRCA1 c.509G>A | BS1 Supporting; BS3 Strong; BP5 Strong; BP1 Strong | 1 | Třída sedí. ARIANE používá vydané combined LR 0,03947 z ENIGMA tracku 2026-08-18 jako jeden celek. FAF95 0,00003841 splňuje BS1 Supporting. |
+| BRCA1 c.1534C>T | BS1 Supporting; BS3 Strong; BP5 Very Strong; BP1 Strong | 1 | Třída sedí. Aktuální ENIGMA track uvádí combined LR 0, tedy BP5 Very Strong. FAF95 0,00007212 splňuje BS1 Supporting. |
 | BRCA1 c.3668_3671dup | PVS1 Very Strong; PM5 PTC Strong | 5 | Třída sedí; tutorial používá také PM2 Supporting. ARIANE PM2 pro malé indely nepoužívá. |
 | BRCA2 c.9097del | PVS1 Very Strong; PM5 PTC Strong | 5 | Třída sedí; tutorial používá také PM2 Supporting. |
 | BRCA1 c.5551_5552insT | PVS1 Very Strong; PM5 PTC Strong | 5 | Neshoda s historickým tutorialem. Současná implementace ENIGMA v1.2 vybírá PVS1 a PM5 ze stejného řádku Table 4 podle exonu nukleotidové změny. |
 | BRCA2 delece exonu 10 | PM2 Supporting; PVS1 N/A zobrazeno jako vyloučené | 3 | Třída se shoduje, kritéria ne. PM2 vzniká obecným Appendix G grafem nad Table 4 exony a úplným gnomAD-SV, nikoli variantovým záznamem. Tutorial používá BS3 Moderate, ale delece není v ENIGMA Table 9, proto ARIANE BS3 nepřidělí. |
 | BRCA2 c.6147_6149del | BP1 Strong | 2 | Shoda s tutorialem. BayesDel pro tuto variantu není dostupný a populační kritérium se bez úplných způsobilých podkladů nepřidělí. |
 | BRCA1 c.3891_3893del | BS3 Strong; BP5 Strong | 1 | Třída sedí. Aktuální ENIGMA track uvádí combined LR 0,02896, tedy BP5 Strong. SpliceAI 0,15 vede v aktuální Figure 1A větvi mimo BP1. |
-| BRCA1 c.4185G>A | PP3 Supporting; PP4 Strong | 3 | Přesný ST2 řádek popisuje nekvantifikovanou pacientskou RNA s delecí exonu 12. Podle Appendix E musí kurátor rozhodnout, zda jde o apparent near-complete nebo incomplete splice impact. ARIANE proto PVS1 RNA automaticky nepřidělí a předvyplní odbornou revizi. |
-| BRCA1 c.628C>T | žádné automatické kritérium | 3 | Table 4 uvádí PVS1 N/A. PM2 bez potvrzené coverage metody automaticky nevznikne. |
-| BRCA2 c.8953+2T>C | žádné automatické kritérium | 3 | Table 4 uvádí PVS1 N/A a Figure 1A zde PP3 nepoužívá. PM2 bez potvrzené coverage metody automaticky nevznikne. |
+| BRCA1 c.4185G>A | PM2 Supporting; PP3 Supporting; PP4 Strong | 4 | Přesný ST2 řádek popisuje nekvantifikovanou pacientskou RNA s delecí exonu 12. Podle Appendix E musí kurátor rozhodnout, zda jde o apparent near-complete nebo incomplete splice impact. ARIANE proto PVS1 RNA automaticky nepřidělí a předvyplní odbornou revizi. |
+| BRCA1 c.628C>T | PM2 Supporting | 3 | Table 4 uvádí PVS1 N/A. Nepřítomnost v obou gnomAD datasetech a dostatečná coverage splňují PM2 Supporting. |
+| BRCA2 c.8953+2T>C | PM2 Supporting | 3 | Table 4 uvádí PVS1 N/A a Figure 1A zde PP3 nepoužívá. Nepřítomnost v obou gnomAD datasetech a dostatečná coverage splňují PM2 Supporting. |
 
 ## BRCA1 c.4185G>A po odborné RNA revizi
 
@@ -51,14 +51,15 @@ Pokud hodnotitel přijme stejný závěr jako tutorial a ve formuláři doloží
 `PVS1 RNA Strong`, amended výsledek ARIANE je:
 
 - `PVS1 RNA Strong`, 4 body;
+- `PM2 Supporting`, 1 bod;
 - `PP4 Strong`, 4 body;
-- celkem 8 bodů, Class 4, Likely Pathogenic.
+- celkem 9 bodů, Class 5, Pathogenic podle kombinace dvou Strong a jednoho
+  Supporting kritéria v Table 3.
 
 Původní `PP3 Supporting` se odstraní jako slabší predikční evidence stejného
-splice mechanismu. Rozdíl proti tutorialové Class 5 zůstává doložený. Tutorial
-použil tehdejší `PP4 Very Strong` a `PM2 Supporting`, zatímco současný
-automatický výstup používá aktuální combined LR pro `PP4 Strong` a PM2 bez
-potvrzené coverage metody automaticky nepřiděluje.
+splice mechanismu. Výsledná třída se shoduje s tutorialem, ale síla klinického
+LR kritéria se liší. Tutorial použil tehdejší `PP4 Very Strong`, zatímco
+současný výstup používá aktuální combined LR pro `PP4 Strong`.
 
 ## Důležité poznámky k přepisu
 

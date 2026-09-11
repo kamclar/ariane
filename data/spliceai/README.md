@@ -9,7 +9,7 @@ record also retains the four REF and four ALT component scores.
 ## Runtime mode
 
 ARIANE computes SpliceAI on demand. Runtime uses the profile-pinned result cache
-and then the configured Broad-compatible API. Precomputed coding and intronic
+and then the local Broad-compatible service on `127.0.0.1:8081`. Precomputed coding and intronic
 variant spaces are not classification sources and cannot be activated by an
 environment variable. Existing files remain only as historical validation and
 audit material.
@@ -29,12 +29,12 @@ Final report:
 
 ## Lookup Order
 
-For the current API-primary `reference_transcript` policy:
+For the current local on-demand `reference_transcript` policy:
 
 1. In-memory cache
 2. `${ARIANE_RUNTIME_CACHE_DIR}/spliceai_api_cache.json`, or
    `.runtime-cache/spliceai_api_cache.json` in local development
-3. A configured Broad-compatible API call using exactly the same profile
+3. The configured local Broad-compatible service using exactly the same profile
 
 The lookup does not read a precomputed gene-wide variant space.
 
@@ -62,9 +62,27 @@ python scripts\build_spliceai_reference_caches.py all `
 ## Maintenance
 
 The public Broad SpliceAI API can change and explicitly disallows batch use.
-Reference builds therefore use only local instances of the pinned image.
-Independent spot checks may use the public service at an interactive rate and
-must record API failures separately from numeric differences.
+ARIANE therefore uses a local image identified by its immutable registry digest.
+`latest` is never used by the runtime or deployment scripts. Independent spot
+checks may use the public service at an interactive rate and must record API
+failures separately from numeric differences.
+
+Install or update the local service on the Ubuntu host with:
+
+```bash
+sudo bash /home/ubuntu/ariane/scripts/server-ops/install-spliceai-service.sh
+```
+
+The installer reads the image from the active profile, pulls that exact digest,
+starts it temporarily on a private port and runs
+`scripts/validate_spliceai_service.py`. It changes the ARIANE environment only
+after the response matches the versioned validation case. The permanent service
+binds only to `127.0.0.1:8081` and does not use the optional server-side database.
+
+An update starts with a candidate digest. It must pass the validation case,
+classification regression suite and a representative BRCA comparison before the
+profile is changed. Changing the profile checksum prevents reuse of results from
+the previous engine.
 
 Recommended cadence:
 

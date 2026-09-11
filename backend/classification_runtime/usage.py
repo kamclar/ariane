@@ -13,7 +13,7 @@ from backend.runtime_data import runtime_data_path
 from backend.version import ARIANE_VERSION
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 DEFAULT_DATABASE_NAME = "classification_usage.sqlite3"
 
 
@@ -48,15 +48,68 @@ class ClassificationUsageRepository:
 
     def _initialize(self) -> None:
         with self._connection() as connection:
+            connection.execute("PRAGMA journal_mode = WAL")
+            existing = connection.execute(
+                "SELECT sql FROM sqlite_master "
+                "WHERE type = 'table' AND name = 'classification_usage_events'"
+            ).fetchone()
+            if existing is not None and "'api_key'" not in str(existing["sql"]):
+                connection.executescript(
+                    """
+                    BEGIN IMMEDIATE;
+                    CREATE TABLE classification_usage_events_v2 (
+                        event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        schema_version INTEGER NOT NULL,
+                        occurred_at TEXT NOT NULL,
+                        actor_id TEXT NOT NULL,
+                        actor_type TEXT NOT NULL CHECK (
+                            actor_type IN ('account', 'visitor', 'api_key')
+                        ),
+                        request_id TEXT NOT NULL,
+                        request_mode TEXT NOT NULL CHECK (request_mode IN ('single', 'batch')),
+                        variant_key TEXT NOT NULL,
+                        gene TEXT NOT NULL,
+                        transcript TEXT NOT NULL,
+                        c_notation TEXT NOT NULL,
+                        status TEXT NOT NULL CHECK (status IN ('completed', 'error')),
+                        cache_status TEXT NOT NULL,
+                        predicted_class INTEGER,
+                        total_points INTEGER,
+                        duration_ms REAL NOT NULL,
+                        app_version TEXT NOT NULL,
+                        policy_id TEXT NOT NULL,
+                        policy_version TEXT NOT NULL,
+                        classifier_fingerprint TEXT NOT NULL
+                    );
+                    INSERT INTO classification_usage_events_v2 (
+                        event_id, schema_version, occurred_at, actor_id, actor_type,
+                        request_id, request_mode, variant_key, gene, transcript,
+                        c_notation, status, cache_status, predicted_class,
+                        total_points, duration_ms, app_version, policy_id,
+                        policy_version, classifier_fingerprint
+                    )
+                    SELECT event_id, 2, occurred_at, actor_id, actor_type,
+                        request_id, request_mode, variant_key, gene, transcript,
+                        c_notation, status, cache_status, predicted_class,
+                        total_points, duration_ms, app_version, policy_id,
+                        policy_version, classifier_fingerprint
+                    FROM classification_usage_events;
+                    DROP TABLE classification_usage_events;
+                    ALTER TABLE classification_usage_events_v2
+                        RENAME TO classification_usage_events;
+                    COMMIT;
+                    """
+                )
             connection.executescript(
                 """
-                PRAGMA journal_mode = WAL;
                 CREATE TABLE IF NOT EXISTS classification_usage_events (
                     event_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     schema_version INTEGER NOT NULL,
                     occurred_at TEXT NOT NULL,
                     actor_id TEXT NOT NULL,
-                    actor_type TEXT NOT NULL CHECK (actor_type IN ('account', 'visitor')),
+                    actor_type TEXT NOT NULL CHECK (
+                        actor_type IN ('account', 'visitor', 'api_key')
+                    ),
                     request_id TEXT NOT NULL,
                     request_mode TEXT NOT NULL CHECK (request_mode IN ('single', 'batch')),
                     variant_key TEXT NOT NULL,

@@ -165,7 +165,7 @@
                             await new Promise(resolve => setTimeout(resolve, waitMs));
                         }
                         lastRequestStartedAt = Date.now();
-                        const resp = await namespace.api.request("/api/classify", {
+                        const resp = await namespace.api.request("/ui-api/classify", {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({

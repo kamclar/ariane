@@ -2,10 +2,11 @@
 
 ENIGMA VCEP v1.2 prohibits BA1 and BS1 for well-established pathogenic
 founder variants, but does not publish a machine-readable exhaustive list.
-ARIANE therefore uses a small, provenance-bearing policy snapshot and never
-falls back to an inferred or free-text runtime classification. Absence from
-this non-exhaustive snapshot is an unresolved review state, not evidence that
-the variant is not a pathogenic founder variant.
+ARIANE therefore uses a provenance-bearing policy snapshot and never falls
+back to an inferred or free-text runtime classification. A positive match
+suppresses BA1 and BS1. A missing match means that this particular exception
+was not identified by the versioned screen; it is not a general assertion
+about the variant's clinical classification.
 """
 
 from __future__ import annotations
@@ -130,19 +131,19 @@ def lookup_pathogenic_founder_variant(gene: str, c_notation: str) -> Dict[str, A
     record = FOUNDER_VARIANT_INDEX.get(key)
     if record is None:
         return {
-            "status": "unresolved",
+            "status": "not_listed",
             "is_pathogenic_founder": None,
-            "review_required": True,
+            "exception_match": False,
             "reason": (
-                "variant is not present in the curated pathogenic-founder "
-                "snapshot; because the snapshot is non-exhaustive, this does "
-                "not establish that the variant is not a pathogenic founder variant"
+                "no well-established pathogenic founder exception was found "
+                "in the versioned curated snapshot"
             ),
             "snapshot_version": FOUNDER_VARIANT_METADATA.get("snapshot_version"),
         }
     return {
         "status": "pathogenic_founder",
         "is_pathogenic_founder": True,
+        "exception_match": True,
         "reason": record.get("founder_context") or "well-established pathogenic founder variant",
         "record": record,
         "snapshot_version": FOUNDER_VARIANT_METADATA.get("snapshot_version"),

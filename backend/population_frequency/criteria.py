@@ -243,22 +243,19 @@ def evaluate_frequency_criteria(
                     "founder_exception": founder,
                 }
                 return criteria
-            if not (
-                founder.get("status") == "reviewed_not_found"
-                and founder.get("is_pathogenic_founder") is False
-            ):
+            if founder.get("status") not in {"not_listed", "reviewed_not_found"}:
                 criteria["_gnomad_info"] = {
                     "applies": False,
                     "reason": (
                         "BA1/BS1 not applied: the pathogenic founder exception "
-                        "has not been resolved by an authoritative review; "
+                        "screen is unavailable or invalid; "
                         f"{founder.get('reason')}"
                     ),
                     "founder_exception": founder,
                 }
                 return criteria
             founder_note = (
-                "; pathogenic-founder exception checked against snapshot "
+                "; no pathogenic-founder exception match in snapshot "
                 f"{founder.get('snapshot_version') or 'unknown'}"
             )
             if max_af > ba1_threshold:

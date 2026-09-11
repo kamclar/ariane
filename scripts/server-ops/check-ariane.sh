@@ -24,6 +24,12 @@ else
     echo -e "   ${RED}ERROR ARIANE service: STOPPED${NC}"
 fi
 
+if systemctl is-active --quiet ariane-spliceai; then
+    echo -e "   ${GREEN}OK SpliceAI service: RUNNING${NC}"
+else
+    echo -e "   ${RED}ERROR SpliceAI service: STOPPED${NC}"
+fi
+
 if systemctl is-active --quiet nginx; then
     echo -e "   ${GREEN}OK Nginx: RUNNING${NC}"
 else
@@ -92,7 +98,7 @@ fi
 # 7. Port Status
 echo -e "\n${YELLOW}[7] Port Status${NC}"
 if command -v ss &> /dev/null; then
-    ss -tlnp 2>/dev/null | grep -E ":(8000|80|443)" | sed 's/^/   /' || echo "   (no services found on expected ports)"
+    ss -tlnp 2>/dev/null | grep -E ":(8000|8081|80|443)" | sed 's/^/   /' || echo "   (no services found on expected ports)"
 fi
 
 # 8. Last Restart

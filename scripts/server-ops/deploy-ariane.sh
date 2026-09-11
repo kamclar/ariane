@@ -61,6 +61,7 @@ apt-get install -y -qq \
     wget \
     nginx \
     ufw \
+    docker.io \
     htop \
     build-essential \
     >> "$DEPLOY_LOG" 2>&1
@@ -119,29 +120,38 @@ chmod 0640 /etc/ariane/api-keys.json
 if ! grep -q '^ARIANE_API_KEYS_FILE=' /etc/ariane/ariane.env; then
     printf 'ARIANE_API_KEYS_FILE=/etc/ariane/api-keys.json\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^ARIANE_UI_SESSION_SECRET=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_UI_SESSION_SECRET=%s\n' "$(openssl rand -hex 32)" >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
     printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^SPLICEAI_API_URL=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_URL=http://127.0.0.1:8081/spliceai/\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_SOURCE=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_SOURCE=ARIANE local SpliceAI service\n' >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^SPLICEAI_API_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_TIMEOUT=20\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_TIMEOUT=120\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_LOOKUP_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_LOOKUP_TIMEOUT=55\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_LOOKUP_TIMEOUT=135\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_ATTEMPTS=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_ATTEMPTS=2\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_ATTEMPTS=1\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_RETRY_DELAY=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_RETRY_DELAY=2\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_RETRY_DELAY=0\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_MAX_CONCURRENT=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_API_MAX_CONCURRENT=2\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_RATE_SLEEP=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_RATE_SLEEP=1.5\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_RATE_SLEEP=0\n' >> /etc/ariane/ariane.env
 fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
@@ -187,6 +197,13 @@ systemctl daemon-reload
 systemctl enable ariane >> "$DEPLOY_LOG" 2>&1
 echo -e "${GREEN}OK Service configured${NC}"
 
+echo -e "\n${YELLOW}[6b] Installing local SpliceAI service...${NC}"
+systemctl enable --now docker >> "$DEPLOY_LOG" 2>&1
+ARIANE_RESTART_AFTER_SPLICEAI=0 \
+    bash "$ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" \
+    >> "$DEPLOY_LOG" 2>&1
+echo -e "${GREEN}OK Local SpliceAI service validated${NC}"
+
 # 7. Configure Nginx
 echo -e "\n${YELLOW}[7] Configuring Nginx...${NC}"
 cat > /etc/nginx/sites-available/ariane << 'EOF'
@@ -194,7 +211,7 @@ limit_req_zone $binary_remote_addr zone=ariane_api:10m rate=5r/s;
 limit_req_zone $http_x_ariane_api_key zone=ariane_keyed_api:10m rate=30r/m;
 map $uri $ariane_web_classify_key {
     default "";
-    /api/classify $binary_remote_addr;
+    /ui-api/classify $binary_remote_addr;
 }
 limit_req_zone $ariane_web_classify_key zone=ariane_web_classify:10m rate=30r/m;
 
@@ -312,6 +329,12 @@ if systemctl is-active --quiet ariane; then
     echo -e "   ${GREEN}OK ARIANE service: RUNNING${NC}"
 else
     echo -e "   ${RED}ERROR ARIANE service: FAILED${NC}"
+fi
+
+if systemctl is-active --quiet ariane-spliceai; then
+    echo -e "   ${GREEN}OK SpliceAI service: RUNNING${NC}"
+else
+    echo -e "   ${RED}ERROR SpliceAI service: FAILED${NC}"
 fi
 
 if systemctl is-active --quiet nginx; then

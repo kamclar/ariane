@@ -290,7 +290,7 @@ def test_manual_review_navigation_uses_backend_groups_and_statuses():
     assert "Recommended reviews for this variant" in html
     assert "manualReviewGroups()" in html
     assert "this.manualDefinition(left.code).criterion_order" in javascript
-    assert 'namespace.api.request("/api/manual-evidence/status"' in javascript
+    assert 'namespace.api.request("/ui-api/manual-evidence/status"' in javascript
     assert "manualCriterionStatuses" in javascript
     assert "Ready: ${status.suggested_strength}" in javascript
     assert "case_control_country_matched" not in javascript[
@@ -344,7 +344,7 @@ def test_protein_ps1_reference_facts_are_requested_from_backend():
     assert "Assessed protein consequence" in html
     assert "`${result.gene} ${result.c_notation}`" in html
     assert "resolveProteinPs1Reference(item)" in html
-    assert 'namespace.api.request("/api/manual-evidence/resolve-ps1-reference"' in javascript
+    assert 'namespace.api.request("/ui-api/manual-evidence/resolve-ps1-reference"' in javascript
     assert "resolved.reference.p_notation" in javascript
     assert "resolved.assessed.spliceai_score" in javascript
     assert "resolved.reference.spliceai_score" in javascript

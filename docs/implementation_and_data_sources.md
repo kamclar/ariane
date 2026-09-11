@@ -862,7 +862,7 @@ SpliceAI větev:
 - pouze pro povolené typy, například synonymous, missense, in-frame a intronic,
 - nepoužívá se jako obecné PVS1 pro nonsense, frameshift, exonové CNV nebo canonical splice-site varianty.
 
-Runtime používá profil `enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1`:
+Runtime používá profil `enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2`:
 GRCh38, `distance=10000`, `mask=0`, `basic` anotaci a referenční transkript
 daného genu. Skóre je maximum `DS_AG`, `DS_AL`, `DS_DG` a `DS_DL` pouze v
 jednom přesně odpovídajícím řádku referenčního transkriptu. Není to maximum přes
@@ -1033,15 +1033,15 @@ skutečné větvi varianty:
 První chybějící povinný vstup ukončí požadavek bez klasifikace a vrátí zdroj,
 stav, důvod a informaci, zda má opakování smysl. Platné `absent`,
 `filtered_record`, výsledek pod prahem a explicitní `not_applicable` nejsou
-selhání zdroje. Metodicky dosud nepotvrzená šířka PM2 coverage zůstává zvlášť
-označeným dokončeným stavem bez automatického PM2. Není vydávána za technické
-selhání ani za splněné kritérium.
+selhání zdroje. PM2 coverage je měřena přímo na genomovém rozsahu alely `REF`.
+Bez úplného pokrytí tohoto rozsahu v obou požadovaných datasetech se PM2
+nepřidělí.
 
-Stav founder kontroly `unresolved` není technické selhání provideru. Je to
-explicitní požadavek na odbornou revizi kvůli neúplnému founder registru.
-Automatická část v tomto stavu fail-closed nepřidá BA1 ani BS1 a zobrazí důvod,
-ale ostatní nezávisle dokončená kritéria mohou vytvořit automatický Module 1
-výsledek.
+Founder kontrola rozlišuje pozitivní shodu `pathogenic_founder`, negativní
+výsledek konkrétního screeningu `not_listed` a technicky nedostupný nebo
+nevalidní snapshot. Pozitivní shoda BA1 a BS1 vyloučí. `not_listed` neblokuje
+jinak splněné populační kritérium a není vydáváno za obecný závěr o founder
+statusu. Technické selhání screeningu BA1 a BS1 zablokuje.
 
 Kritéria se po sestavení evidence vyhodnocují v tomto logickém pořadí:
 
@@ -1570,11 +1570,19 @@ zobrazuje počty hledání, cache hitů, chyb, nejčastější varianty a nejakt
 
 ### 8.3 Výpočet a selhání zdroje
 
-Cílový produkční endpoint je vlastní SpliceAI služba spuštěná z image
-připnutého digestem v profilu. Veřejný Broad endpoint lze použít jako
-nakonfigurovaný zdroj, není však záložním zdrojem s jinou verzí modelu. Při
-změně modelu, anotace nebo referenčního genomu vznikne nový profil a nový prostor
+Runtime endpoint je vlastní SpliceAI služba na `127.0.0.1:8081`, spuštěná z
+image připnutého úplným SHA-256 digestem v profilu. Port není vystaven do veřejné
+sítě. Služba používá `GENE_SET=basic`, nemá připojenou databázi a skóruje varianty
+na požádání. Veřejný Broad endpoint není runtime ani záložní zdroj. Při změně
+modelu, image, anotace nebo referenčního genomu vznikne nový profil a nový prostor
 runtime cache.
+
+`scripts/server-ops/install-spliceai-service.sh` nejprve stáhne přesný digest a
+spustí jej na dočasném lokálním portu. Skript
+`scripts/validate_spliceai_service.py` ověří GRCh38, `distance=10000`, `mask=0`,
+anotaci `basic`, přesný referenční transkript a úplná delta, REF a ALT skóre.
+Konfigurace ARIANE se změní pouze po úspěšném ověření. Tag `latest` se v provozu
+nepoužívá.
 
 Dynamická API cache používá klíč obsahující ID závazného profilu. Staré runtime
 záznamy proto nejsou znovu použity. I jednotlivá odpověď API musí výslovně
@@ -1587,15 +1595,15 @@ Veřejný `spliceai_audit` je v hlavním výsledku sbalený pod
 maskování, sestavu, transkript, použitou delta hodnotu, všechna delta skóre,
 REF a ALT hodnoty, zdroj, GRCh38 dotaz a cache klíč.
 
-Volání Broad SpliceAI používá nejvýše dva pokusy po 20 sekundách. Druhý pokus
-se provede pouze po timeoutu, síťové chybě, HTTP 429 nebo HTTP 5xx. HTTP 400,
-nesouhlas profilu, chybějící referenční transkript a chybějící GRCh38 souřadnice
-se automaticky neopakují. Celý SpliceAI lookup má vnější limit 55 sekund a
-reverse proxy dovoluje dokončení celého požadavku do 180 sekund.
+Lokální výpočet má jeden pokus s limitem 120 sekund a celý SpliceAI lookup má
+vnější limit 135 sekund. Opakování stejného náročného výpočtu v rámci jednoho
+webového požadavku není povoleno. Nesouhlas profilu, chybějící referenční
+transkript a chybějící GRCh38 souřadnice se automaticky neopakují. Reverse proxy
+dovoluje dokončení celého požadavku do 180 sekund.
 
 Produkční služba používá jeden aplikační proces. Uvnitř něj mohou běžet nejvýše
-dva souběžné SpliceAI požadavky a jejich zahájení odděluje společný časový
-interval. Tím se limit neuplatňuje zvlášť v několika procesech. Úspěšný výsledek
+dva souběžné SpliceAI požadavky. Lokální služba nepoužívá umělé prodlevy mezi
+požadavky. Tím se limit neuplatňuje zvlášť v několika procesech. Úspěšný výsledek
 se uloží do profilově vázané runtime cache.
 
 Pokud SpliceAI zůstane nedostupný pro missense, potvrzenou in-frame,
@@ -1616,10 +1624,22 @@ kritéria a výslednou třídu.
 ### 8.4 Priorita zdrojů
 
 Používá se paměťová cache, profilově validovaná runtime cache a potom
-nakonfigurovaný Broad kompatibilní výpočet. Každá
+lokální Broad kompatibilní výpočet. Každá
 odpověď je přijata jen se stejnými parametry a úplnou auditní stopou. Neexistuje
 fallback na předpočítaný prostor, starší parametry, první
 dostupný transkript ani nulové skóre.
+
+Před aktualizací se nový image eviduje jako kandidát a ověří mimo aktivní
+službu. Požadována je shoda verzovaného validačního případu, klasifikačních
+regresních testů a reprezentativní sady BRCA variant. Schválený digest se potom
+zapíše do profilu. Změna checksumu profilu vyřadí staré runtime výsledky z
+aktivního lookup pořadí bez jejich odstranění z auditních dat.
+
+SpliceAI Lookup wrapper je distribuován pod MIT licencí. Profilovaný commit
+SpliceAI používá GPLv3 pro zdrojový kód a CC BY-NC 4.0 pro modelové váhy. ARIANE
+je v současné fázi bezplatný akademický vývojový nástroj. Před zpřístupněním
+lokálního modelu pro použití v placené diagnostické službě je nutné vyjasnit
+licenční rozsah s Illumina.
 
 ## 9. Souřadnice
 
@@ -1784,39 +1804,35 @@ strukturální větev Appendix G, kterou runtime aktuálně podporuje pro úpln�
 exonové delece.
 
 Coverage lookup agreguje všechny pozice genomového rozsahu `REF`. ENIGMA v1.2
-neuvádí šířku flanking okna, proto se okolní báze mimo vlastní variantu
-nepřidávají. Tato definice je uvedena v diagnostických polích jako
+nepředepisuje flanking okno, proto se okolní báze mimo vlastní variantu
+nepřidávají. Jde o měření hloubky přímo na lokusu varianty. Tato definice je
+uvedena v diagnostických polích jako
 `coverage_scope: variant_reference_span`. Pro SNV je výsledek shodný s mean
 depth na lokusu, který zobrazuje gnomAD. Pro vícebázový rozsah musí být v cache
 všechny pozice. Naměřená hloubka a její klasifikační způsobilost jsou oddělené
 údaje. Pole `measurement_passes_threshold` popisuje pouze číselný výsledek.
 Pole `classification_compatible` určuje, zda lze daný coverage zdroj použít pro
-kritérium. Současná metoda `variant_reference_span` má stav
-`methodologically_unresolved`, takže automatické PM2 nepřiděluje.
+kritérium. Metoda `variant_reference_span` má stav
+`approved_variant_locus_measurement` a může při splnění ostatních podmínek
+založit PM2 Supporting.
 
 ### 10.1 Otevřené implementační body
 
 Souhrnný a průběžně udržovaný seznam je v
 [`open_methodological_and_data_tasks.md`](open_methodological_and_data_tasks.md).
 
-1. ENIGMA v1.2 pro PM2 požaduje průměrnou hloubku alespoň 25 v oblasti kolem
-   varianty, ale neurčuje šířku této oblasti. Současná reprodukovatelná definice
-   ARIANE používá genomový rozsah alely `REF` pouze jako auditní měření. Pro SNV
-   je to jedna pozice. Toto měření samo automatické PM2 nepovoluje.
-   Případná změna na flanking okno se nesmí provést odhadem. Vyžaduje potvrzení
-   ENIGMA, verzovanou změnu politiky a nové regresní testy.
-
-2. ENIGMA zakazuje BA1 a BS1 u dobře doložených patogenních founder variant,
+1. ENIGMA zakazuje BA1 a BS1 u dobře doložených patogenních founder variant,
    ale neposkytuje jejich úplný strojově čitelný seznam. Lokální kurátorovaný
    soubor proto obsahuje pouze varianty s doloženým zdrojem. Nepřítomnost
    varianty v tomto souboru sama o sobě nedokazuje, že nejde o founder variantu.
-   Runtime proto používá tři stavy: `pathogenic_founder`,
-   `reviewed_not_found` a `unresolved`. Jen první dva jsou rozhodnuté. Stav
-   `unresolved` vede k odborné revizi a nepřiděluje BA1 ani BS1.
+   Pozitivní shoda má stav `pathogenic_founder` a BA1 nebo BS1 vyloučí. Stav
+   `not_listed` znamená pouze to, že verzovaný screen nenašel známou výjimku.
+   Není to obecné tvrzení o founder statusu a neblokuje jinak splněné BA1 nebo
+   BS1. Nedostupný nebo nevalidní screen kritérium zablokuje.
    Rozšíření seznamu musí obsahovat kanonickou HGVS notaci, používaný transkript,
    founder populaci, tvrzení o patogenitě, zdroj, datum přístupu a checksum.
 
-3. Nezávislý validační soubor očekávaných ENIGMA klasifikací se připravuje
+2. Nezávislý validační soubor očekávaných ENIGMA klasifikací se připravuje
    externě. Po jeho získání musí být připnuta verze a původ každého záznamu,
    oddělena automatizovatelná a manuální evidence a porovnána nejen výsledná
    třída, ale také kritéria, síly a rozhodovací cesta. Interní regresní testy
@@ -1832,19 +1848,16 @@ Release v3.1.2 opravil některé genotypy a frekvence, ale samostatnou coverage
 tabulku v3.1.2 neuvolnil.
 
 Použitá r3.0.1 coverage je oficiální gnomAD produkt a jediná veřejně
-distribuovaná genome coverage tabulka pro řadu v3. Není však vzorkově totožná s
-variantním callsetem v3.1.2. ENIGMA v1.2 požaduje gnomAD v3.1 a pokrytí oblasti
-kolem varianty, ale neuvádí konkrétní coverage release. Z toho nelze odvodit,
-že ENIGMA rozdíl výslovně schválila.
-
-Do získání potvrzení od ENIGMA je stav veden jako doložený provozní zdroj s
-nepotvrzenou přesnou kompatibilitou. Zdroj a verze se vždy zobrazují v auditu a
-nesmí být přepsány na `v3.1.2 coverage`. Naměřená hloubka je dostupná pro audit,
-ale má `classification_compatible: false` a nemůže automaticky splnit požadavek
-pokrytí pro BA1, BS1 ani PM2. Podklady:
+distribuovaná genome coverage tabulka pro řadu v3. Oficiální implementace
+`gnomad_methods` ji nadále uvádí jako aktuální genome coverage resource a
+používá ji také při anotaci pozdějších GRCh38 genome frequency releases.
+ARIANE ji proto používá jako klasifikačně způsobilý oficiální coverage zdroj.
+Zdroj a verze se vždy zobrazují v auditu a nesmí být přepsány na
+`v3.1.2 coverage`. Podklady:
 
 - [gnomAD v3.1 release](https://gnomad.broadinstitute.org/news/2020-10-gnomad-v3-1-new-content-methods-annotations-and-data-availability/),
 - [gnomAD v3.1.2 minor release](https://gnomad.broadinstitute.org/news/2021-10-gnomad-v3-1-2-minor-release/),
+- [oficiální gnomAD resource bindings](https://github.com/broadinstitute/gnomad_methods/blob/main/gnomad/resources/grch38/gnomad.py),
 - `gs://gcp-public-data--gnomad/release/3.0.1/coverage/genomes/gnomad.genomes.r3.0.1.coverage.ht`.
 
 ### 10.3 Přidání dalších genů
@@ -2066,13 +2079,17 @@ burst limitem 3. Jeden klíč proto nemůže neomezeně násobit paralelní batc
 požadavky.
 
 Endpoint `/api/v1/capabilities` zůstává veřejný a zveřejňuje pouze požadovaný
-způsob autentizace. Interní kompatibilní endpoint webového rozhraní nelze
-chránit tajemstvím vloženým do klientského JavaScriptu. Je proto nadále omezen
-na úrovni reverse proxy na 30 požadavků za minutu pro jednu IP adresu s krátkým
-burst limitem 3. Batch ve webovém rozhraní používá jednu souběžnou klasifikaci
-a mezi zahájením požadavků zachovává alespoň 2,1 sekundy. Starý endpoint
-`/api/classify/batch` není webovým rozhraním používán a vyžaduje stejný API klíč
-jako verze v1.
+způsob autentizace. Staré endpointy `/api/classify` a `/api/classify/batch`
+vyžadují stejný API klíč jako verze v1. Webové rozhraní používá oddělené cesty
+`/ui-api`. Při načtení hlavní stránky server vytvoří krátkodobou podepsanou
+relaci v HttpOnly cookie. API klíč proto není vložen do HTML ani JavaScriptu.
+Zápisové požadavky navíc musí mít hlavičku Origin odpovídající ARIANE serveru.
+Relace dokládá načtení stejného webového rozhraní, není uživatelským přihlášením.
+Reverse proxy proto nadále omezuje interaktivní klasifikaci na 30 požadavků za
+minutu pro jednu IP adresu s krátkým burst limitem 3. Batch ve webovém rozhraní
+používá jednu souběžnou klasifikaci a mezi zahájením požadavků zachovává alespoň
+2,1 sekundy. Produkční podpisový klíč `ARIANE_UI_SESSION_SECRET` je uložen mimo
+Git v `/etc/ariane/ariane.env`.
 
 ### 15.2 Graf pro ručně doplněnou evidenci
 
@@ -2161,12 +2178,13 @@ nekvantifikovaných pacientských RNA záznamů v ST2.
 U `BRCA1 c.4185G>A` historický tutorial a automatický Module 1 výsledek nejsou
 stejným typem výsledku. Tutorial obsahuje kurátorské posouzení nekvantifikované
 pacientské RNA jako `PVS1 RNA Strong`. Strukturovaný ST2/ST3 záznam tuto sílu
-sám neurčuje. ARIANE proto nejprve vydá automatický výsledek 5 bodů, Class 3,
-s `PP3 Supporting` a `PP4 Strong`. Pokud odborník přijme tutorialový RNA závěr,
-amended výsledek má `PVS1 RNA Strong` a `PP4 Strong`, 8 bodů a Class 4. PP3 se
-odstraní jako slabší predikce stejného splice mechanismu. Rozdíl proti
-tutorialové Class 5 souvisí také s novějšími klinickými LR podklady a s tím, že
-PM2 bez potvrzené coverage metody není automatické.
+sám neurčuje. ARIANE proto nejprve vydá automatický výsledek 6 bodů, Class 4,
+s `PM2 Supporting`, `PP3 Supporting` a `PP4 Strong`. Pokud odborník přijme
+tutorialový RNA závěr, amended výsledek má `PVS1 RNA Strong`,
+`PM2 Supporting` a `PP4 Strong`, 9 bodů a Class 5 podle kombinace dvou Strong
+a jednoho Supporting kritéria v Table 3. PP3 se odstraní jako slabší predikce
+stejného splice mechanismu. Síla PP4 se proti tutorialu liší kvůli novějším
+klinickým LR podkladům.
 
 Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.

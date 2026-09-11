@@ -15,7 +15,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROFILE_PATH = PROJECT_ROOT / "data" / "spliceai" / "enigma_v1_2_spliceai_profile.json"
 
 _EXPECTED = {
-    "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1",
+    "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2",
     "genome_assembly": "GRCh38",
     "max_distance": 10000,
     "mask": 0,
@@ -52,6 +52,19 @@ def _load_profile() -> dict[str, Any]:
         "pp3_min_inclusive": 0.2,
     }:
         mismatches.append("thresholds")
+    approved_engine = value.get("approved_engine") or {}
+    if approved_engine != {
+        "software": "SpliceAI",
+        "python_package_version": "1.3.4",
+        "model_commit": "7f36ca847e1b1885167dab79681dbb75c09c6743",
+        "lookup_server": "Broad Institute SpliceAI Lookup, self-hosted",
+        "lookup_annotation": "GENCODE v49 basic",
+        "docker_image": (
+            "docker.io/weisburd/spliceai-38@sha256:"
+            "1bbd1735122086995ad3d05238d674ff8b2a3336f489d11985aeb5abe67f5e4b"
+        ),
+    }:
+        mismatches.append("approved_engine")
     if mismatches:
         raise RuntimeError(
             "ENIGMA SpliceAI scoring profile does not match Appendix J: "

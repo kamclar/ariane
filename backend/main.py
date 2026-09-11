@@ -24,6 +24,7 @@ from backend.admin import router as admin_router
 from backend.review_api import router as review_router
 from backend.version import ARIANE_VERSION
 from backend.api_auth import require_public_api_key
+from backend.ui_session import issue_ui_session, require_ui_session
 from backend.classification_runtime import (
     ClassificationCacheRepository,
     ClassificationUsageRepository,
@@ -47,6 +48,7 @@ from backend.gene_policy import (
 )
 from backend.data_validation import validate_required_datasets
 from backend.data_health import get_data_issues
+from backend.lookups.spliceai import spliceai_runtime_health
 from backend.classification_dag import (
     DagNodeExecutionError,
     get_configured_engine_mode,
@@ -237,6 +239,7 @@ async def audit_request(request: Request, call_next):
         response.headers["X-ARIANE-Version"] = ARIANE_VERSION
     log_completion = (
         request.url.path.startswith("/admin/")
+        or request.url.path.startswith("/ui-api/")
         or request.url.path.startswith("/api/") and request.url.path != "/api/health"
     )
     if log_completion:
@@ -347,16 +350,23 @@ app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="stati
 
 
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    return FileResponse(FRONTEND_DIR / "index.html")
+async def index(request: Request):
+    response = FileResponse(FRONTEND_DIR / "index.html")
+    issue_ui_session(request, response)
+    return response
 
 
 @app.get("/api/health")
 async def health():
     issues = get_data_issues()
     panel = load_panel_provider()
+    spliceai = spliceai_runtime_health()
     return {
-        "status": "degraded" if issues else "ok",
+        "status": (
+            "degraded"
+            if issues or (spliceai["local"] and spliceai["status"] != "ok")
+            else "ok"
+        ),
         "version": ARIANE_VERSION,
         "classification_engine": CLASSIFIER_ENGINE_MODE.value,
         "data": {
@@ -369,12 +379,18 @@ async def health():
             "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH.exists(),
             "reference_bundle": panel.provenance.get("reference_bundle", ""),
             "normalization_engine": panel.provenance.get("normalization_engine", ""),
+            "spliceai": spliceai,
         },
         "data_issues": issues,
     }
 
 
-@app.get("/api/resources")
+@app.get(
+    "/ui-api/resources",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.get("/api/resources", dependencies=[Depends(require_public_api_key)])
 async def resources(gene: Optional[str] = None):
     return {
         "version": ARIANE_VERSION,
@@ -399,13 +415,26 @@ async def resources(gene: Optional[str] = None):
     }
 
 
-@app.get("/api/rules")
+@app.get(
+    "/ui-api/rules",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.get("/api/rules", dependencies=[Depends(require_public_api_key)])
 async def enigma_rules_catalog():
-    """Public, versioned source and rule index without local file paths."""
+    """Return the validated source and rule index without local file paths."""
     return public_catalog()
 
 
-@app.get("/api/rules/trees/{tree_id}")
+@app.get(
+    "/ui-api/rules/trees/{tree_id}",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.get(
+    "/api/rules/trees/{tree_id}",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def enigma_decision_tree(tree_id: str):
     tree = get_decision_tree(tree_id)
     if tree is None:
@@ -413,7 +442,15 @@ async def enigma_decision_tree(tree_id: str):
     return tree
 
 
-@app.get("/api/rules/tables/table9")
+@app.get(
+    "/ui-api/rules/tables/table9",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.get(
+    "/api/rules/tables/table9",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def enigma_table9_records(
     gene: Optional[str] = Query(default=None, max_length=40),
     query: str = Query(default="", max_length=200),
@@ -437,7 +474,15 @@ async def enigma_table9_records(
     )
 
 
-@app.get("/api/rules/tables/{table_id}")
+@app.get(
+    "/ui-api/rules/tables/{table_id}",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.get(
+    "/api/rules/tables/{table_id}",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def enigma_reference_table_records(
     table_id: str,
     section: Optional[str] = Query(default=None, max_length=80),
@@ -457,7 +502,17 @@ async def enigma_reference_table_records(
     return payload
 
 
-@app.post("/api/audit/client-validation", status_code=204)
+@app.post(
+    "/ui-api/audit/client-validation",
+    status_code=204,
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post(
+    "/api/audit/client-validation",
+    status_code=204,
+    dependencies=[Depends(require_public_api_key)],
+)
 async def client_validation_error(
     req: ClientValidationRequest,
     request: Request,
@@ -473,7 +528,15 @@ async def client_validation_error(
     return Response(status_code=204)
 
 
-@app.post("/api/manual-evidence/evaluate")
+@app.post(
+    "/ui-api/manual-evidence/evaluate",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post(
+    "/api/manual-evidence/evaluate",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def evaluate_manual_evidence_endpoint(
     req: ManualEvidenceRequest,
     request: Request,
@@ -539,7 +602,15 @@ async def evaluate_manual_evidence_endpoint(
     return response
 
 
-@app.post("/api/manual-evidence/status")
+@app.post(
+    "/ui-api/manual-evidence/status",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post(
+    "/api/manual-evidence/status",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def manual_evidence_status_endpoint(
     req: ManualEvidenceStatusRequest,
 ) -> ManualEvidenceStatusResponse:
@@ -553,7 +624,15 @@ async def manual_evidence_status_endpoint(
     )
 
 
-@app.post("/api/manual-evidence/resolve-ps1-reference")
+@app.post(
+    "/ui-api/manual-evidence/resolve-ps1-reference",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post(
+    "/api/manual-evidence/resolve-ps1-reference",
+    dependencies=[Depends(require_public_api_key)],
+)
 async def resolve_ps1_reference_endpoint(
     req: Ps1ReferenceResolutionRequest,
     request: Request,
@@ -754,7 +833,12 @@ def _record_classification_usage(**values) -> None:
         )
 
 
-@app.post("/api/normalize")
+@app.post(
+    "/ui-api/normalize",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post("/api/normalize", dependencies=[Depends(require_public_api_key)])
 async def normalize_variant(
     req: VariantRequest, request: Request
 ) -> VariantNormalizationResponse:
@@ -779,7 +863,12 @@ async def normalize_variant(
     return response
 
 
-@app.post("/api/classify")
+@app.post(
+    "/ui-api/classify",
+    dependencies=[Depends(require_ui_session)],
+    include_in_schema=False,
+)
+@app.post("/api/classify", dependencies=[Depends(require_public_api_key)])
 async def classify_variant(
     req: VariantRequest,
     request: Request,

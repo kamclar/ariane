@@ -156,8 +156,12 @@ def test_request_model_accepts_canonical_start_and_stop_extension_forms(
 def test_normalize_api_uses_same_engine_and_returns_provenance():
     from backend.main import app
 
-    response = TestClient(app).post(
-        "/api/normalize", json={"gene": "BRCA1", "c_notation": "c.2102delA"}
+    client = TestClient(app)
+    assert client.get("/").status_code == 200
+    response = client.post(
+        "/ui-api/normalize",
+        json={"gene": "BRCA1", "c_notation": "c.2102delA"},
+        headers={"Origin": "http://testserver"},
     )
     assert response.status_code == 200
     result = response.json()
@@ -172,13 +176,16 @@ def test_normalize_api_uses_same_engine_and_returns_provenance():
 def test_normalize_api_rejects_random_protein_consequence():
     from backend.main import app
 
-    response = TestClient(app).post(
-        "/api/normalize",
+    client = TestClient(app)
+    assert client.get("/").status_code == 200
+    response = client.post(
+        "/ui-api/normalize",
         json={
             "gene": "BRCA1",
             "c_notation": "c.2102del",
             "p_notation": "p.(Gln1Ter)",
         },
+        headers={"Origin": "http://testserver"},
     )
     assert response.status_code == 422
     assert "Protein consequence mismatch" in response.text

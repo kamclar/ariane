@@ -456,11 +456,11 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         criteria = {criterion.name: criterion for criterion in result.criteria}
         self.assertEqual(criteria["PVS1"].strength, "Very Strong")
         self.assertEqual(criteria["PP4"].strength, "Very Strong")
-        self.assertNotIn("PM2_Supporting", criteria)
-        self.assertTrue(
+        self.assertEqual(criteria["PM2_Supporting"].strength, "Supporting")
+        self.assertFalse(
             any("coverage-region method" in warning for warning in result.warnings)
         )
-        self.assertEqual(result.total_points, 16)
+        self.assertEqual(result.total_points, 17)
         self.assertEqual(result.predicted_class, 5)
         self.assertEqual(result.predicted_label, "Pathogenic")
 

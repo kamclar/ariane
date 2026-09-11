@@ -340,7 +340,7 @@
             this.manualStatusLoading = true;
             this.manualStatusError = "";
             try {
-                const response = await namespace.api.request("/api/manual-evidence/status", {
+                const response = await namespace.api.request("/ui-api/manual-evidence/status", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -391,7 +391,7 @@
             }
             this.ps1ReferenceLoading = true;
             try {
-                const response = await namespace.api.request("/api/manual-evidence/resolve-ps1-reference", {
+                const response = await namespace.api.request("/ui-api/manual-evidence/resolve-ps1-reference", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -484,7 +484,7 @@
 
             this.manualLoading = true;
             try {
-                const response = await namespace.api.request("/api/manual-evidence/evaluate", {
+                const response = await namespace.api.request("/ui-api/manual-evidence/evaluate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(this.manualEvidenceRequestPayload()),

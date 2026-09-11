@@ -6,9 +6,9 @@
 # results that were returned by the configured service for variants that were
 # actually requested.
 #
-# API endpoint: https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/
+# Default endpoint: http://127.0.0.1:8081/spliceai/
 # Variant format: chr{chrom}-{pos}-{ref}-{alt}
-# Rate limit: a few requests per minute - cache prevents repeated calls.
+# Successful results are kept in the profile-specific runtime cache.
 #
 # The previous MANE VCF subset approach was removed because the Ensembl MANE v1.0
 # file uses an older Gencode version and gives incorrect scores for some variants
@@ -48,6 +48,7 @@ from backend.spliceai_profile import (
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
 from backend.modules.spliceai_policy import FIGURE_1A_SPLICEAI_TYPES
+from backend.version import ARIANE_VERSION
 
 
 def choose_project_root() -> Path:
@@ -71,8 +72,10 @@ SPLICEAI_API_CACHE_PATH = RUNTIME_CACHE_DIR / "spliceai_api_cache.json"
 SPLICEAI_CACHE:        Dict[str, float] = {}   # policy:gene:c_notation -> score
 SPLICEAI_STATUS_CACHE: Dict[str, dict]  = {}   # gene:c_notation -> status details
 
-# Broad API endpoint (Google Cloud Run, hg38) or a local compatible server.
-DEFAULT_SPLICEAI_API_URL = "https://spliceai-38-xwkwwwxdwq-uc.a.run.app/spliceai/"
+# ARIANE uses its private, digest-pinned service by default. An explicitly
+# configured compatible endpoint is accepted, but it is never used as a
+# fallback after the configured source fails.
+DEFAULT_SPLICEAI_API_URL = "http://127.0.0.1:8081/spliceai/"
 
 
 def _env_float(name: str, default: float) -> float:
@@ -101,16 +104,20 @@ SPLICEAI_API_URL = _normalize_api_url(os.environ.get("SPLICEAI_API_URL", DEFAULT
 # Required Figure 1A evidence must complete within the bounded lookup deadline
 # or the classifier returns no classification. Offline cache builders do not
 # use this web-request deadline.
-SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 20)
-SPLICEAI_API_RATE_SLEEP = _env_float("SPLICEAI_API_RATE_SLEEP", 1.5)
-SPLICEAI_API_ATTEMPTS = max(1, _env_int("SPLICEAI_API_ATTEMPTS", 2))
+SPLICEAI_API_TIMEOUT = _env_int("SPLICEAI_API_TIMEOUT", 120)
+SPLICEAI_API_RATE_SLEEP = _env_float("SPLICEAI_API_RATE_SLEEP", 0.0)
+SPLICEAI_API_ATTEMPTS = max(1, _env_int("SPLICEAI_API_ATTEMPTS", 1))
 SPLICEAI_API_RETRY_DELAY = _env_float("SPLICEAI_API_RETRY_DELAY", 2.0)
 SPLICEAI_API_MAX_CONCURRENT = max(
     1, _env_int("SPLICEAI_API_MAX_CONCURRENT", 2)
 )
 SPLICEAI_API_SOURCE = os.environ.get(
     "SPLICEAI_API_SOURCE",
-    "Local Broad SpliceAI API" if "localhost" in SPLICEAI_API_URL else "Broad SpliceAI API",
+    (
+        "ARIANE local SpliceAI service"
+        if urllib.parse.urlsplit(SPLICEAI_API_URL).hostname in {"127.0.0.1", "localhost", "::1"}
+        else "Configured SpliceAI API"
+    ),
 )
 
 REFERENCE_TRANSCRIPTS = SPLICEAI_PROFILE["reference_transcripts"]
@@ -118,6 +125,31 @@ REFERENCE_TRANSCRIPTS = SPLICEAI_PROFILE["reference_transcripts"]
 _API_REQUEST_GATE = threading.BoundedSemaphore(SPLICEAI_API_MAX_CONCURRENT)
 _API_RATE_LOCK = threading.Lock()
 _API_NEXT_REQUEST_AT = 0.0
+
+
+def spliceai_runtime_health() -> dict:
+    """Report local service reachability without running model inference."""
+    parsed = urllib.parse.urlsplit(SPLICEAI_API_URL)
+    host = parsed.hostname or ""
+    local = host in {"127.0.0.1", "localhost", "::1"}
+    result = {
+        "status": "configured",
+        "source": SPLICEAI_API_SOURCE,
+        "local": local,
+        "profile_id": SPLICEAI_PROFILE_ID,
+        "docker_image": SPLICEAI_PROFILE.get("approved_engine", {}).get("docker_image", ""),
+    }
+    if not local:
+        return result
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    try:
+        with socket.create_connection((host, port), timeout=0.25):
+            pass
+    except OSError as exc:
+        result.update({"status": "unavailable", "reason": f"{type(exc).__name__}: {exc}"})
+        return result
+    result["status"] = "ok"
+    return result
 
 _requested_transcript_policy = os.environ.get(
     "SPLICEAI_TRANSCRIPT_POLICY", SPLICEAI_TRANSCRIPT_POLICY_REQUIRED
@@ -388,7 +420,7 @@ def _query_spliceai_api_once(
     alt: str,
 ) -> Optional[dict]:
     """
-    Query Broad SpliceAI API for a single variant.
+    Query the configured SpliceAI API for a single variant.
     Returns selected SpliceAI score details, or None on failure.
     """
     chrom_clean = str(chrom).replace("chr", "")
@@ -404,7 +436,7 @@ def _query_spliceai_api_once(
     try:
         req = urllib.request.Request(
             url,
-            headers={"Accept": "application/json", "User-Agent": "BRCA-ACMG-Module1/1.6.4"},
+            headers={"Accept": "application/json", "User-Agent": f"ARIANE/{ARIANE_VERSION}"},
         )
         with urllib.request.urlopen(req, timeout=SPLICEAI_API_TIMEOUT) as resp:
             data = _json.loads(resp.read())
@@ -578,7 +610,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "status": "no_grch38_coords",
             "score":  None,
             "reason": "No GRCh38 coordinates available",
-            "source": "Broad SpliceAI API",
+            "source": SPLICEAI_API_SOURCE,
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
             "scoring_profile_id": SPLICEAI_PROFILE_ID,
             "distance": SPLICEAI_MAX_DISTANCE,
@@ -597,7 +629,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
             "score":  None,
             "reason": (
                 selected.get("error") if isinstance(selected, dict) and selected.get("error")
-                else "Broad SpliceAI API returned no score for the required transcript"
+                else "Configured SpliceAI API returned no score for the required transcript"
             ),
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
             "source": SPLICEAI_API_SOURCE,

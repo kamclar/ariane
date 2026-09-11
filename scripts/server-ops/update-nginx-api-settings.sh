@@ -23,6 +23,10 @@ restore_config() {
     rm -f "$BACKUP_PATH"
 }
 
+# Earlier installations limited the browser through the old public API path.
+# The browser now uses a separate session-protected transport path.
+sed -i 's|/api/classify $binary_remote_addr;|/ui-api/classify $binary_remote_addr;|' "$NGINX_CONFIG"
+
 if ! grep -q '^[[:space:]]*limit_req_status 429;' "$NGINX_CONFIG"; then
     sed -i '/^[[:space:]]*server_tokens off;[[:space:]]*$/a\    limit_req_status 429;' "$NGINX_CONFIG"
 fi
@@ -31,7 +35,7 @@ if ! grep -q 'zone=ariane_web_classify:' "$NGINX_CONFIG"; then
     sed -i '/^limit_req_zone \$binary_remote_addr zone=ariane_api:/a\
 map $uri $ariane_web_classify_key {\
     default "";\
-    /api/classify $binary_remote_addr;\
+    /ui-api/classify $binary_remote_addr;\
 }\
 limit_req_zone $ariane_web_classify_key zone=ariane_web_classify:10m rate=30r/m;' "$NGINX_CONFIG"
 fi

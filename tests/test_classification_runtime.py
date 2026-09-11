@@ -236,6 +236,96 @@ def test_usage_events_count_every_search_separately(tmp_path: Path):
     ]
 
 
+def test_usage_events_accept_authenticated_api_key_identity(tmp_path: Path):
+    repository = ClassificationUsageRepository(tmp_path / "usage.sqlite3")
+    repository.record(
+        actor_id="external-client-01",
+        actor_type="api_key",
+        request_id="api-request",
+        request_mode="single",
+        gene="BRCA1",
+        transcript="NM_007294.4",
+        c_notation="c.4185G>A",
+        status="completed",
+        cache_status="hit",
+        predicted_class=3,
+        total_points=0,
+        duration_ms=4.0,
+        policy_id="ENIGMA_BRCA_VCEP_1.2",
+        policy_version="1.2.0",
+        classifier_fingerprint="fingerprint",
+    )
+
+    now = datetime.now(timezone.utc)
+    summary = repository.summary(
+        start=now - timedelta(minutes=5),
+        end=now + timedelta(minutes=5),
+    )
+    assert summary["top_actors"] == [
+        {
+            "actor_id": "external-client-01",
+            "actor_type": "api_key",
+            "searches": 1,
+        }
+    ]
+
+
+def test_usage_database_migrates_actor_type_constraint_for_api_keys(tmp_path: Path):
+    database = tmp_path / "usage.sqlite3"
+    with sqlite3.connect(database) as connection:
+        connection.executescript(
+            """
+            CREATE TABLE classification_usage_events (
+                event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                schema_version INTEGER NOT NULL,
+                occurred_at TEXT NOT NULL,
+                actor_id TEXT NOT NULL,
+                actor_type TEXT NOT NULL CHECK (actor_type IN ('account', 'visitor')),
+                request_id TEXT NOT NULL,
+                request_mode TEXT NOT NULL CHECK (request_mode IN ('single', 'batch')),
+                variant_key TEXT NOT NULL,
+                gene TEXT NOT NULL,
+                transcript TEXT NOT NULL,
+                c_notation TEXT NOT NULL,
+                status TEXT NOT NULL CHECK (status IN ('completed', 'error')),
+                cache_status TEXT NOT NULL,
+                predicted_class INTEGER,
+                total_points INTEGER,
+                duration_ms REAL NOT NULL,
+                app_version TEXT NOT NULL,
+                policy_id TEXT NOT NULL,
+                policy_version TEXT NOT NULL,
+                classifier_fingerprint TEXT NOT NULL
+            );
+            INSERT INTO classification_usage_events (
+                schema_version, occurred_at, actor_id, actor_type, request_id,
+                request_mode, variant_key, gene, transcript, c_notation,
+                status, cache_status, duration_ms, app_version, policy_id,
+                policy_version, classifier_fingerprint
+            ) VALUES (
+                1, '2026-09-11T00:00:00+00:00', 'visitor-1', 'visitor', 'old',
+                'single', 'BRCA1:c.1A>G', 'BRCA1', 'NM_007294.4', 'c.1A>G',
+                'completed', 'miss', 1.0, '1.9.4', 'policy', '1.2.0', 'fp'
+            );
+            """
+        )
+
+    repository = ClassificationUsageRepository(database)
+    with sqlite3.connect(database) as connection:
+        rows = connection.execute(
+            "SELECT schema_version, actor_id, actor_type "
+            "FROM classification_usage_events ORDER BY event_id"
+        ).fetchall()
+        table_sql = connection.execute(
+            "SELECT sql FROM sqlite_master "
+            "WHERE type = 'table' AND name = 'classification_usage_events'"
+        ).fetchone()[0]
+
+    assert rows == [(2, "visitor-1", "visitor")]
+    assert "'api_key'" in table_sql
+    assert repository.database_path == database
+
+
 def test_identity_uses_cookie_without_storing_ip_and_supports_trusted_header(monkeypatch):
     app = FastAPI()
 
@@ -292,13 +382,19 @@ def test_classification_endpoint_caches_result_but_counts_both_searches(tmp_path
     monkeypatch.setattr(main, "classification_fingerprint", lambda gene, mode: "test-fingerprint")
 
     client = TestClient(main.app)
+    assert client.get("/").status_code == 200
     payload = {
         "gene": "BRCA1",
         "c_notation": "c.4185G>A",
         "p_notation": "p.(Gln1395=)",
     }
-    assert client.post("/api/classify", json=payload).status_code == 200
-    assert client.post("/api/classify", json=payload).status_code == 200
+    headers = {"Origin": "http://testserver"}
+    assert client.post(
+        "/ui-api/classify", json=payload, headers=headers
+    ).status_code == 200
+    assert client.post(
+        "/ui-api/classify", json=payload, headers=headers
+    ).status_code == 200
     assert calls == 1
 
     now = datetime.now(timezone.utc)

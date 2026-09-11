@@ -40,12 +40,12 @@ GNOMAD_LOCAL_DATASET_CONFIG = {
         "callset": "genomes",
         "frequency_release": "3.1.2",
         "coverage_release": "3.0.1",
-        "coverage_frequency_compatibility": "unresolved_release_mismatch",
-        "coverage_classification_compatible": False,
+        "coverage_frequency_compatibility": "approved_official_genome_coverage_resource",
+        "coverage_classification_compatible": True,
         "coverage_compatibility_reason": (
-            "The public genome coverage product is gnomAD r3.0.1, while "
-            "the frequency callset is v3.1.2. Exact sample compatibility "
-            "has not been established."
+            "gnomAD r3.0.1 is the latest official genome coverage resource. "
+            "The gnomAD resource implementation also uses it when annotating "
+            "later GRCh38 genome frequency releases."
         ),
     },
 }
@@ -53,13 +53,12 @@ GNOMAD_LOCAL_DATASET_CONFIG = {
 
 PM2_COVERAGE_METHOD_REVIEW = {
     "scope": "variant_reference_span",
-    "status": "methodologically_unresolved",
-    "automatic_assignment_allowed": False,
+    "status": "approved_variant_locus_measurement",
+    "automatic_assignment_allowed": True,
     "reason": (
-        "ENIGMA v1.2 requires average read depth in the region around the "
-        "variant but does not define the width of that region. The REF span "
-        "is retained as an auditable measurement and is not treated as a "
-        "confirmed ENIGMA coverage method."
+        "ENIGMA v1.2 requires read depth at the region around the variant. "
+        "ARIANE measures every genomic base represented by the REF allele, "
+        "records that exact span, and does not add an unspecified flank."
     ),
 }
 

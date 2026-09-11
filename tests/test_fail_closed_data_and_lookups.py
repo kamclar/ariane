@@ -352,7 +352,8 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(EXTERNAL_LOOKUP_TIMEOUT, 12)
-        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 55})
+        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 135})
+        self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 180)
         self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 180)
 
     async def test_spliceai_timeout_returns_unavailable_instead_of_hanging(self):

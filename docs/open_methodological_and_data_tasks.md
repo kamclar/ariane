@@ -12,37 +12,23 @@ následujícím exonu. Není potvrzeno, zda se v hraniční větvi mají PVS1 a 
 posuzovat odděleně. Dotaz byl odeslán Janě. Do obdržení odpovědi se současná
 logika nesmí měnit odhadem.
 
-## 2. gnomAD coverage pro PM2
-
-ENIGMA vyžaduje dostatečnou mean depth v oblasti kolem varianty, ale neurčuje
-šířku tohoto okolí. ARIANE nyní používá přesně genomový rozsah alely `REF` a
-uvádí jej jako `coverage_scope: variant_reference_span`. Tato hodnota zůstává
-dostupná pro audit, ale není považována za potvrzenou metodu ENIGMA a sama
-nemůže automaticky založit PM2.
-
-Současně jsou frekvence z gnomAD v3.1.2 kombinovány s veřejně dostupnou coverage
-z release 3.0.1. Runtime tuto dvojici označuje jako
-`unresolved_release_mismatch`. Hloubku zobrazí, ale nepoužije ji k automatickému
-BA1, BS1 ani PM2. Je třeba získat metodické potvrzení přijatelné šířky okolí a
-ověřit, zda je tato kombinace verzí přípustná. Případná změna musí mít novou
-verzi datové politiky a regresní testy.
-
-## 3. Úplný seznam patogenních founder variant
+## 2. Úplný seznam patogenních founder variant
 
 ENIGMA neposkytuje úplný strojově čitelný katalog founder variant, pro které se
 nesmějí použít BA1 a BS1. Současný seznam obsahuje pouze doložené záznamy.
-Nenalezení varianty proto vrací stav `unresolved`, nikoliv negativní závěr.
-BA1 nebo BS1 lze použít jen po explicitním výsledku `reviewed_not_found`.
+Pozitivní nález BA1 a BS1 vyloučí. Nenalezení má stav `not_listed` a znamená
+pouze negativní výsledek tohoto konkrétního screeningu. Nejde o obecné tvrzení
+o founder statusu.
 Rozšíření vyžaduje kanonickou HGVS notaci, referenční transkript, populaci,
 tvrzení o patogenitě, stabilní zdroj, datum přístupu a checksum.
 
-## 4. Nezávislý validační soubor
+## 3. Nezávislý validační soubor
 
 Externě se připravuje soubor očekávaných ENIGMA klasifikací. Po jeho získání je
 třeba připnout verzi a původ, oddělit automatizovatelnou a manuální evidenci a
 porovnat jednotlivá kritéria, síly, body, výslednou třídu a důvody rozdílů.
 
-## 5. Data pro automatické proteinové PS1, vyřešeno 2026-09-07
+## 4. Data pro automatické proteinové PS1, vyřešeno 2026-09-07
 
 Odborná metodická konzultace potvrdila, že P/LP zařazení v ENIGMA ST7 v1.2 lze
 považovat za splnění klasifikačního požadavku reference pro proteinové PS1.
@@ -53,7 +39,7 @@ normalizované missense substituci z jiné nukleotidové změny, SpliceAI nejvý
 podmínek. Původní otázka a rozhodnutí jsou popsány v
 [`ps1_reference_validation_request.md`](ps1_reference_validation_request.md).
 
-## 6. Nekvantifikovaná RNA evidence
+## 5. Nekvantifikovaná RNA evidence
 
 Nekvantifikované výsledky ST2 nyní správně vedou do předvyplněné manuální
 revize a samy nepřidávají PVS1 RNA. Další automatizace by vyžadovala
@@ -61,7 +47,7 @@ strukturovaný zdroj, který výslovně zachytí konsenzuální kurátorské za�
 větve Appendix E Table 9 a výslednou sílu. Bez takového zdroje zůstává tato část
 manuální.
 
-## 7. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
+## 6. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
 
 U 40 variant se síla vypočtená z nezkráceného `combined LR` podle publikovaných
 prahových hodnot ENIGMA VCEP v1.2 liší od štítku `ACMGcode` v UCSC ENIGMA
@@ -108,7 +94,7 @@ Zdroje: [ClinGen ENIGMA BRCA1/2 VCEP v1.2](https://cspec.genome.network/cspec/ui
 [Zanti et al. 2025](https://www.nature.com/articles/s41467-025-59979-6) a
 [UCSC ENIGMA track](https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html).
 
-## 8. Lokální HGVS mapování pro další geny
+## 7. Lokální HGVS mapování pro další geny
 
 Současný referenční balík podporuje lokální převod `c.` na `p.`, ale není
 obecným zdrojem genomových souřadnic. Obsahuje pouze transkriptový alignment pro
@@ -136,7 +122,7 @@ souřadnicový manifest bez změny klasifikačního DAGu.
   bodování. Hranice `+7/-21` a interakce s RNA a funkční evidencí mají úplnou
   regresní matici.
 
-## 9. Současné použití PS3 nebo BS3 a PVS1 RNA, čeká se na VCEP
+## 8. Současné použití PS3 nebo BS3 a PVS1 RNA, čeká se na VCEP
 
 U variant na posledním nukleotidu exonu, například `BRCA1 c.5074G>A/C` nebo
 `BRCA2 c.7976G>A/C`, může Specifications Table 9 uvádět PS3 Strong z assay
@@ -193,7 +179,7 @@ Do předvyplnění se přenášejí také všechny odpovídající publikace a a
 ze Supplementary Table 3. ST3 slouží k dohledání podkladů a sama nepřiděluje
 PVS1 RNA ani jeho sílu.
 
-## 10. Proteinový delins s terminačním kodonem
+## 9. Proteinový delins s terminačním kodonem
 
 V připnutém indelovém snapshotu je 22 coding DNA `delins` variant, jejichž
 normalizovaný proteinový následek je proteinový `delins` obsahující `Ter`,
@@ -208,7 +194,7 @@ zda se proteinový delins s `Ter` má posoudit v PVS1 a PM5 PTC větvi, nebo jak
 in-frame delins ve Figure 1A. ARIANE tyto varianty bez metodického potvrzení
 nepřeklápí do PTC větve. Bod vyžaduje konzultaci s VCEP.
 
-## 11. Strojově ověřitelná verze veřejné služby SpliceAI
+## 10. Strojově ověřitelná verze služby SpliceAI
 
 ARIANE připíná scoring profil, kontroluje GRCh38, `distance=10000`, `mask=0`,
 úplnost všech skórovacích komponent a přesnou verzi referenčního transkriptu.
@@ -217,12 +203,18 @@ verze modelu, anotace ani image digestu. Z odpovědi proto nelze strojově
 prokázat, že provozovatel veřejného endpointu nezměnil interní release při
 zachování stejné URL.
 
-Pro dlouhodobě reprodukovatelný provoz je potřeba buď verze vracená přímo
-providerem, nebo vlastní on-demand služba připnutá na schválený image digest.
-Nejde o předpočítávání variant. Varianta by se stále skórovala až při požadavku.
-Případná změna provideru musí zachovat stejný API kontrakt, projít srovnávacím
-validačním souborem a vytvořit novou verzi scoring profilu. Veřejný a připnutý
-provider se nesmějí používat jako tiché vzájemné fallbacky.
+Technická část byla vyřešena 2026-09-11. ARIANE používá vlastní on-demand službu
+z image připnutého úplným SHA-256 digestem. Varianta se skóruje až při požadavku.
+Instalace nejprve ověří přesný referenční transkript, parametry Appendix J a
+všechna delta, REF a ALT skóre proti verzovanému validačnímu případu. Teprve pak
+přepne ARIANE na lokální endpoint. Změna image vyžaduje novou verzi profilu a
+oddělený prostor runtime cache. Veřejný Broad endpoint není záložní zdroj.
+
+Zůstává licenční otázka před případným zpřístupněním komerčním klinickým
+laboratořím. Wrapper SpliceAI Lookup má licenci MIT. Použitý commit SpliceAI má
+zdrojový kód pod GPLv3 a modelové váhy pod CC BY-NC 4.0. Současný bezplatný
+akademický vývoj a interní hodnocení odpovídají nekomerčnímu účelu. Před použitím
+v placené diagnostické službě je potřeba písemné vyjasnění s Illumina.
 
 Podrobnosti implementace jsou v
 [`implementation_and_data_sources.md`](implementation_and_data_sources.md).

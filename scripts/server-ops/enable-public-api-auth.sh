@@ -33,6 +33,9 @@ if grep -q '^ARIANE_API_KEYS_FILE=' "$ENV_FILE"; then
 else
     printf 'ARIANE_API_KEYS_FILE=%s\n' "$KEY_FILE" >> "$ENV_FILE"
 fi
+if ! grep -q '^ARIANE_UI_SESSION_SECRET=' "$ENV_FILE"; then
+    printf 'ARIANE_UI_SESSION_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$ENV_FILE"
+fi
 chown root:"$ARIANE_USER" "$ENV_FILE"
 chmod 0640 "$ENV_FILE"
 

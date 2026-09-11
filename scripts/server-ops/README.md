@@ -29,6 +29,45 @@ bash health-monitor.sh 30
 
 The application service is `ariane`. Application logs are stored in the systemd journal. Nginx logs are stored under `/var/log/nginx`.
 
+## Local SpliceAI service
+
+ARIANE uses a separate SpliceAI container bound to `127.0.0.1:8081`. Install it
+on an existing server after updating the repository:
+
+```bash
+sudo bash /home/ubuntu/ariane/scripts/server-ops/install-spliceai-service.sh
+```
+
+The script reads the immutable image digest from the active SpliceAI profile. It
+tests the image on a temporary private port before changing `/etc/ariane/ariane.env`.
+The test requires the Appendix J parameters, the BRCA1 and BRCA2 reference
+transcripts and the exact delta, REF and ALT scores in the versioned validation cases. A failed
+validation leaves ARIANE on its previous configuration.
+
+Useful checks:
+
+```bash
+systemctl status ariane-spliceai
+journalctl -u ariane-spliceai -f
+python3 /home/ubuntu/ariane/scripts/validate_spliceai_service.py \
+  --url http://127.0.0.1:8081/spliceai/
+```
+
+The service has no public listener and no server-side database. ARIANE keeps its
+own profile-specific runtime cache. Do not replace the digest with a mutable
+`latest` tag. A new image is promoted by updating the profile and validation
+case together, running the test suite and then running the installer.
+
+`restart-ariane.sh` verifies the running local service against the active profile
+before restarting the application. If a repository update contains a new
+SpliceAI profile, run `install-spliceai-service.sh`. It installs and verifies the
+new image before restarting ARIANE.
+
+The Broad SpliceAI Lookup wrapper is MIT licensed. The pinned SpliceAI commit is
+GPLv3 and its model weights are CC BY-NC 4.0. The current deployment is intended
+for free academic development and evaluation. Confirm the licence scope with
+Illumina before allowing use as part of a paid diagnostic service.
+
 ## Public API keys
 
 Configure the protected registry on an existing server, then create one key
@@ -63,12 +102,19 @@ Registry updates are read on each authenticated request. Disabling a key does
 not require a service restart. The key ID, never the secret, identifies API
 usage in classification statistics.
 
-The same key is required by the legacy `/api/classify/batch` endpoint to prevent
-an authentication bypass. The single `/api/classify` endpoint remains available
-to the public browser interface and is limited to 30 requests per minute per IP
-with a burst of 3. Authenticated routes are also limited to 30 HTTP requests per
-minute for each key with a burst of 3. The browser batch tool and reference API
-client space or sequence requests accordingly.
+The same key is required by the legacy `/api/classify` and
+`/api/classify/batch` endpoints. The browser uses `/ui-api` routes with a signed
+HttpOnly session and never receives a reusable API key. Interactive
+classification is limited to 30 requests per minute per IP with a burst of 3.
+Authenticated routes are limited to 30 HTTP requests per minute for each key
+with a burst of 3. The browser batch tool and reference API client space or
+sequence requests accordingly.
+
+`ARIANE_UI_SESSION_SECRET` signs browser sessions. Installation scripts create
+a random 32-byte secret in `/etc/ariane/ariane.env`. Keep the value outside Git
+and use the same value for every ARIANE worker. ARIANE does not start if this
+value is missing or shorter than 32 bytes. The restart script provisions the
+value on installations created before this setting was introduced.
 
 Structured audit events include the request ID, source IP, endpoint, submitted values, predicted class, class label, total points, and error details. Tokens and request headers are not logged.
 

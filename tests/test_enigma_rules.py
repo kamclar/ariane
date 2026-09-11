@@ -311,7 +311,7 @@ class FrequencyTests(unittest.TestCase):
         self.assertNotIn("BA1", result)
         self.assertIn("BS1_Strong", result)
 
-    def test_tutorial_snvs_keep_coverage_auditable_but_do_not_establish_pm2(self):
+    def test_tutorial_snvs_establish_pm2_from_approved_locus_coverage(self):
         from backend.lookups.coordinates import resolve_variant
 
         for c_notation in ("c.4185G>A", "c.5217T>A"):
@@ -323,12 +323,10 @@ class FrequencyTests(unittest.TestCase):
                 )
                 self.assertEqual(result["datasets"]["v2_1_non_cancer"]["status"], "absent")
                 self.assertEqual(result["datasets"]["v3_1_non_cancer"]["status"], "absent")
-                self.assertFalse(result["pm2_coverage_ok"])
-                self.assertFalse(result["pm2_absence_established"])
-                self.assertEqual(
-                    result["status"], "pm2_coverage_method_unresolved"
-                )
-                self.assertFalse(
+                self.assertTrue(result["pm2_coverage_ok"])
+                self.assertTrue(result["pm2_absence_established"])
+                self.assertEqual(result["status"], "absent_with_coverage")
+                self.assertTrue(
                     result["pm2_coverage_method"]["automatic_assignment_allowed"]
                 )
                 for coverage in result["coverage"]["datasets"].values():
@@ -339,15 +337,33 @@ class FrequencyTests(unittest.TestCase):
                     result["coverage"]["datasets"]["v2_1_non_cancer"]
                     ["classification_compatible"]
                 )
-                self.assertFalse(
+                self.assertTrue(
                     result["coverage"]["datasets"]["v3_1_non_cancer"]
                     ["classification_compatible"]
                 )
                 self.assertEqual(
                     result["coverage"]["datasets"]["v3_1_non_cancer"]
                     ["compatibility_status"],
-                    "unresolved_release_mismatch",
+                    "approved_official_genome_coverage_resource",
                 )
+
+    def test_real_common_brca2_variant_receives_ba1(self):
+        from backend.lookups.coordinates import resolve_variant
+
+        c_notation = "c.7397T>C"
+        coords = resolve_variant("BRCA2", c_notation)
+        self.assertEqual(coords.status, "ok")
+        data = get_gnomad_frequencies(
+            "BRCA2", coords.grch37, coords.grch38, c_notation=c_notation
+        )
+        self.assertEqual(data["founder_exception"]["status"], "not_listed")
+        self.assertGreater(data["max_af"], 0.001)
+
+        criteria = evaluate_frequency_criteria(
+            data, "synonymous", gene="BRCA2", c_notation=c_notation
+        )
+        self.assertEqual(criteria["BA1"]["strength"], "Stand-alone")
+        self.assertEqual(criteria["BA1"]["points"], -99)
 
     def test_pm2_configuration_requires_both_gnomad_versions(self):
         policy = classification_policy_for_gene("BRCA1")
@@ -645,7 +661,7 @@ class FrequencyTests(unittest.TestCase):
             data, "missense", gene="BRCA1", c_notation="c.509G>A"
         )
         self.assertNotIn("BA1", result)
-        self.assertIn("authoritative review", result["_gnomad_info"]["reason"])
+        self.assertIn("unavailable or invalid", result["_gnomad_info"]["reason"])
 
     def test_ba1_bs1_fail_closed_when_provider_omits_founder_evidence(self):
         data = gnomad_data(max_af=0.002, found=True, v2_status="found")
@@ -656,19 +672,19 @@ class FrequencyTests(unittest.TestCase):
         self.assertNotIn("BA1", result)
         self.assertIn("does not contain a founder-exception result", result["_gnomad_info"]["reason"])
 
-    def test_non_exhaustive_founder_snapshot_absence_is_unresolved(self):
+    def test_no_founder_exception_match_does_not_disable_ba1(self):
         lookup = lookup_pathogenic_founder_variant("BRCA1", "c.509G>A")
-        self.assertEqual(lookup["status"], "unresolved")
+        self.assertEqual(lookup["status"], "not_listed")
         self.assertIsNone(lookup["is_pathogenic_founder"])
-        self.assertTrue(lookup["review_required"])
+        self.assertFalse(lookup["exception_match"])
 
         data = gnomad_data(max_af=0.002, found=True, v2_status="found")
         data["founder_exception"] = lookup
         result = evaluate_frequency_criteria(
             data, "missense", gene="BRCA1", c_notation="c.509G>A"
         )
-        self.assertNotIn("BA1", result)
-        self.assertIn("authoritative review", result["_gnomad_info"]["reason"])
+        self.assertIn("BA1", result)
+        self.assertIn("no pathogenic-founder exception match", result["BA1"]["reason"])
 
     def test_legacy_not_found_founder_status_does_not_authorize_ba1(self):
         data = gnomad_data(max_af=0.002, found=True, v2_status="found")
@@ -681,7 +697,7 @@ class FrequencyTests(unittest.TestCase):
             data, "missense", gene="BRCA1", c_notation="c.509G>A"
         )
         self.assertNotIn("BA1", result)
-        self.assertIn("authoritative review", result["_gnomad_info"]["reason"])
+        self.assertIn("unavailable or invalid", result["_gnomad_info"]["reason"])
 
     def test_incompatible_coverage_is_measured_but_not_classification_eligible(self):
         dataset = "gnomad_v3_1_2_genomes_grch38"
@@ -959,9 +975,7 @@ class SpliceTests(unittest.TestCase):
             "NM_007294.4",
         )
 
-    def test_reviewed_intronic_variants_use_local_spliceai_and_apply_pp3(self):
-        from backend.lookups.spliceai import get_spliceai_score
-
+    def test_reviewed_intronic_spliceai_scores_apply_pp3(self):
         expected_scores = {
             "c.548-9A>G": 0.86,
             # ENIGMA Table 9 and the Appendix J raw-delta profile both use
@@ -970,14 +984,12 @@ class SpliceTests(unittest.TestCase):
         }
         for c_notation, expected_score in expected_scores.items():
             with self.subTest(c_notation=c_notation):
-                score = get_spliceai_score("BRCA1", c_notation)
-                self.assertEqual(score, expected_score)
                 result = evaluate_variant(
                     gene="BRCA1",
                     variant_type=infer_variant_type(c_notation, ""),
                     p_notation="",
                     c_notation=c_notation,
-                    spliceai_score=score,
+                    spliceai_score=expected_score,
                 )
                 self.assertEqual(result["criteria"]["PP3"]["strength"], "Supporting")
                 self.assertEqual(result["criteria"]["PP3"]["points"], 1)

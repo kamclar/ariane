@@ -136,7 +136,8 @@ Classification follows this order (higher level overrides lower):
 - ENIGMA VCEP v1.2 (2024-11-18): Table 4, Table 9
 - gnomAD v2.1.1 exomes non-cancer
 - gnomAD v3.1.2 genomes non-cancer
-- SpliceAI: Broad API (spliceai-38-xwkwwwxdwq-uc.a.run.app)
+- SpliceAI: local Broad-compatible service using the digest-pinned image from
+  `data/spliceai/enigma_v1_2_spliceai_profile.json`
 - BayesDel: myvariant.info
 - ClinVar: NCBI eutils
 
@@ -264,11 +265,16 @@ responses, limits and a reference client.
 
 The classification routes under `/api/v1` require an individual API key.
 Only its SHA-256 digest is stored on the server. The public capabilities route
-does not require a key. Browser-facing compatibility routes remain protected
-by the deployment request limit because the public web interface cannot hold
-a secret credential. The interactive classification route permits 30 requests
-per minute per client IP with a burst of 3. The legacy batch route requires an
-API key.
+does not require a key. Unversioned `/api` classification and data routes also
+require a key. The browser uses separate `/ui-api` routes with a short-lived,
+server-signed HttpOnly session established when the page loads. No reusable API
+key is present in the HTML or JavaScript. Interactive classification permits 30
+requests per minute per client IP with a burst of 3.
+
+Local development also requires a session signing secret before starting
+Uvicorn. Use a development-only value of at least 32 bytes, for example
+`ARIANE_UI_SESSION_SECRET=local-development-secret-change-me`. Server
+installation scripts generate a cryptographically random value instead.
 
 `POST /api/v1/classify/batch` accepts at most 10 items and preserves their input
 order. Five items are recommended for uncached work. Each item is validated

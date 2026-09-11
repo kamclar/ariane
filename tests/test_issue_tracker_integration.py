@@ -8,7 +8,9 @@ def test_resources_expose_configured_issue_tracker_context(monkeypatch):
     monkeypatch.setenv("ARIANE_ISSUE_TRACKER_URL", "https://bugs.example.org/bug_report_page.php")
     monkeypatch.setenv("ARIANE_BUILD_REVISION", "abc1234")
 
-    response = TestClient(app).get("/api/resources")
+    client = TestClient(app)
+    assert client.get("/").status_code == 200
+    response = client.get("/ui-api/resources")
 
     assert response.status_code == 200
     payload = response.json()
@@ -21,7 +23,9 @@ def test_resources_hide_unconfigured_issue_tracker(monkeypatch):
     monkeypatch.delenv("ARIANE_ISSUE_TRACKER_URL", raising=False)
     monkeypatch.delenv("ARIANE_BUILD_REVISION", raising=False)
 
-    payload = TestClient(app).get("/api/resources").json()
+    client = TestClient(app)
+    assert client.get("/").status_code == 200
+    payload = client.get("/ui-api/resources").json()
 
     assert payload["build_revision"] == ""
     assert payload["issue_tracker_url"] == ""

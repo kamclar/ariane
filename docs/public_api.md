@@ -169,15 +169,17 @@ birth, sample identifiers or clinical notes.
 
 ## Legacy endpoints
 
-The unversioned `/api/classify` route remains available for the public web
-interface. It has a separate limit of 30 requests per minute per client IP with
-a burst of 3. The browser batch tool sends one request at a time with at least
-2.1 seconds between starts.
+The unversioned `/api/classify` and `/api/classify/batch` routes require the
+same API key as v1, so they cannot bypass authentication. They remain only for
+compatibility and do not have the documented v1 response contract. External
+integrations must use `/api/v1`.
 
-The unversioned `/api/classify/batch` route requires the same API key as v1, so
-it cannot bypass authentication. It remains only for compatibility and does
-not have the documented v1 response contract. External integrations must use
-`/api/v1`.
+The web application does not contain an API key. It uses internal `/ui-api`
+routes with a short-lived, server-signed HttpOnly session created when the main
+page loads. Mutating requests must also carry the browser's matching Origin
+header. These routes are intended only for the same-origin browser and are
+limited separately by client IP. Obtaining a browser session is not user
+authentication, so request limits remain necessary.
 
 ## Python example
 

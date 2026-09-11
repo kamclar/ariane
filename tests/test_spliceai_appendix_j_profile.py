@@ -28,7 +28,10 @@ def complete_entry():
 
 class SpliceAIAppendixJProfileTests(unittest.TestCase):
     def test_profile_is_fixed_to_appendix_j(self):
-        self.assertEqual(SPLICEAI_PROFILE_ID, "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v1")
+        self.assertEqual(
+            SPLICEAI_PROFILE_ID,
+            "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2",
+        )
         self.assertEqual(spliceai.SPLICEAI_MAX_DISTANCE, 10000)
         self.assertEqual(spliceai.SPLICEAI_MASK, 0)
         self.assertEqual(spliceai.SPLICEAI_LOW_THRESHOLD, 0.1)

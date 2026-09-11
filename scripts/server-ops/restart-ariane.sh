@@ -7,6 +7,7 @@ set -euo pipefail
 ARIANE_PORT="${ARIANE_PORT:-8000}"
 ARIANE_HOME="${ARIANE_HOME:-/home/ubuntu/ariane}"
 ARIANE_USER="${ARIANE_USER:-ubuntu}"
+ARIANE_ENV_FILE="${ARIANE_ENV_FILE:-/etc/ariane/ariane.env}"
 
 if [ "$EUID" -ne 0 ]; then
     echo "Run this script as root" >&2
@@ -24,6 +25,28 @@ fi
 if ! command -v pg_config > /dev/null 2>&1; then
     echo "Missing pg_config required to install the pinned hgvs dependency." >&2
     echo "Install it with: apt-get update && apt-get install -y libpq-dev python3-dev build-essential" >&2
+    exit 1
+fi
+if [ ! -f "$ARIANE_ENV_FILE" ]; then
+    echo "ARIANE environment file is missing: $ARIANE_ENV_FILE" >&2
+    exit 1
+fi
+if ! grep -q '^ARIANE_UI_SESSION_SECRET=' "$ARIANE_ENV_FILE"; then
+    printf 'ARIANE_UI_SESSION_SECRET=%s\n' "$(openssl rand -hex 32)" >> "$ARIANE_ENV_FILE"
+    chown root:"$ARIANE_USER" "$ARIANE_ENV_FILE"
+    chmod 0640 "$ARIANE_ENV_FILE"
+    echo "Created the ARIANE browser-session signing secret"
+fi
+if ! systemctl is-active --quiet ariane-spliceai.service; then
+    echo "ARIANE local SpliceAI service is not running" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
+    exit 1
+fi
+if ! python3 "$ARIANE_HOME/scripts/validate_spliceai_service.py" \
+    --url http://127.0.0.1:8081/spliceai/ \
+    --timeout 180; then
+    echo "The running SpliceAI service does not match the active ARIANE profile" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
     exit 1
 fi
 

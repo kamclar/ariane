@@ -198,7 +198,9 @@ class SpliceAITranscriptPolicyTests(unittest.TestCase):
             spliceai.urllib.request,
             "urlopen",
             side_effect=[TimeoutError("temporary timeout"), response],
-        ) as mocked, patch.object(spliceai.time, "sleep"):
+        ) as mocked, patch.object(spliceai.time, "sleep"), patch.object(
+            spliceai, "SPLICEAI_API_ATTEMPTS", 2
+        ):
             result = spliceai._query_spliceai_api("BRCA1", "17", 1, "A", "G")
 
         self.assertEqual(result["score"], 0.23)

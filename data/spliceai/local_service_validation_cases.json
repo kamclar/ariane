@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-11",
+  "source": "Broad Institute SpliceAI Lookup GRCh38 API",
+  "profile_id": "enigma-brca-v1.2-appendix-j-spliceai-raw-10kb-v2",
+  "cases": [
+    {
+      "id": "BRCA1_c.4185G>A",
+      "variant": "chr17-43090944-C-T",
+      "gene": "BRCA1",
+      "transcript": "ENST00000357654.9",
+      "refseq": "NM_007294.4",
+      "delta_scores": {
+        "DS_AG": 0.000,
+        "DS_AL": 0.877,
+        "DS_DG": 0.007,
+        "DS_DL": 0.930
+      },
+      "reference_scores": {
+        "DS_AG_REF": 0.003,
+        "DS_AL_REF": 0.981,
+        "DS_DG_REF": 0.001,
+        "DS_DL_REF": 0.987
+      },
+      "alternate_scores": {
+        "DS_AG_ALT": 0.003,
+        "DS_AL_ALT": 0.104,
+        "DS_DG_ALT": 0.008,
+        "DS_DL_ALT": 0.058
+      }
+    },
+    {
+      "id": "BRCA2_c.7805+9T>G",
+      "variant": "chr13-32357938-T-G",
+      "gene": "BRCA2",
+      "transcript": "ENST00000380152.8",
+      "refseq": "NM_000059.4",
+      "delta_scores": {
+        "DS_AG": 0.030,
+        "DS_AL": 0.016,
+        "DS_DG": 0.206,
+        "DS_DL": 0.049
+      },
+      "reference_scores": {
+        "DS_AG_REF": 0.274,
+        "DS_AL_REF": 0.065,
+        "DS_DG_REF": 0.434,
+        "DS_DL_REF": 0.977
+      },
+      "alternate_scores": {
+        "DS_AG_ALT": 0.304,
+        "DS_AL_ALT": 0.049,
+        "DS_DG_ALT": 0.640,
+        "DS_DL_ALT": 0.927
+      }
+    }
+  ]
+}

@@ -101,7 +101,7 @@
                 assembly: this.assembly || null,
                 dup_type: this.dup_type,
             };
-            namespace.api.request("/api/audit/client-validation", {
+            namespace.api.request("/ui-api/audit/client-validation", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 keepalive: true,
@@ -122,6 +122,9 @@
                 if (messages.length > 0) return messages.join("; ");
             }
             if (typeof detail === "string" && detail.trim()) return detail;
+            if (detail && typeof detail.message === "string" && detail.message.trim()) {
+                return detail.message;
+            }
             if ([502, 503, 504].includes(status)) {
                 return "The classification service did not finish because an upstream data source or the server timed out. The input was not rejected as invalid. Please retry; if the problem persists, report the time and variant to the administrator.";
             }
@@ -174,7 +177,7 @@
             }, 1500);
 
             try {
-                const resp = await namespace.api.request("/api/classify", {
+                const resp = await namespace.api.request("/ui-api/classify", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -212,4 +215,3 @@
         // â”€â”€ Batch: parse CSV text whenever batchText changes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     };
 })(window.ArianeFrontend = window.ArianeFrontend || {});
-

@@ -94,29 +94,38 @@ chmod 0640 /etc/ariane/api-keys.json
 if ! grep -q '^ARIANE_API_KEYS_FILE=' /etc/ariane/ariane.env; then
     printf 'ARIANE_API_KEYS_FILE=/etc/ariane/api-keys.json\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^ARIANE_UI_SESSION_SECRET=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_UI_SESSION_SECRET=%s\n' "$(openssl rand -hex 32)" >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
     printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^SPLICEAI_API_URL=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_URL=http://127.0.0.1:8081/spliceai/\n' >> /etc/ariane/ariane.env
+fi
+if ! grep -q '^SPLICEAI_API_SOURCE=' /etc/ariane/ariane.env; then
+    printf 'SPLICEAI_API_SOURCE=ARIANE local SpliceAI service\n' >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^SPLICEAI_API_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_TIMEOUT=20\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_TIMEOUT=120\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_LOOKUP_TIMEOUT=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_LOOKUP_TIMEOUT=55\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_LOOKUP_TIMEOUT=135\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_ATTEMPTS=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_ATTEMPTS=2\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_ATTEMPTS=1\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_RETRY_DELAY=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_RETRY_DELAY=2\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_RETRY_DELAY=0\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_MAX_CONCURRENT=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_API_MAX_CONCURRENT=2\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_RATE_SLEEP=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_RATE_SLEEP=1.5\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_RATE_SLEEP=0\n' >> /etc/ariane/ariane.env
 fi
 chown root:"$ARIANE_USER" /etc/ariane/ariane.env
 chmod 0640 /etc/ariane/ariane.env
@@ -172,6 +181,11 @@ echo -e "${GREEN}OK Service enabled${NC}"
 
 # 7. Start service
 echo -e "\n${YELLOW}[5] Starting ARIANE service...${NC}"
+if ! systemctl is-active --quiet ariane-spliceai.service; then
+    echo -e "${RED}Error: ARIANE local SpliceAI service is not running.${NC}" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
+    exit 1
+fi
 systemctl start ariane
 sleep 2
 

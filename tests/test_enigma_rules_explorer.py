@@ -275,9 +275,9 @@ def test_frontend_contains_complete_tables_page_and_expandable_decision_path():
     assert "Official ENIGMA figure redrawn" in html
     assert "ARIANE decision path derived from ENIGMA rules" in html
     assert "selectRuleTree(selectedRuleTreeId)" in html
-    assert "/api/rules/trees/${encodeURIComponent(selectedId)}" in javascript
-    assert "/api/rules/tables/table9" in javascript
-    assert "/api/rules/tables/${encodeURIComponent(this.selectedReferenceTableId)}" in javascript
+    assert "/ui-api/rules/trees/${encodeURIComponent(selectedId)}" in javascript
+    assert "/ui-api/rules/tables/table9" in javascript
+    assert "/ui-api/rules/tables/${encodeURIComponent(this.selectedReferenceTableId)}" in javascript
     assert "decisionTreeSvg(branch, path = null)" in javascript
     assert "const observedAnnotations = Object.fromEntries" in javascript
     assert "this.wrapGraphText(value, maximumCharacters)" in javascript
@@ -445,14 +445,15 @@ def test_rules_http_api_uses_the_validated_catalog():
     from backend.main import app
 
     client = TestClient(app)
-    catalog = client.get("/api/rules")
-    tree = client.get("/api/rules/trees/figure-1a")
+    assert client.get("/").status_code == 200
+    catalog = client.get("/ui-api/rules")
+    tree = client.get("/ui-api/rules/trees/figure-1a")
     table = client.get(
-        "/api/rules/tables/table9",
+        "/ui-api/rules/tables/table9",
         params={"gene": "BRCA1", "query": "c.509G>A", "page_size": 5},
     )
     supplementary_table = client.get(
-        "/api/rules/tables/supplementary-table-7",
+        "/ui-api/rules/tables/supplementary-table-7",
         params={"query": "c.1001C>A", "page_size": 5},
     )
 
@@ -463,11 +464,11 @@ def test_rules_http_api_uses_the_validated_catalog():
     assert table.json()["items"][0]["c_notation"] == "c.509G>A"
     assert supplementary_table.status_code == 200
     assert supplementary_table.json()["items"][0]["source_row"] == 5
-    assert client.get("/api/rules/trees/not-a-tree").status_code == 404
-    assert client.get("/api/rules/tables/not-a-table").status_code == 404
-    assert client.get("/api/rules/tables/table9", params={"page_size": 101}).status_code == 422
+    assert client.get("/ui-api/rules/trees/not-a-tree").status_code == 404
+    assert client.get("/ui-api/rules/tables/not-a-table").status_code == 404
+    assert client.get("/ui-api/rules/tables/table9", params={"page_size": 101}).status_code == 422
 
     for tree_summary in catalog.json()["decision_trees"]:
-        response = client.get(f"/api/rules/trees/{tree_summary['id']}")
+        response = client.get(f"/ui-api/rules/trees/{tree_summary['id']}")
         assert response.status_code == 200
         assert response.json()["diagram_provenance"] in {"official_redraw", "ariane_derived"}

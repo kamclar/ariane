@@ -49,7 +49,7 @@
             this.rulesLoading = true;
             this.rulesError = "";
             try {
-                const catalogResponse = await namespace.api.request("/api/rules");
+                const catalogResponse = await namespace.api.request("/ui-api/rules");
                 if (!catalogResponse.ok) throw new Error(`HTTP ${catalogResponse.status}`);
                 this.rulesCatalog = await catalogResponse.json();
                 await this.selectRuleTree(requestedTreeId, selectedPath?.branch_id || null);
@@ -66,7 +66,7 @@
             const selectedId = available ? treeId : "figure-1a";
             this.selectedRuleTreeId = selectedId;
             if (!this.rulesTreeCache[selectedId]) {
-                const response = await namespace.api.request(`/api/rules/trees/${encodeURIComponent(selectedId)}`);
+                const response = await namespace.api.request(`/ui-api/rules/trees/${encodeURIComponent(selectedId)}`);
                 if (!response.ok) throw new Error(`Decision tree HTTP ${response.status}`);
                 this.rulesTreeCache[selectedId] = await response.json();
             }
@@ -190,7 +190,7 @@
             if (this.referenceTableQuery.trim()) params.set("query", this.referenceTableQuery.trim());
             try {
                 const response = await namespace.api.request(
-                    `/api/rules/tables/${encodeURIComponent(this.selectedReferenceTableId)}?${params.toString()}`
+                    `/ui-api/rules/tables/${encodeURIComponent(this.selectedReferenceTableId)}?${params.toString()}`
                 );
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const payload = await response.json();
@@ -235,7 +235,7 @@
             if (this.table9Gene) params.set("gene", this.table9Gene);
             if (this.table9Query.trim()) params.set("query", this.table9Query.trim());
             if (this.table9Code) params.set("code", this.table9Code);
-            const response = await namespace.api.request(`/api/rules/tables/table9?${params.toString()}`);
+            const response = await namespace.api.request(`/ui-api/rules/tables/table9?${params.toString()}`);
             if (!response.ok) throw new Error(`Table 9 HTTP ${response.status}`);
             const payload = await response.json();
             this.table9Items = payload.items || [];
@@ -288,4 +288,3 @@
         },
     };
 })(window.ArianeFrontend = window.ArianeFrontend || {});
-

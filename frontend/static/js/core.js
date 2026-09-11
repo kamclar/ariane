@@ -21,7 +21,7 @@
         async init() {
             this.resetManualItems();
             try {
-                const response = await namespace.api.request("/api/resources");
+                const response = await namespace.api.request("/ui-api/resources");
                 if (response.ok) {
                     const resources = await response.json();
                     this.setAppVersion(resources.version);
@@ -107,7 +107,7 @@
 
         async loadManualDefinitions() {
             if (!this.gene) return;
-            const response = await namespace.api.request(`/api/resources?gene=${encodeURIComponent(this.gene)}`);
+            const response = await namespace.api.request(`/ui-api/resources?gene=${encodeURIComponent(this.gene)}`);
             if (!response.ok) throw new Error(`Manual evidence resources HTTP ${response.status}`);
             const resources = await response.json();
             this.setAppVersion(resources.version);

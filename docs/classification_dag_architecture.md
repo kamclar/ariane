@@ -42,11 +42,11 @@ Populační provider používá aplikačně vlastněný `PopulationFrequencyServ
 snapshot. Lookup z něj vytvoří gnomAD evidence včetně výsledku kontroly founder
 výjimky. Teprve čistý uzel `rule.population_frequency` z předané evidence
 vyhodnotí BA1, BS1 a PM2. Pravidlový uzel neotevírá soubory a nevolá founder
-registr. Chybějící výsledek founder kontroly vede k nedostupnému BA1/BS1, nikoli
-k předpokladu, že varianta founder výjimkou není.
-Stejně se zachází s nenalezením v neúplném registru. Takový výsledek má stav
-`unresolved`. Kód BA1 nebo BS1 může pokračovat pouze po pozitivním founder nálezu,
-který kritérium vyloučí, nebo po doloženém stavu `reviewed_not_found`.
+registr. Pozitivní shoda `pathogenic_founder` BA1 a BS1 vyloučí. Stav
+`not_listed` pouze zaznamenává, že ve verzovaném screeningu nebyla nalezena
+známá výjimka, a dovolí pokračovat v hodnocení frekvence. Není to obecné
+tvrzení o founder statusu varianty. Nedostupný nebo nevalidní founder snapshot
+BA1 a BS1 zablokuje.
 
 Coverage evidence odděluje naměřenou hloubku od klasifikační kompatibility
 zdroje. Numericky dostatečné pokrytí z nekompatibilního release zůstává v auditu,
@@ -313,15 +313,18 @@ vytvářejí strukturovanou `decision_path`. Ta obsahuje navštívené uzly, vý
 každého testu, pozorovanou hodnotu, výsledný uzel a oficiální zdroj. Nejde o
 pozdější rekonstrukci z textového důvodu.
 
-Veřejné endpointy jsou:
+Interní endpointy webového rozhraní jsou:
 
-- `/api/rules` pro verze, zdroje a seznam dostupných pravidel;
-- `/api/rules/trees/{tree_id}` pro každý validovaný oficiální nebo odvozený
+- `/ui-api/rules` pro verze, zdroje a seznam dostupných pravidel;
+- `/ui-api/rules/trees/{tree_id}` pro každý validovaný oficiální nebo odvozený
   diagram;
-- `/api/rules/tables/table9` pro filtrovaný a stránkovaný veřejný pohled na
+- `/ui-api/rules/tables/table9` pro filtrovaný a stránkovaný pohled na
   runtime Table 9;
-- `/api/rules/tables/{table_id}` pro stránkovaný a filtrovaný pohled na všech
+- `/ui-api/rules/tables/{table_id}` pro stránkovaný a filtrovaný pohled na všech
   42 Specification, Appendix a Supplementary Tables.
+
+Tyto cesty vyžadují podepsanou relaci webového rozhraní. Odpovídající cesty
+pod `/api` vyžadují individuální API klíč.
 
 API nevydává lokální cesty ani celé zdrojové sešity. Table 9 ve specializovaném
 endpointu používá stejný validovaný JSON jako klasifikátor. Obecný prohlížeč
