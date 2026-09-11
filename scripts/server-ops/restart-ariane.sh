@@ -37,6 +37,12 @@ if ! grep -q '^ARIANE_UI_SESSION_SECRET=' "$ARIANE_ENV_FILE"; then
     chmod 0640 "$ARIANE_ENV_FILE"
     echo "Created the ARIANE browser-session signing secret"
 fi
+if ! grep -q '^ARIANE_API_DAILY_CLASSIFICATION_LIMIT=' "$ARIANE_ENV_FILE"; then
+    printf 'ARIANE_API_DAILY_CLASSIFICATION_LIMIT=5000\n' >> "$ARIANE_ENV_FILE"
+    chown root:"$ARIANE_USER" "$ARIANE_ENV_FILE"
+    chmod 0640 "$ARIANE_ENV_FILE"
+    echo "Configured the public API daily classification limit"
+fi
 if ! systemctl is-active --quiet ariane-spliceai.service; then
     echo "ARIANE local SpliceAI service is not running" >&2
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2

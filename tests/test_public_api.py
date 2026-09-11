@@ -1,7 +1,10 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from backend.models import ClassificationResult, RnaReviewRecommendation
+from backend.classification_runtime import ApiQuotaReservation
 
 
 API_HEADERS = {"X-ARIANE-API-Key": "test-api-key"}
@@ -180,6 +183,9 @@ def test_public_api_capabilities_publish_limits_and_policy():
     assert payload["limits"]["recommended_uncached_batch_items"] == 5
     assert payload["limits"]["per_key_requests_per_minute"] == 30
     assert payload["limits"]["per_key_request_burst"] == 3
+    assert payload["limits"]["per_key_classifications_per_utc_day"] == 5000
+    assert payload["limits"]["concurrent_classifications_per_ip"] == 4
+    assert payload["limits"]["concurrent_classifications_per_key"] == 2
     assert payload["authentication_required"] is True
     assert payload["authentication_header"] == "X-ARIANE-API-Key"
     assert {gene["symbol"] for gene in payload["supported_genes"]} == {
@@ -267,3 +273,82 @@ def test_public_api_fails_closed_when_key_registry_is_missing(
     assert response.status_code == 503
     assert response.json()["error"]["code"] == "api_authentication_unavailable"
     assert response.json()["error"]["retryable"] is False
+
+
+def test_public_api_daily_quota_counts_batch_items(monkeypatch):
+    from backend import main
+
+    class CapturingQuota:
+        calls: list[tuple[str, int, int]] = []
+
+        def reserve_public_api_classifications(self, *, api_key_id, units, limit):
+            self.calls.append((api_key_id, units, limit))
+            return ApiQuotaReservation(
+                allowed=True,
+                limit=limit,
+                used=units,
+                remaining=limit - units,
+                reset_at=datetime(2026, 9, 12, tzinfo=timezone.utc),
+            )
+
+    quota = CapturingQuota()
+    monkeypatch.setattr(main, "PUBLIC_API_QUOTA", quota)
+    response = _client(monkeypatch).post(
+        "/api/v1/classify/batch",
+        json={
+            "variants": [
+                {"gene": "BRCA1", "c_notation": "c.4185G>A"},
+                {"gene": "BRCA1", "c_notation": "not-hgvs"},
+            ]
+        },
+        headers=API_HEADERS,
+    )
+
+    assert response.status_code == 200
+    assert quota.calls == [("test-client", 1, 5000)]
+    assert response.headers["X-RateLimit-Limit"] == "5000"
+    assert response.headers["X-RateLimit-Remaining"] == "4999"
+
+
+def test_public_api_daily_quota_rejects_before_classification(tmp_path, monkeypatch):
+    from backend import main
+    from backend.classification_runtime import ClassificationUsageRepository
+
+    monkeypatch.setattr(
+        main,
+        "PUBLIC_API_QUOTA",
+        ClassificationUsageRepository(tmp_path / "quota.sqlite3"),
+    )
+    monkeypatch.setattr(main, "PUBLIC_API_DAILY_CLASSIFICATION_LIMIT", 1)
+    client = _client(monkeypatch)
+    first = client.post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers=API_HEADERS,
+    )
+    second = client.post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers=API_HEADERS,
+    )
+
+    assert first.status_code == 200
+    assert first.headers["X-RateLimit-Remaining"] == "0"
+    assert second.status_code == 429
+    assert second.json()["error"]["code"] == "daily_classification_quota_exceeded"
+    assert second.json()["error"]["retryable"] is True
+    assert int(second.headers["Retry-After"]) > 0
+
+
+def test_public_api_fails_closed_when_quota_storage_is_unavailable(monkeypatch):
+    from backend import main
+
+    monkeypatch.setattr(main, "PUBLIC_API_QUOTA", None)
+    response = _client(monkeypatch).post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers=API_HEADERS,
+    )
+
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "api_quota_unavailable"

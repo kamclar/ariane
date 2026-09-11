@@ -43,6 +43,8 @@ curl https://ariane-app.duckdns.org/api/v1/capabilities
 The capability response is the authoritative source for current limits. The
 reference deployment currently accepts a maximum of 10 variants per synchronous
 v1 batch. Five variants are recommended when the results may not yet be cached.
+It also reports the daily per-key classification allowance and the concurrent
+classification limits enforced by the reference deployment.
 
 ## Single classification
 
@@ -146,6 +148,21 @@ recommended sustained rate. Authenticated requests are additionally limited to
 30 HTTP requests per minute for each API key with a burst of 3. Clients should
 send batches sequentially and wait for each response.
 
+Each API key may reserve at most 5,000 variant classifications per UTC day. A
+single request consumes one unit and a batch consumes one unit for every submitted
+variant that passes request validation, including an item that later fails evidence
+retrieval. Invalid batch items do not consume classification quota, but remain
+subject to the HTTP request-rate limit. The reservation is made atomically before
+classification starts, so parallel requests and batches cannot exceed the
+allowance. Successful responses include `X-RateLimit-Limit`,
+`X-RateLimit-Remaining` and `X-RateLimit-Reset`. An exhausted allowance returns
+HTTP 429 with `daily_classification_quota_exceeded` and a `Retry-After` header.
+
+The reverse proxy permits at most four concurrent classification requests from
+one IP address and at most two concurrent requests for one API key. These limits
+apply to classification endpoints, not to static files or the health endpoint.
+They bound active work while allowing normal browser page loading.
+
 The proxy returns HTTP 429 when the request rate is exceeded. Respect
 `Retry-After` when present. Use bounded retries only for HTTP 429, 502, 503 and
 504. Do not retry HTTP 422 unchanged.
@@ -180,6 +197,23 @@ page loads. Mutating requests must also carry the browser's matching Origin
 header. These routes are intended only for the same-origin browser and are
 limited separately by client IP. Obtaining a browser session is not user
 authentication, so request limits remain necessary.
+
+There is deliberately no quota keyed only by the short-lived UI session. The
+main page can issue a new anonymous session, so such a quota would be easy to
+reset and would not protect the service. Interactive classification is limited
+by IP address and by the concurrent classification ceiling instead.
+
+For local programmatic testing, create a development key in the default ignored
+runtime-data directory before starting ARIANE:
+
+```powershell
+python scripts/manage_api_keys.py create --id local-development
+$env:ARIANE_API_KEYS_FILE = ".runtime-data/api_keys.json"
+```
+
+The command prints the plaintext key once. The registry contains only its hash.
+Local UI use does not require an API key, but it still requires a configured
+`ARIANE_UI_SESSION_SECRET`.
 
 ## Python example
 

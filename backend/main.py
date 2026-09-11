@@ -29,6 +29,7 @@ from backend.classification_runtime import (
     ClassificationCacheRepository,
     ClassificationUsageRepository,
     classification_fingerprint,
+    public_api_daily_classification_limit,
     resolve_usage_identity,
 )
 
@@ -143,6 +144,8 @@ CLASSIFICATION_ORCHESTRATION = EvidenceOrchestrationService(
 )
 CLASSIFICATION_CACHE: ClassificationCacheRepository | None = None
 CLASSIFICATION_USAGE: ClassificationUsageRepository | None = None
+PUBLIC_API_QUOTA: ClassificationUsageRepository | None = None
+PUBLIC_API_DAILY_CLASSIFICATION_LIMIT = public_api_daily_classification_limit()
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -178,6 +181,7 @@ except Exception:
     )
 try:
     CLASSIFICATION_USAGE = ClassificationUsageRepository()
+    PUBLIC_API_QUOTA = CLASSIFICATION_USAGE
 except Exception:
     logging.getLogger("ariane.classification_usage").exception(
         "Classification usage storage could not be initialized"
@@ -833,6 +837,74 @@ def _record_classification_usage(**values) -> None:
         )
 
 
+def _reserve_public_api_classifications(
+    request: Request,
+    response: Response,
+    units: int,
+) -> None:
+    """Reserve per-key work before classification; browser traffic is separate."""
+    api_key_id = str(getattr(request.state, "api_key_id", "") or "").strip()
+    if not api_key_id:
+        return
+    if PUBLIC_API_QUOTA is None:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "api_quota_unavailable",
+                "message": "Public API quota storage is unavailable",
+                "retryable": True,
+            },
+            headers={"Retry-After": "60"},
+        )
+    try:
+        reservation = PUBLIC_API_QUOTA.reserve_public_api_classifications(
+            api_key_id=api_key_id,
+            units=units,
+            limit=PUBLIC_API_DAILY_CLASSIFICATION_LIMIT,
+        )
+    except Exception as exc:
+        logging.getLogger("ariane.api_quota").exception(
+            "Public API quota reservation failed for key %s", api_key_id
+        )
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "api_quota_unavailable",
+                "message": "Public API quota storage is unavailable",
+                "retryable": True,
+            },
+            headers={"Retry-After": "60"},
+        ) from exc
+    reset_epoch = str(int(reservation.reset_at.timestamp()))
+    quota_headers = {
+        "X-RateLimit-Limit": str(reservation.limit),
+        "X-RateLimit-Remaining": str(reservation.remaining),
+        "X-RateLimit-Reset": reset_epoch,
+    }
+    if not reservation.allowed:
+        retry_after = max(
+            1,
+            int(
+                reservation.reset_at.timestamp()
+                - datetime.now(timezone.utc).timestamp()
+            ),
+        )
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "daily_classification_quota_exceeded",
+                "message": (
+                    "The API key has reached its daily classification quota. "
+                    "The quota resets at 00:00 UTC."
+                ),
+                "retryable": True,
+            },
+            headers={**quota_headers, "Retry-After": str(retry_after)},
+        )
+    for name, value in quota_headers.items():
+        response.headers[name] = value
+
+
 @app.post(
     "/ui-api/normalize",
     dependencies=[Depends(require_ui_session)],
@@ -874,6 +946,7 @@ async def classify_variant(
     request: Request,
     http_response: Response,
 ) -> ClassificationResult:
+    _reserve_public_api_classifications(request, http_response, 1)
     input_data = req.model_dump(mode="json")
     identity = resolve_usage_identity(request)
     identity.set_cookie(http_response)
@@ -1071,6 +1144,13 @@ async def classify_batch(
         else:
             valid_items.append((idx, item))
 
+    if valid_items:
+        _reserve_public_api_classifications(
+            request,
+            http_response,
+            len(valid_items),
+        )
+
     executions = await asyncio.gather(*[
         _one(idx, item) for idx, item in valid_items
     ])
@@ -1129,6 +1209,7 @@ app.include_router(create_public_api_router(
     classify_batch=classify_batch,
     engine=CLASSIFIER_ENGINE_MODE.value,
     batch_concurrency=BATCH_CONCURRENCY,
+    per_key_classifications_per_utc_day=PUBLIC_API_DAILY_CLASSIFICATION_LIMIT,
 ))
 
 

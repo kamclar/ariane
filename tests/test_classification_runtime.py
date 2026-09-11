@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 from pathlib import Path
@@ -268,6 +269,58 @@ def test_usage_events_accept_authenticated_api_key_identity(tmp_path: Path):
             "searches": 1,
         }
     ]
+
+
+def test_public_api_daily_quota_counts_variants_and_resets_by_utc_day(tmp_path: Path):
+    repository = ClassificationUsageRepository(tmp_path / "usage.sqlite3")
+    first_day = datetime(2026, 9, 11, 23, 59, tzinfo=timezone.utc)
+
+    first = repository.reserve_public_api_classifications(
+        api_key_id="external-client-01",
+        units=3,
+        limit=5,
+        now=first_day,
+    )
+    rejected = repository.reserve_public_api_classifications(
+        api_key_id="external-client-01",
+        units=3,
+        limit=5,
+        now=first_day,
+    )
+    next_day = repository.reserve_public_api_classifications(
+        api_key_id="external-client-01",
+        units=3,
+        limit=5,
+        now=first_day + timedelta(minutes=2),
+    )
+
+    assert first.allowed is True
+    assert first.used == 3
+    assert first.remaining == 2
+    assert rejected.allowed is False
+    assert rejected.used == 3
+    assert rejected.remaining == 2
+    assert next_day.allowed is True
+    assert next_day.used == 3
+
+
+def test_public_api_daily_quota_reservation_is_atomic(tmp_path: Path):
+    database = tmp_path / "usage.sqlite3"
+    repository = ClassificationUsageRepository(database)
+    now = datetime(2026, 9, 11, 12, 0, tzinfo=timezone.utc)
+
+    def reserve_once(_: int) -> bool:
+        return repository.reserve_public_api_classifications(
+            api_key_id="parallel-client",
+            units=1,
+            limit=10,
+            now=now,
+        ).allowed
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        decisions = list(executor.map(reserve_once, range(24)))
+
+    assert sum(decisions) == 10
 
 
 def test_usage_database_migrates_actor_type_constraint_for_api_keys(tmp_path: Path):

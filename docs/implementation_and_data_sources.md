@@ -2090,6 +2090,26 @@ Každý klíč má na reverse proxy limit 30 HTTP požadavků za minutu s krátk
 burst limitem 3. Jeden klíč proto nemůže neomezeně násobit paralelní batch
 požadavky.
 
+Backend před zahájením klasifikace atomicky rezervuje denní kvótu pro ID
+ověřeného klíče. Výchozí limit je 5 000 variant za UTC den a lze jej změnit přes
+`ARIANE_API_DAILY_CLASSIFICATION_LIMIT`. Jednotkou je varianta, nikoli HTTP
+požadavek. Batch o deseti variantách proto spotřebuje deset jednotek. Do kvóty
+se započítá i pokus, který následně skončí chybou zdroje. Neplatná položka, která
+neprojde vstupní validací, jednotku nespotřebuje a zůstává omezená HTTP rate
+limitem. Jde o omezení provedené práce, ne o statistiku úspěšných výsledků.
+Rezervace používá samostatnou tabulku
+v perzistentní databázi usage events a probíhá v transakci `BEGIN IMMEDIATE`.
+Souběžné požadavky proto nemohou překročit limit kontrolou stejné staré hodnoty.
+Při nedostupném úložišti programové klasifikační API selže uzavřeně s HTTP 503.
+Vyčerpaný limit vrací HTTP 429, čas resetu a počet zbývajících jednotek.
+
+Reverse proxy současně povoluje nejvýše čtyři probíhající klasifikační požadavky
+z jedné IP adresy a dva pro jeden API klíč. Statické soubory, health endpoint a
+ostatní lehké routy se do tohoto limitu nepočítají. Samostatný limit podle
+krátkodobé UI session se nepoužívá. Novou anonymní session lze získat načtením
+hlavní stránky, takže by takový limit nebyl spolehlivou ochranou. UI chrání
+limit podle IP adresy a limit souběžných klasifikací.
+
 Endpoint `/api/v1/capabilities` zůstává veřejný a zveřejňuje pouze požadovaný
 způsob autentizace. Staré endpointy `/api/classify` a `/api/classify/batch`
 vyžadují stejný API klíč jako verze v1. Webové rozhraní používá oddělené cesty
@@ -2102,6 +2122,8 @@ minutu pro jednu IP adresu s krátkým burst limitem 3. Batch ve webovém rozhra
 používá jednu souběžnou klasifikaci a mezi zahájením požadavků zachovává alespoň
 2,1 sekundy. Produkční podpisový klíč `ARIANE_UI_SESSION_SECRET` je uložen mimo
 Git v `/etc/ariane/ariane.env`.
+Instalační a restartovací skripty existující hodnotu nemění. Její vědomá rotace
+zneplatní dříve vydané cookies a uživatel musí znovu načíst hlavní stránku.
 
 ### 15.2 Graf pro ručně doplněnou evidenci
 

@@ -114,11 +114,28 @@ Authenticated routes are limited to 30 HTTP requests per minute for each key
 with a burst of 3. The browser batch tool and reference API client space or
 sequence requests accordingly.
 
+The backend also reserves one quota unit per submitted variant before starting
+classification. The default allowance is 5,000 classifications per API key and
+UTC day. Configure it with `ARIANE_API_DAILY_CLASSIFICATION_LIMIT`. Batch items
+count separately, so batching cannot bypass the allowance. If quota storage is
+unavailable, public classification fails closed with HTTP 503 while the UI
+remains available.
+
+Nginx permits four concurrent classification requests per IP address and two
+per API key. The connection limits apply only to classification paths. Apply the
+current proxy settings to an existing installation with:
+
+```bash
+sudo bash /home/ubuntu/ariane/scripts/server-ops/update-nginx-api-settings.sh
+```
+
 `ARIANE_UI_SESSION_SECRET` signs browser sessions. Installation scripts create
 a random 32-byte secret in `/etc/ariane/ariane.env`. Keep the value outside Git
 and use the same value for every ARIANE worker. ARIANE does not start if this
 value is missing or shorter than 32 bytes. The restart script provisions the
 value on installations created before this setting was introduced.
+An ordinary restart keeps the existing value. Replacing it invalidates active
+browser cookies, so users must reload the page to obtain a new session.
 
 Structured audit events include the request ID, source IP, endpoint, submitted values, predicted class, class label, total points, and error details. Tokens and request headers are not logged.
 

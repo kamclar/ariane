@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import os
 from pathlib import Path
@@ -15,6 +16,8 @@ from backend.version import ARIANE_VERSION
 
 SCHEMA_VERSION = 2
 DEFAULT_DATABASE_NAME = "classification_usage.sqlite3"
+DEFAULT_PUBLIC_API_DAILY_CLASSIFICATION_LIMIT = 5000
+PUBLIC_API_DAILY_LIMIT_ENVIRONMENT = "ARIANE_API_DAILY_CLASSIFICATION_LIMIT"
 
 
 def _utc_now() -> datetime:
@@ -26,6 +29,34 @@ def _retention_days() -> int:
         return max(1, int(os.getenv("ARIANE_USAGE_RETENTION_DAYS", "365")))
     except ValueError:
         return 365
+
+
+def public_api_daily_classification_limit() -> int:
+    """Return the configured per-key UTC-day classification allowance."""
+    raw_value = os.getenv(
+        PUBLIC_API_DAILY_LIMIT_ENVIRONMENT,
+        str(DEFAULT_PUBLIC_API_DAILY_CLASSIFICATION_LIMIT),
+    ).strip()
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise ValueError(
+            f"{PUBLIC_API_DAILY_LIMIT_ENVIRONMENT} must be a positive integer"
+        ) from exc
+    if value < 1:
+        raise ValueError(
+            f"{PUBLIC_API_DAILY_LIMIT_ENVIRONMENT} must be a positive integer"
+        )
+    return value
+
+
+@dataclass(frozen=True)
+class ApiQuotaReservation:
+    allowed: bool
+    limit: int
+    used: int
+    remaining: int
+    reset_at: datetime
 
 
 class ClassificationUsageRepository:
@@ -132,9 +163,88 @@ class ClassificationUsageRepository:
                     ON classification_usage_events(variant_key, occurred_at DESC);
                 CREATE INDEX IF NOT EXISTS classification_usage_actor_idx
                     ON classification_usage_events(actor_id, occurred_at DESC);
+                CREATE TABLE IF NOT EXISTS public_api_daily_quota (
+                    api_key_id TEXT NOT NULL,
+                    utc_date TEXT NOT NULL,
+                    reserved_classifications INTEGER NOT NULL CHECK (
+                        reserved_classifications >= 0
+                    ),
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY (api_key_id, utc_date)
+                );
                 """
             )
             connection.commit()
+
+    def reserve_public_api_classifications(
+        self,
+        *,
+        api_key_id: str,
+        units: int,
+        limit: int,
+        now: datetime | None = None,
+    ) -> ApiQuotaReservation:
+        """Atomically reserve classification units for one API key and UTC day."""
+        if not api_key_id:
+            raise ValueError("api_key_id is required")
+        if units < 1:
+            raise ValueError("units must be positive")
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        current = now or _utc_now()
+        if current.tzinfo is None:
+            raise ValueError("now must include a timezone")
+        current = current.astimezone(timezone.utc)
+        utc_date = current.date().isoformat()
+        reset_at = datetime.combine(
+            current.date() + timedelta(days=1),
+            datetime.min.time(),
+            tzinfo=timezone.utc,
+        )
+        with self._connection() as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            row = connection.execute(
+                """
+                SELECT reserved_classifications
+                FROM public_api_daily_quota
+                WHERE api_key_id = ? AND utc_date = ?
+                """,
+                (api_key_id, utc_date),
+            ).fetchone()
+            used = int(row["reserved_classifications"] or 0) if row else 0
+            if units > limit - used:
+                connection.rollback()
+                return ApiQuotaReservation(
+                    allowed=False,
+                    limit=limit,
+                    used=used,
+                    remaining=max(0, limit - used),
+                    reset_at=reset_at,
+                )
+            reserved = used + units
+            connection.execute(
+                """
+                INSERT INTO public_api_daily_quota (
+                    api_key_id, utc_date, reserved_classifications, updated_at
+                ) VALUES (?, ?, ?, ?)
+                ON CONFLICT(api_key_id, utc_date) DO UPDATE SET
+                    reserved_classifications = excluded.reserved_classifications,
+                    updated_at = excluded.updated_at
+                """,
+                (api_key_id, utc_date, reserved, current.isoformat()),
+            )
+            connection.execute(
+                "DELETE FROM public_api_daily_quota WHERE utc_date < ?",
+                ((current.date() - timedelta(days=14)).isoformat(),),
+            )
+            connection.commit()
+        return ApiQuotaReservation(
+            allowed=True,
+            limit=limit,
+            used=reserved,
+            remaining=limit - reserved,
+            reset_at=reset_at,
+        )
 
     def record(
         self,

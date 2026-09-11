@@ -128,6 +128,9 @@ class PublicApiLimits(BaseModel):
     request_burst: int
     per_key_requests_per_minute: int
     per_key_request_burst: int
+    per_key_classifications_per_utc_day: int
+    concurrent_classifications_per_ip: int
+    concurrent_classifications_per_key: int
 
 
 class PublicApiGene(BaseModel):
@@ -290,6 +293,9 @@ def create_public_api_router(
     request_burst: int = 20,
     per_key_requests_per_minute: int = 30,
     per_key_request_burst: int = 3,
+    per_key_classifications_per_utc_day: int = 5000,
+    concurrent_classifications_per_ip: int = 4,
+    concurrent_classifications_per_key: int = 2,
 ) -> APIRouter:
     """Create the versioned transport router around shared handlers."""
     router = APIRouter(prefix="/api/v1", tags=["Public API v1"])
@@ -319,6 +325,15 @@ def create_public_api_router(
                 request_burst=request_burst,
                 per_key_requests_per_minute=per_key_requests_per_minute,
                 per_key_request_burst=per_key_request_burst,
+                per_key_classifications_per_utc_day=(
+                    per_key_classifications_per_utc_day
+                ),
+                concurrent_classifications_per_ip=(
+                    concurrent_classifications_per_ip
+                ),
+                concurrent_classifications_per_key=(
+                    concurrent_classifications_per_key
+                ),
             ),
             endpoints=[
                 "/api/v1/capabilities",
@@ -339,6 +354,7 @@ def create_public_api_router(
         responses={
             401: {"model": PublicApiErrorResponse},
             422: {"model": PublicApiErrorResponse},
+            429: {"model": PublicApiErrorResponse},
             503: {"model": PublicApiErrorResponse},
         },
     )
@@ -375,6 +391,7 @@ def create_public_api_router(
         responses={
             401: {"model": PublicApiErrorResponse},
             422: {"model": PublicApiErrorResponse},
+            429: {"model": PublicApiErrorResponse},
             503: {"model": PublicApiErrorResponse},
         },
     )

@@ -126,6 +126,9 @@ fi
 if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
     printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^ARIANE_API_DAILY_CLASSIFICATION_LIMIT=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_API_DAILY_CLASSIFICATION_LIMIT=5000\n' >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
@@ -214,6 +217,16 @@ map $uri $ariane_web_classify_key {
     /ui-api/classify $binary_remote_addr;
 }
 limit_req_zone $ariane_web_classify_key zone=ariane_web_classify:10m rate=30r/m;
+map $uri $ariane_classification_ip_conn_key {
+    default "";
+    ~^/(?:ui-api/classify|api/(?:v1/)?classify(?:/batch)?)$ $binary_remote_addr;
+}
+map $uri $ariane_classification_api_key_conn_key {
+    default "";
+    ~^/api/(?:v1/)?classify(?:/batch)?$ $http_x_ariane_api_key;
+}
+limit_conn_zone $ariane_classification_ip_conn_key zone=ariane_classification_ip_conn:10m;
+limit_conn_zone $ariane_classification_api_key_conn_key zone=ariane_classification_key_conn:10m;
 
 # Reject direct IP access and unknown hostnames.
 server {
@@ -230,6 +243,7 @@ server {
     server_name ARIANE_SERVER_NAME_PLACEHOLDER;
     server_tokens off;
     limit_req_status 429;
+    limit_conn_status 429;
 
     # Limit request size
     client_max_body_size 50M;
@@ -243,6 +257,8 @@ server {
         limit_req zone=ariane_api burst=20 nodelay;
         limit_req zone=ariane_keyed_api burst=3 nodelay;
         limit_req zone=ariane_web_classify burst=3 nodelay;
+        limit_conn ariane_classification_ip_conn 4;
+        limit_conn ariane_classification_key_conn 2;
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

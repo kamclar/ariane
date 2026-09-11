@@ -117,6 +117,26 @@ def test_ui_classification_works_after_loading_page(monkeypatch):
     assert response.json()["predicted_class"] == 3
 
 
+def test_ui_classification_does_not_depend_on_public_api_quota(monkeypatch):
+    from backend import main
+
+    _mock_classification(monkeypatch)
+    monkeypatch.setattr(main, "PUBLIC_API_QUOTA", None)
+    client = TestClient(main.app)
+    assert client.get("/").status_code == 200
+
+    response = client.post(
+        "/ui-api/classify",
+        json={"gene": "BRCA1", "c_notation": "c.4185G>A"},
+        headers={
+            "Origin": "http://testserver",
+            "Sec-Fetch-Site": "same-origin",
+        },
+    )
+
+    assert response.status_code == 200
+
+
 def test_ui_classification_rejects_cross_site_browser_request(monkeypatch):
     from backend import main
 

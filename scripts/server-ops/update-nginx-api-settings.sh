@@ -30,6 +30,9 @@ sed -i 's|/api/classify $binary_remote_addr;|/ui-api/classify $binary_remote_add
 if ! grep -q '^[[:space:]]*limit_req_status 429;' "$NGINX_CONFIG"; then
     sed -i '/^[[:space:]]*server_tokens off;[[:space:]]*$/a\    limit_req_status 429;' "$NGINX_CONFIG"
 fi
+if ! grep -q '^[[:space:]]*limit_conn_status 429;' "$NGINX_CONFIG"; then
+    sed -i '/^[[:space:]]*limit_req_status 429;[[:space:]]*$/a\    limit_conn_status 429;' "$NGINX_CONFIG"
+fi
 
 if ! grep -q 'zone=ariane_web_classify:' "$NGINX_CONFIG"; then
     sed -i '/^limit_req_zone \$binary_remote_addr zone=ariane_api:/a\
@@ -42,17 +45,41 @@ fi
 if ! grep -q 'zone=ariane_keyed_api:' "$NGINX_CONFIG"; then
     sed -i '/^limit_req_zone \$binary_remote_addr zone=ariane_api:/a\limit_req_zone $http_x_ariane_api_key zone=ariane_keyed_api:10m rate=30r/m;' "$NGINX_CONFIG"
 fi
+if ! grep -q 'zone=ariane_classification_ip_conn:' "$NGINX_CONFIG"; then
+    sed -i '/^limit_req_zone \$ariane_web_classify_key zone=ariane_web_classify:/a\
+map $uri $ariane_classification_ip_conn_key {\
+    default "";\
+    ~^/(?:ui-api/classify|api/(?:v1/)?classify(?:/batch)?)$ $binary_remote_addr;\
+}\
+map $uri $ariane_classification_api_key_conn_key {\
+    default "";\
+    ~^/api/(?:v1/)?classify(?:/batch)?$ $http_x_ariane_api_key;\
+}\
+limit_conn_zone $ariane_classification_ip_conn_key zone=ariane_classification_ip_conn:10m;\
+limit_conn_zone $ariane_classification_api_key_conn_key zone=ariane_classification_key_conn:10m;' "$NGINX_CONFIG"
+fi
 if ! grep -q 'limit_req zone=ariane_keyed_api burst=3 nodelay;' "$NGINX_CONFIG"; then
     sed -i '/limit_req zone=ariane_api burst=20 nodelay;/a\        limit_req zone=ariane_keyed_api burst=3 nodelay;' "$NGINX_CONFIG"
 fi
 if ! grep -q 'limit_req zone=ariane_web_classify burst=3 nodelay;' "$NGINX_CONFIG"; then
     sed -i '/limit_req zone=ariane_api burst=20 nodelay;/a\        limit_req zone=ariane_web_classify burst=3 nodelay;' "$NGINX_CONFIG"
 fi
+if ! grep -q 'limit_conn ariane_classification_ip_conn 4;' "$NGINX_CONFIG"; then
+    sed -i '/limit_req zone=ariane_web_classify burst=3 nodelay;/a\        limit_conn ariane_classification_ip_conn 4;' "$NGINX_CONFIG"
+fi
+if ! grep -q 'limit_conn ariane_classification_key_conn 2;' "$NGINX_CONFIG"; then
+    sed -i '/limit_conn ariane_classification_ip_conn 4;/a\        limit_conn ariane_classification_key_conn 2;' "$NGINX_CONFIG"
+fi
 
 sed -i 's/^[[:space:]]*proxy_read_timeout 60s;[[:space:]]*$/    proxy_read_timeout 180s;/' "$NGINX_CONFIG"
 
 if ! grep -q '^[[:space:]]*limit_req_status 429;' "$NGINX_CONFIG"; then
     echo "Could not configure HTTP 429 for rate limiting" >&2
+    restore_config
+    exit 1
+fi
+if ! grep -q '^[[:space:]]*limit_conn_status 429;' "$NGINX_CONFIG"; then
+    echo "Could not configure HTTP 429 for connection limiting" >&2
     restore_config
     exit 1
 fi
@@ -78,6 +105,21 @@ if ! grep -q 'limit_req zone=ariane_keyed_api burst=3 nodelay;' "$NGINX_CONFIG";
 fi
 if ! grep -q 'limit_req zone=ariane_web_classify burst=3 nodelay;' "$NGINX_CONFIG"; then
     echo "Could not apply the interactive classification rate limit" >&2
+    restore_config
+    exit 1
+fi
+if ! grep -q 'zone=ariane_classification_ip_conn:10m;' "$NGINX_CONFIG"; then
+    echo "Could not configure the classification connection zone" >&2
+    restore_config
+    exit 1
+fi
+if ! grep -q 'limit_conn ariane_classification_ip_conn 4;' "$NGINX_CONFIG"; then
+    echo "Could not apply the per-IP classification connection limit" >&2
+    restore_config
+    exit 1
+fi
+if ! grep -q 'limit_conn ariane_classification_key_conn 2;' "$NGINX_CONFIG"; then
+    echo "Could not apply the per-key classification connection limit" >&2
     restore_config
     exit 1
 fi

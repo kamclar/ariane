@@ -100,6 +100,9 @@ fi
 if ! grep -q '^ARIANE_USAGE_RETENTION_DAYS=' /etc/ariane/ariane.env; then
     printf 'ARIANE_USAGE_RETENTION_DAYS=365\n' >> /etc/ariane/ariane.env
 fi
+if ! grep -q '^ARIANE_API_DAILY_CLASSIFICATION_LIMIT=' /etc/ariane/ariane.env; then
+    printf 'ARIANE_API_DAILY_CLASSIFICATION_LIMIT=5000\n' >> /etc/ariane/ariane.env
+fi
 if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
