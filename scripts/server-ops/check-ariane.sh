@@ -98,7 +98,7 @@ fi
 # 7. Port Status
 echo -e "\n${YELLOW}[7] Port Status${NC}"
 if command -v ss &> /dev/null; then
-    ss -tlnp 2>/dev/null | grep -E ":(8000|8081|80|443)" | sed 's/^/   /' || echo "   (no services found on expected ports)"
+    ss -tlnp 2>/dev/null | grep -E ":(8000|8081|8082|80|443)" | sed 's/^/   /' || echo "   (no services found on expected ports)"
 fi
 
 # 8. Last Restart

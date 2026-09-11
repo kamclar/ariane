@@ -6,7 +6,7 @@ set -euo pipefail
 
 ARIANE_HOME="${ARIANE_HOME:-/home/ubuntu/ariane}"
 ARIANE_ENV_FILE="${ARIANE_ENV_FILE:-/etc/ariane/ariane.env}"
-SPLICEAI_PORT="${SPLICEAI_PORT:-8081}"
+SPLICEAI_PORT="${SPLICEAI_PORT:-8082}"
 ARIANE_PORT="${ARIANE_PORT:-8000}"
 PROFILE_FILE="$ARIANE_HOME/data/spliceai/enigma_v1_2_spliceai_profile.json"
 VALIDATOR="$ARIANE_HOME/scripts/validate_spliceai_service.py"
@@ -18,7 +18,7 @@ if [ "$EUID" -ne 0 ]; then
     echo "Run this script as root" >&2
     exit 1
 fi
-for command_name in docker python3 curl systemctl; do
+for command_name in docker python3 curl systemctl ss; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         echo "Required command is missing: $command_name" >&2
         exit 1
@@ -42,6 +42,10 @@ if ! [[ "$VALIDATION_PORT" =~ ^[0-9]+$ ]] || [ "$VALIDATION_PORT" -lt 1024 ] || 
 fi
 if ! [[ "$ARIANE_PORT" =~ ^[0-9]+$ ]] || [ "$ARIANE_PORT" -lt 1024 ] || [ "$ARIANE_PORT" -gt 65535 ]; then
     echo "Invalid ARIANE_PORT: $ARIANE_PORT" >&2
+    exit 1
+fi
+if [ "$SPLICEAI_PORT" = "$ARIANE_PORT" ] || [ "$SPLICEAI_PORT" = "$VALIDATION_PORT" ]; then
+    echo "SpliceAI port conflicts with another ARIANE port: $SPLICEAI_PORT" >&2
     exit 1
 fi
 
@@ -97,6 +101,62 @@ python3 "$VALIDATOR" \
     --timeout 180
 cleanup_validation_container
 
+if ss -H -ltn "sport = :${SPLICEAI_PORT}" | grep -q .; then
+    CURRENT_SPLICEAI_MAPPING=""
+    if systemctl is-active --quiet ariane-spliceai.service; then
+        CURRENT_SPLICEAI_MAPPING="$(docker port ariane-spliceai 8080/tcp 2>/dev/null || true)"
+    fi
+    if [ "$CURRENT_SPLICEAI_MAPPING" != "127.0.0.1:${SPLICEAI_PORT}" ]; then
+        echo "SpliceAI port is already used by another service: 127.0.0.1:${SPLICEAI_PORT}" >&2
+        ss -ltnp "sport = :${SPLICEAI_PORT}" >&2 || true
+        exit 1
+    fi
+fi
+
+SERVICE_BACKUP=""
+SERVICE_FILE_EXISTED=0
+SERVICE_WAS_ACTIVE=0
+SERVICE_WAS_ENABLED=0
+if [ -f "$SERVICE_FILE" ]; then
+    SERVICE_BACKUP="$(mktemp /tmp/ariane-spliceai-service-backup.XXXXXX)"
+    cp "$SERVICE_FILE" "$SERVICE_BACKUP"
+    SERVICE_FILE_EXISTED=1
+fi
+if systemctl is-active --quiet ariane-spliceai.service; then
+    SERVICE_WAS_ACTIVE=1
+fi
+if systemctl is-enabled --quiet ariane-spliceai.service; then
+    SERVICE_WAS_ENABLED=1
+fi
+
+restore_service() {
+    local exit_code="$?"
+    trap - ERR
+    set +e
+    systemctl stop ariane-spliceai.service >/dev/null 2>&1
+    if [ "$SERVICE_FILE_EXISTED" -eq 1 ]; then
+        install -m 0644 -o root -g root "$SERVICE_BACKUP" "$SERVICE_FILE"
+    else
+        systemctl disable ariane-spliceai.service >/dev/null 2>&1
+        rm -f "$SERVICE_FILE"
+    fi
+    systemctl daemon-reload
+    if [ "$SERVICE_WAS_ENABLED" -eq 1 ]; then
+        systemctl enable ariane-spliceai.service >/dev/null 2>&1
+    else
+        systemctl disable ariane-spliceai.service >/dev/null 2>&1
+    fi
+    if [ "$SERVICE_WAS_ACTIVE" -eq 1 ]; then
+        systemctl start ariane-spliceai.service
+    fi
+    systemctl reset-failed ariane-spliceai.service >/dev/null 2>&1
+    if [ -n "$SERVICE_BACKUP" ]; then
+        rm -f "$SERVICE_BACKUP"
+    fi
+    exit "$exit_code"
+}
+trap restore_service ERR
+
 TEMP_SERVICE="$(mktemp /tmp/ariane-spliceai-service.XXXXXX)"
 cat > "$TEMP_SERVICE" <<EOF
 [Unit]
@@ -146,6 +206,11 @@ fi
 python3 "$VALIDATOR" \
     --url "http://127.0.0.1:${SPLICEAI_PORT}/spliceai/" \
     --timeout 180
+
+trap - ERR
+if [ -n "$SERVICE_BACKUP" ]; then
+    rm -f "$SERVICE_BACKUP"
+fi
 
 ENV_BACKUP="$(mktemp /tmp/ariane-env.XXXXXX)"
 cp "$ARIANE_ENV_FILE" "$ENV_BACKUP"

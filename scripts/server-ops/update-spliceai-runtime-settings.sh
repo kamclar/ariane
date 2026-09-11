@@ -7,6 +7,8 @@ set -euo pipefail
 SERVICE_FILE="${ARIANE_SERVICE_FILE:-/etc/systemd/system/ariane.service}"
 ENV_FILE="${ARIANE_ENV_FILE:-/etc/ariane/ariane.env}"
 ARIANE_HOME="${ARIANE_HOME:-/home/ubuntu/ariane}"
+SPLICEAI_PORT="${SPLICEAI_PORT:-8082}"
+SPLICEAI_SERVICE_URL="http://127.0.0.1:${SPLICEAI_PORT}/spliceai/"
 
 if [ "$EUID" -ne 0 ]; then
     echo "Run this script as root" >&2
@@ -26,7 +28,7 @@ if ! systemctl is-active --quiet ariane-spliceai.service; then
     exit 1
 fi
 python3 "$ARIANE_HOME/scripts/validate_spliceai_service.py" \
-    --url http://127.0.0.1:8081/spliceai/ \
+    --url "$SPLICEAI_SERVICE_URL" \
     --timeout 180
 if ! grep -q '^ExecStart=.*uvicorn backend\.main:app.*--workers [0-9][0-9]*' "$SERVICE_FILE"; then
     echo "The expected ARIANE uvicorn command was not found" >&2
@@ -57,7 +59,7 @@ set_value() {
     fi
 }
 
-set_value SPLICEAI_API_URL http://127.0.0.1:8081/spliceai/
+set_value SPLICEAI_API_URL "$SPLICEAI_SERVICE_URL"
 set_value SPLICEAI_API_SOURCE "ARIANE local SpliceAI service"
 set_value SPLICEAI_API_TIMEOUT 120
 set_value SPLICEAI_LOOKUP_TIMEOUT 135

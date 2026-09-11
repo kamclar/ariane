@@ -9,7 +9,7 @@ record also retains the four REF and four ALT component scores.
 ## Runtime mode
 
 ARIANE computes SpliceAI on demand. Runtime uses the profile-pinned result cache
-and then the local Broad-compatible service on `127.0.0.1:8081`. Precomputed coding and intronic
+and then the local Broad-compatible service on `127.0.0.1:8082`. Precomputed coding and intronic
 variant spaces are not classification sources and cannot be activated by an
 environment variable. Existing files remain only as historical validation and
 audit material.
@@ -77,7 +77,7 @@ The installer reads the image from the active profile, pulls that exact digest,
 starts it temporarily on a private port and runs
 `scripts/validate_spliceai_service.py`. It changes the ARIANE environment only
 after the response matches the versioned validation case. The permanent service
-binds only to `127.0.0.1:8081` and does not use the optional server-side database.
+binds only to `127.0.0.1:8082` and does not use the optional server-side database.
 
 An update starts with a candidate digest. It must pass the validation case,
 classification regression suite and a representative BRCA comparison before the

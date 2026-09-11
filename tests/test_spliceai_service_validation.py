@@ -72,7 +72,7 @@ def test_service_validation_uses_versioned_cases_without_network():
     fixture = validator.load_json_object(validator.CASES_PATH)
     payloads = [valid_payload(profile, case) for case in fixture["cases"]]
     with patch.object(validator, "fetch_json", side_effect=payloads) as fetch:
-        result = validator.validate_service("http://127.0.0.1:8081/spliceai/")
+        result = validator.validate_service("http://127.0.0.1:8082/spliceai/")
     assert result["status"] == "ok"
     assert result["profile_id"].endswith("-v2")
     assert "@sha256:" in result["docker_image"]
@@ -96,6 +96,9 @@ def test_local_service_image_and_operational_scripts_are_pinned():
     ).read_text(encoding="utf-8")
     assert "spliceai-38:latest" not in installer
     assert "127.0.0.1:${SPLICEAI_PORT}:8080" in installer
+    assert 'SPLICEAI_PORT="${SPLICEAI_PORT:-8082}"' in installer
+    assert "SpliceAI port is already used by another service" in installer
+    assert "restore_service()" in installer
     assert "DATABASE_ENABLED=0" in installer
     assert "python3 \"$VALIDATOR\"" in installer
     restart = (
@@ -108,18 +111,18 @@ def test_local_service_image_and_operational_scripts_are_pinned():
 def test_local_runtime_health_checks_only_the_configured_private_service():
     connection = patch.object(spliceai.socket, "create_connection")
     with patch.object(
-        spliceai, "SPLICEAI_API_URL", "http://127.0.0.1:8081/spliceai/"
+        spliceai, "SPLICEAI_API_URL", "http://127.0.0.1:8082/spliceai/"
     ), connection as create_connection:
         create_connection.return_value.__enter__.return_value = object()
         health = spliceai.spliceai_runtime_health()
     assert health["status"] == "ok"
     assert health["local"] is True
-    create_connection.assert_called_once_with(("127.0.0.1", 8081), timeout=0.25)
+    create_connection.assert_called_once_with(("127.0.0.1", 8082), timeout=0.25)
 
 
 def test_local_runtime_health_reports_unavailable_service():
     with patch.object(
-        spliceai, "SPLICEAI_API_URL", "http://127.0.0.1:8081/spliceai/"
+        spliceai, "SPLICEAI_API_URL", "http://127.0.0.1:8082/spliceai/"
     ), patch.object(
         spliceai.socket,
         "create_connection",

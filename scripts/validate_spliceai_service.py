@@ -173,7 +173,7 @@ def validate_service(
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default="http://127.0.0.1:8081/spliceai/")
+    parser.add_argument("--url", default="http://127.0.0.1:8082/spliceai/")
     parser.add_argument("--profile", type=Path, default=PROFILE_PATH)
     parser.add_argument("--cases", type=Path, default=CASES_PATH)
     parser.add_argument("--timeout", type=float, default=180.0)

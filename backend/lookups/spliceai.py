@@ -6,7 +6,7 @@
 # results that were returned by the configured service for variants that were
 # actually requested.
 #
-# Default endpoint: http://127.0.0.1:8081/spliceai/
+# Default endpoint: http://127.0.0.1:8082/spliceai/
 # Variant format: chr{chrom}-{pos}-{ref}-{alt}
 # Successful results are kept in the profile-specific runtime cache.
 #
@@ -75,7 +75,7 @@ SPLICEAI_STATUS_CACHE: Dict[str, dict]  = {}   # gene:c_notation -> status detai
 # ARIANE uses its private, digest-pinned service by default. An explicitly
 # configured compatible endpoint is accepted, but it is never used as a
 # fallback after the configured source fails.
-DEFAULT_SPLICEAI_API_URL = "http://127.0.0.1:8081/spliceai/"
+DEFAULT_SPLICEAI_API_URL = "http://127.0.0.1:8082/spliceai/"
 
 
 def _env_float(name: str, default: float) -> float:

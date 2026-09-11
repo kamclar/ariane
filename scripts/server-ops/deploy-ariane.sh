@@ -130,7 +130,7 @@ if ! grep -q '^SPLICEAI_USE_PRECOMPUTED_CACHE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_USE_PRECOMPUTED_CACHE=0\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_URL=' /etc/ariane/ariane.env; then
-    printf 'SPLICEAI_API_URL=http://127.0.0.1:8081/spliceai/\n' >> /etc/ariane/ariane.env
+    printf 'SPLICEAI_API_URL=http://127.0.0.1:8082/spliceai/\n' >> /etc/ariane/ariane.env
 fi
 if ! grep -q '^SPLICEAI_API_SOURCE=' /etc/ariane/ariane.env; then
     printf 'SPLICEAI_API_SOURCE=ARIANE local SpliceAI service\n' >> /etc/ariane/ariane.env

@@ -42,8 +42,14 @@ if ! systemctl is-active --quiet ariane-spliceai.service; then
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2
     exit 1
 fi
+SPLICEAI_SERVICE_URL="$(sed -n 's/^SPLICEAI_API_URL=//p' "$ARIANE_ENV_FILE" | tail -n 1)"
+SPLICEAI_SERVICE_URL="${SPLICEAI_SERVICE_URL:-http://127.0.0.1:8082/spliceai/}"
+if ! [[ "$SPLICEAI_SERVICE_URL" =~ ^http://127\.0\.0\.1:[0-9]+/spliceai/$ ]]; then
+    echo "ARIANE has an invalid private SpliceAI URL: $SPLICEAI_SERVICE_URL" >&2
+    exit 1
+fi
 if ! python3 "$ARIANE_HOME/scripts/validate_spliceai_service.py" \
-    --url http://127.0.0.1:8081/spliceai/ \
+    --url "$SPLICEAI_SERVICE_URL" \
     --timeout 180; then
     echo "The running SpliceAI service does not match the active ARIANE profile" >&2
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-spliceai-service.sh" >&2

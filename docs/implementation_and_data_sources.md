@@ -1570,12 +1570,17 @@ zobrazuje počty hledání, cache hitů, chyb, nejčastější varianty a nejakt
 
 ### 8.3 Výpočet a selhání zdroje
 
-Runtime endpoint je vlastní SpliceAI služba na `127.0.0.1:8081`, spuštěná z
+Runtime endpoint je vlastní SpliceAI služba na `127.0.0.1:8082`, spuštěná z
 image připnutého úplným SHA-256 digestem v profilu. Port není vystaven do veřejné
 sítě. Služba používá `GENE_SET=basic`, nemá připojenou databázi a skóruje varianty
 na požádání. Veřejný Broad endpoint není runtime ani záložní zdroj. Při změně
 modelu, image, anotace nebo referenčního genomu vznikne nový profil a nový prostor
 runtime cache.
+
+Port 8081 na současném serveru používá issue tracker. Instalační skript proto pro
+SpliceAI používá 8082. Jiný privátní port lze zadat pomocí `SPLICEAI_PORT`.
+Instalace skončí před změnou služby, pokud je zvolený port obsazený jiným
+procesem.
 
 `scripts/server-ops/install-spliceai-service.sh` nejprve stáhne přesný digest a
 spustí jej na dočasném lokálním portu. Skript

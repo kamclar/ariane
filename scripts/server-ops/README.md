@@ -31,8 +31,12 @@ The application service is `ariane`. Application logs are stored in the systemd 
 
 ## Local SpliceAI service
 
-ARIANE uses a separate SpliceAI container bound to `127.0.0.1:8081`. Install it
+ARIANE uses a separate SpliceAI container bound to `127.0.0.1:8082`. Install it
 on an existing server after updating the repository:
+
+Port 8081 is used by the ARIANE issue tracker on the current host. The SpliceAI
+port can be changed through `SPLICEAI_PORT`. The installer rejects an occupied
+port before replacing the systemd service.
 
 ```bash
 sudo bash /home/ubuntu/ariane/scripts/server-ops/install-spliceai-service.sh
@@ -50,7 +54,7 @@ Useful checks:
 systemctl status ariane-spliceai
 journalctl -u ariane-spliceai -f
 python3 /home/ubuntu/ariane/scripts/validate_spliceai_service.py \
-  --url http://127.0.0.1:8081/spliceai/
+  --url http://127.0.0.1:8082/spliceai/
 ```
 
 The service has no public listener and no server-side database. ARIANE keeps its
