@@ -1667,6 +1667,11 @@
                     <span class="external-heading-toggle" x-text="open ? '▼' : '▶'"></span>
                 </h3>
                 <div class="external-content" x-show="open" x-transition>
+                    <p class="external-comparison-scope">
+                        Compared variant:
+                        <strong x-text="`${result?.gene || ''} ${result?.c_notation || ''}`.trim()"></strong>.
+                        Any separate reference variant used for PS1 is identified in the PS1 criterion.
+                    </p>
 
                     <!-- ClinVar aggregate -->
                     <div class="external-block">

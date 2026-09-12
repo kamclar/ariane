@@ -334,8 +334,9 @@ class EvidenceOrchestrationService:
                 warnings.append(warning)
         if clinvar.get("status") == "ambiguous":
             warnings.append(
-                "ClinVar lookup was ambiguous; no external ClinVar record was selected. "
-                f"Candidate IDs: {', '.join(clinvar.get('candidate_ids', [])) or 'not reported'}."
+                "ClinVar lookup returned more than one possible record for the assessed "
+                "variant; no external ClinVar record was selected. Candidate IDs are "
+                "retained in the audit data."
             )
         elif clinvar.get("status") not in {"ok", "not_found"}:
             warnings.append("ClinVar comparison is temporarily unavailable.")

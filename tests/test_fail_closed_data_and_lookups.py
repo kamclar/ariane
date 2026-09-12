@@ -698,6 +698,31 @@ class DataHealthTests(unittest.TestCase):
 
 
 class ClinVarAmbiguityTests(unittest.TestCase):
+    def test_spdi_search_is_quoted_so_alternate_alleles_are_not_conflated(self):
+        from backend.lookups import clinvar
+
+        resolved_coordinates = MagicMock(status="ok")
+        search_response = MagicMock()
+        search_response.__enter__.return_value.read.return_value = json.dumps({
+            "esearchresult": {"idlist": ["865165"]}
+        }).encode()
+
+        with patch.object(
+            clinvar, "resolve_variant", return_value=resolved_coordinates
+        ), patch.object(
+            clinvar,
+            "get_grch38",
+            return_value={"chrom": "17", "pos": 43057117, "ref": "C", "alt": "G"},
+        ), patch.object(
+            clinvar.urllib.request, "urlopen", return_value=search_response
+        ) as urlopen:
+            result = clinvar.clinvar_search_variation_id("BRCA1", "c.5212G>C")
+
+        self.assertEqual(result, "865165")
+        requested_url = urlopen.call_args.args[0].full_url
+        self.assertIn("%22NC_000017.11%3A43057116%3AC%3AG%22", requested_url)
+        self.assertIn("%5BAll%20Fields%5D", requested_url)
+
     def test_multiple_nonmatching_hgvs_results_are_ambiguous(self):
         from backend.lookups import clinvar
 

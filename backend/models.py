@@ -144,6 +144,7 @@ class ExternalComparison(BaseModel):
     clinvar_status: str = "not_found"
     clinvar_message: str = ""
     clinvar_error: str = ""
+    clinvar_candidate_ids: List[str] = []
     clinvar_classification: str = ""
     clinvar_review_status: str = ""
     clinvar_review_stars: int = 0

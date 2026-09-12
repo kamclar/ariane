@@ -67,10 +67,15 @@ def clinvar_search_variation_id(gene: str, c_notation: str):
         chrom_acc = {"17": "NC_000017.11", "13": "NC_000013.11"}.get(chrom)
         if chrom_acc:
             spdi = f"{chrom_acc}:{pos}:{ref}:{alt}"
+            # ESearch otherwise tokenizes an unquoted SPDI at punctuation. For
+            # example, C>G and C>A alleles at the same position can both be
+            # returned because the bases are treated as independent terms.
+            # An exact quoted phrase keeps the allele identity intact.
+            spdi_term = f'"{spdi}"[All Fields]'
             url  = (
                 f"{CLINVAR_EUTILS}/esearch.fcgi"
                 f"?db=clinvar&retmode=json"
-                f"&term={urllib.parse.quote(spdi)}"
+                f"&term={urllib.parse.quote(spdi_term)}"
             )
             try:
                 req = urllib.request.Request(url, headers={"User-Agent": "BRCA-ACMG/1.7.0"})
@@ -85,10 +90,11 @@ def clinvar_search_variation_id(gene: str, c_notation: str):
     # ── HGVS fallback - filter by exact c. notation in title ──────────────
     tx = reference_transcript(gene)
     hgvs = f"{tx}:{c_notation}"
+    hgvs_term = f'"{hgvs}"[All Fields]'
     url  = (
         f"{CLINVAR_EUTILS}/esearch.fcgi"
         f"?db=clinvar&retmode=json&retmax=10"
-        f"&term={urllib.parse.quote(hgvs)}"
+        f"&term={urllib.parse.quote(hgvs_term)}"
     )
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "BRCA-ACMG/1.7.0"})

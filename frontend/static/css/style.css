@@ -767,6 +767,15 @@ h3 {
     padding: 1.2rem 1.5rem;
 }
 
+.external-comparison-scope {
+    margin: 0 0 1rem;
+    padding: 0.75rem 0.9rem;
+    border-left: 3px solid var(--color-primary);
+    background: var(--color-primary-light);
+    color: var(--color-text);
+    line-height: 1.45;
+}
+
 .external-source-status {
     color: var(--color-text-muted);
     margin: 0.35rem 0 0.75rem;

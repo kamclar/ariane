@@ -81,7 +81,9 @@ def test_ambiguous_clinvar_candidates_are_reported_without_selecting_one():
     ))
 
     assert result.clinvar_status == "ambiguous"
-    assert "123, 456" in result.clinvar_message
+    assert "assessed variant" in result.clinvar_message
+    assert "123" not in result.clinvar_message
+    assert result.clinvar_candidate_ids == ["123", "456"]
     assert not result.clinvar_classification
 
 

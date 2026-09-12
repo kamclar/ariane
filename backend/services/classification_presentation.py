@@ -63,13 +63,14 @@ def _criterion_models(values: dict, *, applies: bool) -> list[CriterionResult]:
 def _external_status_message(source: str, value: dict) -> str:
     status = str(value.get("status") or "unavailable")
     if status == "ok":
-        return f"{source} returned an exact record."
+        return f"{source} returned an exact record for the assessed variant."
     if status == "not_found":
-        return f"No exact record was found in {source}."
+        return f"No exact record was found in {source} for the assessed variant."
     if status == "ambiguous":
-        candidates = ", ".join(str(item) for item in value.get("candidate_ids", []))
-        suffix = f" Candidate IDs: {candidates}." if candidates else ""
-        return f"{source} returned an ambiguous match; no record was selected.{suffix}"
+        return (
+            f"{source} returned more than one possible record for the assessed "
+            "variant. None was selected. Candidate IDs are retained in the audit data."
+        )
     return f"{source} is unavailable for this request (status: {status})."
 
 
@@ -131,6 +132,9 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
         clinvar_status=str(clinvar.get("status") or "unavailable"),
         clinvar_message=_external_status_message("ClinVar", clinvar),
         clinvar_error=str(clinvar.get("error") or "")[:500],
+        clinvar_candidate_ids=[
+            str(value) for value in clinvar.get("candidate_ids", []) if value
+        ],
         clinvar_classification=aggregate.get("classification", ""),
         clinvar_review_status=review_status,
         clinvar_review_stars=stars,

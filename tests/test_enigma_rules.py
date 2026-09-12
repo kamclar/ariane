@@ -1141,7 +1141,7 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["candidates"][0]["reference_status"], "approved")
         self.assertIn("ENIGMA protein-level PS1 splice conditions", result["reason"])
 
-    def test_current_erepo_likely_pathogenic_reference_scores_ps1_moderate(self):
+    def test_current_erepo_reference_can_score_after_qualifying_runtime_checks(self):
         splice_evidence = evaluate_defined_splice_sources(
             "BRCA2",
             "c.7855T>A",
@@ -1152,7 +1152,7 @@ class SpliceTests(unittest.TestCase):
             c_notation="c.7855T>A",
             p_notation="p.(Trp2619Arg)",
             variant_type="missense",
-            spliceai_score=0.10,
+            spliceai_score=0.09,
             vua_splice_evidence_status=splice_evidence["status"],
             vua_splice_sources_checked=splice_evidence["sources_checked"],
             reference_spliceai_scores={"c.7855T>C": 0.08},
@@ -1166,6 +1166,27 @@ class SpliceTests(unittest.TestCase):
             result["reference_variant"]["classification_basis"],
             "external_vcep_assertion",
         )
+
+    def test_c7855_t_to_a_does_not_score_ps1_with_current_runtime_spliceai(self):
+        splice_evidence = evaluate_defined_splice_sources(
+            "BRCA2",
+            "c.7855T>A",
+            table9_lookup_ps3_bs3("BRCA2", "c.7855T>A"),
+        )
+        result = evaluate_ps1(
+            gene="BRCA2",
+            c_notation="c.7855T>A",
+            p_notation="p.(Trp2619Arg)",
+            variant_type="missense",
+            spliceai_score=0.109,
+            vua_splice_evidence_status=splice_evidence["status"],
+            vua_splice_sources_checked=splice_evidence["sources_checked"],
+            reference_spliceai_scores={"c.7855T>C": 0.08},
+        )
+
+        self.assertFalse(result["applies"])
+        self.assertEqual(result["application_status"], "not_applicable")
+        self.assertIn("0.109 > 0.1", result["reason"])
 
     def test_dna_delins_missense_can_automatically_score_ps1(self):
         variant_type = infer_variant_type(
