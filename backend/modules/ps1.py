@@ -629,7 +629,9 @@ def evaluate_ps1(
             "reason": (
                 f"Same normalized missense change {aa_key} as approved "
                 f"{best['classification']} reference {best['c_notation']} "
-                f"{best['p_notation']} ({best['classification_source']}); both variants "
+                f"{best['p_notation']} from "
+                f"{best.get('candidate_source', 'the curated PS1 reference registry')} "
+                f"(classification source: {best['classification_source']}); both variants "
                 "meet the recorded ENIGMA protein-level PS1 splice conditions "
                 f"(assessed-variant SpliceAI {spliceai_score:.3f}, reference-variant "
                 f"SpliceAI {best_reference_score:.3f}, source {vua_spliceai_source})"

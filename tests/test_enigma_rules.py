@@ -1139,7 +1139,33 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["application_status"], "auto_applied")
         self.assertEqual(result["candidates"][0]["c_notation"], "c.122A>G")
         self.assertEqual(result["candidates"][0]["reference_status"], "approved")
+        self.assertIn("ENIGMA Supplementary Table 7 v1.2", result["reason"])
         self.assertIn("ENIGMA protein-level PS1 splice conditions", result["reason"])
+
+    def test_c5212_g_to_c_uses_the_distinct_st7_pathogenic_reference(self):
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.5212G>C",
+            p_notation="p.(Gly1738Arg)",
+            variant_type="missense",
+            spliceai_score=0.0,
+            vua_splice_evidence_status="normal",
+            vua_splice_sources_checked=[
+                "ENIGMA Specifications Table 9 v1.2",
+                "ENIGMA Supplementary Table 2 v1.2",
+                "ENIGMA Supplementary Table 3 v1.2",
+            ],
+            reference_spliceai_scores={"c.5212G>A": 0.01},
+        )
+
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Strong")
+        self.assertEqual(result["reference_variant"]["c_notation"], "c.5212G>A")
+        self.assertEqual(
+            result["reference_variant"]["classification_basis"],
+            "enigma_st7_v1_2_reference_set",
+        )
+        self.assertIn("ENIGMA Supplementary Table 7 v1.2", result["reason"])
 
     def test_current_erepo_reference_can_score_after_qualifying_runtime_checks(self):
         splice_evidence = evaluate_defined_splice_sources(
