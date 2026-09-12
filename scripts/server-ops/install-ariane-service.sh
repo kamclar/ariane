@@ -205,20 +205,27 @@ fi
 
 # 9. Health check
 echo -e "\n${YELLOW}[7] Running health check...${NC}"
-sleep 2
 if command -v curl &> /dev/null; then
-    for i in {1..5}; do
+    health_ok=0
+    for i in $(seq 1 60); do
         if curl --fail --silent --max-time 5 "http://127.0.0.1:$ARIANE_PORT/api/health" | grep -q '"status":"ok"'; then
             echo -e "${GREEN}OK API is responding${NC}"
+            health_ok=1
             break
         fi
-        if [ $i -lt 5 ]; then
-            echo -e "   Attempt $i/5..."
+        if ! systemctl is-active --quiet ariane; then
+            echo -e "${RED}ERROR ARIANE stopped while waiting for the health endpoint${NC}" >&2
+            break
+        fi
+        if [ "$i" -lt 60 ]; then
+            echo -e "   Waiting for ARIANE startup... $i/60"
             sleep 1
         fi
     done
-    if ! curl --fail --silent --max-time 5 "http://127.0.0.1:$ARIANE_PORT/api/health" | grep -q '"status":"ok"'; then
-        echo "Health check failed" >&2
+    if [ "$health_ok" -ne 1 ]; then
+        echo "ARIANE health check failed after waiting up to 60 seconds" >&2
+        systemctl status ariane --no-pager -l >&2 || true
+        journalctl -u ariane -n 50 --no-pager >&2 || true
         exit 1
     fi
 else

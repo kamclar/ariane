@@ -158,6 +158,18 @@ def test_local_service_image_and_operational_scripts_are_pinned():
     assert "--concurrent-copies 3" in restart
     assert "--workers 1" in restart
     assert "install-ariane-service.sh" in restart
+    assert "$(seq 1 60)" in restart
+    assert "systemctl status ariane --no-pager -l" in restart
+    assert "journalctl -u ariane -n 50 --no-pager" in restart
+
+    for script_name in ("install-ariane-service.sh", "deploy-ariane.sh"):
+        service_script = (
+            PROJECT_ROOT / "scripts" / "server-ops" / script_name
+        ).read_text(encoding="utf-8")
+        assert "$(seq 1 60)" in service_script
+        assert "health_ok=1" in service_script
+        assert "systemctl status ariane --no-pager -l" in service_script
+        assert "journalctl -u ariane -n 50 --no-pager" in service_script
 
     startup_validator = (
         PROJECT_ROOT

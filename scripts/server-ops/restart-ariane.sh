@@ -113,15 +113,20 @@ nginx -t
 systemctl restart ariane
 systemctl reload nginx
 
-for attempt in $(seq 1 15); do
+for attempt in $(seq 1 60); do
     if curl --fail --silent --max-time 5 "http://127.0.0.1:${ARIANE_PORT}/api/health" | grep -q '"status":"ok"'; then
         echo "ARIANE is healthy"
         exit 0
     fi
-    echo "Waiting for ARIANE: $attempt/15"
+    if ! systemctl is-active --quiet ariane; then
+        echo "ARIANE stopped while waiting for the health endpoint" >&2
+        break
+    fi
+    echo "Waiting for ARIANE startup: $attempt/60"
     sleep 1
 done
 
-echo "ARIANE health check failed" >&2
-journalctl -u ariane -n 30 --no-pager >&2
+echo "ARIANE health check failed after waiting up to 60 seconds" >&2
+systemctl status ariane --no-pager -l >&2 || true
+journalctl -u ariane -n 50 --no-pager >&2 || true
 exit 1
