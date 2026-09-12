@@ -217,13 +217,14 @@ arrangement. The default is `Unknown`. Select `Confirmed tandem` only when the
 laboratory data support tandem arrangement; the application never infers it
 from copy number alone.
 
-Case-control, Fanconi anemia, family co-segregation, RNA evidence without an
-exact approved ERepo registry record,
+Case-control, Fanconi anemia, family co-segregation, RNA evidence outside an
+exact approved ERepo assertion or an eligible curated ST2 qualitative branch,
 curated functional evidence outside Table 9, curated initiation-codon PVS1
 evidence, and curated splice PS1 evidence (`PS3`, `PS4`, `PM3`, `PP1`, `BS2`,
 `BS3`, `BS4`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`) are handled in
 manual review. Exact published PVS1 RNA assertions in the versioned local ERepo
-registry can enter the automatic Module 1 result. PP4 and BP5 outside the validated clinical LR
+registry and unambiguous ENIGMA-curated ST2 patient-mRNA records can enter the
+automatic Module 1 result. PP4 and BP5 outside the validated clinical LR
 snapshot can also be reviewed manually. After a variant is classified, the
 user can enter these evidence types in a separate manual-review panel. ARIANE
 derives the permitted strength in the backend from ENIGMA VCEP v1.2 thresholds

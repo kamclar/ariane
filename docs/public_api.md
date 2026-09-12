@@ -134,9 +134,10 @@ a score below a criterion threshold, an absent variant in a successfully
 queried dataset, a filtered gnomAD record, and a policy-defined not-applicable
 branch. Live ClinVar and ClinGen ERepo lookups remain external comparisons, so
 their failure does not invalidate the automatic classification. Automatic
-PVS1 RNA can use only an exact assertion in the versioned, checksum-validated
-local ERepo registry. A live ERepo response is not a fallback classification
-source.
+PVS1 RNA can use an exact assertion in the versioned, checksum-validated local
+ERepo registry or an exact eligible record in the checksum-bound ENIGMA ST2/ST3
+snapshot with an unambiguous Table 4 consequence. A live ERepo response is not
+a fallback classification source.
 
 An unresolved pathogenic-founder check is a declared expert-review state, not
 a provider failure. The automatic result contains no BA1 or BS1 from that

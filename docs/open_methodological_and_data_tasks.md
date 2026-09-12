@@ -39,12 +39,18 @@ normalizované missense substituci z jiné nukleotidové změny, SpliceAI nejvý
 podmínek. Původní otázka a rozhodnutí jsou popsány v
 [`ps1_reference_validation_request.md`](ps1_reference_validation_request.md).
 
-## 5. Nekvantifikovaná RNA evidence, částečně vyřešeno 2026-09-12
+## 5. Nekvantifikovaná RNA evidence, automatizovatelná část vyřešena 2026-09-12
 
-Nekvantifikované výsledky ST2 nyní správně vedou do předvyplněné manuální
-revize a samy nepřidávají PVS1 RNA. Automatická cesta byla doplněna pouze pro
-přesné publikované assertions ClinGen ERepo, které ENIGMA BRCA1/2 VCEP vytvořil
-podle specifikace v1.2 a ve kterých je konečná RNA síla výslovně určena.
+Přesné ST2 řádky v ENIGMA-kurátorované kategorii pacientské mRNA bez alelově
+specifické kvantifikace s aberantním transkriptem odpovídajícím ztrátě funkce
+mohou přidělit PVS1 RNA. Automatická větev navíc vyžaduje propojenou ST3
+referenci a jednoznačné mapování delece celého exonu na Table 4. Síla se odvodí
+z kvalitativní apparent near-complete větve Appendix E. Komplexní a částečné
+transkriptové výsledky zůstávají v předvyplněné manuální revizi bez bodů.
+
+Druhá automatická cesta používá přesné publikované assertions ClinGen ERepo,
+které ENIGMA BRCA1/2 VCEP vytvořil podle specifikace v1.2 a ve kterých je
+konečná RNA síla výslovně určena.
 
 Runtime používá checksumovaný lokální registr, ne živý fallback. První registr
 je záměrně označen jako neúplný. Zbývá zavést pravidelný export nových ERepo
@@ -117,7 +123,8 @@ souřadnicový manifest bez změny klasifikačního DAGu.
 
 - ST7 P/LP je přijatý klasifikační základ proteinové PS1 reference; body se
   přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
-- Nekvantifikovaná ST2 sama nepřiděluje PVS1 RNA.
+- Nekvantifikovaná ST2 přiděluje PVS1 RNA jen v přesné standardizované LoF
+  kategorii s propojeným ST3 zdrojem a jednoznačným Table 4 důsledkem.
 - Rozdílné vícenásobné BayesDel hodnoty se neslučují maximem.
 - Malé indely do 50 bp jsou odděleny od strukturální větve Appendix G.
 - Nenalezení v neúplném founder registru se nepovažuje za negativní výsledek.

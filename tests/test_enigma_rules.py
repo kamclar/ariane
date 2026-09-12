@@ -886,24 +886,23 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(score, 0.0)
         self.assertTrue(any("does not replace" in item for item in warnings))
 
-    def test_unquantified_official_st2_patient_rna_requires_manual_review(self):
+    def test_unquantified_official_st2_patient_rna_uses_curated_qualitative_branch(self):
         tutorial_variant = evaluate_pvs1_rna("BRCA1", "c.4185G>A")
         another_st2_variant = evaluate_pvs1_rna("BRCA1", "c.80+5G>A")
 
-        self.assertFalse(tutorial_variant["applies"])
-        self.assertEqual(tutorial_variant["application_status"], "review_required")
-        self.assertTrue(tutorial_variant["review_required"])
-        self.assertEqual(tutorial_variant["points"], 0)
-        self.assertEqual(tutorial_variant["table4_exon"], "E11(12)")
+        self.assertTrue(tutorial_variant["applies"])
         self.assertEqual(
-            tutorial_variant["manual_review_prefill"]["transcript_accession"],
-            "NM_007294.4",
+            tutorial_variant["application_status"], "applied_from_curated_st2"
         )
-        self.assertNotIn(
-            "curated_strength", tutorial_variant["manual_review_prefill"]
-        )
-        self.assertFalse(another_st2_variant["applies"])
-        self.assertEqual(another_st2_variant["application_status"], "review_required")
+        self.assertFalse(tutorial_variant["review_required"])
+        self.assertEqual(tutorial_variant["strength"], "Strong")
+        self.assertEqual(tutorial_variant["points"], 4)
+        self.assertEqual(tutorial_variant["table4_exon"], "E11(12)")
+        self.assertEqual(len(
+            tutorial_variant["source_record"]["supporting_st3_references"]
+        ), 4)
+        self.assertTrue(another_st2_variant["applies"])
+        self.assertEqual(another_st2_variant["strength"], "Strong")
 
     def test_erepo_rna_candidate_with_wrong_vcep_version_is_not_scored(self):
         candidate = {
@@ -941,7 +940,7 @@ class SpliceTests(unittest.TestCase):
         self.assertFalse(result["applies"])
         self.assertIn("complex or partial", result["reason"])
 
-    def test_all_last_exon_base_rna_records_are_prefilled_without_scoring(self):
+    def test_last_exon_base_rna_records_use_only_unambiguous_curated_paths(self):
         variants = (
             ("BRCA1", "c.4185G>A"),
             ("BRCA1", "c.4484G>C"),
@@ -957,24 +956,32 @@ class SpliceTests(unittest.TestCase):
         for gene, c_notation in variants:
             with self.subTest(gene=gene, c_notation=c_notation):
                 result = evaluate_pvs1_rna(gene, c_notation)
-                self.assertFalse(result["applies"])
-                self.assertEqual(result["points"], 0)
-                self.assertTrue(result["review_required"])
-                self.assertEqual(result["application_status"], "review_required")
                 self.assertEqual(
                     result["source_record"]["position_category"], "last base"
                 )
                 self.assertEqual(
                     result["source_record"]["evidence_mechanism"], "rna_splicing"
                 )
-                self.assertEqual(
-                    result["manual_review_prefill"]["assay_scope"], "mrna_only"
-                )
-                self.assertNotIn(
-                    "curated_strength", result["manual_review_prefill"]
-                )
+                if c_notation == "c.4185G>A":
+                    self.assertTrue(result["applies"])
+                    self.assertEqual(result["strength"], "Strong")
+                    self.assertEqual(result["points"], 4)
+                    self.assertFalse(result["review_required"])
+                else:
+                    self.assertFalse(result["applies"])
+                    self.assertEqual(result["points"], 0)
+                    self.assertTrue(result["review_required"])
+                    self.assertEqual(
+                        result["application_status"], "review_required"
+                    )
+                    self.assertEqual(
+                        result["manual_review_prefill"]["assay_scope"], "mrna_only"
+                    )
+                    self.assertNotIn(
+                        "curated_strength", result["manual_review_prefill"]
+                    )
 
-    def test_c4185_keeps_prediction_and_routes_unquantified_rna_to_review(self):
+    def test_c4185_applies_curated_st2_rna_and_replaces_prediction(self):
         result = evaluate_variant(
             gene="BRCA1",
             variant_type="synonymous",
@@ -993,17 +1000,12 @@ class SpliceTests(unittest.TestCase):
 
         self.assertEqual(
             set(result["criteria"]),
-            {"PP3", "PM2_Supporting", "PP4"},
+            {"PVS1_RNA", "PM2_Supporting", "PP4"},
         )
-        self.assertEqual(result["criteria"]["PP3"]["strength"], "Supporting")
-        self.assertEqual(result["total_points"], 6)
+        self.assertEqual(result["criteria"]["PVS1_RNA"]["strength"], "Strong")
+        self.assertEqual(result["total_points"], 9)
         self.assertEqual(result["predicted_class"], 4)
-        self.assertTrue(result["rna_review"]["recommended"])
-        self.assertEqual(result["rna_review"]["priority"], "high")
-        self.assertEqual(
-            result["rna_review"]["manual_review_prefill"]["transcript_accession"],
-            "NM_007294.4",
-        )
+        self.assertFalse(result["rna_review"]["recommended"])
 
     def test_reviewed_intronic_spliceai_scores_apply_pp3(self):
         expected_scores = {

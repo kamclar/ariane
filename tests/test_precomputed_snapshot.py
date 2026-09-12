@@ -285,7 +285,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             {"31131967", "31853058"},
         )
 
-    def test_c4185_full_path_routes_unquantified_rna_to_review(self):
+    def test_c4185_full_path_applies_curated_st2_rna(self):
         from backend.classification_dag import ClassifierEngineMode
         from backend.main import CLASSIFICATION_ORCHESTRATION, _classify_one
         from backend.services import EvidenceOrchestrationService, ExternalEvidenceDependencies
@@ -352,17 +352,12 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
-        self.assertEqual(set(criteria), {"PP3", "PM2_Supporting", "PP4"})
-        self.assertEqual(criteria["PP3"].strength, "Supporting")
+        self.assertEqual(set(criteria), {"PVS1_RNA", "PM2_Supporting", "PP4"})
+        self.assertEqual(criteria["PVS1_RNA"].strength, "Strong")
         self.assertEqual(criteria["PP4"].strength, "Strong")
-        self.assertEqual(result.total_points, 6)
+        self.assertEqual(result.total_points, 9)
         self.assertEqual(result.predicted_class, 4)
-        self.assertTrue(result.rna_review.recommended)
-        self.assertEqual(result.rna_review.priority, "high")
-        self.assertEqual(
-            result.rna_review.manual_review_prefill["transcript_accession"],
-            "NM_007294.4",
-        )
+        self.assertFalse(result.rna_review.recommended)
 
     def test_pp4_snapshot_missing_metadata_fails_closed(self):
         from backend.modules import pp4_bp5

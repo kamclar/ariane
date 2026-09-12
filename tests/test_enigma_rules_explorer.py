@@ -380,12 +380,15 @@ def test_missing_spliceai_produces_explicit_figure1a_unavailable_warning():
     assert "PP3, BP4, BP1 and BP7 were not applied" in warning
 
 
-def test_unquantified_rna_requires_review_and_functional_evidence_links_to_figure():
+def test_curated_st2_rna_uses_appendix_branch_and_functional_evidence_links_to_figure():
     rna = evaluate_pvs1_rna("BRCA1", "c.4185G>A")
-    assert rna["applies"] is False
-    assert rna["application_status"] == "review_required"
+    assert rna["applies"] is True
+    assert rna["application_status"] == "applied_from_curated_st2"
+    assert rna["strength"] == "Strong"
+    assert rna["points"] == 4
     assert rna["source"].endswith("/data")
-    assert "consensus curator judgement" in rna["reason"]
+    assert rna["decision_path"]["tree_id"] == "figure-1b"
+    assert rna["decision_path"]["outcome_node"] == "rna-other-aberrant"
 
     functional = table9_lookup_ps3_bs3("BRCA1", "c.509G>A")
     result = evaluate_variant(

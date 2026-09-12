@@ -17,6 +17,7 @@ from backend.modules import (
     pp4_bp5,
     ps1,
     ps1_splice_evidence,
+    pvs1_rna,
     residues,
     erepo_pvs1_rna,
 )
@@ -71,6 +72,9 @@ def production_provider_dependencies(
         ),
         ps1_lookup=lambda *args, **kwargs: ps1.evaluate_ps1(*args, **kwargs),
         erepo_pvs1_rna_lookup=lambda *args, **kwargs: erepo_pvs1_rna.lookup_erepo_pvs1_rna(
+            *args, **kwargs
+        ),
+        st2_pvs1_rna_lookup=lambda *args, **kwargs: pvs1_rna.lookup_st2_pvs1_rna_evidence(
             *args, **kwargs
         ),
     )

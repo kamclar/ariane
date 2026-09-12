@@ -39,6 +39,7 @@ from backend.classification_dag.providers import (
     Ps1CandidateEvidenceNode,
     ResidueEvidenceNode,
     SpliceAiEvidenceNode,
+    St2Pvs1RnaEvidenceNode,
     Table9EvidenceNode,
 )
 from backend.classification_dag.provider_wiring import production_provider_dependencies
@@ -204,13 +205,14 @@ def build_provider_graph(
     providers = dependencies or production_provider_dependencies()
     return DagDefinition(
         id="ariane.vcep.classification",
-        version="4.1.0-gene-policy-provider-dag",
+        version="4.2.0-curated-st2-rna-provider-dag",
         seed_keys={"classification_request"},
         nodes=(
             ClassificationRequestContractNode(),
             CoordinateEvidenceNode(providers),
             Table9EvidenceNode(),
             ErepoPvs1RnaEvidenceNode(providers),
+            St2Pvs1RnaEvidenceNode(providers),
             Ps1CandidateEvidenceNode(providers),
             SpliceAiEvidenceNode(providers),
             BayesDelEvidenceNode(providers),

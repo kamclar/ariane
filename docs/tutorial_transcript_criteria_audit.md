@@ -36,30 +36,32 @@ jako produkční klasifikační cesta.
 | BRCA2 delece exonu 10 | PM2 Supporting; PVS1 N/A zobrazeno jako vyloučené | 3 | Třída se shoduje, kritéria ne. PM2 vzniká obecným Appendix G grafem nad Table 4 exony a úplným gnomAD-SV, nikoli variantovým záznamem. Tutorial používá BS3 Moderate, ale delece není v ENIGMA Table 9, proto ARIANE BS3 nepřidělí. |
 | BRCA2 c.6147_6149del | BP1 Strong | 2 | Shoda s tutorialem. BayesDel pro tuto variantu není dostupný a populační kritérium se bez úplných způsobilých podkladů nepřidělí. |
 | BRCA1 c.3891_3893del | BS3 Strong; BP5 Strong | 1 | Třída sedí. Aktuální ENIGMA track uvádí combined LR 0,02896, tedy BP5 Strong. SpliceAI 0,15 vede v aktuální Figure 1A větvi mimo BP1. |
-| BRCA1 c.4185G>A | PM2 Supporting; PP3 Supporting; PP4 Strong | 4 | Přesný ST2 řádek popisuje nekvantifikovanou pacientskou RNA s delecí exonu 12. Podle Appendix E musí kurátor rozhodnout, zda jde o apparent near-complete nebo incomplete splice impact. ARIANE proto PVS1 RNA automaticky nepřidělí a předvyplní odbornou revizi. |
+| BRCA1 c.4185G>A | PVS1 RNA Strong; PM2 Supporting; PP4 Strong | 4 | Přesný ST2 řádek obsahuje ENIGMA-kurátorovanou LoF kategorii, deleci exonu 12 a čtyři propojené ST3 studie. Delece se jednoznačně mapuje na výchozí PVS1 v Table 4, proto kvalitativní větev Appendix E dává PVS1 RNA Strong. PP3 se nezapočítá. Aktuální PP4 Strong místo tutorialového Very Strong ponechává výsledek v Class 4. |
 | BRCA1 c.628C>T | PM2 Supporting | 3 | Table 4 uvádí PVS1 N/A. Nepřítomnost v obou gnomAD datasetech a dostatečná coverage splňují PM2 Supporting. |
 | BRCA2 c.8953+2T>C | PM2 Supporting | 3 | Table 4 uvádí PVS1 N/A a Figure 1A zde PP3 nepoužívá. Nepřítomnost v obou gnomAD datasetech a dostatečná coverage splňují PM2 Supporting. |
 
-## BRCA1 c.4185G>A po odborné RNA revizi
+## BRCA1 c.4185G>A a kurátorovaná RNA evidence
 
-Tutorial u této varianty provedl kurátorské posouzení nekvantifikované RNA a
-použil `PVS1 RNA Strong`. Tento závěr nelze odvodit pouze ze strukturovaného
-záznamu ST2/ST3. Appendix E výslovně požaduje u pacientské mRNA bez
-alelově specifické kvantifikace konsenzuální kurátorské posouzení.
+ST2 tento záznam zařazuje do standardizované kategorie pacientské mRNA bez
+alelově specifické kvantifikace s aberantním transkriptem odpovídajícím ztrátě
+funkce. Záznam uvádí deleci exonu 12 a propojuje čtyři publikované ST3 studie.
+ARIANE tuto oficiální kurátorovanou kategorii používá jako konsenzuální
+posouzení požadované Appendix E, pokud lze RNA důsledek jednoznačně mapovat na
+Table 4. Nejde o výjimku pro tuto variantu.
 
-Pokud hodnotitel přijme stejný závěr jako tutorial a ve formuláři doloží
-`PVS1 RNA Strong`, amended výsledek ARIANE je:
+Automatický výsledek ARIANE je:
 
 - `PVS1 RNA Strong`, 4 body;
 - `PM2 Supporting`, 1 bod;
 - `PP4 Strong`, 4 body;
-- celkem 9 bodů, Class 5, Pathogenic podle kombinace dvou Strong a jednoho
-  Supporting kritéria v Table 3.
+- celkem 9 bodů, Class 4, Likely Pathogenic podle Table 3.
 
-Původní `PP3 Supporting` se odstraní jako slabší predikční evidence stejného
-splice mechanismu. Výsledná třída se shoduje s tutorialem, ale síla klinického
-LR kritéria se liší. Tutorial použil tehdejší `PP4 Very Strong`, zatímco
-současný výstup používá aktuální combined LR pro `PP4 Strong`.
+`PP3 Supporting` se nevytvoří, protože přímá RNA evidence nahrazuje predikční
+větev stejného splice mechanismu. Výsledná třída se od tutorialu liší kvůli
+síle klinického LR kritéria. Tutorial použil tehdejší `PP4 Very Strong`, zatímco
+současný výstup používá aktuální combined LR pro `PP4 Strong`. Konečná
+multifaktoriální Class 5 uvedená v ST2 je výsledkem širší evidence a nepoužívá se
+jako samostatné kritérium.
 
 ## Důležité poznámky k přepisu
 
@@ -74,8 +76,8 @@ současný výstup používá aktuální combined LR pro `PP4 Strong`.
    personal/family history `0,59996` z Li et al. 2020. Výsledný combined LR je
    `328,184`, tedy PP4 Strong. To vysvětluje rozdíl mezi tutorialem a současným
    výstupem ARIANE i HECTORu.
-   Tutorialové `PVS1 RNA Strong` je odborně přijatý výsledek manuální RNA
-   revize, nikoli automatický výstup ze ST2/ST3.
+   `PVS1 RNA Strong` nyní vzniká automaticky z obecné kurátorované ST2 větve,
+   propojených ST3 zdrojů a jednoznačného Table 4 důsledku.
 3. U `c.3891_3893del` tutorial výslovně používá posterior probability 0,368 pro
    BP5 Supporting a odmítá tehdy dostupný LR 28 pro PP4 Strong. Aktuální ENIGMA
    track kombinuje Parsons 2019, Caputo 2021 a Zanti 2025 a vydává `combinedLR`

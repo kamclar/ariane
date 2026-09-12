@@ -541,20 +541,28 @@ tato nejistota nesmí být odstraněna nezdokumentovaným předpokladem.
 
 #### 3.2.2 PVS1 z RNA evidence
 
-Supplementary Table 2 se používá jako úplný oficiální zdroj známé RNA evidence,
-nikoli jako automatický seznam pro `PVS1_RNA`. U pacientské mRNA bez alelově
-specifické kvantifikace ST2 neříká, zda výsledek patří do větve apparent
-near-complete nebo apparent incomplete v Appendix E Table 9. Poznámka k této
-tabulce výslovně vyžaduje u nekvantifikovaných výsledků konsenzuální kurátorské
-posouzení.
+Supplementary Table 2 se používá jako úplný oficiální zdroj známé RNA evidence.
+Její standardizovaná kategorie je výsledkem kurátorského kódování ENIGMA. Pro
+pacientskou mRNA bez alelově specifické kvantifikace Appendix E vyžaduje
+konsenzuální posouzení, zda jde o apparent near-complete, incomplete nebo no
+impact. ARIANE považuje toto posouzení za již provedené pouze u přesných ST2
+řádků, které ENIGMA zařadila do kategorie `Patient not allele-specific;
+aberrant transcripts consistent with loss of function`.
 
-ARIANE proto u přesné shody v ST2:
+Automatické `PVS1_RNA` z ST2 vyžaduje současně:
 
-- nepřidělí automaticky žádné body `PVS1_RNA`;
-- zobrazí důvod, zdrojový řádek ST2 a odpovídající kontext Table 4;
-- předvyplní referenční transkript, RNA závěr, popis výsledku a zdroj do
-  formuláře odborné revize;
-- ponechá nevyplněný podíl funkčního transkriptu a výslednou sílu kritéria.
+- přesnou shodu genu a c. HGVS v checksumovaném ST2 snapshotu;
+- uvedenou standardizovanou kategorii pacientské mRNA;
+- alespoň jeden propojený zdrojový řádek ST3;
+- jednoznačný výsledek delece celého exonu;
+- jednoznačné mapování tohoto exonu na použitelnou výchozí sílu PVS1 v Table 4.
+
+Síla se určuje obecnou maticí Appendix E pro apparent near-complete výsledek bez
+alelově specifické kvantifikace. Výchozí PVS1 se změní na PVS1 Strong RNA,
+PVS1 Strong na PVS1 Moderate RNA, PVS1 Moderate zůstává Moderate RNA a
+PVS1 Supporting zůstává Supporting RNA. Komplexní, částečné nebo nejednoznačné
+transkriptové výsledky se automaticky nebodují. ARIANE je předvyplní k odborné
+revizi a výslednou sílu neodhaduje.
 
 Pokud backend doporučí manuální kritérium, rozhraní otevře sekci odborné
 evidence a zobrazí návrh s přímým odkazem na předvyplněný formulář. U RNA
@@ -588,8 +596,10 @@ rozsahu assay a nezávislosti. Obecné potvrzení této kombinace bylo předáno
 vyjasnění VCEP, takže nejde o uzavřené nové pravidlo ENIGMA.
 
 Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
-pacientskou mRNA s delecí exonu 12. ARIANE tento záznam předvyplní k revizi,
-ale sama z něj neurčí `PVS1 Strong (RNA)` ani jinou sílu.
+pacientskou mRNA s delecí exonu 12, standardizovanou LoF kategorii a čtyři
+propojené studie v ST3. Delece exonu 12 se jednoznačně mapuje na výchozí PVS1 v
+Table 4. Appendix E proto dává `PVS1 Strong (RNA)`. Predikční PP3 se při použití
+přímé RNA evidence nezapočítá.
 
 Automatické PVS1 RNA je možné pouze tehdy, když je pro přesnou variantu v
 referenčním transkriptu dostupná publikovaná ENIGMA BRCA1/2 VCEP assertion se
@@ -615,16 +625,16 @@ Aktualizace registru se provádí jako datové vydání:
 5. Regresní test ověří přidělený kód, sílu, body, auditní stopu a potlačení
    překrývající se Figure 1A evidence.
 
-Pokud se přesné PVS1 RNA použije z registru, Figure 1A se pro tuto klasifikaci
-nevyhodnocuje a SpliceAI se nevyžaduje. Audit uvádí stav `not_applicable` a
+Pokud se přesné PVS1 RNA použije z registru nebo z uvedené jednoznačné ST2
+větve, Figure 1A se pro tuto klasifikaci nevyhodnocuje a SpliceAI se nevyžaduje.
+Audit uvádí stav `not_applicable` a
 `replaced_by_curated_pvs1_rna=true`. Výpadek SpliceAI proto nemůže zablokovat
 výsledek, který už stojí na přímé schválené RNA evidenci.
 
 Stejný postup se používá pro přesné záznamy ST2 označené jako `last base`.
 Poslední nukleotid exonu se neposuzuje jako kanonická donorová nebo akceptorová
-pozice `+/-1,2`. Pokud ST2 uvádí poškozující RNA výsledek, ARIANE přenese celý
-záznam do formuláře PVS1 RNA, označí jej k odborné revizi a nepředvyplní sílu.
-Tím se RNA informace neztratí, ale ST2 se nezmění na automatický zdroj bodů.
+pozice `+/-1,2`. Automatické body vzniknou jen při splnění všech výše uvedených
+podmínek. Ostatní záznamy zůstávají v předvyplněné odborné revizi.
 
 ### 3.3 PS3 a BS3
 
@@ -1035,7 +1045,7 @@ Manuálně doplněná kritéria vytvářejí oddělený amended working result. 
 ## 5. Postup klasifikace
 
 Po normalizaci vstupu vytvoří backend `ClassificationRequest` a předá jej
-produkčnímu grafu `4.1.0-gene-policy-provider-dag`. `main.py` klasifikační zdroje přímo
+produkčnímu grafu `4.2.0-curated-st2-rna-provider-dag`. `main.py` klasifikační zdroje přímo
 nevolá. Provider uzly grafu získají:
 
 - souřadnice GRCh37 a GRCh38,
@@ -2100,7 +2110,7 @@ kritériích, řešení interakcí evidence, výsledná klasifikace a prezentace
 oddělené vrstvy.
 
 Produkční klasifikaci provádí provider graf `ariane.vcep.classification`, verze
-`4.1.0-gene-policy-provider-dag`. Starý sekvenční evaluator se v aplikační cestě neimportuje
+`4.2.0-curated-st2-rna-provider-dag`. Starý sekvenční evaluator se v aplikační cestě neimportuje
 ani nespouští. Jediná povolená hodnota `ARIANE_CLASSIFIER_ENGINE` je `dag` a jde
 zároveň o výchozí hodnotu. Režimy `legacy`, `shadow` ani fallback nejsou
 dostupné.
@@ -2261,7 +2271,7 @@ Závěrečná regresní sada je rozdělena podle účelu:
 | Oblast | Regresní kontrakt |
 |---|---|
 | Tutorialové varianty | `tests/test_dag_regression_corpus.py` kontroluje očekávaná kritéria, síly, body, třídu, mixed evidence a N/A větve jednotlivých variant. |
-| Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA a u každého vyžaduje nulové body, stav `review_required` a nepředvyplněnou sílu. `BRCA1 c.4185G>A` navíc ověřuje automatický a odborně revidovaný tutorialový scénář. Po doloženém přijetí `PVS1 RNA Strong` se obecnou interakční logikou potlačí PP3 a amended výsledek se přepočítá. |
+| Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA. Jednoznačné delece celého exonu s propojeným ST3 zdrojem a použitelnou Table 4 větví musí získat sílu podle Appendix E. Komplexní nebo částečné výsledky musí zůstat bez bodů ve stavu `review_required`. `BRCA1 c.4185G>A` ověřuje PVS1 RNA Strong a nepoužití PP3. |
 | Founder varianty | Test načte všechny varianty z aktuálního připnutého founder registru a každou nechá projít plným DAGem s frekvencí nad prahy BA1/BS1. U každého záznamu požaduje, aby se BA1 ani BS1 nepřidělilo a důvod zůstal v auditní stopě. Přidání dalšího záznamu do registru jej automaticky přidá do regrese. |
 | Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Testy připínají současnou interpretaci Table 4. Otevřená metodická otázka k poslednímu exonu zůstává popsána v `docs/open_methodological_and_data_tasks.md`. |
 | Typy variant | `tests/test_variant_type_regression_matrix.py` a `tests/test_bioinformatic_rule_matrix.py` pokrývají rozpoznání typů, větve Figure 1A a interakce s RNA a funkční evidencí. |
@@ -2272,16 +2282,14 @@ RNA logika vychází z kategorie a struktury záznamu ST2, Table 4 a Appendix E.
 Stejný fail-closed postup se regresně ověřuje u všech aktuálních
 nekvantifikovaných pacientských RNA záznamů v ST2.
 
-U `BRCA1 c.4185G>A` historický tutorial a automatický Module 1 výsledek nejsou
-stejným typem výsledku. Tutorial obsahuje kurátorské posouzení nekvantifikované
-pacientské RNA jako `PVS1 RNA Strong`. Strukturovaný ST2/ST3 záznam tuto sílu
-sám neurčuje. ARIANE proto nejprve vydá automatický výsledek 6 bodů, Class 4,
-s `PM2 Supporting`, `PP3 Supporting` a `PP4 Strong`. Pokud odborník přijme
-tutorialový RNA závěr, amended výsledek má `PVS1 RNA Strong`,
-`PM2 Supporting` a `PP4 Strong`, 9 bodů a Class 5 podle kombinace dvou Strong
-a jednoho Supporting kritéria v Table 3. PP3 se odstraní jako slabší predikce
-stejného splice mechanismu. Síla PP4 se proti tutorialu liší kvůli novějším
-klinickým LR podkladům.
+U `BRCA1 c.4185G>A` ST2 obsahuje ENIGMA-kurátorovanou LoF kategorii, deleci
+exonu 12 a čtyři propojené ST3 studie. Delece se jednoznačně mapuje na výchozí
+PVS1 v Table 4. Appendix E proto dává `PVS1 RNA Strong`. Automatický výsledek
+má `PVS1 RNA Strong`, `PM2 Supporting` a `PP4 Strong`, celkem 9 bodů a Class 4
+podle Table 3. PP3 se nepoužije, protože přímá RNA evidence nahrazuje predikci
+stejného splice mechanismu. Tutorialová Class 5 používá PP4 Very Strong;
+současný combined LR dává PP4 Strong. Konečná multifaktoriální Class 5 z ST2 se
+nepřenáší jako samostatná evidence.
 
 Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.

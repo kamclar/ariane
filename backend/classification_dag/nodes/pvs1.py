@@ -33,19 +33,26 @@ class Pvs1CriteriaNode:
             ci.gene,
             ci.c_notation,
             ci.erepo_pvs1_rna_result,
+            ci.st2_pvs1_rna_result,
         )
         decisions: list[CriterionDecision] = []
         excluded: list[CriterionDecision] = []
         not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
         if pvs1_rna.get("applies"):
+            evidence_item_id = (
+                "erepo_pvs1_rna"
+                if pvs1_rna.get("application_status")
+                == "applied_from_approved_registry"
+                else "st2_pvs1_rna"
+            )
             decisions.append(
                 decision(
                     "PVS1_RNA",
                     pvs1_rna,
                     gene=ci.gene,
                     family_id=self.id,
-                    evidence_item_ids=("erepo_pvs1_rna",),
+                    evidence_item_ids=(evidence_item_id,),
                 )
             )
         elif pvs1["applies"]:

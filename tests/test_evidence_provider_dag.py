@@ -89,6 +89,11 @@ def _dependencies(*, spliceai_score=0.03, bayesdel_score=0.438):
             "record": None,
             "reason": "No exact approved record in the test registry.",
         },
+        st2_pvs1_rna_lookup=lambda gene, c: {
+            "status": "not_in_source",
+            "record": None,
+            "reason": "No exact ST2 record in the test provider.",
+        },
     )
 
 
@@ -97,7 +102,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         _request(), dependencies=_dependencies()
     ))
 
-    assert execution.graph_version == "4.1.0-gene-policy-provider-dag"
+    assert execution.graph_version == "4.2.0-curated-st2-rna-provider-dag"
     assert execution.result["criteria"]["PP3"]["points"] == 1
     assert execution.provider_artifacts["spliceai_score"] == 0.03
     assert execution.provider_artifacts["bayesdel_score"] == 0.438
@@ -113,6 +118,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         "provider.gnomad",
         "provider.enigma.table9",
         "provider.enigma.erepo_pvs1_rna",
+        "provider.enigma.st2_pvs1_rna",
         "provider.clinical_lr",
         "provider.protein_ps1",
     }.issubset(provider_ids)
@@ -165,6 +171,59 @@ def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
     invalid_record["guideline_version"] = "1.1.0"
     invalid_curated["record"] = invalid_record
     invalid_artifacts["erepo_pvs1_rna_result"] = invalid_curated
+    invalid_gap = first_required_evidence_gap(request.variant, invalid_artifacts)
+    assert invalid_gap is not None
+    assert invalid_gap.source == "SpliceAI"
+
+
+def test_curated_st2_pvs1_rna_is_applied_without_querying_spliceai():
+    from backend.modules.pvs1_rna import lookup_st2_pvs1_rna_evidence
+    from backend.services.classification_completeness import first_required_evidence_gap
+
+    request = ClassificationRequest(
+        variant=NormalizedVariant(
+            gene="BRCA1",
+            reference_transcript="NM_007294.4",
+            c_notation="c.4185G>A",
+            p_notation="p.(Gln1395=)",
+            variant_type="synonymous",
+            submitted_notation="BRCA1 c.4185G>A",
+            normalization_source="test",
+        )
+    )
+    spliceai_calls = []
+    dependencies = replace(
+        _dependencies(spliceai_score=0.93, bayesdel_score=None),
+        st2_pvs1_rna_lookup=lookup_st2_pvs1_rna_evidence,
+        spliceai_lookup=lambda gene, c: spliceai_calls.append((gene, c)),
+        clinical_lr_lookup=lambda gene, c: {"applies": False},
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request,
+        dependencies=dependencies,
+    ))
+
+    assert spliceai_calls == []
+    assert execution.result["criteria"]["PVS1_RNA"]["strength"] == "Strong"
+    assert execution.result["criteria"]["PVS1_RNA"]["points"] == 4
+    assert "PP3" not in execution.result["criteria"]
+    st2_audit = execution.audit_record()["provider_evidence"]["st2_pvs1_rna"]
+    assert st2_audit["status"] == "available"
+    assert st2_audit["source_checksum"]
+    assert execution.provider_artifacts["spliceai_status"]["pvs1_rna_source"] == "st2"
+    completeness_gap = first_required_evidence_gap(
+        request.variant,
+        execution.provider_artifacts,
+    )
+    assert completeness_gap is None or completeness_gap.source != "SpliceAI"
+
+    invalid_artifacts = dict(execution.provider_artifacts)
+    invalid_curated = dict(invalid_artifacts["st2_pvs1_rna_result"])
+    invalid_record = dict(invalid_curated["record"])
+    invalid_record["result"] = "partial exon 12 deletion"
+    invalid_curated["record"] = invalid_record
+    invalid_artifacts["st2_pvs1_rna_result"] = invalid_curated
     invalid_gap = first_required_evidence_gap(request.variant, invalid_artifacts)
     assert invalid_gap is not None
     assert invalid_gap.source == "SpliceAI"

@@ -72,6 +72,7 @@ class ProviderDependencies:
     select_ps1_spliceai: Callable[..., Any]
     ps1_lookup: Callable[..., Any]
     erepo_pvs1_rna_lookup: Callable[..., Any]
+    st2_pvs1_rna_lookup: Callable[..., Any]
 
 def _request(inputs) -> ClassificationRequest:
     request = inputs["classification_request"]
@@ -252,6 +253,58 @@ class ErepoPvs1RnaEvidenceNode:
 
 
 @dataclass(frozen=True)
+class St2Pvs1RnaEvidenceNode:
+    """Provide exact ENIGMA ST2/ST3 RNA facts and Table 4 context."""
+
+    dependencies: ProviderDependencies
+    id: str = "provider.enigma.st2_pvs1_rna"
+    version: str = "1"
+    requires: frozenset[str] = frozenset({"classification_request"})
+    provides: frozenset[str] = frozenset({"st2_pvs1_rna_evidence"})
+
+    def evaluate(self, context, inputs) -> NodeResult:
+        variant = _request(inputs).variant
+        value = self.dependencies.st2_pvs1_rna_lookup(
+            variant.gene,
+            variant.c_notation,
+        )
+        status = str(value.get("status") or "unavailable")
+        evidence = EvidenceItem(
+            id="st2_pvs1_rna",
+            kind="curated_rna_dataset",
+            status=(
+                EvidenceStatus.AVAILABLE
+                if status == "eligible"
+                else EvidenceStatus.REVIEW_REQUIRED
+                if status == "review_required"
+                else EvidenceStatus.NOT_APPLICABLE
+                if status in {"not_in_source", "not_applicable"}
+                else EvidenceStatus.UNAVAILABLE
+            ),
+            value=value,
+            source_id=str(value.get("source_id") or "enigma-st2-st3-v1.2"),
+            source_version=str(value.get("source_version") or ""),
+            source_checksum=str(value.get("source_checksum") or ""),
+            reason=str(value.get("reason") or ""),
+            provenance={
+                "status": status,
+                "source_url": value.get("source_url"),
+                "source_row": (value.get("record") or {}).get("source_row"),
+                "table4_exon": value.get("table4_exon"),
+            },
+        )
+        return NodeResult.succeeded(
+            {"st2_pvs1_rna_evidence": evidence},
+            provenance={
+                "evidence_status": evidence.status.value,
+                "source_id": evidence.source_id,
+                "source_version": evidence.source_version,
+                "source_checksum": evidence.source_checksum,
+            },
+        )
+
+
+@dataclass(frozen=True)
 class SpliceAiEvidenceNode:
     dependencies: ProviderDependencies
     id: str = "provider.spliceai"
@@ -262,6 +315,7 @@ class SpliceAiEvidenceNode:
             "normalized_variant",
             "ps1_reference_candidates",
             "erepo_pvs1_rna_evidence",
+            "st2_pvs1_rna_evidence",
         }
     )
     provides: frozenset[str] = frozenset(
@@ -272,19 +326,26 @@ class SpliceAiEvidenceNode:
         variant = _request(inputs).variant
         candidates = tuple(inputs["ps1_reference_candidates"])
         curated_rna = inputs["erepo_pvs1_rna_evidence"]
-        curated_pvs1_rna = (
+        st2_rna = inputs["st2_pvs1_rna_evidence"]
+        erepo_pvs1_rna = (
             curated_rna.status == EvidenceStatus.AVAILABLE
             and isinstance(curated_rna.value, Mapping)
             and curated_rna.value.get("status") == "eligible"
         )
+        st2_pvs1_rna = (
+            st2_rna.status == EvidenceStatus.AVAILABLE
+            and isinstance(st2_rna.value, Mapping)
+            and st2_rna.value.get("status") == "eligible"
+        )
+        curated_pvs1_rna = erepo_pvs1_rna or st2_pvs1_rna
         required = (
             spliceai_required_for_classification(variant.variant_type)
             and not curated_pvs1_rna
         )
         if not required:
             reason = (
-                "SpliceAI is not required because an exact approved PVS1 RNA "
-                "assertion replaces the Figure 1A prediction branch."
+                "SpliceAI is not required because exact curated PVS1 RNA "
+                "evidence replaces the Figure 1A prediction branch."
                 if curated_pvs1_rna
                 else
                 "SpliceAI is not required by the automatic ENIGMA path for "
@@ -299,6 +360,10 @@ class SpliceAiEvidenceNode:
                     "status": "not_applicable",
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
+                    "pvs1_rna_source": (
+                        "erepo" if erepo_pvs1_rna else "st2"
+                        if st2_pvs1_rna else None
+                    ),
                     "retryable": False,
                     "reason": reason,
                 },
@@ -312,6 +377,10 @@ class SpliceAiEvidenceNode:
                     "evidence_status": evidence.status.value,
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
+                    "pvs1_rna_source": (
+                        "erepo" if erepo_pvs1_rna else "st2"
+                        if st2_pvs1_rna else None
+                    ),
                 },
             )
 
@@ -676,6 +745,7 @@ class EvidenceBundleAssemblyNode:
         "gnomad_evidence",
         "clinical_lr_evidence",
         "erepo_pvs1_rna_evidence",
+        "st2_pvs1_rna_evidence",
         "protein_ps1_evidence",
         "exon_cnv_evidence",
         "residue_evidence",
@@ -694,6 +764,7 @@ class EvidenceBundleAssemblyNode:
             "gnomad_evidence",
             "clinical_lr_evidence",
             "erepo_pvs1_rna_evidence",
+            "st2_pvs1_rna_evidence",
             "protein_ps1_evidence",
             "exon_cnv_evidence",
             "residue_evidence",
@@ -717,6 +788,7 @@ class EvidenceBundleAssemblyNode:
             ),
             table9_result=value("enigma_table9"),
             erepo_pvs1_rna_result=value("erepo_pvs1_rna"),
+            st2_pvs1_rna_result=value("st2_pvs1_rna"),
             pp4_bp5_result=value("clinical_lr"),
             ps1_result=value("protein_ps1"),
             exon_cnv_result=value("exon_cnv"),
@@ -745,6 +817,7 @@ class EvidenceBundleAssemblyNode:
             "gnomad_data": gnomad_value,
             "clinical_lr_result": value("clinical_lr"),
             "erepo_pvs1_rna_result": value("erepo_pvs1_rna"),
+            "st2_pvs1_rna_result": value("st2_pvs1_rna"),
             "table9_result": value("enigma_table9"),
             "exon_cnv_result": value("exon_cnv"),
             "evidence_audit": {

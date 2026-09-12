@@ -10,7 +10,6 @@ import json
 import pytest
 
 from backend.classification_dag import ClassificationInputs, execute_classification
-from backend.classification_dag.manual import execute_manual_evidence
 from backend.config import ST2_SPLICE_EVIDENCE_PATH
 from backend.lookups.founder_variants import (
     FOUNDER_VARIANT_SNAPSHOT,
@@ -20,7 +19,10 @@ from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
 from backend.modules.pp4_bp5 import evaluate_pp4_bp5
 from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
+from backend.modules.pvs1_rna import (
+    evaluate_pvs1_rna,
+    lookup_st2_pvs1_rna_evidence,
+)
 from backend.modules.table9 import table9_lookup_ps3_bs3
 from backend.modules.variant_type import infer_variant_type
 from backend.population_frequency.indel_size import is_indel_allele
@@ -50,8 +52,8 @@ REGRESSION_VARIANTS = (
     ("BRCA1", "c.3891_3893del", "p.(Ser1298del)", 0.15, None, "Unknown",
      1, -8, {"BS3": ("Strong", -4), "BP5": ("Strong", -4)}, False,
      ("PM2",)),
-    ("BRCA1", "c.4185G>A", "p.(Gln1395=)", 0.95, None, "Unknown", 3, 5,
-     {"PP3": ("Supporting", 1), "PP4": ("Strong", 4)}, False, ()),
+    ("BRCA1", "c.4185G>A", "p.(Gln1395=)", 0.95, None, "Unknown", 4, 8,
+     {"PVS1_RNA": ("Strong", 4), "PP4": ("Strong", 4)}, False, ()),
     ("BRCA1", "c.628C>T", "p.(Gln210Ter)", None, None, "Unknown", 3, 0,
      {}, False, ("PVS1",)),
     ("BRCA2", "c.8953+2T>C", "p.(?)", 0.90, None, "Unknown", 3, 0, {},
@@ -292,7 +294,7 @@ def test_population_terminal_mixed_and_absent_paths_are_explicit_regressions(
     assert result["mixed_evidence"] is expected_mixed
 
 
-def test_c4185_automatic_and_expert_reviewed_rna_results_are_distinct():
+def test_c4185_uses_curated_st2_rna_and_replaces_pp3():
     automatic = execute_classification(
         _inputs(
             "BRCA1",
@@ -304,82 +306,92 @@ def test_c4185_automatic_and_expert_reviewed_rna_results_are_distinct():
         )
     ).result
 
-    assert automatic["predicted_class"] == 3
-    assert automatic["total_points"] == 5
+    assert automatic["predicted_class"] == 4
+    assert automatic["total_points"] == 8
     assert _criterion_summary(automatic) == {
-        "PP3": ("Supporting", 1),
+        "PVS1_RNA": ("Strong", 4),
         "PP4": ("Strong", 4),
     }
-    assert automatic["rna_review"]["recommended"] is True
-    assert "curated_strength" not in automatic["rna_review"][
-        "manual_review_prefill"
-    ]
-
-    base_criteria = [
-        {"name": code, **criterion}
-        for code, criterion in automatic["criteria"].items()
-    ]
-    reviewed = execute_manual_evidence(
-        base_criteria,
-        [{
-            "code": "PVS1_RNA",
-            "enabled": True,
-            "evidence": {
-                "assay_scope": "mrna_only",
-                "rna_conclusion": "damaging",
-                "functional_transcript_remaining": "absent_or_minimal",
-                "curated_strength": "Strong",
-                "transcript_accession": "NM_007294.4",
-                "tissue_or_cell_type": "patient-derived RNA",
-                "nmd_assessed": "no",
-            },
-        }],
-        {
-            "gene": "BRCA1",
-            "c_notation": "c.4185G>A",
-            "p_notation": "p.(Gln1395=)",
-        },
-    ).result
-
-    assert reviewed["predicted_class"] == 4
-    assert reviewed["total_points"] == 8
-    assert reviewed["manual_criteria"][0]["code"] == "PVS1_RNA"
-    assert reviewed["manual_criteria"][0]["selected_strength"] == "Strong"
-    assert reviewed["manual_criteria"][0]["points"] == 4
-    assert reviewed["evidence_interactions"] == [{
-        "status": "deduplicated",
-        "mechanism": "experimentally_confirmed_splicing",
-        "criteria": ["PVS1_RNA", "PP3"],
-        "retained": ["PVS1_RNA"],
-        "suppressed": ["PP3"],
-        "reason": (
-            "Accepted damaging mRNA evidence replaces weaker bioinformatic "
-            "or predictive evidence for the same splicing consequence."
-        ),
-        "source": "ENIGMA v1.2 Figure 1B and Appendix E",
-        "source_url": (
-            "https://cspec.genome.network/cspec/File/id/"
-            "11e62fec-23b0-4a3e-b2df-751855301746/data"
-        ),
-        "review_required": False,
-    }]
+    assert automatic["rna_review"]["recommended"] is False
+    assert automatic["evidence_interactions"] == []
 
 
 @pytest.mark.parametrize("gene,c_notation", UNQUANTIFIED_PATIENT_RNA_VARIANTS)
-def test_unquantified_patient_rna_never_assigns_automatic_pvs1_rna(
+def test_unquantified_patient_rna_is_scored_only_for_unambiguous_st2_table4_path(
     gene,
     c_notation,
 ):
     result = evaluate_pvs1_rna(gene, c_notation)
 
-    assert result["applies"] is False
-    assert result["points"] == 0
-    assert result["review_required"] is True
-    assert result["application_status"] == "review_required"
-    assert result["appendix_branch"] == (
-        "unquantified_patient_mrna_requires_consensus_review"
+    if result["application_status"] == "applied_from_curated_st2":
+        assert result["applies"] is True
+        assert result["strength"] == "Strong"
+        assert result["points"] == 4
+        assert result["review_required"] is False
+        assert result["table4_exon"]
+        assert result["source_record"]["supporting_st3_references"]
+    else:
+        assert result["applies"] is False
+        assert result["points"] == 0
+        assert result["review_required"] is True
+        assert result["application_status"] == "review_required"
+        assert result["appendix_branch"] == (
+            "unquantified_patient_mrna_requires_consensus_review"
+        )
+        assert "curated_strength" not in result["manual_review_prefill"]
+
+
+def test_unquantified_patient_rna_scope_is_explicit_and_complete():
+    outcomes = [
+        evaluate_pvs1_rna(gene, c_notation)["application_status"]
+        for gene, c_notation in UNQUANTIFIED_PATIENT_RNA_VARIANTS
+    ]
+
+    assert len(outcomes) == 26
+    assert outcomes.count("applied_from_curated_st2") == 16
+    assert outcomes.count("review_required") == 10
+
+
+@pytest.mark.parametrize(
+    "baseline_strength,baseline_code,expected_strength,expected_points",
+    (
+        ("Very Strong", "PVS1", "Strong", 4),
+        ("Strong", "PVS1_Strong", "Moderate", 2),
+        ("Moderate", "PVS1_Moderate", "Moderate", 2),
+        ("Supporting", "PVS1_Supporting", "Supporting", 1),
+    ),
+)
+def test_unquantified_patient_rna_uses_appendix_e_weight_matrix(
+    monkeypatch,
+    baseline_strength,
+    baseline_code,
+    expected_strength,
+    expected_points,
+):
+    curated = lookup_st2_pvs1_rna_evidence("BRCA1", "c.4185G>A")
+    baseline = {
+        "found": True,
+        "pvs1_strength": baseline_strength,
+        "pvs1_code": baseline_code,
+    }
+    curated = {
+        **curated,
+        "table4_baseline": baseline,
+    }
+    monkeypatch.setattr(
+        "backend.modules.pvs1_rna.table4_lookup_deletion",
+        lambda gene, exon: baseline,
     )
-    assert "curated_strength" not in result["manual_review_prefill"]
+
+    result = evaluate_pvs1_rna(
+        "BRCA1",
+        "c.4185G>A",
+        st2_evidence_result=curated,
+    )
+
+    assert result["applies"] is True
+    assert result["strength"] == expected_strength
+    assert result["points"] == expected_points
 
 
 @pytest.mark.parametrize(

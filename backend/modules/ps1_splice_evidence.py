@@ -67,6 +67,21 @@ def get_st3_splice_references(gene: str, c_notation: str) -> list[Dict[str, Any]
     return list((record or {}).get("st3_references") or [])
 
 
+def get_st2_source_metadata() -> Dict[str, Any]:
+    """Return immutable provenance for the validated ST2/ST3 snapshot."""
+    payload = _load_st2_payload()
+    return {
+        "dataset": "ENIGMA Supplementary Tables 2 and 3",
+        "version": payload.get("version"),
+        "released": payload.get("released"),
+        "source_url": payload.get("source_url"),
+        "source_file": payload.get("source_file"),
+        "source_file_sha256": payload.get("source_file_sha256"),
+        "total_variants": payload.get("total_variants"),
+        "total_reference_rows": payload.get("total_reference_rows"),
+    }
+
+
 def list_splice_ps1_candidate_discovery(gene: Optional[str] = None) -> Dict[str, Any]:
     """Return factual P/LP splice candidates derived directly from official ST2.
 
