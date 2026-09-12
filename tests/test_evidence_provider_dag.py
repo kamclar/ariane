@@ -84,6 +84,11 @@ def _dependencies(*, spliceai_score=0.03, bayesdel_score=0.438):
         },
         select_ps1_spliceai=lambda score, table9: (score, "test-spliceai"),
         ps1_lookup=ps1_result,
+        erepo_pvs1_rna_lookup=lambda gene, c: {
+            "status": "not_in_registry",
+            "record": None,
+            "reason": "No exact approved record in the test registry.",
+        },
     )
 
 
@@ -92,7 +97,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         _request(), dependencies=_dependencies()
     ))
 
-    assert execution.graph_version == "4.0.0-gene-policy-provider-dag"
+    assert execution.graph_version == "4.1.0-gene-policy-provider-dag"
     assert execution.result["criteria"]["PP3"]["points"] == 1
     assert execution.provider_artifacts["spliceai_score"] == 0.03
     assert execution.provider_artifacts["bayesdel_score"] == 0.438
@@ -107,9 +112,72 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         "provider.bayesdel",
         "provider.gnomad",
         "provider.enigma.table9",
+        "provider.enigma.erepo_pvs1_rna",
         "provider.clinical_lr",
         "provider.protein_ps1",
     }.issubset(provider_ids)
+
+
+def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
+    from backend.modules.erepo_pvs1_rna import lookup_erepo_pvs1_rna
+    from backend.services.classification_completeness import first_required_evidence_gap
+
+    request = ClassificationRequest(
+        variant=NormalizedVariant(
+            gene="BRCA1",
+            reference_transcript="NM_007294.4",
+            c_notation="c.5332G>A",
+            p_notation="p.(Asp1778Asn)",
+            variant_type="missense",
+            submitted_notation="BRCA1 c.5332G>A",
+            normalization_source="test",
+        )
+    )
+    dependencies = replace(
+        _dependencies(spliceai_score=0.25, bayesdel_score=0.50),
+        erepo_pvs1_rna_lookup=lookup_erepo_pvs1_rna,
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request,
+        dependencies=dependencies,
+    ))
+
+    assert execution.result["criteria"]["PVS1_RNA"]["strength"] == "Very Strong"
+    assert execution.result["criteria"]["PVS1_RNA"]["points"] == 8
+    assert "PP3" not in execution.result["criteria"]
+    audit = execution.audit_record()["provider_evidence"]["erepo_pvs1_rna"]
+    assert audit["status"] == "available"
+    assert audit["source_checksum"]
+    assert execution.provider_artifacts["spliceai_status"]["status"] == "not_applicable"
+    assert execution.provider_artifacts["spliceai_status"][
+        "replaced_by_curated_pvs1_rna"
+    ] is True
+    completeness_gap = first_required_evidence_gap(
+        request.variant,
+        execution.provider_artifacts,
+    )
+    assert completeness_gap is None or completeness_gap.source != "SpliceAI"
+
+    invalid_artifacts = dict(execution.provider_artifacts)
+    invalid_curated = dict(invalid_artifacts["erepo_pvs1_rna_result"])
+    invalid_record = dict(invalid_curated["record"])
+    invalid_record["guideline_version"] = "1.1.0"
+    invalid_curated["record"] = invalid_record
+    invalid_artifacts["erepo_pvs1_rna_result"] = invalid_curated
+    invalid_gap = first_required_evidence_gap(request.variant, invalid_artifacts)
+    assert invalid_gap is not None
+    assert invalid_gap.source == "SpliceAI"
+
+
+def test_variant_absent_from_partial_erepo_registry_is_not_treated_as_no_evidence():
+    from backend.modules.erepo_pvs1_rna import lookup_erepo_pvs1_rna
+
+    result = lookup_erepo_pvs1_rna("BRCA1", "c.4185G>A")
+
+    assert result["status"] == "not_in_registry"
+    assert result["coverage_status"] == "partial_verified_seed"
+    assert "does not mean" in result["reason"]
 
 
 def test_unavailable_spliceai_remains_unavailable_and_does_not_enable_bayesdel_pp3():

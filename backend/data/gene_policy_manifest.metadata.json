@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "manifest_id": "ariane_gene_policy_registry",
-  "manifest_version": "2026.08.30",
-  "manifest_sha256": "d1905577772fccea96292582ee8df797d065aa8b763c1778f3f71002fefb9eb5",
+  "manifest_version": "2026.09.12",
+  "manifest_sha256": "a516d3974ff3132549a9993ced18b059ed933ae9991f1c21f82aa8b033aacff3",
   "active_gene_count": 2,
   "active_policy_count": 1,
   "validation_status": "approved"

@@ -29,14 +29,26 @@ class Pvs1CriteriaNode:
             spliceai_score=splice.effective_score,
             dup_type=ci.dup_type,
         )
-        # This result supplies review metadata only. Accepted PVS1 RNA evidence
-        # enters through the manual-evidence DAG after expert review.
-        pvs1_rna = evaluate_pvs1_rna(ci.gene, ci.c_notation)
+        pvs1_rna = evaluate_pvs1_rna(
+            ci.gene,
+            ci.c_notation,
+            ci.erepo_pvs1_rna_result,
+        )
         decisions: list[CriterionDecision] = []
         excluded: list[CriterionDecision] = []
         not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
-        if pvs1["applies"]:
+        if pvs1_rna.get("applies"):
+            decisions.append(
+                decision(
+                    "PVS1_RNA",
+                    pvs1_rna,
+                    gene=ci.gene,
+                    family_id=self.id,
+                    evidence_item_ids=("erepo_pvs1_rna",),
+                )
+            )
+        elif pvs1["applies"]:
             decisions.append(
                 decision(
                     "PVS1",
@@ -100,7 +112,7 @@ class Pvs1CriteriaNode:
             excluded_criteria=tuple(excluded),
             not_applicable_criteria=tuple(not_applicable),
             warnings=tuple(warnings),
-            has_functional_evidence=False,
+            has_functional_evidence=bool(pvs1_rna.get("applies")),
             metadata={"pvs1": pvs1, "pvs1_rna": pvs1_rna},
         )
         return NodeResult.succeeded(

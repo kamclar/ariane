@@ -35,7 +35,7 @@ def _modified_manifest():
 def test_checked_manifest_and_source_bindings_are_valid():
     manifest = load_gene_policy_manifest()
     assert active_genes() == ("BRCA1", "BRCA2")
-    assert manifest["manifest_version"] == "2026.08.30"
+    assert manifest["manifest_version"] == "2026.09.12"
     assert reference_transcript("BRCA1") == "NM_007294.4"
     assert runtime_policy_id("BRCA2") == "ENIGMA_BRCA_VCEP_1.2"
     assert manifest["genes"]["BRCA1"]["decision_assets"]["PVS1"][
@@ -44,6 +44,9 @@ def test_checked_manifest_and_source_bindings_are_valid():
     assert manifest["genes"]["BRCA2"]["functional_domains"]["DBD"][
         "description"
     ].startswith("DNA-binding domain")
+    assert "enigma_erepo_pvs1_rna_registry" in manifest["genes"]["BRCA1"][
+        "required_rule_data"
+    ]["PVS1_RNA"]
     validate_policy_source_bindings()
 
 

@@ -36,6 +36,8 @@ _SMALL_DATA_SOURCES = (
     GENE_POLICY_METADATA_PATH,
     PROJECT_ROOT / "backend" / "data" / "clinically_important_residues.json",
     PROJECT_ROOT / "backend" / "data" / "brca_pathogenic_founder_variants.json",
+    PROJECT_ROOT / "backend" / "data" / "enigma_erepo_pvs1_rna_registry.json",
+    PROJECT_ROOT / "backend" / "data" / "enigma_erepo_pvs1_rna_registry.metadata.json",
     PROJECT_ROOT / "backend" / "data" / "gnomad" / "gnomad_panel_manifest.json",
     PROJECT_ROOT / "data" / "coordinates" / "coordinate_sources.manifest.json",
     PROJECT_ROOT / "data" / "coordinates" / "coordinate_sources.manifest.metadata.json",

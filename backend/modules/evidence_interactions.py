@@ -124,7 +124,7 @@ def apply_manual_rna_interactions(
     combined: Dict[str, Dict[str, Any]],
     applied_manual_codes: set[str],
 ) -> List[Dict[str, Any]]:
-    """Apply the explicit Figure 1B hierarchy after manual criteria are added."""
+    """Apply Figure 1B to accepted manual or curated RNA criteria."""
     warnings: List[Dict[str, Any]] = []
 
     if "PVS1_RNA" in applied_manual_codes:

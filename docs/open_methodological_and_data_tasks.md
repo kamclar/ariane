@@ -39,13 +39,18 @@ normalizované missense substituci z jiné nukleotidové změny, SpliceAI nejvý
 podmínek. Původní otázka a rozhodnutí jsou popsány v
 [`ps1_reference_validation_request.md`](ps1_reference_validation_request.md).
 
-## 5. Nekvantifikovaná RNA evidence
+## 5. Nekvantifikovaná RNA evidence, částečně vyřešeno 2026-09-12
 
 Nekvantifikované výsledky ST2 nyní správně vedou do předvyplněné manuální
-revize a samy nepřidávají PVS1 RNA. Další automatizace by vyžadovala
-strukturovaný zdroj, který výslovně zachytí konsenzuální kurátorské zařazení do
-větve Appendix E Table 9 a výslednou sílu. Bez takového zdroje zůstává tato část
-manuální.
+revize a samy nepřidávají PVS1 RNA. Automatická cesta byla doplněna pouze pro
+přesné publikované assertions ClinGen ERepo, které ENIGMA BRCA1/2 VCEP vytvořil
+podle specifikace v1.2 a ve kterých je konečná RNA síla výslovně určena.
+
+Runtime používá checksumovaný lokální registr, ne živý fallback. První registr
+je záměrně označen jako neúplný. Zbývá zavést pravidelný export nových ERepo
+záznamů, odbornou kontrolu kandidátů a vydání nové verze registru s checksumem.
+Do té doby nepřítomnost varianty v registru nesmí být interpretována jako
+nepřítomnost RNA evidence.
 
 ## 6. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
 

@@ -12,7 +12,11 @@ import re
 from typing import Any, Dict, Optional
 
 from backend.modules.ps1_splice_evidence import get_st2_splice_record
-from backend.modules.table4 import TABLE4_DATA, table4_lookup_deletion
+from backend.modules.table4 import (
+    TABLE4_DATA,
+    parse_pvs1_code_strength,
+    table4_lookup_deletion,
+)
 from backend.gene_policy import reference_transcript, vcep_specification
 
 
@@ -65,8 +69,113 @@ def _st3_reference_url(reference: Dict[str, Any]) -> Optional[str]:
     return f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else None
 
 
-def evaluate_pvs1_rna(gene: str, c_notation: str) -> Dict[str, Any]:
-    """Return a non-scoring PVS1 (RNA) review candidate from exact ST2 data."""
+def _evaluate_approved_erepo_record(
+    gene: str,
+    c_notation: str,
+    registry_result: Optional[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Convert one exact approved registry record into an automatic decision."""
+    if not registry_result or registry_result.get("status") == "not_in_registry":
+        return None
+    specification = vcep_specification(gene)
+    record = registry_result.get("record")
+    problems = []
+    if registry_result.get("status") != "eligible":
+        problems.append(f"registry status is {registry_result.get('status') or 'unknown'}")
+    if not isinstance(record, dict):
+        problems.append("the exact assertion record is missing")
+        record = {}
+    if record.get("gene") != gene or record.get("c_notation") != c_notation:
+        problems.append("the assertion does not match the assessed variant exactly")
+    if record.get("reference_transcript") != reference_transcript(gene):
+        problems.append("the assertion does not use the configured reference transcript")
+    if record.get("guideline_id") != specification["id"]:
+        problems.append("the assertion uses a different VCEP guideline")
+    if record.get("guideline_version") != specification["version"]:
+        problems.append("the assertion does not use the active VCEP specification version")
+    if record.get("code") != "PVS1_RNA" or record.get("evidence_mechanism") != "rna_splicing":
+        problems.append("the assertion does not explicitly identify PVS1 RNA evidence")
+    strength, points, requires_rna = parse_pvs1_code_strength(
+        str(record.get("source_code") or "")
+    )
+    if not requires_rna or strength is None:
+        problems.append("the assertion has no explicit applicable RNA strength")
+    if record.get("strength") != strength or record.get("points") != points:
+        problems.append("the recorded strength and points are inconsistent")
+    if not record.get("assertion_uuid") or not record.get("published_date"):
+        problems.append("the assertion has no published identity and date")
+
+    source = str(record.get("assertion_url") or registry_result.get("source_url") or "")
+    source_record = {
+        **record,
+        "dataset": registry_result.get("registry_id"),
+        "dataset_version": registry_result.get("registry_version"),
+        "dataset_sha256": registry_result.get("registry_sha256"),
+        "coverage_status": registry_result.get("coverage_status"),
+    }
+    if problems:
+        return {
+            "applies": False,
+            "code": "PVS1_RNA",
+            "strength": None,
+            "points": 0,
+            "reason": (
+                "PVS1 (RNA) was not applied automatically because the curated "
+                "ERepo candidate did not satisfy every runtime guard: "
+                + "; ".join(problems)
+                + "."
+            ),
+            "source": source or specification["url"],
+            "source_record": source_record,
+            "table4_exon": None,
+            "appendix_branch": "curated_erepo_record_requires_review",
+            "application_status": "review_required",
+            "review_required": True,
+            "manual_review_prefill": {
+                "assay_scope": "mrna_only",
+                "rna_conclusion": "damaging",
+                "transcript_accession": reference_transcript(gene),
+                "transcript_result_summary": str(record.get("evidence_summary") or ""),
+                "source_citation": "ClinGen ERepo ENIGMA BRCA1/2 VCEP assertion",
+                "source_references": [source] if source else [],
+            },
+        }
+
+    return {
+        "applies": True,
+        "code": "PVS1_RNA",
+        "strength": strength,
+        "points": points,
+        "reason": (
+            f"ClinGen ERepo assertion {record['assertion_uuid']} reports "
+            f"{record['source_code']} for this exact {reference_transcript(gene)} "
+            f"variant under ENIGMA {specification['id']} v{specification['version']}. "
+            f"{record['evidence_summary']}"
+        ),
+        "source": source,
+        "source_record": source_record,
+        "table4_exon": None,
+        "appendix_branch": "published_vcep_pvs1_rna_assertion",
+        "application_status": "applied_from_approved_registry",
+        "review_required": False,
+        "manual_review_prefill": {},
+    }
+
+
+def evaluate_pvs1_rna(
+    gene: str,
+    c_notation: str,
+    erepo_registry_result: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Apply exact approved ERepo RNA evidence or prepare ST2 expert review."""
+    curated_result = _evaluate_approved_erepo_record(
+        gene,
+        c_notation,
+        erepo_registry_result,
+    )
+    if curated_result is not None:
+        return curated_result
+
     specification = vcep_specification(gene)
     result: Dict[str, Any] = {
         "applies": False,

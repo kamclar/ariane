@@ -905,6 +905,36 @@ class SpliceTests(unittest.TestCase):
         self.assertFalse(another_st2_variant["applies"])
         self.assertEqual(another_st2_variant["application_status"], "review_required")
 
+    def test_erepo_rna_candidate_with_wrong_vcep_version_is_not_scored(self):
+        candidate = {
+            "status": "eligible",
+            "registry_id": "test-registry",
+            "registry_version": "test",
+            "record": {
+                "gene": "BRCA1",
+                "reference_transcript": "NM_007294.4",
+                "c_notation": "c.5332G>A",
+                "code": "PVS1_RNA",
+                "source_code": "PVS1 (RNA)",
+                "strength": "Very Strong",
+                "points": 8,
+                "evidence_mechanism": "rna_splicing",
+                "guideline_id": "GN092",
+                "guideline_version": "1.1.0",
+                "assertion_uuid": "test-assertion",
+                "published_date": "2026-01-01",
+                "assertion_url": "https://erepo.clinicalgenome.org/evrepo/",
+                "evidence_summary": "Test candidate from an older specification.",
+            },
+        }
+
+        result = evaluate_pvs1_rna("BRCA1", "c.5332G>A", candidate)
+
+        self.assertFalse(result["applies"])
+        self.assertEqual(result["points"], 0)
+        self.assertTrue(result["review_required"])
+        self.assertIn("active VCEP specification version", result["reason"])
+
     def test_complex_st2_transcript_result_is_not_guessed(self):
         result = evaluate_pvs1_rna("BRCA1", "c.212+1G>T")
         self.assertIsNotNone(result.get("source_record"))

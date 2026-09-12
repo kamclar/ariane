@@ -83,6 +83,7 @@ ariane/
 │   │   └── models.py                   # population evidence records
 │   ├── modules/
 │   │   ├── pvs1.py                     # PVS1 and PM5 evaluation
+│   │   ├── erepo_pvs1_rna.py           # validated ERepo PVS1 RNA registry
 │   │   ├── table4.py                   # ENIGMA Table 4 lookup
 │   │   ├── table9.py                   # ENIGMA Table 9 lookup
 │   │   ├── bp1.py                      # BP1 evaluation
@@ -123,17 +124,20 @@ Classification follows this order (higher level overrides lower):
 
 1. **BA1** - stand-alone benign (gnomAD non-cancer FAF95 > 0.1%), pouze po
    kontrole pokrytí, QC filtru a výjimky pro patogenní founder varianty
-2. **Table 9** - calibrated PS3/BS3 functional evidence
-3. **Table 4** - PVS1/PM5 structural rules
-4. **gnomAD** - BS1, PM2
-5. **SpliceAI/BayesDel** - PP3/BP4/BP7 according to the ENIGMA variant-type decision tree; PP3 is not stacked with PVS1
-6. **BP1** - outside functional domain
-7. **RNA evidence review recommendation** - informational only, no scoring
-8. **External comparison** - ClinVar + ClinGen ERepo, read-only
+2. **Approved ERepo PVS1 RNA registry** - exact ENIGMA v1.2 RNA assertions
+3. **Table 9** - calibrated PS3/BS3 functional evidence
+4. **Table 4** - PVS1/PM5 structural rules
+5. **gnomAD** - BS1, PM2
+6. **SpliceAI/BayesDel** - PP3/BP4/BP7 according to the ENIGMA variant-type decision tree; PP3 is not stacked with PVS1
+7. **BP1** - outside functional domain
+8. **RNA evidence review recommendation** - for evidence not covered by an approved exact registry record
+9. **External comparison** - live ClinVar + ClinGen ERepo, read-only
 
 ## Data sources
 
 - ENIGMA VCEP v1.2 (2024-11-18): Table 4, Table 9
+- ClinGen ERepo ENIGMA BRCA1/2 VCEP v1.2 PVS1 RNA assertions in a local
+  checksum-validated registry
 - gnomAD v2.1.1 exomes non-cancer
 - gnomAD v3.1.2 genomes non-cancer
 - SpliceAI: local Broad-compatible service using the digest-pinned image from
@@ -213,11 +217,13 @@ arrangement. The default is `Unknown`. Select `Confirmed tandem` only when the
 laboratory data support tandem arrangement; the application never infers it
 from copy number alone.
 
-Case-control, Fanconi anemia, family co-segregation, curated RNA evidence,
+Case-control, Fanconi anemia, family co-segregation, RNA evidence without an
+exact approved ERepo registry record,
 curated functional evidence outside Table 9, curated initiation-codon PVS1
 evidence, and curated splice PS1 evidence (`PS3`, `PS4`, `PM3`, `PP1`, `BS2`,
-`BS3`, `BS4`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`) are not part of
-the automatic Module 1 result. PP4 and BP5 outside the validated clinical LR
+`BS3`, `BS4`, `PVS1_RNA`, `BP7_RNA`, `PVS1_INIT`, `PS1_SPLICE`) are handled in
+manual review. Exact published PVS1 RNA assertions in the versioned local ERepo
+registry can enter the automatic Module 1 result. PP4 and BP5 outside the validated clinical LR
 snapshot can also be reviewed manually. After a variant is classified, the
 user can enter these evidence types in a separate manual-review panel. ARIANE
 derives the permitted strength in the backend from ENIGMA VCEP v1.2 thresholds

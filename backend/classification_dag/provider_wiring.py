@@ -18,6 +18,7 @@ from backend.modules import (
     ps1,
     ps1_splice_evidence,
     residues,
+    erepo_pvs1_rna,
 )
 from backend.population_frequency import PopulationFrequencyService
 
@@ -69,4 +70,7 @@ def production_provider_dependencies(
             *args, **kwargs
         ),
         ps1_lookup=lambda *args, **kwargs: ps1.evaluate_ps1(*args, **kwargs),
+        erepo_pvs1_rna_lookup=lambda *args, **kwargs: erepo_pvs1_rna.lookup_erepo_pvs1_rna(
+            *args, **kwargs
+        ),
     )

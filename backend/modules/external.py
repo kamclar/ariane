@@ -1,6 +1,6 @@
 # ============================================================
-# External comparison - ClinVar + ClinGen ERepo
-# Read-only reference, does not feed into classification
+# Live external comparison - ClinVar + ClinGen ERepo
+# Read-only reference. Curated PVS1 RNA uses a separate pinned local registry.
 # ============================================================
 from typing import Dict
 

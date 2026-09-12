@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "registry_id": "enigma_erepo_pvs1_rna_registry",
+  "registry_version": "2026-09-12",
+  "registry_sha256": "cd30c5c2c67f75148682d82117aca9bbdcba9b9ffa52d631039c0826b98b6f37",
+  "record_count": 4,
+  "coverage_status": "partial_verified_seed",
+  "validation_status": "approved"
+}

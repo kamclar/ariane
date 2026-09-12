@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from backend.classification_dag.domain import NormalizedVariant
-from backend.gene_policy import spliceai_thresholds
+from backend.gene_policy import reference_transcript, spliceai_thresholds, vcep_specification
 from backend.modules.spliceai_policy import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
@@ -61,6 +61,23 @@ def _spliceai_gap(
         return None
 
     splice_status = dict(artifacts.get("spliceai_status") or {})
+    if splice_status.get("replaced_by_curated_pvs1_rna") is True:
+        curated = artifacts.get("erepo_pvs1_rna_result")
+        record = curated.get("record") if isinstance(curated, Mapping) else None
+        specification = vcep_specification(variant.gene)
+        if (
+            isinstance(curated, Mapping)
+            and curated.get("status") == "eligible"
+            and isinstance(record, Mapping)
+            and record.get("gene") == variant.gene
+            and record.get("c_notation") == variant.c_notation
+            and record.get("reference_transcript") == reference_transcript(variant.gene)
+            and record.get("guideline_id") == specification["id"]
+            and record.get("guideline_version") == specification["version"]
+            and record.get("code") == "PVS1_RNA"
+            and record.get("evidence_mechanism") == "rna_splicing"
+        ):
+            return None
     score = artifacts.get("spliceai_score")
     status = str(splice_status.get("status") or "unavailable")
     assessed_complete = status == "ok" and score is not None

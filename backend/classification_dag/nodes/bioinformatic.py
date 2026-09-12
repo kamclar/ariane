@@ -34,16 +34,22 @@ class BioinformaticCriteriaNode:
         bayesdel_score = bundle_value(bundle, "bayesdel")
         splice = inputs["splice_context"]
         pvs1 = inputs["pvs1_family"].metadata["pvs1"]
+        pvs1_rna = inputs["pvs1_family"].metadata["pvs1_rna"]
+        figure1a_replaced = bool(pvs1_rna.get("applies"))
         decisions: list[CriterionDecision] = []
         warnings: list[str] = []
         interactions: list[Mapping[str, Any]] = []
-        pp3_bp4 = evaluate_pp3_bp4(
-            ci.gene,
-            ci.variant_type,
-            ci.p_notation,
-            bayesdel_score=bayesdel_score,
-            spliceai_score=splice.effective_score,
-            c_notation=ci.c_notation,
+        pp3_bp4 = (
+            {}
+            if figure1a_replaced
+            else evaluate_pp3_bp4(
+                ci.gene,
+                ci.variant_type,
+                ci.p_notation,
+                bayesdel_score=bayesdel_score,
+                spliceai_score=splice.effective_score,
+                c_notation=ci.c_notation,
+            )
         )
         for code, value in pp3_bp4.items():
             if not value.get("applies"):
@@ -64,7 +70,10 @@ class BioinformaticCriteriaNode:
                         evidence_item_ids=("spliceai", "bayesdel"),
                     )
                 )
-        if ci.variant_type.lower() in {"synonymous", "silent", "intronic"}:
+        if (
+            not figure1a_replaced
+            and ci.variant_type.lower() in {"synonymous", "silent", "intronic"}
+        ):
             protein_interval = get_amino_acid_interval(ci.p_notation)
             in_domain = bool(
                 overlapping_functional_domains(ci.gene, protein_interval)
@@ -90,11 +99,15 @@ class BioinformaticCriteriaNode:
                         evidence_item_ids=("spliceai",),
                     )
                 )
-        bp1 = evaluate_bp1(
-            ci.gene,
-            ci.variant_type,
-            ci.p_notation,
-            spliceai_score=splice.effective_score,
+        bp1 = (
+            {"applies": False}
+            if figure1a_replaced
+            else evaluate_bp1(
+                ci.gene,
+                ci.variant_type,
+                ci.p_notation,
+                spliceai_score=splice.effective_score,
+            )
         )
         if bp1["applies"]:
             decisions.append(
@@ -109,6 +122,7 @@ class BioinformaticCriteriaNode:
         figure1a_unavailable = (
             splice.effective_score is None
             and spliceai_required_for_classification(ci.variant_type)
+            and not figure1a_replaced
         )
         if figure1a_unavailable:
             warnings.append(
@@ -123,7 +137,11 @@ class BioinformaticCriteriaNode:
             "inframe_insertion",
             "inframe_delins",
         }
-        if bayesdel_score is None and ci.variant_type.lower() in bayesdel_types:
+        if (
+            bayesdel_score is None
+            and ci.variant_type.lower() in bayesdel_types
+            and not figure1a_replaced
+        ):
             warnings.append(
                 f"BayesDel_noAF not available for {ci.gene} {ci.c_notation}"
             )
@@ -134,9 +152,14 @@ class BioinformaticCriteriaNode:
             evidence_interactions=tuple(interactions),
             metadata={
                 "evaluation_status": (
-                    "unavailable" if figure1a_unavailable else "evaluated"
+                    "not_applicable"
+                    if figure1a_replaced
+                    else "unavailable"
+                    if figure1a_unavailable
+                    else "evaluated"
                 ),
                 "spliceai_available": splice.effective_score is not None,
+                "replaced_by_curated_pvs1_rna": figure1a_replaced,
             },
         )
         return NodeResult.succeeded(

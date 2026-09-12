@@ -6,7 +6,7 @@ Migrace odděluje normalizaci vstupu, získání evidence, rozhodování o krit�
 řešení interakcí evidence, klasifikaci a prezentaci. Přesun výpočtu do grafu
 nesmí sám o sobě změnit klinický výsledek.
 
-Produkční verze `4.0.0-gene-policy-provider-dag` již starý sekvenční klasifikátor nevolá.
+Produkční verze `4.1.0-gene-policy-provider-dag` již starý sekvenční klasifikátor nevolá.
 Vytváří `NormalizedVariant`, `EvidenceBundle`, samostatné výsledky rodin kritérií,
 mechanism-aware interakce, výslednou ENIGMA klasifikaci a manuální review výstupy.
 Každá rodina má vlastní uzel a společný slovník výsledku vzniká až v poslední
@@ -20,7 +20,7 @@ Pravidlové uzly jsou rozdělené podle odpovědnosti v
 | `context.py` | SpliceAI kontext a porovnání provenance s Table 9 |
 | `population.py` | BA1, BS1, PM2 a populační větev exonových CNV |
 | `functional.py` | Kalibrovaná funkční evidence PS3 a BS3 z Table 9 |
-| `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA pouze jako nebodované podklady pro odbornou revizi |
+| `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA z přesného schváleného ERepo registru nebo jako nebodované podklady pro odbornou revizi |
 | `clinical.py` | Klinické LR PP4/BP5 a proteinové PS1 |
 | `bioinformatic.py` | Figure 1A, PP3, BP4, BP1 a BP7 |
 | `policy.py` | Interakce evidence a výsledná ENIGMA kombinace |
@@ -33,7 +33,8 @@ Původní kompatibilní `native.py` i starý sekvenční klasifikátor byly odst
 
 Klasifikační evidence se již nezískává v `main.py`. Samostatné provider uzly
 získávají souřadnice, SpliceAI, BayesDel, gnomAD, Table 9, klinické LR, exonové
-CNV, důležité aminokyselinové pozice a podklady proteinového PS1. Každý zdroj
+CNV, důležité aminokyselinové pozice, podklady proteinového PS1 a schválené
+PVS1 RNA assertions z lokálního ERepo registru. Každý zdroj
 vrací `EvidenceItem` s explicitním stavem, důvodem a provenance. Sestavovací uzel
 vytvoří jediný neměnný `EvidenceBundle`, ze kterého čtou pravidlové uzly.
 
@@ -95,8 +96,15 @@ testy mohou dodat deterministické implementace. Výběr genu a VCEP politiky st
 probíhá přes verzovaný gene policy manifest. Přidání genu proto nemění transportní
 ani orchestration vrstvu.
 
-ClinVar a ClinGen ERepo nejsou vstupem klasifikace. Běží paralelně s DAGem a
-připojují se až jako externí porovnání vypočteného výsledku.
+Živé dotazy do ClinVar a ClinGen ERepo nejsou vstupem klasifikace. Běží
+paralelně s DAGem a připojují se až jako externí porovnání vypočteného výsledku.
+Výjimkou není živé API, ale samostatný checksumovaný registr přesných ERepo
+PVS1 RNA assertions. Ten je klasifikačním zdrojem se svou verzí a je součástí
+fingerprintu klasifikátoru.
+
+Přesná schválená PVS1 RNA assertion uzavírá splice mechanismus přímou evidencí.
+Provider SpliceAI v takovém případě vrátí `NOT_APPLICABLE` a Figure 1A se
+nevyhodnotí. Nejde o chybějící povinný vstup ani o náhradu chybějícího skóre.
 
 Po dokončení provider DAGu a před sestavením veřejné odpovědi volá orchestrátor
 `classification_completeness.py`. Brána kontroluje všechny zdroje, které jsou
@@ -159,8 +167,9 @@ klasifikační politika ENIGMA
 prezentace a externí porovnání
 ```
 
-Normalizace vstupu není klasifikační uzel. Porovnání s ClinVar a ClinGen ERepo
-je následná anotace a nesmí ovlivnit vypočtenou třídu.
+Normalizace vstupu není klasifikační uzel. Živé porovnání s ClinVar a ClinGen
+ERepo je následná anotace a nesmí ovlivnit vypočtenou třídu. Automatické PVS1
+RNA může pocházet jen z odděleného, lokálně schváleného ERepo registru.
 
 ## Kontrakt uzlu
 
@@ -273,7 +282,7 @@ klasifikaci do bodového postupu pro mixed evidence.
 Synchronní graf `4.0.0-gene-policy`, který přijímá předem sestavené
 `ClassificationInputs`, zůstává pro izolované testy pravidel a explicitní
 regresní korpus. HTTP klasifikace vždy používá asynchronní provider graf
-`4.0.0-gene-policy-provider-dag`.
+`4.1.0-gene-policy-provider-dag`.
 
 Regresní korpus nevolá alternativní klasifikátor. U každé varianty obsahuje
 schválenou třídu, počet bodů, přesný seznam kritérií, mixed evidence stav a

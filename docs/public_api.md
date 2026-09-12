@@ -132,8 +132,11 @@ or `protein_interval_unavailable`. These responses contain no classification.
 A completed negative observation does not count as a failure. Examples include
 a score below a criterion threshold, an absent variant in a successfully
 queried dataset, a filtered gnomAD record, and a policy-defined not-applicable
-branch. ClinVar and ClinGen ERepo remain external comparisons, so their failure
-does not invalidate the automatic classification.
+branch. Live ClinVar and ClinGen ERepo lookups remain external comparisons, so
+their failure does not invalidate the automatic classification. Automatic
+PVS1 RNA can use only an exact assertion in the versioned, checksum-validated
+local ERepo registry. A live ERepo response is not a fallback classification
+source.
 
 An unresolved pathogenic-founder check is a declared expert-review state, not
 a provider failure. The automatic result contains no BA1 or BS1 from that

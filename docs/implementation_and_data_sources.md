@@ -591,6 +591,35 @@ Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
 pacientskou mRNA s delecí exonu 12. ARIANE tento záznam předvyplní k revizi,
 ale sama z něj neurčí `PVS1 Strong (RNA)` ani jinou sílu.
 
+Automatické PVS1 RNA je možné pouze tehdy, když je pro přesnou variantu v
+referenčním transkriptu dostupná publikovaná ENIGMA BRCA1/2 VCEP assertion se
+specifikací v1.2 a s výslovně určenou konečnou RNA silou. Tyto záznamy se
+nečtou za běhu přímo z ERepo API. Po kontrole se zařazují do verzovaného souboru
+`backend/data/enigma_erepo_pvs1_rna_registry.json`, jehož checksum kontroluje
+backend při startu. Síla ani body se z textu za běhu neodhadují.
+
+První vydání registru je označené jako `partial_verified_seed`. Neobsahuje tedy
+všechny existující ERepo záznamy. Pokud v něm varianta není, znamená to pouze,
+že ARIANE nemá schválený lokální záznam pro automatické použití. Nejde o tvrzení,
+že RNA evidence nebo ERepo assertion neexistuje. V takovém případě zůstává
+standardní předvyplněná odborná revize bez bodů.
+
+Aktualizace registru se provádí jako datové vydání:
+
+1. Z živého ERepo se vyberou nové nebo změněné ENIGMA BRCA1/2 záznamy s PVS1.
+2. U každého kandidáta se ověří přesná HGVS, referenční transkript, CSpec ID,
+   verze 1.2.0, RNA mechanismus, konečná síla, datum publikace a assertion UUID.
+3. Záznam se přidá až po odborné kontrole. Celková klasifikace P/LP sama
+   nestačí a síla se nedopočítává z volného textu.
+4. Zvýší se verze registru, počet záznamů a SHA-256 v metadata souboru.
+5. Regresní test ověří přidělený kód, sílu, body, auditní stopu a potlačení
+   překrývající se Figure 1A evidence.
+
+Pokud se přesné PVS1 RNA použije z registru, Figure 1A se pro tuto klasifikaci
+nevyhodnocuje a SpliceAI se nevyžaduje. Audit uvádí stav `not_applicable` a
+`replaced_by_curated_pvs1_rna=true`. Výpadek SpliceAI proto nemůže zablokovat
+výsledek, který už stojí na přímé schválené RNA evidenci.
+
 Stejný postup se používá pro přesné záznamy ST2 označené jako `last base`.
 Poslední nukleotid exonu se neposuzuje jako kanonická donorová nebo akceptorová
 pozice `+/-1,2`. Pokud ST2 uvádí poškozující RNA výsledek, ARIANE přenese celý
@@ -1006,7 +1035,7 @@ Manuálně doplněná kritéria vytvářejí oddělený amended working result. 
 ## 5. Postup klasifikace
 
 Po normalizaci vstupu vytvoří backend `ClassificationRequest` a předá jej
-produkčnímu grafu `4.0.0-gene-policy-provider-dag`. `main.py` klasifikační zdroje přímo
+produkčnímu grafu `4.1.0-gene-policy-provider-dag`. `main.py` klasifikační zdroje přímo
 nevolá. Provider uzly grafu získají:
 
 - souřadnice GRCh37 a GRCh38,
@@ -1014,6 +1043,7 @@ nevolá. Provider uzly grafu získají:
 - BayesDel_noAF a informační AlphaMissense,
 - gnomAD,
 - ENIGMA Table 9,
+- schválené PVS1 RNA assertions z checksumovaného ERepo registru,
 - combined clinical LR,
 - exonovou CNV evidenci,
 - kurátorovanou informaci o důležitém reziduu,
@@ -1022,8 +1052,9 @@ nevolá. Provider uzly grafu získají:
 Nezávislé providery běží paralelně. Každý vrací typovaný `EvidenceItem` se stavem,
 důvodem a provenance. `EvidenceBundle` vznikne až po dokončení provider vrstvy.
 Nedostupná hodnota zůstává `UNAVAILABLE` a nepřevádí se na nulu ani na negativní
-výsledek pravidla. ClinVar a ClinGen ERepo jsou pouze externí porovnání a nejsou
-vstupem klasifikace.
+výsledek pravidla. Živé ClinVar a ClinGen ERepo jsou pouze externí porovnání a
+nejsou vstupem klasifikace. Samostatný lokální ERepo PVS1 RNA registr je
+validovaný klasifikační zdroj a jeho verze i checksum se ukládají do auditu.
 
 Před vydáním výsledku proběhne centrální kontrola úplnosti v
 `backend/services/classification_completeness.py`. Kontrola je závislá na
@@ -1976,9 +2007,15 @@ Selhání služby, chybějící GRCh37 souřadnice nebo nenalezená anotace maj�
 
 ## 12. ClinVar a ClinGen
 
-ClinVar a ClinGen ERepo se používají pro externí srovnání, auditní kontext a
-předvyplnění ověřitelných faktů v manuální revizi proteinového PS1. Jejich
-klasifikace se automaticky nepřičítá jako ACMG nebo ENIGMA kritérium.
+Živé ClinVar a ClinGen ERepo se používají pro externí srovnání, auditní kontext
+a předvyplnění ověřitelných faktů v manuální revizi proteinového PS1. Celková
+klasifikace varianty se automaticky nepřičítá jako ACMG nebo ENIGMA kritérium.
+
+Pro PVS1 RNA existuje úzce vymezená cesta přes lokální registr. Záznam musí
+odpovídat přesné c. HGVS v referenčním transkriptu, genu, příslušnému CSpec ID,
+verzi 1.2.0, RNA mechanismu, konečné síle a publikované assertion. Nesplnění
+kterékoli podmínky nepřidá body a vede k odborné revizi. Živá odpověď ERepo se
+nikdy nepoužije jako tichý fallback za registr.
 
 Pokud vyhledávání vrátí více kandidátů bez jednoznačné přesné shody, stav je `ambiguous`. Aplikace nevybere první ID.
 
@@ -2063,7 +2100,7 @@ kritériích, řešení interakcí evidence, výsledná klasifikace a prezentace
 oddělené vrstvy.
 
 Produkční klasifikaci provádí provider graf `ariane.vcep.classification`, verze
-`4.0.0-gene-policy-provider-dag`. Starý sekvenční evaluator se v aplikační cestě neimportuje
+`4.1.0-gene-policy-provider-dag`. Starý sekvenční evaluator se v aplikační cestě neimportuje
 ani nespouští. Jediná povolená hodnota `ARIANE_CLASSIFIER_ENGINE` je `dag` a jde
 zároveň o výchozí hodnotu. Režimy `legacy`, `shadow` ani fallback nejsou
 dostupné.
@@ -2084,13 +2121,14 @@ evidence.
 | `provider.bayesdel` | BayesDel_noAF a informační AlphaMissense |
 | `provider.gnomad` | Populační frekvence a pokrytí |
 | `provider.enigma.table9` | Lookup ve validovaném Table 9 datasetu, záznam verze a checksumu |
+| `provider.enigma.erepo_pvs1_rna` | Přesná PVS1 RNA assertion ze schváleného lokálního ERepo registru |
 | `provider.clinical_lr`, `provider.exon_cnv`, `provider.protein_ps1` | Další klasifikační evidence |
 | `contract.evidence_bundle` | Sestavení a kontrola typované evidence |
 | `context.spliceai.provenance` | Použití konfigurovaného SpliceAI skóre a auditní porovnání s Table 9 bez přepsání výsledku |
 | `rule.population_frequency` | BA1, BS1 a PM2 z předané gnomAD evidence |
 | `rule.exon_cnv.population` | Populační větev pro exonové delece a duplikace |
 | `rule.functional.table9` | PS3 nebo BS3 a Figure 1C decision path |
-| `rule.pvs1_pm5` | PVS1 a PM5 PTC; PVS1 RNA pouze jako nebodované podklady pro odbornou revizi |
+| `rule.pvs1_pm5` | PVS1 a PM5 PTC; PVS1 RNA z přesného schváleného registru nebo jako nebodované podklady pro odbornou revizi |
 | `rule.clinical_lr` | PP4 nebo BP5 z validované kombinované klinické LR evidence |
 | `rule.protein_ps1` | Proteinové PS1 ze schváleného registru referencí |
 | `rule.bioinformatic.figure1a` | PP3, BP4, BP7 a BP1 podle Figure 1A |
