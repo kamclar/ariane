@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 from backend.config import (
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
     EXON_CNV_EVIDENCE_PATH,
+    ENIGMA_EREPO_VCEP_METADATA_PATH,
+    ENIGMA_EREPO_VCEP_REGISTRY_PATH,
     PS1_PROTEIN_REGISTRY_PATH,
     ST2_SPLICE_EVIDENCE_PATH,
     ST7_PATH,
@@ -27,6 +29,8 @@ class RequiredDatasetValidationTests(unittest.TestCase):
             "table9": TABLE9_PATH,
             "st7": ST7_PATH,
             "ps1_protein_registry": PS1_PROTEIN_REGISTRY_PATH,
+            "enigma_erepo_vcep_registry": ENIGMA_EREPO_VCEP_REGISTRY_PATH,
+            "enigma_erepo_vcep_metadata": ENIGMA_EREPO_VCEP_METADATA_PATH,
             "st2_splice_evidence": ST2_SPLICE_EVIDENCE_PATH,
             "exon_cnv_evidence": EXON_CNV_EVIDENCE_PATH,
             "exon_cnv_evidence_manifest": EXON_CNV_EVIDENCE_MANIFEST_PATH,

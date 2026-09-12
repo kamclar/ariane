@@ -21,6 +21,7 @@ from backend.lookups.clinvar import clinvar_review_stars
 from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.modules.criterion_order import sorted_criterion_items
 from backend.modules.enigma_rules import clinical_annotations_for_variant
+from backend.modules.erepo_vcep import lookup_erepo_vcep_assertion
 from backend.modules.external import external_comparison
 from backend.modules.narrative import generate_narrative
 from backend.modules.vus_explanation import explain_vus
@@ -77,12 +78,15 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
     clingen = evidence.clingen
     result = evidence.result
     variant = evidence.variant
+    local_erepo = lookup_erepo_vcep_assertion(variant.gene, variant.c_notation)
+    local_erepo_record = dict(local_erepo.get("record") or {})
     comparison = external_comparison(
         variant.gene,
         variant.c_notation,
         result["predicted_class"],
         clinvar,
         clingen,
+        local_erepo,
     )
     submitters = [
         ExternalSubmitter(
@@ -93,7 +97,7 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
             is_enigma_ep=item.get("is_enigma_ep", False),
             review_status=item.get("review", ""),
             curated_status=(
-                "ClinGen/ENIGMA curated submitter"
+                "ENIGMA-labelled ClinVar submitter"
                 if item.get("is_enigma_ep", False)
                 else ""
             ),
@@ -104,13 +108,32 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
     ]
     aggregate = clinvar.get("aggregate", {})
     review_status = aggregate.get("review_status", "")
+    stars = clinvar_review_stars(review_status)
+    enigma_submission = dict(clinvar.get("enigma_submission") or {})
+    warning = ""
+    if local_erepo.get("status") in {
+        "historical_vcep_assertion",
+        "unversioned_vcep_assertion",
+    }:
+        version = str(local_erepo_record.get("assertion_method_version") or "not recorded")
+        warning = (
+            "An ENIGMA expert-panel assertion is present, but its recorded "
+            f"specification version is {version}, not the active v1.2. It is "
+            "shown for context and is not used as a current VCEP assertion."
+        )
+    elif stars == 3 and enigma_submission and local_erepo.get("status") != "current_vcep_assertion":
+        warning = (
+            "ClinVar contains a three-star ENIGMA expert-panel assertion, but "
+            "the active local ClinGen ERepo snapshot has no matching current "
+            "v1.2 assertion. It is shown for context only."
+        )
     return ExternalComparison(
         clinvar_status=str(clinvar.get("status") or "unavailable"),
         clinvar_message=_external_status_message("ClinVar", clinvar),
         clinvar_error=str(clinvar.get("error") or "")[:500],
         clinvar_classification=aggregate.get("classification", ""),
         clinvar_review_status=review_status,
-        clinvar_review_stars=clinvar_review_stars(review_status),
+        clinvar_review_stars=stars,
         clinvar_n_submitters=aggregate.get("n_submitters", 0),
         clinvar_has_conflict=clinvar.get("has_conflict", False),
         clinvar_submitters=submitters,
@@ -131,6 +154,12 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
             str(value) for value in clingen.get("cspec_ids", []) if value
         ],
         erepo_assertion_id=str(clingen.get("assertion_id") or ""),
+        erepo_registry_status=str(local_erepo.get("status") or "not_found"),
+        erepo_registry_assertion_uuid=str(local_erepo_record.get("uuid") or ""),
+        erepo_registry_method_version=str(
+            local_erepo_record.get("assertion_method_version") or ""
+        ),
+        historical_expert_panel_warning=warning,
     )
 
 

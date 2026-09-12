@@ -1408,6 +1408,9 @@
                                 <p class="field-hint ps1-resolution-message"
                                     x-show="item.code === 'PS1_PROTEIN' && ps1ReferenceMessage"
                                     x-text="ps1ReferenceMessage"></p>
+                                <p class="curation-warning"
+                                    x-show="item.code === 'PS1_PROTEIN' && ps1ReferenceWarning"
+                                    x-text="ps1ReferenceWarning"></p>
                                 <p class="inline-error"
                                     x-show="item.code === 'PS1_PROTEIN' && ps1ReferenceError"
                                     x-text="ps1ReferenceError"></p>
@@ -1418,14 +1421,17 @@
                                 </p>
                                 <p class="threshold-note" x-show="item.code === 'PS1_PROTEIN'">
                                     <strong>Prefilled facts:</strong> Variant identity, protein consequence,
-                                    ST7 candidate classification, available SpliceAI results and recorded
+                                    current ClinGen ERepo or accepted ST7 reference classification,
+                                    available SpliceAI results and recorded
                                     ENIGMA RNA/splice source checks are completed automatically where data
-                                    are available. An ST7 P/LP classification is accepted as the reference
-                                    classification basis. Identity, protein mechanism, splice evidence and
+                                    are available. Current ERepo v1.2 and accepted ST7 P/LP records can provide
+                                    the reference classification basis. Identity, protein mechanism, splice evidence and
                                     SpliceAI requirements remain mandatory.
                                 </p>
                                 <p class="curation-warning" x-show="item.code === 'PS1_PROTEIN'">
                                     ClinVar review stars describe the review status of a submitted classification.
+                                    Two stars mean that multiple submitters currently agree, not that their
+                                    classifications or supporting evidence are independent.
                                     They do not establish that the reference was classified under the applicable
                                     ENIGMA VCEP specifications. Using the ClinVar aggregate conclusion itself as
                                     proof of the reference classification would be circular. ARIANE therefore does
@@ -1737,6 +1743,9 @@
                     <!-- ENIGMA EP comparison -->
                     <div class="external-block">
                         <h4>ENIGMA Expert Panel</h4>
+                        <p class="curation-warning"
+                           x-show="result?.external?.historical_expert_panel_warning"
+                           x-text="result?.external?.historical_expert_panel_warning"></p>
                         <p class="external-source-status"
                            x-show="!result?.external?.enigma_ep_class"
                            x-text="result?.external?.clingen_message || 'ClinGen ERepo status was not reported.'"></p>

@@ -308,18 +308,18 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         protein_ps1 = json.loads(
             (DATA / "ps1_protein_reference_registry.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(protein_ps1["schema_version"], 5)
+        self.assertEqual(protein_ps1["schema_version"], 6)
         self.assertEqual(
             protein_ps1["candidate_source"]["usage"],
             "accepted_ps1_classification_basis_with_runtime_checks",
         )
-        self.assertEqual(protein_ps1["reference_count"], 60)
+        self.assertEqual(protein_ps1["reference_count"], 85)
         self.assertEqual(
             protein_ps1["status_counts"],
-            {"eligible": 40, "excluded": 20},
+            {"eligible": 63, "excluded": 22},
         )
         self.assertEqual(sum(
-            record["classification_verification"] == "enigma_st7_v1_2_reference_set"
+            "enigma_st7_v1_2_reference_set" in record.get("source_memberships", [])
             and record["status"] == "eligible"
             for record in protein_ps1["references"]
         ), 40)
@@ -336,7 +336,12 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
             "spliceai_score" not in record["reference_splice_evidence"]
             for record in protein_ps1["references"]
         ))
-        self.assertEqual(len(protein_ps1["references"]), 60)
+        self.assertEqual(len(protein_ps1["references"]), 85)
+        self.assertEqual(sum(
+            "clingen_erepo_vcep_v1_2" in record.get("source_memberships", [])
+            and record["status"] == "eligible"
+            for record in protein_ps1["references"]
+        ), 24)
         self.assertEqual(
             {
                 item["id"]
@@ -356,6 +361,23 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         )
         self.assertEqual(extensions["schema_version"], 1)
         self.assertEqual(extensions["records"], [])
+
+        erepo = json.loads(
+            (DATA / "enigma_erepo_vcep_registry.json").read_text(encoding="utf-8")
+        )
+        erepo_metadata = json.loads(
+            (DATA / "enigma_erepo_vcep_registry.metadata.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(erepo["record_count"], 180)
+        self.assertEqual(
+            erepo["source_status_counts"],
+            {
+                "current_vcep_assertion": 44,
+                "historical_vcep_assertion": 90,
+                "unversioned_vcep_assertion": 46,
+            },
+        )
+        self.assertEqual(erepo_metadata["record_count"], 180)
 
         st2 = json.loads(
             (DATA / "enigma_st2_splice_evidence.json").read_text(encoding="utf-8")

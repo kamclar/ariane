@@ -33,6 +33,8 @@ DATA = PROJECT_ROOT / "backend" / "data"
 ST7_PATH = DATA / "st7_reference_set.json"
 TABLE9_PATH = DATA / "enigma_table9.json"
 ST2_PATH = DATA / "enigma_st2_splice_evidence.json"
+EREPO_PATH = DATA / "enigma_erepo_vcep_registry.json"
+EREPO_METADATA_PATH = DATA / "enigma_erepo_vcep_registry.metadata.json"
 OUTPUT_PATH = DATA / "ps1_protein_reference_registry.json"
 EXTENSIONS_PATH = DATA / "ps1_protein_reference_extensions.json"
 def _sha256(path: Path) -> str:
@@ -85,6 +87,8 @@ def build() -> Dict[str, Any]:
         "table9_sha256": _sha256(TABLE9_PATH),
         "st2_sha256": _sha256(ST2_PATH),
         "curated_extensions_sha256": _sha256(EXTENSIONS_PATH),
+        "erepo_vcep_registry_sha256": _sha256(EREPO_PATH),
+        "erepo_vcep_metadata_sha256": _sha256(EREPO_METADATA_PATH),
     }
     records = []
     for source in st7["variants"]:
@@ -113,6 +117,9 @@ def build() -> Dict[str, Any]:
             "classification_verification": "enigma_st7_v1_2_reference_set",
             "classification_source": source.get("source") or "ENIGMA ST7 v1.2",
             "candidate_source": "ENIGMA Supplementary Table 7 v1.2",
+            "source_memberships": ["enigma_st7_v1_2_reference_set"],
+            "st7_source_classification": classification,
+            "st7_source_classification_source": source.get("source") or "ENIGMA ST7 v1.2",
             "status": status,
             "status_reason": status_reason,
             "protein_branch": protein_branch,
@@ -153,6 +160,111 @@ def build() -> Dict[str, Any]:
         record["approval_basis_checksum"] = _record_checksum(record)
         records.append(record)
 
+    erepo = json.loads(EREPO_PATH.read_text(encoding="utf-8"))
+    erepo_metadata = json.loads(EREPO_METADATA_PATH.read_text(encoding="utf-8"))
+    if (
+        erepo.get("schema_version") != 1
+        or erepo.get("status") != "active"
+        or erepo_metadata.get("registry_sha256") != _sha256(EREPO_PATH)
+    ):
+        raise RuntimeError("ENIGMA ERepo VCEP registry is unavailable or has a bad checksum")
+    records_by_variant = {
+        (record["gene"], record["c_notation"]): record for record in records
+    }
+    for assertion in erepo.get("records", []):
+        if (
+            assertion.get("source_status") != "current_vcep_assertion"
+            or assertion.get("classification") not in {"Pathogenic", "Likely Pathogenic"}
+            or not _is_normalized_missense(str(assertion.get("p_notation") or ""))
+        ):
+            continue
+        gene = assertion["gene"]
+        c_notation = assertion["c_notation"]
+        table9 = table9_lookup_ps3_bs3(gene, c_notation)
+        splice = evaluate_defined_splice_sources(gene, c_notation, table9)
+        status, protein_branch, status_reason = _status(splice["status"])
+        ps1_used = any(
+            str(code).upper().startswith("PS1")
+            for code in assertion.get("criteria_met", [])
+        )
+        if ps1_used:
+            status = "review_required"
+            status_reason = (
+                "The current ERepo classification used PS1, but its PS1 reference "
+                "dependency is not encoded in this registry."
+            )
+        key = (gene, c_notation)
+        record = records_by_variant.get(key)
+        if record is None:
+            record = {
+                "reference_id": f"CLINGEN_EREPO_V1_2|{gene}|{c_notation}",
+                "gene": gene,
+                "transcript": assertion["transcript"],
+                "c_notation": c_notation,
+                "p_notation": assertion["p_notation"],
+                "iarc_class": 5 if assertion["classification"] == "Pathogenic" else 4,
+                "protein_mechanism_evidence": {
+                    "basis": (
+                        "enigma_table9_ps3_functional_evidence"
+                        if str(table9.get("code") or "").upper() == "PS3"
+                        else "pathogenic_missense_with_no_predicted_or_confirmed_splice_effect"
+                    ),
+                    "table9_code": table9.get("code"),
+                    "table9_strength": table9.get("strength"),
+                    "table9_summary": table9.get("text"),
+                },
+                "reference_splice_evidence": {
+                    "threshold": 0.1,
+                    "prediction_policy": "runtime_required",
+                    "confirmed_status": splice["status"],
+                    "sources_checked": list(DEFINED_SOURCES),
+                    "checked_at": date.today().isoformat(),
+                    "source_details": splice,
+                    "provenance": {
+                        "provider": "configured_spliceai_service_at_classification_time",
+                        "input_variant": f"{gene}:{c_notation}",
+                        "transcript_policy": "reference_transcript",
+                        **source_checksums,
+                    },
+                },
+            }
+            records.append(record)
+            records_by_variant[key] = record
+        memberships = list(record.get("source_memberships") or [])
+        if "clingen_erepo_vcep_v1_2" not in memberships:
+            memberships.append("clingen_erepo_vcep_v1_2")
+        record.update(
+            {
+                "classification": assertion["classification"],
+                "classification_verification": "external_vcep_assertion",
+                "classification_source": (
+                    "ClinGen Evidence Repository ENIGMA BRCA1/2 VCEP v1.2 "
+                    f"assertion {assertion['uuid']}"
+                ),
+                "classification_assertion": {
+                    "organization": "ENIGMA BRCA1 and BRCA2 VCEP",
+                    "assertion_id": assertion["uuid"],
+                    "ruleset_version": assertion["assertion_method_version"],
+                    "accessed_at": str(erepo_metadata.get("retrieved_at") or ""),
+                    "url": assertion["erepo_url"],
+                },
+                "candidate_source": "ClinGen Evidence Repository",
+                "source_memberships": memberships,
+                "status": status,
+                "status_reason": status_reason,
+                "protein_branch": protein_branch,
+                "classification_ps1_dependency": {
+                    "used": ps1_used,
+                    "reference_ids": ["unresolved_external_ps1_reference"] if ps1_used else [],
+                    "basis": (
+                        "PS1 is listed among the ERepo criteria and requires dependency review."
+                        if ps1_used
+                        else "PS1 is not listed among the criteria met in the current ERepo assertion."
+                    ),
+                },
+            }
+        )
+
     extensions = json.loads(EXTENSIONS_PATH.read_text(encoding="utf-8"))
     if extensions.get("schema_version") != 1 or extensions.get("status") != "active":
         raise RuntimeError("Protein PS1 curated extension file has unsupported metadata")
@@ -168,15 +280,18 @@ def build() -> Dict[str, Any]:
     if len(record_keys) != len(set(record_keys)):
         raise RuntimeError("Protein PS1 sources contain a duplicate gene/c. reference")
 
+    for record in records:
+        record["approval_basis_checksum"] = _record_checksum(record)
     records.sort(key=lambda item: (item["gene"], item["c_notation"]))
     counts = Counter(record["status"] for record in records)
     return {
-        "schema_version": 5,
+        "schema_version": 6,
         "registry_version": date.today().isoformat() + ".1",
         "status": "active",
         "description": (
-            "ENIGMA ST7 v1.2 P/LP missense references accepted for protein-level "
-            "PS1, plus separately verified VCEP references from curated extensions. The "
+            "Current ENIGMA BRCA1/2 VCEP v1.2 P/LP missense assertions from the "
+            "ClinGen Evidence Repository, ENIGMA ST7 v1.2 references and separately "
+            "verified curated extensions. The "
             "reference and assessed-variant SpliceAI scores are computed on demand."
         ),
         "rule_source": {
@@ -221,8 +336,8 @@ def build() -> Dict[str, Any]:
                 },
                 {
                     "id": "external_vcep_assertion",
-                    "source": "Versioned ENIGMA/ClinGen VCEP assertion, normally ClinGen Evidence Repository or a ClinVar expert-panel assertion",
-                    "use": "May enter through the curated extension file after identity, transcript, mechanism, splice and provenance validation."
+                    "source": "Current ENIGMA BRCA1/2 VCEP v1.2 assertion in the checksum-validated local ClinGen Evidence Repository snapshot",
+                    "use": "Accepted after identity, transcript, mechanism, splice, version and provenance validation. ClinVar review stars are not a source of eligibility."
                 },
                 {
                     "id": "locally_recurated_under_enigma_vcep",

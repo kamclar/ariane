@@ -845,8 +845,9 @@ automaticky nepřidělí. Rozdíl proti Table 9 se zobrazí a rozdíl mezi ENIGM
 predikčními pásmy vyžaduje odbornou kontrolu provenance.
 
 Automatické body lze přidat pouze ze záznamu se stavem `eligible` v
-`backend/data/ps1_protein_reference_registry.json`. Registr nyní obsahuje 60
-ST7 missense referencí: 40 `eligible` a 20 `excluded`. Každý záznam obsahuje
+`backend/data/ps1_protein_reference_registry.json`. Registr nyní obsahuje 85
+missense referencí z aktuálního ERepo v1.2 a ST7: 63 `eligible` a 22
+`excluded`. Každý záznam obsahuje
 původ klasifikace, splice stav reference, SpliceAI provenance, kontrolované
 zdroje, datum, checksum podkladu a známé PS1 závislosti. Validátor odmítá přímou
 i delší známou kruhovou závislost. U ST7 je závislost nastavena na `false`,
@@ -860,15 +861,17 @@ zobrazí s důvodem vyloučení a nelze jej manuálně potvrdit jako proteinové
 Potvrzený nebo predikovaný splice efekt proteinové PS1 vylučuje. Konfliktní
 nebo neúplná evidence vede k revizi.
 
-ARIANE u kandidáta předvyplní c. a p. notaci reference, ST7 klasifikaci a
+ARIANE u kandidáta předvyplní c. a p. notaci reference, přijatou klasifikaci a
 zdroj, shodu proteinového následku, odlišnost nukleotidové změny, dostupné
-SpliceAI výsledky a kontrolu definovaných RNA/splice zdrojů. ClinVar a ClinGen
-ERepo se na pozadí kontrolují na samostatnou ENIGMA VCEP assertion. Nedoložené
-podmínky zůstávají viditelně neuzavřené.
+SpliceAI výsledky a kontrolu definovaných RNA/splice zdrojů. Aktuální ENIGMA
+VCEP assertion se čte z povinného lokálního ERepo snapshotu. Živý ClinVar a
+ERepo se používají pouze k porovnání. Nedoložené podmínky zůstávají viditelně
+neuzavřené.
 
-Parser ERepo používá aktuální strukturu odpovědi
-`guideline.agents[].evidenceCodes`. Vrácené CSpec ID, verze pravidel,
-identifikátor assertion a použité evidence codes se zachovávají pro audit.
+ERepo snapshot vzniká z úplného exportu a detailu každé vybrané assertion.
+Ukládá UUID, přesný assertion method ID, verzi pravidel, klasifikaci, evidence
+codes, datum schválení a odkaz na zdroj. Starší verze a záznamy bez explicitní
+verze zůstávají pouze auditním kontextem.
 
 Stav `none_identified` neznamená, že splice efekt neexistuje. Znamená pouze, že
 nebyl nalezen při kontrole přesně uvedených verzí ENIGMA Table 9 a
@@ -1303,18 +1306,20 @@ Registr proteinových referencí:
 `backend/data/ps1_protein_reference_registry.json`.
 Generátor: `scripts/build_ps1_protein_reference_registry.py`.
 
-Registr obsahuje 60 P/LP missense referencí z ST7. Aktuální sestavení obsahuje
-40 záznamů `eligible` a 20 `excluded`. Neúplný, poškozený nebo se ST7 neshodný registr zastaví start
+Registr obsahuje 85 P/LP missense referencí z aktuálních ERepo v1.2 assertion a
+ST7. Aktuální sestavení obsahuje 63 záznamů `eligible` a 22 `excluded`.
+Neúplný, poškozený nebo se zdrojovými snapshoty neshodný registr zastaví start
 aplikace.
 
 Povolené klasifikační zdroje registru jsou:
 
 - oficiální P/LP reference ENIGMA ST7 v1.2 jako přijatý klasifikační základ;
-- verzované oficiální ENIGMA/ClinGen VCEP assertions mimo ST7;
+- aktuální ENIGMA BRCA1/2 VCEP v1.2 assertions z checksumovaného lokálního
+  snapshotu ClinGen Evidence Repository;
 - úplné lokální reklasifikace podle deklarované verze ENIGMA VCEP pravidel,
   jasně označené jako lokální.
 
-Reference mimo ST7 se udržují v kurátorovaném zdrojovém souboru
+Lokálně kurátorované reference mimo ERepo a ST7 se udržují ve zdrojovém souboru
 `backend/data/ps1_protein_reference_extensions.json`. Generátor jej sloučí se
 ST7. Validátor u oficiální assertion vyžaduje organizaci, identifikátor
 assertion, verzi pravidel a datum přístupu. U lokální reklasifikace vyžaduje
@@ -1325,12 +1330,14 @@ ani predikce samy o sobě nejsou přípustným klasifikačním základem `eligib
 reference. Mohou sloužit k nalezení kandidáta nebo jako podklady následné úplné
 VCEP reklasifikace.
 
-Identita a klasifikace současných 60 záznamů pochází ze ST7. Známá RNA evidence
+Registr obsahuje 26 aktuálních P/LP missense assertion ERepo v1.2 a 60 P/LP
+missense záznamů ST7; jedna reference je v obou zdrojích. Známá RNA evidence
 se kontroluje proti úplné Table 9 a úplným ST2 a ST3. SpliceAI skóre není součástí
 registru. Při použití PS1 se vypočítá na požádání pro hodnocenou i referenční
 variantu stejnou verzovanou službou. Transkript a normalizovaný proteinový
 následek se vážou na kanonické ENIGMA RefSeq transkripty. Registr ukládá
-checksum ST7, Table 9, společného snapshotu ST2/ST3 i kurátorovaného extension souboru.
+checksum ERepo registru a jeho metadat, ST7, Table 9, společného snapshotu
+ST2/ST3 i kurátorovaného extension souboru.
 
 Každý záznam ukládá také podklad proteinového mechanismu. Ze 40 současných
 `eligible` referencí má 35 PS3 Strong funkční evidenci v Table 9. U pěti je
@@ -1338,12 +1345,14 @@ podkladem patogenní missense klasifikace spolu s absencí predikovaného a
 potvrzeného splice efektu. Nový externí nebo lokálně reklasifikovaný záznam musí
 mít odpovídající mechanismus výslovně kurátorovaný.
 
-Nález způsobilé ST7 shody může přidělit PS1 až po splnění všech runtime
+Nález způsobilé ERepo nebo ST7 shody může přidělit PS1 až po splnění všech runtime
 podmínek. Při chybějícím výsledku formulář předvyplní identitu reference,
 proteinový následek, ST7 klasifikaci a zdroj, objektivní porovnání variant,
-dostupná SpliceAI skóre a kontrolu definovaných RNA/splice zdrojů. ClinVar a
-ClinGen ERepo se kontrolují na aktuální ENIGMA VCEP assertion. Běžná ClinVar
-P/LP klasifikace ani počet hvězdiček stav `eligible` nevytvářejí.
+dostupná SpliceAI skóre a kontrolu definovaných RNA/splice zdrojů. Aktuální
+VCEP assertion se čte z lokálního checksumovaného ERepo snapshotu. Běžná
+ClinVar P/LP klasifikace ani počet hvězdiček stav `eligible` nevytvářejí.
+Starší nebo v ERepo neversionovaná expert-panel assertion se zobrazí pouze jako
+upozornění pro manuální revizi.
 
 ### 6.4 Velké exonové CNV
 
@@ -2017,9 +2026,15 @@ Selhání služby, chybějící GRCh37 souřadnice nebo nenalezená anotace maj�
 
 ## 12. ClinVar a ClinGen
 
-Živé ClinVar a ClinGen ERepo se používají pro externí srovnání, auditní kontext
-a předvyplnění ověřitelných faktů v manuální revizi proteinového PS1. Celková
-klasifikace varianty se automaticky nepřičítá jako ACMG nebo ENIGMA kritérium.
+Živé ClinVar a ClinGen ERepo se používají pro externí srovnání a auditní
+kontext. Pro proteinové PS1 se aktuální ENIGMA BRCA1/2 VCEP v1.2 assertion čte
+z úplného checksumovaného lokálního ERepo snapshotu. Celková klasifikace
+varianty se automaticky nepřičítá jako samostatné ACMG nebo ENIGMA kritérium;
+může být pouze klasifikačním základem referenční varianty v přesné větvi PS1.
+
+ClinVar review stars nejsou zdrojem způsobilosti. Tříhvězdičková starší ENIGMA
+assertion a ERepo záznam bez explicitně uvedené v1.2 assertion method se
+zobrazí s upozorněním a automaticky se nepoužijí.
 
 Pro PVS1 RNA existuje úzce vymezená cesta přes lokální registr. Záznam musí
 odpovídat přesné c. HGVS v referenčním transkriptu, genu, příslušnému CSpec ID,

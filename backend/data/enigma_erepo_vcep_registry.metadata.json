@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "status": "active",
+  "registry_file": "enigma_erepo_vcep_registry.json",
+  "registry_sha256": "cb75a1b94052d7c8e9aea237a4284c9eb4dffb5e32721691a7b9a44023d0dcc4",
+  "source_export_url": "https://erepo.clinicalgenome.org/evrepo/api/summary/classifications/download?type=csv",
+  "source_export_sha256": "c2493d648bc8fb1b1d60dfd2256b774c2c67f8071e3f4ce717514cf5b0c16beb",
+  "source_service_url": "https://erepo.clinicalgenome.org/evrepo/api/summary/srvc",
+  "source_api_version": "1.6.1",
+  "retrieved_at": "2026-09-12T14:39:21.386916+00:00",
+  "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+  "guideline_affiliation_id": "50087",
+  "record_count": 180,
+  "classification_counts": {
+    "Benign": 22,
+    "Likely Benign": 10,
+    "Likely Pathogenic": 78,
+    "Pathogenic": 32,
+    "Uncertain Significance": 38
+  },
+  "assertion_method_version_counts": {
+    "": 46,
+    "1.0.0": 40,
+    "1.1.0": 50,
+    "1.2.0": 44
+  },
+  "source_status_counts": {
+    "current_vcep_assertion": 44,
+    "historical_vcep_assertion": 90,
+    "unversioned_vcep_assertion": 46
+  }
+}

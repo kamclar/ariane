@@ -201,6 +201,8 @@ def clinvar_parse_vcv(va: ET.Element) -> dict:
             "review":       review,
             "comment":      comment or "",
             "contributes":  contributes == "true",
+            # Submitter-name marker for display only. Current VCEP/version
+            # eligibility is resolved from the local ClinGen ERepo snapshot.
             "is_enigma_ep": "ENIGMA" in org or "Evidence-based Network" in org,
         }
         submissions.append(entry)

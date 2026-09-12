@@ -94,7 +94,7 @@ def compute_approval_basis_checksum(record: Dict[str, Any]) -> str:
 
 def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
     """Validate the curated automatic-scoring registry and known dependencies."""
-    if data.get("schema_version") != 5 or data.get("status") != "active":
+    if data.get("schema_version") != 6 or data.get("status") != "active":
         raise RuntimeError("PS1 protein reference registry has unsupported metadata")
     if not str(data.get("registry_version") or "").strip():
         raise RuntimeError("PS1 protein reference registry has no registry_version")
@@ -123,6 +123,8 @@ def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
         "table9_sha256",
         "st2_sha256",
         "curated_extensions_sha256",
+        "erepo_vcep_registry_sha256",
+        "erepo_vcep_metadata_sha256",
     }
     if not isinstance(source_checksums, dict) or set(source_checksums) != required_checksum_keys:
         raise RuntimeError("PS1 protein reference registry has invalid source checksums")
@@ -297,7 +299,7 @@ def _load_references() -> None:
     st7_registry = {
         key: record
         for key, record in registry_by_variant.items()
-        if record.get("classification_verification") == "enigma_st7_v1_2_reference_set"
+        if "enigma_st7_v1_2_reference_set" in record.get("source_memberships", [])
     }
     if set(st7_registry) != set(expected_st7):
         raise RuntimeError(
@@ -308,8 +310,9 @@ def _load_references() -> None:
         expected_class = "Pathogenic" if source["iarc_class"] == 5 else "Likely Pathogenic"
         if (
             record.get("p_notation") != source.get("p_notation")
-            or record.get("classification") != expected_class
-            or record.get("classification_source") != (source.get("source") or "ENIGMA ST7 v1.2")
+            or record.get("st7_source_classification") != expected_class
+            or record.get("st7_source_classification_source")
+            != (source.get("source") or "ENIGMA ST7 v1.2")
         ):
             raise RuntimeError(f"PS1 registry record does not match ST7 for {key[0]}:{key[1]}")
 

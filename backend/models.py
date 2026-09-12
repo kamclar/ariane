@@ -159,6 +159,10 @@ class ExternalComparison(BaseModel):
     erepo_guideline_versions: List[str] = []
     erepo_cspec_ids: List[str] = []
     erepo_assertion_id: str = ""
+    erepo_registry_status: str = "not_found"
+    erepo_registry_assertion_uuid: str = ""
+    erepo_registry_method_version: str = ""
+    historical_expert_panel_warning: str = ""
 
 
 class AlphaMissenseResult(BaseModel):
@@ -436,6 +440,10 @@ class Ps1ReferenceResolutionResponse(BaseModel):
     clingen_status: str = "not_found"
     clingen_error: str = ""
     clingen_caid: str = ""
+    erepo_registry_status: str = "not_found"
+    erepo_assertion_uuid: str = ""
+    erepo_assertion_method_version: str = ""
+    historical_expert_panel_warning: str = ""
     classification: str = ""
     classification_verification: str = "unresolved"
     classification_source: str = ""

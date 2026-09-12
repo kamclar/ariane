@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
 
 from backend.lookups import clingen, clinvar, spliceai
+from backend.modules.erepo_vcep import lookup_erepo_vcep_assertion
 from backend.modules.ps1 import lookup_ps1_reference_variant
 from backend.modules.variant_input import normalize_variant_input
 from backend.modules.variant_type import infer_variant_type
@@ -44,6 +45,7 @@ class Ps1ReferenceDependencies:
     spliceai_status: Callable[[str, str], Dict[str, Any]]
     clinvar_lookup: Callable[[str, str], Dict[str, Any]]
     clingen_lookup: Callable[[str, str], Dict[str, Any]]
+    erepo_registry_lookup: Callable[[str, str], Dict[str, Any]]
     registry_lookup: Callable[[str, str], Optional[Dict[str, Any]]]
 
     @classmethod
@@ -53,6 +55,7 @@ class Ps1ReferenceDependencies:
             spliceai_status=spliceai.get_spliceai_status,
             clinvar_lookup=clinvar.clinvar_lookup,
             clingen_lookup=clingen.clingen_erepo_lookup,
+            erepo_registry_lookup=lookup_erepo_vcep_assertion,
             registry_lookup=lookup_ps1_reference_variant,
         )
 
@@ -124,29 +127,31 @@ async def resolve_ps1_reference(
     registry_reference = dict(
         deps.registry_lookup(reference.gene, reference.c_notation) or {}
     )
+    erepo_registry_result = dict(
+        deps.erepo_registry_lookup(reference.gene, reference.c_notation) or {}
+    )
+    erepo_registry_record = dict(erepo_registry_result.get("record") or {})
     aggregate = dict(clinvar.get("aggregate") or {})
     stars = _clinvar_review_stars(str(aggregate.get("review_status") or ""))
     aggregate_class = _classification_label(aggregate.get("classification"))
     enigma_submission = dict(clinvar.get("enigma_submission") or {})
     enigma_class = _classification_label(enigma_submission.get("class"))
-    erepo_class = _classification_label(clingen.get("classification"))
+    local_erepo_class = _classification_label(erepo_registry_record.get("classification"))
     registry_class = _classification_label(registry_reference.get("classification"))
 
     classification = ""
     verification = "unresolved"
     source = ""
-    if enigma_class in P_LP:
-        classification = enigma_class
+    if (
+        erepo_registry_result.get("status") == "current_vcep_assertion"
+        and local_erepo_class in P_LP
+    ):
+        classification = local_erepo_class
         verification = "external_vcep_assertion"
-        source = "ClinVar ENIGMA expert-panel assertion"
-        if enigma_submission.get("scv"):
-            source += f" {enigma_submission['scv']}"
-    elif clingen.get("status") == "ok" and erepo_class in P_LP:
-        classification = erepo_class
-        verification = "external_vcep_assertion"
-        source = "ClinGen Evidence Repository ENIGMA assertion"
-        if clingen.get("caid"):
-            source += f" {clingen['caid']}"
+        source = (
+            "ClinGen Evidence Repository ENIGMA BRCA1/2 VCEP v1.2 assertion "
+            f"{erepo_registry_record.get('uuid', '')}"
+        ).strip()
     elif (
         registry_reference.get("classification_basis")
         == "enigma_st7_v1_2_reference_set"
@@ -165,6 +170,30 @@ async def resolve_ps1_reference(
         classification = ""
         verification = "unresolved"
         source = ""
+
+    non_current_erepo = erepo_registry_result.get("status") in {
+        "historical_vcep_assertion",
+        "unversioned_vcep_assertion",
+    }
+    historical_three_star = bool(
+        stars == 3 and enigma_class in P_LP and verification == "unresolved"
+    )
+    historical_warning = ""
+    if non_current_erepo:
+        version = str(erepo_registry_record.get("assertion_method_version") or "unknown")
+        historical_warning = (
+            "ClinGen ERepo contains an ENIGMA expert-panel assertion for this variant, "
+            f"but its recorded specification version is {version}, not the active v1.2. "
+            "It is shown for context "
+            "but is not used as an automatic v1.2 PS1 classification basis."
+        )
+    elif historical_three_star:
+        historical_warning = (
+            "ClinVar contains a three-star ENIGMA expert-panel assertion, but the "
+            "active local ClinGen ERepo snapshot has no matching current v1.2 "
+            "assertion. It is shown for context and does not qualify the PS1 "
+            "reference automatically."
+        )
 
     same_missense = assessed.p_notation == reference.p_notation
     different_nucleotide = assessed.c_notation != reference.c_notation
@@ -191,7 +220,8 @@ async def resolve_ps1_reference(
     )
     if verification == "external_vcep_assertion":
         review_message = (
-            "An ENIGMA VCEP P/LP assertion was found. Complete the defined RNA/splice "
+            "A current ENIGMA BRCA1/2 VCEP v1.2 P/LP assertion was found in the "
+            "checksum-validated local ClinGen ERepo snapshot. Complete the defined RNA/splice "
             "source check and reciprocal PS1 dependency review before submitting PS1."
         )
     elif verification == "enigma_st7_v1_2_reference_set":
@@ -221,15 +251,18 @@ async def resolve_ps1_reference(
     if clinvar.get("status") == "api_error":
         review_message += " ClinVar was unavailable, so its classification could not be checked."
     if clingen.get("status") == "api_error":
-        review_message += " ClinGen ERepo was unavailable, so its VCEP assertion could not be checked."
+        review_message += (
+            " The live ClinGen ERepo comparison was unavailable. The validated local "
+            "snapshot remained the only source used for VCEP eligibility."
+        )
 
     variation_id = str(clinvar.get("variation_id") or "")
     accession = str(clinvar.get("accession") or "")
     references = []
     if variation_id:
         references.append(f"https://www.ncbi.nlm.nih.gov/clinvar/variation/{variation_id}/")
-    if clingen.get("status") == "ok":
-        references.append("https://erepo.clinicalgenome.org/evrepo/")
+    if erepo_registry_record.get("erepo_url"):
+        references.append(str(erepo_registry_record["erepo_url"]))
 
     return {
         "assessed": _resolved_variant(assessed, assessed_score, assessed_status),
@@ -246,6 +279,14 @@ async def resolve_ps1_reference(
         "clingen_status": str(clingen.get("status") or "not_found"),
         "clingen_error": str(clingen.get("error") or ""),
         "clingen_caid": str(clingen.get("caid") or ""),
+        "erepo_registry_status": str(
+            erepo_registry_result.get("status") or "not_found"
+        ),
+        "erepo_assertion_uuid": str(erepo_registry_record.get("uuid") or ""),
+        "erepo_assertion_method_version": str(
+            erepo_registry_record.get("assertion_method_version") or ""
+        ),
+        "historical_expert_panel_warning": historical_warning,
         "classification": classification,
         "classification_verification": verification,
         "classification_source": source,

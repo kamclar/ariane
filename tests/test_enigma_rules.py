@@ -1336,7 +1336,7 @@ class SpliceTests(unittest.TestCase):
             return value
 
         registry = {
-            "schema_version": 5,
+            "schema_version": 6,
             "registry_version": "test",
             "status": "active",
             "methodological_decision": {
@@ -1359,6 +1359,8 @@ class SpliceTests(unittest.TestCase):
                 "table9_sha256": "0" * 64,
                 "st2_sha256": "0" * 64,
                 "curated_extensions_sha256": "0" * 64,
+                "erepo_vcep_registry_sha256": "0" * 64,
+                "erepo_vcep_metadata_sha256": "0" * 64,
             },
             "reference_count": 2,
             "status_counts": {"eligible": 2},

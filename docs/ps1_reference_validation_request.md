@@ -10,8 +10,9 @@ historické ClinVar klasifikace bez ENIGMA podkladu.
 Implementace přijímá ST7 pouze jako klasifikační základ reference. Nadále
 vyžaduje stejnou normalizovanou missense substituci z jiné nukleotidové změny,
 proteinový mechanismus, SpliceAI nejvýše 0,1 pro obě varianty a kontrolu známé
-RNA/splice evidence. Registr po rozhodnutí obsahuje 40 záznamů `eligible` a 20
-záznamů `excluded`.
+RNA/splice evidence. Po přidání aktuálního ERepo v1.2 snapshotu registr obsahuje
+85 referencí: 63 záznamů `eligible` a 22 záznamů `excluded`. Původních 60 ST7
+referencí zůstává dohledatelných přes `source_memberships`.
 
 ST7 uvádí IARC klasifikace z historického multifaktoriálního likelihood
 referenčního souboru. Tyto klasifikace nevznikly použitím proteinového PS1,

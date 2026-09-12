@@ -7,6 +7,7 @@ from typing import Mapping
 
 from backend.gene_policy import validate_gene_policy_payload
 from backend.modules.exon_cnv_evidence import validate_exon_cnv_evidence_snapshot
+from backend.modules.erepo_vcep import validate_erepo_vcep_registry
 from backend.modules.ps1 import validate_ps1_reference_registry
 
 
@@ -212,6 +213,19 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         "protein PS1 reference registry", paths["ps1_protein_registry"]
     )
     validate_ps1_reference_registry(ps1_registry)
+
+    erepo_registry_path = paths["enigma_erepo_vcep_registry"]
+    erepo_registry = _load_required_json(
+        "ENIGMA ERepo VCEP registry", erepo_registry_path
+    )
+    erepo_metadata = _load_required_json(
+        "ENIGMA ERepo VCEP registry metadata", paths["enigma_erepo_vcep_metadata"]
+    )
+    validate_erepo_vcep_registry(
+        erepo_registry,
+        erepo_metadata,
+        registry_path=erepo_registry_path,
+    )
 
     st2 = _load_required_json(
         "complete ENIGMA Supplementary Table 2 splice evidence",

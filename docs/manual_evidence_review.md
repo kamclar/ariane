@@ -258,11 +258,23 @@ ARIANE displays official ClinVar review stars for the aggregate assertion:
 | 3 | reviewed by an expert panel |
 | 4 | practice guideline |
 
-These stars describe the review status of the assertion. They are not a general
-quality score for a laboratory.
+These stars describe the review status of the assertion. They are not a measure
+of the amount, strength or independence of the underlying evidence. In
+particular, two stars mean only that multiple submitters provided criteria and
+currently agree. They do not show that the submitters produced independent
+classifications or used independent evidence. No aggregate star count alone
+establishes compliance with the applicable VCEP specification or makes a
+reference eligible for PS1.
+
+ARIANE uses its checksum-validated local ClinGen ERepo snapshot to identify a
+current ENIGMA BRCA1/2 VCEP v1.2 assertion. An older three-star ENIGMA ClinVar
+assertion, or an ERepo assertion without an explicit v1.2 method version, is
+shown with a manual-review warning and does not prefill an eligible PS1
+classification basis.
 
 Individual ENIGMA submissions are marked as
-`ClinGen/ENIGMA curated submitter`. ARIANE does not currently assign a custom
+`ENIGMA-labelled ClinVar submitter`. This label does not assert that the
+submission uses the active v1.2 specification. ARIANE does not assign a custom
 credibility score to other laboratories. Any future list should have explicit,
 documented inclusion criteria and versioning.
 

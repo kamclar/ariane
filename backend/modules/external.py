@@ -7,8 +7,11 @@ from typing import Dict
 CLASSIFICATION_MAP = {
     "Pathogenic":               5,
     "Likely pathogenic":        4,
+    "Likely Pathogenic":        4,
     "Uncertain significance":   3,
+    "Uncertain Significance":   3,
     "Likely benign":            2,
+    "Likely Benign":            2,
     "Benign":                   1,
 }
 
@@ -19,6 +22,7 @@ def external_comparison(
     predicted_class: int,
     clinvar_result: Dict,
     erepo_result: Dict,
+    local_erepo_result: Dict | None = None,
 ) -> Dict:
     """
     Compare predicted class against ENIGMA EP classification
@@ -26,16 +30,25 @@ def external_comparison(
     """
     cv = clinvar_result
     er = erepo_result
+    local_er = local_erepo_result or {}
 
-    # ENIGMA EP class - prefer ClinVar (more coverage), fallback to ERepo
+    # The checksum-validated local ERepo snapshot is the authoritative current
+    # VCEP comparison. Live services remain visible as external context only.
     enigma_class_str = ""
     enigma_source    = ""
-    if cv.get("enigma_submission"):
-        enigma_class_str = cv["enigma_submission"]["class"]
-        enigma_source    = "ClinVar EP"
+    local_record = local_er.get("record") or {}
+    if local_er.get("status") == "current_vcep_assertion":
+        enigma_class_str = local_record.get("classification", "")
+        enigma_source = "Local ClinGen ERepo ENIGMA VCEP v1.2 snapshot"
+    elif local_record:
+        enigma_class_str = local_record.get("classification", "")
+        enigma_source = "Local ClinGen ERepo non-current assertion (context only)"
     elif er.get("status") == "ok":
         enigma_class_str = er["classification"]
-        enigma_source    = "ClinGen ERepo"
+        enigma_source = "Live ClinGen ERepo comparison"
+    elif cv.get("enigma_submission"):
+        enigma_class_str = cv["enigma_submission"]["class"]
+        enigma_source = "ClinVar expert-panel comparison"
 
     enigma_class_int = CLASSIFICATION_MAP.get(enigma_class_str)
     match = (

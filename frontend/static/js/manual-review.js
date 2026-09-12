@@ -14,6 +14,7 @@
         ps1ReferenceLoading: false,
         ps1ReferenceError: "",
         ps1ReferenceMessage: "",
+        ps1ReferenceWarning: "",
         manualStatusLoading: false,
         manualStatusError: "",
         manualCriterionStatuses: {},
@@ -99,6 +100,7 @@
             this.manualError = "";
             this.ps1ReferenceError = "";
             this.ps1ReferenceMessage = "";
+            this.ps1ReferenceWarning = "";
             this.manualStatusError = "";
             this.manualCriterionStatuses = {};
             this.manualStatusLoading = false;
@@ -380,6 +382,7 @@
         async resolveProteinPs1Reference(item) {
             this.ps1ReferenceError = "";
             this.ps1ReferenceMessage = "";
+            this.ps1ReferenceWarning = "";
             if (!this.result) {
                 this.ps1ReferenceError = "Classify the assessed variant first.";
                 return;
@@ -440,6 +443,7 @@
                         : item.evidence.ps1_protein_rationale,
                 };
                 this.ps1ReferenceMessage = resolved.review_message || "Reference facts resolved.";
+                this.ps1ReferenceWarning = resolved.historical_expert_panel_warning || "";
             } catch (e) {
                 this.ps1ReferenceError = "Network error - PS1 reference facts could not be resolved.";
             } finally {

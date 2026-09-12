@@ -8,7 +8,7 @@ from backend.services.ps1_reference_resolution import (
 
 class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
     @staticmethod
-    def dependencies(*, clinvar, clingen=None, registry=None):
+    def dependencies(*, clinvar, clingen=None, erepo_registry=None, registry=None):
         scores = {
             "c.5217T>A": 0.03,
             "c.5217T>G": 0.00,
@@ -27,6 +27,9 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             spliceai_status=lambda gene, c_notation: statuses.get(c_notation, {}),
             clinvar_lookup=lambda gene, c_notation: clinvar,
             clingen_lookup=lambda gene, c_notation: clingen or {"status": "not_found"},
+            erepo_registry_lookup=lambda gene, c_notation: (
+                erepo_registry or {"status": "not_found"}
+            ),
             registry_lookup=lambda gene, c_notation: registry,
         )
 
@@ -59,7 +62,7 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(result["classification_source"], "")
         self.assertFalse(result["objective_ps1_checks_pass"])
 
-    async def test_enigma_expert_panel_assertion_is_recognized(self):
+    async def test_clinvar_enigma_expert_panel_assertion_is_display_only(self):
         result = await resolve_ps1_reference(
             "BRCA1",
             "c.5217T>A",
@@ -80,9 +83,58 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             ),
         )
 
+        self.assertEqual(result["classification"], "")
+        self.assertEqual(result["classification_verification"], "unresolved")
+        self.assertFalse(result["objective_ps1_checks_pass"])
+        self.assertIn("three-star", result["historical_expert_panel_warning"])
+
+    async def test_current_local_erepo_v12_assertion_is_recognized(self):
+        result = await resolve_ps1_reference(
+            "BRCA1",
+            "c.5217T>A",
+            "c.5217T>G",
+            dependencies=self.dependencies(
+                clinvar={"status": "not_found"},
+                erepo_registry={
+                    "status": "current_vcep_assertion",
+                    "record": {
+                        "uuid": "11111111-2222-3333-4444-555555555555",
+                        "classification": "Likely Pathogenic",
+                        "assertion_method_version": "1.2.0",
+                        "erepo_url": "https://erepo.example/current",
+                    },
+                },
+            ),
+        )
+
         self.assertEqual(result["classification"], "Likely Pathogenic")
         self.assertEqual(result["classification_verification"], "external_vcep_assertion")
+        self.assertEqual(result["erepo_registry_status"], "current_vcep_assertion")
         self.assertTrue(result["objective_ps1_checks_pass"])
+
+    async def test_historical_erepo_assertion_is_not_used_automatically(self):
+        result = await resolve_ps1_reference(
+            "BRCA1",
+            "c.5217T>A",
+            "c.5217T>G",
+            dependencies=self.dependencies(
+                clinvar={"status": "not_found"},
+                erepo_registry={
+                    "status": "historical_vcep_assertion",
+                    "record": {
+                        "uuid": "11111111-2222-3333-4444-555555555555",
+                        "classification": "Likely Pathogenic",
+                        "assertion_method_version": "1.0.0",
+                        "erepo_url": "https://erepo.example/historical",
+                    },
+                },
+            ),
+        )
+
+        self.assertEqual(result["classification"], "")
+        self.assertEqual(result["classification_verification"], "unresolved")
+        self.assertFalse(result["objective_ps1_checks_pass"])
+        self.assertIn("not the active v1.2", result["historical_expert_panel_warning"])
 
     async def test_different_protein_consequence_is_reported_not_guessed(self):
         result = await resolve_ps1_reference(
@@ -106,6 +158,7 @@ class Ps1ReferenceResolutionTests(unittest.IsolatedAsyncioTestCase):
             spliceai_status=dependencies.spliceai_status,
             clinvar_lookup=unavailable,
             clingen_lookup=unavailable,
+            erepo_registry_lookup=lambda gene, c_notation: {"status": "not_found"},
             registry_lookup=lambda gene, c_notation: None,
         )
         result = await resolve_ps1_reference(

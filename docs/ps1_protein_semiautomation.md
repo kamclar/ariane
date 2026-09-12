@@ -2,12 +2,13 @@
 
 ## Rozhodovací pravidlo
 
-ST7 je oficiální ENIGMA referenční dataset. Jeho P/LP missense varianty jsou
-zařazeny do proteinového PS1 registru. Aktuální registr obsahuje 60 referencí:
-40 `eligible` a 20 `excluded` podle známé RNA a splice evidence. P/LP třída ve
-ST7 je přijata jako klasifikační základ reference. Nejde o bezpodmínečný PS1
-allowlist. SpliceAI skóre není v registru uloženo a kontroluje se při každém
-použití reference.
+Proteinový PS1 registr spojuje P/LP missense reference z ENIGMA ST7 v1.2 s
+aktuálními assertion ENIGMA BRCA1/2 VCEP v1.2 publikovanými v ClinGen Evidence
+Repository. Aktuální registr obsahuje 85 referencí: 63 `eligible` a 22
+`excluded` podle známé RNA a splice evidence. Z nich 26 pochází z aktuálních
+ERepo v1.2 assertion a 60 ze ST7; jedna reference je v obou zdrojích. Nejde o
+bezpodmínečný PS1 allowlist. SpliceAI skóre není v registru uloženo a kontroluje
+se při každém použití reference.
 
 Automatické proteinové PS1 vyžaduje:
 
@@ -58,8 +59,12 @@ bez PS1                  splice podmínky splněny?
 - `enigma_st2_splice_evidence.json`: úplných 220 řádků ENIGMA ST2 a všech 383
   navázaných referencí ST3 pro kontrolu a doložení známých RNA výsledků;
 - `enigma_table9.json`: funkční a publikovaná splice evidence;
-- `ps1_protein_reference_registry.json`: všech 60 P/LP missense referencí ST7
-  s explicitním stavem a auditními podklady;
+- `enigma_erepo_vcep_registry.json`: úplný lokální snapshot 180 publikovaných
+  assertion panelu ENIGMA BRCA1/2 VCEP, včetně přesné verze assertion metody;
+- `enigma_erepo_vcep_registry.metadata.json`: checksum, datum získání, verze API
+  a počty záznamů podle verze a stavu;
+- `ps1_protein_reference_registry.json`: 85 P/LP missense referencí z aktuálního
+  ERepo v1.2 a ST7 s explicitním stavem a auditními podklady;
 - splice PS1 nemá aktivní referenční registr; vyžaduje samostatnou strukturovanou manuální revizi.
 
 ## Co patří do registru
@@ -68,8 +73,8 @@ Registr přijímá pouze missense P/LP reference v kanonickém ENIGMA transkript
 které mají dohledatelný klasifikační původ. Přípustné klasifikační základy jsou:
 
 1. P/LP kandidáti z oficiální ENIGMA Supplementary Table 7 v1.2;
-2. verzovaná oficiální ENIGMA/ClinGen VCEP assertion, například z ClinGen
-   Evidence Repository, pokud ještě není v ST7;
+2. aktuální verzovaná ENIGMA BRCA1/2 VCEP v1.2 assertion z checksumovaného
+   lokálního snapshotu ClinGen Evidence Repository;
 3. lokální úplná reklasifikace podle uvedené verze ENIGMA VCEP pravidel.
 
 Lokální reklasifikace musí být označena
@@ -77,33 +82,32 @@ Lokální reklasifikace musí být označena
 panel assertion. Musí obsahovat identifikátor posuzovatele, datum, verzi
 pravidel a identifikátor úplného evidenčního záznamu.
 
-Nové oficiální nebo lokálně reklasifikované reference mimo ST7 se zapisují do
-`backend/data/ps1_protein_reference_extensions.json`. Generátor je sloučí se
-ST7 a vytvoří jediný runtime registr. Prázdný extension soubor znamená, že
-aktuální registr obsahuje pouze oficiální ST7 reference.
+Nové oficiální ERepo reference se získají reprodukovatelným builderem. Lokálně
+reklasifikované reference mimo ERepo a ST7 se zapisují do
+`backend/data/ps1_protein_reference_extensions.json`. Generátor všechny zdroje
+sloučí do jediného runtime registru.
 
-Při nálezu ST7 reference ARIANE předvyplní referenční c. a p. notaci, ST7
+Při nálezu reference ARIANE předvyplní referenční c. a p. notaci, přijatou
 klasifikaci a zdroj, shodu proteinového následku, rozdílnou nukleotidovou změnu,
 dostupná SpliceAI skóre a výsledky kontroly definovaných RNA/splice zdrojů.
-Současně na pozadí ověří ClinVar a ClinGen ERepo. Aktuální ENIGMA VCEP assertion
-má při zobrazení přednost před historickým zdrojem ST7. Uživatel potvrzuje jen
+Aktuální ERepo v1.2 assertion má přednost před historickým zdrojem ST7.
+ClinVar a živé ERepo slouží jen jako externí porovnání. Uživatel potvrzuje jen
 podmínky, které nebylo možné doložit automaticky. Neúplná revize nepřidá body.
-ERepo evidence codes se čtou z aktuální struktury `guideline.agents[].evidenceCodes`
-a zobrazují se jako auditní podklad použité VCEP klasifikace.
 
-Samotný záznam v ClinVar bez ENIGMA/ClinGen expert-panel assertion, CANVarUK,
-BRCA Exchange, jednotlivá publikace nebo výpočetní predikce nestačí k vytvoření
-`eligible` reference. Tyto zdroje lze použít k nalezení kandidáta nebo jako
-podklad úplné reklasifikace.
+ClinVar aggregate, počet hvězdiček, CANVarUK, BRCA Exchange, jednotlivá
+publikace nebo výpočetní predikce nestačí k vytvoření `eligible` reference.
+Tříhvězdičková historická ENIGMA assertion se zobrazí s upozorněním, ale bez
+odpovídající aktuální v1.2 assertion v lokálním ERepo registru se automaticky
+nepoužije.
 
 Ve strukturované manuální revizi lze zadat pouze c. HGVS referenční varianty.
 Backend z referenčního transkriptu odvodí a ověří p. následek, porovná jej s
 hodnocenou variantou a získá SpliceAI pro obě varianty. Přesnou referenci ověří
-také v ClinVar a ClinGen ERepo. Hvězdičky ClinVar popisují pouze review status
+také v lokálním ERepo registru a pro porovnání v ClinVar. Hvězdičky ClinVar popisují pouze review status
 a žádný jejich počet nekvalifikuje referenci pro PS1. Běžný ClinVar aggregate
 závěr nepředvyplňuje klasifikaci, ověření, klasifikační zdroj ani evidenční
 reference. Použít lze pouze samostatně identifikovanou assertion příslušného
-ENIGMA/ClinGen VCEP nebo úplnou lokální reklasifikaci.
+ENIGMA/ClinGen VCEP v lokálním ERepo snapshotu nebo úplnou lokální reklasifikaci.
 
 ## Odkud se berou jednotlivá pole
 
@@ -159,6 +163,17 @@ Registr se reprodukovatelně vytvoří příkazem:
 ```bash
 python scripts/build_ps1_protein_reference_registry.py
 ```
+
+Před sestavením PS1 registru se aktualizuje ERepo snapshot:
+
+```bash
+python scripts/build_enigma_erepo_vcep_registry.py
+```
+
+Builder stáhne úplný ERepo export, vybere přesně panel `ENIGMA BRCA1 and BRCA2
+VCEP` a u každého záznamu načte detail assertion metody. Pouze verze `1.2.0`
+má stav `current_vcep_assertion`. Starší verze a záznamy bez uvedené verze jsou
+uloženy pro audit a upozornění, ne pro automatickou způsobilost PS1.
 
 Po úmyslné kurátorské změně schváleného záznamu lze jeho checksum přepočítat
 výhradně explicitním příkazem:
