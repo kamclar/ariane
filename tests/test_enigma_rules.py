@@ -28,6 +28,7 @@ from backend.modules.bp7 import evaluate_bp7
 from backend.modules.pp3_bp4 import evaluate_pp3_bp4
 from backend.modules.pvs1 import evaluate_pvs1
 from backend.modules.pvs1_rna import evaluate_pvs1_rna
+from backend.modules.rna_review import evaluate_rna_review
 from backend.modules.ps1 import (
     compute_approval_basis_checksum,
     evaluate_ps1,
@@ -981,6 +982,30 @@ class SpliceTests(unittest.TestCase):
                         "curated_strength", result["manual_review_prefill"]
                     )
 
+    def test_rna_review_reports_table9_publication_role_overlap(self):
+        table9 = table9_lookup_ps3_bs3("BRCA2", "c.7976G>A")
+        pvs1_rna = evaluate_pvs1_rna("BRCA2", "c.7976G>A")
+        review = evaluate_rna_review(
+            gene="BRCA2",
+            variant_type="missense",
+            spliceai_score=0.82,
+            pvs1_rna_result=pvs1_rna,
+            criteria={
+                "PS3": {
+                    "applies": True,
+                    "table9_audit": table9["source_record"],
+                }
+            },
+        )
+
+        self.assertTrue(review["recommended"])
+        self.assertTrue(any("PMID 33293522" in reason for reason in review["reasons"]))
+        self.assertTrue(any("exclude reused evidence" in item for item in review["what_to_test"]))
+        self.assertNotIn(
+            "https://pubmed.ncbi.nlm.nih.gov/33293522/",
+            review["manual_review_prefill"]["source_references"],
+        )
+
     def test_c4185_applies_curated_st2_rna_and_replaces_prediction(self):
         result = evaluate_variant(
             gene="BRCA1",
@@ -1115,6 +1140,32 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["candidates"][0]["c_notation"], "c.122A>G")
         self.assertEqual(result["candidates"][0]["reference_status"], "approved")
         self.assertIn("ENIGMA protein-level PS1 splice conditions", result["reason"])
+
+    def test_current_erepo_likely_pathogenic_reference_scores_ps1_moderate(self):
+        splice_evidence = evaluate_defined_splice_sources(
+            "BRCA2",
+            "c.7855T>A",
+            table9_lookup_ps3_bs3("BRCA2", "c.7855T>A"),
+        )
+        result = evaluate_ps1(
+            gene="BRCA2",
+            c_notation="c.7855T>A",
+            p_notation="p.(Trp2619Arg)",
+            variant_type="missense",
+            spliceai_score=0.10,
+            vua_splice_evidence_status=splice_evidence["status"],
+            vua_splice_sources_checked=splice_evidence["sources_checked"],
+            reference_spliceai_scores={"c.7855T>C": 0.08},
+        )
+
+        self.assertTrue(result["applies"])
+        self.assertEqual(result["strength"], "Moderate")
+        self.assertEqual(result["points"], 2)
+        self.assertEqual(result["reference_variant"]["c_notation"], "c.7855T>C")
+        self.assertEqual(
+            result["reference_variant"]["classification_basis"],
+            "external_vcep_assertion",
+        )
 
     def test_dna_delins_missense_can_automatically_score_ps1(self):
         variant_type = infer_variant_type(

@@ -1,5 +1,6 @@
 """Informational recommendation for review or generation of RNA evidence."""
 
+import re
 from typing import Dict, List, Optional
 from backend.gene_policy import spliceai_thresholds, vcep_specification
 
@@ -14,6 +15,39 @@ SPLICE_RELEVANT_TYPES = {
     "inframe_delins",
     "delins",
 }
+
+
+_PMID_CONTEXT = re.compile(r"PMIDs?|pubmed\.ncbi\.nlm\.nih\.gov/", re.I)
+_PMID_NUMBER = re.compile(r"\b\d{6,9}\b")
+
+
+def _pmids(value) -> set[str]:
+    """Extract explicitly labelled PubMed identifiers from nested audit values."""
+    if isinstance(value, dict):
+        values = value.values()
+    elif isinstance(value, (list, tuple, set)):
+        values = value
+    else:
+        text = str(value or "")
+        return set(_PMID_NUMBER.findall(text)) if _PMID_CONTEXT.search(text) else set()
+    return set().union(*(_pmids(item) for item in values)) if values else set()
+
+
+def _table9_functional_splice_overlap(criteria: Dict) -> list[str]:
+    """Return PMIDs used in both Table 9 assay and splice-context fields.
+
+    This is a provenance-overlap signal, not proof that the same experimental
+    observation was counted twice. Table 9 may describe a combined mRNA and
+    protein assay or a paper containing more than one experiment.
+    """
+    overlaps: set[str] = set()
+    for code in ("PS3", "BS3"):
+        criterion = criteria.get(code) or {}
+        audit = criterion.get("table9_audit") or {}
+        functional_pmids = _pmids(audit.get("assay_results") or [])
+        splice_pmids = _pmids(audit.get("splice_result_published") or "")
+        overlaps.update(functional_pmids & splice_pmids)
+    return sorted(overlaps, key=int)
 
 
 def evaluate_rna_review(
@@ -115,6 +149,19 @@ def evaluate_rna_review(
             "could detect nonsense-mediated decay."
         )
 
+    publication_overlap = _table9_functional_splice_overlap(criteria)
+    if publication_overlap and (
+        pvs1_rna_result.get("review_required") or pvs1_result.get("requires_rna")
+    ):
+        reasons.append(
+            "Table 9 cites PMID "
+            + ", ".join(publication_overlap)
+            + " both as functional-assay evidence and in its published splice "
+            "context. ARIANE counts the Table 9 functional result only once. "
+            "Before adding PVS1 (RNA), use independent RNA evidence or document "
+            "that the publication contains distinct non-overlapping assay data."
+        )
+
     if not reasons:
         return {
             "recommended": False,
@@ -133,6 +180,18 @@ def evaluate_rna_review(
     if "BP7 (RNA)" not in potential_branches:
         potential_branches.append("BP7 (RNA)")
 
+    what_to_test = [
+        "Confirm the effect on the configured reference transcript and identify all abnormal transcript products.",
+        "Quantify the proportion of normal and abnormal transcript where the assay permits.",
+        "Document tissue or cell type, assay method, transcript accession, and whether nonsense-mediated decay could be detected.",
+        "Determine whether the abnormal transcript is in-frame or out-of-frame and whether functional transcript remains.",
+    ]
+    if publication_overlap:
+        what_to_test.append(
+            "Compare the publications supporting PS3/BS3 and PVS1 (RNA). Record "
+            "which assay and observations support each code and exclude reused evidence."
+        )
+
     return {
         "recommended": True,
         "priority": priority,
@@ -143,12 +202,7 @@ def evaluate_rna_review(
             "ENIGMA evidence criterion, and it adds no points."
         ),
         "reasons": reasons,
-        "what_to_test": [
-            "Confirm the effect on the configured reference transcript and identify all abnormal transcript products.",
-            "Quantify the proportion of normal and abnormal transcript where the assay permits.",
-            "Document tissue or cell type, assay method, transcript accession, and whether nonsense-mediated decay could be detected.",
-            "Determine whether the abnormal transcript is in-frame or out-of-frame and whether functional transcript remains.",
-        ],
+        "what_to_test": what_to_test,
         "potential_branches": potential_branches,
         "limitations": (
             "A negative RNA result is not automatically benign. Interpretation "

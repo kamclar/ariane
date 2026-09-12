@@ -191,6 +191,15 @@ Do předvyplnění se přenášejí také všechny odpovídající publikace a a
 ze Supplementary Table 3. ST3 slouží k dohledání podkladů a sama nepřiděluje
 PVS1 RNA ani jeho sílu.
 
+Od verze 1.9.16 RNA review navíc porovnává strukturované Table 9 pole pro
+funkční assay s polem publikovaných splice výsledků. Pokud se v obou rolích
+objeví stejný PMID, zobrazí jej jako kontrolu provenance. Shoda PMID sama
+kritérium nemaže, protože publikace může obsahovat odlišné experimenty. Před
+současným přijetím PS3/BS3 a PVS1 RNA je však nutné přiřadit konkrétní assay a
+pozorování ke každému kódu a vyloučit opakované použití stejné evidence. U
+`BRCA2 c.7976G>A` je takto označen PMID `33293522`; automaticky se započítává jen
+PS3 a předvyplnění PVS1 RNA odkazuje na tři jiné ST3 publikace.
+
 ## 9. Proteinový delins s terminačním kodonem
 
 V připnutém indelovém snapshotu je 22 coding DNA `delins` variant, jejichž

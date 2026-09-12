@@ -595,6 +595,17 @@ odbornému zvážení. Při jejich současném přijetí zobrazí upozornění n
 rozsahu assay a nezávislosti. Obecné potvrzení této kombinace bylo předáno k
 vyjasnění VCEP, takže nejde o uzavřené nové pravidlo ENIGMA.
 
+Stejný PMID v poli funkčního assay a v přehledu publikovaných splice výsledků
+není automaticky druhé kritérium ani důkaz dvojího započtení. Jedna publikace
+může obsahovat více experimentů a Table 9 může popisovat kombinovaný mRNA a
+proteinový assay. Jde však o povinný signál ke kontrole provenance. ARIANE proto
+takový překryv rozpozná a uvede konkrétní PMID v RNA review. Automaticky započítá
+Table 9 funkční výsledek pouze jednou. Před současným použitím PVS1 RNA musí
+kurátor doložit nezávislou RNA evidenci nebo popsat, které odlišné assay a
+pozorování v téže publikaci podporují jednotlivá kritéria. U `BRCA2 c.7976G>A`
+je překryvový PMID `33293522`; předvyplněný PVS1 RNA záznam používá samostatné
+ST3 zdroje PMID `28339459`, `18451181` a `12624152`.
+
 Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
 pacientskou mRNA s delecí exonu 12, standardizovanou LoF kategorii a čtyři
 propojené studie v ST3. Delece exonu 12 se jednoznačně mapuje na výchozí PVS1 v
