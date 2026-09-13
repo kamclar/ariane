@@ -1,7 +1,11 @@
 import re
 from pathlib import Path
 
-from backend.presentation.frontend import PARTIAL_NAMES, load_frontend_template
+from backend.presentation.frontend import (
+    NESTED_PARTIAL_NAMES,
+    PARTIAL_NAMES,
+    load_frontend_template,
+)
 
 
 FRONTEND_HTML = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
@@ -42,18 +46,31 @@ def test_frontend_source_is_split_into_bounded_feature_templates_and_stylesheets
         partial = template_dir / f"{name}.html"
         assert partial.is_file()
         assert len(partial.read_text(encoding="utf-8").splitlines()) < 1000
+    for name in NESTED_PARTIAL_NAMES:
+        partial = template_dir / f"{name}.html"
+        assert partial.is_file()
+        assert len(partial.read_text(encoding="utf-8").splitlines()) < 300
 
     stylesheets = sorted(css_dir.glob("*.css"))
     assert {path.name for path in stylesheets} == {
         "base.css",
+        "batch.css",
+        "decision-paths.css",
         "evidence.css",
         "forms.css",
         "layout.css",
-        "modes.css",
+        "manual-review.css",
+        "navigation.css",
         "results.css",
+        "rules.css",
+        "sources.css",
     }
-    assert all(len(path.read_text(encoding="utf-8").splitlines()) < 1000 for path in stylesheets)
+    assert all(len(path.read_text(encoding="utf-8").splitlines()) < 600 for path in stylesheets)
     assert "style.css" not in shell
+
+    scripts = sorted(FRONTEND_JS_DIR.glob("*.js"))
+    assert scripts
+    assert all(len(path.read_text(encoding="utf-8").splitlines()) < 400 for path in scripts)
 
 
 def test_application_version_is_loaded_from_backend_and_visible_in_header_and_footer():
@@ -216,9 +233,9 @@ def test_unreviewed_splice_ps1_pilot_is_not_exposed_in_production_ui():
     assert "baseline PP3 or PVS1 result" in html
     assert "concurrent protein-level consequence" in html
     assert "applySplicePs1CandidateFacts(item)" in html
-    safe_prefill_start = javascript.index("applySplicePs1CandidateFacts(item)")
-    safe_prefill_end = javascript.index("async evaluateManualEvidence()", safe_prefill_start)
-    safe_prefill = javascript[safe_prefill_start:safe_prefill_end]
+    ps1_javascript = (FRONTEND_JS_DIR / "manual-review-ps1.js").read_text(encoding="utf-8")
+    safe_prefill_start = ps1_javascript.index("applySplicePs1CandidateFacts(item)")
+    safe_prefill = ps1_javascript[safe_prefill_start:]
     assert "curated_strength" not in safe_prefill
     assert "same_splice_event_confirmed" not in safe_prefill
     assert "prediction_strength_comparison" not in safe_prefill
@@ -371,9 +388,9 @@ def test_recommended_manual_criterion_is_offered_without_automatic_assignment():
     assert "this.manualReviewOpen = true" in javascript
     assert "manual-criterion-${code}" in javascript
 
-    prefill_start = javascript.index("prefillManualReviewFromResult() {")
-    prefill_end = javascript.index("manualCriteriaPayload()", prefill_start)
-    prefill = javascript[prefill_start:prefill_end]
+    manual_review = (FRONTEND_JS_DIR / "manual-review.js").read_text(encoding="utf-8")
+    prefill_start = manual_review.index("prefillManualReviewFromResult() {")
+    prefill = manual_review[prefill_start:]
     assert "item.enabled = true" not in prefill
 
 

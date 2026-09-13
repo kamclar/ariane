@@ -108,16 +108,17 @@ ariane/
 │   ├── index.html                    # page shell and explicit template includes
 │   ├── templates/                    # feature-level Alpine templates
 │   └── static/
-│       ├── css/                      # base, forms, results, evidence, layout and modes
+│       ├── css/                      # styles split by UI feature
 │       └── js/
 │           ├── app.js                  # Alpine application assembly
 │           ├── api.js                  # backend API calls
 │           ├── batch.js                # batch input and results
 │           ├── classification.js       # classification result state
+│           ├── composition.js          # collision-safe component composition
 │           ├── core.js                 # shared frontend state
 │           ├── formatters.js           # display formatting
 │           ├── graphs.js               # decision graph rendering
-│           ├── manual-review.js        # manual evidence forms
+│           ├── manual-review*.js       # manual forms, API, PS1 and persistence
 │           └── rules.js                # rule explorer state
 ├── requirements.txt
 ├── railway.toml

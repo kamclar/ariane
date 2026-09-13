@@ -1,0 +1,116 @@
+            <!-- Manual evidence form -->
+            <div class="manual-evidence-section" id="manual-evidence-section"
+                 :class="{ 'manual-evidence-section-recommended': manualReviewRecommendations().length }">
+                <h3 @click="manualReviewOpen = !manualReviewOpen" class="collapsible">
+                    Manual review and amended result
+                    <span class="manual-heading-summary"
+                        x-show="manualReviewRecommendations().length"
+                        x-text="`${manualReviewRecommendations().length} suggested`"></span>
+                    <span x-text="manualReviewOpen ? '&#9660;' : '&#9654;'"></span>
+                </h3>
+                <p class="panel-intro">
+                    Add evidence that cannot be automated. The original Module 1
+                    result remains unchanged; ARIANE calculates a separate amended
+                    working result.
+                </p>
+                <div x-show="manualReviewOpen" x-transition>
+                    <section class="manual-review-recommendations"
+                        x-show="manualReviewRecommendations().length">
+                        <div>
+                            <strong>Recommended reviews for this variant</strong>
+                            <p>ARIANE found variant-specific evidence that can be carried into expert review.</p>
+                        </div>
+                        <div class="manual-recommendation-list">
+                            <template x-for="recommendation in manualReviewRecommendations()"
+                                :key="recommendation.code">
+                                <button type="button" class="manual-recommendation"
+                                    @click="enableManualCriterion(recommendation.code)">
+                                    <span class="criterion-badge" x-text="recommendation.code"></span>
+                                    <span>
+                                        <strong x-text="manualDefinition(recommendation.code)?.title"></strong>
+                                        <small x-text="recommendation.reason"></small>
+                                    </span>
+                                    <span class="manual-recommendation-action">Open form</span>
+                                </button>
+                            </template>
+                        </div>
+                    </section>
+
+                    <p class="manual-status-error" x-show="manualStatusError"
+                        x-text="manualStatusError"></p>
+
+                    <template x-for="group in manualReviewGroups()" :key="group.id">
+                        <details class="manual-evidence-group"
+                            :open="manualGroupRecommendedCount(group) > 0">
+                            <summary>
+                                <span x-text="group.title"></span>
+                                <span class="manual-group-counts">
+                                    <span x-show="manualGroupRecommendedCount(group)"
+                                        x-text="`${manualGroupRecommendedCount(group)} recommended`"></span>
+                                    <span x-show="manualGroupEnabledCount(group)"
+                                        x-text="`${manualGroupEnabledCount(group)} selected`"></span>
+                                </span>
+                            </summary>
+                    <template x-for="item in group.items" :key="item.code">
+                        <div class="manual-criterion-card"
+                            :id="`manual-criterion-${item.code}`">
+                            <div class="manual-card-heading">
+                                <label>
+                                    <input type="checkbox" x-model="item.enabled"
+                                        @change="refreshManualFormStatuses()">
+                                    <span class="criterion-badge" x-text="item.code"></span>
+                                    <strong x-text="manualDefinition(item.code)?.title"></strong>
+                                    <span class="manual-recommended-badge"
+                                        x-show="isManualReviewRecommended(item.code)">Recommended</span>
+                                    <span class="manual-completion-badge"
+                                        x-show="item.enabled"
+                                        :class="`status-${manualCriterionStatus(item.code).status}`"
+                                        x-text="manualCriterionStatusLabel(item.code)"></span>
+                                </label>
+                            </div>
+
+                            <div x-show="item.enabled" class="manual-card-body"
+                                @input.debounce.500ms="refreshManualFormStatuses()"
+                                @change.debounce.300ms="refreshManualFormStatuses()">
+                                <p class="threshold-note">
+                                    <strong>ARIANE threshold:</strong>
+                                    <span x-text="manualDefinition(item.code)?.threshold"></span>
+                                </p>
+                                <p class="manual-completion-message"
+                                    :class="`status-${manualCriterionStatus(item.code).status}`"
+                                    x-text="manualCriterionStatus(item.code).message"></p>
+
+<!-- ARIANE_INCLUDE:manual-review-clinical-fields -->
+
+<!-- ARIANE_INCLUDE:manual-review-functional-fields -->
+
+<!-- ARIANE_INCLUDE:manual-review-rna-splice-fields -->
+
+<!-- ARIANE_INCLUDE:manual-review-protein-ps1-fields -->
+
+                                <details class="checklist-details">
+                                    <summary>What to check and where to look</summary>
+                                    <p><strong>Check:</strong> <span x-text="manualDefinition(item.code)?.check"></span></p>
+                                    <p><strong>Literature:</strong> <span x-text="manualDefinition(item.code)?.literature"></span></p>
+                                    <a :href="manualDefinition(item.code)?.source_url" target="_blank" rel="noopener">
+                                        Open ENIGMA specification
+                                    </a>
+                                </details>
+
+                                <label class="full-width-label">Evidence notes
+                                    <textarea rows="3" x-model="item.notes"
+                                        placeholder="Summarise the evidence, assumptions, and any limitations."></textarea>
+                                </label>
+                                <label class="full-width-label">References
+                                    <textarea rows="2" x-model="item.references"
+                                        placeholder="One PMID, DOI, URL, or internal record per line."></textarea>
+                                </label>
+                            </div>
+                        </div>
+                    </template>
+                        </details>
+                    </template>
+
+<!-- ARIANE_INCLUDE:manual-review-result -->
+                </div>
+            </div>

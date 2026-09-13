@@ -1,0 +1,175 @@
+                                <div class="manual-input-grid" x-show="item.code === 'PS4'">
+                                    <label>p-value
+                                        <input type="number" min="0" step="any" x-model="item.evidence.p_value">
+                                    </label>
+                                    <label>Odds ratio
+                                        <input type="number" min="0" step="any" x-model="item.evidence.odds_ratio">
+                                    </label>
+                                    <label>Lower confidence limit
+                                        <input type="number" min="0" step="any" x-model="item.evidence.lower_ci">
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.case_control_country_matched">
+                                        Case and control datasets are country-matched
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.case_control_ethnicity_matched">
+                                        Case and control datasets are ethnicity-matched
+                                    </label>
+                                </div>
+
+                                <div class="manual-input-grid" x-show="item.code === 'PM3' || item.code === 'BS2'">
+                                    <label>ENIGMA evidence points
+                                        <input type="number" min="0" step="0.5" x-model="item.evidence.evidence_points">
+                                    </label>
+                                    <label>Co-occurring P/LP classification basis
+                                        <select x-model="item.evidence.cooccurring_variant_classification_basis">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="vcep_specifications">Classified using VCEP specifications</option>
+                                            <option value="other">Other or not verified</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.code === 'PM3'">Population evidence review for the assessed variant
+                                        <select x-model="item.evidence.vua_benign_population_review">
+                                            <option value="not_assessed">Not assessed</option>
+                                            <option value="does_not_meet">Does not meet a benign population evidence code</option>
+                                            <option value="meets">Meets a benign population evidence code</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="manual-input-grid" x-show="item.code === 'PP1' || item.code === 'BS4'">
+                                    <label x-show="item.code === 'PP1'">Likelihood ratio
+                                        <input type="number" min="0" step="any" x-model="item.evidence.likelihood_ratio">
+                                    </label>
+                                    <label x-show="item.code === 'BS4'">Reported combined likelihood ratio
+                                        <input type="number" min="0" step="any" x-model="item.evidence.likelihood_ratio">
+                                    </label>
+                                    <label x-show="item.code === 'PP1'">
+                                        Effect evidence relevant to PP1 Very Strong
+                                        <select x-model="item.evidence.very_strong_effect_basis">
+                                            <option value="">Not documented</option>
+                                            <option value="predicted_protein">Predicted protein effect</option>
+                                            <option value="predicted_splicing">Predicted mRNA splicing effect</option>
+                                            <option value="experimental_protein">Experimentally proven protein effect</option>
+                                            <option value="experimental_splicing">Experimentally proven mRNA splicing effect</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="bs4-lr-components" x-show="item.code === 'BS4'">
+                                    <p class="field-hint">
+                                        A reported combined LR is sufficient to derive BS4 strength. To let BS4 Strong qualify as the sole Strong code for Likely Benign under ENIGMA Table 3, record at least two independent LR components. Their product must equal the reported combined LR.
+                                    </p>
+                                    <template x-for="(component, componentIndex) in (item.evidence.likelihood_ratio_components || [])" :key="componentIndex">
+                                        <div class="bs4-lr-component-row">
+                                            <label>Component LR
+                                                <input type="number" min="0" step="any" x-model="component.likelihood_ratio">
+                                            </label>
+                                            <label>Source
+                                                <input type="text" x-model="component.source" placeholder="Family, publication or analysis record">
+                                            </label>
+                                            <label>Independence group
+                                                <input type="text" x-model="component.independence_group" placeholder="Unique family or cohort identifier">
+                                            </label>
+                                            <button type="button" class="btn-secondary bs4-remove-component"
+                                                @click="item.evidence.likelihood_ratio_components.splice(componentIndex, 1)">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </template>
+                                    <button type="button" class="btn-secondary"
+                                        @click="item.evidence.likelihood_ratio_components.push({ likelihood_ratio: '', source: '', independence_group: '' })">
+                                        Add LR component
+                                    </button>
+                                </div>
+
+                                <div x-show="item.code === 'PP1' || item.code === 'PS4'">
+                                    <label>
+                                        <input type="checkbox" x-model="item.evidence.independent_from_pp4_bp5">
+                                        Observations are independent from any PP4/BP5 clinical LR data
+                                    </label>
+                                    <label class="full-width-label">
+                                        Independence rationale
+                                        <textarea rows="2" x-model="item.evidence.independence_rationale"
+                                            placeholder="Identify the cohorts or observations and explain why they are not already included in PP4/BP5."></textarea>
+                                    </label>
+                                    <p class="field-hint">
+                                        Required when PP1 or PS4 is combined with PP4/BP5. Do not confirm independence without reviewing the underlying clinical LR components.
+                                    </p>
+                                </div>
+
+                                <div class="manual-input-grid" x-show="item.code === 'PP4' || item.code === 'BP5'">
+                                    <label>Reported value
+                                        <input type="number" step="any" x-model="item.evidence.clinical_lr_value"
+                                            placeholder="e.g. 45.84">
+                                    </label>
+                                    <label>Reported scale
+                                        <select x-model="item.evidence.clinical_lr_scale">
+                                            <option value="lr">LR</option>
+                                            <option value="log10_lr">log10(LR), e.g. Li LLR in CANVarUK</option>
+                                            <option value="acmg_points">ACMG evidence points</option>
+                                        </select>
+                                    </label>
+                                    <label>Source review status
+                                        <select x-model="item.evidence.source_review_status">
+                                            <option value="enigma_recognised">ENIGMA recognised source</option>
+                                            <option value="other_reviewed">Other reviewed source</option>
+                                            <option value="unreviewed">Unreviewed source, audit only</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status === 'enigma_recognised'">ENIGMA publication or dataset
+                                        <select x-model="item.evidence.source_pmid">
+                                            <option value="">Select publication</option>
+                                            <template x-for="source in (manualDefinition(item.code)?.recognised_sources || [])" :key="source.pmid">
+                                                <option :value="source.pmid" x-text="`${source.citation}, PMID:${source.pmid}`"></option>
+                                            </template>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status !== 'enigma_recognised'">Primary source or citation
+                                        <input type="text" x-model="item.evidence.source_citation"
+                                            placeholder="Publication, PMID or stable dataset identifier">
+                                    </label>
+                                    <label x-show="item.evidence.source_review_status === 'other_reviewed'">Source reviewed by
+                                        <input type="text" x-model="item.evidence.source_reviewed_by"
+                                            placeholder="Reviewer name">
+                                    </label>
+                                </div>
+
+                                <p class="field-hint" x-show="item.code === 'PP4' || item.code === 'BP5'">
+                                    Select the scale exactly as reported. Do not enter a log10 likelihood ratio as an ordinary LR.
+                                </p>
+
+                                <label class="full-width-label" x-show="item.code === 'PP4' || item.code === 'BP5'">
+                                    Included clinical data and independence review
+                                    <textarea rows="3" x-model="item.evidence.clinical_data_summary"
+                                        placeholder="Describe segregation, co-occurrence, family history, tumour pathology and/or case-control inputs, and whether overlapping observations were checked."></textarea>
+                                </label>
+
+                                <label class="full-width-label" x-show="(item.code === 'PP4' || item.code === 'BP5') && item.evidence.source_review_status === 'other_reviewed'">
+                                    Methodological review rationale
+                                    <textarea rows="3" x-model="item.evidence.source_review_rationale"
+                                        placeholder="Explain why the study provides a variant-specific, clinically calibrated LR compatible with ENIGMA PP4/BP5 and how overlap or double counting was assessed."></textarea>
+                                </label>
+
+                                <p class="curation-warning" x-show="(item.code === 'PP4' || item.code === 'BP5') && item.evidence.source_review_status === 'unreviewed'">
+                                    This source will be retained in the audit record but cannot add clinical LR evidence points.
+                                </p>
+
+                                <div x-show="item.code === 'BP5'">
+                                    <p class="field-hint">Clinical evidence types contributing to the combined LR</p>
+                                    <div class="manual-checkbox-grid">
+                                        <label><input type="checkbox" value="family_history" x-model="item.evidence.clinical_evidence_types"> Family history</label>
+                                        <label><input type="checkbox" value="cooccurrence" x-model="item.evidence.clinical_evidence_types"> Co-occurrence</label>
+                                        <label><input type="checkbox" value="segregation" x-model="item.evidence.clinical_evidence_types"> Segregation</label>
+                                        <label><input type="checkbox" value="pathology" x-model="item.evidence.clinical_evidence_types"> Pathology</label>
+                                        <label><input type="checkbox" value="case_control" x-model="item.evidence.clinical_evidence_types"> Case-control</label>
+                                    </div>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.independence_review_confirmed">
+                                        Independence and overlap of the selected clinical evidence types were reviewed
+                                    </label>
+                                    <p class="field-hint">
+                                        This record is required before BP5 Strong can serve as the single Strong route to Likely Benign. BP5 points may still be valid without that single-criterion route.
+                                    </p>
+                                </div>

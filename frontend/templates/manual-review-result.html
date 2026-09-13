@@ -1,0 +1,163 @@
+                    <div class="audit-grid">
+                        <label>Assessor
+                            <input type="text" x-model="manualAssessor" placeholder="Name or identifier">
+                        </label>
+                        <label>Reviewer role
+                            <input type="text" x-model="manualReviewerRole"
+                                placeholder="e.g. Clinical geneticist or variant curator">
+                        </label>
+                        <label>Assessment date
+                            <input type="date" x-model="manualAssessedAt">
+                        </label>
+                    </div>
+                    <p class="field-hint">
+                        Do not enter names, dates of birth or other direct patient identifiers in evidence notes.
+                    </p>
+                    <button class="btn-primary" @click="evaluateManualEvidence()"
+                        :disabled="manualLoading">
+                        <span x-show="!manualLoading">Calculate amended result</span>
+                        <span x-show="manualLoading">Calculating...</span>
+                    </button>
+                    <p class="input-hint" x-show="manualError" x-text="manualError"
+                        style="color: var(--color-error);"></p>
+
+                    <div class="amended-result" x-show="manualResult">
+                        <div class="amended-result-heading">
+                            <div class="class-badge compact"
+                                :class="'class-' + manualResult?.predicted_class">
+                                <span class="class-number" x-text="manualResult?.predicted_class"></span>
+                                <span class="class-label" x-text="manualResult?.predicted_label"></span>
+                            </div>
+                            <div>
+                                <h4>Working result including user-provided evidence</h4>
+                                <p>Total points: <strong x-text="manualResult?.total_points"></strong></p>
+                                <p x-show="manualResult?.classification_note"
+                                    x-text="manualResult?.classification_note"></p>
+                            </div>
+                        </div>
+                        <p class="working-result-warning">
+                            This amended result is audit support, not an independent
+                            clinical classification. The reviewer remains responsible
+                            for evidence validity and applicability.
+                        </p>
+                        <details class="evidence-detail-item"
+                                 x-show="manualResult?.evidence_interactions?.length">
+                            <summary>
+                                <span>Evidence interaction warnings</span>
+                                <span class="evidence-detail-summary"
+                                      x-text="`${manualResult?.evidence_interactions?.length || 0} interaction(s)`"></span>
+                            </summary>
+                            <div class="evidence-interaction-list">
+                                <template
+                                    x-for="(item, index) in (manualResult?.evidence_interactions || [])"
+                                    :key="`${item.status}-${index}`">
+                                    <article class="evidence-interaction"
+                                             :class="`interaction-${item.status}`">
+                                        <p>
+                                            <strong x-text="item.status.replaceAll('_', ' ')"></strong>
+                                            <span x-text="item.reason"></span>
+                                        </p>
+                                        <p class="evidence-interaction-meta">
+                                            Criteria: <span x-text="item.criteria.join(', ')"></span>.
+                                            <span x-show="item.suppressed?.length">
+                                                Not counted: <span x-text="item.suppressed.join(', ')"></span>.
+                                            </span>
+                                        </p>
+                                        <a :href="item.source_url" target="_blank" rel="noopener"
+                                           x-text="item.source"></a>
+                                    </article>
+                                </template>
+                            </div>
+                        </details>
+                        <table class="detail-table manual-result-table">
+                            <thead>
+                                <tr>
+                                    <th>Criterion</th>
+                                    <th>ARIANE suggestion</th>
+                                    <th>Selected strength</th>
+                                    <th>Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template
+                                    x-for="criterion in (manualResult?.manual_criteria || []).filter(c => c.applies)"
+                                    :key="criterion.code">
+                                    <tr>
+                                        <td><span class="criterion-badge" x-text="criterion.code"></span></td>
+                                        <td x-text="criterion.suggested_strength || 'threshold not met'"></td>
+                                        <td>
+                                            <span x-text="criterion.selected_strength"></span>
+                                        </td>
+                                        <td x-text="criterion.points"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                        <p class="audit-summary">
+                            Assessor: <strong x-text="manualResult?.assessor"></strong>;
+                            date: <strong x-text="manualResult?.assessed_at"></strong>
+                        </p>
+                        <div class="manual-record-actions">
+                            <button class="btn-secondary" @click="downloadManualAuditJson()">
+                                Download audit record
+                            </button>
+                            <button class="btn-primary" @click="saveManualReviewDraft()"
+                                :disabled="manualRecordLoading">
+                                <span x-text="manualRecordLoading ? 'Saving...' : 'Save immutable review draft'"></span>
+                            </button>
+                            <a href="/admin/audit" target="_blank" rel="noopener">
+                                Reviewer sign-in
+                            </a>
+                        </div>
+                        <p class="field-hint">
+                            Saving and approval require the authenticated reviewer account configured for this ARIANE installation.
+                            The current beta uses the protected administrator account and records both the account and the stated reviewer identity.
+                        </p>
+                        <p class="manual-status-error" x-show="manualRecordError"
+                            x-text="manualRecordError"></p>
+
+                        <section class="manual-record-summary" x-show="manualSavedRecord">
+                            <div>
+                                <strong x-text="manualSavedRecord?.status === 'approved' ? 'Approved review version' : 'Saved review draft'"></strong>
+                                <span>
+                                    Version <span x-text="manualSavedRecord?.version"></span>;
+                                    record <code x-text="manualSavedRecord?.record_id"></code>
+                                </span>
+                            </div>
+                            <p>Content SHA-256: <code x-text="manualSavedRecord?.hashes?.content_sha256"></code></p>
+                        </section>
+
+                        <section class="manual-approval-panel"
+                            x-show="manualSavedRecord?.status === 'draft'">
+                            <h4>Approve this saved version</h4>
+                            <p>
+                                Approval creates a new immutable version. The saved draft is retained unchanged.
+                            </p>
+                            <div class="audit-grid">
+                                <label>Approver
+                                    <input type="text" x-model="manualApprovalName">
+                                </label>
+                                <label>Professional role
+                                    <input type="text" x-model="manualApprovalRole">
+                                </label>
+                            </div>
+                            <label class="full-width-label">Approval comment
+                                <textarea rows="2" x-model="manualApprovalComment"
+                                    placeholder="Record the scope of review, limitations and any required follow-up."></textarea>
+                            </label>
+                            <label class="manual-approval-attestation">
+                                <input type="checkbox" x-model="manualApprovalAttested">
+                                I confirm that I reviewed the variant identity, evidence, ENIGMA conditions,
+                                evidence interactions and resulting classification shown in this saved version.
+                            </label>
+                            <button class="btn-primary" @click="approveManualReviewRecord()"
+                                :disabled="manualRecordLoading">
+                                Approve saved version
+                            </button>
+                        </section>
+
+                        <p class="manual-approved-message"
+                            x-show="manualSavedRecord?.status === 'approved'">
+                            This review version is approved and immutable. New evidence must be saved as a new draft.
+                        </p>
+                    </div>

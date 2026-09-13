@@ -16,6 +16,15 @@ PARTIAL_NAMES = (
     "batch",
 )
 
+NESTED_PARTIAL_NAMES = (
+    "manual-review-form",
+    "manual-review-clinical-fields",
+    "manual-review-functional-fields",
+    "manual-review-rna-splice-fields",
+    "manual-review-protein-ps1-fields",
+    "manual-review-result",
+)
+
 
 @dataclass(frozen=True)
 class FrontendAssets:
@@ -32,10 +41,10 @@ def load_frontend_template(frontend_dir: Path) -> str:
         raise RuntimeError(f"Frontend shell cannot be loaded: {shell_path}: {exc}") from exc
 
     partial_dir = frontend_dir / "templates"
-    for name in PARTIAL_NAMES:
+    for name in (*PARTIAL_NAMES, *NESTED_PARTIAL_NAMES):
         marker = f"<!-- ARIANE_INCLUDE:{name} -->"
         if html.count(marker) != 1:
-            raise RuntimeError(f"Frontend shell must contain one {marker} marker")
+            raise RuntimeError(f"Frontend templates must contain one {marker} marker")
         path = partial_dir / f"{name}.html"
         try:
             content = path.read_text(encoding="utf-8")

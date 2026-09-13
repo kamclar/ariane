@@ -1,0 +1,206 @@
+                                <div class="manual-input-grid" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
+                                    <label>Assay scope
+                                        <select x-model="item.evidence.assay_scope">
+                                            <option value="">Select</option>
+                                            <option value="mrna_only">mRNA-only assay</option>
+                                            <option value="combined_mrna_protein">mRNA + protein assay</option>
+                                            <option value="protein_only">Protein-only assay</option>
+                                        </select>
+                                    </label>
+                                    <label>RNA conclusion
+                                        <select x-model="item.evidence.rna_conclusion">
+                                            <option value="">Select</option>
+                                            <option value="damaging" x-show="item.code === 'PVS1_RNA'">Damaging transcript effect</option>
+                                            <option value="no_damaging_effect" x-show="item.code === 'BP7_RNA'">No damaging transcript effect</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.code === 'PVS1_RNA'">Functional transcript remaining
+                                        <select x-model="item.evidence.functional_transcript_remaining">
+                                            <option value="">Select</option>
+                                            <option value="absent_or_minimal">Absent or minimal</option>
+                                            <option value="reduced">Reduced</option>
+                                        </select>
+                                    </label>
+                                    <label x-show="item.code === 'PVS1_RNA'">Curated PVS1 (RNA) strength
+                                        <select x-model="item.evidence.curated_strength">
+                                            <option value="">Select</option>
+                                            <option value="Supporting">Supporting</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="Strong">Strong</option>
+                                            <option value="Very Strong">Very Strong</option>
+                                        </select>
+                                        <span class="field-hint">Select manually from the curated RNA interpretation; ARIANE does not infer this strength automatically.</span>
+                                    </label>
+                                    <label>Transcript accession
+                                        <input type="text" x-model="item.evidence.transcript_accession"
+                                            placeholder="e.g. NM_007294.4">
+                                    </label>
+                                    <label>Tissue or cell type
+                                        <input type="text" x-model="item.evidence.tissue_or_cell_type"
+                                            placeholder="e.g. blood, lymphocytes, fibroblasts">
+                                    </label>
+                                    <label>NMD assessed or controlled
+                                        <select x-model="item.evidence.nmd_assessed">
+                                            <option value="">Select</option>
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                            <option value="not_applicable">Not applicable</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <p class="field-hint" x-show="item.code === 'BP7_RNA'">
+                                    ARIANE checks BP7 Strong (RNA) against the classified variant. A missense variant inside an ENIGMA functional domain must meet BS3 through calibrated Table 9 evidence or the complete manual BS3 review above. This condition cannot be confirmed by a standalone checkbox.
+                                </p>
+                                <p class="curation-warning" x-show="item.code === 'BP7_RNA' && result?.bp7_rna_context && !result.bp7_rna_context.eligible"
+                                    x-text="result?.bp7_rna_context?.reason || ''"></p>
+
+                                <label class="full-width-label" x-show="item.code === 'PVS1_RNA' || item.code === 'BP7_RNA'">
+                                    RNA transcript result summary
+                                    <textarea rows="3" x-model="item.evidence.transcript_result_summary"
+                                        placeholder="Summarise normal/abnormal transcript products, quantification, in-frame/out-of-frame effect, and assay limitations."></textarea>
+                                </label>
+
+                                <div class="manual-input-grid" x-show="item.code === 'PVS1_INIT'">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.met1_loss_confirmed">
+                                        Met1/start-loss confirmed
+                                    </label>
+                                    <label>Alternative start assessed
+                                        <select x-model="item.evidence.alternative_start_assessed">
+                                            <option value="">Select</option>
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                        </select>
+                                    </label>
+                                    <label>Nearest alternative in-frame start
+                                        <input type="text" x-model="item.evidence.nearest_alternative_start"
+                                            placeholder="e.g. p.Met16 or none found">
+                                    </label>
+                                    <label>Upstream P/LP evidence before nearest start
+                                        <select x-model="item.evidence.upstream_pathogenic_evidence">
+                                            <option value="">Select</option>
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                            <option value="not_applicable">Not applicable</option>
+                                        </select>
+                                    </label>
+                                    <label>Expected N-terminal functional impact
+                                        <select x-model="item.evidence.functional_domain_impact">
+                                            <option value="">Select</option>
+                                            <option value="yes">Yes</option>
+                                            <option value="no">No</option>
+                                            <option value="uncertain">Uncertain</option>
+                                        </select>
+                                    </label>
+                                    <label>Curated PVS1 initiation strength
+                                        <select x-model="item.evidence.curated_strength">
+                                            <option value="">Select</option>
+                                            <option value="Supporting">Supporting</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="Strong">Strong</option>
+                                            <option value="Very Strong">Very Strong</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <label class="full-width-label" x-show="item.code === 'PVS1_INIT'">
+                                    Initiation-codon flowchart rationale
+                                    <textarea rows="3" x-model="item.evidence.initiation_flowchart_rationale"
+                                        placeholder="Summarise the ENIGMA initiation-codon flowchart decision, transcript context, alternative start assessment, and supporting variant evidence."></textarea>
+                                </label>
+
+                                <div x-show="item.code === 'PS1_SPLICE'" class="reference-helper">
+                                    <label class="full-width-label">
+                                        Candidate reference variant from ENIGMA ST2
+                                        <select x-model="item.evidence.splice_ps1_candidate_key"
+                                            @change="applySplicePs1CandidateFacts(item)">
+                                            <option value="">Select a candidate to prefill factual source fields</option>
+                                            <template x-for="candidate in splicePs1CandidatesForCurrentGene()" :key="candidate.key">
+                                                <option :value="candidate.key" x-text="splicePs1CandidateLabel(candidate)"></option>
+                                            </template>
+                                        </select>
+                                        <span class="field-hint">
+                                            <strong>Candidate discovery only.</strong>
+                                            The ST2 record does not confirm PS1 eligibility, the same splice event for this variant, or the applicable Appendix J/Table 17 strength.
+                                        </span>
+                                    </label>
+                                    <details class="ps1-splice-guidance">
+                                        <summary>Why PS1 cannot be assigned from ST2 alone</summary>
+                                        <p>ENIGMA additionally requires:</p>
+                                        <ul>
+                                            <li>a reference P/LP classification assigned using VCEP specifications;</li>
+                                            <li>precisely the same splice event in the assessed and reference variants;</li>
+                                            <li>a splice prediction for the assessed variant that is similar to or stronger than the reference prediction;</li>
+                                            <li>the correct Appendix J/Table 17 branch based on the positions of both variants within the donor or acceptor motif;</li>
+                                            <li>the assessed variant's baseline PP3 or PVS1 result to be included in the Table 17 decision;</li>
+                                            <li>review of any concurrent protein-level consequence for an exonic variant.</li>
+                                        </ul>
+                                        <p>ARIANE therefore leaves same-event confirmation, prediction comparison and PS1 strength for manual review.</p>
+                                    </details>
+                                </div>
+
+                                <div class="manual-input-grid" x-show="item.code === 'PS1_SPLICE'">
+                                    <label>Reference P/LP variant
+                                        <input type="text" x-model="item.evidence.reference_variant"
+                                            placeholder="e.g. BRCA1 c.4185G>A">
+                                    </label>
+                                    <label>Reference classification
+                                        <select x-model="item.evidence.reference_classification">
+                                            <option value="">Select</option>
+                                            <option value="Pathogenic">Pathogenic</option>
+                                            <option value="Likely Pathogenic">Likely Pathogenic</option>
+                                        </select>
+                                    </label>
+                                    <label>Reference classification source
+                                        <input type="text" x-model="item.evidence.reference_classification_source"
+                                            placeholder="e.g. ENIGMA ST2/ST7, ClinGen EP, PMID">
+                                    </label>
+                                    <label>Reference event type
+                                        <input type="text" x-model="item.evidence.reference_event_type"
+                                            placeholder="e.g. exon skipping, cryptic splice-site use">
+                                    </label>
+                                    <label>Reference assay/context
+                                        <input type="text" x-model="item.evidence.reference_assay_result_category"
+                                            placeholder="Describe the RNA assay and biological context">
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" x-model="item.evidence.same_splice_event_confirmed">
+                                        Same splice event confirmed
+                                    </label>
+                                    <label>Prediction strength comparison
+                                        <select x-model="item.evidence.prediction_strength_comparison">
+                                            <option value="">Select</option>
+                                            <option value="similar">Similar to reference</option>
+                                            <option value="stronger">Stronger than reference</option>
+                                            <option value="weaker">Weaker than reference</option>
+                                        </select>
+                                    </label>
+                                    <label>Curated PS1(splice) strength
+                                        <select x-model="item.evidence.curated_strength">
+                                            <option value="">Select</option>
+                                            <option value="Supporting">Supporting</option>
+                                            <option value="Moderate">Moderate</option>
+                                            <option value="Strong">Strong</option>
+                                        </select>
+                                        <span class="field-hint">
+                                            Select manually from ENIGMA Appendix J/Table 17; ARIANE does not infer this strength automatically.
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <label class="full-width-label" x-show="item.code === 'PS1_SPLICE'">
+                                    VUA splice event
+                                    <textarea rows="2" x-model="item.evidence.vua_splice_event"
+                                        placeholder="Describe the predicted or proven splice event for the variant under assessment."></textarea>
+                                </label>
+                                <label class="full-width-label" x-show="item.code === 'PS1_SPLICE'">
+                                    Reference splice event
+                                    <textarea rows="2" x-model="item.evidence.reference_splice_event"
+                                        placeholder="Describe the reference variant splice event and why it matches the VUA event."></textarea>
+                                </label>
+                                <label class="full-width-label" x-show="item.code === 'PS1_SPLICE'">
+                                    PS1(splice) rationale
+                                    <textarea rows="3" x-model="item.evidence.ps1_splice_rationale"
+                                        placeholder="Summarise the same-event assessment, prediction strength comparison, reference source, and Appendix J/Table 17 strength decision."></textarea>
+                                </label>

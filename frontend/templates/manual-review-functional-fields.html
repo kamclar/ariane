@@ -1,0 +1,62 @@
+                                <div x-show="item.code === 'PS3' || item.code === 'BS3'">
+                                    <div class="evidence-prefill-summary">
+                                        <strong>Assessed variant facts</strong>
+                                        <span x-text="`${item.evidence.assessed_gene || ''} ${item.evidence.assessed_c_notation || ''} ${item.evidence.assessed_p_notation || ''}`"></span>
+                                        <span x-text="`Transcript: ${item.evidence.reference_transcript || 'not reported'}; variant type: ${item.evidence.assessed_variant_type || 'unknown'}; SpliceAI: ${item.evidence.spliceai_score === '' ? 'unavailable' : item.evidence.spliceai_score}`"></span>
+                                    </div>
+                                    <div class="manual-input-grid">
+                                        <label>Assay scope
+                                            <select x-model="item.evidence.assay_scope">
+                                                <option value="">Select</option>
+                                                <option value="protein_only">Protein-only assay</option>
+                                                <option value="combined_mrna_protein">Combined mRNA and protein assay</option>
+                                            </select>
+                                        </label>
+                                        <label>Functional conclusion
+                                            <select x-model="item.evidence.functional_conclusion">
+                                                <option value="">Select</option>
+                                                <option value="abnormal" x-show="item.code === 'PS3'">Abnormal function</option>
+                                                <option value="normal" x-show="item.code === 'BS3'">Function similar to benign controls</option>
+                                            </select>
+                                        </label>
+                                        <label>ENIGMA calibration review
+                                            <select x-model="item.evidence.calibration_status">
+                                                <option value="not_reviewed">Not reviewed</option>
+                                                <option value="reviewed_under_enigma_vcep">Reviewed under ENIGMA VCEP specifications</option>
+                                            </select>
+                                        </label>
+                                        <label>Curated strength
+                                            <select x-model="item.evidence.curated_strength">
+                                                <option value="">Select</option>
+                                                <option value="Strong">Strong</option>
+                                            </select>
+                                        </label>
+                                        <label>Assay or study name
+                                            <input type="text" x-model="item.evidence.assay_name" placeholder="Validated assay or study">
+                                        </label>
+                                        <label>Primary source
+                                            <input type="text" x-model="item.evidence.source_citation" placeholder="Publication, PMID or stable source">
+                                        </label>
+                                        <label>Reviewed by
+                                            <input type="text" x-model="item.evidence.functional_reviewed_by" placeholder="Expert reviewer">
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" x-model="item.evidence.pathogenic_and_benign_controls_confirmed">
+                                            Pathogenic and benign control calibration confirmed
+                                        </label>
+                                    </div>
+                                    <label class="full-width-label">Assay calibration summary
+                                        <textarea rows="3" x-model="item.evidence.calibration_summary"
+                                            placeholder="Describe controls, assay performance, calibration and the basis for the selected ENIGMA strength."></textarea>
+                                    </label>
+                                    <label class="full-width-label">Variant-specific functional result
+                                        <textarea rows="3" x-model="item.evidence.variant_result_summary"
+                                            placeholder="Describe the measured result, replicate evidence and relevant assay limitations."></textarea>
+                                    </label>
+                                    <p class="curation-warning" x-show="item.evidence.table9_lookup_status === 'already_applied'">
+                                        This criterion is already present from ENIGMA Table 9 and cannot be counted again manually.
+                                    </p>
+                                    <p class="field-hint">
+                                        Variant identity, transcript, variant type and available SpliceAI context are prefilled. ARIANE does not infer a new functional strength from those facts. The reviewer must document the ENIGMA-compatible assay calibration.
+                                    </p>
+                                </div>

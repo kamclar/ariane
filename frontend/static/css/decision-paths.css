@@ -1,0 +1,123 @@
+/* Decision provenance shown without crowding the primary result. */
+.decision-path-details {
+    margin: 0 0.75rem 0.8rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.45rem;
+}
+
+.decision-path-details summary {
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.table9-audit-details {
+    margin: 0 0.75rem 0.8rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.45rem;
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+}
+
+.table9-audit-details summary {
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.table9-audit-details > p {
+    margin: 0.6rem 0;
+    color: var(--color-text);
+}
+
+.table9-audit-details dl {
+    display: grid;
+    grid-template-columns: minmax(9rem, max-content) minmax(0, 1fr);
+    gap: 0.3rem 0.75rem;
+    margin: 0.5rem 0;
+}
+
+.table9-audit-details dt { font-weight: 600; }
+.table9-audit-details dd { margin: 0; overflow-wrap: anywhere; }
+.table9-audit-details ul { margin: 0.4rem 0 0 1.2rem; }
+
+.decision-path-list {
+    margin: 0.6rem 0 0.35rem 1.25rem;
+}
+
+.decision-path-accessible {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.decision-path-graph {
+    margin: 0.75rem 0 0.55rem;
+    overflow: hidden;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius);
+    background: #f8fbff;
+}
+
+.decision-path-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+}
+
+.decision-path-svg .path-edge-active {
+    fill: none;
+    stroke: #2563eb;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+}
+
+.decision-path-svg marker path { fill: #2563eb; }
+.decision-path-svg .path-edge-label {
+    fill: #1e40af;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.decision-path-svg .path-node rect { stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.decision-path-svg .path-node-entry rect { fill: #fbbf24; stroke: #2563eb; }
+.decision-path-svg .path-node-decision rect { fill: #fff; stroke: #2563eb; }
+.decision-path-svg .path-node-outcome rect { fill: #b9cbea; stroke: #2563eb; }
+.decision-path-svg .path-node-title { fill: #172033; font-size: 12px; font-weight: 700; }
+.decision-path-svg .path-node-observed { fill: #1d4ed8; font-size: 10px; font-weight: 600; }
+
+.decision-path-list li { margin-bottom: 0.45rem; }
+.decision-path-list strong { display: block; font-size: 0.78rem; }
+.decision-path-list small { display: block; color: var(--color-text-muted); }
+
+.decision-path-result {
+    display: inline-block;
+    margin: 0.15rem 0;
+    padding: 0.05rem 0.4rem;
+    border-radius: 99px;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+}
+
+.decision-path-links { display: flex; flex-wrap: wrap; gap: 0.7rem; font-size: 0.76rem; }
+.decision-source-links { display: inline-flex; flex-wrap: wrap; gap: 0.7rem; }
+.link-button {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+}

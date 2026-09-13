@@ -2280,11 +2280,22 @@ nesmí být `unsafe-eval` z hlavičky odstraněno, protože by se rozhraní nesp
 
 Zdrojová šablona není jeden soubor. `frontend/index.html` obsahuje pouze shell
 a explicitní značky pro části `search`, `classification-result`, `manual-review`,
-`external-comparison`, `rules-explorer` a `batch`. Backend je při startu složí
-funkcí `backend/presentation/frontend.py::load_frontend_template`. CSS je ve
-stejném pořadí rozděleno na `base`, `forms`, `results`, `evidence`, `layout` a
-`modes`. Rozdělení nemění DOM ani pořadí pravidel. Regresní testy pracují se
-složenou šablonou a asset version zahrnuje všechny soubory ve `frontend/static`.
+`external-comparison`, `rules-explorer` a `batch`. Manuální revize se dále skládá
+z částí pro klinickou evidenci, funkční evidenci, RNA a splice evidenci,
+proteinové PS1 a amended výsledek. Backend je při startu složí funkcí
+`backend/presentation/frontend.py::load_frontend_template`.
+
+CSS je rozděleno podle odpovědnosti. Navigace, batch, rozhodovací cesty,
+prohlížeč pravidel, manuální revize a zdrojové karty mají samostatné soubory.
+Rozdělení nemění DOM ani pořadí pravidel. Regresní testy pracují se složenou
+šablonou a asset version zahrnuje všechny soubory ve `frontend/static`.
+
+Frontend zůstává bez build kroku. Jednotlivé Alpine stavové a metodové objekty
+skládá `frontend/static/js/composition.js`. Kompozice při duplicitním klíči
+selže s uvedením obou modulů; později načtený modul proto nemůže tiše přepsat
+stav nebo metodu jiného modulu. Spustitelné JavaScriptové testy ověřují
+kompozici, načtení klasifikace, bezpečné předvyplnění manuální revize a
+odeslání amended výsledku s mockovaným transportem.
 
 ### 15.2 Graf pro ručně doplněnou evidenci
 

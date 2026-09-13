@@ -98,6 +98,12 @@ Middleware jsou v `backend/api/middleware.py`, společné převody chyb v
 HTML shellu v `backend/api/frontend.py`. `backend/main.py` je pouze composition
 root: vytvoří runtime a služby, nainstaluje adaptéry a registruje routery.
 
+Frontend nepoužívá build krok. Alpine komponenta se skládá z pojmenovaných
+příspěvků pomocí `frontend/static/js/composition.js`; duplicitní stav nebo metoda
+způsobí chybu při vytvoření komponenty. Manuální revize má oddělenou správu
+formuláře, API komunikaci, PS1 a persistenci. HTML a CSS jsou rozděleny podle
+stejných funkčních oblastí.
+
 FastAPI modul `backend/main.py` je kompoziční kořen aplikace. Při startu si
 vyžádá produkční vazby providerů z jediného kompozičního modulu
 `backend/classification_dag/provider_wiring.py`, ale sám neprovádí
