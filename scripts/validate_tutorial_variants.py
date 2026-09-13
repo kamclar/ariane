@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from backend.main import _classify_one
+from backend.main import CLASSIFICATION_API
 
 
 # Expected ENIGMA classifications and evidence are transcribed from the local
@@ -36,7 +36,9 @@ async def main() -> None:
     ):
         for run, gene, c_notation, p_notation, expected_class, expected_criteria in CASES:
             try:
-                result = await _classify_one(gene, c_notation, p_notation, "Unknown")
+                result = await CLASSIFICATION_API.classify_uncached(
+                    gene, c_notation, p_notation, "Unknown"
+                )
                 record = {
                     "run": run,
                     "variant": f"{gene} {c_notation} {p_notation}",

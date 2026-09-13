@@ -16,9 +16,9 @@ from pathlib import Path
 import re
 from typing import Any, Dict, Optional
 
-from backend.config import TRANSCRIPTS
-from backend.data_health import clear_issue, register_issue
-from backend.lookups import indels, precomputed
+from backend.policy.catalog import TRANSCRIPTS
+from backend.infrastructure.health import DataHealthRegistry
+from backend.reference_data import classification_snapshot, indel_snapshot
 
 
 logger = logging.getLogger(__name__)
@@ -181,15 +181,15 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
         if not data_path.is_file() or not metadata_path.is_file():
             raise RuntimeError(f"Coordinate source {source_id} data or metadata is missing")
         if source_type == "classification_snapshot" and (
-            data_path != precomputed.CLASSIFICATION_SNAPSHOT_INDEX.resolve()
-            or metadata_path != precomputed.CLASSIFICATION_SNAPSHOT_METADATA.resolve()
+            data_path != classification_snapshot.CLASSIFICATION_SNAPSHOT_INDEX.resolve()
+            or metadata_path != classification_snapshot.CLASSIFICATION_SNAPSHOT_METADATA.resolve()
         ):
             raise RuntimeError(
                 f"Coordinate source {source_id} does not match the configured snapshot loader"
             )
         if source_type == "normalized_indel_snapshot" and (
-            data_path != indels.INDEX_PATH.resolve()
-            or metadata_path != indels.METADATA_PATH.resolve()
+            data_path != indel_snapshot.INDEX_PATH.resolve()
+            or metadata_path != indel_snapshot.METADATA_PATH.resolve()
         ):
             raise RuntimeError(
                 f"Coordinate source {source_id} does not match the configured snapshot loader"
@@ -218,11 +218,10 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
                     )
             loaded_coordinate_maps[source_id] = records
 
-    precomputed.validate_classification_snapshot()
-    indels.load_indel_snapshot()
+    classification_snapshot.validate_classification_snapshot()
+    indel_snapshot.load_indel_snapshot()
     _COORDINATE_MAPS = loaded_coordinate_maps
     _SOURCE_MANIFEST = manifest
-    clear_issue("Local coordinate sources")
     return manifest
 
 
@@ -284,7 +283,7 @@ def _resolve_source(
     transcript = str(source["genes"][gene])
     source_type = source["source_type"]
     if source_type == "normalized_indel_snapshot":
-        record = indels.lookup_indel_snapshot(gene, c_notation)
+        record = indel_snapshot.lookup_indel_snapshot(gene, c_notation)
         if not record:
             return None
         return _resolved(
@@ -296,7 +295,7 @@ def _resolve_source(
             grch38=_dict_to_coords(record.get("grch38"), "GRCh38"),
         )
     if source_type == "classification_snapshot":
-        snapshot = precomputed.lookup_classification_snapshot(gene, c_notation)
+        snapshot = classification_snapshot.lookup_classification_snapshot(gene, c_notation)
         if not snapshot:
             return None
         record = snapshot.get("record", {})
@@ -322,13 +321,16 @@ def _resolve_source(
     )
 
 
-def load_local_coordinate_sources() -> None:
+def load_local_coordinate_sources(health: DataHealthRegistry | None = None) -> None:
     """Load and validate immutable local coordinate sources."""
     try:
         manifest = validate_coordinate_source_manifest()
     except Exception as exc:
-        register_issue("Local coordinate sources", str(exc))
+        if health is not None:
+            health.register("Local coordinate sources", str(exc))
         raise
+    if health is not None:
+        health.clear("Local coordinate sources")
     records = sum(len(value) for value in _COORDINATE_MAPS.values())
     logger.info(
         "Loaded %s local coordinate map records from %s registered sources",
@@ -427,5 +429,3 @@ def get_grch38(
 
 
 RESOLVED_VARIANTS: Dict[str, ResolvedVariant] = {}
-
-load_local_coordinate_sources()

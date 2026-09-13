@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
-from backend.models import ClassificationResult, RnaReviewRecommendation
+from backend.contracts import ClassificationResult, RnaReviewRecommendation
 from backend.classification_runtime import ApiQuotaReservation
 
 
@@ -33,12 +33,12 @@ def _result_with_review() -> ClassificationResult:
 
 def _client(monkeypatch) -> TestClient:
     from backend import main
-    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     async def classify_cached(*args, **kwargs):
         return _result_with_review(), "hit", "test-fingerprint"
 
-    monkeypatch.setattr(main, "_classify_one_cached", classify_cached)
+    monkeypatch.setattr(main.CLASSIFICATION_API, "classify_cached", classify_cached)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
@@ -131,7 +131,7 @@ def test_public_api_marks_required_spliceai_timeout_as_retryable_item_error(
     monkeypatch,
 ):
     from backend import main
-    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     async def unavailable(*args, **kwargs):
         raise HTTPException(
@@ -144,7 +144,7 @@ def test_public_api_marks_required_spliceai_timeout_as_retryable_item_error(
             },
         )
 
-    monkeypatch.setattr(main, "_classify_one_cached", unavailable)
+    monkeypatch.setattr(main.CLASSIFICATION_API, "classify_cached", unavailable)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
@@ -209,7 +209,7 @@ def test_openapi_documents_api_key_on_classification_routes():
 
 def test_public_api_rejects_more_than_synchronous_batch_limit(monkeypatch):
     from backend import main
-    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     monkeypatch.setattr(
         PUBLIC_API_KEY_AUTHENTICATOR,

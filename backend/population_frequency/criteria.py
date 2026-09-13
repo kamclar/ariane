@@ -345,8 +345,9 @@ def evaluate_frequency_criteria(
         }
         return criteria
     pm2_coverage_method = gnomad_data.get("pm2_coverage_method")
-    if not isinstance(pm2_coverage_method, Mapping) or not (
-        pm2_coverage_method.get("automatic_assignment_allowed") is True
+    if (
+        not isinstance(pm2_coverage_method, Mapping)
+        or pm2_coverage_method.get("automatic_assignment_allowed") is not True
     ):
         criteria["PM2"] = {
             "applies": False,

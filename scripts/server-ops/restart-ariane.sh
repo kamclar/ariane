@@ -107,7 +107,7 @@ runuser -u "$ARIANE_USER" -- \
 runuser -u "$ARIANE_USER" -- \
     env PYTHONPATH="$ARIANE_HOME" \
     "$ARIANE_HOME/venv/bin/python" -c \
-    'import cdot, fastapi, hgvs, pydantic, uvicorn; from backend.modules import hgvs_engine, hgvs_provider'
+    'import cdot, fastapi, hgvs, pydantic, uvicorn; from backend.variant_processing import hgvs_engine, hgvs_provider'
 
 nginx -t
 systemctl restart ariane

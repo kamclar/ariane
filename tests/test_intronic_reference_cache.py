@@ -3,7 +3,7 @@ import json
 import re
 import unittest
 from pathlib import Path
-from backend.spliceai_profile import validate_scoring_metadata
+from backend.policy.spliceai_profile import validate_scoring_metadata
 
 
 ROOT = Path(__file__).resolve().parents[1]

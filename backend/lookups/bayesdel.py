@@ -20,10 +20,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from backend.data_health import clear_issue, register_issue
-from backend.gene_policy import reference_transcript
+from backend.infrastructure.health import DataHealthRegistry
+from backend.policy.gene import reference_transcript
 from backend.lookups import coordinates
-from backend.runtime_cache import runtime_cache_path
+from backend.infrastructure.runtime_cache import runtime_cache_path
 from backend.version import ARIANE_VERSION
 
 MYVARIANT_BASE_URL = "https://myvariant.info/v1/variant"
@@ -32,15 +32,18 @@ BAYESDEL_SELECTION_POLICY = "unambiguous_variant_score_v1"
 # Cache stores dicts: {"bayesdel": ..., "am_score": ..., "am_class": ...}
 BAYESDEL_CACHE: Dict[str, Optional[dict]] = {}
 BAYESDEL_STATUS_CACHE: Dict[str, dict] = {}
+_CACHE_LOADED = False
 
 _CACHE_PATH = runtime_cache_path("bayesdel_api_cache.json")
 _FILE_LOCK  = threading.Lock()
 
 
-def _load_cache() -> None:
-    global BAYESDEL_CACHE
+def _load_cache(health: DataHealthRegistry | None = None) -> None:
+    global BAYESDEL_CACHE, _CACHE_LOADED
+    _CACHE_LOADED = True
     if not _CACHE_PATH.exists():
-        clear_issue("BayesDel cache")
+        if health is not None:
+            health.clear("BayesDel cache")
         return
     try:
         with open(_CACHE_PATH, encoding="utf-8") as fh:
@@ -72,13 +75,18 @@ def _load_cache() -> None:
             # Float-only legacy entries have no selection provenance and are
             # intentionally ignored.
         print(f"Loaded BayesDel/AM cache: {len(BAYESDEL_CACHE)} entries")
-        clear_issue("BayesDel cache")
+        if health is not None:
+            health.clear("BayesDel cache")
     except Exception as exc:
         print(f"Warning: could not load BayesDel cache: {exc}")
-        register_issue("BayesDel cache", f"could not load {_CACHE_PATH}: {type(exc).__name__}: {exc}")
+        if health is not None:
+            health.register(
+                "BayesDel cache",
+                f"could not load {_CACHE_PATH}: {type(exc).__name__}: {exc}",
+            )
 
 
-def _save_cache() -> None:
+def _save_cache(health: DataHealthRegistry | None = None) -> None:
     with _FILE_LOCK:
         temporary_path = None
         try:
@@ -96,7 +104,8 @@ def _save_cache() -> None:
                 fh.flush()
                 os.fsync(fh.fileno())
             os.replace(temporary_path, _CACHE_PATH)
-            clear_issue("BayesDel cache")
+            if health is not None:
+                health.clear("BayesDel cache")
         except Exception as exc:
             if temporary_path is not None:
                 try:
@@ -104,13 +113,14 @@ def _save_cache() -> None:
                 except OSError:
                     pass
             print(f"Warning: could not save BayesDel cache: {exc}")
-            register_issue(
-                "BayesDel cache",
-                "score was obtained and used, but the runtime cache could not "
-                f"be saved to {_CACHE_PATH}; this request is unaffected, but the "
-                "score may need to be fetched again after restart: "
-                f"{type(exc).__name__}: {exc}",
-            )
+            if health is not None:
+                health.register(
+                    "BayesDel cache",
+                    "score was obtained and used, but the runtime cache could not "
+                    f"be saved to {_CACHE_PATH}; this request is unaffected, but the "
+                    "score may need to be fetched again after restart: "
+                    f"{type(exc).__name__}: {exc}",
+                )
 
 
 def _numeric_values(value) -> list[float]:
@@ -230,13 +240,18 @@ def fetch_variant_data_myvariant(gene: str, c_notation: str, hg37_coords: Option
 
 
 def get_bayesdel_and_alphamissense(
-    gene: str, c_notation: str
+    gene: str,
+    c_notation: str,
+    *,
+    health: DataHealthRegistry | None = None,
 ) -> Tuple[Optional[float], Optional[dict]]:
     """
     Return (bayesdel_score, alphamissense_dict) from cache or API.
     alphamissense_dict is {"am_score": float, "am_class": str} or None.
     Single function so both scores come from one API call.
     """
+    if not _CACHE_LOADED:
+        _load_cache(health)
     variant_key = f"{gene}:{c_notation}"
 
     entry = BAYESDEL_CACHE.get(variant_key)
@@ -299,7 +314,7 @@ def get_bayesdel_and_alphamissense(
             "reference_transcript": data.get("reference_transcript"),
             "returned_transcripts": data.get("returned_transcripts", []),
         }
-        _save_cache()
+        _save_cache(health)
 
     am = ({"am_score": data["am_score"], "am_class": data["am_class"]}
           if data["am_score"] is not None else None)
@@ -310,6 +325,3 @@ def get_bayesdel_score(gene: str, c_notation: str) -> Optional[float]:
     """Backward-compatible wrapper returning only the BayesDel score."""
     bd, _ = get_bayesdel_and_alphamissense(gene, c_notation)
     return bd
-
-
-_load_cache()

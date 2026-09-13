@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from backend.classification_runtime.cache import ClassificationCacheRepository
 from backend.classification_runtime.identity import resolve_usage_identity
 from backend.classification_runtime.usage import ClassificationUsageRepository
-from backend.models import ClassificationResult, SpliceAIAudit
+from backend.contracts import ClassificationResult, SpliceAIAudit
 
 
 def _result() -> ClassificationResult:
@@ -431,8 +431,11 @@ def test_classification_endpoint_caches_result_but_counts_both_searches(tmp_path
 
     monkeypatch.setattr(main, "CLASSIFICATION_CACHE", cache)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", usage)
-    monkeypatch.setattr(main, "_classify_one", classify_once)
-    monkeypatch.setattr(main, "classification_fingerprint", lambda gene, mode: "test-fingerprint")
+    monkeypatch.setattr(main.CLASSIFICATION_API, "classify_uncached", classify_once)
+    monkeypatch.setattr(
+        "backend.services.variant_classification_service.classification_fingerprint",
+        lambda gene: "test-fingerprint",
+    )
 
     client = TestClient(main.app)
     assert client.get("/").status_code == 200

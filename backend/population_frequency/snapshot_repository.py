@@ -8,7 +8,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
-from backend.data_health import clear_issue, register_issue
+from backend.infrastructure.health import DataHealthRegistry
 from backend.population_frequency.models import GnomadRepository
 from backend.population_frequency.policy import (
     GNOMAD_COVERAGE_SNAPSHOT_PATH,
@@ -212,6 +212,8 @@ def _load_json(path: Path) -> tuple[dict[str, Any] | None, str | None]:
 def load_gnomad_repository(
     frequency_path: Path = GNOMAD_FREQUENCY_SNAPSHOT_PATH,
     coverage_path: Path = GNOMAD_COVERAGE_SNAPSHOT_PATH,
+    *,
+    health: DataHealthRegistry | None = None,
 ) -> GnomadRepository:
     """Load both snapshots explicitly and return one immutable runtime binding."""
     selected_frequency = choose_frequency_snapshot(frequency_path)
@@ -219,33 +221,37 @@ def load_gnomad_repository(
     metadata: Mapping[str, Any] = {}
     frequency_status = "missing"
     if selected_frequency is None:
-        register_issue(
-            "gnomAD variant cache",
-            f"approved frequency snapshot is missing: {frequency_path}",
-        )
+        if health is not None:
+            health.register(
+                "gnomAD variant cache",
+                f"approved frequency snapshot is missing: {frequency_path}",
+            )
     else:
         payload, error = _load_json(selected_frequency)
         if error:
             frequency_status = "load_failed"
-            register_issue(
-                "gnomAD variant cache",
-                f"could not load {selected_frequency}: {error}",
-            )
+            if health is not None:
+                health.register(
+                    "gnomAD variant cache",
+                    f"could not load {selected_frequency}: {error}",
+                )
         else:
             assert payload is not None
             metadata = payload.get("metadata", {})
             validation_error = validate_frequency_snapshot(payload)
             if validation_error:
                 frequency_status = "invalid_faf95"
-                register_issue(
-                    "gnomAD variant cache",
-                    "cache failed non-cancer FAF95 validation: " + validation_error,
-                )
+                if health is not None:
+                    health.register(
+                        "gnomAD variant cache",
+                        "cache failed non-cancer FAF95 validation: " + validation_error,
+                    )
             else:
                 raw = payload.get("variants") or payload.get("by_variant") or {}
                 variants = _normalize_variant_keys(raw)
                 frequency_status = "approved_snapshot"
-                clear_issue("gnomAD variant cache")
+                if health is not None:
+                    health.clear("gnomAD variant cache")
                 LOGGER.info(
                     "Loaded gnomAD frequency snapshot %s with %d variants",
                     selected_frequency,
@@ -255,31 +261,35 @@ def load_gnomad_repository(
     coverage: Mapping[str, Any] = {}
     coverage_status = "missing"
     if not coverage_path.exists():
-        register_issue(
-            "gnomAD coverage snapshot",
-            f"coverage snapshot is missing: {coverage_path}",
-        )
+        if health is not None:
+            health.register(
+                "gnomAD coverage snapshot",
+                f"coverage snapshot is missing: {coverage_path}",
+            )
     else:
         payload, error = _load_json(coverage_path)
         if error:
             coverage_status = "load_failed"
-            register_issue(
-                "gnomAD coverage snapshot",
-                f"could not load {coverage_path}: {error}",
-            )
+            if health is not None:
+                health.register(
+                    "gnomAD coverage snapshot",
+                    f"could not load {coverage_path}: {error}",
+                )
         else:
             assert payload is not None
             validation_error = validate_coverage_snapshot(payload)
             if validation_error:
                 coverage_status = "invalid"
-                register_issue(
-                    "gnomAD coverage snapshot",
-                    "coverage snapshot validation failed: " + validation_error,
-                )
+                if health is not None:
+                    health.register(
+                        "gnomAD coverage snapshot",
+                        "coverage snapshot validation failed: " + validation_error,
+                    )
             else:
                 coverage = payload.get("coverage_by_position", {}) or {}
                 coverage_status = "approved_snapshot"
-                clear_issue("gnomAD coverage snapshot")
+                if health is not None:
+                    health.clear("gnomAD coverage snapshot")
                 LOGGER.info(
                     "Loaded gnomAD coverage snapshot %s with %d positions",
                     coverage_path,

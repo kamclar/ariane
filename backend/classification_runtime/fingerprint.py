@@ -8,21 +8,24 @@ import json
 import os
 from pathlib import Path
 
-from backend.config import (
+from backend.reference_data.paths import (
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
     EXON_CNV_EVIDENCE_PATH,
     ENIGMA_EREPO_VCEP_METADATA_PATH,
     ENIGMA_EREPO_VCEP_REGISTRY_PATH,
-    GENE_POLICY_MANIFEST_PATH,
-    GENE_POLICY_METADATA_PATH,
     PS1_PROTEIN_REGISTRY_PATH,
     ST2_SPLICE_EVIDENCE_PATH,
     ST7_PATH,
     TABLE4_PATH,
     TABLE9_PATH,
 )
-from backend.gene_policy import get_gene_policy
+from backend.policy.gene import (
+    GENE_POLICY_MANIFEST_PATH,
+    GENE_POLICY_METADATA_PATH,
+    get_gene_policy,
+)
 from backend.version import ARIANE_VERSION
+from backend.domain.classification import CLASSIFICATION_ENGINE_ID
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -110,14 +113,14 @@ def _code_identity() -> str:
 
 
 @lru_cache(maxsize=16)
-def classification_fingerprint(gene: str, engine_mode: str) -> str:
+def classification_fingerprint(gene: str) -> str:
     """Return the cache boundary for one active gene policy."""
     configured = get_gene_policy(gene)
     payload = {
         "schema_version": 1,
         "application_version": ARIANE_VERSION,
         "build_revision": os.getenv("ARIANE_BUILD_REVISION", "").strip(),
-        "engine_mode": engine_mode,
+        "engine_mode": CLASSIFICATION_ENGINE_ID,
         "policy_id": configured["policy"]["runtime_policy_id"],
         "policy_version": configured["policy"]["version"],
         "gene": gene,

@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
+import subprocess
+import sys
 
-from backend.classification_dag.domain import ClassificationInputs
+from backend.domain.classification import ClassificationInputs
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1] / "backend"
+PROJECT_ROOT = BACKEND_ROOT.parent
 
 
 class _FunctionLocalBackendImportVisitor(ast.NodeVisitor):
@@ -58,5 +61,338 @@ def test_backend_dependencies_are_not_imported_inside_functions() -> None:
 
 
 def test_classification_inputs_belong_to_domain_layer() -> None:
-    assert ClassificationInputs.__module__ == "backend.classification_dag.domain"
+    assert ClassificationInputs.__module__ == "backend.domain.classification"
 
+
+def _backend_imports(path: Path) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    imports: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("backend"):
+            imports.add(node.module or "")
+        elif isinstance(node, ast.Import):
+            imports.update(
+                alias.name
+                for alias in node.names
+                if alias.name == "backend" or alias.name.startswith("backend.")
+            )
+    return imports
+
+
+def test_domain_and_policy_do_not_depend_on_application_layers() -> None:
+    forbidden = (
+        "backend.api",
+        "backend.classification_dag",
+        "backend.criteria",
+        "backend.lookups",
+        "backend.presentation",
+        "backend.reference_data",
+        "backend.review",
+        "backend.services",
+    )
+    violations: list[str] = []
+    for package in ("domain", "policy"):
+        for path in sorted((BACKEND_ROOT / package).glob("*.py")):
+            for imported in sorted(_backend_imports(path)):
+                if imported.startswith(forbidden):
+                    violations.append(f"{path.name}: {imported}")
+    assert not violations, "Shared layers import an application layer:\n" + "\n".join(violations)
+
+
+def test_criteria_do_not_import_lookups_or_presentation() -> None:
+    forbidden = (
+        "backend.api",
+        "backend.lookups",
+        "backend.presentation",
+        "backend.review",
+    )
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "criteria").glob("*.py")):
+        for imported in sorted(_backend_imports(path)):
+            if imported.startswith(forbidden):
+                violations.append(f"{path.name}: {imported}")
+    assert not violations, "Criterion modules contain an inverted dependency:\n" + "\n".join(violations)
+
+
+def test_lookups_do_not_import_criteria_or_review_layers() -> None:
+    forbidden = (
+        "backend.api",
+        "backend.criteria",
+        "backend.presentation",
+        "backend.review",
+    )
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "lookups").glob("*.py")):
+        for imported in sorted(_backend_imports(path)):
+            if imported.startswith(forbidden):
+                violations.append(f"{path.name}: {imported}")
+    assert not violations, "Lookup modules contain an inverted dependency:\n" + "\n".join(violations)
+
+
+def test_variant_processing_does_not_import_lookup_or_rule_layers() -> None:
+    forbidden = (
+        "backend.api",
+        "backend.classification_dag",
+        "backend.criteria",
+        "backend.lookups",
+        "backend.presentation",
+        "backend.review",
+        "backend.services",
+    )
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "variant_processing").glob("*.py")):
+        for imported in sorted(_backend_imports(path)):
+            if imported.startswith(forbidden):
+                violations.append(f"{path.name}: {imported}")
+    assert not violations, "Variant processing contains an inverted dependency:\n" + "\n".join(violations)
+
+
+def test_application_and_data_layers_do_not_import_api_transport() -> None:
+    violations: list[str] = []
+    for package in (
+        "classification_dag",
+        "classification_runtime",
+        "population_frequency",
+        "reference_data",
+        "review",
+        "services",
+    ):
+        for path in sorted((BACKEND_ROOT / package).rglob("*.py")):
+            for imported in sorted(_backend_imports(path)):
+                if imported.startswith("backend.api"):
+                    violations.append(f"{path.relative_to(BACKEND_ROOT)}: {imported}")
+    assert not violations, "A lower layer imports API transport:\n" + "\n".join(violations)
+
+
+def test_reference_and_lookup_modules_do_not_read_or_create_files_on_import() -> None:
+    modules = (
+        "backend.reference_data.table4",
+        "backend.reference_data.table9",
+        "backend.reference_data.erepo_pvs1_rna",
+        "backend.policy.spliceai_profile",
+        "backend.lookups.founder_variants",
+        "backend.lookups.coordinates",
+        "backend.lookups.bayesdel",
+        "backend.lookups.spliceai",
+    )
+    script = f"""
+import builtins
+from pathlib import Path
+
+def blocked(*args, **kwargs):
+    raise AssertionError("file I/O occurred during module import")
+
+builtins.open = blocked
+Path.read_text = blocked
+Path.read_bytes = blocked
+Path.mkdir = blocked
+
+for module in {modules!r}:
+    __import__(module)
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_missing_required_data_keeps_health_available_and_blocks_readiness() -> None:
+    script = """
+import os
+from pathlib import Path
+
+os.environ["ARIANE_UI_SESSION_SECRET"] = "test-session-secret-at-least-32-bytes-long"
+import backend.reference_data.paths as paths
+paths.TABLE9_PATH = Path("does-not-exist-table9.json")
+
+from backend import main
+from fastapi.testclient import TestClient
+
+response = TestClient(main.app).get("/api/health")
+assert response.status_code == 503, response.text
+payload = response.json()
+assert payload["status"] == "not_ready", payload
+assert payload["ready"] is False, payload
+assert any(
+    item["component"] == "required classification datasets"
+    and "Table 9" in item["detail"]
+    for item in payload["startup"]["failures"]
+), payload
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def _function_call_paths(path: Path, function_name: str) -> set[str]:
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    function = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name == function_name
+    )
+
+    def dotted_name(node: ast.AST) -> str:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            parent = dotted_name(node.value)
+            return f"{parent}.{node.attr}" if parent else node.attr
+        return ""
+
+    return {
+        dotted_name(node.func)
+        for node in ast.walk(function)
+        if isinstance(node, ast.Call)
+    }
+
+
+def test_classification_controllers_delegate_application_workflow() -> None:
+    controller_path = BACKEND_ROOT / "api" / "classification.py"
+    single_calls = _function_call_paths(controller_path, "classify_variant")
+    batch_calls = _function_call_paths(controller_path, "classify_batch")
+
+    assert "self.service.classify_single" in single_calls
+    assert "self.service.prepare_batch" in batch_calls
+    assert "self.service.classify_batch" in batch_calls
+
+    forbidden = {
+        "CLASSIFICATION_CACHE.get",
+        "CLASSIFICATION_CACHE.put",
+        "CLASSIFICATION_USAGE.record",
+        "VariantRequest.model_validate",
+        "asyncio.gather",
+        "classification_fingerprint",
+        "get_gene_policy",
+    }
+    assert not (single_calls & forbidden)
+    assert not (batch_calls & forbidden)
+
+
+def test_native_dag_has_no_runtime_engine_selector() -> None:
+    runtime = (BACKEND_ROOT / "classification_dag" / "runtime.py").read_text(
+        encoding="utf-8"
+    )
+    assert "ClassifierEngineMode" not in runtime
+    assert "get_configured_engine_mode" not in runtime
+    assert "ARIANE_CLASSIFIER_ENGINE" not in runtime
+
+
+def test_manual_evidence_responsibilities_remain_split() -> None:
+    review_root = BACKEND_ROOT / "review"
+    expected = {
+        "definitions.py",
+        "strength.py",
+        "validation.py",
+        "service.py",
+        "manual_evidence.py",
+    }
+    assert expected.issubset({path.name for path in review_root.glob("*.py")})
+
+    for name in expected - {"manual_evidence.py"}:
+        line_count = len((review_root / name).read_text(encoding="utf-8").splitlines())
+        assert line_count < 600, f"backend/review/{name} has grown to {line_count} lines"
+
+    facade_tree = ast.parse(
+        (review_root / "manual_evidence.py").read_text(encoding="utf-8")
+    )
+    assert not any(
+        isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        for node in facade_tree.body
+    )
+
+
+def test_backend_root_contains_only_composition_entry_points() -> None:
+    root_modules = {path.name for path in BACKEND_ROOT.glob("*.py")}
+    assert root_modules == {"__init__.py", "bootstrap.py", "main.py", "version.py"}
+
+
+def test_transport_and_contract_boundaries_are_explicit() -> None:
+    api_modules = {path.name for path in (BACKEND_ROOT / "api").glob("*.py")}
+    assert {
+        "admin.py",
+        "auth.py",
+        "classification.py",
+        "manual.py",
+        "public.py",
+        "review.py",
+        "session.py",
+        "system.py",
+    }.issubset(api_modules)
+    assert {
+        "batch.py",
+        "client.py",
+        "ps1.py",
+        "result.py",
+        "review.py",
+        "variant.py",
+    }.issubset({path.name for path in (BACKEND_ROOT / "contracts").glob("*.py")})
+
+    retired = {
+        "admin.py",
+        "api_auth.py",
+        "config.py",
+        "data_health.py",
+        "data_validation.py",
+        "models.py",
+        "public_api.py",
+        "review_api.py",
+        "review_records.py",
+        "runtime_cache.py",
+        "runtime_data.py",
+        "spliceai_profile.py",
+        "startup.py",
+        "ui_session.py",
+    }
+    assert not (retired & {path.name for path in BACKEND_ROOT.glob("*.py")})
+
+
+def test_main_is_a_composition_root_not_a_route_collection() -> None:
+    main_path = BACKEND_ROOT / "main.py"
+    lines = main_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) < 180
+    source = "\n".join(lines)
+    assert "create_manual_router" in source
+    assert "create_system_router" in source
+    assert "install_http_middleware" in source
+    assert "install_exception_handlers" in source
+    assert "install_frontend" in source
+    assert "@app." not in source
+
+
+def test_paired_routes_use_one_auth_policy_helper() -> None:
+    routing = (BACKEND_ROOT / "api" / "routing.py").read_text(encoding="utf-8")
+    assert "require_public_api_key" in routing
+    assert "require_ui_session" in routing
+    assert "include_in_schema=False" in routing
+
+    for module_name in ("classification.py", "manual.py", "system.py"):
+        source = (BACKEND_ROOT / "api" / module_name).read_text(encoding="utf-8")
+        assert '"/ui-api/' not in source
+    assert '@paired.post("/manual-evidence/evaluate")' in (
+        BACKEND_ROOT / "api" / "manual.py"
+    ).read_text(encoding="utf-8")
+    assert '@paired.get("/rules")' in (
+        BACKEND_ROOT / "api" / "system.py"
+    ).read_text(encoding="utf-8")
+
+
+def test_runtime_health_has_no_process_global_registry() -> None:
+    health_path = BACKEND_ROOT / "infrastructure" / "health.py"
+    tree = ast.parse(health_path.read_text(encoding="utf-8"))
+    assert not any(
+        isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "_ISSUES" for target in node.targets)
+        for node in tree.body
+    )
+    assert "DataHealthRegistry()" not in health_path.read_text(encoding="utf-8")

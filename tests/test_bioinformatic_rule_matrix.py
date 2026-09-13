@@ -2,17 +2,17 @@
 
 import pytest
 
-from backend.modules.bp1 import evaluate_bp1
-from backend.modules.bp7 import evaluate_bp7
-from backend.modules.evidence_interactions import (
+from backend.criteria.bp1 import evaluate_bp1
+from backend.criteria.bp7 import evaluate_bp7
+from backend.criteria.evidence_interactions import (
     apply_manual_rna_interactions,
     automatic_functional_interactions,
 )
-from backend.modules.manual_evidence import suggest_strength
-from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.variant_type import infer_variant_type
+from backend.review.manual_evidence import suggest_strength
+from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.variant_processing.variant_type import infer_variant_type
 
 
 def applied_codes(results):

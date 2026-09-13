@@ -4,16 +4,16 @@ import shutil
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.config import PANEL_REFERENCE_DIR
-from backend.models import VariantRequest
-from backend.modules.hgvs import protein_notations_compatible
-from backend.modules.hgvs_engine import (
+from backend.reference_data.paths import PANEL_REFERENCE_DIR
+from backend.contracts import VariantRequest
+from backend.variant_processing.hgvs import protein_notations_compatible
+from backend.variant_processing.hgvs_engine import (
     VariantNormalizationError,
     derive_protein_consequence,
     load_hgvs_engine,
 )
-from backend.modules.hgvs_provider import load_panel_provider
-from backend.modules.variant_input import normalize_variant_input
+from backend.variant_processing.hgvs_provider import load_panel_provider
+from backend.variant_processing.variant_input import normalize_variant_input
 
 
 @pytest.mark.parametrize(

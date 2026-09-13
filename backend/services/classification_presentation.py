@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from backend.models import (
+from backend.contracts import (
     AlphaMissenseResult,
     CLASS_LABELS,
     ClassificationResult,
@@ -18,13 +18,13 @@ from backend.models import (
     VusExplanation,
 )
 from backend.lookups.clinvar import clinvar_review_stars
-from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
-from backend.modules.criterion_order import sorted_criterion_items
-from backend.modules.enigma_rules import clinical_annotations_for_variant
-from backend.modules.erepo_vcep import lookup_erepo_vcep_assertion
-from backend.modules.external import external_comparison
-from backend.modules.narrative import generate_narrative
-from backend.modules.vus_explanation import explain_vus
+from backend.criteria.bp7_rna import evaluate_bp7_rna_variant_context
+from backend.presentation.criterion_order import sorted_criterion_items
+from backend.reference_data.enigma_rules import clinical_annotations_for_variant
+from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
+from backend.presentation.external import external_comparison
+from backend.presentation.narrative import generate_narrative
+from backend.presentation.vus_explanation import explain_vus
 from backend.services.evidence_orchestration import OrchestratedEvidence
 
 

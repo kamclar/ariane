@@ -10,11 +10,10 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-import hashlib
 import logging
 from typing import Any, Callable, Mapping
 
-from backend.classification_dag.domain import (
+from backend.domain.classification import (
     ClassificationInputs,
     EvidenceBundle,
     EvidenceItem,
@@ -22,15 +21,16 @@ from backend.classification_dag.domain import (
     NormalizedVariant,
 )
 from backend.classification_dag.types import NodeResult
-from backend.lookup_execution import lookup_or_unavailable
-from backend.modules.spliceai_policy import (
+from backend.infrastructure.lookup_execution import lookup_or_unavailable
+from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
 )
 from backend.population_frequency.indel_size import is_indel_allele
-from backend.modules.table9 import (
-    TABLE9_DATA,
+from backend.reference_data.table9 import (
     TABLE9_JSON_PATH,
+    load_table9_data,
+    table9_checksum,
     table9_lookup_ps3_bs3,
 )
 
@@ -771,7 +771,10 @@ class EvidenceBundleAssemblyNode:
             "table9_evidence",
         ))
         bundle = EvidenceBundle(items)
-        value = lambda evidence_id: bundle.get(evidence_id).value
+
+        def value(evidence_id: str) -> Any:
+            return bundle.get(evidence_id).value
+
         gnomad_value = value("gnomad")
         classification_inputs = ClassificationInputs(
             gene=variant.gene,
@@ -861,7 +864,8 @@ class Table9EvidenceNode:
 
         value = table9_lookup_ps3_bs3(variant.gene, variant.c_notation)
         reviewed = bool(value.get("reviewed"))
-        dataset_sha256 = hashlib.sha256(TABLE9_JSON_PATH.read_bytes()).hexdigest()
+        table9_data = load_table9_data()
+        dataset_sha256 = table9_checksum()
         evidence = EvidenceItem(
             id="enigma_table9",
             kind="functional_assay",
@@ -872,12 +876,12 @@ class Table9EvidenceNode:
             ),
             value=value,
             source_id="enigma-v1.2-table9",
-            source_version=str(TABLE9_DATA.get("version") or ""),
+            source_version=str(table9_data.get("version") or ""),
             source_checksum=dataset_sha256,
             reason=str(value.get("reason") or ""),
             provenance={
                 "runtime_dataset": TABLE9_JSON_PATH.name,
-                "runtime_rows": TABLE9_DATA.get("row_count"),
+                "runtime_rows": table9_data.get("row_count"),
             },
         )
         return NodeResult.succeeded(

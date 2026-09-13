@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from backend.spliceai_profile import (
+from backend.policy.spliceai_profile import (
     SPLICEAI_AGGREGATION,
     SPLICEAI_ALTERNATE_FIELDS,
     SPLICEAI_ANNOTATION_SUBSET,

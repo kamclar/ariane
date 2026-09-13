@@ -1,7 +1,9 @@
 import unittest
 
 from backend.lookups import spliceai
-from backend.spliceai_profile import (
+from backend.policy.spliceai_profile import (
+    SPLICEAI_HIGH_THRESHOLD,
+    SPLICEAI_LOW_THRESHOLD,
     SPLICEAI_PROFILE_ID,
     SPLICEAI_PROFILE_SHA256,
 )
@@ -34,8 +36,8 @@ class SpliceAIAppendixJProfileTests(unittest.TestCase):
         )
         self.assertEqual(spliceai.SPLICEAI_MAX_DISTANCE, 10000)
         self.assertEqual(spliceai.SPLICEAI_MASK, 0)
-        self.assertEqual(spliceai.SPLICEAI_LOW_THRESHOLD, 0.1)
-        self.assertEqual(spliceai.SPLICEAI_HIGH_THRESHOLD, 0.2)
+        self.assertEqual(SPLICEAI_LOW_THRESHOLD, 0.1)
+        self.assertEqual(SPLICEAI_HIGH_THRESHOLD, 0.2)
 
     def test_precomputed_variant_space_is_not_supported_by_runtime(self):
         self.assertFalse(hasattr(spliceai, "SPLICEAI_USE_PRECOMPUTED_CACHE"))

@@ -17,14 +17,12 @@ from backend.classification_dag import (
     EvidenceStatus,
     NodeResult,
     NodeStatus,
-    ClassifierEngineMode,
     execute_classification,
-    get_configured_engine_mode,
 )
-from backend.classification_dag.policy import classify_by_enigma_combination
+from backend.policy.classification import classify_by_enigma_combination
 from backend.classification_dag.nodes import population as population_nodes
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
 
 
@@ -388,7 +386,7 @@ def test_benign_table3_combinations_are_monotonic_for_stronger_evidence():
 
 
 def test_dag_preserves_bp5_provenance_and_rejects_single_lr_class2_shortcut():
-    from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+    from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
     clinical_lr = evaluate_pp4_bp5("BRCA1", "c.1005C>A")
     execution = execute_classification(
@@ -399,7 +397,6 @@ def test_dag_preserves_bp5_provenance_and_rejects_single_lr_class2_shortcut():
             p_notation="p.(?)",
             pp4_bp5_result=clinical_lr,
         ),
-        mode="dag",
     )
 
     bp5 = execution.result["criteria"]["BP5"]
@@ -411,7 +408,7 @@ def test_dag_preserves_bp5_provenance_and_rejects_single_lr_class2_shortcut():
 
 def test_dag_produces_approved_representative_clinical_result():
     inputs = _representative_inputs()
-    execution = execute_classification(inputs, mode="dag")
+    execution = execute_classification(inputs)
 
     assert execution.result["predicted_class"] == 3
     assert execution.result["total_points"] == 5
@@ -450,7 +447,7 @@ def test_table9_provider_records_version_and_runtime_checksum():
         p_notation="p.(Arg170Gln)",
         reference_transcript="NM_007294.4",
     )
-    execution = execute_classification(inputs, mode="dag")
+    execution = execute_classification(inputs)
     provider_trace = next(
         entry for entry in execution.trace
         if entry.node_id == "provider.enigma.table9"
@@ -497,7 +494,6 @@ def test_table9_decision_path_reports_eligible_assay_scope_without_guessing(
             p_notation=p_notation,
             reference_transcript="NM_007294.4",
         ),
-        mode="dag",
     )
     criterion = next(
         value
@@ -538,7 +534,7 @@ def test_table9_provider_rejects_conflicting_pre_dag_value():
     )
 
     with pytest.raises(DagNodeExecutionError, match="Table 9 evidence conflicts"):
-        execute_classification(inputs, mode="dag")
+        execute_classification(inputs)
 
 
 @pytest.mark.parametrize(
@@ -566,7 +562,7 @@ def test_dag_contract_accepts_supported_variant_families(
         p_notation=p_notation,
         table9_result=table9_lookup_ps3_bs3(gene, c_notation),
     )
-    execution = execute_classification(inputs, mode="dag")
+    execution = execute_classification(inputs)
     assert execution.result["gene"] == gene
     assert execution.result["c_notation"] == c_notation
     assert execution.result["p_notation"] == p_notation
@@ -586,7 +582,6 @@ def test_table4_pvs1_na_is_reported_separately_from_excluded_evidence():
             spliceai_score=0.90,
             reference_transcript="NM_000059.4",
         ),
-        mode="dag",
     )
 
     pvs1 = execution.result["not_applicable_criteria"]["PVS1"]
@@ -612,7 +607,6 @@ def test_indel_pm2_na_is_reported_without_hiding_unavailable_or_not_met_states()
                 "status": "not_queried",
             },
         ),
-        mode="dag",
     )
 
     pm2 = execution.result["not_applicable_criteria"]["PM2"]
@@ -651,7 +645,6 @@ def test_pm2_na_status_does_not_depend_on_reason_wording(monkeypatch):
             reference_transcript="NM_007294.4",
             gnomad_data={"status": "test"},
         ),
-        mode="dag",
     )
 
     assert (
@@ -688,27 +681,13 @@ def test_pm2_unavailable_text_cannot_create_not_applicable_status(monkeypatch):
             reference_transcript="NM_007294.4",
             gnomad_data={"status": "test"},
         ),
-        mode="dag",
     )
 
     assert "PM2" not in execution.result["not_applicable_criteria"]
     assert unavailable["reason"] in execution.result["warnings"]
 
 
-def test_unknown_runtime_mode_is_rejected(monkeypatch):
-    monkeypatch.setenv("ARIANE_CLASSIFIER_ENGINE", "fallback")
-    with pytest.raises(ValueError, match="Invalid ARIANE_CLASSIFIER_ENGINE"):
-        execute_classification(_representative_inputs())
-
-
-def test_native_dag_is_default_and_does_not_require_legacy_evaluator(monkeypatch):
-    monkeypatch.delenv("ARIANE_CLASSIFIER_ENGINE", raising=False)
-    assert get_configured_engine_mode() == ClassifierEngineMode.DAG
+def test_native_dag_has_no_legacy_execution_path():
     execution = execute_classification(_representative_inputs())
-    assert execution.engine_mode == ClassifierEngineMode.DAG
+    assert execution.audit_record()["engine_mode"] == "dag"
     assert all("legacy." not in entry.node_id for entry in execution.trace)
-
-
-def test_legacy_runtime_mode_is_no_longer_available():
-    with pytest.raises(ValueError, match="Invalid ARIANE_CLASSIFIER_ENGINE"):
-        execute_classification(_representative_inputs(), mode="legacy")

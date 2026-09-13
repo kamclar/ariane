@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 import asyncio
 import json
 import hashlib
@@ -9,11 +9,11 @@ from unittest.mock import patch
 
 from fastapi import HTTPException
 
-from backend.lookups.precomputed import (
+from backend.reference_data.classification_snapshot import (
     load_classification_snapshot_metadata,
     lookup_classification_snapshot,
 )
-from backend.modules.reference_validation import validate_reference_allele
+from backend.variant_processing.reference_validation import validate_reference_allele
 
 
 class PrecomputedSnapshotTests(unittest.TestCase):
@@ -85,7 +85,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_conflicting_normalized_c5266_alias_requires_source_review(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         canonical = evaluate_pp4_bp5("BRCA1", "c.5266dup")
         alias = evaluate_pp4_bp5("BRCA1", "c.5266dupC")
@@ -109,7 +109,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_c509_uses_publisher_combined_lr_as_bp5_strong(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.509G>A")
         self.assertTrue(result["applies"])
@@ -138,7 +138,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(comparison["threshold_value"], 0.05)
 
     def test_source_reported_zero_lr_is_distinct_from_unavailable_lr(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.1534C>T")
 
@@ -149,7 +149,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(result["strength"], "Very Strong")
 
     def test_source_label_difference_is_compared_with_vcep_threshold_generically(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.4675+3A>T")
 
@@ -169,13 +169,13 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertIn("VCEP threshold result", result["reason"])
 
     def test_unknown_source_acmg_label_fails_closed(self):
-        from backend.modules.pp4_bp5 import _parse_source_acmg_label
+        from backend.reference_data.pp4_bp5 import _parse_source_acmg_label
 
         with self.assertRaisesRegex(RuntimeError, "Unsupported PP4/BP5 source ACMG label"):
             _parse_source_acmg_label("Probably moderate")
 
     def test_every_eligible_snapshot_record_uses_the_same_label_comparison_rule(self):
-        from backend.modules.pp4_bp5 import (
+        from backend.reference_data.pp4_bp5 import (
             _threshold_comparison,
             load_pp4_bp5_snapshot,
             lr_to_bp5_strength,
@@ -212,7 +212,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_single_lr_bp5_strong_is_not_single_strong_class2_eligible(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.1005C>A")
         self.assertTrue(result["applies"])
@@ -223,7 +223,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertFalse(result["single_strong_likely_benign_eligible"])
 
     def test_pp4_unavailable_reason_does_not_expose_storage_terminology(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.999999A>G")
         self.assertFalse(result["applies"])
@@ -232,7 +232,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertNotIn("snapshot", result["reason"].lower())
 
     def test_bp5_snapshot_resolves_multibase_duplication_alias(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         canonical = evaluate_pp4_bp5("BRCA2", "c.9891_9894dup")
         source_spelling = evaluate_pp4_bp5("BRCA2", "c.9891_9894dupATTT")
@@ -245,7 +245,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(set(canonical["source_components"][0]["pmids"]), {"31853058"})
 
     def test_conflicting_normalized_c475_del_rows_require_source_review(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA2", "c.475+4del")
         self.assertFalse(result["applies"])
@@ -258,7 +258,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_c3891_del_uses_publisher_combined_lr_as_bp5_strong(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.3891_3893del")
         self.assertTrue(result["applies"])
@@ -272,7 +272,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_pp4_uses_publisher_combined_clinical_lr(self):
-        from backend.modules.pp4_bp5 import evaluate_pp4_bp5
+        from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 
         result = evaluate_pp4_bp5("BRCA1", "c.4185G>A")
         self.assertTrue(result["applies"])
@@ -286,8 +286,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         )
 
     def test_c4185_full_path_applies_curated_st2_rna(self):
-        from backend.classification_dag import ClassifierEngineMode
-        from backend.main import CLASSIFICATION_ORCHESTRATION, _classify_one
+        from backend.main import CLASSIFICATION_API, CLASSIFICATION_ORCHESTRATION
         from backend.services import EvidenceOrchestrationService, ExternalEvidenceDependencies
 
         pm2 = {
@@ -336,7 +335,6 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             bayesdel_status=lambda *_args, **_kwargs: {"status": "not_found"},
         )
         orchestration = EvidenceOrchestrationService(
-            engine_mode=ClassifierEngineMode.DAG,
             provider_dependencies=dependencies,
             external_dependencies=ExternalEvidenceDependencies(
                 clinvar_lookup=lambda *_args, **_kwargs: {"status": "not_found"},
@@ -348,7 +346,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             return_value=pm2,
         ), patch("backend.main.CLASSIFICATION_ORCHESTRATION", orchestration):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.4185G>A", "p.(Gln1395=)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.4185G>A", "p.(Gln1395=)")
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
@@ -360,7 +358,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertFalse(result.rna_review.recommended)
 
     def test_pp4_snapshot_missing_metadata_fails_closed(self):
-        from backend.modules import pp4_bp5
+        from backend.reference_data import pp4_bp5
 
         original_snapshot, original_aliases = pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES
         try:
@@ -373,7 +371,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES = original_snapshot, original_aliases
 
     def test_pp4_snapshot_missing_source_manifest_fails_closed(self):
-        from backend.modules import pp4_bp5
+        from backend.reference_data import pp4_bp5
 
         original_snapshot, original_aliases = pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES
         try:
@@ -388,7 +386,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
             pp4_bp5._SNAPSHOT, pp4_bp5._ALIASES = original_snapshot, original_aliases
 
     def test_normalized_indel_snapshot_resolves_alias_and_protein(self):
-        from backend.lookups.indels import lookup_indel_snapshot
+        from backend.reference_data.indel_snapshot import lookup_indel_snapshot
 
         record = lookup_indel_snapshot("BRCA1", "c.5266dupC")
         self.assertIsNotNone(record)
@@ -399,7 +397,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
         self.assertEqual(record["grch38"]["alt"], "TG")
 
     def test_indel_snapshot_records_and_excludes_ambiguous_aliases(self):
-        from backend.lookups.indels import load_indel_snapshot, lookup_indel_snapshot
+        from backend.reference_data.indel_snapshot import load_indel_snapshot, lookup_indel_snapshot
 
         index, aliases = load_indel_snapshot()
         self.assertEqual(len(index), 16511)
@@ -433,7 +431,7 @@ class PrecomputedSnapshotTests(unittest.TestCase):
 
 class ClassificationInputIntegrationTests(unittest.TestCase):
     def test_c4676_acceptor_variant_with_two_very_strong_criteria_is_pathogenic(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch(
             "backend.lookups.spliceai.get_spliceai_score", return_value=0.996
@@ -446,7 +444,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "backend.lookups.clingen.clingen_erepo_lookup",
             return_value={"status": "not_found"},
         ):
-            result = asyncio.run(_classify_one("BRCA1", "c.4676-1G>A", "p.?"))
+            result = asyncio.run(CLASSIFICATION_API.classify_uncached("BRCA1", "c.4676-1G>A", "p.?"))
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
         self.assertEqual(criteria["PVS1"].strength, "Very Strong")
@@ -460,26 +458,26 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.predicted_label, "Pathogenic")
 
     def test_abbreviated_frameshift_is_classified_with_canonical_output(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.3668_3671dup", "p.(Cys1225fs)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.3668_3671dup", "p.(Cys1225fs)")
             )
 
         self.assertEqual(result.p_notation, "p.(Cys1225SerfsTer10)")
         self.assertEqual(result.predicted_class, 5)
 
     def test_terminal_frameshift_receives_paired_table4_codes(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.5556_5560del", "p.(Tyr1853AspfsTer25)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.5556_5560del", "p.(Tyr1853AspfsTer25)")
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
@@ -489,7 +487,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.predicted_class, 5)
 
     def test_exon_cnv_skips_small_variant_lookups_and_hides_provider_errors(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         notation = "c.(793+1_794-1)_(1909+1_1910-1)del"
         with patch("backend.lookups.coordinates.resolve_variant") as coordinates, patch(
@@ -503,7 +501,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "backend.lookups.clingen.clingen_erepo_lookup",
             return_value={"status": "api_timeout", "error": "raw provider error"},
         ):
-            result = asyncio.run(_classify_one("BRCA2", notation, "p.(?)"))
+            result = asyncio.run(CLASSIFICATION_API.classify_uncached("BRCA2", notation, "p.(?)"))
 
         coordinates.assert_not_called()
         spliceai.assert_not_called()
@@ -541,7 +539,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         )
 
     def test_c5266_conflicting_clinical_lr_rows_require_review(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
@@ -549,7 +547,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.5266dup", "p.(Gln1756ProfsTer74)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.5266dup", "p.(Gln1756ProfsTer74)")
             )
 
         self.assertNotIn("PP4", {criterion.name for criterion in result.criteria})
@@ -560,7 +558,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         )
 
     def test_c509_full_classification_scores_publisher_combined_bp5(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch.dict(
             "backend.lookups.spliceai.SPLICEAI_STATUS_CACHE",
@@ -584,7 +582,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             return_value={"status": "not_found"},
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.509G>A", "p.(Arg170Gln)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.509G>A", "p.(Arg170Gln)")
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
@@ -598,7 +596,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         )
 
     def test_c3247a_to_c_receives_bp1_and_variant_specific_pp4(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch.dict(
             "backend.lookups.spliceai.SPLICEAI_STATUS_CACHE",
@@ -622,7 +620,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             return_value={"status": "not_found"},
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.3247A>C", "p.(Met1083Leu)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.3247A>C", "p.(Met1083Leu)")
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
@@ -636,7 +634,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.predicted_class, 2)
 
     def test_brca2_multibase_duplication_receives_bp5_supporting(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
@@ -644,7 +642,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
             result = asyncio.run(
-                _classify_one("BRCA2", "c.9891_9894dup", "p.(Gln3299fs)")
+                CLASSIFICATION_API.classify_uncached("BRCA2", "c.9891_9894dup", "p.(Gln3299fs)")
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
@@ -657,26 +655,26 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertTrue(result.mixed_evidence)
 
     def test_general_indel_snapshot_rejects_random_protein_notation(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with self.assertRaises(HTTPException) as raised:
-            asyncio.run(_classify_one("BRCA1", "c.3668_3671dup", "p.(Arg100Gly)"))
+            asyncio.run(CLASSIFICATION_API.classify_uncached("BRCA1", "c.3668_3671dup", "p.(Arg100Gly)"))
         self.assertEqual(raised.exception.status_code, 422)
         self.assertIn("p.(Cys1225SerfsTer10)", raised.exception.detail)
 
     def test_table9_indel_rejects_random_protein_notation(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with self.assertRaises(HTTPException) as raised:
             asyncio.run(
-                _classify_one("BRCA1", "c.5266dup", "p.(Arg100Gly)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.5266dup", "p.(Arg100Gly)")
             )
         self.assertEqual(raised.exception.status_code, 422)
         self.assertIn("p.(Gln1756ProfsTer74)", raised.exception.detail)
 
     def test_table9_asterisk_and_ter_protein_notations_are_equivalent(self):
-        from backend.modules.hgvs import normalize_protein_notation
-        from backend.modules.table9 import table9_protein_notation
+        from backend.variant_processing.hgvs import normalize_protein_notation
+        from backend.reference_data.table9 import table9_protein_notation
 
         reviewed = table9_protein_notation("BRCA1", "c.5266dup")
         self.assertEqual(
@@ -685,7 +683,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         )
 
     def test_c_only_nonsense_derives_protein_consequence(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
@@ -694,12 +692,12 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         ), patch(
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
-            result = asyncio.run(_classify_one("BRCA1", "c.303T>G", ""))
+            result = asyncio.run(CLASSIFICATION_API.classify_uncached("BRCA1", "c.303T>G", ""))
         self.assertEqual(result.p_notation, "p.(Tyr101Ter)")
         self.assertEqual(result.consequence_status, "sequence_derived")
 
     def test_nonsense_with_protein_notation_is_classified(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.spliceai.get_spliceai_score", return_value=None), patch(
             "backend.lookups.bayesdel.get_bayesdel_and_alphamissense", return_value=(None, None)
@@ -707,7 +705,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             "backend.lookups.clingen.clingen_erepo_lookup", return_value={"status": "not_found"}
         ):
             result = asyncio.run(
-                _classify_one("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
+                CLASSIFICATION_API.classify_uncached("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
             )
 
         self.assertEqual(result.p_notation, "p.(Tyr101Ter)")
@@ -716,10 +714,10 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.predicted_class, 5)
 
     def test_wrong_reference_stops_before_classification(self):
-        from backend.main import _classify_one
+        from backend.main import CLASSIFICATION_API
 
         with self.assertRaises(HTTPException) as raised:
-            asyncio.run(_classify_one("BRCA1", "c.181A>C", ""))
+            asyncio.run(CLASSIFICATION_API.classify_uncached("BRCA1", "c.181A>C", ""))
         self.assertEqual(raised.exception.status_code, 422)
         self.assertIn("is T", raised.exception.detail)
 

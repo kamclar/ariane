@@ -1,13 +1,13 @@
 from fastapi.testclient import TestClient
 
-from backend.models import ClassificationResult
+from backend.contracts import ClassificationResult
 
 
 API_HEADERS = {"X-ARIANE-API-Key": "test-api-key"}
 
 
 def _allow_test_api_key(monkeypatch):
-    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     monkeypatch.setattr(
         PUBLIC_API_KEY_AUTHENTICATOR,
@@ -39,7 +39,7 @@ def test_batch_returns_item_error_without_discarding_valid_variants(monkeypatch)
         calls.append(f"{gene}:{c_notation}")
         return _classification_result(), "miss", "test-fingerprint"
 
-    monkeypatch.setattr(main, "_classify_one_cached", classify_cached)
+    monkeypatch.setattr(main.CLASSIFICATION_API, "classify_cached", classify_cached)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
 

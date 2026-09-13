@@ -10,18 +10,17 @@ from typing import Any, Callable, Mapping
 
 from backend.classification_dag import (
     ClassificationRequest,
-    ClassifierEngineMode,
     DagNodeExecutionError,
     NormalizedVariant,
     ProviderDependencies,
     execute_classification_request,
 )
 from backend.classification_dag.runtime import ClassificationExecution
-from backend.data_health import get_user_warnings
+from backend.infrastructure.health import DataHealthRegistry
 from backend.lookups import clingen, clinvar
-from backend.lookup_execution import lookup_or_unavailable
-from backend.modules.variant_input import NormalizedVariantInput, normalize_variant_input
-from backend.modules.variant_type import infer_variant_type
+from backend.infrastructure.lookup_execution import lookup_or_unavailable
+from backend.variant_processing.variant_input import NormalizedVariantInput, normalize_variant_input
+from backend.variant_processing.variant_type import infer_variant_type
 from backend.services.classification_completeness import first_required_evidence_gap
 
 
@@ -125,13 +124,13 @@ class EvidenceOrchestrationService:
     def __init__(
         self,
         *,
-        engine_mode: ClassifierEngineMode,
         provider_dependencies: ProviderDependencies | None = None,
         external_dependencies: ExternalEvidenceDependencies | None = None,
+        health: DataHealthRegistry | None = None,
     ) -> None:
-        self.engine_mode = engine_mode
         self.provider_dependencies = provider_dependencies
         self.external_dependencies = external_dependencies
+        self.health = health
 
     def _external_dependencies(self) -> ExternalEvidenceDependencies:
         return self.external_dependencies or ExternalEvidenceDependencies.production()
@@ -187,7 +186,6 @@ class EvidenceOrchestrationService:
         classification_task = execute_classification_request(
             request,
             dependencies=self.provider_dependencies,
-            mode=self.engine_mode,
         )
         external_tasks = (
             lookup_or_unavailable(
@@ -298,8 +296,8 @@ class EvidenceOrchestrationService:
         for diagnostic in (*execution.provider_warnings, *external_diagnostics):
             LOGGER.warning("External lookup diagnostic: %s", diagnostic)
 
-    @staticmethod
     def _append_availability_warnings(
+        self,
         result: dict[str, Any],
         artifacts: Mapping[str, Any],
         *,
@@ -329,7 +327,7 @@ class EvidenceOrchestrationService:
                 "Coordinate-dependent evidence was not evaluated because genomic "
                 "coordinates could not be resolved."
             )
-        for warning in get_user_warnings():
+        for warning in self.health.user_warnings() if self.health is not None else ():
             if warning not in warnings:
                 warnings.append(warning)
         if clinvar.get("status") == "ambiguous":

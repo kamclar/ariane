@@ -8,7 +8,7 @@ from typing import Any
 from hgvs.exceptions import HGVSParseError
 from hgvs.parser import Parser
 
-from backend.config import TRANSCRIPTS
+from backend.policy.catalog import TRANSCRIPTS
 
 
 _PARSER = Parser()

@@ -8,8 +8,7 @@ from unittest.mock import patch
 import pytest
 
 from backend.classification_dag.runtime import ClassificationInputs, execute_classification
-from backend.gene_policy import (
-    GENE_POLICY_MANIFEST_PATH,
+from backend.policy.gene import (
     GenePolicyError,
     active_genes,
     bayesdel_thresholds,
@@ -20,12 +19,12 @@ from backend.gene_policy import (
     validate_gene_policy_payload,
     validate_policy_source_bindings,
 )
-from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-from backend.modules.manual_evidence import (
+from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
+from backend.review.manual_evidence import (
     manual_criteria_for_gene,
     resource_links_for_gene,
 )
-from backend.modules.pvs1 import evaluate_pvs1
+from backend.criteria.pvs1 import evaluate_pvs1
 
 
 def _modified_manifest():
@@ -99,7 +98,7 @@ def test_bayesdel_decision_changes_from_manifest_without_python_change():
 
     manifest = _modified_manifest()
     manifest["genes"]["BRCA1"]["thresholds"]["bayesdel_noaf"]["pp3_min_inclusive"] = 0.50
-    with patch("backend.gene_policy.load_gene_policy_manifest", return_value=manifest):
+    with patch("backend.policy.gene.load_gene_policy_manifest", return_value=manifest):
         changed = evaluate_pp3_bp4(
             "BRCA1", "missense", "p.(Ala1789Val)",
             bayesdel_score=0.438, spliceai_score=0.03,
@@ -119,7 +118,7 @@ def test_non_applicable_rule_is_excluded_before_classification():
         spliceai_score=0.03,
         bayesdel_score=0.438,
     )
-    with patch("backend.gene_policy.load_gene_policy_manifest", return_value=manifest):
+    with patch("backend.policy.gene.load_gene_policy_manifest", return_value=manifest):
         result = execute_classification(inputs).result
     assert "PP3" not in result["criteria"]
     assert result["excluded_criteria"]["PP3"]["points"] == 0
@@ -138,7 +137,7 @@ def test_unimplemented_policy_profile_fails_closed_before_classification():
         p_notation="p.(Ala1789Val)",
         reference_transcript="NM_007294.4",
     )
-    with patch("backend.gene_policy.load_gene_policy_manifest", return_value=manifest):
+    with patch("backend.policy.gene.load_gene_policy_manifest", return_value=manifest):
         with pytest.raises(RuntimeError, match="No classification DAG is implemented"):
             execute_classification(inputs)
 
@@ -158,14 +157,14 @@ def test_generic_runtime_files_do_not_branch_on_brca_gene_symbols():
     project_root = Path(__file__).resolve().parents[1]
     files = (
         "backend/main.py",
-        "backend/modules/variant_input.py",
-        "backend/modules/hgvs_engine.py",
-        "backend/modules/pvs1.py",
-        "backend/modules/narrative.py",
-        "backend/modules/table4.py",
-        "backend/modules/enigma_rules.py",
+        "backend/variant_processing/variant_input.py",
+        "backend/variant_processing/hgvs_engine.py",
+        "backend/criteria/pvs1.py",
+        "backend/presentation/narrative.py",
+        "backend/reference_data/table4.py",
+        "backend/reference_data/enigma_rules.py",
         "backend/lookups/founder_variants.py",
-        "backend/modules/exon_cnv_evidence.py",
+        "backend/reference_data/exon_cnv_evidence.py",
     )
     forbidden = (
         re.compile(r'gene\s*==\s*["\']BRCA[12]["\']'),

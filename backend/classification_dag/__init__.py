@@ -6,7 +6,8 @@ from backend.classification_dag.engine import (
     DagExecutor,
     DagNodeExecutionError,
 )
-from backend.classification_dag.domain import (
+from backend.domain.classification import (
+    CLASSIFICATION_ENGINE_ID,
     ClassificationInputs,
     CriterionDecision,
     CriterionDecisionStatus,
@@ -19,10 +20,8 @@ from backend.classification_dag.domain import (
 )
 from backend.classification_dag.runtime import (
     ClassificationExecution,
-    ClassifierEngineMode,
     execute_classification,
     execute_classification_request,
-    get_configured_engine_mode,
 )
 from backend.classification_dag.providers import (
     ClassificationRequest,
@@ -39,9 +38,9 @@ from backend.classification_dag.types import (
 
 __all__ = [
     "ClassificationExecution",
+    "CLASSIFICATION_ENGINE_ID",
     "ClassificationInputs",
     "ClassificationRequest",
-    "ClassifierEngineMode",
     "CriterionDecision",
     "CriterionDecisionStatus",
     "CriterionFamilyResult",
@@ -63,5 +62,4 @@ __all__ = [
     "VariantAssertion",
     "execute_classification",
     "execute_classification_request",
-    "get_configured_engine_mode",
 ]

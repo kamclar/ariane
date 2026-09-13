@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from backend.classification_dag.types import NodeResult
-from backend.modules.initiation_review import evaluate_initiation_review
-from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
-from backend.modules.rna_review import evaluate_rna_review
-from backend.modules.splice_ps1_review import evaluate_splice_ps1_review
+from backend.review.initiation_review import evaluate_initiation_review
+from backend.review.protein_ps1_review import evaluate_protein_ps1_review
+from backend.review.rna_review import evaluate_rna_review
+from backend.review.splice_ps1_review import evaluate_splice_ps1_review
 
 
 @dataclass(frozen=True)

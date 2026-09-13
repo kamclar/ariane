@@ -56,20 +56,26 @@ scripts and individual data files are omitted here.
 ```
 ariane/
 ├── backend/
-│   ├── main.py                         # FastAPI application and routes
-│   ├── config.py                       # paths and runtime settings
-│   ├── models.py                       # API request and response models
+│   ├── main.py                         # FastAPI composition root
+│   ├── bootstrap.py                    # explicit startup validation and runtime wiring
+│   ├── api/
+│   │   ├── classification.py           # classification HTTP transport and quotas
+│   │   ├── manual.py                   # manual evidence and normalization routes
+│   │   ├── system.py                   # health, rules, resources and maintenance
+│   │   └── auth.py / session.py        # API key and browser-session boundaries
+│   ├── contracts/                      # typed classification, batch and review DTOs
+│   ├── domain/                         # shared classification records and audit structures
+│   ├── policy/                         # gene, combination and SpliceAI policies
+│   ├── infrastructure/                 # runtime paths, health, caches and repositories
 │   ├── classification_dag/
-│   │   ├── domain.py                   # typed classification records
 │   │   ├── engine.py                   # DAG validation and execution
-│   │   ├── policy.py                   # ENIGMA point combination policy
 │   │   ├── providers.py                # evidence provider nodes
 │   │   ├── provider_wiring.py          # production provider adapters
 │   │   ├── runtime.py                  # production graph assembly
 │   │   └── nodes/                      # criterion-family rule nodes
 │   ├── services/
 │   │   ├── evidence_orchestration.py   # evidence lookup coordination
-│   │   ├── variant_classification_service.py
+│   │   ├── variant_classification_service.py # single/batch workflow, cache and usage
 │   │   ├── classification_presentation.py
 │   │   └── ps1_reference_resolution.py
 │   ├── population_frequency/
@@ -81,16 +87,16 @@ ariane/
 │   │   ├── lookup.py                   # frequency record lookup
 │   │   ├── policy.py                   # dataset and policy bindings
 │   │   └── models.py                   # population evidence records
-│   ├── modules/
-│   │   ├── pvs1.py                     # PVS1 and PM5 evaluation
-│   │   ├── erepo_pvs1_rna.py           # validated ERepo PVS1 RNA registry
-│   │   ├── table4.py                   # ENIGMA Table 4 lookup
-│   │   ├── table9.py                   # ENIGMA Table 9 lookup
-│   │   ├── bp1.py                      # BP1 evaluation
-│   │   ├── pp3_bp4.py                  # PP3 and BP4 evaluation
-│   │   ├── bp7.py                      # BP7 evaluation
-│   │   ├── manual_evidence.py          # validated manual evidence forms
-│   │   └── external.py                 # external comparison formatting
+│   ├── criteria/                        # criterion evaluators and interactions
+│   ├── reference_data/                  # validated ENIGMA tables and registries
+│   ├── review/
+│   │   ├── definitions.py              # manual form definitions and sources
+│   │   ├── strength.py                 # policy-bound strength derivation
+│   │   ├── validation.py               # form readiness and completeness
+│   │   ├── service.py                  # amended working classification
+│   │   └── *_review.py                 # variant-specific review builders
+│   ├── presentation/                    # narratives, external comparison and display ordering
+│   ├── variant_processing/              # HGVS normalization and variant typing
 │   ├── lookups/
 │   │   ├── spliceai.py                 # SpliceAI API lookup
 │   │   ├── bayesdel.py                 # BayesDel lookup
@@ -99,10 +105,10 @@ ariane/
 │   │   └── coordinates.py              # validated local GRCh37/38 resolution
 │   └── data/                            # immutable reference datasets
 ├── frontend/
-│   ├── index.html
+│   ├── index.html                    # page shell and explicit template includes
+│   ├── templates/                    # feature-level Alpine templates
 │   └── static/
-│       ├── css/
-│       │   └── style.css
+│       ├── css/                      # base, forms, results, evidence, layout and modes
 │       └── js/
 │           ├── app.js                  # Alpine application assembly
 │           ├── api.js                  # backend API calls
@@ -317,13 +323,21 @@ See `docs/manual_evidence_review.md` for thresholds, sources, and limitations.
 
 ## Tests
 
-Install development dependencies and run the offline regression suite without
-network access:
+Use Python 3.12. A virtual environment created with Python 3.13 or newer is not
+supported by the pinned scientific dependencies. Install development
+dependencies and run the offline regression suite without network access:
 
 ```bash
 pip install -r requirements-dev.txt
+python -m ruff check .
+python -m mypy
 python -m pytest tests -q
 ```
+
+The same lint, type and test checks run automatically for every push and pull
+request through `.github/workflows/quality.yml`. Tool configuration is kept in
+`pyproject.toml`; exact development-tool versions are pinned in
+`requirements-dev.txt`.
 
 The VUS explanation layer and regression golden cases are documented in
 `docs/vus_explanation_and_golden_cases.md`.

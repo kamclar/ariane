@@ -10,21 +10,21 @@ import json
 import pytest
 
 from backend.classification_dag import ClassificationInputs, execute_classification
-from backend.config import ST2_SPLICE_EVIDENCE_PATH
+from backend.reference_data.paths import ST2_SPLICE_EVIDENCE_PATH
 from backend.lookups.founder_variants import (
     FOUNDER_VARIANT_SNAPSHOT,
     lookup_pathogenic_founder_variant,
 )
-from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
+from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
-from backend.modules.pp4_bp5 import evaluate_pp4_bp5
-from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.pvs1_rna import (
+from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
+from backend.criteria.pvs1 import evaluate_pvs1
+from backend.criteria.pvs1_rna import (
     evaluate_pvs1_rna,
     lookup_st2_pvs1_rna_evidence,
 )
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.variant_type import infer_variant_type
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.variant_processing.variant_type import infer_variant_type
 from backend.population_frequency.indel_size import is_indel_allele
 
 
@@ -379,7 +379,7 @@ def test_unquantified_patient_rna_uses_appendix_e_weight_matrix(
         "table4_baseline": baseline,
     }
     monkeypatch.setattr(
-        "backend.modules.pvs1_rna.table4_lookup_deletion",
+        "backend.criteria.pvs1_rna.table4_lookup_deletion",
         lambda gene, exon: baseline,
     )
 

@@ -2,10 +2,10 @@ import pytest
 from pydantic import ValidationError
 from unittest.mock import patch
 
-from backend.models import VariantRequest
-from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
-from backend.modules.variant_input import normalize_variant_input
-from backend.modules.variant_input import explicit_gene_from_notation
+from backend.contracts import VariantRequest
+from backend.variant_processing.hgvs import normalize_protein_notation, protein_notations_compatible
+from backend.variant_processing.variant_input import normalize_variant_input
+from backend.variant_processing.variant_input import explicit_gene_from_notation
 
 
 @pytest.mark.parametrize(
@@ -169,7 +169,7 @@ def test_explicit_gene_prefix_overrides_selected_gene():
 
 def test_gene_qualified_input_is_driven_by_configured_transcripts():
     with patch(
-        "backend.modules.variant_input.TRANSCRIPTS",
+        "backend.variant_processing.variant_input.TRANSCRIPTS",
         {"BRCA1": "NM_007294.4", "GENE3": "NM_123456.1"},
     ):
         assert explicit_gene_from_notation("gene3 c.1A>G") == "GENE3"

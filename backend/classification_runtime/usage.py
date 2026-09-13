@@ -10,7 +10,7 @@ from pathlib import Path
 import sqlite3
 from typing import Any, Iterator
 
-from backend.runtime_data import runtime_data_path
+from backend.infrastructure.runtime_data import runtime_data_path
 from backend.version import ARIANE_VERSION
 
 

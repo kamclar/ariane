@@ -1,11 +1,10 @@
-import asyncio
 import json
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from backend.config import (
+from backend.reference_data.paths import (
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
     EXON_CNV_EVIDENCE_PATH,
     ENIGMA_EREPO_VCEP_METADATA_PATH,
@@ -16,10 +15,10 @@ from backend.config import (
     TABLE4_PATH,
     TABLE9_PATH,
 )
-from backend.data_validation import validate_required_datasets
-from backend.data_health import clear_issue, get_data_issues, get_user_warnings, register_issue
-from backend.gene_policy import GENE_POLICY_MANIFEST_PATH, GENE_POLICY_METADATA_PATH
-from backend.lookup_execution import lookup_or_unavailable
+from backend.reference_data.validation import validate_required_datasets
+from backend.infrastructure.health import DataHealthRegistry
+from backend.policy.gene import GENE_POLICY_MANIFEST_PATH, GENE_POLICY_METADATA_PATH
+from backend.infrastructure.lookup_execution import lookup_or_unavailable
 
 
 class RequiredDatasetValidationTests(unittest.TestCase):
@@ -57,7 +56,7 @@ class RequiredDatasetValidationTests(unittest.TestCase):
                 })
 
     def test_incomplete_coding_snv_snapshot_stops_startup(self):
-        from backend.lookups import precomputed
+        from backend.reference_data import classification_snapshot as precomputed
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -350,7 +349,7 @@ class GnomadFailClosedTests(unittest.TestCase):
 
 class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
     def test_spliceai_deadline_finishes_before_nginx_timeout(self):
-        from backend.lookup_execution import (
+        from backend.infrastructure.lookup_execution import (
             EXTERNAL_LOOKUP_TIMEOUT,
             SERVICE_LOOKUP_TIMEOUTS,
         )
@@ -361,7 +360,7 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 180)
 
     async def test_spliceai_timeout_returns_unavailable_instead_of_hanging(self):
-        from backend import lookup_execution
+        from backend.infrastructure import lookup_execution
 
         diagnostics = []
 
@@ -387,7 +386,10 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         def failing_lookup():
             raise ConnectionError("service refused connection")
 
-        with self.assertLogs("backend.lookup_execution", level="ERROR") as logs:
+        with self.assertLogs(
+            "backend.infrastructure.lookup_execution",
+            level="ERROR",
+        ) as logs:
             result = await lookup_or_unavailable(
                 failing_lookup, None, "Example service", diagnostics
             )
@@ -588,6 +590,9 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
 
 
 class DataHealthTests(unittest.TestCase):
+    def setUp(self):
+        self.health = DataHealthRegistry()
+
     def test_spliceai_runtime_cache_prefers_explicit_directory(self):
         from backend.lookups import spliceai
 
@@ -616,7 +621,7 @@ class DataHealthTests(unittest.TestCase):
             )
 
     def test_local_runtime_cache_is_outside_versioned_data_directories(self):
-        from backend.runtime_cache import PROJECT_ROOT, choose_runtime_cache_dir
+        from backend.infrastructure.runtime_cache import PROJECT_ROOT, choose_runtime_cache_dir
 
         with patch.dict("os.environ", {}, clear=True):
             self.assertEqual(
@@ -638,56 +643,60 @@ class DataHealthTests(unittest.TestCase):
     def test_spliceai_cache_write_failure_explains_current_score_is_usable(self):
         from backend.lookups import spliceai
 
-        clear_issue("SpliceAI API cache")
         with patch.object(
             spliceai.tempfile,
             "NamedTemporaryFile",
             side_effect=OSError(30, "Read-only file system"),
         ):
-            saved = spliceai._save_api_cache({"example": {"score": 0.1}})
+            saved = spliceai._save_api_cache(
+                {"example": {"score": 0.1}},
+                self.health,
+            )
         self.assertFalse(saved)
         warning = next(
-            item for item in get_user_warnings() if "SpliceAI API cache" in item
+            item
+            for item in self.health.user_warnings()
+            if "SpliceAI API cache" in item
         )
         self.assertIn("score was obtained and used", warning)
         self.assertIn("this request is unaffected", warning)
         self.assertTrue(warning.startswith("Runtime cache persistence warning:"))
         self.assertNotIn("Data source degraded", warning)
-        clear_issue("SpliceAI API cache")
 
     def test_registered_degradation_is_visible_to_user(self):
-        clear_issue("test cache")
-        register_issue("test cache", "checksum mismatch")
+        self.health.register("test cache", "checksum mismatch")
         self.assertIn(
             {"component": "test cache", "reason": "checksum mismatch"},
-            get_data_issues(),
+            self.health.issues(),
         )
-        self.assertTrue(any("test cache" in warning and "checksum mismatch" in warning for warning in get_user_warnings()))
-        clear_issue("test cache")
+        self.assertTrue(any(
+            "test cache" in warning and "checksum mismatch" in warning
+            for warning in self.health.user_warnings()
+        ))
 
     def test_degradation_messages_hide_linux_deployment_path(self):
-        clear_issue("test cache")
-        register_issue(
+        self.health.register(
             "test cache",
             "metadata is missing: /home/ubuntu/ariane/data/spliceai/cache.metadata.json",
         )
-        issue = next(item for item in get_data_issues() if item["component"] == "test cache")
+        issue = next(
+            item for item in self.health.issues() if item["component"] == "test cache"
+        )
         self.assertEqual(
             issue["reason"],
             "metadata is missing: …ariane/data/spliceai/cache.metadata.json",
         )
-        self.assertNotIn("/home/ubuntu", get_user_warnings()[0])
-        clear_issue("test cache")
+        self.assertNotIn("/home/ubuntu", self.health.user_warnings()[0])
 
     def test_degradation_messages_hide_windows_deployment_path(self):
-        clear_issue("test cache")
-        register_issue(
+        self.health.register(
             "test cache",
             r"cache is missing: F:\UOCHB\Enigma\ARIANE_app\ariane\data\cache.json",
         )
-        issue = next(item for item in get_data_issues() if item["component"] == "test cache")
+        issue = next(
+            item for item in self.health.issues() if item["component"] == "test cache"
+        )
         self.assertEqual(issue["reason"], "cache is missing: …ariane/data/cache.json")
-        clear_issue("test cache")
 
     def test_precomputed_spliceai_variant_space_is_not_a_runtime_source(self):
         from backend.lookups import spliceai
@@ -772,12 +781,12 @@ class ClinVarAmbiguityTests(unittest.TestCase):
 
 class RemainingFallbackTests(unittest.TestCase):
     def test_unknown_pvs1_code_has_no_implicit_weight(self):
-        from backend.modules.table4 import parse_pvs1_code_strength
+        from backend.reference_data.table4 import parse_pvs1_code_strength
 
         self.assertEqual(parse_pvs1_code_strength("PVS1_UNRECOGNISED"), (None, 0, False))
 
     def test_exon_cnv_requires_exact_boundaries(self):
-        from backend.modules.table4 import parse_exon_from_duplication_notation
+        from backend.reference_data.table4 import parse_exon_from_duplication_notation
 
         exact = "c.(80+1_81-1)_(134+1_135-1)dup"
         shifted = "c.(80+1_82-1)_(133+1_135-1)dup"
@@ -806,7 +815,7 @@ class RemainingFallbackTests(unittest.TestCase):
         self.assertNotIn(key, clingen.EREPO_CACHE)
 
     def test_duplication_rule_never_substitutes_another_arrangement(self):
-        from backend.modules import table4
+        from backend.reference_data import table4
 
         old_rules = table4.TABLE4_DATA["duplication_rules"]
         try:

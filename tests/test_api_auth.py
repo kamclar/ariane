@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from backend.api_auth import (
+from backend.api.auth import (
     API_KEY_FILE_ENVIRONMENT,
     ApiKeyAuthenticator,
     ApiKeyConfigurationError,

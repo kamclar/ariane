@@ -12,21 +12,22 @@ from typing import Any, Callable
 
 from backend.classification_dag.providers import ProviderDependencies
 from backend.lookups import bayesdel, coordinates, spliceai
-from backend.modules import (
+from backend.criteria import ps1, pvs1_rna
+from backend.reference_data import (
     exon_cnv_evidence,
     pp4_bp5,
-    ps1,
     ps1_splice_evidence,
-    pvs1_rna,
     residues,
     erepo_pvs1_rna,
 )
 from backend.population_frequency import PopulationFrequencyService
+from backend.infrastructure.health import DataHealthRegistry
 
 
 def production_provider_dependencies(
     *,
     population_frequency_lookup: Callable[..., Any] | None = None,
+    health: DataHealthRegistry | None = None,
 ) -> ProviderDependencies:
     """Bind the provider interface to the production evidence implementations."""
     if population_frequency_lookup is None:
@@ -40,13 +41,13 @@ def production_provider_dependencies(
         get_grch37=lambda *args, **kwargs: coordinates.get_grch37(*args, **kwargs),
         get_grch38=lambda *args, **kwargs: coordinates.get_grch38(*args, **kwargs),
         spliceai_lookup=lambda *args, **kwargs: spliceai.get_spliceai_score(
-            *args, **kwargs
+            *args, **kwargs, health=health
         ),
         spliceai_status=lambda gene, c: dict(
             spliceai.SPLICEAI_STATUS_CACHE.get(f"{gene}:{c}", {})
         ),
         bayesdel_lookup=lambda *args, **kwargs: bayesdel.get_bayesdel_and_alphamissense(
-            *args, **kwargs
+            *args, **kwargs, health=health
         ),
         bayesdel_status=lambda gene, c: dict(
             bayesdel.BAYESDEL_STATUS_CACHE.get(f"{gene}:{c}", {})

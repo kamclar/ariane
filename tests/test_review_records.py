@@ -4,8 +4,8 @@ import sqlite3
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from backend.review_api import router
-from backend.review_records import ReviewRecordRepository
+from backend.api.review import router
+from backend.infrastructure.review_repository import ReviewRecordRepository
 
 
 def _repository_draft(repository: ReviewRecordRepository):

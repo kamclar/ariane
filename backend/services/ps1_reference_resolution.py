@@ -7,10 +7,10 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
 
 from backend.lookups import clingen, clinvar, spliceai
-from backend.modules.erepo_vcep import lookup_erepo_vcep_assertion
-from backend.modules.ps1 import lookup_ps1_reference_variant
-from backend.modules.variant_input import normalize_variant_input
-from backend.modules.variant_type import infer_variant_type
+from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
+from backend.criteria.ps1 import lookup_ps1_reference_variant
+from backend.variant_processing.variant_input import normalize_variant_input
+from backend.variant_processing.variant_type import infer_variant_type
 
 
 P_LP = {"Pathogenic", "Likely Pathogenic"}

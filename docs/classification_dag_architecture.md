@@ -23,7 +23,7 @@ Pravidlové uzly jsou rozdělené podle odpovědnosti v
 | `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA z přesného schváleného ERepo registru nebo z jednoznačné kurátorované větve ST2, ostatní RNA podklady pro odbornou revizi |
 | `clinical.py` | Klinické LR PP4/BP5 a proteinové PS1 |
 | `bioinformatic.py` | Figure 1A, PP3, BP4, BP1 a BP7 |
-| `policy.py` | Interakce evidence a výsledná ENIGMA kombinace |
+| `policy.py` | DAG uzly pro interakce evidence a předání do sdílené kombinační politiky |
 | `review.py` | Vytvoření požadavků na manuální revizi |
 | `support.py` | Neměnné společné typy a převod rozhodnutí |
 
@@ -76,8 +76,30 @@ BA1 / BS1 / PM2 decision
 
 ## Aplikační orchestrace
 
-FastAPI modul `backend/main.py` je aplikační kořen a transportní vrstva. Při
-startu si vyžádá produkční vazby providerů z jediného kompozičního modulu
+HTTP routy jsou rozdělené v `backend/api/`. `classification.py` obsluhuje
+jednotlivou a batch klasifikaci, `manual.py` manuální evidenci a normalizaci a
+`system.py` health, pravidla, zdroje a správu cache. Sdílené Pydantic kontrakty
+jsou v `backend/contracts/`, proto aplikační služby nemusí importovat transportní
+vrstvu. Proměnné runtime soubory a repository adaptéry jsou v
+`backend/infrastructure/`.
+
+Routy dostupné z webového rozhraní i programového API se registrují pomocí
+`backend/api/routing.py`. Jeden zápis vytvoří obě cesty a současně vynutí session
+cookie pro `/ui-api` a API klíč pro `/api`. UI kopie se nezobrazuje v OpenAPI.
+Autentizační pravidla proto nejsou ručně opakovaná ve dvojici dekorátorů.
+
+Validace dat probíhá v `backend/bootstrap.py`. Běhový stav degradovaných zdrojů
+je instance `DataHealthRegistry`, kterou bootstrap explicitně předává lookupům,
+provider wiring a orchestration službě. Health endpoint i varování klasifikace
+čtou stejný registr bez procesního globálního slovníku.
+
+Middleware jsou v `backend/api/middleware.py`, společné převody chyb v
+`backend/api/errors.py`, auditní transport v `backend/api/audit.py` a obsluha
+HTML shellu v `backend/api/frontend.py`. `backend/main.py` je pouze composition
+root: vytvoří runtime a služby, nainstaluje adaptéry a registruje routery.
+
+FastAPI modul `backend/main.py` je kompoziční kořen aplikace. Při startu si
+vyžádá produkční vazby providerů z jediného kompozičního modulu
 `backend/classification_dag/provider_wiring.py`, ale sám neprovádí
 normalizaci, lookupy, klasifikační rozhodování, diagnostiku zdrojů ani sestavení
 veřejného klasifikačního modelu.
@@ -89,7 +111,13 @@ Tyto odpovědnosti jsou rozdělené v `backend/services/`:
 | `evidence_orchestration.py` | `ClassificationCommand`, normalizace, typ varianty, sestavení `ClassificationRequest`, paralelní provider DAG a externí porovnání, diagnostika dostupnosti |
 | `classification_completeness.py` | Jediná publikační brána, která rozliší dokončený negativní výsledek od selhání povinného zdroje a nepovolí neúplnou klasifikaci |
 | `classification_presentation.py` | Převod strukturovaného výsledku a artefaktů na stabilní `ClassificationResult`, bez změny kritérií nebo třídy |
-| `variant_classification_service.py` | Funkce `execute_variant_classification()`, jediný aplikační use case pro klasifikaci jedné varianty, který spojuje orchestraci a prezentaci |
+| `variant_classification_service.py` | Společný aplikační workflow pro jednu variantu i batch: klasifikace, cache, nezávislá validace položek, omezení souběhu, policy metadata a pomocný zápis usage |
+
+Klasifikační endpointy jsou v `backend/api/classification.py` a řeší pouze HTTP
+odpovědnost: autentizaci, kvótu, uživatelskou cookie, hlavičky, převod aplikačních
+chyb a předání auditních událostí loggeru. Jednotlivá a batch klasifikace
+používají stejnou aplikační službu. Cache, měření času, metadata politiky ani
+zápis usage se v controllerech neopakují.
 
 Orchestrátor přijímá volitelné `ProviderDependencies` a
 `ExternalEvidenceDependencies`. Produkce používá adaptéry registrované v DAGu,
@@ -126,13 +154,22 @@ jen kontrakt `ProviderDependencies` a typovanou evidenci. Modulové adaptéry ve
 wiringu volají aktuální atribut zdrojového modulu, takže test může provider
 nahradit bez lokálního importu a bez druhé produkční cesty.
 
-`ClassificationInputs` patří do `classification_dag/domain.py`. Runtime i
-provider vrstva závisejí na doméně, ale nezávisí vzájemně na sobě. Tím je
+`ClassificationInputs` a ostatní stabilní datové kontrakty patří do
+`backend/domain/classification.py`. Struktura auditní rozhodovací cesty je v
+`backend/domain/decision_trace.py`. Runtime, providery, kritéria a prezentace
+smějí záviset na doméně, doména však neimportuje žádnou z těchto vrstev. Tím je
 odstraněn dřívější cyklus `providers -> runtime -> providers`.
+
+Čistá sdílená pravidla jsou v `backend/policy/`. `classification.py` obsahuje
+ENIGMA kombinaci evidence, `gene.py` načítá verzovanou genovou politiku a
+`spliceai.py` určuje použitelnost a úplnost SpliceAI. Lookupy, DAG i odborné
+formuláře tuto vrstvu používají, ale `backend/policy/` nesmí importovat lookup,
+kritérium, DAG uzel, review builder ani prezentační kód.
 
 Test `tests/test_backend_import_architecture.py` parsuje celý backend pomocí AST
 a odmítne nový projektový import uvnitř funkce nebo metody. Současně ověřuje
-vlastnictví `ClassificationInputs` doménovou vrstvou. Výjimka ani allowlist pro
+vlastnictví `ClassificationInputs`, jednosměrné závislosti spodních vrstev a
+zákaz importů z lookupů nebo prezentace do kritérií. Výjimka ani allowlist pro
 skrytý import nejsou zavedeny.
 
 ## Hranice vrstev
@@ -171,6 +208,11 @@ prezentace a externí porovnání
 Normalizace vstupu není klasifikační uzel. Živé porovnání s ClinVar a ClinGen
 ERepo je následná anotace a nesmí ovlivnit vypočtenou třídu. Automatické PVS1
 RNA může pocházet jen z odděleného, lokálně schváleného ERepo registru.
+Normalizace smí před vznikem `EvidenceBundle` použít checksumované lokální
+referenční mapy a snapshoty z `backend/reference_data/`, protože ověřují identitu
+a zápis varianty. Nesmí volat živé lookupy ani z těchto dat odvozovat kritérium.
+Klasifikační fakta získávají provider uzly a pravidlové moduly je přijímají jako
+hodnoty v `EvidenceBundle`.
 
 ## Kontrakt uzlu
 
@@ -190,12 +232,13 @@ Nedostupná data se zejména nesmí převést na nesplněné kritérium.
 
 ## Provozní režim
 
-Proměnná `ARIANE_CLASSIFIER_ENGINE` přijímá pouze `dag`, který je zároveň výchozí
-hodnotou. Hodnoty `legacy`, `shadow` ani tichý fallback nejsou povoleny.
+Klasifikační engine není runtime volba. Aplikace sestavuje výhradně nativní DAG
+a v auditu jej označuje stabilním identifikátorem `dag`. Hodnoty `legacy`,
+`shadow` ani tichý fallback v implementaci neexistují.
 
 Aktivní režim vrací `/api/health`. DAG zapisuje do logu strukturovanou stopu všech
-uzlů. Porovnání původní a DAG cesty patří pouze do testovacího běhu, aby
-vývojová kontrola nezvyšovala dobu odezvy a nemohla zasáhnout uživatele.
+uzlů. Regresní testy porovnávají výsledky s explicitními očekávanými případy,
+nikoli s odstraněným klasifikátorem.
 
 Asynchronní executor spouští nezávislé provider uzly paralelně. Blokující
 knihovny a HTTP klienti běží mimo event-loop vlákno. Porucha uzlu nebo porušení

@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from backend.classification_dag.domain import CriterionDecision, CriterionFamilyResult, NormalizedVariant
+from backend.domain.classification import CriterionDecision, CriterionFamilyResult, NormalizedVariant
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
-from backend.gene_policy import policy_name, policy_version, vcep_specification
+from backend.policy.gene import policy_name, policy_version, vcep_specification
 
 
 def functional_decision_path(

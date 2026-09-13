@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.modules.bp1 import evaluate_bp1
-from backend.modules.bp7 import evaluate_bp7
-from backend.modules.enigma_rules import (
+from backend.criteria.bp1 import evaluate_bp1
+from backend.criteria.bp7 import evaluate_bp7
+from backend.reference_data.enigma_rules import (
     clinical_annotations_for_variant,
     get_decision_tree,
     public_catalog,
@@ -15,11 +15,11 @@ from backend.modules.enigma_rules import (
     validate_rule_catalog,
 )
 from tests.dag_test_support import classify_with_dag as evaluate_variant
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
-from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-from backend.modules.utils import get_amino_acid_interval
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.criteria.pvs1 import evaluate_pvs1
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
+from backend.variant_processing.utils import get_amino_acid_interval
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -257,7 +257,9 @@ def test_applied_figure1a_criteria_carry_the_actual_decision_path(
 
 
 def test_frontend_contains_complete_tables_page_and_expandable_decision_path():
-    html = (ROOT / "frontend" / "index.html").read_text(encoding="utf-8")
+    from backend.presentation.frontend import load_frontend_template
+
+    html = load_frontend_template(ROOT / "frontend")
     javascript = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ROOT / "frontend" / "static" / "js").glob("*.js"))

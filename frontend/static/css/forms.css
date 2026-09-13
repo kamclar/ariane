@@ -1,0 +1,115 @@
+/* ── Search form ────────────────────────────────────────────── */
+.search-section {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 2rem 0 1rem;
+    box-shadow: var(--shadow);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 0.3rem;
+}
+
+.form-group .optional {
+    font-weight: 400;
+    color: #adb5bd;
+}
+
+.form-group-wide {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form-group-btn {
+    flex-shrink: 0;
+}
+
+input, select {
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-family: var(--mono);
+    background: var(--color-bg);
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+button {
+    padding: 0.55rem 1.5rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+button:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.input-hint {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.field-hint {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.35;
+}
+
+/* ── Progress bar ───────────────────────────────────────────── */
+.progress-container {
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    transition: width 0.4s ease;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-top: 0.3rem;
+}
+

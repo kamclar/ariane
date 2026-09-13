@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import pytest
 
-from backend.classification_dag import ClassifierEngineMode
 from backend.services.variant_classification_service import execute_variant_classification
 from backend.services.evidence_orchestration import (
     ClassificationCommand,
@@ -15,7 +14,7 @@ from backend.services.evidence_orchestration import (
     RequiredEvidenceUnavailableError,
     VariantPreparationError,
 )
-from backend.modules.variant_input import NormalizedVariantInput
+from backend.variant_processing.variant_input import NormalizedVariantInput
 
 
 def _complete_population_result():
@@ -53,7 +52,7 @@ def _complete_artifacts(**overrides):
 
 
 def test_orchestrator_prepares_policy_bound_normalized_variant():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     normalized, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
     )
@@ -66,7 +65,7 @@ def test_orchestrator_prepares_policy_bound_normalized_variant():
 
 
 def test_orchestrator_routes_dna_delins_with_missense_consequence_to_figure1a():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     normalized, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.131_132delinsCT")
     )
@@ -76,13 +75,13 @@ def test_orchestrator_routes_dna_delins_with_missense_consequence_to_figure1a():
 
 
 def test_orchestrator_rejects_invalid_input_before_provider_planning():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     with pytest.raises(VariantPreparationError):
         service.prepare(ClassificationCommand("BRCA1", "c.181A>C"))
 
 
 def test_orchestrator_rejects_unresolved_coding_delins_with_explicit_reason():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     unresolved = NormalizedVariantInput(
         gene="BRCA1",
         submitted_notation="c.922_923delinsGC",
@@ -105,7 +104,7 @@ def test_orchestrator_rejects_unresolved_coding_delins_with_explicit_reason():
 
 
 def test_required_spliceai_timeout_stops_figure1a_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.5366C>T", "p.(Ala1789Val)")
     )
@@ -128,7 +127,7 @@ def test_required_spliceai_timeout_stops_figure1a_classification():
 
 
 def test_required_spliceai_timeout_for_dna_delins_reports_source_and_no_result():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.131_132delinsCT")
     )
@@ -155,7 +154,7 @@ def test_required_spliceai_timeout_for_dna_delins_reports_source_and_no_result()
 
 
 def test_missing_spliceai_does_not_block_non_figure1a_ptc_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
     )
@@ -173,7 +172,7 @@ def test_missing_spliceai_does_not_block_non_figure1a_ptc_classification():
 
 
 def test_incomplete_ps1_reference_spliceai_stops_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.5217T>A", "p.(Asp1739Glu)")
     )
@@ -205,7 +204,7 @@ def test_incomplete_ps1_reference_spliceai_stops_classification():
 
 
 def test_required_bayesdel_timeout_stops_in_domain_figure1a_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.5366C>T", "p.(Ala1789Val)")
     )
@@ -230,7 +229,7 @@ def test_required_bayesdel_timeout_stops_in_domain_figure1a_classification():
 
 
 def test_bayesdel_is_not_required_after_spliceai_pp3_branch_is_resolved():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.5366C>T", "p.(Ala1789Val)")
     )
@@ -247,7 +246,7 @@ def test_bayesdel_is_not_required_after_spliceai_pp3_branch_is_resolved():
 
 
 def test_bayesdel_is_not_required_outside_functional_domain():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.3247A>C", "p.(Met1083Leu)")
     )
@@ -264,7 +263,7 @@ def test_bayesdel_is_not_required_outside_functional_domain():
 
 
 def test_incomplete_required_gnomad_dataset_stops_ptc_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
     )
@@ -291,7 +290,7 @@ def test_incomplete_required_gnomad_dataset_stops_ptc_classification():
 
 
 def test_one_found_gnomad_dataset_does_not_hide_failure_of_the_other():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, variant = service.prepare(
         ClassificationCommand("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
     )
@@ -315,7 +314,7 @@ def test_one_found_gnomad_dataset_does_not_hide_failure_of_the_other():
 
 
 def test_unresolved_appendix_g_path_stops_exon_cnv_classification():
-    service = EvidenceOrchestrationService(engine_mode=ClassifierEngineMode.DAG)
+    service = EvidenceOrchestrationService()
     _, base_variant = service.prepare(
         ClassificationCommand("BRCA1", "c.303T>G", "p.(Tyr101Ter)")
     )
@@ -361,7 +360,6 @@ def test_classification_service_composes_orchestration_and_presentation():
 
     result = asyncio.run(execute_variant_classification(
         ClassificationCommand("BRCA1", "c.303T>G"),
-        engine_mode=ClassifierEngineMode.DAG,
         orchestration=StubOrchestration(),
         presentation=StubPresentation(),
     ))

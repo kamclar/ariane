@@ -4,7 +4,7 @@ import urllib.error
 from unittest.mock import MagicMock, patch
 
 from backend.lookups import spliceai
-from backend.modules.spliceai_policy import spliceai_failure_is_retryable
+from backend.policy.spliceai import spliceai_failure_is_retryable
 
 
 def score_row(transcript, refseq, *, ds_al, ds_dl=0.0):

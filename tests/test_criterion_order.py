@@ -1,6 +1,6 @@
 import unittest
 
-from backend.modules.criterion_order import criterion_sort_key, sorted_criterion_items
+from backend.presentation.criterion_order import criterion_sort_key, sorted_criterion_items
 
 
 class CriterionOrderTests(unittest.TestCase):

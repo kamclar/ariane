@@ -1,6 +1,6 @@
 """Regression tests for ENIGMA BP7 Strong (RNA) variant stipulations."""
 
-from backend.modules.bp7_rna import evaluate_bp7_rna_variant_context
+from backend.criteria.bp7_rna import evaluate_bp7_rna_variant_context
 
 
 def _context(c_notation: str, p_notation: str, gene: str = "BRCA1"):

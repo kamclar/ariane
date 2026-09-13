@@ -6,10 +6,10 @@ import argparse
 import json
 from collections import Counter
 
-from backend.lookups.indels import load_indel_snapshot
-from backend.lookups.precomputed import load_classification_snapshot_index
-from backend.modules.hgvs import normalize_protein_notation, protein_notations_compatible
-from backend.modules.hgvs_engine import VariantNormalizationError, derive_protein_consequence
+from backend.reference_data.indel_snapshot import load_indel_snapshot
+from backend.reference_data.classification_snapshot import load_classification_snapshot_index
+from backend.variant_processing.hgvs import normalize_protein_notation, protein_notations_compatible
+from backend.variant_processing.hgvs_engine import VariantNormalizationError, derive_protein_consequence
 
 
 def records(include_indels: bool, only_indels: bool):

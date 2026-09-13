@@ -1,10 +1,25 @@
 import re
 from pathlib import Path
 
+from backend.presentation.frontend import PARTIAL_NAMES, load_frontend_template
+
 
 FRONTEND_HTML = Path(__file__).resolve().parents[1] / "frontend" / "index.html"
 FRONTEND_JS_DIR = Path(__file__).resolve().parents[1] / "frontend" / "static" / "js"
-BACKEND_MODELS = Path(__file__).resolve().parents[1] / "backend" / "models.py"
+CLASSIFICATION_RESULT_CONTRACTS = (
+    Path(__file__).resolve().parents[1] / "backend" / "contracts" / "result.py"
+)
+
+
+def frontend_html() -> str:
+    return load_frontend_template(FRONTEND_HTML.parent)
+
+
+def frontend_css() -> str:
+    return "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((FRONTEND_HTML.parent / "static" / "css").glob("*.css"))
+    )
 
 
 def frontend_javascript() -> str:
@@ -14,8 +29,35 @@ def frontend_javascript() -> str:
     )
 
 
+def test_frontend_source_is_split_into_bounded_feature_templates_and_stylesheets():
+    shell = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
+    template_dir = FRONTEND_HTML.parent / "templates"
+    css_dir = FRONTEND_HTML.parent / "static" / "css"
+
+    assert len(shell.splitlines()) < 150
+    assert "<!-- ARIANE_INCLUDE:" not in html
+    for name in PARTIAL_NAMES:
+        assert shell.count(f"<!-- ARIANE_INCLUDE:{name} -->") == 1
+        partial = template_dir / f"{name}.html"
+        assert partial.is_file()
+        assert len(partial.read_text(encoding="utf-8").splitlines()) < 1000
+
+    stylesheets = sorted(css_dir.glob("*.css"))
+    assert {path.name for path in stylesheets} == {
+        "base.css",
+        "evidence.css",
+        "forms.css",
+        "layout.css",
+        "modes.css",
+        "results.css",
+    }
+    assert all(len(path.read_text(encoding="utf-8").splitlines()) < 1000 for path in stylesheets)
+    assert "style.css" not in shell
+
+
 def test_application_version_is_loaded_from_backend_and_visible_in_header_and_footer():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert 'id="ariane-version"' in html
@@ -27,7 +69,7 @@ def test_application_version_is_loaded_from_backend_and_visible_in_header_and_fo
 
 
 def test_applied_criteria_immediately_follows_classification_header():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     classification = html.index("<!-- Classification badge -->")
     criteria = html.index("<!-- Criteria table -->")
     narrative = html.index("<!-- Narrative summary -->")
@@ -37,7 +79,7 @@ def test_applied_criteria_immediately_follows_classification_header():
 
 
 def test_variant_specific_not_applicable_criteria_are_compact_and_backend_driven():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert 'class="not-applicable-criteria-details"' in html
@@ -52,7 +94,7 @@ def test_variant_specific_not_applicable_criteria_are_compact_and_backend_driven
 
 
 def test_point_thermometer_is_present_for_every_classified_result():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     thermometer = html.index('class="point-thermometer"')
     badge = html.index('class="class-badge"', thermometer)
     thermometer_markup = html[thermometer:badge]
@@ -69,7 +111,7 @@ def test_point_thermometer_is_present_for_every_classified_result():
 
 
 def test_variant_specific_clinical_annotation_is_visible_but_not_scored():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     assert "result?.clinical_annotations" in html
     assert 'class="clinical-annotation-strip"' in html
     assert "annotation.affects_classification" not in html
@@ -78,7 +120,7 @@ def test_variant_specific_clinical_annotation_is_visible_but_not_scored():
 
 
 def test_external_comparison_remains_visible_for_not_found_or_failed_sources():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
 
     assert 'class="external-section"' in html
     assert "result?.external?.clinvar_message" in html
@@ -89,7 +131,7 @@ def test_external_comparison_remains_visible_for_not_found_or_failed_sources():
 
 
 def test_clinical_lr_source_audit_is_visible_and_backend_driven():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
 
     assert "result?.clinical_lr_audit" in html
     assert "PP4/BP5 clinical likelihood ratios" in html
@@ -109,9 +151,9 @@ def test_clinical_lr_source_audit_is_visible_and_backend_driven():
 
 
 def test_clinical_lr_statuses_have_user_facing_labels():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     formatters = (FRONTEND_JS_DIR / "formatters.js").read_text(encoding="utf-8")
-    models = BACKEND_MODELS.read_text(encoding="utf-8")
+    models = CLASSIFICATION_RESULT_CONTRACTS.read_text(encoding="utf-8")
     status_literal = re.search(
         r"likelihood_ratio_status:\s*Literal\[(.*?)\]", models, re.DOTALL
     )
@@ -129,7 +171,7 @@ def test_clinical_lr_statuses_have_user_facing_labels():
 
 
 def test_population_audit_shows_founder_and_coverage_eligibility():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
 
     assert "Founder exception review" in html
     assert "PM2 coverage method" in html
@@ -139,7 +181,7 @@ def test_population_audit_shows_founder_and_coverage_eligibility():
 
 
 def test_variant_input_can_synchronise_the_explicit_gene_selector():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert '@input="syncGeneFromVariantInput()"' in html
@@ -153,7 +195,7 @@ def test_variant_input_can_synchronise_the_explicit_gene_selector():
 
 def test_unreviewed_splice_ps1_pilot_is_not_exposed_in_production_ui():
     project_root = FRONTEND_HTML.parents[1]
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
     backend_main = (project_root / "backend" / "main.py").read_text(encoding="utf-8")
 
@@ -185,7 +227,7 @@ def test_unreviewed_splice_ps1_pilot_is_not_exposed_in_production_ui():
 
 
 def test_decision_path_stays_inside_applied_criteria_details():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     criteria = html.index("<!-- Criteria table -->")
     narrative = html.index("<!-- Narrative summary -->")
     fragment = html[criteria:narrative]
@@ -199,7 +241,7 @@ def test_decision_path_stays_inside_applied_criteria_details():
 
 
 def test_complete_table9_audit_is_available_below_the_criterion():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
 
     assert 'class="table9-audit-details"' in html
     assert "Show complete Table 9 evidence" in html
@@ -210,7 +252,7 @@ def test_complete_table9_audit_is_available_below_the_criterion():
 
 
 def test_embedded_decision_path_uses_full_width_without_horizontal_scrollbar():
-    css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
+    css = frontend_css()
     javascript = frontend_javascript()
 
     graph_start = css.index(".decision-path-graph {")
@@ -227,8 +269,8 @@ def test_embedded_decision_path_uses_full_width_without_horizontal_scrollbar():
 
 
 def test_rules_navigation_labels_are_not_left_to_global_button_colours():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
-    css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
+    html = frontend_html()
+    css = frontend_css()
 
     assert ">Decision trees</button>" in html
     assert ">Original figures</button>" in html
@@ -239,7 +281,7 @@ def test_rules_navigation_labels_are_not_left_to_global_button_colours():
 
 
 def test_decision_tree_is_responsive_without_horizontal_scrollbar():
-    css = (FRONTEND_HTML.parent / "static" / "css" / "style.css").read_text(encoding="utf-8")
+    css = frontend_css()
     javascript = frontend_javascript()
 
     canvas_rule = css[css.index(".decision-tree-canvas"):css.index(".decision-tree-svg")]
@@ -256,7 +298,7 @@ def test_decision_tree_is_responsive_without_horizontal_scrollbar():
 
 
 def test_manual_review_ui_has_no_strength_override_control():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "Reviewer-selected strength" not in html
@@ -268,7 +310,7 @@ def test_manual_review_ui_has_no_strength_override_control():
 
 
 def test_frontend_does_not_calculate_manual_criterion_strength_or_eligibility():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "suggestedManualStrength" not in javascript
@@ -284,7 +326,7 @@ def test_frontend_does_not_calculate_manual_criterion_strength_or_eligibility():
 
 
 def test_manual_review_navigation_uses_backend_groups_and_statuses():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "Recommended reviews for this variant" in html
@@ -300,7 +342,7 @@ def test_manual_review_navigation_uses_backend_groups_and_statuses():
 
 
 def test_manual_review_persistence_is_authenticated_and_versioned():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "Save immutable review draft" in html
@@ -313,7 +355,7 @@ def test_manual_review_persistence_is_authenticated_and_versioned():
 
 
 def test_recommended_manual_criterion_is_offered_without_automatic_assignment():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "Manual review recommended" in html
@@ -336,7 +378,7 @@ def test_recommended_manual_criterion_is_offered_without_automatic_assignment():
 
 
 def test_protein_ps1_reference_facts_are_requested_from_backend():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     assert "Complete reference facts" in html
@@ -359,7 +401,7 @@ def test_protein_ps1_reference_facts_are_requested_from_backend():
 
 
 def test_manual_review_ui_collects_required_enigma_stipulations():
-    html = FRONTEND_HTML.read_text(encoding="utf-8")
+    html = frontend_html()
     javascript = frontend_javascript()
 
     for field in (

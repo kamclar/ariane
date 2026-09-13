@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from backend.classification_dag.domain import EvidenceItem
+from backend.domain.classification import EvidenceItem
 from backend.classification_dag.nodes.support import SpliceContext, bundle_value
 from backend.classification_dag.types import NodeResult
-from backend.modules.spliceai_policy import compare_table9_spliceai
+from backend.policy.spliceai import compare_table9_spliceai
 
 
 @dataclass(frozen=True)

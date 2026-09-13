@@ -6,8 +6,8 @@ from pydantic import ValidationError
 from backend.classification_dag.manual import execute_manual_evidence
 from backend.classification_dag.engine import DagNodeExecutionError
 from backend.classification_dag.runtime import compare_classification_results
-from backend.models import ManualCriterionInput, ManualEvidenceRequest
-from backend.modules.manual_evidence import evaluate_manual_evidence
+from backend.contracts import ManualCriterionInput, ManualEvidenceRequest
+from backend.review.manual_evidence import evaluate_manual_evidence
 
 
 PVS1_RNA = [{

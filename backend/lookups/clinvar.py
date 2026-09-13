@@ -3,18 +3,15 @@
 # Source: NCBI eutils efetch VCV XML
 # Docs: https://www.ncbi.nlm.nih.gov/clinvar/docs/programmatic_access/
 # ============================================================
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
+from typing import Optional, Dict
 import json
-import re
 import time
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
-from typing import Optional, Dict, List
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
-from backend.gene_policy import reference_transcript
+from backend.policy.gene import reference_transcript
 
 CLINVAR_EUTILS   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 CLINVAR_CACHE: Dict[str, dict] = {}  # gene:c_notation -> parsed result

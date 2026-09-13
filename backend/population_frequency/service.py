@@ -9,6 +9,7 @@ from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
 from backend.population_frequency.lookup import get_gnomad_frequencies
 from backend.population_frequency.models import GnomadRepository
 from backend.population_frequency.snapshot_repository import load_gnomad_repository
+from backend.infrastructure.health import DataHealthRegistry
 
 
 FounderLookup = Callable[[str, str], Mapping[str, Any]]
@@ -22,14 +23,20 @@ class PopulationFrequencyService:
         repository: GnomadRepository,
         *,
         founder_lookup: FounderLookup = lookup_pathogenic_founder_variant,
+        health: DataHealthRegistry | None = None,
     ) -> None:
         self._repository = repository
         self._founder_lookup = founder_lookup
+        self._health = health
         self._lock = RLock()
 
     @classmethod
-    def load_default(cls) -> "PopulationFrequencyService":
-        return cls(load_gnomad_repository())
+    def load_default(
+        cls,
+        *,
+        health: DataHealthRegistry | None = None,
+    ) -> "PopulationFrequencyService":
+        return cls(load_gnomad_repository(health=health), health=health)
 
     @property
     def repository(self) -> GnomadRepository:
@@ -37,7 +44,7 @@ class PopulationFrequencyService:
             return self._repository
 
     def reload(self) -> GnomadRepository:
-        repository = load_gnomad_repository()
+        repository = load_gnomad_repository(health=self._health)
         with self._lock:
             self._repository = repository
         return repository

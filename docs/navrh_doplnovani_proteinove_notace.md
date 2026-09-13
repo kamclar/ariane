@@ -716,22 +716,22 @@ Nový runtime výpočet lze zapnout pouze tehdy, pokud:
 backend/reference_bundle.py
   načtení panelového manifestu, sekvencí, metadat a checksumů
 
-backend/modules/hgvs_engine.py
+backend/variant_processing/hgvs_engine.py
   jednotné rozhraní nad připnutým lokálním hgvs a zaměnitelným providerem
 
-backend/modules/hgvs_provider.py
+backend/variant_processing/hgvs_provider.py
   vytvoření cdot JSONDataProvider a propojení sekvenčních providerů
 
-backend/modules/panel_seqfetcher.py
+backend/variant_processing/panel_seqfetcher.py
   čtení přesných NCBI transkriptových a proteinových FASTA podle accession
 
-backend/modules/hgvs_input_adapter.py
+backend/variant_processing/hgvs_input_adapter.py
   tolerantní povrchová normalizace a převod chyb na stavy ARIANE
 
-backend/modules/hgvs_engine_health.py
+backend/variant_processing/hgvs_engine_health.py
   kontrola verzí, lokální dostupnosti a zákazu síťového fallbacku
 
-backend/modules/variant_input.py
+backend/variant_processing/variant_input.py
   orchestrace vstupu a politika transkriptů
 
 scripts/prepare_panel_reference_bundle.py

@@ -2,8 +2,8 @@ from fastapi.testclient import TestClient
 import pytest
 import re
 
-from backend.models import ClassificationResult
-from backend.ui_session import (
+from backend.contracts import ClassificationResult
+from backend.api.session import (
     UI_SESSION_AUTHENTICATOR,
     UI_SESSION_COOKIE,
     UI_SESSION_MAX_AGE_SECONDS,
@@ -34,13 +34,13 @@ def _mock_classification(monkeypatch) -> None:
     async def classify_cached(*args, **kwargs):
         return _result(), "hit", "test-fingerprint"
 
-    monkeypatch.setattr(main, "_classify_one_cached", classify_cached)
+    monkeypatch.setattr(main.CLASSIFICATION_API, "classify_cached", classify_cached)
     monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
     monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
 
 
 def _allow_test_api_key(monkeypatch) -> None:
-    from backend.api_auth import PUBLIC_API_KEY_AUTHENTICATOR
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
 
     monkeypatch.setattr(
         PUBLIC_API_KEY_AUTHENTICATOR,
@@ -100,6 +100,25 @@ def test_root_prevents_stale_html_and_versions_all_local_assets():
         for asset in assets
     )
     assert main.FRONTEND_ASSET_VERSION.startswith(f"{main.ARIANE_VERSION}-")
+
+
+def test_frontend_dependency_is_pinned_and_security_headers_are_application_owned():
+    from backend import main
+
+    response = TestClient(main.app).get("/")
+
+    assert response.status_code == 200
+    assert "alpinejs@3.17.2/dist/cdn.min.js" in response.text
+    assert "alpinejs@3.x.x" not in response.text
+    assert 'integrity="sha384-lcaMFHdvRVsEXVuhit4fTnbxq6eTLm5HPdNzO7vXNZjr8HOCMouPmv4hSGF3PCJV"' in response.text
+    assert 'crossorigin="anonymous"' in response.text
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    csp = response.headers["Content-Security-Policy"]
+    assert "default-src 'self'" in csp
+    assert "https://cdn.jsdelivr.net" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert "object-src 'none'" in csp
 
 
 def test_ui_classification_requires_session_even_with_api_key(monkeypatch):

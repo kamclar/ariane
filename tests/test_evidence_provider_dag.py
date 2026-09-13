@@ -125,7 +125,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
 
 
 def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
-    from backend.modules.erepo_pvs1_rna import lookup_erepo_pvs1_rna
+    from backend.reference_data.erepo_pvs1_rna import lookup_erepo_pvs1_rna
     from backend.services.classification_completeness import first_required_evidence_gap
 
     request = ClassificationRequest(
@@ -177,7 +177,7 @@ def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
 
 
 def test_curated_st2_pvs1_rna_is_applied_without_querying_spliceai():
-    from backend.modules.pvs1_rna import lookup_st2_pvs1_rna_evidence
+    from backend.criteria.pvs1_rna import lookup_st2_pvs1_rna_evidence
     from backend.services.classification_completeness import first_required_evidence_gap
 
     request = ClassificationRequest(
@@ -230,7 +230,7 @@ def test_curated_st2_pvs1_rna_is_applied_without_querying_spliceai():
 
 
 def test_variant_absent_from_partial_erepo_registry_is_not_treated_as_no_evidence():
-    from backend.modules.erepo_pvs1_rna import lookup_erepo_pvs1_rna
+    from backend.reference_data.erepo_pvs1_rna import lookup_erepo_pvs1_rna
 
     result = lookup_erepo_pvs1_rna("BRCA1", "c.4185G>A")
 

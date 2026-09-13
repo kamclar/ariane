@@ -1,0 +1,153 @@
+            <!-- Warnings -->
+            <div class="warnings-section" x-show="result?.warnings?.length > 0">
+                <h3>Warnings</h3>
+                <template x-for="w in result?.warnings" :key="w">
+                    <p class="warning" x-text="w"></p>
+                </template>
+            </div>
+
+            <!-- External comparison (collapsible) -->
+            <div class="external-section" x-show="result?.external" x-data="{ open: false }">
+                <h3 @click="open = !open" class="collapsible external-heading">
+                    <span class="external-heading-text">
+                        <span class="external-heading-title">External comparison</span>
+                        <span class="external-heading-subtitle">ClinVar and ENIGMA Expert Panel</span>
+                    </span>
+                    <span class="external-heading-toggle" x-text="open ? '▼' : '▶'"></span>
+                </h3>
+                <div class="external-content" x-show="open" x-transition>
+                    <p class="external-comparison-scope">
+                        Compared variant:
+                        <strong x-text="`${result?.gene || ''} ${result?.c_notation || ''}`.trim()"></strong>.
+                        Any separate reference variant used for PS1 is identified in the PS1 criterion.
+                    </p>
+
+                    <!-- ClinVar aggregate -->
+                    <div class="external-block">
+                        <h4>ClinVar</h4>
+                        <p class="external-source-status"
+                           x-text="result?.external?.clinvar_message || 'ClinVar status was not reported.'"></p>
+                        <p class="external-source-error"
+                           x-show="result?.external?.clinvar_error"
+                           x-text="result?.external?.clinvar_error"></p>
+                        <table class="detail-table" x-show="result?.external?.clinvar_classification">
+                            <tr>
+                                <td>Aggregate classification</td>
+                                <td x-text="result?.external?.clinvar_classification"></td>
+                            </tr>
+                            <tr>
+                                <td>Review status</td>
+                                <td x-text="result?.external?.clinvar_review_status"></td>
+                            </tr>
+                            <tr>
+                                <td>ClinVar review stars</td>
+                                <td>
+                                    <span class="clinvar-stars"
+                                        :aria-label="(result?.external?.clinvar_review_stars || 0) + ' of 4 ClinVar stars'">
+                                        <template x-for="i in [1,2,3,4]" :key="i">
+                                            <span x-text="i <= (result?.external?.clinvar_review_stars || 0) ? '\u2605' : '\u2606'"></span>
+                                        </template>
+                                    </span>
+                                    <span class="star-count"
+                                        x-text="'(' + (result?.external?.clinvar_review_stars || 0) + '/4)'"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Submitters</td>
+                                <td x-text="result?.external?.clinvar_n_submitters"></td>
+                            </tr>
+                            <tr x-show="result?.external?.clinvar_has_conflict">
+                                <td>Conflict</td>
+                                <td class="conflict-flag">Yes - conflicting interpretations</td>
+                            </tr>
+                        </table>
+
+                        <!-- Submitter table -->
+                        <div x-show="result?.external?.clinvar_submitters?.length > 0" class="submitter-section">
+                            <h4>Submitter details</h4>
+                            <table class="submitter-table">
+                                <thead>
+                                    <tr>
+                                        <th>Submitter</th>
+                                        <th>Classification</th>
+                                        <th>Date</th>
+                                        <th>Review</th>
+                                        <th>Curated status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="s in result?.external?.clinvar_submitters" :key="s.scv">
+                                        <tr :class="s.is_enigma_ep ? 'enigma-row' : ''">
+                                            <td x-text="s.org"></td>
+                                            <td x-text="s.classification"></td>
+                                            <td x-text="s.date_eval"></td>
+                                            <td x-text="s.review_status"></td>
+                                            <td>
+                                                <span class="curated-status"
+                                                    x-show="s.curated_status"
+                                                    x-text="s.curated_status"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ENIGMA EP comparison -->
+                    <div class="external-block">
+                        <h4>ENIGMA Expert Panel</h4>
+                        <p class="curation-warning"
+                           x-show="result?.external?.historical_expert_panel_warning"
+                           x-text="result?.external?.historical_expert_panel_warning"></p>
+                        <p class="external-source-status"
+                           x-show="!result?.external?.enigma_ep_class"
+                           x-text="result?.external?.clingen_message || 'ClinGen ERepo status was not reported.'"></p>
+                        <p class="external-source-error"
+                           x-show="result?.external?.clingen_error"
+                           x-text="result?.external?.clingen_error"></p>
+                        <table class="detail-table" x-show="result?.external?.enigma_ep_class">
+                            <tr>
+                                <td>ENIGMA EP classification</td>
+                                <td x-text="result?.external?.enigma_ep_class"></td>
+                            </tr>
+                            <tr>
+                                <td>Source</td>
+                                <td x-text="result?.external?.enigma_ep_source"></td>
+                            </tr>
+                        </table>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_evidence_codes?.length"
+                           x-text="'ClinGen evidence codes: ' + result.external.erepo_evidence_codes.join(', ')"></p>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_guideline_versions?.length"
+                           x-text="'Guideline version: ' + result.external.erepo_guideline_versions.join(', ')"></p>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_cspec_ids?.length"
+                           x-text="'CSpec record: ' + result.external.erepo_cspec_ids.join(', ')"></p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Source links -->
+            <div class="sources-section" x-data="{ open: false }">
+                <h3 @click="open = !open" class="collapsible">
+                    Criteria sources and supplementary material
+                    <span x-text="open ? '&#9660;' : '&#9654;'"></span>
+                </h3>
+                <p class="panel-intro">
+                    Direct links to the ENIGMA BRCA1/2 VCEP v1.2 documents used
+                    to implement ARIANE and to the ClinVar review-status guidance.
+                </p>
+                <div x-show="open" x-transition class="source-list">
+                    <template x-for="source in resourceLinks" :key="source.url">
+                        <div class="source-item">
+                            <a :href="source.url" target="_blank" rel="noopener"
+                                x-text="source.title"></a>
+                            <p x-text="source.description"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+

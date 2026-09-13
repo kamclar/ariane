@@ -11,7 +11,6 @@ never be calculated from raw AF or popmax AF as a fallback.
 """
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 import math

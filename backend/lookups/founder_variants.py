@@ -17,8 +17,8 @@ import re
 from pathlib import Path
 from typing import Any, Dict
 
-from backend.data_health import clear_issue, register_issue
-from backend.gene_policy import active_genes
+from backend.infrastructure.health import DataHealthRegistry
+from backend.policy.gene import active_genes
 
 
 FOUNDER_VARIANT_SNAPSHOT = (
@@ -53,7 +53,11 @@ def _normalise_lookup_c(c_notation: str) -> str:
     return value
 
 
-def load_founder_variant_snapshot(path: Path | None = None) -> None:
+def load_founder_variant_snapshot(
+    path: Path | None = None,
+    *,
+    health: DataHealthRegistry | None = None,
+) -> None:
     global FOUNDER_VARIANT_INDEX, FOUNDER_VARIANT_METADATA, FOUNDER_VARIANT_STATUS
 
     selected = Path(path) if path is not None else FOUNDER_VARIANT_SNAPSHOT
@@ -63,10 +67,11 @@ def load_founder_variant_snapshot(path: Path | None = None) -> None:
         FOUNDER_VARIANT_INDEX = {}
         FOUNDER_VARIANT_METADATA = {}
         FOUNDER_VARIANT_STATUS = "unavailable"
-        register_issue(
-            "BRCA pathogenic founder variant snapshot",
-            f"could not load {selected}: {type(exc).__name__}: {exc}",
-        )
+        if health is not None:
+            health.register(
+                "BRCA pathogenic founder variant snapshot",
+                f"could not load {selected}: {type(exc).__name__}: {exc}",
+            )
         return
 
     records = payload.get("variants")
@@ -90,7 +95,8 @@ def load_founder_variant_snapshot(path: Path | None = None) -> None:
         FOUNDER_VARIANT_INDEX = {}
         FOUNDER_VARIANT_METADATA = metadata
         FOUNDER_VARIANT_STATUS = "invalid"
-        register_issue("BRCA pathogenic founder variant snapshot", error)
+        if health is not None:
+            health.register("BRCA pathogenic founder variant snapshot", error)
         return
 
     index: Dict[str, Dict[str, Any]] = {}
@@ -106,11 +112,14 @@ def load_founder_variant_snapshot(path: Path | None = None) -> None:
     FOUNDER_VARIANT_INDEX = index
     FOUNDER_VARIANT_METADATA = metadata
     FOUNDER_VARIANT_STATUS = "ok"
-    clear_issue("BRCA pathogenic founder variant snapshot")
+    if health is not None:
+        health.clear("BRCA pathogenic founder variant snapshot")
 
 
 def lookup_pathogenic_founder_variant(gene: str, c_notation: str) -> Dict[str, Any]:
     """Return a fail-closed founder-exception decision for BA1/BS1."""
+    if FOUNDER_VARIANT_STATUS == "not_loaded":
+        load_founder_variant_snapshot()
     if FOUNDER_VARIANT_STATUS != "ok":
         return {
             "status": "unavailable",
@@ -148,6 +157,3 @@ def lookup_pathogenic_founder_variant(gene: str, c_notation: str) -> Dict[str, A
         "record": record,
         "snapshot_version": FOUNDER_VARIANT_METADATA.get("snapshot_version"),
     }
-
-
-load_founder_variant_snapshot()

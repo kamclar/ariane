@@ -120,24 +120,64 @@ identifikátory pacientů.
 Manuální vyhodnocení kontroluje také povinné stipulace CSpec v1.2. PS4 vyžaduje shodu země a etnicity případů a kontrol. PM3 a BS2 vyžadují ověření, že koexistující P/LP varianta byla klasifikována podle VCEP specifications. PM3 navíc vyžaduje potvrzení, že hodnocená varianta nesplňuje benigní populační kritérium. PP1 Very Strong vyžaduje zaznamenaný predikovaný nebo experimentálně prokázaný účinek na protein nebo mRNA sestřih. Pokud poslední podmínka chybí, LR nejméně 350 vede nejvýše k PP1 Strong.
 
 Produkční klasifikace je v `backend/classification_dag/`. Automatický výpočet
-spouští `runtime.py`, jednotlivé rodiny pravidel jsou v podbalíku `nodes/` a společná
-ENIGMA combinační politika je v `policy.py`. Starý sekvenční klasifikátor a
+spouští `runtime.py` a jednotlivé rodiny pravidel jsou v podbalíku `nodes/`.
+Sdílená ENIGMA kombinační politika je v `backend/policy/classification.py`.
+Starý sekvenční klasifikátor a
 kompatibilní re-export `classification_dag/native.py` byly odstraněny. V aplikaci
 i testech existuje jediná implementace klasifikační logiky, tedy DAG.
 
-Transportní vrstva `backend/main.py` předává klasifikační požadavek službě
-`backend/services/variant_classification_service.py`. Normalizaci, sestavení vstupu provider DAGu,
+Kompoziční kořen `backend/main.py` sestaví klasifikační transport
+`backend/api/classification.py` a aplikační službu
+`backend/services/variant_classification_service.py`. Tato služba sdílí mezi
+jednotlivou a batch routou cache, měření, policy metadata, usage a omezenou
+souběžnost. Transport ponechává pouze HTTP autentizaci, kvóty, cookies, hlavičky,
+převod chyb a zápis auditních událostí. Normalizaci, sestavení vstupu provider DAGu,
 paralelní získání evidence, diagnostiku a fail-closed zpracování řídí
 `backend/services/evidence_orchestration.py`. Veřejný Pydantic výsledek sestavuje
 oddělený `backend/services/classification_presentation.py`. Prezentační služba
 nesmí přidávat, potlačovat ani měnit sílu kritérií.
+
+Další HTTP skupiny jsou v `backend/api/manual.py`, `backend/api/system.py`,
+`backend/api/review.py` a `backend/api/admin.py`. Datové kontrakty používané
+transportem, službami a cache jsou rozdělené podle workflow v
+`backend/contracts/`. Cesty k referenčním datům jsou v
+`backend/reference_data/paths.py`, genová politika v `backend/policy/` a měnitelná
+provozní data v `backend/infrastructure/`. Kořen `backend/` obsahuje pouze vstupní
+body aplikace a verzi.
+
+`backend/bootstrap.py` vytvoří jednu instanci `DataHealthRegistry` a předá ji
+konkrétním lookupům a orchestration službě. Selhání zdroje se proto neukládá do
+skrytého modulového slovníku. Stejný registr poskytuje data health endpointu i
+varování připojená ke klasifikaci.
+
+Společné `/api` a `/ui-api` routy používají `backend/api/routing.py`. Každý
+handler je registrován jednou. Helper pevně nastaví API klíč pro programovou
+cestu, podepsanou session cookie pro webovou cestu a skryje pouze webovou kopii
+z OpenAPI. Middleware, error handlery, auditní logger a browser shell mají
+samostatné moduly v `backend/api/`; `backend/main.py` je pouze propojuje.
+
+Podpůrný kód je rozdělen podle odpovědnosti. `backend/criteria/` obsahuje
+vyhodnocení jednotlivých kritérií a pravidla pro jejich vzájemné interakce.
+`backend/domain/` obsahuje čisté datové kontrakty a strukturu auditní rozhodovací
+cesty. `backend/policy/` obsahuje genovou, kombinační a SpliceAI politiku, kterou
+sdílejí DAG, lookupy, kritéria i odborná revize. Tyto dvě spodní vrstvy neimportují
+žádnou aplikační vrstvu.
+`backend/reference_data/` načítá a kontroluje připnuté tabulky, registry a lokální
+snapshoty. `backend/review/` rozděluje odbornou revizi na definice formulářů,
+odvození síly, kontrolu úplnosti a sestavení amended working classification.
+`backend/presentation/` řadí a vysvětluje hotový výsledek, ale nemění body.
+`backend/variant_processing/` zajišťuje HGVS, lokální sekvence, kontrolu reference
+a určení typu varianty. Normalizace probíhá před vytvořením `EvidenceBundle` a
+smí používat pouze checksumované lokální mapy a normalizační snapshoty z
+`backend/reference_data/`. Nevolá živé lookupy a nezískává klasifikační
+evidenci. Obecný balík `backend/modules/` se nepoužívá.
 
 ## 2. Zpracování vstupu
 
 ### 2.1 Normalizace vstupu a HGVS
 
 Uživatel zadává gen a jednu variantu. Vstupní normalizační vrstva
-`backend/modules/variant_input.py` přijímá:
+`backend/variant_processing/variant_input.py` přijímá:
 
 - referenční transkriptovou notaci, například `c.303T>G`,
 - notaci s accession prefixem, například `NM_007294.4:c.303T>G`,
@@ -255,15 +295,15 @@ Příklad:
 
 Neshoda reference vrací HTTP 422 a klasifikace se nespustí. Pokud nainstalovaná data neumožňují referenci ověřit, aplikace postup ukončí místo tichého pokračování.
 
-Implementace je v `backend/modules/reference_validation.py`.
+Implementace je v `backend/variant_processing/reference_validation.py`.
 
 ### 2.3 Odvození a kontrola proteinového následku
 
 Proteinový následek se za běhu počítá ze sekvence schváleného referenčního
 transkriptu. Primárním enginem je `biocommons.hgvs==1.5.7`, providerem
 `cdot==0.2.30` `JSONDataProvider` a zdrojem sekvencí je lokální
-checksumovaný panelový balík. Kód je v `backend/modules/hgvs_engine.py`,
-`backend/modules/hgvs_provider.py` a `backend/modules/panel_seqfetcher.py`.
+checksumovaný panelový balík. Kód je v `backend/variant_processing/hgvs_engine.py`,
+`backend/variant_processing/hgvs_provider.py` a `backend/variant_processing/panel_seqfetcher.py`.
 
 Pro přesně popsané coding SNV, delece, duplikace, inserce a delins engine:
 
@@ -695,7 +735,7 @@ odborné revize podle Figure 1C a Appendix E.
 
 PS3 a BS3 nemají dva oddělené lookup moduly. Obě kritéria jsou opačné výsledky
 stejného kalibrovaného funkčního hodnocení a proto je společně vrací
-`backend/modules/table9.py`; v klasifikačním DAG je zpracovává uzel
+`backend/reference_data/table9.py`; v klasifikačním DAG je zpracovává uzel
 `rule.functional.table9`. Samostatná BP7 RNA větev tento výsledek pouze čte,
 nevytváří náhradní BS3.
 
@@ -2136,10 +2176,9 @@ kritériích, řešení interakcí evidence, výsledná klasifikace a prezentace
 oddělené vrstvy.
 
 Produkční klasifikaci provádí provider graf `ariane.vcep.classification`, verze
-`4.2.0-curated-st2-rna-provider-dag`. Starý sekvenční evaluator se v aplikační cestě neimportuje
-ani nespouští. Jediná povolená hodnota `ARIANE_CLASSIFIER_ENGINE` je `dag` a jde
-zároveň o výchozí hodnotu. Režimy `legacy`, `shadow` ani fallback nejsou
-dostupné.
+`4.2.0-curated-st2-rna-provider-dag`. Starý sekvenční evaluator se v aplikační
+cestě neimportuje ani nespouští. Produkční engine je pevně daný identifikátorem
+`dag`; konfigurační volba a režimy `legacy`, `shadow` nebo fallback neexistují.
 
 DAG používá typy `NormalizedVariant`, `EvidenceBundle`,
 `CriterionFamilyResult`, `CriterionDecision` a `VariantAssertion`. Jednotlivé
@@ -2224,6 +2263,29 @@ Změna frontendového souboru proto vynutí novou URL i tehdy, kdyby při vývoj
 nebyla zvýšena verze aplikace. Prohlížeč po nasazení nemůže spojit nový backend
 se starým cachovaným klasifikačním modulem.
 
+Frontend používá Alpine.js 3.17.2 z přesně verzované URL. Atribut `integrity`
+obsahuje SHA-384 otisk distribuovaného souboru a `crossorigin="anonymous"`
+umožňuje prohlížeči integritu ověřit. Plovoucí verze `3.x.x` se nepoužívá.
+FastAPI přidává na všechny odpovědi `Content-Security-Policy`,
+`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`
+a omezení `Permissions-Policy`. Ochrana proto platí i při přímém spuštění přes
+Uvicorn, nejen za produkčním nginxem.
+
+Použitý standardní Alpine build vyhodnocuje deklarativní výrazy v atributech
+a vyžaduje `unsafe-eval` v `script-src`. CSP přesto omezuje skripty na vlastní
+origin a přesně kontrolovaný jsDelivr soubor, zakazuje objekty a vložení stránky
+do rámce. Odstranění `unsafe-eval` vyžaduje přechod na Alpine CSP build a převod
+složitých výrazů z HTML do pojmenovaných metod. Dokud tento převod není hotový,
+nesmí být `unsafe-eval` z hlavičky odstraněno, protože by se rozhraní nespustilo.
+
+Zdrojová šablona není jeden soubor. `frontend/index.html` obsahuje pouze shell
+a explicitní značky pro části `search`, `classification-result`, `manual-review`,
+`external-comparison`, `rules-explorer` a `batch`. Backend je při startu složí
+funkcí `backend/presentation/frontend.py::load_frontend_template`. CSS je ve
+stejném pořadí rozděleno na `base`, `forms`, `results`, `evidence`, `layout` a
+`modes`. Rozdělení nemění DOM ani pořadí pravidel. Regresní testy pracují se
+složenou šablonou a asset version zahrnuje všechny soubory ve `frontend/static`.
+
 ### 15.2 Graf pro ručně doplněnou evidenci
 
 Přepočet po ručně doplněné odborné evidenci používá samostatný graf
@@ -2243,6 +2305,13 @@ model. Klient pouze odesílá surová pole a zobrazuje odpověď.
 Auditní export přebírá odvozené síly z backendového `amended_working_result` a
 nevytváří vlastní výpočet.
 
+Implementace ruční evidence není soustředěna v jednom souboru.
+`backend/review/definitions.py` vlastní obsah formulářů a odkazy,
+`strength.py` odvozuje sílu ze strukturovaných údajů, `validation.py` vrací stav
+úplnosti a `service.py` sestavuje amended working classification. Soubor
+`manual_evidence.py` je pouze kompatibilní veřejná importní fasáda bez vlastní
+rozhodovací logiky.
+
 Pokud automatický výsledek obsahuje BA1, zůstává v manuálním grafu
 stand-alone benigní klasifikací. Ručně doplněná kritéria se zachovají v
 auditní stopě, ale BA1 nepřepínají do bodové klasifikace mixed evidence.
@@ -2251,6 +2320,16 @@ Neúplný odborný podklad vrací validační chybu 422. Neočekávaná interní
 uzlu vrací 503. V obou případech se nová klasifikace nevydá a audit obsahuje
 identifikátor chybného uzlu. Chybějící podklad se nenahrazuje odhadem, nulou,
 fixture hodnotou ani fallbackem.
+
+#### Automatické kontroly kódu
+
+Workflow `.github/workflows/quality.yml` se spouští při každém pushi a pull
+requestu. Používá Python 3.12, přesně připnuté GitHub Actions a závislosti z
+`requirements-dev.txt`. Povinně spouští Ruff, mypy a úplnou offline sadu pytest.
+Konfigurace všech tří nástrojů je v `pyproject.toml`. Ruff kontroluje chyby
+syntaxe, neplatné a duplicitní importy a nedefinovaná jména v celém repozitáři.
+Mypy je zapnutý přísně pro stabilní doménové, klasifikační policy a frontendové
+kompoziční rozhraní; jeho rozsah se může rozšiřovat po typování dalších vrstev.
 
 ### 15.3 Hranice získávání dat
 
@@ -2269,21 +2348,40 @@ kritéria. Důvod již uvedený u PM2 N/A se neopakuje v uživatelských warning
 
 Konkrétní produkční implementace providerů jsou propojené pouze v
 `backend/classification_dag/provider_wiring.py`. `ClassificationInputs` je
-doménový typ v `backend/classification_dag/domain.py`, takže provider a runtime
+doménový typ v `backend/domain/classification.py`, takže provider a runtime
 vrstva mezi sebou netvoří importní cyklus. Projektové importy `backend.*` se
 nesmějí provádět uvnitř funkcí ani metod. Tento invariant kontroluje AST test
 `tests/test_backend_import_architecture.py`. Pravidlové uzly proto mají své
 závislosti viditelné na úrovni modulů a načítají pouze předanou typovanou
 evidenci.
 
-### 15.4 Jediná klasifikační implementace
+### 15.4 Inicializace dat a stav připravenosti
+
+Import zdrojových modulů neotevírá referenční soubory ani nevytváří adresáře
+pro runtime cache. Načtení a kontrola dat aplikace probíhají v jednom explicitním kroku
+`backend/startup.py::initialize_application_data`, který ukládá výsledek každé
+kontroly do `StartupStatus`.
+
+Chyba povinného klasifikačního podkladu nezpůsobí nečitelnou chybu při importu
+aplikace. Server zpřístupní `/api/health` s HTTP 503, stavem `not_ready` a názvem
+konkrétní neúspěšné kontroly. Klasifikační endpointy ve stejném stavu vrátí 503
+s kódem `application_not_ready` a žádnou klasifikaci nevydají. Tím zůstává
+zachováno fail-closed chování.
+
+Obnovitelné runtime cache a informační podklady jsou vedeny odděleně. Jejich
+výpadek se zobrazí jako `degraded` a v `data_issues`; příslušný provider pak
+vrátí nedostupnou evidenci podle svého kontraktu. Importní regresní test ověřuje,
+že Table 4, Table 9, ERepo RNA, SpliceAI profil, founder registr a lookup moduly
+neprovádějí souborové I/O během importu.
+
+### 15.5 Jediná klasifikační implementace
 
 ARIANE neobsahuje starý sekvenční klasifikátor, kompatibilní re-export ani
 alternativní runtime režim. Produkce i testy používají veřejný DAG kontrakt.
 Testovací adaptér pouze sestaví `ClassificationInputs` a spustí DAG. Neobsahuje
 prahy, kombinace kritérií ani jinou klinickou logiku.
 
-### 15.5 Regresní ověření DAG
+### 15.6 Regresní ověření DAG
 
 Regresní testy používají explicitně schválené očekávané třídy, body, kritéria a
 review stavy. Pokrývají tutorialové varianty, hlavní typy variant, PVS1 a PM5,
@@ -2320,7 +2418,7 @@ nepřenáší jako samostatná evidence.
 Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.
 
-### 15.6 Veřejný přístup k pravidlům a tabulkám
+### 15.7 Veřejný přístup k pravidlům a tabulkám
 
 ARIANE používá verzovaný katalog `backend/data/enigma_rule_catalog.json` jako
 společný registr pravidel, oficiálních zdrojů a jejich checksumů. Souřadnice

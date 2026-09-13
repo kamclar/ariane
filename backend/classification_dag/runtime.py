@@ -3,20 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-import os
 from typing import Any, Dict, Mapping
 import uuid
 
-from backend.gene_policy import implementation_profile, policy_version, runtime_policy_id
+from backend.policy.gene import implementation_profile, policy_version, runtime_policy_id
 
 from backend.classification_dag.engine import DagDefinition, DagExecutor
-from backend.classification_dag.domain import (
+from backend.domain.classification import (
+    CLASSIFICATION_ENGINE_ID,
     ClassificationInputs,
-    EvidenceBundle,
-    EvidenceItem,
-    EvidenceStatus,
-    NormalizedVariant,
     VariantAssertion,
 )
 from backend.classification_dag.types import (
@@ -58,10 +53,6 @@ from backend.classification_dag.nodes import (
 )
 
 
-class ClassifierEngineMode(str, Enum):
-    DAG = "dag"
-
-
 SUPPORTED_CLASSIFICATION_PROFILES = frozenset({"enigma_brca_vcep_1_2"})
 
 
@@ -78,7 +69,6 @@ def _require_supported_profile(gene: str) -> str:
 @dataclass(frozen=True)
 class ClassificationExecution:
     result: Dict[str, Any]
-    engine_mode: ClassifierEngineMode
     graph_id: str = ""
     graph_version: str = ""
     trace: tuple[DagTraceEntry, ...] = ()
@@ -86,7 +76,7 @@ class ClassificationExecution:
 
     def audit_record(self) -> dict[str, Any]:
         return {
-            "engine_mode": self.engine_mode.value,
+            "engine_mode": CLASSIFICATION_ENGINE_ID,
             "graph_id": self.graph_id,
             "graph_version": self.graph_version,
             "provider_evidence": dict(
@@ -239,28 +229,9 @@ def build_provider_graph(
     )
 
 
-def get_configured_engine_mode(value: str | None = None) -> ClassifierEngineMode:
-    raw = (value if value is not None else os.getenv(
-        "ARIANE_CLASSIFIER_ENGINE", "dag"
-    )).strip().lower()
-    try:
-        return ClassifierEngineMode(raw)
-    except ValueError as exc:
-        allowed = ", ".join(mode.value for mode in ClassifierEngineMode)
-        raise ValueError(
-            f"Invalid ARIANE_CLASSIFIER_ENGINE={raw!r}; expected one of {allowed}"
-        ) from exc
-
-
 def execute_classification(
     inputs: ClassificationInputs,
-    *,
-    mode: ClassifierEngineMode | str | None = None,
 ) -> ClassificationExecution:
-    selected_mode = (
-        mode if isinstance(mode, ClassifierEngineMode)
-        else get_configured_engine_mode(mode)
-    )
     _require_supported_profile(inputs.gene)
     graph = build_native_graph()
     dag_run = DagExecutor(graph).run(
@@ -270,7 +241,7 @@ def execute_classification(
             variant_key=inputs.variant_key,
             policy_id=runtime_policy_id(inputs.gene),
             metadata={
-                "engine_mode": selected_mode.value,
+                "engine_mode": CLASSIFICATION_ENGINE_ID,
                 "policy_version": policy_version(inputs.gene),
             },
         ),
@@ -281,7 +252,6 @@ def execute_classification(
 
     return ClassificationExecution(
         result=dag_result,
-        engine_mode=selected_mode,
         graph_id=dag_run.graph_id,
         graph_version=dag_run.graph_version,
         trace=dag_run.trace,
@@ -293,13 +263,8 @@ async def execute_classification_request(
     request: ClassificationRequest,
     *,
     dependencies: ProviderDependencies | None = None,
-    mode: ClassifierEngineMode | str | None = None,
 ) -> ClassificationExecution:
     """Acquire evidence and classify one normalized variant in one DAG run."""
-    selected_mode = (
-        mode if isinstance(mode, ClassifierEngineMode)
-        else get_configured_engine_mode(mode)
-    )
     _require_supported_profile(request.variant.gene)
     graph = build_provider_graph(dependencies)
     dag_run = await DagExecutor(graph).run_async(
@@ -309,7 +274,7 @@ async def execute_classification_request(
             variant_key=request.variant.variant_key,
             policy_id=runtime_policy_id(request.variant.gene),
             metadata={
-                "engine_mode": selected_mode.value,
+                "engine_mode": CLASSIFICATION_ENGINE_ID,
                 "policy_version": policy_version(request.variant.gene),
             },
         ),
@@ -322,7 +287,6 @@ async def execute_classification_request(
         raise RuntimeError("Classification provider DAG did not produce provider_artifacts")
     return ClassificationExecution(
         result=dag_result,
-        engine_mode=selected_mode,
         graph_id=dag_run.graph_id,
         graph_version=dag_run.graph_version,
         trace=dag_run.trace,

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from backend.classification_dag.domain import CriterionDecision, CriterionDecisionStatus, CriterionFamilyResult
+from backend.domain.classification import CriterionDecision, CriterionDecisionStatus, CriterionFamilyResult
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
-from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
+from backend.criteria.pvs1 import evaluate_pvs1
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
 
 
 @dataclass(frozen=True)

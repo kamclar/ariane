@@ -218,7 +218,7 @@ def canonicalize_source_variant(
     indel_records: dict[str, dict],
     indel_aliases: dict[str, str],
 ) -> tuple[str, dict[str, str], bool]:
-    from backend.modules.hgvs_engine import derive_protein_consequence
+    from backend.variant_processing.hgvs_engine import derive_protein_consequence
 
     normalized = derive_protein_consequence(gene, c_notation)
     canonical_c = normalized.canonical_c_notation

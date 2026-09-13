@@ -6,9 +6,9 @@ import re
 import unittest
 
 from tests.dag_test_support import classify_with_dag as evaluate_variant
-from backend.modules.pp4_bp5 import evaluate_pp4_bp5
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.variant_type import infer_variant_type
+from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.variant_processing.variant_type import infer_variant_type
 
 
 class VariantTypeInferenceMatrixTests(unittest.TestCase):

@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Any, Mapping
 
-from backend.classification_dag.domain import (
+from backend.domain.classification import (
     CriterionDecision,
     CriterionDecisionStatus,
     EvidenceBundle,
 )
-from backend.gene_policy import policy_version
+from backend.policy.gene import policy_version
 
 
 FIRST_PASS_WARNING = (

@@ -11,7 +11,7 @@ from collections import Counter
 from datetime import date
 from pathlib import Path
 
-from backend.modules.hgvs_engine import derive_protein_consequence
+from backend.variant_processing.hgvs_engine import derive_protein_consequence
 
 
 ROOT = Path(__file__).resolve().parents[1]

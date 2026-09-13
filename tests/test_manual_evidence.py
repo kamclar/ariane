@@ -1,7 +1,7 @@
 import unittest
 
 from backend.lookups.clinvar import clinvar_review_stars
-from backend.modules.manual_evidence import (
+from backend.review.manual_evidence import (
     evaluate_manual_evidence,
     manual_criteria_for_gene,
     manual_criterion_statuses,

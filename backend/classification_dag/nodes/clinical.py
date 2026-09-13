@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from backend.classification_dag.domain import CriterionFamilyResult
+from backend.domain.classification import CriterionFamilyResult
 from backend.classification_dag.nodes.support import bundle_value, decision
 from backend.classification_dag.types import NodeResult
 

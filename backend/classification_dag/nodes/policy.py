@@ -12,14 +12,14 @@ from backend.classification_dag.nodes.support import (
     criteria_dict,
     excluded_by_policy,
 )
-from backend.classification_dag.policy import (
+from backend.policy.classification import (
     classify_by_enigma_combination,
     classify_by_points,
     verify_acmg_combination,
 )
 from backend.classification_dag.types import NodeResult
-from backend.gene_policy import rule_is_applicable
-from backend.modules.evidence_interactions import (
+from backend.policy.gene import rule_is_applicable
+from backend.criteria.evidence_interactions import (
     apply_manual_rna_interactions,
     automatic_functional_interactions,
     clinical_functional_risk_interactions,

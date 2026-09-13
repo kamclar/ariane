@@ -10,42 +10,41 @@ from backend.population_frequency.coverage import (
 from backend.population_frequency.criteria import evaluate_frequency_criteria
 from backend.population_frequency.models import GnomadRepository
 from backend.population_frequency.policy import (
-    GNOMAD_LOCAL_DATASET_CONFIG,
     classification_policy_for_gene,
 )
 from backend.population_frequency.service import PopulationFrequencyService
-from backend.classification_dag.policy import classify_by_enigma_combination
+from backend.policy.classification import classify_by_enigma_combination
 from tests.dag_test_support import classify_with_dag as evaluate_variant
-from backend.modules.evidence_interactions import clinical_functional_risk_interactions
-from backend.modules.exon_cnv_evidence import lookup_exon_cnv_evidence
-from backend.modules.table9 import table9_lookup_ps3_bs3
-from backend.modules.table4 import (
+from backend.criteria.evidence_interactions import clinical_functional_risk_interactions
+from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
+from backend.reference_data.table9 import table9_lookup_ps3_bs3
+from backend.reference_data.table4 import (
     TABLE4_DATA,
     parse_pvs1_code_strength,
     table4_lookup_splice,
 )
-from backend.modules.bp7 import evaluate_bp7
-from backend.modules.pp3_bp4 import evaluate_pp3_bp4
-from backend.modules.pvs1 import evaluate_pvs1
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
-from backend.modules.rna_review import evaluate_rna_review
-from backend.modules.ps1 import (
+from backend.criteria.bp7 import evaluate_bp7
+from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
+from backend.criteria.pvs1 import evaluate_pvs1
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.review.rna_review import evaluate_rna_review
+from backend.criteria.ps1 import (
     compute_approval_basis_checksum,
     evaluate_ps1,
     select_vua_spliceai_for_ps1,
     validate_ps1_reference_registry,
 )
-import backend.modules.ps1 as ps1_module
+import backend.criteria.ps1 as ps1_module
 from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
-from backend.modules.ps1_splice_evidence import evaluate_defined_splice_sources
-from backend.modules.spliceai_policy import compare_table9_spliceai
-from backend.modules.utils import is_in_functional_domain
-from backend.modules.variant_type import infer_variant_type
-from backend.modules.hgvs import split_combined_hgvs
-from backend.modules.vus_explanation import explain_vus
-from backend.modules.narrative import generate_narrative
+from backend.reference_data.ps1_splice_evidence import evaluate_defined_splice_sources
+from backend.policy.spliceai import compare_table9_spliceai
+from backend.variant_processing.utils import is_in_functional_domain
+from backend.variant_processing.variant_type import infer_variant_type
+from backend.variant_processing.hgvs import split_combined_hgvs
+from backend.presentation.vus_explanation import explain_vus
+from backend.presentation.narrative import generate_narrative
 try:
-    from backend.models import VariantRequest
+    from backend.contracts import VariantRequest
 except ImportError:
     VariantRequest = None
 try:
@@ -1111,7 +1110,7 @@ class SpliceTests(unittest.TestCase):
         self.assertFalse(result["applies"])
         self.assertTrue(result["review_required"])
         self.assertIn("SpliceAI is unavailable", result["reason"])
-        from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
+        from backend.review.protein_ps1_review import evaluate_protein_ps1_review
 
         display = evaluate_protein_ps1_review(result, gene="BRCA1")
         prefill = display["manual_review_prefill"]
@@ -1311,7 +1310,7 @@ class SpliceTests(unittest.TestCase):
         self.assertEqual(result["application_status"], "reference_ineligible")
         self.assertEqual(result["candidates"][0]["c_notation"], "c.140G>A")
         self.assertEqual(result["candidates"][0]["reference_status"], "excluded")
-        from backend.modules.protein_ps1_review import evaluate_protein_ps1_review
+        from backend.review.protein_ps1_review import evaluate_protein_ps1_review
 
         display = evaluate_protein_ps1_review(result)
         self.assertTrue(display["display"])
@@ -1488,7 +1487,7 @@ class SpliceTests(unittest.TestCase):
             validate_ps1_reference_registry(unresolved_registry)
 
     def test_splice_ps1_candidate_discovery_comes_directly_from_complete_st2(self):
-        from backend.modules.ps1_splice_evidence import (
+        from backend.reference_data.ps1_splice_evidence import (
             list_splice_ps1_candidate_discovery,
         )
 
@@ -1667,7 +1666,8 @@ class ClassifierIntegrationTests(unittest.TestCase):
         )
     def test_custom_donor_guard_is_not_part_of_active_scoring(self):
         project_root = Path(__file__).resolve().parents[1]
-        self.assertFalse((project_root / "backend/modules/donor_guard.py").exists())
+        self.assertFalse((project_root / "backend/criteria/donor_guard.py").exists())
+        self.assertFalse(list((project_root / "backend/modules").glob("*.py")))
         self.assertNotIn("donor_guard", (project_root / "backend/main.py").read_text(encoding="utf-8"))
 
     def test_rna_dependent_pvs1_does_not_leak_into_score(self):

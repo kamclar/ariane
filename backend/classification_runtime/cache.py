@@ -12,9 +12,9 @@ from pathlib import Path
 import sqlite3
 from typing import Iterator
 
-from backend.models import ClassificationResult
-from backend.modules.spliceai_policy import spliceai_result_is_complete
-from backend.runtime_cache import runtime_cache_path
+from backend.contracts import ClassificationResult
+from backend.policy.spliceai import spliceai_result_is_complete
+from backend.infrastructure.runtime_cache import runtime_cache_path
 
 
 SCHEMA_VERSION = 1

@@ -41,4 +41,4 @@ def classify_with_dag(
         residue_info=residue_info,
         dup_type=dup_type,
     )
-    return execute_classification(inputs, mode="dag").result
+    return execute_classification(inputs).result

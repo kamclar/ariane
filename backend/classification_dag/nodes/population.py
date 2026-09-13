@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Mapping
 
-from backend.classification_dag.domain import (
+from backend.domain.classification import (
     CriterionDecision,
     CriterionDecisionStatus,
     CriterionFamilyResult,

@@ -8,8 +8,8 @@ import uuid
 
 from backend.classification_dag.engine import DagDefinition, DagExecutor
 from backend.classification_dag.types import DagExecutionContext, DagTraceEntry, NodeResult
-from backend.gene_policy import resolve_policy_identity
-from backend.modules.manual_evidence import evaluate_manual_evidence
+from backend.policy.gene import resolve_policy_identity
+from backend.review.service import evaluate_manual_evidence
 
 
 @dataclass(frozen=True)

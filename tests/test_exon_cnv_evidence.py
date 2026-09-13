@@ -1,7 +1,7 @@
 import copy
 import unittest
 
-from backend.modules.exon_cnv_evidence import (
+from backend.reference_data.exon_cnv_evidence import (
     load_exon_cnv_evidence_snapshot,
     lookup_exon_cnv_evidence,
     validate_exon_cnv_evidence_snapshot,

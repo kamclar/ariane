@@ -1,0 +1,272 @@
+        <!-- ENIGMA rules explorer -->
+        <section class="rules-section" x-show="mode === 'rules'">
+            <div class="rules-header">
+                <div>
+                    <h2>ENIGMA rules used by ARIANE</h2>
+                    <p x-show="rulesCatalog">
+                        ClinGen ENIGMA BRCA1/2 VCEP
+                        <strong x-text="rulesCatalog?.criteria_specification_version"></strong>,
+                        released <span x-text="rulesCatalog?.release_date"></span>.
+                    </p>
+                </div>
+                <a x-show="rulesCatalog" :href="rulesCatalog?.registry_url" target="_blank" rel="noopener">Official specification</a>
+            </div>
+
+            <p class="rules-status" x-show="rulesLoading">Loading validated rules and data sources...</p>
+            <p class="rules-status rules-error" x-show="rulesError" x-text="rulesError"></p>
+
+            <div class="rules-subtabs" x-show="rulesCatalog">
+                <button :class="{ active: rulesView === 'trees' }" @click="rulesView = 'trees'">Decision trees</button>
+                <button :class="{ active: rulesView === 'figures' }" @click="rulesView = 'figures'">Original figures</button>
+                <button :class="{ active: rulesView === 'tables' }"
+                        @click="rulesView = 'tables'; ensureReferenceTableSelected()">Tables</button>
+                <button :class="{ active: rulesView === 'sources' }" @click="rulesView = 'sources'">Sources and versions</button>
+            </div>
+
+            <div x-show="rulesView === 'trees' && rulesTree" class="rules-panel">
+                <div class="rule-tree-selector">
+                    <label for="rule-tree-select">Decision diagram</label>
+                    <select id="rule-tree-select" x-model="selectedRuleTreeId"
+                            @change="selectRuleTree(selectedRuleTreeId)">
+                        <template x-for="tree in rulesCatalog?.decision_trees || []" :key="tree.id">
+                            <option :value="tree.id" x-text="ruleTreeOptionLabel(tree)"></option>
+                        </template>
+                    </select>
+                </div>
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3 x-text="rulesTree?.title"></h3>
+                        <p x-text="rulesTree?.description"></p>
+                        <p class="diagram-provenance"
+                           :class="rulesTree?.diagram_provenance === 'official_redraw' ? 'official' : 'derived'">
+                            <strong x-text="rulesTree?.diagram_provenance === 'official_redraw' ? 'Official ENIGMA figure redrawn' : 'ARIANE decision path derived from ENIGMA rules'"></strong>
+                            <span x-text="rulesTree?.source_location"></span>
+                        </p>
+                    </div>
+                    <div class="rules-heading-links">
+                        <template x-for="figure in selectedRuleOriginalFigures()" :key="figure.id">
+                            <a :href="figure.asset_url" target="_blank" rel="noopener"
+                               x-text="'Open original ' + figure.title"></a>
+                        </template>
+                        <a :href="(rulesCatalog?.sources || []).find(s => s.id === rulesTree?.source_id)?.official_url"
+                           target="_blank" rel="noopener">Open complete specification</a>
+                    </div>
+                </div>
+                <p class="rules-highlight-note" x-show="highlightedRulePath?.tree_id === selectedRuleTreeId && highlightedRulePath?.branch_id === selectedRuleBranch">
+                    The coloured nodes and connectors show the path used for the selected applied criterion.
+                </p>
+                <div class="rule-path-context" x-show="highlightedRulePath?.tree_id === selectedRuleTreeId">
+                    <div class="rule-path-context-heading">
+                        <div>
+                            <span>Selected variant path</span>
+                            <strong x-text="result?.variant || highlightedRulePath?.criterion"></strong>
+                        </div>
+                        <span class="rule-path-criterion" x-text="highlightedRulePath?.criterion"></span>
+                    </div>
+                    <div class="rule-path-facts">
+                        <template x-for="item in highlightedRulePath?.steps || []" :key="item.node_id">
+                            <span>
+                                <b x-text="edgeDisplayLabel(item.result)"></b>
+                                <small x-text="item.observed"></small>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+                <div class="rule-path-selector" x-show="resultDecisionPaths().length > 1">
+                    <span>Show path for:</span>
+                    <template x-for="criterion in resultDecisionPaths()" :key="criterion.name">
+                        <button type="button"
+                                :class="{ active: highlightedRulePath?.criterion === criterion.name }"
+                                @click="selectResultDecisionPath(criterion)"
+                                x-text="criterion.name"></button>
+                    </template>
+                </div>
+                <p class="rules-no-path" x-show="!highlightedRulePath || highlightedRulePath?.tree_id !== selectedRuleTreeId || highlightedRulePath?.branch_id !== selectedRuleBranch">
+                    <span x-show="!highlightedRulePath || highlightedRulePath?.tree_id !== selectedRuleTreeId">General rule view. Classify a variant, then open a criterion's decision path to highlight the route supported by its evidence.</span>
+                    <span x-show="highlightedRulePath?.tree_id === selectedRuleTreeId && highlightedRulePath?.branch_id !== selectedRuleBranch">
+                        General view of this branch. The selected variant follows the
+                        <strong x-text="ruleBranchTitle(highlightedRulePath?.branch_id)"></strong> branch.
+                    </span>
+                </p>
+                <div class="tree-branch-tabs" role="tablist" aria-label="Decision diagram branch">
+                    <template x-for="branch in rulesTree?.branches || []" :key="branch.id">
+                        <button type="button" role="tab"
+                                :aria-selected="selectedRuleBranch === branch.id"
+                                :class="{ active: selectedRuleBranch === branch.id }"
+                                @click="selectedRuleBranch = branch.id"
+                                x-text="branch.title"></button>
+                    </template>
+                </div>
+                <div class="decision-tree-canvas" x-show="selectedTreeBranch()">
+                    <div x-html="decisionTreeSvg(selectedTreeBranch(), highlightedRulePath?.tree_id === selectedRuleTreeId ? highlightedRulePath : null)"></div>
+                </div>
+                <div class="tree-legend">
+                    <span><i class="legend-entry"></i> Variant type</span>
+                    <span><i class="legend-decision"></i> Decision</span>
+                    <span><i class="legend-outcome"></i> Outcome</span>
+                    <span><i class="legend-active"></i> Path used for this result</span>
+                </div>
+                <div class="condition-definitions" x-show="(rulesTree?.condition_definitions || []).length">
+                    <h4>Key</h4>
+                    <template x-for="condition in rulesTree?.condition_definitions || []" :key="condition.id">
+                        <div>
+                            <strong x-text="condition.label"></strong>
+                            <span x-text="condition.notes || ''"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'figures' && rulesCatalog" class="rules-panel">
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3>Original ENIGMA figures</h3>
+                        <p>Original panels extracted from the checksum-validated ENIGMA Specifications and Appendix v1.2 documents.</p>
+                    </div>
+                    <a :href="(rulesCatalog?.sources || []).find(s => s.id === 'enigma-v1.2-specifications')?.official_url"
+                       target="_blank" rel="noopener">Open complete specification</a>
+                </div>
+                <div class="rules-figure-gallery">
+                    <template x-for="figure in rulesCatalog?.figures || []" :key="figure.id">
+                        <figure class="rules-figure-card">
+                            <figcaption x-text="figure.title"></figcaption>
+                            <a :href="figure.asset_url" target="_blank" rel="noopener" :aria-label="'Open ' + figure.title + ' at full size'">
+                                <img :src="figure.asset_url" :alt="figure.title" loading="lazy">
+                            </a>
+                        </figure>
+                    </template>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'tables' && rulesCatalog" class="rules-panel">
+                <div class="rules-panel-heading">
+                    <div>
+                        <h3>ENIGMA tables</h3>
+                        <p>
+                            ENIGMA tables used by ARIANE are shown first. The complete
+                            <strong x-text="rulesCatalog?.tables?.table_count"></strong>-table v1.2 source bundle
+                            remains available for expert review and audit.
+                        </p>
+                    </div>
+                    <a :href="referenceTableSourceUrl()" target="_blank" rel="noopener">Open official source</a>
+                </div>
+
+                <div class="reference-table-groups" role="tablist" aria-label="ENIGMA table role">
+                    <template x-for="role in referenceTableRoles()" :key="role.id">
+                        <button type="button" role="tab"
+                                :class="{ active: selectedReferenceTableRole === role.id }"
+                                :aria-selected="selectedReferenceTableRole === role.id"
+                                :title="role.description"
+                                @click="selectReferenceTableRole(role.id)">
+                            <span x-text="role.title"></span>
+                            <small x-text="role.table_count"></small>
+                        </button>
+                    </template>
+                </div>
+
+                <div class="reference-table-controls">
+                    <label>
+                        <span>Table</span>
+                        <select x-model="selectedReferenceTableId"
+                                @change="selectReferenceTable(selectedReferenceTableId)">
+                            <template x-for="table in referenceTablesForRole()" :key="table.id">
+                                <option :value="table.id"
+                                        x-text="referenceTableOptionLabel(table)"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label x-show="(selectedReferenceTable()?.sections || []).length > 1">
+                        <span>Worksheet</span>
+                        <select x-model="selectedReferenceSectionId"
+                                @change="selectReferenceSection(selectedReferenceSectionId)">
+                            <template x-for="section in selectedReferenceTable()?.sections || []" :key="section.id">
+                                <option :value="section.id" x-text="section.title"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <form class="reference-table-search" @submit.prevent="searchReferenceTable(1)">
+                        <label>
+                            <span>Search this table</span>
+                            <input x-model="referenceTableQuery" type="search"
+                                   placeholder="Variant, criterion, PMID or text">
+                        </label>
+                        <button type="submit" class="btn-primary">Search</button>
+                    </form>
+                </div>
+
+                <article class="reference-table-summary" x-show="selectedReferenceTable()">
+                    <div>
+                        <h4 x-text="selectedReferenceTable()?.title"></h4>
+                        <p x-text="selectedReferenceTable()?.usage_text"></p>
+                        <p x-show="selectedReferenceTable()?.consumer">
+                            <strong>ARIANE use:</strong>
+                            <span x-text="selectedReferenceTable()?.consumer"></span>
+                        </p>
+                    </div>
+                    <span class="reference-table-usage" :class="selectedReferenceTable()?.usage"
+                          x-text="referenceTableUsageLabel()"></span>
+                </article>
+
+                <p class="reference-table-note" x-text="rulesCatalog?.tables?.description"></p>
+                <p class="rules-status" x-show="referenceTableLoading">Loading table rows...</p>
+                <p class="rules-status rules-error" x-show="referenceTableError" x-text="referenceTableError"></p>
+
+                <div class="reference-table-grid-wrap" x-show="!referenceTableLoading && !referenceTableError">
+                    <table class="reference-table-grid">
+                        <thead>
+                            <tr>
+                                <th scope="col">Row</th>
+                                <template x-for="column in referenceTableColumns" :key="column">
+                                    <th scope="col" x-text="column"></th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="row in referenceTableItems" :key="row.source_row">
+                                <tr>
+                                    <th scope="row" x-text="row.source_row"></th>
+                                    <template x-for="(cell, cellIndex) in row.cells" :key="cellIndex">
+                                        <td x-text="referenceCellText(cell)"
+                                            :title="referenceCellFormula(cell)"></td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="reference-table-empty"
+                   x-show="!referenceTableLoading && !referenceTableError && referenceTableItems.length === 0">
+                    No rows match this search.
+                </p>
+                <div class="table9-pagination" x-show="!referenceTableError">
+                    <button class="btn-secondary" @click="searchReferenceTable(referenceTablePage - 1)"
+                            :disabled="referenceTablePage <= 1 || referenceTableLoading">Previous</button>
+                    <span>
+                        <strong x-text="referenceTableTotal"></strong> rows,
+                        page <b x-text="referenceTablePage"></b> of <b x-text="referenceTableLastPage()"></b>
+                    </span>
+                    <button class="btn-secondary" @click="searchReferenceTable(referenceTablePage + 1)"
+                            :disabled="referenceTablePage >= referenceTableLastPage() || referenceTableLoading">Next</button>
+                </div>
+            </div>
+
+            <div x-show="rulesView === 'sources' && rulesCatalog" class="rules-panel">
+                <h3>Validated sources and versions</h3>
+                <p class="panel-intro">Checksums identify the exact official files used to build and verify ARIANE data. Local server paths are not exposed.</p>
+                <div class="rules-source-grid">
+                    <template x-for="source in rulesCatalog?.sources || []" :key="source.id">
+                        <article class="rules-source-card">
+                            <h4 x-text="source.title"></h4>
+                            <p x-text="source.role"></p>
+                            <dl>
+                                <dt>Version</dt><dd x-text="source.version"></dd>
+                                <dt>SHA256</dt><dd><code x-text="source.sha256"></code></dd>
+                                <dt x-show="source.runtime_rows">Runtime records</dt><dd x-show="source.runtime_rows" x-text="source.runtime_rows"></dd>
+                            </dl>
+                            <a :href="source.official_url" target="_blank" rel="noopener">Open official source</a>
+                        </article>
+                    </template>
+                </div>
+            </div>
+        </section>
+

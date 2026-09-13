@@ -21,11 +21,9 @@ SCRIPT_ROOT = Path(__file__).resolve().parents[1]
 if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
-from backend.spliceai_profile import SPLICEAI_PROFILE, scoring_profile_metadata
+from backend.policy.spliceai_profile import SPLICEAI_PROFILE, scoring_profile_metadata
 from scripts.build_intronic_reference_cache import (
     ROOT,
-    SPLICEAI as INTRONIC_CACHE,
-    SPLICEAI_METADATA as INTRONIC_METADATA,
     TRANSCRIPTS,
     _atomic_json,
     _read_json,

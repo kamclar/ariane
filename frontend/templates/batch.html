@@ -1,0 +1,92 @@
+        <!-- Batch mode -->
+        <section class="batch-section" x-show="mode === 'batch'">
+
+            <div class="batch-instructions">
+                <p>Enter one variant per line. Both formats are accepted:</p>
+                <pre class="batch-example">BRCA1, c.509G>A                          &lt;-- gene and reference-transcript c. HGVS
+BRCA1, NM_007294.4:c.303T&gt;G             &lt;-- transcript-qualified HGVS
+BRCA1, chr17:43099813:C&gt;T, GRCh38       &lt;-- genomic variant requires assembly
+BRCA1, c.509G&gt;A, p.(Arg170Gln)          &lt;-- comma-separated input
+BRCA1 NM_007294.4:c.509G&gt;A p.(Arg170Gln) &lt;-- space-separated input</pre>
+                <p>A header row starting with <code>gene</code> or <code>#</code> is skipped automatically.</p>
+            </div>
+
+            <textarea class="batch-input" x-model="batchText"
+                @input="parseBatch()" rows="8"
+                placeholder="BRCA1 NM_007294.4:c.509G>A p.(Arg170Gln)&#10;BRCA1, c.5551_5552insT, p.(Asp1851ValfsTer29)&#10;BRCA2 c.5351T>A"></textarea>
+
+            <div class="batch-controls">
+                <span class="batch-count" x-text="batchParsed.length > 0 ? batchParsed.length + ' variants parsed' : ''"></span>
+                <span class="batch-error" x-text="batchParseError" style="color: var(--color-error)"></span>
+                <button class="btn-primary" @click="classifyBatch()" :disabled="batchRunning || batchParsed.length === 0">
+                    <span x-show="!batchRunning">Classify batch</span>
+                    <span x-show="batchRunning" x-text="'Processing ' + batchDone + ' / ' + batchTotal + '...'"></span>
+                </button>
+            </div>
+
+            <!-- Batch progress bar -->
+            <div class="progress-container" x-show="batchRunning" x-transition>
+                <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: (batchTotal > 0 ? (batchDone / batchTotal * 100) : 0) + '%' }"></div>
+                </div>
+            </div>
+
+            <!-- Batch results table -->
+            <div x-show="batchResults.length > 0">
+                <div class="batch-results-header">
+                    <h3>Results (<span x-text="batchResults.filter(r => r.status === 'ok').length"></span> classified,
+                        <span x-text="batchResults.filter(r => r.status === 'error').length"></span> errors)</h3>
+                    <button class="btn-secondary" @click="downloadBatchCsv()">Download CSV</button>
+                </div>
+                <div class="batch-table-wrap">
+                <table class="batch-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Gene</th>
+                            <th>c. notation</th>
+                            <th>p. notation</th>
+                            <th>Class</th>
+                            <th>Points</th>
+                            <th>Criteria</th>
+                            <th>Review</th>
+                            <th>Warnings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(row, idx) in batchResults" :key="idx">
+                            <tr :class="row.status === 'error' ? 'row-error' : ''">
+                                <td x-text="idx + 1"></td>
+                                <td x-text="row.gene"></td>
+                                <td x-text="row.c_notation"></td>
+                                <td x-text="row.p_notation || ''"></td>
+                                <template x-if="row.status === 'ok'">
+                                    <td>
+                                        <span class="class-badge-sm" :class="'class-' + row.result.predicted_class"
+                                              x-text="row.result.predicted_class + ' ' + row.result.predicted_label"></span>
+                                    </td>
+                                </template>
+                                <template x-if="row.status === 'error'">
+                                    <td colspan="5" class="error-cell" x-text="'Error: ' + row.error"></td>
+                                </template>
+                                <template x-if="row.status === 'ok'">
+                                    <td x-text="row.result.total_points"></td>
+                                </template>
+                                <template x-if="row.status === 'ok'">
+                                    <td class="criteria-cell" x-text="row.result.criteria.filter(c => c.applies).map(c => c.name + (c.strength ? ' (' + c.strength.substring(0,1).toUpperCase() + ')' : '')).join(', ')"></td>
+                                </template>
+                                <template x-if="row.status === 'ok'">
+                                    <td class="review-cell" x-text="batchReviewLabel(row.result) || '-'"></td>
+                                </template>
+                                <template x-if="row.status === 'ok'">
+                                    <td class="warnings-cell" x-text="row.result.warnings.length > 0 ? row.result.warnings.length + ' warning(s)' : ''"></td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+        </section>
+

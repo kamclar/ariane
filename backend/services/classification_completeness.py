@@ -10,14 +10,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from backend.classification_dag.domain import NormalizedVariant
-from backend.gene_policy import spliceai_thresholds
-from backend.modules.pvs1_rna import evaluate_pvs1_rna
-from backend.modules.spliceai_policy import (
+from backend.domain.classification import NormalizedVariant
+from backend.policy.gene import spliceai_thresholds
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
 )
-from backend.modules.utils import (
+from backend.variant_processing.utils import (
     get_amino_acid_interval,
     overlapping_functional_domains,
 )

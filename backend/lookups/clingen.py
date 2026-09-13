@@ -3,15 +3,12 @@
 # ENIGMA VCEP classifications with evidence codes
 # Docs: https://erepo.clinicalgenome.org/evrepo/api
 # ============================================================
-from typing import Optional, Dict, List, Tuple
-from pathlib import Path
+from typing import Dict
 import json
-import re
-import time
 import urllib.parse
 import urllib.request
 
-from backend.gene_policy import external_evidence_config, reference_transcript
+from backend.policy.gene import external_evidence_config, reference_transcript
 from backend.version import ARIANE_VERSION
 
 EREPO_BASE  = 'https://erepo.clinicalgenome.org/evrepo/api'

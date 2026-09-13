@@ -14,10 +14,9 @@
 # file uses an older Gencode version and gives incorrect scores for some variants
 # (e.g. BRCA1 c.4185G>A: MANE gives DS_DL=0.01, Broad API gives DS_DL=0.93).
 # ============================================================
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict
 from pathlib import Path
 import json
-import re
 import socket
 import threading
 import time
@@ -27,27 +26,25 @@ import urllib.parse
 import json as _json
 import os
 import tempfile
-from backend.data_health import clear_issue, register_issue
-from backend.runtime_cache import choose_runtime_cache_dir
-from backend.spliceai_profile import (
+from backend.infrastructure.health import DataHealthRegistry
+from backend.infrastructure.runtime_cache import choose_runtime_cache_dir
+from backend.policy.spliceai_profile import (
     SPLICEAI_AGGREGATION,
     SPLICEAI_ALTERNATE_FIELDS,
+    SPLICEAI_APPROVED_DOCKER_IMAGE,
     SPLICEAI_ANNOTATION_SUBSET,
     SPLICEAI_DELTA_FIELDS,
     SPLICEAI_GENOME_ASSEMBLY,
-    SPLICEAI_HIGH_THRESHOLD,
-    SPLICEAI_LOW_THRESHOLD,
     SPLICEAI_MASK,
     SPLICEAI_MAX_DISTANCE,
-    SPLICEAI_PROFILE,
     SPLICEAI_PROFILE_ID,
     SPLICEAI_PROFILE_SHA256,
     SPLICEAI_REFERENCE_FIELDS,
+    SPLICEAI_REFERENCE_TRANSCRIPTS,
     SPLICEAI_TRANSCRIPT_POLICY_REQUIRED,
 )
 
 from backend.lookups.coordinates import resolve_variant, get_grch38
-from backend.modules.spliceai_policy import FIGURE_1A_SPLICEAI_TYPES
 from backend.version import ARIANE_VERSION
 
 
@@ -61,10 +58,8 @@ def choose_project_root() -> Path:
 
 PROJECT_ROOT  = choose_project_root()
 SPLICEAI_DIR  = PROJECT_ROOT / "data" / "spliceai"
-SPLICEAI_DIR.mkdir(parents=True, exist_ok=True)
 
 RUNTIME_CACHE_DIR = choose_runtime_cache_dir()
-RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Mutable API results are separate from immutable, versioned snapshots.
 SPLICEAI_API_CACHE_PATH = RUNTIME_CACHE_DIR / "spliceai_api_cache.json"
@@ -120,7 +115,7 @@ SPLICEAI_API_SOURCE = os.environ.get(
     ),
 )
 
-REFERENCE_TRANSCRIPTS = SPLICEAI_PROFILE["reference_transcripts"]
+REFERENCE_TRANSCRIPTS = SPLICEAI_REFERENCE_TRANSCRIPTS
 
 _API_REQUEST_GATE = threading.BoundedSemaphore(SPLICEAI_API_MAX_CONCURRENT)
 _API_RATE_LOCK = threading.Lock()
@@ -137,7 +132,7 @@ def spliceai_runtime_health() -> dict:
         "source": SPLICEAI_API_SOURCE,
         "local": local,
         "profile_id": SPLICEAI_PROFILE_ID,
-        "docker_image": SPLICEAI_PROFILE.get("approved_engine", {}).get("docker_image", ""),
+        "docker_image": SPLICEAI_APPROVED_DOCKER_IMAGE,
     }
     if not local:
         return result
@@ -162,8 +157,9 @@ if _requested_transcript_policy != SPLICEAI_TRANSCRIPT_POLICY_REQUIRED:
     )
 SPLICEAI_TRANSCRIPT_POLICY = SPLICEAI_TRANSCRIPT_POLICY_REQUIRED
 
-def _load_api_cache() -> dict:
+def _load_api_cache(health: DataHealthRegistry | None = None) -> dict:
     """Load the persistent runtime API cache."""
+    RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     if SPLICEAI_API_CACHE_PATH.exists():
         try:
             with open(SPLICEAI_API_CACHE_PATH) as f:
@@ -171,13 +167,15 @@ def _load_api_cache() -> dict:
             if not isinstance(result, dict):
                 raise ValueError("runtime cache root must be a JSON object")
             result = _current_profile_cache_entries(result)
-            clear_issue("SpliceAI API cache")
+            if health is not None:
+                health.clear("SpliceAI API cache")
             return result
         except Exception as exc:
-            register_issue(
-                "SpliceAI API cache",
-                f"could not load {SPLICEAI_API_CACHE_PATH}: {type(exc).__name__}: {exc}",
-            )
+            if health is not None:
+                health.register(
+                    "SpliceAI API cache",
+                    f"could not load {SPLICEAI_API_CACHE_PATH}: {type(exc).__name__}: {exc}",
+                )
     return {}
 
 
@@ -191,7 +189,10 @@ def _current_profile_cache_entries(cache: dict) -> dict:
     }
 
 
-def _save_api_cache(cache: dict) -> bool:
+def _save_api_cache(
+    cache: dict,
+    health: DataHealthRegistry | None = None,
+) -> bool:
     """Atomically persist the API cache and report whether it succeeded."""
     temporary_path = None
     try:
@@ -209,7 +210,8 @@ def _save_api_cache(cache: dict) -> bool:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary_path, SPLICEAI_API_CACHE_PATH)
-        clear_issue("SpliceAI API cache")
+        if health is not None:
+            health.clear("SpliceAI API cache")
         return True
     except Exception as e:
         if temporary_path is not None:
@@ -218,12 +220,13 @@ def _save_api_cache(cache: dict) -> bool:
             except OSError:
                 pass
         print(f"Warning: could not save SpliceAI cache: {e}")
-        register_issue(
-            "SpliceAI API cache",
-            f"score was obtained and used, but the runtime cache could not be saved to "
-            f"{SPLICEAI_API_CACHE_PATH}; this request is unaffected, but the score may need "
-            f"to be fetched again after restart: {type(e).__name__}: {e}",
-        )
+        if health is not None:
+            health.register(
+                "SpliceAI API cache",
+                f"score was obtained and used, but the runtime cache could not be saved to "
+                f"{SPLICEAI_API_CACHE_PATH}; this request is unaffected, but the score may need "
+                f"to be fetched again after restart: {type(e).__name__}: {e}",
+            )
         return False
 
 
@@ -555,7 +558,12 @@ def _query_spliceai_api(
     return last_result
 
 
-def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
+def get_spliceai_score(
+    gene: str,
+    c_notation: str,
+    *,
+    health: DataHealthRegistry | None = None,
+) -> Optional[float]:
     """
     Look up SpliceAI score through the profile-pinned API runtime path.
 
@@ -575,7 +583,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         return SPLICEAI_CACHE[cache_key]
 
     # 2. persistent runtime cache
-    api_cache = _load_api_cache()
+    api_cache = _load_api_cache(health)
     if cache_key in api_cache:
         entry = api_cache[cache_key]
         if _runtime_entry_matches_profile(entry, gene):
@@ -606,10 +614,11 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
                 "aggregation": SPLICEAI_AGGREGATION,
             }
             return score
-        register_issue(
-            "SpliceAI API cache",
-            "ignored a runtime record created with an incompatible or incomplete scoring profile",
-        )
+        if health is not None:
+            health.register(
+                "SpliceAI API cache",
+                "ignored a runtime record created with an incompatible or incomplete scoring profile",
+            )
 
     # 3. need GRCh38 coords to call API
     resolved = {}
@@ -690,7 +699,7 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
         "aggregation": SPLICEAI_AGGREGATION,
     }
-    cache_saved = _save_api_cache(api_cache)
+    cache_saved = _save_api_cache(api_cache, health)
 
     SPLICEAI_STATUS_CACHE[variant_key] = {
         "status": "ok",
@@ -721,44 +730,6 @@ def get_spliceai_score(gene: str, c_notation: str) -> Optional[float]:
         "aggregation": SPLICEAI_AGGREGATION,
     }
     return score
-
-
-# ============================================================
-# SpliceAI criterion helper functions
-# ============================================================
-
-SPLICEAI_PP3_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
-SPLICEAI_BP4_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
-
-
-def normalize_variant_type(variant_type: str) -> str:
-    return (variant_type or "").strip().lower()
-
-
-def spliceai_is_confirmed_low(score: Optional[float]) -> bool:
-    """True only when SpliceAI is available and <= 0.10."""
-    return score is not None and score <= SPLICEAI_LOW_THRESHOLD
-
-
-def spliceai_predicts_splice_effect(score: Optional[float]) -> bool:
-    """True only when SpliceAI is available and >= 0.20."""
-    return score is not None and score >= SPLICEAI_HIGH_THRESHOLD
-
-
-def variant_type_allows_spliceai_pp3(variant_type: str) -> bool:
-    """
-    Guardrail for PP3 from SpliceAI.
-
-    PP3-SpliceAI is not a generic "any variant" rule. It should not be added
-    to nonsense/PTC, frameshift, exon-deletion, or canonical splice-site variants
-    where the same loss-of-function/splicing mechanism is evaluated through
-    PVS1/RNA logic.
-    """
-    return normalize_variant_type(variant_type) in SPLICEAI_PP3_ALLOWED_TYPES
-
-
-def variant_type_allows_spliceai_bp4(variant_type: str) -> bool:
-    return normalize_variant_type(variant_type) in SPLICEAI_BP4_ALLOWED_TYPES
 
 
 def get_spliceai_status(gene: str, c_notation: str) -> dict:

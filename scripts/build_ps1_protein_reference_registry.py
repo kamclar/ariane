@@ -22,11 +22,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from backend.modules.ps1_splice_evidence import (  # noqa: E402
+from backend.reference_data.ps1_splice_evidence import (  # noqa: E402
     DEFINED_SOURCES,
     evaluate_defined_splice_sources,
 )
-from backend.modules.table9 import table9_lookup_ps3_bs3  # noqa: E402
+from backend.reference_data.table9 import table9_lookup_ps3_bs3  # noqa: E402
 
 
 DATA = PROJECT_ROOT / "backend" / "data"
