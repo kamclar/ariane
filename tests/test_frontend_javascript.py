@@ -23,15 +23,25 @@ APPLICATION_SCRIPTS = (
     "batch.js",
     "app.js",
 )
+SHELL_SCRIPTS = ("startup.js", *APPLICATION_SCRIPTS)
 
 
 def test_browser_shell_loads_every_application_script_in_dependency_order():
     shell = (FRONTEND_JS_DIR.parents[1] / "index.html").read_text(encoding="utf-8")
-    positions = [shell.index(f"/static/js/{filename}") for filename in APPLICATION_SCRIPTS]
+    positions = [shell.index(f"/static/js/{filename}") for filename in SHELL_SCRIPTS]
 
     assert positions == sorted(positions)
     loaded_names = set(re.findall(r'/static/js/([^"?]+)\?v=', shell))
-    assert loaded_names == set(APPLICATION_SCRIPTS)
+    assert loaded_names == set(SHELL_SCRIPTS)
+
+
+def test_browser_shell_has_a_visible_fallback_for_incomplete_startup():
+    shell = (FRONTEND_JS_DIR.parents[1] / "index.html").read_text(encoding="utf-8")
+    startup = (FRONTEND_JS_DIR / "startup.js").read_text(encoding="utf-8")
+
+    assert 'id="frontend-startup-error"' in shell
+    assert "arianeReady" in startup
+    assert "message.hidden = false" in startup
 
 
 def run_javascript(body: str) -> dict:

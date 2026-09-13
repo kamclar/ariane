@@ -19,6 +19,7 @@
 
     namespace.coreMethods = {
         async init() {
+            document.documentElement.dataset.arianeReady = "true";
             this.resetManualItems();
             try {
                 const response = await namespace.api.request("/ui-api/resources");

@@ -141,6 +141,11 @@ current proxy settings to an existing installation with:
 sudo bash /home/ubuntu/ariane/scripts/server-ops/update-nginx-api-settings.sh
 ```
 
+The general per-IP request limit applies only to `/api/*` routes. The page,
+stylesheets, JavaScript modules and images are not charged against that limit,
+because browsers fetch these files concurrently. Interactive classification is
+limited separately on `/ui-api/classify`.
+
 `ARIANE_UI_SESSION_SECRET` signs browser sessions. Installation scripts create
 a random 32-byte secret in `/etc/ariane/ariane.env`. Keep the value outside Git
 and use the same value for every ARIANE worker. ARIANE does not start if this

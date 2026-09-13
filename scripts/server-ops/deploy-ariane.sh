@@ -211,7 +211,16 @@ echo -e "${GREEN}OK Local SpliceAI service validated${NC}"
 # 7. Configure Nginx
 echo -e "\n${YELLOW}[7] Configuring Nginx...${NC}"
 cat > /etc/nginx/sites-available/ariane << 'EOF'
-limit_req_zone $binary_remote_addr zone=ariane_api:10m rate=5r/s;
+# Only API requests receive the general per-IP limit. An empty map key is not
+# counted by nginx, so the document, CSS, JavaScript and images can load in
+# parallel without consuming the API request budget.
+map $uri $ariane_api_ip_key {
+    default "";
+    /api/health "";
+    /api/v1/capabilities "";
+    ~^/api/ $binary_remote_addr;
+}
+limit_req_zone $ariane_api_ip_key zone=ariane_public_api:10m rate=5r/s;
 limit_req_zone $http_x_ariane_api_key zone=ariane_keyed_api:10m rate=30r/m;
 map $uri $ariane_web_classify_key {
     default "";
@@ -255,7 +264,7 @@ server {
     proxy_read_timeout 180s;
 
     location / {
-        limit_req zone=ariane_api burst=20 nodelay;
+        limit_req zone=ariane_public_api burst=20 nodelay;
         limit_req zone=ariane_keyed_api burst=3 nodelay;
         limit_req zone=ariane_web_classify burst=3 nodelay;
         limit_conn ariane_classification_ip_conn 4;

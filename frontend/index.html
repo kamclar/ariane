@@ -40,6 +40,11 @@
             <span>ARIANE is currently in beta and running in a test environment. Results are intended for evaluation and must be reviewed by a qualified clinical genetics professional before clinical use.</span>
         </aside>
 
+        <aside id="frontend-startup-error" class="frontend-startup-error" role="alert" hidden>
+            <strong>ARIANE interface did not finish loading.</strong>
+            <span>Reload this page. If the problem continues, report the time of the error to the administrator.</span>
+        </aside>
+
         <!-- Mode tabs -->
         <div class="mode-tabs">
             <button class="tab-btn" :class="{ active: mode === 'single' }" @click="mode = 'single'">Single variant</button>
@@ -80,6 +85,7 @@
         </div>
     </footer>
 
+    <script src="/static/js/startup.js?v=__ARIANE_ASSET_VERSION__"></script>
     <script src="/static/js/api.js?v=__ARIANE_ASSET_VERSION__"></script>
     <script src="/static/js/composition.js?v=__ARIANE_ASSET_VERSION__"></script>
     <script src="/static/js/core.js?v=__ARIANE_ASSET_VERSION__"></script>
