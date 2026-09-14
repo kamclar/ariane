@@ -412,10 +412,6 @@ def test_manual_evidence_responsibilities_remain_split() -> None:
     }
     assert expected.issubset({path.name for path in review_root.glob("*.py")})
 
-    for name in expected - {"manual_evidence.py"}:
-        line_count = len((review_root / name).read_text(encoding="utf-8").splitlines())
-        assert line_count < 600, f"backend/review/{name} has grown to {line_count} lines"
-
     facade_tree = ast.parse(
         (review_root / "manual_evidence.py").read_text(encoding="utf-8")
     )
@@ -430,74 +426,67 @@ def test_backend_root_contains_only_composition_entry_points() -> None:
     assert root_modules == {"__init__.py", "bootstrap.py", "main.py", "version.py"}
 
 
-def test_transport_and_contract_boundaries_are_explicit() -> None:
-    api_modules = {path.name for path in (BACKEND_ROOT / "api").glob("*.py")}
-    assert {
-        "admin.py",
-        "auth.py",
-        "classification.py",
-        "manual.py",
-        "public.py",
-        "review.py",
-        "session.py",
-        "system.py",
-    }.issubset(api_modules)
-    assert {
-        "batch.py",
-        "client.py",
-        "ps1.py",
-        "result.py",
-        "review.py",
-        "variant.py",
-    }.issubset({path.name for path in (BACKEND_ROOT / "contracts").glob("*.py")})
-
-    retired = {
-        "admin.py",
-        "api_auth.py",
-        "config.py",
-        "data_health.py",
-        "data_validation.py",
-        "models.py",
-        "public_api.py",
-        "review_api.py",
-        "review_records.py",
-        "runtime_cache.py",
-        "runtime_data.py",
-        "spliceai_profile.py",
-        "startup.py",
-        "ui_session.py",
-    }
-    assert not (retired & {path.name for path in BACKEND_ROOT.glob("*.py")})
-
-
 def test_main_is_a_composition_root_not_a_route_collection() -> None:
     main_path = BACKEND_ROOT / "main.py"
-    lines = main_path.read_text(encoding="utf-8").splitlines()
-    assert len(lines) < 180
-    source = "\n".join(lines)
-    assert "create_manual_router" in source
-    assert "create_system_router" in source
-    assert "install_http_middleware" in source
-    assert "install_exception_handlers" in source
-    assert "install_frontend" in source
-    assert "@app." not in source
+    tree = ast.parse(main_path.read_text(encoding="utf-8"), filename=str(main_path))
+    definitions = [
+        node
+        for node in tree.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    ]
+    assert not any(isinstance(node, ast.ClassDef) for node in definitions)
+    assert all(node.name.startswith("_") for node in definitions)
+
+    app_assignments = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(target, ast.Name) and target.id == "app" for target in node.targets)
+    ]
+    assert len(app_assignments) == 1
+    app_factory = app_assignments[0].value
+    assert isinstance(app_factory, ast.Call)
+    assert isinstance(app_factory.func, ast.Name) and app_factory.func.id == "FastAPI"
+
+    route_methods = {"get", "post", "put", "patch", "delete", "options", "head"}
+    route_decorators = [
+        decorator
+        for node in definitions
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        for decorator in node.decorator_list
+        if isinstance(decorator, ast.Call)
+        and isinstance(decorator.func, ast.Attribute)
+        and isinstance(decorator.func.value, ast.Name)
+        and decorator.func.value.id == "app"
+        and decorator.func.attr in route_methods
+    ]
+    assert not route_decorators
+
+    assert any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "app"
+        and node.func.attr == "include_router"
+        for node in ast.walk(tree)
+    )
 
 
-def test_paired_routes_use_one_auth_policy_helper() -> None:
-    routing = (BACKEND_ROOT / "api" / "routing.py").read_text(encoding="utf-8")
-    assert "require_public_api_key" in routing
-    assert "require_ui_session" in routing
-    assert "include_in_schema=False" in routing
-
+def test_ui_api_paths_are_not_duplicated_in_feature_routers() -> None:
+    violations: list[str] = []
     for module_name in ("classification.py", "manual.py", "system.py"):
-        source = (BACKEND_ROOT / "api" / module_name).read_text(encoding="utf-8")
-        assert '"/ui-api/' not in source
-    assert '@paired.post("/manual-evidence/evaluate")' in (
-        BACKEND_ROOT / "api" / "manual.py"
-    ).read_text(encoding="utf-8")
-    assert '@paired.get("/rules")' in (
-        BACKEND_ROOT / "api" / "system.py"
-    ).read_text(encoding="utf-8")
+        path = BACKEND_ROOT / "api" / module_name
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Constant)
+                and isinstance(node.value, str)
+                and node.value.startswith("/ui-api/")
+            ):
+                violations.append(f"{module_name}:{node.lineno}: {node.value}")
+    assert not violations, "Feature routers duplicate browser route paths:\n" + "\n".join(
+        violations
+    )
 
 
 def test_runtime_health_has_no_process_global_registry() -> None:

@@ -52,19 +52,11 @@ def test_frontend_source_is_split_into_bounded_feature_templates_and_stylesheets
         assert len(partial.read_text(encoding="utf-8").splitlines()) < 300
 
     stylesheets = sorted(css_dir.glob("*.css"))
-    assert {path.name for path in stylesheets} == {
-        "base.css",
-        "batch.css",
-        "decision-paths.css",
-        "evidence.css",
-        "forms.css",
-        "layout.css",
-        "manual-review.css",
-        "navigation.css",
-        "results.css",
-        "rules.css",
-        "sources.css",
-    }
+    referenced_stylesheets = set(
+        re.findall(r'href="/static/css/([^"?]+\.css)(?:\?[^"?]*)?"', shell)
+    )
+    assert referenced_stylesheets
+    assert {path.name for path in stylesheets} == referenced_stylesheets
     assert all(len(path.read_text(encoding="utf-8").splitlines()) < 600 for path in stylesheets)
     assert "style.css" not in shell
 
