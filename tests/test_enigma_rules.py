@@ -1076,6 +1076,22 @@ class SpliceTests(unittest.TestCase):
         self.assertTrue(result["requires_rna"])
         self.assertFalse(result["applies"])
 
+    def test_unlisted_canonical_splice_keeps_table4_review_reason(self):
+        for spliceai_score in (None, 0.099, 0.1):
+            with self.subTest(spliceai_score=spliceai_score):
+                result = evaluate_pvs1(
+                    "BRCA1",
+                    "splice_site",
+                    "p.(?)",
+                    "c.100+1G>A",
+                    spliceai_score=spliceai_score,
+                )
+                self.assertFalse(result["applies"])
+                self.assertIsNone(result["strength"])
+                self.assertEqual(result["points"], 0)
+                self.assertIn("NOT FOUND in Table 4", result["reason"])
+                self.assertIn("Manual review required", result["reason"])
+
     def test_intronic_bp7_applies_outside_conserved_motif(self):
         result = evaluate_bp7(
             "intronic",

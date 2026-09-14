@@ -163,7 +163,7 @@ LockPersonality=true
 RestrictRealtime=true
 CapabilityBoundingSet=
 AmbientCapabilities=
-ReadWritePaths=$ARIANE_HOME/backend/data /var/log/ariane
+ReadWritePaths=/var/log/ariane
 StandardOutput=journal
 StandardError=journal
 

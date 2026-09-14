@@ -8,11 +8,14 @@ import json
 import urllib.parse
 import urllib.request
 
+from backend.infrastructure.cache_registry import register_runtime_cache
 from backend.policy.gene import external_evidence_config, reference_transcript
 from backend.version import ARIANE_VERSION
 
 EREPO_BASE  = 'https://erepo.clinicalgenome.org/evrepo/api'
 EREPO_CACHE: Dict[str, dict] = {}
+
+register_runtime_cache("clingen_erepo", EREPO_CACHE.clear)
 
 
 def clingen_erepo_lookup(gene: str, c_notation: str) -> dict:

@@ -166,10 +166,14 @@ def test_local_service_image_and_operational_scripts_are_pinned():
         service_script = (
             PROJECT_ROOT / "scripts" / "server-ops" / script_name
         ).read_text(encoding="utf-8")
+        assert "ReadWritePaths=$ARIANE_HOME/backend/data" not in service_script
+        assert "ReadWritePaths=/var/lib/ariane/runtime-cache" in service_script
         assert "$(seq 1 60)" in service_script
         assert "health_ok=1" in service_script
         assert "systemctl status ariane --no-pager -l" in service_script
         assert "journalctl -u ariane -n 50 --no-pager" in service_script
+
+    assert "must keep versioned backend/data reference files read-only" in restart
 
     startup_validator = (
         PROJECT_ROOT

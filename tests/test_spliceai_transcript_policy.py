@@ -1,5 +1,8 @@
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 import json
+from pathlib import Path
+import tempfile
 import urllib.error
 from unittest.mock import MagicMock, patch
 
@@ -27,6 +30,29 @@ def score_row(transcript, refseq, *, ds_al, ds_dl=0.0):
 
 
 class SpliceAITranscriptPolicyTests(unittest.TestCase):
+    def test_concurrent_cache_entry_updates_are_merged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            runtime_dir = Path(directory)
+            cache_path = runtime_dir / "spliceai_api_cache.json"
+            keys = [
+                spliceai._cache_key("BRCA1", "c.1A>G"),
+                spliceai._cache_key("BRCA1", "c.2A>G"),
+            ]
+            with patch.object(spliceai, "RUNTIME_CACHE_DIR", runtime_dir), patch.object(
+                spliceai, "SPLICEAI_API_CACHE_PATH", cache_path
+            ):
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    saved = list(executor.map(
+                        lambda item: spliceai._persist_api_cache_entry(
+                            item[0], {"score": item[1]}
+                        ),
+                        zip(keys, (0.1, 0.2)),
+                    ))
+
+                self.assertEqual(saved, [True, True])
+                persisted = json.loads(cache_path.read_text(encoding="utf-8"))
+                self.assertEqual(set(persisted), set(keys))
+
     def test_runtime_cache_discards_retired_profile_entries(self):
         current_key = (
             f"{spliceai.SPLICEAI_PROFILE_ID}:reference_transcript:BRCA1:c.1A>G"

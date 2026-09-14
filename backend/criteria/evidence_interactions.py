@@ -14,6 +14,12 @@ APPENDIX_URL = (
 
 BIOINFORMATIC_CODES = {"PP3", "BP1", "BP4", "BP7"}
 PROTEIN_FUNCTION_CODES = {"PS3", "BS3"}
+RNA_INTERACTION_CODES = frozenset({"PVS1_RNA", "BP7_RNA"})
+
+
+def rna_interaction_codes(criteria: Dict[str, Dict[str, Any]]) -> set[str]:
+    """Return applied RNA criteria whose evidence interactions must be run."""
+    return set(criteria).intersection(RNA_INTERACTION_CODES)
 
 
 def interaction(
@@ -120,14 +126,14 @@ def pvs1_prediction_deduplication() -> Dict[str, Any]:
     )
 
 
-def apply_manual_rna_interactions(
+def apply_rna_interactions(
     combined: Dict[str, Dict[str, Any]],
-    applied_manual_codes: set[str],
+    applied_rna_codes: set[str],
 ) -> List[Dict[str, Any]]:
     """Apply Figure 1B to accepted manual or curated RNA criteria."""
     warnings: List[Dict[str, Any]] = []
 
-    if "PVS1_RNA" in applied_manual_codes:
+    if "PVS1_RNA" in applied_rna_codes:
         replaceable = BIOINFORMATIC_CODES | {"PS1", "PS1_SPLICE"}
         suppressed = sorted(code for code in replaceable if code in combined)
         for code in suppressed:
@@ -173,7 +179,7 @@ def apply_manual_rna_interactions(
                 )
             )
 
-    if "BP7_RNA" in applied_manual_codes:
+    if "BP7_RNA" in applied_rna_codes:
         if "BP7" in combined:
             combined.pop("BP7")
             warnings.append(

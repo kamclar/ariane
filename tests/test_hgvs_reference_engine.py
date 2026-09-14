@@ -65,6 +65,21 @@ def test_wrong_reference_allele_fails_closed():
     assert raised.value.code == "reference_allele_mismatch"
 
 
+@pytest.mark.parametrize("notation", ["c.-10C>G", "c.*10A>G"])
+def test_wrong_utr_reference_allele_fails_closed_in_public_normalization(notation):
+    with pytest.raises(ValueError, match="Reference allele does not match"):
+        normalize_variant_input("BRCA1", notation)
+
+
+@pytest.mark.parametrize("notation", ["c.-10A>G", "c.*10G>A"])
+def test_valid_utr_snv_reaches_normalized_unknown_protein_consequence(notation):
+    result = normalize_variant_input("BRCA1", notation)
+
+    assert result.c_notation == notation
+    assert result.p_notation == "p.?"
+    assert result.consequence_status == "protein_consequence_unknown"
+
+
 @pytest.mark.parametrize("notation", ["c.2102delC", "c.5266dupA"])
 def test_wrong_indel_sequence_suffix_fails_closed(notation):
     with pytest.raises(VariantNormalizationError) as raised:

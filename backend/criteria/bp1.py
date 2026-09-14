@@ -6,6 +6,7 @@ from backend.variant_processing.utils import (
 )
 from backend.domain.decision_trace import figure1a_path, step
 from backend.policy.gene import spliceai_thresholds
+from backend.policy.spliceai import normalize_variant_type
 
 def evaluate_bp1(
     gene: str,
@@ -30,6 +31,7 @@ def evaluate_bp1(
         "reason": ""
     }
     splice_low = spliceai_thresholds(gene)["bp4"]
+    vtype = normalize_variant_type(variant_type)
 
     # BP1 only applies to certain variant types
     # BP1_Strong applies to missense, synonymous, AND inframe insertion/deletion/delins
@@ -40,7 +42,7 @@ def evaluate_bp1(
         "synonymous", "silent",  # silent is an alias for synonymous
         "inframe_deletion", "inframe_insertion", "inframe_delins"
     ]
-    if variant_type not in applicable_types:
+    if vtype not in applicable_types:
         result["reason"] = f"BP1 not applicable for {variant_type} variants"
         return result
 
@@ -89,7 +91,7 @@ def evaluate_bp1(
         f"Variant amino acid interval {interval_label} is outside functional "
         "domains, no splicing predicted"
     )
-    branch_id = "synonymous" if variant_type in {"synonymous", "silent"} else "missense-inframe"
+    branch_id = "synonymous" if vtype in {"synonymous", "silent"} else "missense-inframe"
     splice_node = "syn-splice-impact" if branch_id == "synonymous" else "mi-splice-impact"
     domain_node = "syn-domain" if branch_id == "synonymous" else "mi-domain-after-low"
     outcome_node = "syn-bp1" if branch_id == "synonymous" else "mi-bp1"

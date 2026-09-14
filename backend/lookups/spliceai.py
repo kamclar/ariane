@@ -26,6 +26,7 @@ import urllib.parse
 import json as _json
 import os
 import tempfile
+from backend.infrastructure.cache_registry import register_runtime_cache
 from backend.infrastructure.health import DataHealthRegistry
 from backend.infrastructure.runtime_cache import choose_runtime_cache_dir
 from backend.policy.spliceai_profile import (
@@ -120,6 +121,23 @@ REFERENCE_TRANSCRIPTS = SPLICEAI_REFERENCE_TRANSCRIPTS
 _API_REQUEST_GATE = threading.BoundedSemaphore(SPLICEAI_API_MAX_CONCURRENT)
 _API_RATE_LOCK = threading.Lock()
 _API_NEXT_REQUEST_AT = 0.0
+# File writes need a separate lock from the request gate. Different SpliceAI
+# requests may finish concurrently and must merge their entries against the
+# latest on-disk cache instead of replacing one another's updates.
+_API_CACHE_FILE_LOCK = threading.RLock()
+# A small striped lock set provides per-key single-flight behaviour without an
+# ever-growing dictionary of locks. Unrelated variants can still run in
+# parallel, while duplicate requests for the same variant share the first
+# completed result.
+_API_KEY_LOCKS = tuple(threading.Lock() for _ in range(64))
+
+
+def _clear_runtime_cache() -> None:
+    SPLICEAI_CACHE.clear()
+    SPLICEAI_STATUS_CACHE.clear()
+
+
+register_runtime_cache("spliceai", _clear_runtime_cache)
 
 
 def spliceai_runtime_health() -> dict:
@@ -157,7 +175,7 @@ if _requested_transcript_policy != SPLICEAI_TRANSCRIPT_POLICY_REQUIRED:
     )
 SPLICEAI_TRANSCRIPT_POLICY = SPLICEAI_TRANSCRIPT_POLICY_REQUIRED
 
-def _load_api_cache(health: DataHealthRegistry | None = None) -> dict:
+def _load_api_cache_unlocked(health: DataHealthRegistry | None = None) -> dict:
     """Load the persistent runtime API cache."""
     RUNTIME_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     if SPLICEAI_API_CACHE_PATH.exists():
@@ -179,6 +197,12 @@ def _load_api_cache(health: DataHealthRegistry | None = None) -> dict:
     return {}
 
 
+def _load_api_cache(health: DataHealthRegistry | None = None) -> dict:
+    """Load the persistent cache without racing a concurrent replacement."""
+    with _API_CACHE_FILE_LOCK:
+        return _load_api_cache_unlocked(health)
+
+
 def _current_profile_cache_entries(cache: dict) -> dict:
     """Discard entries from retired profiles before the next cache write."""
     prefix = f"{SPLICEAI_PROFILE_ID}:{SPLICEAI_TRANSCRIPT_POLICY}:"
@@ -189,7 +213,7 @@ def _current_profile_cache_entries(cache: dict) -> dict:
     }
 
 
-def _save_api_cache(
+def _save_api_cache_unlocked(
     cache: dict,
     health: DataHealthRegistry | None = None,
 ) -> bool:
@@ -228,6 +252,27 @@ def _save_api_cache(
                 f"to be fetched again after restart: {type(e).__name__}: {e}",
             )
         return False
+
+
+def _save_api_cache(
+    cache: dict,
+    health: DataHealthRegistry | None = None,
+) -> bool:
+    """Atomically replace the cache while excluding concurrent readers/writers."""
+    with _API_CACHE_FILE_LOCK:
+        return _save_api_cache_unlocked(cache, health)
+
+
+def _persist_api_cache_entry(
+    cache_key: str,
+    entry: dict,
+    health: DataHealthRegistry | None = None,
+) -> bool:
+    """Merge one completed lookup without losing another thread's update."""
+    with _API_CACHE_FILE_LOCK:
+        latest_cache = _load_api_cache_unlocked(health)
+        latest_cache[cache_key] = entry
+        return _save_api_cache_unlocked(latest_cache, health)
 
 
 def _cache_key(gene: str, c_notation: str) -> str:
@@ -564,6 +609,25 @@ def get_spliceai_score(
     *,
     health: DataHealthRegistry | None = None,
 ) -> Optional[float]:
+    """Return one score, coalescing concurrent requests for the same variant."""
+    cache_key = _cache_key(gene, c_notation)
+    if cache_key in SPLICEAI_CACHE:
+        return SPLICEAI_CACHE[cache_key]
+    key_lock = _API_KEY_LOCKS[hash(cache_key) % len(_API_KEY_LOCKS)]
+    with key_lock:
+        return _get_spliceai_score_serialized(
+            gene,
+            c_notation,
+            health=health,
+        )
+
+
+def _get_spliceai_score_serialized(
+    gene: str,
+    c_notation: str,
+    *,
+    health: DataHealthRegistry | None = None,
+) -> Optional[float]:
     """
     Look up SpliceAI score through the profile-pinned API runtime path.
 
@@ -671,7 +735,7 @@ def get_spliceai_score(
 
     # cache result
     SPLICEAI_CACHE[cache_key] = score
-    api_cache[cache_key] = {
+    cache_entry = {
         "score":   score,
         "chrom":   str(coords["chrom"]),
         "pos":     coords["pos"],
@@ -699,7 +763,9 @@ def get_spliceai_score(
         "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
         "aggregation": SPLICEAI_AGGREGATION,
     }
-    cache_saved = _save_api_cache(api_cache, health)
+    # Another variant may have completed since this request loaded the file.
+    # Reload and merge under one lock so that neither successful result is lost.
+    cache_saved = _persist_api_cache_entry(cache_key, cache_entry, health)
 
     SPLICEAI_STATUS_CACHE[variant_key] = {
         "status": "ok",

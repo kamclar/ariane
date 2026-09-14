@@ -5,8 +5,9 @@ import pytest
 from backend.criteria.bp1 import evaluate_bp1
 from backend.criteria.bp7 import evaluate_bp7
 from backend.criteria.evidence_interactions import (
-    apply_manual_rna_interactions,
+    apply_rna_interactions,
     automatic_functional_interactions,
+    rna_interaction_codes,
 )
 from backend.review.manual_evidence import suggest_strength
 from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
@@ -155,17 +156,71 @@ def test_inframe_and_unresolved_indel_types_are_distinguished():
     assert not applied_codes(unresolved)
 
 
+@pytest.mark.parametrize("variant_type", ("missense", "Missense", " MISSENSE "))
+def test_bp1_normalizes_variant_type_at_rule_boundary(variant_type):
+    result = evaluate_bp1(
+        "BRCA1",
+        variant_type,
+        "p.(Arg500Gln)",
+        spliceai_score=0.01,
+    )
+
+    assert result["applies"] is True
+    assert result["strength"] == "Strong"
+    assert result["points"] == -4
+    assert result["decision_path"]["branch_id"] == "missense-inframe"
+
+
+@pytest.mark.parametrize(
+    ("variant_type", "c_notation", "in_domain", "branch_id"),
+    (
+        ("Intronic", "c.500+7A>G", False, "intronic"),
+        (" INTRONIC ", "c.500+7A>G", False, "intronic"),
+        ("Synonymous", "c.306A>G", True, "synonymous"),
+        (" SYNONYMOUS ", "c.306A>G", True, "synonymous"),
+    ),
+)
+def test_bp7_normalizes_variant_type_at_rule_boundary(
+    variant_type,
+    c_notation,
+    in_domain,
+    branch_id,
+):
+    result = evaluate_bp7(
+        variant_type,
+        spliceai_score=0.01,
+        in_domain=in_domain,
+        bp4_met=True,
+        c_notation=c_notation,
+        gene="BRCA1",
+    )
+
+    assert result["applies"] is True
+    assert result["points"] == -1
+    assert result["decision_path"]["branch_id"] == branch_id
+
+
 @pytest.mark.parametrize("bioinformatic_code", ("PP3", "BP4", "BP7", "BP1"))
 def test_pvs1_rna_replaces_each_figure1a_code(bioinformatic_code):
     combined = {
         "PVS1_RNA": {"points": 8},
         bioinformatic_code: {"points": 1 if bioinformatic_code == "PP3" else -1},
     }
-    interactions = apply_manual_rna_interactions(combined, {"PVS1_RNA"})
+    interactions = apply_rna_interactions(combined, {"PVS1_RNA"})
 
     assert bioinformatic_code not in combined
     assert interactions[0]["status"] == "deduplicated"
     assert interactions[0]["suppressed"] == [bioinformatic_code]
+
+
+def test_automatic_rna_interaction_dispatch_discovers_all_applied_rna_codes():
+    combined = {
+        "PVS1_RNA": {"points": 4},
+        "BP7_RNA": {"points": -4},
+        "PP4": {"points": 4},
+    }
+
+    assert rna_interaction_codes(combined) == {"PVS1_RNA", "BP7_RNA"}
 
 
 @pytest.mark.parametrize("bioinformatic_code", ("BP1", "BP4"))
@@ -174,7 +229,7 @@ def test_bp7_rna_retains_applicable_figure1a_benign_code_with_audit(bioinformati
         "BP7_RNA": {"points": -4},
         bioinformatic_code: {"points": -4 if bioinformatic_code == "BP1" else -1},
     }
-    interactions = apply_manual_rna_interactions(combined, {"BP7_RNA"})
+    interactions = apply_rna_interactions(combined, {"BP7_RNA"})
 
     assert set(combined) == {"BP7_RNA", bioinformatic_code}
     assert len(interactions) == 1
@@ -273,7 +328,7 @@ def test_pvs1_rna_and_table9_ps3_are_retained_with_pending_vcep_warning():
         },
     }
 
-    interactions = apply_manual_rna_interactions(combined, {"PVS1_RNA"})
+    interactions = apply_rna_interactions(combined, {"PVS1_RNA"})
 
     assert set(combined) == {"PVS1_RNA", "PS3"}
     assert len(interactions) == 1

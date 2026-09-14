@@ -59,6 +59,7 @@ class ExternalComparison(BaseModel):
     erepo_registry_assertion_uuid: str = ""
     erepo_registry_method_version: str = ""
     historical_expert_panel_warning: str = ""
+    expert_panel_difference_message: str = ""
 
 
 class AlphaMissenseResult(BaseModel):
@@ -257,6 +258,8 @@ class ClassificationResult(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     external: ExternalComparison | None = None
     has_functional_evidence: bool = False
+    has_table9_functional_evidence: bool = False
+    has_curated_rna_evidence: bool = False
     classification_note: str = ""
     evidence_direction: str = "none"
     mixed_evidence: bool = False

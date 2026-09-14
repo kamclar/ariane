@@ -26,7 +26,7 @@ from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
 )
-from backend.population_frequency.indel_size import is_indel_allele
+from backend.domain.indel import is_indel_allele
 from backend.reference_data.table9 import (
     TABLE9_JSON_PATH,
     load_table9_data,
@@ -489,15 +489,22 @@ class BayesDelEvidenceNode:
 
     async def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
-        is_exon_cnv = variant.variant_type.lower() in {
-            "exon_deletion", "exon_duplication",
+        variant_type = variant.variant_type.lower()
+        protein_prediction_types = {
+            "missense",
+            "inframe_deletion",
+            "inframe_insertion",
+            "inframe_delins",
         }
-        if is_exon_cnv:
+        if variant_type not in protein_prediction_types:
             evidence = EvidenceItem(
                 id="bayesdel",
                 kind="protein_prediction",
                 status=EvidenceStatus.NOT_APPLICABLE,
-                reason="BayesDel is not evaluated for exon-level CNVs.",
+                reason=(
+                    "BayesDel is only evaluated for missense and confirmed "
+                    "in-frame variants in the ENIGMA Figure 1A protein branch."
+                ),
             )
             return NodeResult.succeeded(
                 {"bayesdel_evidence": evidence, "alphamissense_annotation": None},

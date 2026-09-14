@@ -136,6 +136,25 @@ def test_variant_specific_clinical_annotation_is_visible_but_not_scored():
     assert "annotation.publications" in html
 
 
+def test_rna_and_table9_evidence_labels_are_not_conflated():
+    html = frontend_html()
+
+    assert "result?.has_table9_functional_evidence" in html
+    assert "result?.has_curated_rna_evidence" in html
+    assert 'x-show="result?.has_functional_evidence"' not in html
+    assert "ENIGMA Supplementary Tables 2 and 3" in html
+
+
+def test_expert_panel_classification_difference_is_outside_collapsed_comparison():
+    html = frontend_html()
+    banner = html.index('class="expert-classification-difference"')
+    external = html.index('class="external-section"')
+
+    assert banner < external
+    assert "result?.external?.expert_panel_difference_message" in html
+    assert "does not replace" in html[banner:external]
+
+
 def test_external_comparison_remains_visible_for_not_found_or_failed_sources():
     html = frontend_html()
 

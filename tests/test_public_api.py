@@ -192,6 +192,97 @@ def test_public_api_capabilities_publish_limits_and_policy():
         "BRCA1",
         "BRCA2",
     }
+    assert "missense" in payload["supported_variant_types"]
+    assert payload["out_of_scope_variant_types"] == ["5utr", "3utr", "stop_lost"]
+    assert set(payload["unresolved_variant_types"]) == {
+        "unknown",
+        "delins",
+        "deletion",
+        "insertion",
+        "duplication",
+    }
+    assert "no VUS classification" in payload["variant_scope_semantics"]
+
+
+def test_public_api_rejects_out_of_scope_type_without_classification(monkeypatch):
+    from backend import main
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
+
+    class AllowingQuota:
+        def reserve_public_api_classifications(self, *, api_key_id, units, limit):
+            return ApiQuotaReservation(
+                allowed=True,
+                limit=limit,
+                used=units,
+                remaining=limit - units,
+                reset_at=datetime(2026, 9, 15, tzinfo=timezone.utc),
+            )
+
+    monkeypatch.setattr(
+        PUBLIC_API_KEY_AUTHENTICATOR,
+        "authenticate",
+        lambda value: "test-client" if value == "test-api-key" else None,
+    )
+    monkeypatch.setattr(main, "PUBLIC_API_QUOTA", AllowingQuota())
+    monkeypatch.setattr(main, "CLASSIFICATION_CACHE", None)
+    monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
+    monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
+
+    response = TestClient(main.app).post(
+        "/api/v1/classify",
+        json={"gene": "BRCA1", "c_notation": "c.5590T>A"},
+        headers=API_HEADERS,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["error"] == {
+        "code": "unsupported_variant_type",
+        "message": (
+            "BRCA1 c.5590T>A: stop-loss variants do not have a complete "
+            "automatic path in the current ARIANE implementation of ENIGMA "
+            "BRCA1/2 VCEP v1.2. No classification was returned."
+        ),
+        "retryable": False,
+    }
+    assert "classification" not in response.json()
+
+
+def test_public_api_batch_marks_out_of_scope_item_as_error(monkeypatch):
+    from backend import main
+    from backend.api.auth import PUBLIC_API_KEY_AUTHENTICATOR
+
+    class AllowingQuota:
+        def reserve_public_api_classifications(self, *, api_key_id, units, limit):
+            return ApiQuotaReservation(
+                allowed=True,
+                limit=limit,
+                used=units,
+                remaining=limit - units,
+                reset_at=datetime(2026, 9, 15, tzinfo=timezone.utc),
+            )
+
+    monkeypatch.setattr(
+        PUBLIC_API_KEY_AUTHENTICATOR,
+        "authenticate",
+        lambda value: "test-client" if value == "test-api-key" else None,
+    )
+    monkeypatch.setattr(main, "PUBLIC_API_QUOTA", AllowingQuota())
+    monkeypatch.setattr(main, "CLASSIFICATION_CACHE", None)
+    monkeypatch.setattr(main, "CLASSIFICATION_USAGE", None)
+    monkeypatch.setattr(main, "_audit", lambda *args, **kwargs: None)
+
+    response = TestClient(main.app).post(
+        "/api/v1/classify/batch",
+        json={"variants": [{"gene": "BRCA1", "c_notation": "c.5590T>A"}]},
+        headers=API_HEADERS,
+    )
+
+    assert response.status_code == 200
+    item = response.json()["results"][0]
+    assert item["status"] == "error"
+    assert item["error"]["code"] == "unsupported_variant_type"
+    assert item["error"]["retryable"] is False
+    assert "classification" not in item
 
 
 def test_openapi_documents_api_key_on_classification_routes():

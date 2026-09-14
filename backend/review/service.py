@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Mapping
 
 from backend.criteria.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.criteria.evidence_interactions import (
-    apply_manual_rna_interactions,
+    apply_rna_interactions,
     automatic_functional_interactions,
     clinical_functional_risk_interactions,
 )
@@ -213,7 +213,7 @@ def evaluate_manual_evidence(
     applied_manual_codes = {
         result["code"] for result in results if result["applies"]
     }
-    evidence_interactions = apply_manual_rna_interactions(
+    evidence_interactions = apply_rna_interactions(
         combined, applied_manual_codes
     )
     evidence_interactions.extend(automatic_functional_interactions(combined))

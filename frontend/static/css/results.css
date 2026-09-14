@@ -217,6 +217,30 @@
 .class-details p { font-size: 0.85rem; color: var(--color-text-muted); }
 .class-note { font-style: italic; }
 .evidence-flag { color: var(--color-success); font-weight: 500; }
+.evidence-flag-rna { color: #3157a8; }
+
+.expert-classification-difference {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    border: 2px solid #b65b16;
+    border-left-width: 7px;
+    border-radius: var(--radius);
+    background: #fff6e9;
+    color: #683108;
+    box-shadow: 0 6px 18px rgb(182 91 22 / 12%);
+}
+
+.expert-classification-difference strong {
+    color: #552600;
+    font-size: 0.92rem;
+}
+
+.expert-classification-difference span {
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
 
 .manual-review-callout {
     display: grid;
@@ -278,4 +302,3 @@
     font-size: 0.68rem;
     font-weight: 400;
 }
-

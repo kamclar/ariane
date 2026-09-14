@@ -10,12 +10,15 @@ import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 
+from backend.infrastructure.cache_registry import register_runtime_cache
 from backend.lookups.coordinates import resolve_variant, get_grch38
 from backend.policy.gene import reference_transcript
 
 CLINVAR_EUTILS   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 CLINVAR_CACHE: Dict[str, dict] = {}  # gene:c_notation -> parsed result
 CLINVAR_API_SLEEP = 0.4  # NCBI rate limit: max 3 requests/sec without API key
+
+register_runtime_cache("clinvar", CLINVAR_CACHE.clear)
 
 
 def clinvar_review_stars(review_status: str) -> int:

@@ -18,6 +18,7 @@ from backend.classification_runtime import (
 )
 from backend.contracts import BatchRequest, BatchResponse, ClassificationResult, VariantRequest
 from backend.api.public import create_public_api_router
+from backend.services.classification_presentation import ClassificationPresentationService
 from backend.services import (
     ClassificationCommand,
     EvidenceExecutionError,
@@ -57,6 +58,7 @@ class ClassificationApi:
         self._quota_repository = quota_repository
         self._daily_classification_limit = daily_classification_limit
         self.audit = audit
+        self.presentation = ClassificationPresentationService()
 
     @staticmethod
     def map_execution_error(exc: Exception) -> tuple[str, str, bool]:
@@ -108,7 +110,11 @@ class ClassificationApi:
                 orchestration=self._orchestration(),
             )
         except VariantPreparationError as exc:
-            raise HTTPException(status_code=422, detail=str(exc)) from exc
+            raise HTTPException(
+                status_code=422,
+                detail=str(exc),
+                headers={"X-ARIANE-Error-Code": exc.code},
+            ) from exc
         except RequiredEvidenceUnavailableError as exc:
             headers = {
                 "X-ARIANE-Error-Code": exc.code,
@@ -132,6 +138,17 @@ class ClassificationApi:
         dup_type: str = "Unknown",
         reference_transcript: str = "",
     ) -> tuple[ClassificationResult, str, str]:
+        async def refresh_cached(result: ClassificationResult) -> ClassificationResult:
+            clinvar, clingen, _diagnostics = await self._orchestration().lookup_external(
+                result.gene,
+                result.c_notation,
+            )
+            return self.presentation.refresh_external(
+                result,
+                clinvar=clinvar,
+                clingen=clingen,
+            )
+
         return await self.service.classify_cached(
             gene,
             c_notation,
@@ -140,6 +157,7 @@ class ClassificationApi:
             reference_transcript,
             cache_repository=self._cache_repository(),
             classify_uncached=self.classify_uncached,
+            refresh_cached=refresh_cached,
         )
 
     def reserve_public_api_classifications(

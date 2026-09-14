@@ -20,6 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from backend.infrastructure.cache_registry import register_runtime_cache
 from backend.infrastructure.health import DataHealthRegistry
 from backend.policy.gene import reference_transcript
 from backend.lookups import coordinates
@@ -36,6 +37,14 @@ _CACHE_LOADED = False
 
 _CACHE_PATH = runtime_cache_path("bayesdel_api_cache.json")
 _FILE_LOCK  = threading.Lock()
+
+
+def _clear_runtime_cache() -> None:
+    BAYESDEL_CACHE.clear()
+    BAYESDEL_STATUS_CACHE.clear()
+
+
+register_runtime_cache("bayesdel", _clear_runtime_cache)
 
 
 def _load_cache(health: DataHealthRegistry | None = None) -> None:

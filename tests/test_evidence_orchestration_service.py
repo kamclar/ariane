@@ -99,7 +99,61 @@ def test_orchestrator_rejects_unresolved_coding_delins_with_explicit_reason():
         service.prepare(ClassificationCommand("BRCA1", "c.922_923delinsGC"))
 
     assert "protein consequence" in str(error.value)
-    assert "ENIGMA PTC or Figure 1A branch" in str(error.value)
+    assert "ENIGMA PTC, Figure 1A, or structural-variant path" in str(error.value)
+    assert "No classification was returned" in str(error.value)
+    assert error.value.code == "protein_consequence_unresolved"
+
+
+@pytest.mark.parametrize(
+    ("c_notation", "expected_label"),
+    (
+        ("c.5590T>A", "stop-loss"),
+        ("c.-10A>G", "5' utr"),
+        ("c.*10G>A", "3' utr"),
+    ),
+)
+def test_orchestrator_rejects_recognized_types_without_complete_automatic_path(
+    c_notation,
+    expected_label,
+):
+    with pytest.raises(VariantPreparationError) as error:
+        EvidenceOrchestrationService.prepare(
+            ClassificationCommand("BRCA1", c_notation)
+        )
+
+    assert error.value.code == "unsupported_variant_type"
+    assert expected_label in str(error.value).lower()
+    assert "No classification was returned" in str(error.value)
+
+
+@pytest.mark.parametrize(
+    "variant_type",
+    ("unknown", "deletion", "insertion", "duplication"),
+)
+def test_orchestrator_rejects_unresolved_fallback_types(variant_type):
+    operation = {
+        "unknown": "c.100A>G",
+        "deletion": "c.100del",
+        "insertion": "c.100_101insA",
+        "duplication": "c.100dup",
+    }[variant_type]
+    unresolved = NormalizedVariantInput(
+        gene="BRCA1",
+        submitted_notation=operation,
+        c_notation=operation,
+        p_notation="p.?",
+        reference_transcript="NM_007294.4",
+        normalization_source="test source",
+        consequence_status="protein_consequence_unknown",
+    )
+
+    with patch(
+        "backend.services.evidence_orchestration.normalize_variant_input",
+        return_value=unresolved,
+    ), pytest.raises(VariantPreparationError) as error:
+        EvidenceOrchestrationService.prepare(ClassificationCommand("BRCA1", operation))
+
+    assert error.value.code == "protein_consequence_unresolved"
     assert "No classification was returned" in str(error.value)
 
 

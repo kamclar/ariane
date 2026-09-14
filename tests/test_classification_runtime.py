@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
+import asyncio
 import hashlib
 import json
 from pathlib import Path
@@ -11,7 +12,8 @@ from fastapi.testclient import TestClient
 from backend.classification_runtime.cache import ClassificationCacheRepository
 from backend.classification_runtime.identity import resolve_usage_identity
 from backend.classification_runtime.usage import ClassificationUsageRepository
-from backend.contracts import ClassificationResult, SpliceAIAudit
+from backend.contracts import ClassificationResult, ExternalComparison, SpliceAIAudit
+from backend.services.variant_classification_service import VariantClassificationService
 
 
 def _result() -> ClassificationResult:
@@ -20,8 +22,14 @@ def _result() -> ClassificationResult:
         gene="BRCA1",
         c_notation="c.4185G>A",
         p_notation="p.(Gln1395=)",
+        variant_type="synonymous",
         predicted_class=3,
         predicted_label="Uncertain significance",
+        spliceai_audit=SpliceAIAudit(
+            status="ok",
+            score=0.01,
+            required_for_classification=True,
+        ),
     )
 
 
@@ -71,6 +79,93 @@ def test_classification_cache_requires_exact_fingerprint(tmp_path: Path):
     assert hit.result is not None
     assert hit.result.predicted_class == 3
     assert repository.get(**_cache_arguments("policy-b")).status == "miss"
+
+
+def test_classification_cache_excludes_volatile_external_comparison(tmp_path: Path):
+    repository = ClassificationCacheRepository(
+        tmp_path / "cache.sqlite3", max_age_seconds=3600
+    )
+    result = _result().model_copy(update={
+        "external": ExternalComparison(
+            clinvar_status="ok",
+            clinvar_classification="Pathogenic",
+        )
+    })
+    repository.put(
+        result,
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+
+    cached = repository.get(**_cache_arguments("policy-a"))
+
+    assert cached.status == "hit"
+    assert cached.result is not None
+    assert cached.result.external is None
+
+
+def test_classification_cache_rejects_older_schema(tmp_path: Path):
+    database = tmp_path / "cache.sqlite3"
+    repository = ClassificationCacheRepository(database, max_age_seconds=3600)
+    repository.put(
+        _result(),
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+    with sqlite3.connect(database) as connection:
+        connection.execute("UPDATE classification_results SET schema_version = 1")
+        connection.commit()
+
+    assert repository.get(**_cache_arguments("policy-a")).status == "invalid"
+
+
+def test_cached_classification_refreshes_external_comparison(tmp_path: Path, monkeypatch):
+    repository = ClassificationCacheRepository(
+        tmp_path / "cache.sqlite3", max_age_seconds=3600
+    )
+    repository.put(
+        _result(),
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+    monkeypatch.setattr(
+        "backend.services.variant_classification_service.classification_fingerprint",
+        lambda gene: "policy-a",
+    )
+    refresh_calls = []
+
+    async def classify_uncached(*_args):
+        raise AssertionError("complete cached Module 1 result should be reused")
+
+    async def refresh_cached(result):
+        refresh_calls.append(result.c_notation)
+        return result.model_copy(update={
+            "external": ExternalComparison(
+                clinvar_status="ok",
+                clinvar_classification="Pathogenic",
+            )
+        })
+
+    result, status, _fingerprint = asyncio.run(
+        VariantClassificationService().classify_cached(
+            "BRCA1",
+            "c.4185G>A",
+            "p.(Gln1395=)",
+            "Unknown",
+            "NM_007294.4",
+            cache_repository=repository,
+            classify_uncached=classify_uncached,
+            refresh_cached=refresh_cached,
+        )
+    )
+
+    assert status == "hit"
+    assert refresh_calls == ["c.4185G>A"]
+    assert result.external is not None
+    assert result.external.clinvar_classification == "Pathogenic"
 
 
 def test_classification_cache_rejects_modified_payload(tmp_path: Path):
@@ -130,6 +225,36 @@ def test_classification_cache_does_not_store_incomplete_required_spliceai(tmp_pa
         fingerprint="policy-a",
     )
     assert hit.status == "miss"
+
+
+def test_classification_cache_does_not_store_out_of_scope_result(tmp_path: Path):
+    repository = ClassificationCacheRepository(
+        tmp_path / "cache.sqlite3", max_age_seconds=3600
+    )
+    result = ClassificationResult(
+        variant="BRCA1 c.5590T>A p.(Ter1864ArgextTer39)",
+        gene="BRCA1",
+        c_notation="c.5590T>A",
+        p_notation="p.(Ter1864ArgextTer39)",
+        variant_type="stop_lost",
+        predicted_class=3,
+        predicted_label="VUS",
+    )
+    repository.put(
+        result,
+        transcript="NM_007294.4",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    )
+
+    assert repository.get(
+        gene="BRCA1",
+        transcript="NM_007294.4",
+        c_notation="c.5590T>A",
+        p_notation="p.(Ter1864ArgextTer39)",
+        dup_type="Unknown",
+        fingerprint="policy-a",
+    ).status == "miss"
 
 
 def test_classification_cache_does_not_store_incomplete_ps1_reference_lookup(

@@ -61,10 +61,17 @@ _LARGE_VALIDATED_SOURCES = (
 )
 _CODE_DIRECTORIES = (
     PROJECT_ROOT / "backend" / "classification_dag",
+    PROJECT_ROOT / "backend" / "classification_runtime",
+    PROJECT_ROOT / "backend" / "contracts",
+    PROJECT_ROOT / "backend" / "criteria",
+    PROJECT_ROOT / "backend" / "domain",
     PROJECT_ROOT / "backend" / "lookups",
-    PROJECT_ROOT / "backend" / "modules",
+    PROJECT_ROOT / "backend" / "policy",
     PROJECT_ROOT / "backend" / "population_frequency",
+    PROJECT_ROOT / "backend" / "reference_data",
+    PROJECT_ROOT / "backend" / "review",
     PROJECT_ROOT / "backend" / "services",
+    PROJECT_ROOT / "backend" / "variant_processing",
 )
 
 

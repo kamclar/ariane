@@ -19,6 +19,7 @@ from backend.classification_dag.runtime import ClassificationExecution
 from backend.infrastructure.health import DataHealthRegistry
 from backend.lookups import clingen, clinvar
 from backend.infrastructure.lookup_execution import lookup_or_unavailable
+from backend.policy.classification_scope import automatic_classification_scope
 from backend.variant_processing.variant_input import NormalizedVariantInput, normalize_variant_input
 from backend.variant_processing.variant_type import infer_variant_type
 from backend.services.classification_completeness import first_required_evidence_gap
@@ -26,9 +27,49 @@ from backend.services.classification_completeness import first_required_evidence
 
 LOGGER = logging.getLogger("ariane.evidence_orchestration")
 
+_EXTERNAL_WARNING_PREFIXES = (
+    "ClinVar lookup returned more than one possible record",
+    "ClinVar comparison is temporarily unavailable.",
+    "ClinGen ERepo comparison is temporarily unavailable.",
+)
+
+
+def refreshed_external_warnings(
+    existing: list[str],
+    *,
+    clinvar: Mapping[str, Any],
+    clingen: Mapping[str, Any],
+) -> list[str]:
+    """Replace, rather than accumulate, volatile external-source warnings."""
+    warnings = [
+        warning
+        for warning in existing
+        if not warning.startswith(_EXTERNAL_WARNING_PREFIXES)
+    ]
+    if clinvar.get("status") == "ambiguous":
+        warnings.append(
+            "ClinVar lookup returned more than one possible record for the assessed "
+            "variant; no external ClinVar record was selected. Candidate IDs are "
+            "retained in the audit data."
+        )
+    elif clinvar.get("status") not in {"ok", "not_found"}:
+        warnings.append("ClinVar comparison is temporarily unavailable.")
+    if clingen.get("status") not in {"ok", "not_found"}:
+        warnings.append("ClinGen ERepo comparison is temporarily unavailable.")
+    return warnings
+
 
 class VariantPreparationError(ValueError):
     """The submitted variant cannot enter evidence acquisition."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str = "variant_not_classifiable",
+    ) -> None:
+        self.code = code
+        super().__init__(message)
 
 
 class EvidenceExecutionError(RuntimeError):
@@ -135,6 +176,37 @@ class EvidenceOrchestrationService:
     def _external_dependencies(self) -> ExternalEvidenceDependencies:
         return self.external_dependencies or ExternalEvidenceDependencies.production()
 
+    async def lookup_external(
+        self,
+        gene: str,
+        c_notation: str,
+    ) -> tuple[dict[str, Any], dict[str, Any], tuple[str, ...]]:
+        """Acquire non-classifying comparison data independently of Module 1."""
+        dependencies = self._external_dependencies()
+        diagnostics: list[str] = []
+        clinvar_result, clingen_result = await asyncio.gather(
+            lookup_or_unavailable(
+                dependencies.clinvar_lookup,
+                {"status": "api_timeout", "error": "ClinVar lookup timed out"},
+                "ClinVar",
+                diagnostics,
+                gene,
+                c_notation,
+            ),
+            lookup_or_unavailable(
+                dependencies.clingen_lookup,
+                {
+                    "status": "api_timeout",
+                    "error": "ClinGen ERepo lookup timed out",
+                },
+                "ClinGen ERepo",
+                diagnostics,
+                gene,
+                c_notation,
+            ),
+        )
+        return dict(clinvar_result), dict(clingen_result), tuple(diagnostics)
+
     @staticmethod
     def prepare(
         command: ClassificationCommand,
@@ -151,12 +223,11 @@ class EvidenceOrchestrationService:
             normalized.c_notation,
             normalized.p_notation,
         )
-        if variant_type == "delins":
+        scope = automatic_classification_scope(variant_type)
+        if not scope.supported:
             raise VariantPreparationError(
-                f"The protein consequence of {normalized.gene} "
-                f"{normalized.c_notation} could not be determined. The applicable "
-                "ENIGMA PTC or Figure 1A branch cannot be selected. No "
-                "classification was returned."
+                f"{normalized.gene} {normalized.c_notation}: {scope.reason}",
+                code=scope.error_code,
             )
         variant = NormalizedVariant(
             gene=normalized.gene,
@@ -181,37 +252,15 @@ class EvidenceOrchestrationService:
             "exon_duplication",
         }
         request = ClassificationRequest(variant=variant, dup_type=command.dup_type)
-        external_dependencies = self._external_dependencies()
-        external_diagnostics: list[str] = []
         classification_task = execute_classification_request(
             request,
             dependencies=self.provider_dependencies,
         )
-        external_tasks = (
-            lookup_or_unavailable(
-                external_dependencies.clinvar_lookup,
-                {"status": "api_timeout", "error": "ClinVar lookup timed out"},
-                "ClinVar",
-                external_diagnostics,
-                variant.gene,
-                variant.c_notation,
-            ),
-            lookup_or_unavailable(
-                external_dependencies.clingen_lookup,
-                {
-                    "status": "api_timeout",
-                    "error": "ClinGen ERepo lookup timed out",
-                },
-                "ClinGen ERepo",
-                external_diagnostics,
-                variant.gene,
-                variant.c_notation,
-            ),
-        )
+        external_task = self.lookup_external(variant.gene, variant.c_notation)
         try:
-            execution, clinvar, clingen = await asyncio.gather(
+            execution, external = await asyncio.gather(
                 classification_task,
-                *external_tasks,
+                external_task,
             )
         except DagNodeExecutionError as exc:
             LOGGER.exception(
@@ -226,6 +275,9 @@ class EvidenceOrchestrationService:
                 ),
             )
             raise EvidenceExecutionError(exc.node_id, exc.trace) from exc
+
+        clinvar, clingen, external_diagnostics_tuple = external
+        external_diagnostics = list(external_diagnostics_tuple)
 
         artifacts = dict(execution.provider_artifacts)
         self._require_complete_classification_evidence(variant, artifacts)
@@ -330,13 +382,8 @@ class EvidenceOrchestrationService:
         for warning in self.health.user_warnings() if self.health is not None else ():
             if warning not in warnings:
                 warnings.append(warning)
-        if clinvar.get("status") == "ambiguous":
-            warnings.append(
-                "ClinVar lookup returned more than one possible record for the assessed "
-                "variant; no external ClinVar record was selected. Candidate IDs are "
-                "retained in the audit data."
-            )
-        elif clinvar.get("status") not in {"ok", "not_found"}:
-            warnings.append("ClinVar comparison is temporarily unavailable.")
-        if clingen.get("status") not in {"ok", "not_found"}:
-            warnings.append("ClinGen ERepo comparison is temporarily unavailable.")
+        result["warnings"] = refreshed_external_warnings(
+            warnings,
+            clinvar=clinvar,
+            clingen=clingen,
+        )

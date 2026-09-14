@@ -40,11 +40,18 @@ request limits before starting a run:
 curl https://ariane-app.duckdns.org/api/v1/capabilities
 ```
 
-The capability response is the authoritative source for current limits. The
-reference deployment currently accepts a maximum of 10 variants per synchronous
-v1 batch. Five variants are recommended when the results may not yet be cached.
-It also reports the daily per-key classification allowance and the concurrent
-classification limits enforced by the reference deployment.
+The capability response is the authoritative source for current limits and
+automatic variant-type scope. `supported_variant_types` lists normalized types
+that can enter a complete automatic path. `out_of_scope_variant_types` lists
+recognized types for which no complete path is implemented, and
+`unresolved_variant_types` lists fallback types whose protein consequence is
+not specific enough to select a rule path. The latter two groups return no
+classification and must not be interpreted as VUS.
+
+The reference deployment currently accepts a maximum of 10 variants per
+synchronous v1 batch. Five variants are recommended when the results may not
+yet be cached. It also reports the daily per-key classification allowance and
+the concurrent classification limits enforced by the reference deployment.
 
 ## Single classification
 
@@ -96,6 +103,13 @@ Clients must not retry `invalid_request`, `invalid_variant` or
 still provides no classification and must never be interpreted as negative or
 benign evidence.
 
+Recognized 5' UTR, 3' UTR and stop-loss inputs return
+`unsupported_variant_type`. Unresolved `unknown`, `delins`, `deletion`,
+`insertion` and `duplication` inputs return `protein_consequence_unresolved`.
+Both errors are non-retryable and contain no classification. A precise coding
+indel normally receives a sequence-derived frameshift, nonsense or in-frame
+type before this scope check.
+
 For a missense, confirmed in-frame, synonymous or relevant intronic variant,
 SpliceAI is required by the automatic Figure 1A path. If the required score is
 unavailable, the item has `status: "error"` and contains no classification.
@@ -138,6 +152,23 @@ PVS1 RNA can use an exact assertion in the versioned, checksum-validated local
 ERepo registry or an exact eligible record in the checksum-bound ENIGMA ST2/ST3
 snapshot with an unambiguous Table 4 consequence. A live ERepo response is not
 a fallback classification source.
+
+The long-lived classification cache stores the completed Module 1 result, but
+not the volatile `external` comparison object. On a classification cache hit,
+ClinVar and ClinGen ERepo comparison data are attached again through the
+separate external lookup layer. A cached ARIANE assertion can therefore remain
+reusable without freezing an old external classification into the response.
+
+The response keeps evidence-source labels separate. The field
+`has_table9_functional_evidence` refers only to applied PS3 or BS3 with a Table 9
+audit record. The field `has_curated_rna_evidence` identifies applied PVS1 RNA
+from the curated RNA sources. The older `has_functional_evidence` field remains
+for compatibility and must not be interpreted as proof of a Table 9 record.
+
+When a historical ENIGMA expert-panel class differs from the current automated
+result, `external.expert_panel_difference_message` states both classifications.
+The external class is comparison metadata. It does not change the criteria,
+points or ARIANE v1.2 result.
 
 An unresolved pathogenic-founder check is a declared expert-review state, not
 a provider failure. The automatic result contains no BA1 or BS1 from that

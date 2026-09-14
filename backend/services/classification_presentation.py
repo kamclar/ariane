@@ -25,7 +25,10 @@ from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
 from backend.presentation.external import external_comparison
 from backend.presentation.narrative import generate_narrative
 from backend.presentation.vus_explanation import explain_vus
-from backend.services.evidence_orchestration import OrchestratedEvidence
+from backend.services.evidence_orchestration import (
+    OrchestratedEvidence,
+    refreshed_external_warnings,
+)
 
 
 def _criterion_models(values: dict, *, applies: bool) -> list[CriterionResult]:
@@ -74,17 +77,86 @@ def _external_status_message(source: str, value: dict) -> str:
     return f"{source} is unavailable for this request (status: {status})."
 
 
-def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
-    clinvar = evidence.clinvar
-    clingen = evidence.clingen
-    result = evidence.result
-    variant = evidence.variant
-    local_erepo = lookup_erepo_vcep_assertion(variant.gene, variant.c_notation)
+def _historical_expert_panel_warning(
+    *,
+    local_erepo: dict,
+    local_erepo_record: dict,
+    clinvar_stars: int,
+    enigma_submission: dict,
+) -> str:
+    if local_erepo.get("status") in {
+        "historical_vcep_assertion",
+        "unversioned_vcep_assertion",
+    }:
+        version = str(local_erepo_record.get("assertion_method_version") or "not recorded")
+        return (
+            "An ENIGMA expert-panel assertion is present, but its recorded "
+            f"specification version is {version}, not the active v1.2. It is "
+            "shown for context and is not used as a current VCEP assertion."
+        )
+
+    if (
+        clinvar_stars != 3
+        or not enigma_submission
+        or local_erepo.get("status") == "current_vcep_assertion"
+    ):
+        return ""
+
+    comment = str(enigma_submission.get("comment") or "")
+    historical_multifactorial = any(
+        phrase in comment.lower()
+        for phrase in (
+            "multifactorial likelihood",
+            "posterior probability",
+            "iarc class",
+        )
+    )
+    date_evaluated = str(enigma_submission.get("date_eval") or "").strip()
+    if historical_multifactorial:
+        date_text = f" evaluated on {date_evaluated}" if date_evaluated else ""
+        return (
+            f"The ClinVar ENIGMA expert-panel assertion{date_text} records an "
+            "IARC class based on multifactorial posterior probability. It is not "
+            "a criterion-by-criterion assertion under the active VCEP v1.2 and "
+            "is shown as historical context."
+        )
+
+    return (
+        "ClinVar contains a three-star ENIGMA expert-panel assertion, but "
+        "the active local ClinGen ERepo snapshot has no matching current "
+        "v1.2 assertion. It is shown for context only."
+    )
+
+
+def _evidence_display_flags(criteria: list[CriterionResult]) -> tuple[bool, bool]:
+    """Keep protein-function and RNA evidence labels distinct in the UI."""
+    has_table9_functional_evidence = any(
+        criterion.applies
+        and criterion.name in {"PS3", "BS3"}
+        and criterion.table9_audit is not None
+        for criterion in criteria
+    )
+    has_curated_rna_evidence = any(
+        criterion.applies and criterion.name == "PVS1_RNA"
+        for criterion in criteria
+    )
+    return has_table9_functional_evidence, has_curated_rna_evidence
+
+
+def _external_model_from_values(
+    *,
+    gene: str,
+    c_notation: str,
+    predicted_class: int,
+    clinvar: dict,
+    clingen: dict,
+) -> ExternalComparison:
+    local_erepo = lookup_erepo_vcep_assertion(gene, c_notation)
     local_erepo_record = dict(local_erepo.get("record") or {})
     comparison = external_comparison(
-        variant.gene,
-        variant.c_notation,
-        result["predicted_class"],
+        gene,
+        c_notation,
+        predicted_class,
         clinvar,
         clingen,
         local_erepo,
@@ -98,7 +170,10 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
             is_enigma_ep=item.get("is_enigma_ep", False),
             review_status=item.get("review", ""),
             curated_status=(
-                "ENIGMA-labelled ClinVar submitter"
+                "ENIGMA expert-panel ClinVar assertion"
+                if item.get("is_enigma_ep", False)
+                and "expert panel" in str(item.get("review") or "").lower()
+                else "ENIGMA-labelled ClinVar submission"
                 if item.get("is_enigma_ep", False)
                 else ""
             ),
@@ -111,22 +186,23 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
     review_status = aggregate.get("review_status", "")
     stars = clinvar_review_stars(review_status)
     enigma_submission = dict(clinvar.get("enigma_submission") or {})
-    warning = ""
-    if local_erepo.get("status") in {
-        "historical_vcep_assertion",
-        "unversioned_vcep_assertion",
-    }:
-        version = str(local_erepo_record.get("assertion_method_version") or "not recorded")
-        warning = (
-            "An ENIGMA expert-panel assertion is present, but its recorded "
-            f"specification version is {version}, not the active v1.2. It is "
-            "shown for context and is not used as a current VCEP assertion."
+    warning = _historical_expert_panel_warning(
+        local_erepo=local_erepo,
+        local_erepo_record=local_erepo_record,
+        clinvar_stars=stars,
+        enigma_submission=enigma_submission,
+    )
+    difference_message = ""
+    if comparison.get("match") is False:
+        prefix = (
+            "Historical ENIGMA expert-panel classification"
+            if warning
+            else "ENIGMA expert-panel classification"
         )
-    elif stars == 3 and enigma_submission and local_erepo.get("status") != "current_vcep_assertion":
-        warning = (
-            "ClinVar contains a three-star ENIGMA expert-panel assertion, but "
-            "the active local ClinGen ERepo snapshot has no matching current "
-            "v1.2 assertion. It is shown for context only."
+        difference_message = (
+            f"{prefix}: {comparison.get('enigma_class', '')}; current ARIANE "
+            "v1.2 automated result: "
+            f"{CLASS_LABELS.get(predicted_class, '')}."
         )
     return ExternalComparison(
         clinvar_status=str(clinvar.get("status") or "unavailable"),
@@ -164,11 +240,45 @@ def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
             local_erepo_record.get("assertion_method_version") or ""
         ),
         historical_expert_panel_warning=warning,
+        expert_panel_difference_message=difference_message,
+    )
+
+
+def _external_model(evidence: OrchestratedEvidence) -> ExternalComparison:
+    """Compatibility wrapper for a fully orchestrated classification."""
+    return _external_model_from_values(
+        gene=evidence.variant.gene,
+        c_notation=evidence.variant.c_notation,
+        predicted_class=evidence.result["predicted_class"],
+        clinvar=dict(evidence.clinvar),
+        clingen=dict(evidence.clingen),
     )
 
 
 class ClassificationPresentationService:
     """Build the API model without acquiring evidence or changing classification."""
+
+    def refresh_external(
+        self,
+        result: ClassificationResult,
+        *,
+        clinvar: dict,
+        clingen: dict,
+    ) -> ClassificationResult:
+        """Attach current read-only comparisons to a cached Module 1 result."""
+        external = _external_model_from_values(
+            gene=result.gene,
+            c_notation=result.c_notation,
+            predicted_class=result.predicted_class,
+            clinvar=clinvar,
+            clingen=clingen,
+        )
+        warnings = refreshed_external_warnings(
+            result.warnings,
+            clinvar=clinvar,
+            clingen=clingen,
+        )
+        return result.model_copy(update={"external": external, "warnings": warnings})
 
     def build(self, evidence: OrchestratedEvidence) -> ClassificationResult:
         result = evidence.result
@@ -208,6 +318,9 @@ class ClassificationPresentationService:
             },
             [criterion.model_dump() for criterion in criteria],
         )
+        has_table9_functional_evidence, has_curated_rna_evidence = (
+            _evidence_display_flags(criteria)
+        )
         return ClassificationResult(
             variant=result["variant"],
             gene=variant.gene,
@@ -229,6 +342,8 @@ class ClassificationPresentationService:
             warnings=result["warnings"],
             external=_external_model(evidence),
             has_functional_evidence=result.get("has_functional_evidence", False),
+            has_table9_functional_evidence=has_table9_functional_evidence,
+            has_curated_rna_evidence=has_curated_rna_evidence,
             classification_note=result.get("classification_note", ""),
             evidence_direction=result.get("evidence_direction", "none"),
             mixed_evidence=result.get("mixed_evidence", False),

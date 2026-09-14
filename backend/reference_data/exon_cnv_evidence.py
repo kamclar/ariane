@@ -13,7 +13,8 @@ from backend.reference_data.paths import (
 )
 from backend.policy.gene import active_genes
 from backend.reference_data.table4 import parse_exon_from_deletion_notation
-from backend.population_frequency.indel_size import assess_indel_size
+from backend.domain.indel import assess_indel_size_for_transcript
+from backend.policy.gene import reference_transcript
 
 
 def _file_sha256(path: Path) -> str:
@@ -108,7 +109,7 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
     payload = load_exon_cnv_evidence_snapshot()
     policy = payload["pm2_policy"]
     minimum_size = int(policy["minimum_variant_size_bp"])
-    size = assess_indel_size(gene, c_notation)
+    size = assess_indel_size_for_transcript(reference_transcript(gene), c_notation)
     is_deletion = size.get("operation") == "del"
     is_duplication = size.get("operation") == "dup"
     trace = [{

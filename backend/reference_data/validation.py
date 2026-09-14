@@ -8,7 +8,7 @@ from typing import Mapping
 from backend.policy.gene import validate_gene_policy_payload
 from backend.reference_data.exon_cnv_evidence import validate_exon_cnv_evidence_snapshot
 from backend.reference_data.erepo_vcep import validate_erepo_vcep_registry
-from backend.criteria.ps1 import validate_ps1_reference_registry
+from backend.reference_data.ps1_registry_validation import validate_ps1_reference_registry
 
 
 def _load_required_json(label: str, path: Path):

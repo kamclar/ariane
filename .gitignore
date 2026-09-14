@@ -29,6 +29,8 @@ build/
 /tmp/
 /.runtime-cache/
 /.runtime-data/
+/backend/.runtime-cache/
+/backend/.runtime-data/
 /backend/data/bayesdel_cache.json
 /backend/data/coordinates_cache.json
 /data/spliceai/spliceai_api_cache.json
@@ -70,6 +72,7 @@ htmlcov/
 # Pytest
 .pytest_cache/
 .test-tmp-*/
+.pytest_tmp_*/
 .pytest_tmp_codex_brca/
 .pytest_tmp_codex_*/
 

@@ -41,6 +41,9 @@ LOGGER = logging.getLogger("ariane.variant_classification")
 UncachedClassifier = Callable[
     [str, str, str, str], Awaitable[ClassificationResult]
 ]
+CachedResultRefresher = Callable[
+    [ClassificationResult], Awaitable[ClassificationResult]
+]
 CachedClassifier = Callable[
     [str, str, str, str, str],
     Awaitable[tuple[ClassificationResult, str, str]],
@@ -186,6 +189,7 @@ class VariantClassificationService:
         *,
         cache_repository: ClassificationCacheRepository | None,
         classify_uncached: UncachedClassifier,
+        refresh_cached: CachedResultRefresher | None = None,
     ) -> tuple[ClassificationResult, str, str]:
         """Return a fingerprint-bound result, using only complete cache entries."""
         fingerprint = classification_fingerprint(gene)
@@ -210,7 +214,10 @@ class VariantClassificationService:
                 cached = None
                 cache_status = "read_error"
         if cached is not None and cached.result is not None:
-            return cached.result, cached.status, fingerprint
+            result = cached.result
+            if refresh_cached is not None:
+                result = await refresh_cached(result)
+            return result, cached.status, fingerprint
 
         response = await classify_uncached(gene, c_notation, p_notation, dup_type)
         if cache_repository is not None:

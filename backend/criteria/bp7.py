@@ -2,6 +2,7 @@ from typing import Optional, Dict
 from backend.variant_processing.utils import get_intron_offset_from_c_notation
 from backend.domain.decision_trace import figure1a_path, step
 from backend.policy.gene import spliceai_thresholds
+from backend.policy.spliceai import normalize_variant_type
 
 def evaluate_bp7(
     variant_type: str,
@@ -34,8 +35,9 @@ def evaluate_bp7(
         "reason": ""
     }
     splice_low = spliceai_thresholds(gene)["bp4"]
+    vtype = normalize_variant_type(variant_type)
 
-    if variant_type.lower() == "intronic":
+    if vtype == "intronic":
         if not bp4_met:
             result["reason"] = "Intronic variant but BP4 not met - BP7 not applied"
             return result
@@ -70,7 +72,7 @@ def evaluate_bp7(
         return result
 
     # BP7 also applies to synonymous variants inside a functional domain.
-    if variant_type.lower() not in ["synonymous", "silent"]:
+    if vtype not in ["synonymous", "silent"]:
         result["reason"] = f"BP7 not applicable for {variant_type} variants"
         return result
 

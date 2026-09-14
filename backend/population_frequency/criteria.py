@@ -10,7 +10,7 @@ from typing import Any, Mapping
 
 from backend.population_frequency.coverage import frequency_depth_ok, frequency_qc_ok
 from backend.population_frequency.lookup import scored_frequency_label
-from backend.population_frequency.indel_size import is_indel_allele
+from backend.domain.indel import is_indel_allele
 from backend.population_frequency.utils import as_float, as_int
 
 

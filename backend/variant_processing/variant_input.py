@@ -179,10 +179,13 @@ def _genomic_reverse_index() -> dict[tuple[str, str, str, int, str, str], tuple[
 def _from_c_notation(
     gene: str, submitted: str, c_notation: str, supplied_p: str
 ) -> NormalizedVariantInput:
-    # Validate the stated transcript reference before attempting consequence
-    # lookup. This also prevents a wrong-reference SNV from being accepted with
-    # a user-supplied protein description.
-    validate_reference_allele(gene, c_notation)
+    # Coding and UTR reference alleles are verified directly against the local
+    # transcript sequence by the HGVS engine. Intronic positions cannot be
+    # verified from transcript sequence, so they retain the separate generated
+    # reference-base check before the engine preserves their p.? consequence.
+    is_utr = bool(re.match(r"^c\.(?:-|\*)", c_notation, re.IGNORECASE))
+    if not is_utr:
+        validate_reference_allele(gene, c_notation)
 
     consequence = derive_protein_consequence(gene, c_notation)
     canonical_c = consequence.canonical_c_notation

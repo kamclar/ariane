@@ -19,7 +19,6 @@ from backend.reference_data.table4 import (
 from backend.policy.gene import (
     decision_asset,
     pvs1_thresholds,
-    spliceai_thresholds,
     vcep_specification,
 )
 
@@ -213,12 +212,6 @@ def evaluate_pvs1(
                 f"NOT FOUND in Table 4. Manual review required. "
                 f"Do not auto-apply PVS1 for BRCA splice variants."
             )
-            splice_low = spliceai_thresholds(gene)["bp4"]
-            if spliceai_score is not None and spliceai_score < splice_low:
-                result["applies"] = False
-                result["strength"] = None
-                result["points"] = 0
-                result["reason"] = f"Canonical splice but SpliceAI {spliceai_score:.3f} < {splice_low} - flag for review"
         else:
             score_str = f"{spliceai_score:.3f}" if spliceai_score is not None else "N/A"
             result["reason"] = (

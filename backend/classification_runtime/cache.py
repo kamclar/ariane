@@ -13,11 +13,13 @@ import sqlite3
 from typing import Iterator
 
 from backend.contracts import ClassificationResult
+from backend.infrastructure.cache_registry import register_runtime_cache
+from backend.policy.classification_scope import automatic_classification_is_supported
 from backend.policy.spliceai import spliceai_result_is_complete
 from backend.infrastructure.runtime_cache import runtime_cache_path
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 DEFAULT_DATABASE_NAME = "classification_results.sqlite3"
 
 
@@ -30,6 +32,8 @@ def _canonical_json(value: object) -> str:
 
 
 def _is_complete(result: ClassificationResult) -> bool:
+    if not automatic_classification_is_supported(result.variant_type):
+        return False
     audit = result.spliceai_audit
     assessed_complete = spliceai_result_is_complete(
         result.variant_type,
@@ -167,6 +171,8 @@ class ClassificationCacheRepository:
             ).fetchone()
             if row is None:
                 return ClassificationCacheResult("miss")
+            if row["schema_version"] != SCHEMA_VERSION:
+                return ClassificationCacheResult("invalid")
             raw_expiry = str(row["expires_at"] or "").strip()
             if raw_expiry:
                 try:
@@ -213,7 +219,11 @@ class ClassificationCacheRepository:
             if self.max_age_seconds is not None
             else None
         )
-        result_json = _canonical_json(result.model_dump(mode="json"))
+        # ClinVar and ClinGen are volatile, read-only comparisons. They are
+        # refreshed independently on a cache hit and must not become part of a
+        # long-lived Module 1 assertion snapshot.
+        cacheable_result = result.model_copy(update={"external": None})
+        result_json = _canonical_json(cacheable_result.model_dump(mode="json"))
         result_sha256 = hashlib.sha256(result_json.encode("utf-8")).hexdigest()
         key = _cache_key(
             gene=result.gene,
@@ -275,3 +285,10 @@ class ClassificationCacheRepository:
         with self._connection() as connection:
             connection.execute("DELETE FROM classification_results")
             connection.commit()
+
+
+def _clear_classification_cache() -> None:
+    ClassificationCacheRepository().clear()
+
+
+register_runtime_cache("classification_results", _clear_classification_cache)

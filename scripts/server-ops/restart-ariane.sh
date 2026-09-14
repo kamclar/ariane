@@ -57,6 +57,11 @@ if ! grep -Fq "ReadWritePaths=/var/lib/ariane/runtime-cache /var/lib/ariane/runt
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-ariane-service.sh" >&2
     exit 1
 fi
+if grep -Eq '^ReadWritePaths=.*backend/data' <<<"$SERVICE_DEFINITION"; then
+    echo "ARIANE service must keep versioned backend/data reference files read-only" >&2
+    echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-ariane-service.sh" >&2
+    exit 1
+fi
 if ! grep -Eq 'ExecStart=.*uvicorn .*--workers 1([[:space:]]|$)' <<<"$SERVICE_DEFINITION"; then
     echo "ARIANE service must use one application worker with the shared runtime caches" >&2
     echo "Run: sudo bash $ARIANE_HOME/scripts/server-ops/install-ariane-service.sh" >&2

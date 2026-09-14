@@ -121,6 +121,15 @@ souřadnicový manifest bez změny klasifikačního DAGu.
 
 ## Již opravené auditní body
 
+- BP1 a BP7 normalizují token typu varianty na hranici pravidla stejnou sdílenou
+  funkcí jako PP3/BP4. Velikost písmen ani okolní mezery proto nemohou změnit
+  použitelnost kritéria, sílu, body nebo větev auditního rozhodovacího stromu.
+- Rozpoznaný typ varianty se již nepovažuje automaticky za klasifikovatelný.
+  `5utr`, `3utr` a `stop_lost` končí jako `unsupported_variant_type`; neurčené
+  `unknown`, `delins`, `deletion`, `insertion` a `duplication` končí jako
+  `protein_consequence_unresolved`. V obou případech se nevrací VUS a výsledek
+  se neukládá do cache. Nejde o otevřenou metodickou otázku: brána pouze brání
+  publikaci výsledku tam, kde ARIANE nemá dokončenou větev popsaných pravidel.
 - ST7 P/LP je přijatý klasifikační základ proteinové PS1 reference; body se
   přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
 - Nekvantifikovaná ST2 přiděluje PVS1 RNA jen v přesné standardizované LoF
@@ -239,3 +248,95 @@ v placené diagnostické službě je potřeba písemné vyjasnění s Illumina.
 
 Podrobnosti implementace jsou v
 [`implementation_and_data_sources.md`](implementation_and_data_sources.md).
+
+## 11. Historická Class 5 a současná klasifikace podle VCEP v1.2
+
+Varianta `BRCA1 NM_007294.4:c.4185G>A p.(Gln1395=)` má v ClinVaru ENIGMA
+expert-panel assertion `SCV001161546` s klasifikací Pathogenic, hodnocenou
+18. června 2019 podle ENIGMA BRCA1/2 Classification Criteria z roku 2017.
+Komentář assertion uvádí IARC Class 5 na základě posteriorní pravděpodobnosti
+`0,999943` z multifaktoriální likelihood analýzy. Nejde o zveřejněný
+kritérium-po-kritériu rozpis podle současné specifikace VCEP v1.2.
+
+ARIANE podle aktuálně připnutých podkladů v1.2 použije `PVS1 RNA Strong`,
+`PP4 Strong` a `PM2 Supporting`. Combined LR `328,184` nedosahuje hranice `350`
+pro `PP4 Very Strong`. Dvě silná a jedno podpůrné patogenní kritérium splňují
+Table 3 kombinaci pro Likely Pathogenic, nikoli pro Pathogenic. Historická
+výsledná multifaktoriální Class 5 se nepřidává jako další kritérium, protože by
+se tím znovu započítaly její podkladové složky.
+
+Současně zveřejnila ENIGMA BRCA1/2 VCEP v roce 2026 podle v1.2 kuraci varianty
+`BRCA1 c.4185G>C`. Tato kurace výslovně používá `c.4185G>A` jako variantu
+klasifikovanou ENIGMA VCEP jako Pathogenic a jako referenci pro `PS1 Splicing`.
+ENIGMA tedy historický patogenní závěr nadále přijímá, ale pro přesnou variantu
+`c.4185G>A` nebyl v kontrolovaném ERepo snapshotu nalezen nový samostatný v1.2
+rozpis kritérií.
+
+Do vyjasnění se historická klasifikace zobrazuje výrazně a odděleně od výpočtu:
+
+> Historical ENIGMA expert-panel classification: Pathogenic; current ARIANE
+> v1.2 automated result: Likely Pathogenic.
+
+Externí assertion nemění body ani automatický výsledek. Rozdíl vyžaduje odbornou
+revizi a následující dotaz pro ENIGMA:
+
+> BRCA1 NM_007294.4:c.4185G>A p.(Gln1395=) has an ENIGMA expert-panel ClinVar
+> assertion, SCV001161546, evaluated on 18 June 2019 as Pathogenic, IARC Class 5,
+> based on a posterior probability of 0.999943 from multifactorial likelihood
+> analysis under the 2017 ENIGMA criteria. Applying the evidence currently
+> available to ARIANE under BRCA1/2 VCEP v1.2 gives PVS1 RNA Strong, PP4 Strong
+> with a combined LR of 328.184, and PM2 Supporting. This combination meets
+> Likely Pathogenic, but not Pathogenic, under v1.2 Table 3. A 2026 v1.2 ERepo
+> assertion for BRCA1 c.4185G>C still cites c.4185G>A as a Pathogenic PS1
+> Splicing reference. Should the historical expert-panel Class 5 for c.4185G>A
+> remain authoritative under v1.2 without a new criterion-by-criterion
+> assertion, or should c.4185G>A be re-curated under v1.2? If it remains
+> Pathogenic, which current v1.2 criteria and evidence combination should be
+> recorded?
+
+Zdroje: [ClinVar RCV000112286](https://www.ncbi.nlm.nih.gov/clinvar/RCV000112286/)
+a [ClinGen ERepo c.4185G>C](https://erepo.clinicalgenome.org/evrepo/ui/classification/9ef5ebb6-b717-4061-8655-b7c3bf79b9a5).
+
+## 12. Přechod mezi Table 3 a bodovým systémem pro mixed evidence
+
+ENIGMA VCEP v1.2 určuje Table 3 jako výchozí způsob kombinace kritérií. Pokud
+jsou současně splněna patogenní i benigní kritéria, předepisuje druhý postup
+založený na bodovém systému Tavtigian 2020. ARIANE tento přechod implementuje
+doslovně.
+
+Mezi oběma postupy však existují hraniční rozdíly:
+
+| Evidence | Table 3 | Bodový systém |
+|---|---|---|
+| PVS1 Very Strong | VUS | Likely Pathogenic, 8 bodů |
+| šest patogenních Supporting | VUS | Likely Pathogenic, 6 bodů |
+| jedno benigní Strong bez více doložených složek | VUS | Likely Benign, -4 body |
+
+Konkrétně samotné PVS1 Very Strong zůstane podle Table 3 VUS. Přidání BP7
+Supporting vytvoří mixed evidence, přepne klasifikaci do bodového systému a
+součet `8 - 1 = 7` vede k Likely Pathogenic. Benigní kritérium tedy formálně
+zvýší třídu, protože změnilo použitý klasifikační postup.
+
+Nejde o chybu přepisu ARIANE. Specifications v1.2 výslovně uvádějí, že druhý
+postup se použije při současném splnění benigních a patogenních kritérií.
+Specifikace současně požaduje opatrnost a diskusi VCEP při významné konfliktní
+evidenci. Není však vysvětleno, zda je popsaná diskontinuita zamýšlená a jak má
+být takový výsledek klinicky komunikován.
+
+Dotaz pro ENIGMA:
+
+> ENIGMA BRCA1/2 VCEP v1.2 specifies the adapted Table 3 combinations as the
+> default classification approach and the Tavtigian 2020 point system when
+> both pathogenic and benign criteria are met. This creates a boundary case in
+> which PVS1 Very Strong alone is VUS under Table 3, while adding BP7 Supporting
+> changes the method and produces 7 points, formally Likely Pathogenic. Similar
+> differences occur for six pathogenic Supporting criteria and for a single
+> benign Strong criterion without multiple evidence contributions. Is this
+> change in class at the transition between the two approaches intended? Should
+> the point-based class be reported as the working result pending VCEP
+> discussion, or should an additional constraint prevent evidence in the
+> opposite direction from increasing the class?
+
+Do metodického potvrzení ARIANE zachovává doslovný výpočet v1.2, označuje
+výsledek jako mixed evidence a požaduje odbornou revizi. Bodová třída nesmí být
+interpretována jako důkaz, že benigní kritérium posílilo patogenní evidenci.

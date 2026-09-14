@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import importlib
 from pathlib import Path
 import subprocess
 import sys
@@ -79,6 +80,68 @@ def _backend_imports(path: Path) -> set[str]:
     return imports
 
 
+def _backend_package_edges() -> dict[str, set[str]]:
+    packages = {
+        path.name
+        for path in BACKEND_ROOT.iterdir()
+        if path.is_dir() and (path / "__init__.py").is_file()
+    }
+    edges = {package: set() for package in packages}
+    for path in BACKEND_ROOT.rglob("*.py"):
+        source = path.relative_to(BACKEND_ROOT).parts[0]
+        if source not in packages:
+            continue
+        for imported in _backend_imports(path):
+            parts = imported.split(".")
+            if len(parts) > 1 and parts[1] in packages and parts[1] != source:
+                edges[source].add(parts[1])
+    return edges
+
+
+def test_backend_package_dependencies_are_acyclic() -> None:
+    edges = _backend_package_edges()
+    reachable = {
+        (source, dependency)
+        for source, dependencies in edges.items()
+        for dependency in dependencies
+    }
+    for _ in range(len(edges)):
+        reachable |= {
+            (source, target)
+            for source, intermediate in reachable
+            for candidate, target in reachable
+            if intermediate == candidate
+        }
+    cycles = sorted(
+        (source, target)
+        for source, target in reachable
+        if source < target and (target, source) in reachable
+    )
+    assert not cycles, "Backend package dependency cycles: " + ", ".join(
+        f"{source} <-> {target}" for source, target in cycles
+    )
+
+
+def test_runtime_cache_owners_register_their_clearers() -> None:
+    for module_name in (
+        "backend.classification_runtime.cache",
+        "backend.lookups.bayesdel",
+        "backend.lookups.clingen",
+        "backend.lookups.clinvar",
+        "backend.lookups.spliceai",
+    ):
+        importlib.import_module(module_name)
+
+    registry = importlib.import_module("backend.infrastructure.cache_registry")
+    assert set(registry.registered_runtime_caches()) == {
+        "bayesdel",
+        "classification_results",
+        "clingen_erepo",
+        "clinvar",
+        "spliceai",
+    }
+
+
 def test_domain_and_policy_do_not_depend_on_application_layers() -> None:
     forbidden = (
         "backend.api",
@@ -127,6 +190,32 @@ def test_lookups_do_not_import_criteria_or_review_layers() -> None:
             if imported.startswith(forbidden):
                 violations.append(f"{path.name}: {imported}")
     assert not violations, "Lookup modules contain an inverted dependency:\n" + "\n".join(violations)
+
+
+def test_reference_data_does_not_import_criteria() -> None:
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "reference_data").glob("*.py")):
+        for imported in sorted(_backend_imports(path)):
+            if imported.startswith("backend.criteria"):
+                violations.append(f"{path.name}: {imported}")
+    assert not violations, "Reference-data modules import criteria:\n" + "\n".join(violations)
+
+
+def test_infrastructure_does_not_import_cache_owners() -> None:
+    forbidden = (
+        "backend.classification_runtime",
+        "backend.criteria",
+        "backend.lookups",
+        "backend.reference_data",
+        "backend.review",
+        "backend.services",
+    )
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "infrastructure").glob("*.py")):
+        for imported in sorted(_backend_imports(path)):
+            if imported.startswith(forbidden):
+                violations.append(f"{path.name}: {imported}")
+    assert not violations, "Infrastructure imports a cache owner:\n" + "\n".join(violations)
 
 
 def test_variant_processing_does_not_import_lookup_or_rule_layers() -> None:
@@ -286,6 +375,30 @@ def test_native_dag_has_no_runtime_engine_selector() -> None:
     assert "ClassifierEngineMode" not in runtime
     assert "get_configured_engine_mode" not in runtime
     assert "ARIANE_CLASSIFIER_ENGINE" not in runtime
+
+
+def test_classifier_fingerprint_covers_all_classification_layers() -> None:
+    from backend.classification_runtime import fingerprint
+
+    covered = {
+        path.relative_to(fingerprint.PROJECT_ROOT).as_posix()
+        for path in fingerprint._CODE_DIRECTORIES
+    }
+    assert {
+        "backend/classification_dag",
+        "backend/classification_runtime",
+        "backend/contracts",
+        "backend/criteria",
+        "backend/domain",
+        "backend/lookups",
+        "backend/policy",
+        "backend/population_frequency",
+        "backend/reference_data",
+        "backend/review",
+        "backend/services",
+        "backend/variant_processing",
+    } <= covered
+    assert "backend/modules" not in covered
 
 
 def test_manual_evidence_responsibilities_remain_split() -> None:

@@ -20,9 +20,10 @@ from backend.policy.classification import (
 from backend.classification_dag.types import NodeResult
 from backend.policy.gene import rule_is_applicable
 from backend.criteria.evidence_interactions import (
-    apply_manual_rna_interactions,
+    apply_rna_interactions,
     automatic_functional_interactions,
     clinical_functional_risk_interactions,
+    rna_interaction_codes,
 )
 
 
@@ -107,9 +108,10 @@ class EvidenceInteractionNode:
             inputs["bioinformatic_family"].evidence_interactions
         )
         public = criteria_dict(tuple(criteria.values()))
-        if "PVS1_RNA" in public:
+        applied_rna_codes = rna_interaction_codes(public)
+        if applied_rna_codes:
             interactions.extend(
-                apply_manual_rna_interactions(public, {"PVS1_RNA"})
+                apply_rna_interactions(public, applied_rna_codes)
             )
         interactions.extend(automatic_functional_interactions(public))
         interactions.extend(clinical_functional_risk_interactions(public))

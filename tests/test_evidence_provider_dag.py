@@ -124,6 +124,34 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
     }.issubset(provider_ids)
 
 
+def test_bayesdel_provider_does_not_query_for_non_protein_prediction_type():
+    request = ClassificationRequest(
+        variant=NormalizedVariant(
+            gene="BRCA1",
+            reference_transcript="NM_007294.4",
+            c_notation="c.68_69del",
+            p_notation="p.(Glu23ValfsTer17)",
+            variant_type="frameshift",
+            submitted_notation="BRCA1 c.68_69del",
+            normalization_source="test",
+        )
+    )
+    bayesdel_calls = []
+    dependencies = replace(
+        _dependencies(),
+        bayesdel_lookup=lambda gene, c: bayesdel_calls.append((gene, c)),
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request, dependencies=dependencies
+    ))
+
+    assert bayesdel_calls == []
+    assert execution.provider_artifacts["bayesdel_score"] is None
+    provider_evidence = execution.audit_record()["provider_evidence"]["bayesdel"]
+    assert provider_evidence["status"] == "not_applicable"
+
+
 def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
     from backend.reference_data.erepo_pvs1_rna import lookup_erepo_pvs1_rna
     from backend.services.classification_completeness import first_required_evidence_gap

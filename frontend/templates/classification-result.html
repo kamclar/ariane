@@ -41,8 +41,11 @@
                         <p x-show="result?.classification_note"
                            x-text="result?.classification_note"
                            class="class-note"></p>
-                        <p x-show="result?.has_functional_evidence" class="evidence-flag">
+                        <p x-show="result?.has_table9_functional_evidence" class="evidence-flag">
                             Calibrated functional evidence available in ENIGMA Table 9
+                        </p>
+                        <p x-show="result?.has_curated_rna_evidence" class="evidence-flag evidence-flag-rna">
+                            Curated RNA evidence from ENIGMA Supplementary Tables 2 and 3 contributed to this result
                         </p>
                     </div>
                 </div>
@@ -77,6 +80,16 @@
                     </a>
                 </div>
             </div>
+
+            <aside class="expert-classification-difference"
+                   x-show="result?.external?.expert_panel_difference_message"
+                   role="alert">
+                <strong x-text="result?.external?.expert_panel_difference_message"></strong>
+                <span>
+                    The external assertion is shown for comparison and does not replace
+                    the current criterion-by-criterion calculation.
+                </span>
+            </aside>
 
             <section class="manual-review-callout"
                      x-show="manualReviewRecommendations().length"
@@ -677,4 +690,3 @@
                     </dl>
                 </details>
             </section>
-

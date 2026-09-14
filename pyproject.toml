@@ -35,6 +35,7 @@ python_version = "3.12"
 files = [
     "backend/domain",
     "backend/policy/classification.py",
+    "backend/policy/classification_scope.py",
     "backend/presentation/frontend.py",
 ]
 check_untyped_defs = true

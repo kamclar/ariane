@@ -376,6 +376,30 @@ Typ varianty se odvozuje z kombinace `c.` a `p.` notace. Rozlišují se zejména
 
 Typ varianty určuje, které větve pravidel lze použít. Nonsense varianta bez proteinového následku se nesmí tiše považovat za missense.
 
+Rozpoznání typu není samo o sobě oprávněním vydat automatickou klasifikaci.
+Produkční publikační brána povoluje pouze typy, pro které je v ARIANE dokončena
+odpovídající větev ENIGMA v1.2:
+
+- `nonsense`, `frameshift`, `splice_site`, `initiation_codon`,
+- `exon_deletion`, `exon_duplication`,
+- `missense`, `synonymous`, `intronic`,
+- `inframe_deletion`, `inframe_insertion`, `inframe_delins`.
+
+Typy `5utr`, `3utr` a `stop_lost` lze normalizovat a rozpoznat, ale současná
+implementace pro ně nemá úplnou automatickou cestu. Výsledek proto končí
+chybou `unsupported_variant_type` a nevrací třídu VUS. Specifikace v1.2 uvádí,
+že se PM4 pro stop-loss nepoužívá a změna délky proteinu je součástí
+bioinformatického posouzení. Figure 1A však poskytuje automatické větve pro
+missense a in-frame varianty, silent varianty a příslušné intronické varianty;
+ARIANE proto stop-loss nepřeklápí do jiné větve odhadem.
+
+Typy `unknown`, `delins`, `deletion`, `insertion` a `duplication` označují
+nedostatečně určený proteinový následek. Nelze u nich bezpečně vybrat PTC,
+Figure 1A ani strukturální větev. Produkční cesta vrací
+`protein_consequence_unresolved` bez klasifikace. Přesné coding indely se za
+běžného provozu sekvenčně převádějí na konkrétní frameshift, nonsense nebo
+in-frame následek; obecné tokeny zůstávají bezpečnostním fallbackem.
+
 ## 3. Automaticky vyhodnocovaná kritéria
 
 Síla kritéria se převádí na body:
@@ -1195,9 +1219,10 @@ Strong kritéria proto vedou k Class 5. Silnější evidence nesmí snížit tř
 by bylo dosaženo se stejným kritériem na úrovni Strong. Regresním příkladem je
 BRCA1 c.4676-1G>A s PVS1 Very Strong a PP4 Very Strong.
 
-Stejná monotónní zásada platí pro benigní směr. Zesílení nebo přidání benigní
-evidence nesmí posunout výsledek k vyšší třídě. Testovací matice vyčerpávajícím
-způsobem kontroluje přidávání a postupné zesilování kritérií v obou směrech.
+Stejná monotónní zásada platí pro benigní směr pouze tehdy, dokud klasifikace
+zůstává v jednom režimu, tedy uvnitř Table 3 nebo uvnitř bodového systému.
+Testovací matice kontroluje přidávání a zesilování kritérií v rámci stejného
+režimu. Nejde o globální záruku při přechodu mezi oběma postupy.
 
 Pokud jsou současně přítomna patogenní i benigní kritéria, nastává druhý klasifikační postup ENIGMA. V tomto případě se používá bodový systém Tavtigian 2020:
 
@@ -1208,6 +1233,16 @@ Pokud jsou současně přítomna patogenní i benigní kritéria, nastává druh
 | -1 až 5 | Class 3, VUS |
 | -6 až -2 | Class 2, Likely Benign |
 | méně než -6 | Class 1, Benign |
+
+Přepnutí mezi postupy může vytvořit nemonotónní hraniční výsledek. Například
+samotné PVS1 Very Strong nesplňuje kombinaci Table 3 pro Likely Pathogenic a
+zůstává VUS. Po přidání BP7 Supporting vznikne mixed evidence, použije se druhý
+postup a součet `8 - 1 = 7` odpovídá Likely Pathogenic. Přidání benigní evidence
+tak může formálně zvýšit výslednou třídu, protože se současně změnil
+klasifikační postup. ARIANE tento výsledek nevydává za posílení patogenní
+evidence. Zachovává oba směry, použitou metodu a požadavek na odbornou diskusi.
+Zda je tato diskontinuita zamýšleným důsledkem v1.2, je otevřená metodická
+otázka vedená v `open_methodological_and_data_tasks.md`.
 
 Výsledek s protichůdnými směry zachovává vypočtenou ENIGMA třídu a obsahuje barevný pruh `Mixed evidence`. Pruh uvádí, že byla použita ENIGMA bodová kombinace a že je nutná expertní revize. Odkazuje přímo na verzovaný dokument [ENIGMA Specifications v1.2](https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data), část `Classification Methods`, druhý postup. Rozbalovací technický detail zvlášť ukazuje součet patogenních bodů, benigních bodů a celkový výsledek.
 
@@ -1619,6 +1654,12 @@ Zápis dynamické cache je atomický. Bez nakonfigurovaného runtime adresáře 
 Railway volume se při lokálním vývoji používá neveřejný adresář
 `.runtime-cache/` v kořeni projektu.
 
+Souběžné dokončené SpliceAI výpočty se při zápisu slučují s nejnovější podobou
+cache pod procesovým zámkem, takže si navzájem nepřepisují nové záznamy. Souběžné
+dotazy na stejnou variantu jsou uvnitř jednoho aplikačního procesu sloučeny do
+jednoho výpočtu. Meziprocesový zápis JSON cache podporovaný není, proto produkční
+ARIANE nadále používá právě jeden aplikační proces.
+
 ### 8.2.1 Cache hotových automatických klasifikací
 
 Každá úspěšná automatická Module 1 klasifikace se ukládá také do SQLite cache
@@ -1633,6 +1674,11 @@ c. a p. notaci, typ duplikace a otisk aktivní implementace. Otisk zahrnuje verz
 ARIANE, build revision, klasifikační engine, VCEP policy, zdrojový kód DAGu a
 providerů a identity verzovaných runtime datasetů. Změna kterékoliv z těchto
 složek vytvoří jiný prostor cache.
+
+Otisk pokrývá všechny vrstvy, které mohou změnit automatické nebo amended
+vyhodnocení: doménové typy, kontrakty, kritéria, policy, referenční data,
+variant processing, providery, DAG, review a aplikační služby. Starý adresář
+`backend/modules` není součástí aktivního otisku.
 
 Cache není náhradní klasifikační zdroj. Záznam s jiným otiskem, prošlou dobou
 platnosti, neplatným JSON nebo nesouhlasícím SHA-256 se nepoužije. Po takovém
@@ -1653,6 +1699,12 @@ k výsledku bez PS1 ani k uložení takového výsledku do cache.
 
 Manuální evidence a amended working result se do této cache neukládají. Patří
 do verzovaných review records v `ARIANE_RUNTIME_DATA_DIR`.
+
+Do dlouhodobé cache Module 1 se neukládá ani objekt `external` s živým srovnáním
+ClinVar a ClinGen ERepo. Při cache hitu se toto read-only srovnání doplní znovu
+z oddělené externí vrstvy. Změna externí databáze tak nemění původní automatickou
+klasifikaci, ale současně nezůstává uzamčena ve starém klasifikačním záznamu.
+Záznamy staršího schématu cache se bezpečně odmítnou a znovu vypočítají.
 
 ### 8.2.2 Evidence použití a statistiky
 
@@ -1738,6 +1790,10 @@ skript jejich konfiguraci doplní a odmítne spustit starou systemd definici,
 která adresáře nezpřístupňuje nebo pouští více aplikačních procesů. Takový stav
 by vypnul statistiky, obešel limit souběžných SpliceAI dotazů a umožnil souběžný
 zápis několika procesů do stejné JSON cache.
+
+Verzovaná referenční data v `backend/data` nejsou zapisovatelnou runtime cestou
+systemd služby. Aplikační proces může zapisovat pouze do dedikovaných runtime
+adresářů a logu; změna klasifikačních datasetů patří výhradně do deploymentu.
 
 Pokud SpliceAI zůstane nedostupný pro missense, potvrzenou in-frame,
 synonymous nebo relevantní intronickou variantu, automatická klasifikace se
@@ -2055,6 +2111,11 @@ patogenních founder variant není v ENIGMA publikován jako úplný strojově
 
 BayesDel_noAF a AlphaMissense se získávají jedním dotazem nad genomovou variantou přes MyVariant.info a ukládají se do lokální cache.
 
+Provider tento dotaz spouští pouze pro missense a proteinovou notací potvrzené
+in-frame varianty. Pro nonsense, frameshift, synonymous, intronické, exonové CNV
+a další větve mimo proteinovou část Figure 1A vrací explicitní stav
+`not_applicable` a síťový dotaz neprovádí.
+
 Do trvalé cache se ukládá pouze úspěšná anotace, stabilní nejednoznačný výsledek
 nebo explicitní odpověď, že
 varianta v MyVariant nebyla nalezena. Odpověď `no_score`, při které služba
@@ -2129,7 +2190,7 @@ Změna oficiální ENIGMA verze, transkriptu, genomového sestavení, predikčn�
 
 ### 14.1 Regresní matice typů variant
 
-Soubor `tests/test_variant_type_regression_matrix.py` udržuje explicitní regresní matici podporovaných typů variant. První část ověřuje odvození normalizovaného typu pro nonsense, frameshift, missense, synonymous, intronickou SNV, canonical splice-site variantu, in-frame indel, exonovou deleci a duplikaci, iniciační kodon a obě UTR oblasti.
+Soubor `tests/test_variant_type_regression_matrix.py` udržuje explicitní regresní matici rozpoznávaných typů variant. První část ověřuje odvození normalizovaného typu pro nonsense, frameshift, missense, synonymous, intronickou SNV, canonical splice-site variantu, in-frame indel, exonovou deleci a duplikaci, iniciační kodon, stop-loss a obě UTR oblasti. Samostatné testy produkční publikační brány ověřují, že rozpoznaný typ bez úplné automatické cesty nevede k VUS ani k uložení výsledku do cache.
 
 Druhá část pro reprezentativní varianty kontroluje celý deterministický průchod Module 1 od typu varianty přes lokální tabulky a snapshoty po aplikovaná kritéria a výslednou třídu. Každý řádek obsahuje očekávaná i zakázaná kritéria. Tím se kontroluje nejen přítomnost správné větve, ale také nepřípustné přičtení kritéria z jiné větve, například PP3 u nonsense nebo frameshift varianty.
 
@@ -2366,6 +2427,21 @@ nesmějí provádět uvnitř funkcí ani metod. Tento invariant kontroluje AST t
 závislosti viditelné na úrovni modulů a načítají pouze předanou typovanou
 evidenci.
 
+Stejný test sestavuje graf importů mezi backendovými balíčky a vyžaduje, aby byl
+acyklický. Registr runtime cache v `backend/infrastructure/cache_registry.py`
+neimportuje jejich vlastníky. Jednotlivé cache při načtení svého modulu registrují
+pojmenovanou funkci pro vyčištění; samostatný regresní test kontroluje úplnost
+registrace. Tím `infrastructure` nezávisí na `lookups` ani na
+`classification_runtime`.
+
+Validace kurátorovaného proteinového PS1 registru patří do
+`backend/reference_data/ps1_registry_validation.py`. Kritérium PS1 tuto validaci
+používá při načtení registru, ale referenční datová vrstva neimportuje pravidlový
+modul. Obecná analýza tvaru a velikosti indelu je ve sdílené doménové vrstvě;
+adaptér populačních frekvencí pouze doplňuje schválený transkript. Tyto hranice
+odstraňují i nepřímý cyklus mezi `reference_data`, `population_frequency` a
+`lookups`, aniž by měnily rozhodovací pravidla.
+
 ### 15.4 Inicializace dat a stav připravenosti
 
 Import zdrojových modulů neotevírá referenční soubory ani nevytváří adresáře
@@ -2425,6 +2501,18 @@ podle Table 3. PP3 se nepoužije, protože přímá RNA evidence nahrazuje predi
 stejného splice mechanismu. Tutorialová Class 5 používá PP4 Very Strong;
 současný combined LR dává PP4 Strong. Konečná multifaktoriální Class 5 z ST2 se
 nepřenáší jako samostatná evidence.
+
+Prezentační kontrakt rozlišuje proteinovou funkční evidenci z Table 9 od RNA
+evidence ze Supplementary Tables 2 a 3. Příznak PVS1 RNA proto nesmí vyvolat
+hlášku o dostupné Table 9 evidenci. Hláška Table 9 se zobrazí pouze tehdy, pokud
+je aplikováno PS3 nebo BS3 s odpovídající auditní stopou Table 9.
+
+Pokud se automatický výsledek liší od ENIGMA expert-panel klasifikace, rozhraní
+zobrazí rozdíl přímo pod klasifikační kartou. Historická assertion zůstává
+oddělena od aktuálního v1.2 výpočtu a nemění kritéria ani body. U
+`BRCA1 c.4185G>A` se proto zobrazí historická ENIGMA klasifikace Pathogenic vedle
+aktuálního automatického výsledku Likely Pathogenic. Metodická otázka je vedena
+v [`open_methodological_and_data_tasks.md`](open_methodological_and_data_tasks.md).
 
 Podrobný návrh a invarianty jsou v
 `docs/classification_dag_architecture.md`.

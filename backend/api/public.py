@@ -15,6 +15,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from backend.policy.gene import active_genes, get_gene_policy
+from backend.policy.classification_scope import (
+    OUT_OF_SCOPE_VARIANT_TYPES,
+    SUPPORTED_AUTOMATIC_VARIANT_TYPES,
+    UNRESOLVED_VARIANT_TYPES,
+)
 from backend.contracts import (
     BatchRequest,
     BatchResponse,
@@ -147,6 +152,10 @@ class PublicApiCapabilities(BaseModel):
     status: Literal["beta"] = "beta"
     classification_engine: Literal["dag"] = "dag"
     supported_genes: list[PublicApiGene]
+    supported_variant_types: list[str]
+    out_of_scope_variant_types: list[str]
+    unresolved_variant_types: list[str]
+    variant_scope_semantics: str
     limits: PublicApiLimits
     endpoints: list[str]
     manual_review_semantics: str
@@ -317,6 +326,15 @@ def create_public_api_router(
                 )
                 for symbol in active_genes()
             ],
+            supported_variant_types=list(SUPPORTED_AUTOMATIC_VARIANT_TYPES),
+            out_of_scope_variant_types=list(OUT_OF_SCOPE_VARIANT_TYPES),
+            unresolved_variant_types=list(UNRESOLVED_VARIANT_TYPES),
+            variant_scope_semantics=(
+                "A recognized HGVS consequence is classified only when the "
+                "current ARIANE ENIGMA BRCA1/2 VCEP v1.2 implementation has a "
+                "complete automatic path. Out-of-scope or unresolved types "
+                "return an error and no VUS classification."
+            ),
             limits=PublicApiLimits(
                 maximum_batch_items=PUBLIC_API_MAXIMUM_BATCH_ITEMS,
                 recommended_uncached_batch_items=RECOMMENDED_UNCACHED_BATCH_ITEMS,

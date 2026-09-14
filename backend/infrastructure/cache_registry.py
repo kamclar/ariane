@@ -1,17 +1,28 @@
-"""Explicit registry of mutable runtime caches owned by the application."""
+"""Registry of mutable runtime caches owned by higher-level components."""
 
-from backend.lookups.bayesdel import BAYESDEL_CACHE
-from backend.lookups.clingen import EREPO_CACHE
-from backend.lookups.clinvar import CLINVAR_CACHE
-from backend.lookups.spliceai import SPLICEAI_CACHE, SPLICEAI_STATUS_CACHE
-from backend.classification_runtime.cache import ClassificationCacheRepository
+from __future__ import annotations
+
+from collections.abc import Callable
+
+
+CacheClearer = Callable[[], None]
+_CACHE_CLEARERS: dict[str, CacheClearer] = {}
+
+
+def register_runtime_cache(name: str, clearer: CacheClearer) -> None:
+    """Register or replace one named cache clearer without importing its owner."""
+    normalized = name.strip()
+    if not normalized:
+        raise ValueError("Runtime cache registration requires a non-empty name")
+    _CACHE_CLEARERS[normalized] = clearer
+
+
+def registered_runtime_caches() -> tuple[str, ...]:
+    """Expose deterministic registration state for startup diagnostics and tests."""
+    return tuple(sorted(_CACHE_CLEARERS))
 
 
 def clear_runtime_caches() -> None:
-    """Clear API-derived in-memory caches without touching immutable datasets."""
-    SPLICEAI_CACHE.clear()
-    SPLICEAI_STATUS_CACHE.clear()
-    BAYESDEL_CACHE.clear()
-    CLINVAR_CACHE.clear()
-    EREPO_CACHE.clear()
-    ClassificationCacheRepository().clear()
+    """Clear every cache registered by an imported application component."""
+    for name in registered_runtime_caches():
+        _CACHE_CLEARERS[name]()
