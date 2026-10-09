@@ -15,6 +15,22 @@
     background: #fffaf0;
 }
 
+.criteria-section-classified {
+    border-width: 2px;
+    color: var(--color-text);
+}
+
+.criteria-section-classified.criteria-class-5 { border-color: var(--class-5); }
+.criteria-section-classified.criteria-class-4 { border-color: var(--class-4); }
+.criteria-section-classified.criteria-class-3 { border-color: var(--class-3); }
+.criteria-section-classified.criteria-class-2 { border-color: var(--class-2); }
+.criteria-section-classified.criteria-class-1 { border-color: var(--class-1); }
+
+.criteria-section-classified th,
+.criteria-section-classified .reason-cell {
+    color: var(--color-text);
+}
+
 .excluded-criteria-intro {
     margin: -0.2rem 0 0.8rem;
     color: var(--color-text-muted);
@@ -96,7 +112,7 @@
 }
 
 h3 {
-    font-size: 0.95rem;
+    font-size: var(--result-panel-title-size, 0.95rem);
     font-weight: 600;
     margin-bottom: 0.8rem;
     color: var(--color-text);
@@ -192,7 +208,7 @@ h3 {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85rem;
+    font-size: var(--result-body-size, 0.84rem);
 }
 
 th {
@@ -201,7 +217,7 @@ th {
     border-bottom: 2px solid var(--color-border);
     font-weight: 600;
     color: var(--color-text-muted);
-    font-size: 0.78rem;
+    font-size: var(--result-meta-size, 0.78rem);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
@@ -212,7 +228,7 @@ td {
 }
 
 .reason-cell {
-    font-size: 0.8rem;
+    font-size: var(--result-meta-size, 0.78rem);
     color: var(--color-text-muted);
     max-width: 400px;
 }
@@ -239,11 +255,31 @@ td {
 .criterion-badge {
     display: inline-block;
     padding: 0.15rem 0.5rem;
+    border: 1px solid transparent;
     background: #e9ecef;
     border-radius: 3px;
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: var(--result-meta-size, 0.78rem);
     font-weight: 600;
+}
+
+.criterion-badge-applied {
+    color: var(--color-text);
+}
+
+.criterion-badge-pathogenic {
+    border-color: var(--class-5);
+    background: #fee2e2;
+}
+
+.criterion-badge-benign {
+    border-color: var(--class-1);
+    background: #d1fae5;
+}
+
+.criterion-badge-neutral {
+    border-color: var(--class-3);
+    background: #f3f4f6;
 }
 
 .detail-table td:first-child {

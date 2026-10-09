@@ -118,7 +118,9 @@
             </section>
 
             <!-- Criteria table -->
-            <div class="criteria-section" x-show="result?.criteria?.length > 0">
+            <div class="criteria-section criteria-section-classified"
+                 :class="`criteria-class-${result?.predicted_class}`"
+                 x-show="result?.criteria?.length > 0">
                 <h3>Applied criteria</h3>
                 <table class="criteria-table">
                     <colgroup>
@@ -140,7 +142,12 @@
                             <tr class="criterion-composite-row">
                                 <td colspan="4">
                                     <div class="criterion-summary-grid">
-                                        <div><span class="criterion-badge" x-text="c.name"></span></div>
+                                        <div>
+                                            <span class="criterion-badge criterion-badge-applied"
+                                                  :class="Number(c.points) > 0 ? 'criterion-badge-pathogenic' : (Number(c.points) < 0 ? 'criterion-badge-benign' : 'criterion-badge-neutral')"
+                                                  :aria-label="`${c.name}: ${Number(c.points) > 0 ? 'pathogenic evidence' : (Number(c.points) < 0 ? 'benign evidence' : 'direction neutral')}`"
+                                                  x-text="c.name"></span>
+                                        </div>
                                         <div x-text="c.strength || '-'"></div>
                                         <div x-text="c.points"></div>
                                         <div class="reason-cell" x-text="c.reason"></div>
@@ -467,9 +474,13 @@
                 </a>
             </div>
 
-            <section class="evidence-details"
+            <details class="evidence-details"
                      x-show="result?.normalization_provenance || result?.spliceai_audit || result?.clinical_lr_audit || result?.population_frequency_audit?.datasets?.length || result?.mixed_evidence || result?.evidence_interactions?.length">
-                <h3>Evidence details</h3>
+                <summary class="evidence-details-heading">
+                    <span>Evidence details</span>
+                    <span class="evidence-details-toggle" aria-hidden="true"></span>
+                </summary>
+                <div class="evidence-details-content">
                 <details class="evidence-detail-item" x-show="result?.normalization_provenance">
                     <summary>
                         <span>Variant normalization</span>
@@ -689,4 +700,5 @@
                         <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA VCEP v1.2 second classification approach for mixed evidence, using the Tavtigian 2020 point system</dd></div>
                     </dl>
                 </details>
-            </section>
+                </div>
+            </details>

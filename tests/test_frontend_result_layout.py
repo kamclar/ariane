@@ -119,6 +119,67 @@ def test_point_thermometer_is_present_for_every_classified_result():
     assert "&minus;7" in thermometer_markup
 
 
+def test_point_threshold_labels_use_the_corresponding_class_colours():
+    css = frontend_css()
+
+    expected_colours = {
+        "pathogenic": "var(--class-5)",
+        "likely-pathogenic": "var(--class-4)",
+        "likely-benign": "var(--class-2)",
+        "benign": "var(--class-1)",
+    }
+    for threshold, colour in expected_colours.items():
+        assert f".threshold-{threshold} b {{ color: {colour}; }}" in css
+
+
+def test_applied_criteria_show_class_and_evidence_direction_without_colour_only_cues():
+    html = frontend_html()
+    css = frontend_css()
+
+    assert 'class="criteria-section criteria-section-classified"' in html
+    assert ':class="`criteria-class-${result?.predicted_class}`"' in html
+    for predicted_class in range(1, 6):
+        assert f".criteria-section-classified.criteria-class-{predicted_class}" in css
+
+    assert "criterion-badge-pathogenic" in html
+    assert "criterion-badge-benign" in html
+    assert "Number(c.points) > 0" in html
+    assert "Number(c.points) < 0" in html
+    assert "pathogenic evidence" in html
+    assert "benign evidence" in html
+    assert ".criterion-badge-pathogenic" in css
+    assert ".criterion-badge-benign" in css
+
+
+def test_evidence_details_are_collapsed_as_one_accessible_panel_by_default():
+    html = frontend_html()
+    css = frontend_css()
+    start = html.index('<details class="evidence-details"')
+    opening_tag = html[start:html.index(">", start) + 1]
+
+    assert " open" not in opening_tag
+    assert 'class="evidence-details-heading"' in html
+    assert 'class="evidence-details-toggle" aria-hidden="true"' in html
+    assert 'class="evidence-details-content"' in html
+    assert '.evidence-details-toggle::before' in css
+    assert '.evidence-details[open] .evidence-details-toggle::before' in css
+
+
+def test_result_panels_share_a_small_typography_scale():
+    css = frontend_css()
+
+    for token in (
+        "--result-panel-title-size",
+        "--result-body-size",
+        "--result-meta-size",
+        "--result-small-size",
+    ):
+        assert token in css
+    assert "font-size: var(--result-panel-title-size" in css
+    assert "font-size: var(--result-body-size" in css
+    assert "font-size: var(--result-meta-size" in css
+
+
 def test_variant_specific_clinical_annotation_is_visible_but_not_scored():
     html = frontend_html()
     assert "result?.clinical_annotations" in html

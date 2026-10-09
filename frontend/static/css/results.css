@@ -1,6 +1,10 @@
 /* ── Classification result ──────────────────────────────────── */
 .result-section {
     margin: 1.5rem 0 3rem;
+    --result-panel-title-size: 0.95rem;
+    --result-body-size: 0.84rem;
+    --result-meta-size: 0.78rem;
+    --result-small-size: 0.72rem;
 }
 
 .classification-header {
@@ -83,7 +87,7 @@
 
 .point-threshold b {
     font-size: 0.58rem;
-    font-weight: 500;
+    font-weight: 700;
     line-height: 1;
     margin-left: 3px;
 }
@@ -92,6 +96,16 @@
 .threshold-likely-pathogenic { top: 33.33%; }
 .threshold-likely-benign { top: 62.96%; }
 .threshold-benign { top: 81.48%; }
+
+.threshold-pathogenic b { color: var(--class-5); }
+.threshold-likely-pathogenic b { color: var(--class-4); }
+.threshold-likely-benign b { color: var(--class-2); }
+.threshold-benign b { color: var(--class-1); }
+
+.threshold-pathogenic i { background: var(--class-5); }
+.threshold-likely-pathogenic i { background: var(--class-4); }
+.threshold-likely-benign i { background: var(--class-2); }
+.threshold-benign i { background: var(--class-1); }
 
 .point-position {
     position: absolute;
@@ -214,7 +228,7 @@
     font-weight: 500;
 }
 
-.class-details p { font-size: 0.85rem; color: var(--color-text-muted); }
+.class-details p { font-size: var(--result-body-size); color: var(--color-text-muted); }
 .class-note { font-style: italic; }
 .evidence-flag { color: var(--color-success); font-weight: 500; }
 .evidence-flag-rna { color: #3157a8; }
