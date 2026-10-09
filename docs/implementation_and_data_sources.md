@@ -2577,3 +2577,49 @@ Samostatná galerie obsahuje původní obrazové panely z checksumem ověřenýc
 ENIGMA Specifications a Appendix v1.2. Appendixová média se reprodukovatelně
 extrahují skriptem `scripts/extract_enigma_appendix_figures.py`; skript pouze
 přejmenuje embedded média a nijak nemění jejich obsah.
+
+## 16. Kontrola aktuálnosti upstream zdrojů
+
+Kontrola integrity aktivních snapshotů a kontrola aktuálnosti jejich upstream
+zdrojů jsou dvě oddělené operace. Startup a `/api/health` kontrolují pouze
+lokální produkční kontrakt: přítomnost souborů, schéma, manifesty, checksumy a
+vzájemnou kompatibilitu. Neprovádějí síťové dotazy a netvrdí, že je použitý zdroj
+nejnovější.
+
+Read-only aktualitu zajišťuje centrální registr
+`data/sources/source_watch_registry.json` a příkaz:
+
+```bash
+python scripts/check_source_updates.py
+```
+
+Registr pokrývá oba oficiální ENIGMA CSpec záznamy GN092 a GN097, úplný ClinGen
+ERepo export ENIGMA VCEP assertions, UCSC combined clinical LR a gnomAD
+population/coverage zdroje. CSpec kontrola porovnává verzi, stav `Released`,
+revizi a datum změny strukturovaného API záznamu. ERepo kontrola ukládá SHA-256
+úplného exportu pro audit, ale o potřebě revize rozhoduje fingerprint pouze
+ENIGMA BRCA1/2 řádků a verze Summary API; změna jiného VCEP proto nevytvoří
+falešný poplach. Clinical-LR kontrola znovu používá
+checksumový kontrakt aktuálního BigBed. gnomAD kontrola ověřuje identity
+aktivních oficiálních Hail objektů a zjišťuje, zda novější release obsahuje
+ekvivalentní small-variant produkt; pouhá existence novějšího adresáře nestačí.
+
+Zdroje bez jednoznačného bezpečného `latest` endpointu jsou v reportu explicitně
+uvedeny jako `manual_only`. Jde zejména o SpliceAI model a profil, referenční
+transkripty a souřadnice, founder registr, klinicky významná rezidua a exon-CNV
+evidenci. Tím je viditelné, že vyžadují kurátorskou kontrolu, aniž by automat
+předstíral jejich aktuálnost.
+
+GitHub workflow `.github/workflows/source-watch.yml` běží týdně a lze jej spustit
+ručně před každým releasem. Kódy výsledku odlišují stav `current`, nález
+vyžadující revizi a technicky neprovedenou kontrolu. Síťová chyba source watch
+nemění připravenost produkce; aplikace dále používá poslední schválený lokální
+snapshot.
+
+Žádný checker nesmí zapisovat do aktivních dat, měnit manifest ani aktivovat
+release. Každá nalezená změna nejprve vytvoří kandidátní podklad. Aktivace
+vyžaduje kontrolu release notes a ENIGMA kompatibility, zdrojovou identitu,
+record-level a criterion-level diff, kontrolu prahových přechodů, cílené i úplné
+regrese a zaznamenané odborné schválení. Přesný provozní postup, význam stavů a
+návratových kódů popisuje
+[`source_freshness_and_update_policy.md`](source_freshness_and_update_policy.md).

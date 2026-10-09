@@ -5,11 +5,24 @@
                     <div class="form-group">
                         <label for="gene">Gene</label>
                         <select id="gene" x-model="gene" @change="syncGeneFromVariantInput()"
+                                aria-describedby="future-gene-hint"
                                 x-on:change.debounce="loadManualDefinitions()" required>
                             <template x-for="item in configuredGenes" :key="item.symbol">
                                 <option :value="item.symbol" x-text="item.symbol"></option>
                             </template>
+                            <optgroup label="Future genes — classification not available">
+                                <option value="ATM" disabled>ATM — under construction</option>
+                                <option value="PALB2" disabled>PALB2 — under construction</option>
+                                <option value="TP53" disabled>TP53 — planned</option>
+                            </optgroup>
                         </select>
+                        <p id="future-gene-hint" class="input-hint">
+                            Future gene support is not yet available for classification:
+                            <a href="https://clinicalgenome.org/affiliation/50039/"
+                               target="_blank" rel="noopener noreferrer">ATM and PALB2</a>
+                            are under construction; <a href="https://clinicalgenome.org/affiliation/50013/"
+                               target="_blank" rel="noopener noreferrer">TP53</a> is planned.
+                        </p>
                     </div>
                     <div class="form-group form-group-wide">
                         <label for="c_notation">Variant</label>

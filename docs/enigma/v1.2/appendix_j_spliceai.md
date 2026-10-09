@@ -18,3 +18,8 @@ The machine-readable profile is
 cache builders use that same file. Cache metadata with a different profile,
 distance, masking mode, assembly, transcript policy, aggregation, or score
 field set is rejected. It is never reinterpreted as ENIGMA-compatible data.
+
+The isolated [search-distance experiment](spliceai_distance_experiment.md)
+compares D=4999, D=5000 and D=10000, with D=50 as a smaller-window control,
+using fresh local inference and full unrounded model outputs. It is a research
+comparison and does not alter the binding profile above.

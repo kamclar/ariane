@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "automatic_activation": false,
+    "runtime_network_dependency": false,
+    "default_timeout_seconds": 60,
+    "required_before_activation": [
+      "archive the candidate source with retrieval time and immutable identity",
+      "review the official release notes, schema and applicable ENIGMA policy",
+      "build a candidate snapshot outside the production runtime",
+      "produce record-level and criterion-level diffs against the active snapshot",
+      "review threshold crossings, evidence-direction changes and missing records",
+      "run targeted regressions and the complete quality suite",
+      "record expert approval and update source, manifest, tests and documentation together"
+    ]
+  },
+  "sources": [
+    {
+      "id": "enigma_vcep_specifications",
+      "name": "ENIGMA BRCA1/2 VCEP specifications",
+      "checker": "cspec_records",
+      "cadence_days": 7,
+      "official_url": "https://cspec.genome.network/cspec/",
+      "manifest_path": "backend/data/gene_policy_manifest.json",
+      "records": [
+        {
+          "gene": "BRCA1",
+          "id": "GN092",
+          "api_url": "https://cspec.genome.network/cspec/id/GN092",
+          "pinned_version": "1.2.0",
+          "observed_revision": "_l2AfI46---",
+          "observed_modified": "2026-07-20T17:44:33.957Z"
+        },
+        {
+          "gene": "BRCA2",
+          "id": "GN097",
+          "api_url": "https://cspec.genome.network/cspec/id/GN097",
+          "pinned_version": "1.2.0",
+          "observed_revision": "_l2AfJsG---",
+          "observed_modified": "2026-07-20T17:44:34.775Z"
+        }
+      ],
+      "activation_command": "python scripts/verify_enigma_source_bundle.py"
+    },
+    {
+      "id": "enigma_erepo_vcep_assertions",
+      "name": "ClinGen ERepo ENIGMA VCEP assertions",
+      "checker": "erepo_export",
+      "cadence_days": 7,
+      "official_url": "https://erepo.clinicalgenome.org/evrepo/",
+      "metadata_path": "backend/data/enigma_erepo_vcep_registry.metadata.json",
+      "genes": ["BRCA1", "BRCA2"],
+      "selected_rows_sha256": "34b2ccbae0d644bb9ca5f45f433f6e64d53163b828d587ce366e2006fc9c0f07",
+      "selected_row_count": 180,
+      "selected_rows_observed_utc": "2026-09-14T16:50:09Z",
+      "activation_command": "python scripts/build_enigma_erepo_vcep_registry.py"
+    },
+    {
+      "id": "enigma_clinical_lr",
+      "name": "UCSC ENIGMA combined clinical LR",
+      "checker": "clinical_lr",
+      "cadence_days": 30,
+      "official_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
+      "manifest_path": "data/sources/enigma/clinical_lr_sources.manifest.json",
+      "activation_command": "python scripts/build_enigma_clinical_lr_snapshot.py"
+    },
+    {
+      "id": "gnomad_population_data",
+      "name": "gnomAD population and coverage data",
+      "checker": "gnomad_releases",
+      "cadence_days": 30,
+      "official_url": "https://gnomad.broadinstitute.org/news/",
+      "manifest_path": "backend/data/gnomad/gnomad_panel_manifest.json",
+      "activation_command": "python scripts/refresh_gnomad_panel_snapshot.py refresh"
+    },
+    {
+      "id": "spliceai_profile_and_model",
+      "name": "SpliceAI scoring profile and pinned model image",
+      "checker": "manual",
+      "official_url": "https://github.com/Illumina/SpliceAI",
+      "review_trigger": "ENIGMA specification, model, licence or pinned container change",
+      "tracked_files": [
+        "data/spliceai/enigma_v1_2_spliceai_profile.json"
+      ],
+      "note": "Correctness is checked by deterministic validation variants; there is no safe latest-version auto-activation."
+    },
+    {
+      "id": "reference_and_coordinate_bundle",
+      "name": "Reference transcripts and coordinate sources",
+      "checker": "manual",
+      "review_trigger": "reference transcript, genome assembly, HGVS engine or source release change",
+      "tracked_files": [
+        "data/reference/panel/panel_manifest.json",
+        "data/coordinates/coordinate_sources.manifest.json"
+      ],
+      "note": "Reference changes require rebuilding and validating every derived coordinate snapshot."
+    },
+    {
+      "id": "curated_auxiliary_registries",
+      "name": "Founder, residue and exon-CNV curated registries",
+      "checker": "manual",
+      "review_trigger": "new VCEP guidance, curated assertion or source publication",
+      "tracked_files": [
+        "backend/data/brca_pathogenic_founder_variants.json",
+        "backend/data/clinically_important_residues.json",
+        "data/sources/enigma/exon_cnv_evidence_manifest.json"
+      ],
+      "note": "These sources have no single authoritative machine-readable latest endpoint and remain an explicit curation task."
+    }
+  ]
+}

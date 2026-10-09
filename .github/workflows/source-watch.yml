@@ -1,0 +1,52 @@
+name: Upstream source watch
+
+on:
+  schedule:
+    # Weekly checks are inexpensive and also satisfy the 30-day checks.
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+
+      - name: Check official sources without activating them
+        id: source_watch
+        continue-on-error: true
+        run: >-
+          python scripts/check_source_updates.py
+          --output /tmp/ariane-source-watch.json
+          --markdown-output /tmp/ariane-source-watch.md
+
+      - name: Publish source-watch summary
+        if: always()
+        run: |
+          if test -f /tmp/ariane-source-watch.md; then
+            cat /tmp/ariane-source-watch.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "# ARIANE source-watch report" >> "$GITHUB_STEP_SUMMARY"
+            echo "The checker failed before it could create a report." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Require review of changes or failed checks
+        if: steps.source_watch.outcome == 'failure'
+        run: |
+          echo "The source-watch report requires attention. See the job summary."
+          exit 1

@@ -142,7 +142,8 @@ Classification follows this order (higher level overrides lower):
 
 ## Data sources
 
-- ENIGMA VCEP v1.2 (2024-11-18): Table 4, Table 9
+- ENIGMA VCEP v1.2 (approved 2025-01-09; source documents dated 2024-11-18):
+  Table 4, Table 9
 - ClinGen ERepo ENIGMA BRCA1/2 VCEP v1.2 PVS1 RNA assertions in a local
   checksum-validated registry
 - gnomAD v2.1.1 exomes non-cancer
@@ -159,6 +160,20 @@ releases without changing the active classification data:
 ```bash
 python scripts/refresh_gnomad_panel_snapshot.py check-updates
 ```
+
+The unified read-only source watch also checks the official ENIGMA CSpec
+records, ClinGen ERepo assertions, the UCSC clinical-LR track and gnomAD. It
+lists manually curated sources without pretending that a highest remote version
+can be activated safely:
+
+```bash
+python scripts/check_source_updates.py
+```
+
+The scheduled GitHub workflow runs this check weekly. It reports a change or an
+unavailable upstream source, but never updates active data. The review and
+activation policy is documented in
+[`docs/source_freshness_and_update_policy.md`](docs/source_freshness_and_update_policy.md).
 
 Refresh and validate the panel snapshots in a separate data-build environment:
 

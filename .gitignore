@@ -35,6 +35,7 @@ build/
 /backend/data/coordinates_cache.json
 /data/spliceai/spliceai_api_cache.json
 /data/sources/*
+!/data/sources/source_watch_registry.json
 !/data/sources/enigma/
 /data/sources/enigma/*
 !/data/sources/enigma/BRCAmfa.hg38.2026-08-18.bb
@@ -69,6 +70,13 @@ secrets.yml
 .coverage
 htmlcov/
 
+# Local tooling caches and scratch outputs
+.mypy_cache/
+.ruff_cache/
+.Rhistory
+.tmp-*.log
+.tmp_enigma_*/
+
 # Pytest
 .pytest_cache/
 .test-tmp-*/
@@ -102,6 +110,7 @@ htmlcov/
 !/docs/navrh_doplnovani_proteinove_notace.md
 !/docs/classification_dag_architecture.md
 !/docs/public_api.md
+!/docs/source_freshness_and_update_policy.md
 !/docs/enigma/
 !/docs/enigma/**
 data/spliceai/build/

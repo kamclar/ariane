@@ -221,6 +221,31 @@ def test_variant_input_can_synchronise_the_explicit_gene_selector():
     assert "item.reference_transcript" in javascript
 
 
+def test_future_genes_are_disabled_presentation_only_entries_with_clingen_context():
+    html = frontend_html()
+    future_group = re.search(
+        r'<optgroup label="Future genes — classification not available">(.*?)</optgroup>',
+        html,
+        re.DOTALL,
+    )
+
+    assert future_group
+    options = future_group.group(1)
+    assert '<option value="ATM" disabled>ATM — under construction</option>' in options
+    assert '<option value="PALB2" disabled>PALB2 — under construction</option>' in options
+    assert '<option value="TP53" disabled>TP53 — planned</option>' in options
+    assert 'aria-describedby="future-gene-hint"' in html
+    assert 'id="future-gene-hint"' in html
+    for url in (
+        "https://clinicalgenome.org/affiliation/50039/",
+        "https://clinicalgenome.org/affiliation/50013/",
+    ):
+        assert re.search(
+            rf'href="{re.escape(url)}"\s+target="_blank" rel="noopener noreferrer"',
+            html,
+        )
+
+
 def test_unreviewed_splice_ps1_pilot_is_not_exposed_in_production_ui():
     project_root = FRONTEND_HTML.parents[1]
     html = frontend_html()
