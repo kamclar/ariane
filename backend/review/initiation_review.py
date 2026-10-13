@@ -2,6 +2,7 @@
 
 from typing import Dict
 from backend.policy.gene import vcep_specification
+from backend.reference_data.table4 import table4_lookup_initiation
 
 
 INITIATION_REFERENCE_SOURCE = (
@@ -10,10 +11,43 @@ INITIATION_REFERENCE_SOURCE = (
 )
 
 
-def evaluate_initiation_review(gene: str, variant_type: str) -> Dict:
+def evaluate_initiation_review(
+    gene: str,
+    variant_type: str,
+    *,
+    c_notation: str = "",
+    p_notation: str = "",
+    reference_transcript: str = "",
+) -> Dict:
     """Flag Met1/start-loss variants for curated PVS1_INIT review."""
     if (variant_type or "").lower() != "initiation_codon":
         return _empty(gene)
+
+    table4 = table4_lookup_initiation(gene)
+    prefill = {
+        "met1_loss_confirmed": True,
+        "assessed_gene": gene,
+        "assessed_c_notation": c_notation,
+        "assessed_p_notation": p_notation,
+        "reference_transcript": reference_transcript,
+        "table4_code": table4.get("pvs1_code") or "",
+        "table4_exon": table4.get("exon") or "",
+        "source_citation": "ENIGMA BRCA1/2 VCEP v1.2 Specifications Table 4",
+        "source_references": [
+            INITIATION_REFERENCE_SOURCE,
+            vcep_specification(gene)["url"],
+        ],
+    }
+    if table4.get("found"):
+        prefill.update({
+            "curated_strength": table4["pvs1_strength"],
+            "initiation_flowchart_rationale": (
+                f"ENIGMA Table 4 assigns {table4['pvs1_code']} "
+                f"({table4['pvs1_strength']}) to the {gene} start-codon branch "
+                f"in {table4['exon']}. Confirm the Appendix D alternative-start, "
+                "upstream P/LP and N-terminal functional-impact checks before use."
+            ),
+        })
 
     return {
         "recommended": True,
@@ -43,6 +77,7 @@ def evaluate_initiation_review(gene: str, variant_type: str) -> Dict:
         "reference_source": INITIATION_REFERENCE_SOURCE,
         "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
+        "manual_review_prefill": prefill,
     }
 
 
@@ -59,4 +94,5 @@ def _empty(gene: str) -> Dict:
         "reference_source": "",
         "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
+        "manual_review_prefill": {},
     }

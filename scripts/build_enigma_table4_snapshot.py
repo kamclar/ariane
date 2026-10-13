@@ -70,6 +70,7 @@ def build_snapshot(source: Path) -> dict:
     rows = [[_clean(value) for value in row] for row in sheet.iter_rows(values_only=True)]
 
     exon_ranges = {"BRCA1": {}, "BRCA2": {}}
+    initiation_rules = {"BRCA1": {}, "BRCA2": {}}
     ptc_rules = {"BRCA1": {}, "BRCA2": {}}
     splice_rules = {"BRCA1": {}, "BRCA2": {}}
     deletion_rules = {"BRCA1": {}, "BRCA2": {}}
@@ -94,7 +95,18 @@ def build_snapshot(source: Path) -> dict:
 
         marker = str(row[10]).strip() if row[10] is not None else ""
         code = row[9]
-        if marker == "PTC":
+        if marker == "START codon":
+            if initiation_rules[gene]:
+                raise RuntimeError(
+                    f"Duplicate Table 4 initiation-codon rule for {gene} at row {row_number}"
+                )
+            initiation_rules[gene] = {
+                "exon": exon,
+                "pvs1_code": str(code).strip(),
+                "notes": _notes(row[2], row[18]),
+                "source_row": row_number,
+            }
+        elif marker == "PTC":
             ptc_rules[gene][exon] = {
                 "pvs1_code": code,
                 "pm5_code": row[11],
@@ -169,6 +181,7 @@ def build_snapshot(source: Path) -> dict:
         "source_columns": 20,
         "source_rows": rows,
         "exon_ranges": exon_ranges,
+        "initiation_rules": initiation_rules,
         "ptc_rules": ptc_rules,
         "splice_rules": splice_rules,
         "deletion_rules": deletion_rules,

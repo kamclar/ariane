@@ -4,7 +4,7 @@
   "released": "2025-01-09",
   "source": "ClinGen ENIGMA BRCA1/2 VCEP Specifications Table 4",
   "source_url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
-  "generated": "2026-07-21",
+  "generated": "2026-10-13",
   "readme": [
     "ACMG/AMP Classification Rules Specified for BRCA1 & BRCA2",
     "ENIGMA Variant Curation Expert Panel, Classification Criteria V1.2 2024-11-18.",
@@ -11093,6 +11093,20 @@
         9649,
         10254
       ]
+    }
+  },
+  "initiation_rules": {
+    "BRCA1": {
+      "exon": "E2",
+      "pvs1_code": "PVS1",
+      "notes": "",
+      "source_row": 11
+    },
+    "BRCA2": {
+      "exon": "E2",
+      "pvs1_code": "PVS1",
+      "notes": "",
+      "source_row": 232
     }
   },
   "ptc_rules": {

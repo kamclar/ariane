@@ -179,6 +179,53 @@ def test_classification_prefills_but_does_not_enable_recommended_manual_review()
     }
 
 
+def test_initiation_review_prefills_table4_facts_without_enabling_criterion():
+    result = run_javascript(
+        """
+const component = ariane();
+component.resetManualItems();
+component.result = {
+    gene: "BRCA2",
+    c_notation: "c.1A>G",
+    p_notation: "p.(Met1Val)",
+    criteria: [],
+    initiation_review: {
+        recommended: true,
+        source_url: "https://example.test/GN097",
+        manual_review_prefill: {
+            met1_loss_confirmed: true,
+            assessed_gene: "BRCA2",
+            assessed_c_notation: "c.1A>G",
+            assessed_p_notation: "p.(Met1Val)",
+            reference_transcript: "NM_000059.4",
+            table4_code: "PVS1",
+            table4_exon: "E2",
+            curated_strength: "Very Strong",
+            initiation_flowchart_rationale: "Table 4 assigns PVS1; confirm Appendix D checks.",
+            source_citation: "ENIGMA Table 4 v1.2",
+            source_references: ["Appendix D"],
+        },
+    },
+};
+component.prefillManualReviewFromResult();
+const item = component.manualItems.find(value => value.code === "PVS1_INIT");
+process.stdout.write(JSON.stringify({
+    enabled: item.enabled,
+    evidence: item.evidence,
+    notes: item.notes,
+    references: item.references,
+}));
+"""
+    )
+
+    assert result["enabled"] is False
+    assert result["evidence"]["met1_loss_confirmed"] is True
+    assert result["evidence"]["curated_strength"] == "Very Strong"
+    assert result["evidence"]["alternative_start_assessed"] == ""
+    assert result["notes"] == "Table 4 assigns PVS1; confirm Appendix D checks."
+    assert result["references"] == "ENIGMA Table 4 v1.2\nAppendix D"
+
+
 def test_manual_evidence_evaluation_uses_the_prefilled_form_payload():
     result = run_javascript(
         """

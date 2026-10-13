@@ -265,6 +265,24 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         self.assertEqual(data["schema_version"], 2)
         self.assertEqual(data["source_columns"], 20)
         self.assertEqual(len(data["source_rows"]), 493)
+        self.assertEqual(
+            data["initiation_rules"]["BRCA1"],
+            {
+                "exon": "E2",
+                "pvs1_code": "PVS1",
+                "notes": "",
+                "source_row": 11,
+            },
+        )
+        self.assertEqual(
+            data["initiation_rules"]["BRCA2"],
+            {
+                "exon": "E2",
+                "pvs1_code": "PVS1",
+                "notes": "",
+                "source_row": 232,
+            },
+        )
         self.assertIn(
             "GC splice site",
             data["deletion_rules"]["BRCA2"]["E15"]["notes"],

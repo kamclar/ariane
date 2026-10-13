@@ -40,7 +40,10 @@ TABLE4_DATA = LazyJsonObject(load_table4_data)
 def validate_table4_data():
     """Check that all exons referenced in rules have corresponding ranges."""
     issues = []
-    gene_sections = ("exon_ranges", "ptc_rules", "deletion_rules", "duplication_rules")
+    gene_sections = (
+        "exon_ranges", "initiation_rules", "ptc_rules", "deletion_rules",
+        "duplication_rules",
+    )
     genes = sorted({
         gene
         for section in gene_sections
@@ -155,6 +158,51 @@ def parse_pvs1_code_strength(pvs1_code: str) -> tuple:
         return (None, 0, requires_rna)
     # Unknown source codes must never acquire evidence weight implicitly.
     return (None, 0, requires_rna)
+
+
+def table4_lookup_initiation(gene: str) -> Dict:
+    """Return the gene-level ENIGMA Table 4 initiation-codon rule."""
+    entry = TABLE4_DATA.get("initiation_rules", {}).get(gene)
+    if not isinstance(entry, dict) or not entry:
+        return {
+            "found": False,
+            "pvs1_code": None,
+            "pvs1_strength": None,
+            "pvs1_points": 0,
+            "exon": None,
+            "notes": "",
+            "source_row": None,
+            "reason": f"No Table 4 initiation-codon rule for {gene}",
+        }
+
+    pvs1_code = entry.get("pvs1_code")
+    strength, points, requires_rna = parse_pvs1_code_strength(pvs1_code)
+    if requires_rna or strength is None:
+        return {
+            "found": False,
+            "pvs1_code": pvs1_code,
+            "pvs1_strength": None,
+            "pvs1_points": 0,
+            "exon": entry.get("exon"),
+            "notes": entry.get("notes", ""),
+            "source_row": entry.get("source_row"),
+            "reason": (
+                f"Table 4 initiation-codon rule for {gene} has an unsupported "
+                f"code: {pvs1_code!r}"
+            ),
+        }
+    return {
+        "found": True,
+        "pvs1_code": pvs1_code,
+        "pvs1_strength": strength,
+        "pvs1_points": points,
+        "exon": entry.get("exon"),
+        "notes": entry.get("notes", ""),
+        "source_row": entry.get("source_row"),
+        "reason": (
+            f"ENIGMA Table 4 assigns {pvs1_code} to {gene} initiation-codon variants"
+        ),
+    }
 
 
 def table4_lookup_pvs1_ptc(

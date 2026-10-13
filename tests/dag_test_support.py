@@ -24,6 +24,7 @@ def classify_with_dag(
     exon_cnv_result: Mapping[str, Any] | None = None,
     residue_info: Mapping[str, Any] | None = None,
     dup_type: str = "Unknown",
+    reference_transcript: str = "",
 ) -> dict[str, Any]:
     inputs = ClassificationInputs(
         gene=gene,
@@ -40,5 +41,6 @@ def classify_with_dag(
         exon_cnv_result=exon_cnv_result,
         residue_info=residue_info,
         dup_type=dup_type,
+        reference_transcript=reference_transcript,
     )
     return execute_classification(inputs).result

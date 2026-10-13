@@ -51,8 +51,8 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
             "Required ENIGMA Table 4 dataset is not the complete lossless v1.2 snapshot"
         )
     required_table4_sections = {
-        "exon_ranges", "ptc_rules", "splice_rules", "deletion_rules",
-        "duplication_rules", "critical_boundaries",
+        "exon_ranges", "initiation_rules", "ptc_rules", "splice_rules",
+        "deletion_rules", "duplication_rules", "critical_boundaries",
     }
     missing_sections = sorted(required_table4_sections - set(table4))
     if missing_sections:
@@ -86,6 +86,18 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         None, "PM5_Strong (PTC)", "PM5 (PTC)",
         "PM5_Supporting (PTC)", "PM5_N/A",
     }
+    for gene in table4_genes:
+        initiation = table4["initiation_rules"][gene]
+        if initiation.get("exon") not in table4["exon_ranges"][gene]:
+            raise RuntimeError(
+                f"Required ENIGMA Table 4 initiation rule references unknown exon: "
+                f"{gene}/{initiation.get('exon')!r}"
+            )
+        if initiation.get("pvs1_code") not in allowed_pvs1_codes:
+            raise RuntimeError(
+                f"Required ENIGMA Table 4 initiation rule has unknown PVS1 code at "
+                f"{gene}: {initiation.get('pvs1_code')!r}"
+            )
     for gene, boundary in table4.get("critical_boundaries", {}).items():
         if boundary.get("exon") not in table4["exon_ranges"].get(gene, {}):
             raise RuntimeError(

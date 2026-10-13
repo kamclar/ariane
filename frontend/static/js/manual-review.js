@@ -57,6 +57,15 @@
                 pathogenic_and_benign_controls_confirmed: false,
                 curated_strength: "",
             };
+            if (code === "PVS1_INIT") return {
+                met1_loss_confirmed: false,
+                alternative_start_assessed: "",
+                nearest_alternative_start: "",
+                upstream_pathogenic_evidence: "",
+                functional_domain_impact: "",
+                curated_strength: "",
+                initiation_flowchart_rationale: "",
+            };
             if (code === "PS1_PROTEIN") return {
                 reference_variant: "",
                 reference_p_notation: "",
@@ -264,12 +273,20 @@
                 }
             }
 
-            if (this.result?.initiation_review?.recommended) {
+            const initiationReview = this.result?.initiation_review;
+            if (initiationReview?.recommended) {
                 const item = this.manualItems.find(value => value.code === "PVS1_INIT");
-                if (item && !item.evidence?.reference_variant) {
-                    item.evidence.met1_loss_confirmed = true;
-                    item.evidence.initiation_flowchart_rationale =
-                        "Met1/start-loss variant flagged by ARIANE. Complete the ENIGMA initiation-codon flowchart review: alternative start assessment, upstream P/LP evidence, expected N-terminal impact, and curated PVS1_INIT strength.";
+                const prefill = initiationReview.manual_review_prefill || {};
+                if (item && Object.keys(prefill).length) {
+                    item.evidence = {
+                        ...item.evidence,
+                        ...prefill,
+                    };
+                    item.notes = prefill.initiation_flowchart_rationale || item.notes;
+                    item.references = [
+                        prefill.source_citation,
+                        ...(prefill.source_references || []),
+                    ].filter(Boolean).join("\n");
                 }
             }
 

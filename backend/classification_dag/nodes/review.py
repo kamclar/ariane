@@ -46,6 +46,9 @@ class ReviewTriageNode:
         )
         result["initiation_review"] = evaluate_initiation_review(
             gene=ci.gene,
-            variant_type=ci.variant_type
+            variant_type=ci.variant_type,
+            c_notation=ci.c_notation,
+            p_notation=ci.p_notation,
+            reference_transcript=ci.reference_transcript,
         )
         return NodeResult.succeeded({"unvalidated_classification_result": result})

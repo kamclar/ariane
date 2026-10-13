@@ -21,6 +21,7 @@ from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.reference_data.table4 import (
     TABLE4_DATA,
     parse_pvs1_code_strength,
+    table4_lookup_initiation,
     table4_lookup_splice,
 )
 from backend.criteria.bp7 import evaluate_bp7
@@ -1747,6 +1748,39 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertEqual(result["initiation_review"]["priority"], "high")
         self.assertIn("PVS1_INIT", result["initiation_review"]["potential_branches"])
         self.assertFalse(result["initiation_review"]["is_evidence_criterion"])
+
+    def test_initiation_codon_prefill_uses_table4_without_automatic_points(self):
+        lookup = table4_lookup_initiation("BRCA2")
+        self.assertEqual(lookup["pvs1_code"], "PVS1")
+        self.assertEqual(lookup["pvs1_strength"], "Very Strong")
+        self.assertEqual(lookup["exon"], "E2")
+
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="initiation_codon",
+            p_notation="p.(Met1Val)",
+            c_notation="c.1A>G",
+            reference_transcript="NM_000059.4",
+        )
+        self.assertNotIn("PVS1", result["criteria"])
+        prefill = result["initiation_review"]["manual_review_prefill"]
+        self.assertTrue(prefill["met1_loss_confirmed"])
+        self.assertEqual(prefill["assessed_c_notation"], "c.1A>G")
+        self.assertEqual(prefill["assessed_p_notation"], "p.(Met1Val)")
+        self.assertEqual(prefill["reference_transcript"], "NM_000059.4")
+        self.assertEqual(prefill["table4_code"], "PVS1")
+        self.assertEqual(prefill["curated_strength"], "Very Strong")
+        self.assertNotIn("alternative_start_assessed", prefill)
+
+    def test_non_initiation_variant_has_no_initiation_prefill(self):
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="missense",
+            p_notation="p.(Met124Val)",
+            c_notation="c.370A>G",
+        )
+        self.assertFalse(result["initiation_review"]["recommended"])
+        self.assertEqual(result["initiation_review"]["manual_review_prefill"], {})
 
     def test_exon_duplication_uses_confirmed_tandem_input(self):
         notation = "c.(80+1_81-1)_(134+1_135-1)dup"

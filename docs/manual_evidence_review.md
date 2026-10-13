@@ -122,10 +122,12 @@ controls, variant-specific result, source and reviewer pass backend validation.
 Missing variant context, an unresolved protein position, a standalone checkbox
 or incomplete BS3 fails closed and adds no BP7 RNA points.
 
-For Met1/start-loss variants, ARIANE can show an initiation-codon review
-recommendation and prefill `met1_loss_confirmed` in the `PVS1_INIT` manual
-record. The reviewer must still complete the alternative start, upstream P/LP
-evidence, functional-impact, strength, notes, and references fields.
+For Met1/start-loss variants, ARIANE shows an initiation-codon review
+recommendation. It prefills the normalized variant context, `met1_loss_confirmed`,
+the gene-level ENIGMA Table 4 start-codon result and its source provenance. The
+criterion remains disabled until selected by a reviewer. The reviewer must still
+confirm the Appendix D alternative-start, upstream P/LP and functional-impact
+branches before submitting the structured `PVS1_INIT` record.
 
 `PS1_SPLICE` is separate from automated protein-level `PS1`. It requires a
 known Pathogenic or Likely Pathogenic reference variant, the reference
