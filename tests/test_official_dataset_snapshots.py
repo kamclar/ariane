@@ -272,6 +272,12 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
                 "pvs1_code": "PVS1",
                 "notes": "",
                 "source_row": 11,
+                "alternative_start_assessed": "yes",
+                "alternative_start_conclusion": "no_known_alternative_start",
+                "nearest_alternative_start": "p.Met18",
+                "upstream_pathogenic_evidence": "yes",
+                "functional_domain_impact": "not_applicable",
+                "appendix_figure": "Appendix D Figure 3",
             },
         )
         self.assertEqual(
@@ -281,6 +287,12 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
                 "pvs1_code": "PVS1",
                 "notes": "",
                 "source_row": 232,
+                "alternative_start_assessed": "yes",
+                "alternative_start_conclusion": "no_known_alternative_start",
+                "nearest_alternative_start": "p.Met124",
+                "upstream_pathogenic_evidence": "yes",
+                "functional_domain_impact": "not_applicable",
+                "appendix_figure": "Appendix D Figure 5",
             },
         )
         self.assertIn(
@@ -301,6 +313,22 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
             data["critical_boundaries"]["BRCA2"]["at_or_before"],
             {"pvs1_code": "PVS1", "pm5_code": "PM5_Strong (PTC)"},
         )
+
+    def test_table4_builder_preserves_appendix_d_initiation_facts(self):
+        from scripts.build_enigma_table4_snapshot import build_snapshot
+
+        source = (
+            Path(__file__).resolve().parents[1]
+            / "docs"
+            / "enigma"
+            / "v1.2"
+            / "source"
+            / "Specifications_Table4_V1.2.xlsx"
+        )
+        stored = json.loads((DATA / "enigma_table4.json").read_text(encoding="utf-8"))
+        rebuilt = build_snapshot(source)
+
+        self.assertEqual(rebuilt["initiation_rules"], stored["initiation_rules"])
 
     def test_st7_is_lossless(self):
         data = json.loads((DATA / "st7_reference_set.json").read_text(encoding="utf-8"))

@@ -39,15 +39,30 @@ def evaluate_initiation_review(
         ],
     }
     if table4.get("found"):
+        appendix_figure = table4["appendix_figure"]
+        nearest_start = table4["nearest_alternative_start"]
         prefill.update({
             "curated_strength": table4["pvs1_strength"],
+            "alternative_start_assessed": table4["alternative_start_assessed"],
+            "nearest_alternative_start": nearest_start,
+            "upstream_pathogenic_evidence": table4["upstream_pathogenic_evidence"],
+            "functional_domain_impact": table4["functional_domain_impact"],
+            "alternative_start_conclusion": table4["alternative_start_conclusion"],
+            "appendix_figure": appendix_figure,
             "initiation_flowchart_rationale": (
                 f"ENIGMA Table 4 assigns {table4['pvs1_code']} "
                 f"({table4['pvs1_strength']}) to the {gene} start-codon branch "
-                f"in {table4['exon']}. Confirm the Appendix D alternative-start, "
-                "upstream P/LP and N-terminal functional-impact checks before use."
+                f"in {table4['exon']}. {appendix_figure} records no known "
+                f"alternative start codon, identifies {nearest_start} as the "
+                "closest potential in-frame start, and reports at least one "
+                "pathogenic variant upstream. N-terminal functional impact is "
+                "not a decision node for this initiation-codon branch."
             ),
         })
+        prefill["source_references"].insert(
+            1,
+            f"ENIGMA BRCA1/2 VCEP v1.2 {appendix_figure}",
+        )
 
     return {
         "recommended": True,

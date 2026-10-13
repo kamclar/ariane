@@ -124,10 +124,12 @@ or incomplete BS3 fails closed and adds no BP7 RNA points.
 
 For Met1/start-loss variants, ARIANE shows an initiation-codon review
 recommendation. It prefills the normalized variant context, `met1_loss_confirmed`,
-the gene-level ENIGMA Table 4 start-codon result and its source provenance. The
-criterion remains disabled until selected by a reviewer. The reviewer must still
-confirm the Appendix D alternative-start, upstream P/LP and functional-impact
-branches before submitting the structured `PVS1_INIT` record.
+the gene-level ENIGMA Table 4 start-codon result, the corresponding Appendix D
+branch facts and their source provenance. For BRCA1 and BRCA2 these facts include
+the closest potential in-frame start and the recorded upstream pathogenic-variant
+evidence. A field that is not a decision node in the initiation-codon branch is
+stored explicitly as not applicable. The criterion remains disabled until it is
+selected and submitted by a reviewer; prefilled source facts do not add points.
 
 `PS1_SPLICE` is separate from automated protein-level `PS1`. It requires a
 known Pathogenic or Likely Pathogenic reference variant, the reference

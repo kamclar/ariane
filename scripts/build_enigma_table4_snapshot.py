@@ -16,6 +16,30 @@ SOURCE_URL = (
 )
 
 
+# Appendix D records the gene-level initiation-codon branch that was used to
+# derive the final Table 4 code.  Keep these source facts next to the generated
+# initiation rule so the manual-review form can reproduce the curated branch
+# without asking the reviewer to re-enter facts already fixed by ENIGMA.
+APPENDIX_D_INITIATION_FACTS = {
+    "BRCA1": {
+        "alternative_start_assessed": "yes",
+        "alternative_start_conclusion": "no_known_alternative_start",
+        "nearest_alternative_start": "p.Met18",
+        "upstream_pathogenic_evidence": "yes",
+        "functional_domain_impact": "not_applicable",
+        "appendix_figure": "Appendix D Figure 3",
+    },
+    "BRCA2": {
+        "alternative_start_assessed": "yes",
+        "alternative_start_conclusion": "no_known_alternative_start",
+        "nearest_alternative_start": "p.Met124",
+        "upstream_pathogenic_evidence": "yes",
+        "functional_domain_impact": "not_applicable",
+        "appendix_figure": "Appendix D Figure 5",
+    },
+}
+
+
 def _clean(value):
     if isinstance(value, str):
         return value.strip()
@@ -105,6 +129,7 @@ def build_snapshot(source: Path) -> dict:
                 "pvs1_code": str(code).strip(),
                 "notes": _notes(row[2], row[18]),
                 "source_row": row_number,
+                **APPENDIX_D_INITIATION_FACTS[gene],
             }
         elif marker == "PTC":
             ptc_rules[gene][exon] = {

@@ -66,14 +66,14 @@
                                         <input type="checkbox" x-model="item.evidence.met1_loss_confirmed">
                                         Met1/start-loss confirmed
                                     </label>
-                                    <label>Alternative start assessed
+                                    <label>Alternative-start review completed
                                         <select x-model="item.evidence.alternative_start_assessed">
                                             <option value="">Select</option>
                                             <option value="yes">Yes</option>
                                             <option value="no">No</option>
                                         </select>
                                     </label>
-                                    <label>Nearest alternative in-frame start
+                                    <label>Closest potential in-frame start
                                         <input type="text" x-model="item.evidence.nearest_alternative_start"
                                             placeholder="e.g. p.Met16 or none found">
                                     </label>
@@ -91,6 +91,7 @@
                                             <option value="yes">Yes</option>
                                             <option value="no">No</option>
                                             <option value="uncertain">Uncertain</option>
+                                            <option value="not_applicable">Not applicable to this branch</option>
                                         </select>
                                     </label>
                                     <label>Curated PVS1 initiation strength

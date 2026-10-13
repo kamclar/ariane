@@ -11100,13 +11100,25 @@
       "exon": "E2",
       "pvs1_code": "PVS1",
       "notes": "",
-      "source_row": 11
+      "source_row": 11,
+      "alternative_start_assessed": "yes",
+      "alternative_start_conclusion": "no_known_alternative_start",
+      "nearest_alternative_start": "p.Met18",
+      "upstream_pathogenic_evidence": "yes",
+      "functional_domain_impact": "not_applicable",
+      "appendix_figure": "Appendix D Figure 3"
     },
     "BRCA2": {
       "exon": "E2",
       "pvs1_code": "PVS1",
       "notes": "",
-      "source_row": 232
+      "source_row": 232,
+      "alternative_start_assessed": "yes",
+      "alternative_start_conclusion": "no_known_alternative_start",
+      "nearest_alternative_start": "p.Met124",
+      "upstream_pathogenic_evidence": "yes",
+      "functional_domain_impact": "not_applicable",
+      "appendix_figure": "Appendix D Figure 5"
     }
   },
   "ptc_rules": {

@@ -259,6 +259,7 @@ def suggest_strength(
             "yes",
             "no",
             "uncertain",
+            "not_applicable",
         }:
             return None
         nearest_start = (evidence.get("nearest_alternative_start") or "").strip()

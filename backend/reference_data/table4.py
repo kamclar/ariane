@@ -172,6 +172,12 @@ def table4_lookup_initiation(gene: str) -> Dict:
             "exon": None,
             "notes": "",
             "source_row": None,
+            "alternative_start_assessed": None,
+            "alternative_start_conclusion": None,
+            "nearest_alternative_start": None,
+            "upstream_pathogenic_evidence": None,
+            "functional_domain_impact": None,
+            "appendix_figure": None,
             "reason": f"No Table 4 initiation-codon rule for {gene}",
         }
 
@@ -186,6 +192,12 @@ def table4_lookup_initiation(gene: str) -> Dict:
             "exon": entry.get("exon"),
             "notes": entry.get("notes", ""),
             "source_row": entry.get("source_row"),
+            "alternative_start_assessed": entry.get("alternative_start_assessed"),
+            "alternative_start_conclusion": entry.get("alternative_start_conclusion"),
+            "nearest_alternative_start": entry.get("nearest_alternative_start"),
+            "upstream_pathogenic_evidence": entry.get("upstream_pathogenic_evidence"),
+            "functional_domain_impact": entry.get("functional_domain_impact"),
+            "appendix_figure": entry.get("appendix_figure"),
             "reason": (
                 f"Table 4 initiation-codon rule for {gene} has an unsupported "
                 f"code: {pvs1_code!r}"
@@ -199,6 +211,12 @@ def table4_lookup_initiation(gene: str) -> Dict:
         "exon": entry.get("exon"),
         "notes": entry.get("notes", ""),
         "source_row": entry.get("source_row"),
+        "alternative_start_assessed": entry.get("alternative_start_assessed"),
+        "alternative_start_conclusion": entry.get("alternative_start_conclusion"),
+        "nearest_alternative_start": entry.get("nearest_alternative_start"),
+        "upstream_pathogenic_evidence": entry.get("upstream_pathogenic_evidence"),
+        "functional_domain_impact": entry.get("functional_domain_impact"),
+        "appendix_figure": entry.get("appendix_figure"),
         "reason": (
             f"ENIGMA Table 4 assigns {pvs1_code} to {gene} initiation-codon variants"
         ),

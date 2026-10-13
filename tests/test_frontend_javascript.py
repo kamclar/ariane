@@ -187,7 +187,7 @@ component.resetManualItems();
 component.result = {
     gene: "BRCA2",
     c_notation: "c.1A>G",
-    p_notation: "p.(Met1Val)",
+    p_notation: "p.(Met1?)",
     criteria: [],
     initiation_review: {
         recommended: true,
@@ -196,14 +196,20 @@ component.result = {
             met1_loss_confirmed: true,
             assessed_gene: "BRCA2",
             assessed_c_notation: "c.1A>G",
-            assessed_p_notation: "p.(Met1Val)",
+            assessed_p_notation: "p.(Met1?)",
             reference_transcript: "NM_000059.4",
             table4_code: "PVS1",
             table4_exon: "E2",
             curated_strength: "Very Strong",
-            initiation_flowchart_rationale: "Table 4 assigns PVS1; confirm Appendix D checks.",
+            alternative_start_assessed: "yes",
+            alternative_start_conclusion: "no_known_alternative_start",
+            nearest_alternative_start: "p.Met124",
+            upstream_pathogenic_evidence: "yes",
+            functional_domain_impact: "not_applicable",
+            appendix_figure: "Appendix D Figure 5",
+            initiation_flowchart_rationale: "Table 4 and Appendix D Figure 5 assign PVS1.",
             source_citation: "ENIGMA Table 4 v1.2",
-            source_references: ["Appendix D"],
+            source_references: ["Appendix D Figure 5"],
         },
     },
 };
@@ -221,9 +227,12 @@ process.stdout.write(JSON.stringify({
     assert result["enabled"] is False
     assert result["evidence"]["met1_loss_confirmed"] is True
     assert result["evidence"]["curated_strength"] == "Very Strong"
-    assert result["evidence"]["alternative_start_assessed"] == ""
-    assert result["notes"] == "Table 4 assigns PVS1; confirm Appendix D checks."
-    assert result["references"] == "ENIGMA Table 4 v1.2\nAppendix D"
+    assert result["evidence"]["alternative_start_assessed"] == "yes"
+    assert result["evidence"]["nearest_alternative_start"] == "p.Met124"
+    assert result["evidence"]["upstream_pathogenic_evidence"] == "yes"
+    assert result["evidence"]["functional_domain_impact"] == "not_applicable"
+    assert result["notes"] == "Table 4 and Appendix D Figure 5 assign PVS1."
+    assert result["references"] == "ENIGMA Table 4 v1.2\nAppendix D Figure 5"
 
 
 def test_manual_evidence_evaluation_uses_the_prefilled_form_payload():

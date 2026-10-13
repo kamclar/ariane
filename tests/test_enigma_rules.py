@@ -1770,7 +1770,28 @@ class ClassifierIntegrationTests(unittest.TestCase):
         self.assertEqual(prefill["reference_transcript"], "NM_000059.4")
         self.assertEqual(prefill["table4_code"], "PVS1")
         self.assertEqual(prefill["curated_strength"], "Very Strong")
-        self.assertNotIn("alternative_start_assessed", prefill)
+        self.assertEqual(prefill["alternative_start_assessed"], "yes")
+        self.assertEqual(prefill["alternative_start_conclusion"], "no_known_alternative_start")
+        self.assertEqual(prefill["nearest_alternative_start"], "p.Met124")
+        self.assertEqual(prefill["upstream_pathogenic_evidence"], "yes")
+        self.assertEqual(prefill["functional_domain_impact"], "not_applicable")
+        self.assertEqual(prefill["appendix_figure"], "Appendix D Figure 5")
+        self.assertIn("p.Met124", prefill["initiation_flowchart_rationale"])
+
+    def test_unknown_met1_consequence_gets_complete_brca2_initiation_prefill(self):
+        result = evaluate_variant(
+            gene="BRCA2",
+            variant_type="initiation_codon",
+            p_notation="p.(Met1?)",
+            c_notation="c.1A>G",
+            reference_transcript="NM_000059.4",
+        )
+
+        self.assertNotIn("PVS1", result["criteria"])
+        prefill = result["initiation_review"]["manual_review_prefill"]
+        self.assertEqual(prefill["assessed_p_notation"], "p.(Met1?)")
+        self.assertEqual(prefill["nearest_alternative_start"], "p.Met124")
+        self.assertEqual(prefill["curated_strength"], "Very Strong")
 
     def test_non_initiation_variant_has_no_initiation_prefill(self):
         result = evaluate_variant(

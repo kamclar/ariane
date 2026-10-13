@@ -463,13 +463,13 @@ class ManualStrengthSuggestionTests(unittest.TestCase):
         evidence = {
             "met1_loss_confirmed": True,
             "alternative_start_assessed": "yes",
-            "nearest_alternative_start": "p.Met16",
+            "nearest_alternative_start": "p.Met124",
             "upstream_pathogenic_evidence": "yes",
-            "functional_domain_impact": "yes",
-            "curated_strength": "Moderate",
-            "initiation_flowchart_rationale": "start-loss flowchart supports PVS1_Moderate",
+            "functional_domain_impact": "not_applicable",
+            "curated_strength": "Very Strong",
+            "initiation_flowchart_rationale": "Appendix D Figure 5 supports PVS1",
         }
-        self.assertEqual(suggest_strength("PVS1_INIT", evidence), "Moderate")
+        self.assertEqual(suggest_strength("PVS1_INIT", evidence), "Very Strong")
         evidence["met1_loss_confirmed"] = False
         self.assertIsNone(suggest_strength("PVS1_INIT", evidence))
 

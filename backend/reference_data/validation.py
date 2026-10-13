@@ -98,6 +98,30 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                 f"Required ENIGMA Table 4 initiation rule has unknown PVS1 code at "
                 f"{gene}: {initiation.get('pvs1_code')!r}"
             )
+        allowed_initiation_facts = {
+            "alternative_start_assessed": {"yes", "no"},
+            "alternative_start_conclusion": {
+                "known_alternative_start",
+                "no_known_alternative_start",
+                "uncertain",
+            },
+            "upstream_pathogenic_evidence": {"yes", "no", "not_applicable"},
+            "functional_domain_impact": {"yes", "no", "uncertain", "not_applicable"},
+        }
+        invalid_facts = {
+            key: initiation.get(key)
+            for key, allowed in allowed_initiation_facts.items()
+            if initiation.get(key) not in allowed
+        }
+        if (
+            invalid_facts
+            or not initiation.get("nearest_alternative_start")
+            or not initiation.get("appendix_figure")
+        ):
+            raise RuntimeError(
+                "Required ENIGMA Table 4 initiation rule lacks its Appendix D "
+                f"branch facts at {gene}: {invalid_facts}"
+            )
     for gene, boundary in table4.get("critical_boundaries", {}).items():
         if boundary.get("exon") not in table4["exon_ranges"].get(gene, {}):
             raise RuntimeError(
