@@ -53,9 +53,13 @@ které ENIGMA BRCA1/2 VCEP vytvořil podle specifikace v1.2 a ve kterých je
 konečná RNA síla výslovně určena.
 
 Runtime používá checksumovaný lokální registr, ne živý fallback. První registr
-je záměrně označen jako neúplný. Zbývá zavést pravidelný export nových ERepo
-záznamů, odbornou kontrolu kandidátů a vydání nové verze registru s checksumem.
-Do té doby nepřítomnost varianty v registru nesmí být interpretována jako
+je záměrně označen jako neúplný. Týdenní hlídač nyní porovnává ERepo se
+zaznamenaným stavem zdroje. Při změně vytvoří nebo aktualizuje GitHub issue s
+rozdílem. Samostatně spuštěný workflow umí stáhnout kandidátní snapshot,
+porovnat záznamy a kritéria, spustit úplné testy a připravit draft pull request.
+Nový registr se však neaktivuje automaticky: kandidáty musí odborně zkontrolovat
+člověk a změna vstoupí do ARIANE až po schválení a sloučení pull requestu.
+Nepřítomnost varianty v registru nadále nesmí být interpretována jako
 nepřítomnost RNA evidence.
 
 ## 6. PP4/BP5: rozdíl mezi combined LR a štítkem zdrojového tracku
@@ -118,6 +122,38 @@ GRCh37 i GRCh38. Nový provider musí jednoznačně kontrolovat referenční ale
 normalizaci indelů, transkript a assembly. Nejednoznačný nebo neúplný výsledek
 musí zůstat nedostupný. Po validaci lze provider připojit přes existující
 souřadnicový manifest bez změny klasifikačního DAGu.
+
+## Stav automatizace aktualizace zdrojů
+
+ARIANE odděluje zjištění změny, přípravu kandidátních dat, odborné schválení a
+produkční nasazení. Novější vzdálený zdroj proto nikdy sám nepřepíše aktivní
+snapshot ani klasifikační politiku.
+
+- Týdenní source watch kontroluje ERepo, UCSC ENIGMA clinical LR, ClinGen CSpec
+  a dostupnost odpovídajících produktů gnomAD. Změna zdroje je review událost,
+  nikoli chyba CI. Vznikne deduplikované GitHub issue s identitou zdroje,
+  zjištěným rozdílem a navrženým dalším krokem. Skutečné technické selhání
+  kontroly zůstává červenou chybou workflow.
+- Pro ERepo lze připravit kandidátní registr včetně rozdílu záznamů a kritérií.
+  Pro UCSC clinical LR lze připravit kandidátní snapshot včetně kontroly
+  checksumu nástroje `bigBedToBed` a rozdílu hodnot LR, PP4/BP5 a směru
+  evidence. Obě cesty spustí úplné testy a vytvoří pouze draft pull request.
+- Změna CSpec vytvoří metodický report s verzí, revizí, datem a stavem vydání.
+  Neimplementuje automaticky nová pravidla, protože změnu musí nejprve odborně
+  přeložit a validovat člověk.
+- U gnomAD se sleduje identita aktivních Hail objektů a dostupnost stejného
+  produktu v novější verzi. Automatický přechod ani přestavba snapshotu se
+  neprovádí: je nutné posoudit release, kohortu, coverage, schéma a kompatibilitu
+  populační politiky.
+- SpliceAI profil a kurátorované lokální registry mají další ruční kontrolu
+  naplánovanou na 1. února 2027. Referenční transkripty a souřadnicové zdroje na
+  1. května 2027.
+
+Aktivní data se změní teprve po odborném schválení, sloučení verzovaného pull
+requestu a samostatném nasazení. Přesný provozní postup a odpovědnosti jsou v
+[`source_freshness_and_update_policy.md`](source_freshness_and_update_policy.md);
+technické vazby zdrojů jsou v
+[`implementation_and_data_sources.md`](implementation_and_data_sources.md).
 
 ## Již opravené auditní body
 
