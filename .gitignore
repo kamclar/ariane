@@ -113,5 +113,7 @@ htmlcov/
 !/docs/source_freshness_and_update_policy.md
 !/docs/enigma/
 !/docs/enigma/**
+!/docs/source_update_reviews/
+!/docs/source_update_reviews/**
 data/spliceai/build/
 /experiments/spliceai_distance/artifacts/build/

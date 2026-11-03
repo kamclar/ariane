@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 from scripts.prepare_source_update import _clinical_lr_diff, _increment_patch_version
 from scripts.sync_source_watch_issue import MARKER_PREFIX, build_issue_body
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_issue_body_links_report_and_manual_candidate_workflow() -> None:
@@ -40,6 +44,21 @@ def test_candidate_version_increment_changes_only_patch(tmp_path: Path) -> None:
     assert previous == "1.9.36"
     assert candidate == "1.9.37"
     assert version_path.read_text(encoding="utf-8") == 'ARIANE_VERSION = "1.9.37"\n'
+
+
+def test_generated_source_update_review_is_not_gitignored() -> None:
+    result = subprocess.run(
+        [
+            "git",
+            "check-ignore",
+            "--quiet",
+            "docs/source_update_reviews/example.md",
+        ],
+        cwd=REPOSITORY_ROOT,
+        check=False,
+    )
+
+    assert result.returncode == 1
 
 
 def test_clinical_lr_diff_highlights_threshold_and_direction_changes() -> None:
