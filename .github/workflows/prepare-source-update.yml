@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - enigma_erepo_vcep_assertions
+          - enigma_clinical_lr
 
 permissions:
   contents: write
@@ -40,7 +41,7 @@ jobs:
       - name: Build candidate snapshot and review report
         id: candidate
         run: |
-          review_path="docs/source_update_reviews/enigma_erepo_$(date -u +%F).md"
+          review_path="docs/source_update_reviews/${{ inputs.source }}_$(date -u +%F).md"
           python scripts/prepare_source_update.py \
             --source "${{ inputs.source }}" \
             --review-output "$review_path" \
@@ -67,16 +68,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch --create "$branch"
           git add \
-            backend/data/enigma_erepo_vcep_registry.json \
-            backend/data/enigma_erepo_vcep_registry.metadata.json \
             backend/version.py \
-            data/sources/source_watch_registry.json \
+            backend/data \
+            data/precomputed \
+            data/sources \
             docs/source_update_reviews
-          git commit -m "data: prepare reviewed ENIGMA ERepo update"
+          git commit -m "data: prepare reviewed ${{ inputs.source }} update"
           git push --set-upstream origin "$branch"
           gh pr create \
             --base "${{ github.event.repository.default_branch }}" \
             --head "$branch" \
             --draft \
-            --title "Data update: ClinGen ERepo ENIGMA assertions" \
+            --title "Data update: ${{ inputs.source }}" \
             --body-file "${{ steps.candidate.outputs.review_path }}"

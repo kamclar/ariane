@@ -54,7 +54,8 @@
       "selected_rows_sha256": "34b2ccbae0d644bb9ca5f45f433f6e64d53163b828d587ce366e2006fc9c0f07",
       "selected_row_count": 180,
       "selected_rows_observed_utc": "2026-09-14T16:50:09Z",
-      "activation_command": "python scripts/build_enigma_erepo_vcep_registry.py"
+      "candidate_workflow": "draft_pull_request",
+      "activation_command": "python scripts/prepare_source_update.py --source enigma_erepo_vcep_assertions --review-output docs/source_update_reviews/erepo_candidate.md --write"
     },
     {
       "id": "enigma_clinical_lr",
@@ -63,7 +64,8 @@
       "cadence_days": 30,
       "official_url": "https://hgdownload.soe.ucsc.edu/hubs/enigma/enigma.html",
       "manifest_path": "data/sources/enigma/clinical_lr_sources.manifest.json",
-      "activation_command": "python scripts/build_enigma_clinical_lr_snapshot.py"
+      "candidate_workflow": "draft_pull_request",
+      "activation_command": "python scripts/prepare_source_update.py --source enigma_clinical_lr --review-output docs/source_update_reviews/clinical_lr_candidate.md --write"
     },
     {
       "id": "gnomad_population_data",
@@ -79,6 +81,7 @@
       "name": "SpliceAI scoring profile and pinned model image",
       "checker": "manual",
       "official_url": "https://github.com/Illumina/SpliceAI",
+      "next_review_due": "2027-02-01",
       "review_trigger": "ENIGMA specification, model, licence or pinned container change",
       "tracked_files": [
         "data/spliceai/enigma_v1_2_spliceai_profile.json"
@@ -89,6 +92,7 @@
       "id": "reference_and_coordinate_bundle",
       "name": "Reference transcripts and coordinate sources",
       "checker": "manual",
+      "next_review_due": "2027-05-01",
       "review_trigger": "reference transcript, genome assembly, HGVS engine or source release change",
       "tracked_files": [
         "data/reference/panel/panel_manifest.json",
@@ -100,6 +104,7 @@
       "id": "curated_auxiliary_registries",
       "name": "Founder, residue and exon-CNV curated registries",
       "checker": "manual",
+      "next_review_due": "2027-02-01",
       "review_trigger": "new VCEP guidance, curated assertion or source publication",
       "tracked_files": [
         "backend/data/brca_pathogenic_founder_variants.json",

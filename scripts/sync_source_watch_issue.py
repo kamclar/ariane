@@ -27,18 +27,23 @@ def build_issue_body(
     prepare_url = (
         f"https://github.com/{repository}/actions/workflows/prepare-source-update.yml"
     )
+    actions = [f"- [Source-watch run]({run_url})"]
+    if any(
+        source.get("review_required")
+        and source.get("candidate_workflow") == "draft_pull_request"
+        for source in report.get("sources", [])
+    ):
+        actions.append(f"- [Prepare a draft update pull request]({prepare_url})")
     return "\n".join(
         [
             markdown.rstrip(),
             "",
             "## GitHub actions",
             "",
-            f"- [Source-watch run]({run_url})",
-            f"- [Prepare a draft update pull request]({prepare_url})",
+            *actions,
             "",
-            "The preparation workflow is manual. It does not deploy the update. "
-            "The active ARIANE data change only after the resulting pull request "
-            "is reviewed, approved and merged.",
+            "Candidate preparation is manual and does not deploy the update. Active "
+            "ARIANE data change only after expert review and merge.",
             "",
             f"{MARKER_PREFIX}{fingerprint} -->",
             "",

@@ -103,6 +103,13 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
             raise SourceWatchConfigurationError(
                 f"Automated source {source['id']!r} needs a positive cadence_days"
             )
+        if checker == "manual" and source.get("next_review_due"):
+            try:
+                date.fromisoformat(str(source["next_review_due"]))
+            except ValueError as exc:
+                raise SourceWatchConfigurationError(
+                    f"Manual source {source['id']!r} has an invalid next_review_due"
+                ) from exc
         for field in ("manifest_path", "metadata_path", "registry_path"):
             if source.get(field):
                 local_path = _project_path(str(source[field]))
@@ -542,7 +549,15 @@ def check_gnomad_releases(source: dict[str, Any], timeout: float) -> dict[str, A
     module = _load_script_module(
         "ariane_gnomad_update_check", "refresh_gnomad_panel_snapshot.py"
     )
-    specialised = module.check_updates(_project_path(source["manifest_path"]))
+    try:
+        specialised = module.check_updates(_project_path(source["manifest_path"]))
+    except module.GnomadSourceIdentityChangedError as exc:
+        return {
+            "status": "upstream_changed",
+            "review_required": True,
+            "identity_change": exc.detail,
+            "automatic_activation": False,
+        }
     review_required = specialised.get("activation_status") == "review_required"
     return {
         "status": "update_available" if review_required else "current",
@@ -613,6 +628,7 @@ def run_checks(
             "cadence_days": source.get("cadence_days"),
             "official_url": source.get("official_url"),
             "activation_command": source.get("activation_command"),
+            "candidate_workflow": source.get("candidate_workflow"),
             "checked_utc": checked_at,
         }
         try:
@@ -755,6 +771,67 @@ def _render_source_details(lines: list[str], source: dict[str, Any]) -> None:
         )
     if source.get("candidate_diff"):
         render_erepo_diff(lines, source["candidate_diff"])
+    if source.get("checker") == "clinical_lr":
+        lines.extend(
+            [
+                "",
+                "| Pinned release | Remote dataVersion | BigBed changed |",
+                "|---|---|---|",
+                (
+                    f"| {_markdown_cell(source.get('pinned_release_date'))} | "
+                    f"{_markdown_cell(source.get('remote_data_version'))} | "
+                    f"{source.get('pinned_bigbed_sha256') != source.get('remote_bigbed_sha256')} |"
+                ),
+            ]
+        )
+    if source.get("checker") == "gnomad_releases":
+        if source.get("identity_change"):
+            change = source["identity_change"]
+            lines.extend(
+                [
+                    "",
+                    "### Active object identity changed",
+                    "",
+                    f"Dataset: `{change.get('dataset')}`  ",
+                    f"Object: `{change.get('source_type')}`  ",
+                    f"Field: `{change.get('field')}`  ",
+                    f"Pinned: `{change.get('expected')}`  ",
+                    f"Remote: `{change.get('observed')}`",
+                ]
+            )
+        compatible = source.get("newer_equivalent_product_releases", {})
+        lines.extend(
+            [
+                "",
+                f"Active releases: `{source.get('active_releases', [])}`  ",
+                f"Newer equivalent products: `{compatible}`",
+            ]
+        )
+        checks = source.get("equivalent_product_checks", [])
+        if checks:
+            lines.extend(
+                [
+                    "",
+                    "| Dataset | Candidate release | Equivalent product | HTTP |",
+                    "|---|---|---|---|",
+                ]
+            )
+            for check in checks:
+                lines.append(
+                    f"| {_markdown_cell(check.get('dataset'))} | "
+                    f"{_markdown_cell(check.get('candidate_release'))} | "
+                    f"{_markdown_cell(check.get('equivalent_sites_product_available'))} | "
+                    f"{_markdown_cell(check.get('http_status'))} |"
+                )
+    if source.get("checker") == "manual":
+        lines.extend(
+            [
+                "",
+                f"Review due: `{source.get('next_review_due')}`  ",
+                f"Trigger: {_markdown_cell(source.get('review_trigger'))}  ",
+                f"Tracked files: `{source.get('tracked_files', [])}`",
+            ]
+        )
     if source.get("records"):
         lines.extend(
             [
@@ -803,7 +880,12 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
         ]
     )
-    if report["overall_status"] == "review_required":
+    draft_supported = any(
+        source.get("review_required")
+        and source.get("candidate_workflow") == "draft_pull_request"
+        for source in report["sources"]
+    )
+    if report["overall_status"] == "review_required" and draft_supported:
         lines.extend(
             [
                 "## Approval path",
@@ -812,6 +894,17 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "draft pull request. Review its source provenance, record-level "
                 "diff and test results. The active snapshot changes only after "
                 "the pull request is approved and merged.",
+                "",
+            ]
+        )
+    elif report["overall_status"] == "review_required":
+        lines.extend(
+            [
+                "## Approval path",
+                "",
+                "This source does not have a safe automatic snapshot builder. "
+                "Use the report as a methodological review package; update the "
+                "implementation and baseline only after expert review.",
                 "",
             ]
         )

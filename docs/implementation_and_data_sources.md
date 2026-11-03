@@ -2635,6 +2635,15 @@ sestavit kandidátní snapshot a otevřít draft pull request. Kandidát se vytv
 pouze v GitHub runneru a aktivní data ani server nemění. Aktualizace vstoupí do
 větve `main` až po odborném schválení a merge pull requestu.
 
+Automatická kandidátní větev je dostupná pro ERepo ENIGMA assertions a UCSC
+clinical LR. Clinical-LR kandidát stáhne a archivuje nový BigBed, ověří připnutý
+`bigBedToBed`, přestaví odvozený snapshot a připraví diff LR, PP4/BP5 prahových
+přechodů a změn směru evidence. CSpec změny dostávají metodický report s verzí,
+revizí a datem, nikoli automatickou implementaci pravidel. gnomAD report odlišuje
+novější ekvivalentní datový produkt od jiného typu release a změnu identity
+aktivního objektu hlásí jako review událost. Rebuild gnomAD zůstává samostatný,
+protože vyžaduje Hail, kontrolu coverage a schválený výběr release.
+
 Žádný checker nesmí zapisovat do aktivních dat, měnit manifest ani aktivovat
 release. Každá nalezená změna nejprve vytvoří kandidátní podklad. Aktivace
 vyžaduje kontrolu release notes a ENIGMA kompatibility, zdrojovou identitu,

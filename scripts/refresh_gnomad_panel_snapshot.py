@@ -36,6 +36,31 @@ DEFAULT_COVERAGE = GNOMAD_DIR / "gnomad_brca_coverage_snapshot.json"
 FAF_CONFIDENCE = 0.95
 
 
+class GnomadSourceIdentityChangedError(RuntimeError):
+    """Raised when an active official gnomAD object no longer matches its pin."""
+
+    def __init__(
+        self,
+        *,
+        dataset: str,
+        source_type: str,
+        field: str,
+        expected: object,
+        observed: object,
+    ) -> None:
+        self.detail = {
+            "dataset": dataset,
+            "source_type": source_type,
+            "field": field,
+            "expected": expected,
+            "observed": observed,
+        }
+        super().__init__(
+            f"official {source_type} source identity changed for {dataset}: "
+            f"{field} expected {expected!r}, observed {observed!r}"
+        )
+
+
 def _canonical_sha256(value: Any) -> str:
     encoded = json.dumps(
         value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
@@ -255,10 +280,12 @@ def _verify_sources(manifest: dict) -> dict[str, dict[str, dict]]:
                     observed_value = _hash_header_parts(observed_value)
                     expected_value = _hash_header_parts(expected_value)
                 if observed_value != expected_value:
-                    raise RuntimeError(
-                        f"official {source_type} source identity changed for "
-                        f"{dataset['dataset_key']}: {field} expected "
-                        f"{expected.get(field)!r}, observed {observed.get(field)!r}"
+                    raise GnomadSourceIdentityChangedError(
+                        dataset=dataset["dataset_key"],
+                        source_type=source_type,
+                        field=field,
+                        expected=expected.get(field),
+                        observed=observed.get(field),
                     )
             dataset_verified[source_type] = observed
         verified[dataset["dataset_key"]] = dataset_verified

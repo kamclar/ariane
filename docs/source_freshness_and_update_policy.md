@@ -91,6 +91,20 @@ provenanci a review report, provede cílené testy a otevře **draft pull reques
 Nic nenasazuje na server. Schválením je až odborná kontrola a merge pull requestu;
 produkční nasazení zůstává samostatným krokem.
 
+Draft kandidát je podporován pro ClinGen ERepo ENIGMA assertions a UCSC ENIGMA
+clinical LR. ERepo kandidát obsahuje record-level a criterion-level diff.
+Clinical-LR kandidát ověří checksum převodního nástroje, převede BigBed, obnoví
+snapshot a vypíše přidané, odstraněné a změněné varianty, přechody PP4/BP5 prahů
+a změny směru evidence. Pro CSpec a gnomAD vzniká podrobný review report, ale ne
+automaticky aktivovatelný snapshot: CSpec může vyžadovat změnu pravidel a gnomAD
+vyžaduje vědomý výběr release, kontrolu kohort a coverage a samostatný Hail build.
+
+Změna identity již připnutého gnomAD objektu je source-review událost, nikoli
+technická chyba kontroly. Skutečná nedostupnost endpointu nebo nečitelný formát
+zůstává chybou workflow. Zdroje bez bezpečného strojového endpointu mají vedle
+událostních triggerů také datum příští manuální revize; po jeho překročení vznikne
+stejné review upozornění.
+
 ## Postup po nálezu změny
 
 1. Ověřit, že nejde jen o technickou změnu endpointu nebo transientní chybu.

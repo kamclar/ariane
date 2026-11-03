@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -352,6 +353,37 @@ def test_run_checks_distinguishes_review_from_operational_failure() -> None:
     assert failed_report["sources"][0]["error_type"] == "TimeoutError"
 
 
+def test_gnomad_identity_change_is_review_notice_not_check_failure(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class IdentityChanged(RuntimeError):
+        detail = {
+            "dataset": "gnomad_v3",
+            "source_type": "sites",
+            "field": "etag",
+            "expected": "old",
+            "observed": "new",
+        }
+
+    def changed(_path: Path) -> None:
+        raise IdentityChanged("identity changed")
+
+    module = SimpleNamespace(
+        GnomadSourceIdentityChangedError=IdentityChanged,
+        check_updates=changed,
+    )
+    monkeypatch.setattr(source_watch, "_load_script_module", lambda *_args: module)
+
+    result = source_watch.check_gnomad_releases(
+        {"manifest_path": "backend/data/gnomad/gnomad_panel_manifest.json"},
+        1,
+    )
+
+    assert result["status"] == "upstream_changed"
+    assert result["review_required"] is True
+    assert result["identity_change"]["field"] == "etag"
+
+
 def test_markdown_explains_review_notice_and_candidate_diff() -> None:
     report = {
         "overall_status": "review_required",
@@ -362,6 +394,7 @@ def test_markdown_explains_review_notice_and_candidate_diff() -> None:
                 "checker": "erepo_export",
                 "status": "update_available",
                 "review_required": True,
+                "candidate_workflow": "draft_pull_request",
                 "official_url": "https://example.test",
                 "activation_command": "python build.py",
                 "candidate_diff": {

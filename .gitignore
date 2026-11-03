@@ -38,8 +38,8 @@ build/
 !/data/sources/source_watch_registry.json
 !/data/sources/enigma/
 /data/sources/enigma/*
-!/data/sources/enigma/BRCAmfa.hg38.2026-08-18.bb
-!/data/sources/enigma/BRCAmfa.hg38.2026-08-18.bed
+!/data/sources/enigma/BRCAmfa.hg38.*.bb
+!/data/sources/enigma/BRCAmfa.hg38.*.bed
 !/data/sources/enigma/clinical_lr_sources.manifest.json
 !/data/sources/enigma/exon_cnv_evidence_manifest.json
 /data/precomputed/brca_exchange_*.tsv
