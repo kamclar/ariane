@@ -50,10 +50,13 @@
       "official_url": "https://erepo.clinicalgenome.org/evrepo/",
       "metadata_path": "backend/data/enigma_erepo_vcep_registry.metadata.json",
       "registry_path": "backend/data/enigma_erepo_vcep_registry.json",
-      "genes": ["BRCA1", "BRCA2"],
-      "selected_rows_sha256": "34b2ccbae0d644bb9ca5f45f433f6e64d53163b828d587ce366e2006fc9c0f07",
-      "selected_row_count": 180,
-      "selected_rows_observed_utc": "2026-09-14T16:50:09Z",
+      "genes": [
+        "BRCA1",
+        "BRCA2"
+      ],
+      "selected_rows_sha256": "b57b3524af9c79c85e53e1fd81fbbb8f46df4f648209912b35bebd5e589ac0f4",
+      "selected_row_count": 200,
+      "selected_rows_observed_utc": "2026-11-03T17:46:37.214729+00:00",
       "candidate_workflow": "draft_pull_request",
       "activation_command": "python scripts/prepare_source_update.py --source enigma_erepo_vcep_assertions --review-output docs/source_update_reviews/erepo_candidate.md --write"
     },

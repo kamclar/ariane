@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": "2026-09-12",
+  "registry_version": "2026-11-03",
   "status": "active",
   "description": "Complete local snapshot of published ENIGMA BRCA1/2 VCEP assertions from ClinGen Evidence Repository. Current v1.2 assertions may support automatic workflows. Historical assertions are display-only.",
   "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
@@ -13,24 +13,24 @@
     "clinvar_review_stars": "display_only_not_a_vcep_eligibility_source",
     "network_fallback": false
   },
-  "record_count": 180,
+  "record_count": 200,
   "classification_counts": {
     "Benign": 22,
-    "Likely Benign": 10,
-    "Likely Pathogenic": 78,
-    "Pathogenic": 32,
-    "Uncertain Significance": 38
+    "Likely Benign": 11,
+    "Likely Pathogenic": 82,
+    "Pathogenic": 38,
+    "Uncertain Significance": 47
   },
   "assertion_method_version_counts": {
-    "": 46,
+    "": 56,
     "1.0.0": 40,
-    "1.1.0": 50,
-    "1.2.0": 44
+    "1.1.0": 51,
+    "1.2.0": 53
   },
   "source_status_counts": {
-    "current_vcep_assertion": 44,
-    "historical_vcep_assertion": 90,
-    "unversioned_vcep_assertion": 46
+    "current_vcep_assertion": 53,
+    "historical_vcep_assertion": 91,
+    "unversioned_vcep_assertion": 56
   },
   "records": [
     {
@@ -465,6 +465,40 @@
       "source_status": "historical_vcep_assertion"
     },
     {
+      "uuid": "3db6e1f9-314a-4f78-ac0a-2bc384813ed7",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.247G>T",
+      "p_notation": "p.(Val83Phe)",
+      "classification": "Uncertain Significance",
+      "caid": "CA10601661",
+      "clinvar_variation_id": "409332",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PM2_Supporting",
+        "PP3",
+        "BP5"
+      ],
+      "criteria_not_met": [
+        "PS3",
+        "BS3"
+      ],
+      "interpretation_summary": "The c.247G>T variant in BRCA1 is a missense variant predicted to cause substitution of Valine by Phenylalanine at amino acid 83 (p.(Val83Phe)). This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This BRCA1 missense variant is within a key functional domain and a SpliceAI score of 0.12 indicates an unclear predicted impact on splicing (score threshold 0.1-0.2). The computational predictor BayesDel (noAF) gives a score of 0.47, above the recommended threshold of 0.28 for prediction of impact on BRCA1 function via protein change (PP3 met). Reported by 2 calibrated studies with discordant results. Exhibits protein function similar to pathogenic control variants (PMID:30209399) and between what was observed for benign and pathogenic control variants (PMID:35659930) (PS3 and BS3 not met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.47 (based on Family History LR=0.47), within the thresholds for supporting benign evidence (LR >0.23 & ≤0.48) (BP5 met; PMID: 31853058). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PP3, BP5).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1530970787",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA1 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/3db6e1f9-314a-4f78-ac0a-2bc384813ed7",
+      "source_status": "current_vcep_assertion"
+    },
+    {
       "uuid": "ca89c16c-f8e4-46d9-89ba-b95ad2c5a405",
       "gene": "BRCA1",
       "transcript": "NM_007294.4",
@@ -498,6 +532,111 @@
       "published_date": "2026-01-05",
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/ca89c16c-f8e4-46d9-89ba-b95ad2c5a405",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
+      "uuid": "4a9c9a42-3b07-4023-8d52-47e60c2bc398",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.286G>C",
+      "p_notation": "p.(Asp96His)",
+      "classification": "Likely Pathogenic",
+      "caid": "CA10601582",
+      "clinvar_variation_id": "462596",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PM2_Supporting",
+        "PS3",
+        "PP3"
+      ],
+      "criteria_not_met": [
+        "BP7"
+      ],
+      "interpretation_summary": "The c.286G>C variant in BRCA1 is a missense variant predicted to cause substitution of Aspartic acid by Histidine at amino acid 96 (p.(Asp96His)). This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This BRCA1 missense variant is within a key functional domain and a SpliceAI score of 0.06 predicts no impact on splicing (score threshold ≤0.1). The computational predictor BayesDel (noAF) gives a score of 0.49, above the recommended threshold of 0.28 for prediction of impact on BRCA1 function via protein change (PP3 met). Reported by two calibrated studies to exhibit protein function similar to pathogenic control variants (PMIDs: 35659930, 30209399) (PS3 met). mRNA experimental analysis indicates no impact on splicing (PMID: 32123317) but is not applied as strong evidence against pathogenicity since missense impact has been reported (BP7_Strong (RNA) not met). In summary, this variant meets the criteria to be classified as a Likely pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PP3, PS3).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1530970787",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA1 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/4a9c9a42-3b07-4023-8d52-47e60c2bc398",
+      "source_status": "current_vcep_assertion"
+    },
+    {
+      "uuid": "948d378a-c849-4351-b210-182d0e810ace",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.301+1G>C",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA055552",
+      "clinvar_variation_id": "267517",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1_Supporting",
+        "BP5"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "PS3",
+        "BS1",
+        "BS3",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.301+1G>C variant is an intronic variant within the native donor 1,2 splice site occurring in intron 5(6) of the BRCA1 gene. Legacy exon numbering is shown in parentheses. The Total GrpMax filtering allele frequency (the lower threshold of the 95% CI) in gnomAD v4.1 is 0.00000615 in the Non-Finnish European genetic ancestry group (based on 13/1178920 alleles) which is below the ENIGMA BRCA1/2 VCEP threshold (>0.00002) for BS1_Supporting and does not meet any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met). Intronic variant, functional data considered only from assays that measure effect via mRNA and protein. Reported by two calibrated studies with discordant results: shown by one calibrated study incorporating mRNA splicing effects to exhibit function similar to benign control variants (unpublished report, Dace and Findlay 2023, https://www.cangene-canvaruk.org/_files/ugd/ed948a_0399a952a1dc4767bed4364a04f6408b.pdf). Variant also reported by another calibrated study incorporating mRNA splicing to exhibit a partial impact on protein function (intermediate homologous recombination activity at 40-45%) (Mesman et al., unpublished). Variant has also been reported to exhibit function similar to pathogenic control variants (PMID:30209399), however this result has been updated in the unpublished report by Dace and Findlay 2023 (see above) due to a technical issue (PS3 and BS3 not met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.16 (based on Cosegregation LR=0.25; Family History LR=0.27; Case-Control LR=2.3), within the thresholds for moderate benign evidence (LR >0.05 & ≤0.23) (BP5_Moderate met; PMIDs: 31853058, 40413188, Internal lab contributor). This variant is reported to result in aberrant mRNA splicing. Assay type: RT-PCR demonstrated that the variant impacts splicing by use of a cryptic site 9 nt upstream from 5' ss (PMID: 29750258). RT-PCRseq demonstrated that the variant impacts splicing by skipping part of exon 5(6) (r.293_301del, p.Gly98_Tyr101delinsAsp), which is in-frame. The percent of aberrant in-frame transcript produced was >40%, using a non-allele specific quantitative assessment with sequence analysis (Ambry internal data). The VCEP estimates up to 10% full-length transcript is produced by the variant allele. Preliminary code strength determined by comparison of results to PVS1 decision tree and assessment of mRNA splicing data (PVS1_Supporting (RNA) met). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PVS1_Supporting (RNA), BP5_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/948d378a-c849-4351-b210-182d0e810ace",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
+      "uuid": "11fd7b4c-dea3-483e-b233-e882b798e0f8",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.301+1G>T",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA055557",
+      "clinvar_variation_id": "246510",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1_Supporting",
+        "PP4_Moderate"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "PS3",
+        "BS1",
+        "BS3",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.301+1G>T variant is an intronic variant within the native donor 1,2 splice site occurring in intron 5(6) of the BRCA1 gene. Legacy exon numbering is shown in parentheses. The Total GrpMax filtering allele frequency (the lower threshold of the 95% CI) in gnomAD v4.1 is 0.00000615 in the Non-Finnish European genetic ancestry group (based on 13/1178926 alleles) which is below the ENIGMA BRCA1/2 VCEP threshold (>0.00002) for BS1_Supporting and does not meet any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met). Intronic variant, functional data considered only from assays that measure effect via mRNA and protein. Reported by two calibrated studies with discordant results: shown by one calibrated study incorporating mRNA splicing effects to exhibit function similar to benign control variants (unpublished report, Dace and Findlay 2023, https://www.cangene-canvaruk.org/_files/ugd/ed948a_0399a952a1dc4767bed4364a04f6408b.pdf). Variant also reported by another calibrated study incorporating mRNA splicing to exhibit a partial impact on protein function (intermediate homologous recombination activity at 40-45%) (Mesman et al., unpublished). Variant has also been reported to exhibit function similar to pathogenic control variants (PMID:30209399), however this result has been updated in the unpublished report by Dace and Findlay 2023 (see above) due to a technical issue (PS3 and BS3 not met). This variant is predicted to cause aberrant splicing by use of a cryptic splice site 9 nt upstream from 5' ss (PVS1_Supporting met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 11.9 (based on Case-Control LR=11.9), within the thresholds for moderate evidence towards pathogenicity (LR ≥4.3 & <18.7) (PP4_Moderate met; PMID: 40413188). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PVS1_Supporting, PP4_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/11fd7b4c-dea3-483e-b233-e882b798e0f8",
       "source_status": "unversioned_vcep_assertion"
     },
     {
@@ -836,6 +975,44 @@
       "source_status": "unversioned_vcep_assertion"
     },
     {
+      "uuid": "8ebde3c1-8c4c-45b9-b341-f3d56e130138",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.441G>C",
+      "p_notation": "p.(Leu147Phe)",
+      "classification": "Likely Benign",
+      "caid": "CA056114",
+      "clinvar_variation_id": "220023",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PP3",
+        "BP5_Strong",
+        "BS2_Supporting"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "PVS1",
+        "BS1",
+        "BS3",
+        "BP7",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.441G>C variant in BRCA1 is a missense variant predicted to cause substitution of Leucine by Phenylalanine at amino acid 147 (p.(Leu147Phe)). Legacy exon numbering is shown in parentheses. The Total GrpMax filtering allele frequency (the lower threshold of the 95% CI) in gnomAD v4.1 is 0.00001221 in the Non-Finnish European genetic ancestry group (based on 22/1179212) which is below the ENIGMA BRCA1/2 VCEP threshold (>0.00002) for BS1_Supporting and does not meet any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met). This BRCA1 missense variant has a SpliceAI score of 0.35, predicting an impact on splicing (score threshold >0.20) (PP3 met). This variant is reported to result in aberrant mRNA splicing. RT-PCR demonstrated that the variant impacts splicing by retention of intron 6(7) (PMID: 30832263) while a different RT-PCR showed no aberration (PMID: 31143303, Ambry internal data). The VCEP decided to currently not apply BP7_Strong (RNA) or PVS1 (RNA) at any strength, due to the discrepancy between the assays. Reported by one calibrated study to exhibit protein function similar to benign control variants (PMID:32546644), however the VCEP decided to not apply BS3 due to this assay being unable to measure impact on splicing and PMID: 30832263 demonstrating a splicing impact (BS3 not met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.049 (based on Family History LR=0.79; Case-Control LR=0.062), within the thresholds for strong benign evidence (LR >0.00285 & ≤0.05) (BP5_Strong met; PMIDs: 31853058, 40413188). This variant has been observed in one individual with features considered inconsistent with an FA-associated phenotype, and a pathogenic variant seen in trans (BRCA1:c.5277+1G>A) (points equated to 2, BS2_Moderate met; Internal lab contributors). In summary, this variant meets the criteria to be classified as a Likely benign variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PP3, BS2_Moderate, BP5_Strong).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/8ebde3c1-8c4c-45b9-b341-f3d56e130138",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
       "uuid": "6c49b308-3c3f-45b7-965c-d96bed67512b",
       "gene": "BRCA1",
       "transcript": "NM_007294.4",
@@ -1102,6 +1279,40 @@
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/90a8be26-130c-452a-9af7-49f94663218a",
       "source_status": "historical_vcep_assertion"
+    },
+    {
+      "uuid": "b4407a53-6c03-4cda-827d-40d769122dfd",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.5074G>A",
+      "p_notation": "p.(Asp1692Asn)",
+      "classification": "Pathogenic",
+      "caid": "CA003201",
+      "clinvar_variation_id": "37632",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1_Strong",
+        "PM2_Supporting",
+        "PS3",
+        "PP4"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.5074G>A variant in BRCA1 is a variant predicted to cause substitution of aspartic acid by asparagine at amino acid 1692 (p.Asp1692Asn). This variant has been previously reported as 5193G>A in PMID: 9452084. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This BRCA1 missense variant has a SpliceAI score of 0.73, predicting an impact on splicing (score threshold ≥0.2) (PP3 not applied because a PVS1 (RNA) code is met). This variant is reported to result in aberrant mRNA splicing. Mini-gene demonstrated that the variant impacts splicing by out-of-frame skipping of exon 16(17) and in-frame retention of 153 bp of intron 16(17) (containing a premature stop codon and predicted to be non-functional) (PMID 25724305). The percent skipping of exon 16(17)/in-frame retention produced from the variant allele, estimated by measuring gel electrophoretic band intensities, was stated to be 25%/75%, no full-length transcript is produced by the variant allele and all transcripts produced are predicted to be non-functional. Final code strength determined by the rubric: PVS1_Strong (RNA). Functional data considered only from assays that measure effect via mRNA and protein. Results from two calibrated studies with cDNA based design not considered for code application (PMIDs:38709234, 32546644). Reported by one calibrated study incorporating mRNA splicing effect to exhibit function similar to pathogenic control variants (PMID:30209399) (PS3 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 3.065 (based on Co-occurrence LR=1.3848; Family History LR=2.213), above the thresholds for Supporting evidence towards pathogenicity (LR >2.08 & ≤4.3) (PP4 met; PMID 31853058, Internal lab contributors). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, PVS1_Strong (RNA), PS3, PP4).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/b4407a53-6c03-4cda-827d-40d769122dfd",
+      "source_status": "unversioned_vcep_assertion"
     },
     {
       "uuid": "93d8bd27-96bf-44f5-9d60-9dec6ff27ac9",
@@ -1374,6 +1585,39 @@
       "source_status": "unversioned_vcep_assertion"
     },
     {
+      "uuid": "1b443e08-f73d-49d9-8e07-b83d91b6749b",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.5141T>C",
+      "p_notation": "p.(Val1714Ala)",
+      "classification": "Uncertain Significance",
+      "caid": "CA10591259",
+      "clinvar_variation_id": "629871",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PM2_Supporting",
+        "PP3"
+      ],
+      "criteria_not_met": [
+        "PS3",
+        "BS3"
+      ],
+      "interpretation_summary": "The c.5141T>C variant in BRCA1 is a missense variant predicted to cause substitution of Valine by Alanine at amino acid 1714 (p.(Val1714Ala)). This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This BRCA1 missense variant is within a key functional domain and the computational predictor BayesDel (noAF) gives a score of 0.47, above the recommended threshold of 0.28 for prediction of impact on BRCA1 function via protein change. A SpliceAI score of 0.06 predicts no impact on splicing (score threshold <0.10) (PP3 met). Reported by one calibrated study to exhibit a partial impact on protein function, between what was observed for benign and pathogenic control variants (PMID:30209399) (PS3 and BS3 not met). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PP3, PM2_supporting).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/1b443e08-f73d-49d9-8e07-b83d91b6749b",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
       "uuid": "50a3a90a-c1a9-4ddc-8872-407c8b987b5d",
       "gene": "BRCA1",
       "transcript": "NM_007294.4",
@@ -1474,6 +1718,40 @@
       "published_date": "2025-08-21",
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/626ebdc5-310f-45de-8bbc-09402b1e60b1",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
+      "uuid": "6c841cef-2e6a-4554-b474-cd06662ce00a",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.5152+6T>G",
+      "p_notation": "",
+      "classification": "Pathogenic",
+      "caid": "CA003292",
+      "clinvar_variation_id": "125778",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1",
+        "PP4_Moderate",
+        "PM2_Supporting",
+        "PS3"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.5152+6T>G variant is an intronic variant occurring in intron 17(18) of the BRCA1 gene. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). Intronic variant, functional data considered only from assays that measure effect via mRNA and protein. Reported by one calibrated study incorporating mRNA splicing effects to exhibit protein function similar to pathogenic control variants (PMID:30209399) (PS3 met). This BRCA1 intronic variant is located outside of the native donor and acceptor 1,2 splice sites, and has a SpliceAI score of 0.84, predicting an impact on splicing (score threshold >0.20) (PP3 not applied because a PVS1 (RNA) code is met). This variant is reported to result in aberrant mRNA splicing. Capture RNA-seq, RT-PCT and cloneSeq demonstrated that the variant impacts splicing by skipping of exon 17(18). The impact appears to be complete (PMID: 32133419). RT-PCRseq confirms the exon skipping and the percent of aberrant transcripts produced was >45%, using a non-allele specific quantitative assessment with sequence analysis. (Ambry internal data). The VCEP estimate less than 5% full-length transcript is produced by the variant allele. Appropriate code strength determined by comparison of results to PVS1 decision tree, PVS1 (RNA). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 7.98 (based on Co-occurrence LR=1.22; Family History LR=6.56), within the thresholds for moderate evidence towards pathogenicity (LR >4.3 & ≤18.7) (PP4_Moderate met; Internal lab contributor). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, PS3, PP4_Moderate, PVS1 (RNA)).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/6c841cef-2e6a-4554-b474-cd06662ce00a",
       "source_status": "unversioned_vcep_assertion"
     },
     {
@@ -2112,6 +2390,40 @@
       "source_status": "historical_vcep_assertion"
     },
     {
+      "uuid": "f67b6f54-199b-4516-a5ff-b0aabaf1048b",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.5333-6T>G",
+      "p_notation": "",
+      "classification": "Pathogenic",
+      "caid": "CA003501",
+      "clinvar_variation_id": "55538",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1",
+        "PM2_Supporting",
+        "PS3",
+        "PP4"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.5333-6T>G variant is an intronic variant occurring in intron 20(21) of the BRCA1 gene. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). Intronic variant, functional data considered only from assays that measure effect via mRNA and protein. Reported by one calibrated study incorporating mRNA splicing effects to exhibit protein function similar to pathogenic control variants (PMID:30209399) (PS3 met). This BRCA1 intronic variant is located outside of the native donor and acceptor 1,2 splice sites, and has a SpliceAI score of 0.79, predicting an impact on splicing (score threshold ≥0.2) (PP3 not applied because a PVS1 (RNA) code is met). This variant is reported to result in aberrant mRNA splicing. RT-PCR demonstrated that the variant impacts splicing by skipping of exon 21(22). The percent reference (full-length, FL) and aberrant transcripts produced from the variant allele could not be determined (PMID: 11802209). RT-PCRseq confirms the exon skipping and the percent of aberrant transcripts produced was >45%, using a non-allele specific quantitative assessment with sequence analysis. (Ambry internal data). The VCEP estimate less than 5% full-length transcript is produced by the variant allele. Appropriate code strength determined by comparison of results to PVS1 decision tree, PVS1 (RNA). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 2.55 (based on Cosegregation LR=0.69; Pathology LR=3.73), within the thresholds for supporting evidence towards pathogenicity (LR >2.08 & ≤4.3) (PP4 met; Internal lab contributor). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, PS3, PP4, PVS1 (RNA)).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/f67b6f54-199b-4516-a5ff-b0aabaf1048b",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
       "uuid": "fc077444-55cf-4bed-b559-769e0dd9a400",
       "gene": "BRCA1",
       "transcript": "NM_007294.4",
@@ -2362,7 +2674,7 @@
       "transcript": "NM_007294.4",
       "c_notation": "c.5522G>A",
       "p_notation": "p.(Ser1841Asn)",
-      "classification": "Uncertain Significance",
+      "classification": "Likely Pathogenic",
       "caid": "CA003696",
       "clinvar_variation_id": "55613",
       "disease": "BRCA1-related cancer predisposition",
@@ -2371,21 +2683,19 @@
       "criteria_met": [
         "PP4_Moderate",
         "PM2_Supporting",
+        "PS3",
         "BP4"
       ],
-      "criteria_not_met": [
-        "PS3",
-        "BS3"
-      ],
-      "interpretation_summary": "The c.5522G>A variant in BRCA1 is a missense variant predicted to cause substitution of Serine by Asparagine at amino acid 1841 (p.(Ser1841Asn)). This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met). Reported by two or more calibrated studies with discordant results. Functional effect similar to pathogenic control variants (PMID:30209399, 38709234) and between what was observed for benign and pathogenic control variants (PMID:30257991) (PS3 and BS3 not met). This BRCA1 missense variant is within a key functional domain and the computational predictor BayesDel (noAF) gives a score of 0.14, which is below the recommended threshold of 0.15 for predicting no impact on BRCA1 via protein change. A SpliceAI score of 0 predicts no impact on splicing (score threshold <0.10) (BP4 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 8.42 (based on Cosegregation LR=14.79; Pathology LR=0.09; Co-occurrence LR=1.07; Family History LR=5.98), within the thresholds for moderate evidence towards pathogenicity (LR >4.3 & ≤18.7) (PP4_Moderate met; PMID: 31131967, Internal lab contributor). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, BP4, PP4_Moderate).",
+      "criteria_not_met": [],
+      "interpretation_summary": "The c.5522G>A variant in BRCA1 is a missense variant predicted to cause substitution of Serine by Asparagine at amino acid 1841 (p.(Ser1841Asn)). This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met). Reported by two or more calibrated studies with discordant results. Reported by three calibrated studies with discordant results. Functional effect similar to pathogenic control variants (PMIDs:30209399, 38709234) and between what was observed for benign and pathogenic control variants (PMID:30257991), however due to the number of concordant assays and only one discrepancy, the VCEP decided to apply PS3 (PS3 met). This BRCA1 missense variant is within a key functional domain and the computational predictor BayesDel (noAF) gives a score of 0.14, which is below the recommended threshold of 0.15 for predicting no impact on BRCA1 via protein change. A SpliceAI score of 0 predicts no impact on splicing (score threshold <0.10) (BP4 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 8.42 (based on Cosegregation LR=14.79; Pathology LR=0.09; Co-occurrence LR=1.07; Family History LR=5.98), within the thresholds for moderate evidence towards pathogenicity (LR >4.3 & ≤18.7) (PP4_Moderate met; PMID: 31131967, Internal lab contributor). In summary, this variant meets the criteria to be classified as a Likely pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, BP4, PP4_Moderate, PS3).",
       "pubmed_articles": [],
       "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
       "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
       "assertion_method_id": "",
       "assertion_method_label": "",
       "assertion_method_version": "",
-      "approval_date": "2026-01-05",
-      "published_date": "2026-01-05",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/97edbb9e-9abc-4eb4-acb8-8c2d6be224e2",
       "source_status": "unversioned_vcep_assertion"
@@ -2745,6 +3055,39 @@
       "source_status": "unversioned_vcep_assertion"
     },
     {
+      "uuid": "cf9fd4e6-e4d1-4a26-8754-7d60f3afbab0",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.643G>T",
+      "p_notation": "p.(Glu215Ter)",
+      "classification": "Uncertain Significance",
+      "caid": "CA10600817",
+      "clinvar_variation_id": "921178",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PM2_Supporting"
+      ],
+      "criteria_not_met": [
+        "PVS1",
+        "PP3",
+        "PM5"
+      ],
+      "interpretation_summary": "The c.643G>T variant in BRCA1 is predicted to cause a change in the length of the protein due to the insertion of a terminating codon instead of the usual Glutamic Acid at amino acid 215 (p.(Glu215Ter)). This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This variant has a SpliceAI score of 0.53, predicting an impact on splicing. It is predicted to cause skipping of exon 9(10), which is expected to be rescued by skipping of exon 8(9) and 9(10) in-frame isoform. The ENIGMA BRCA1/2 VCEP considered multiple lines of functional and clinical evidence to define exon-specific weights for PTC in BRCA1, and results indicate that no evidence towards pathogenicity may be applied for a PTC variant in BRCA1 exon 9(10) (PVS1_N/A, PM5_N/A (PTC)). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/cf9fd4e6-e4d1-4a26-8754-7d60f3afbab0",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
       "uuid": "9a41d228-a2ad-40e2-bdd2-5d591330ec89",
       "gene": "BRCA1",
       "transcript": "NM_007294.4",
@@ -2774,6 +3117,103 @@
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/9a41d228-a2ad-40e2-bdd2-5d591330ec89",
       "source_status": "current_vcep_assertion"
+    },
+    {
+      "uuid": "3eb7d48a-01f6-43f5-9a98-057e764132ca",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.670+1del",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA10602599",
+      "clinvar_variation_id": "267611",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [],
+      "criteria_not_met": [
+        "PM2",
+        "PVS1",
+        "PP3",
+        "PM5"
+      ],
+      "interpretation_summary": "The c.670+1del variant is an intronic variant within the native donor 1,2 splice site occurring in intron 9(10) of the BRCA1 gene. Legacy exon numbering is shown in parentheses. This deletion variant was not observed in gnomAD v4.1, but PM2_Supporting was not applied since recall is considered suboptimal for this type of variant (PM2_Supporting not met). This BRCA1 intronic variant is located inside the canonical splice donor site (+/- 1,2), and has a SpliceAI donor loss score of 0.79 and a donor gain score of 1, predicting an impact on splicing (score threshold ≥0.2) (PP3_N/A for variants inside the donor/acceptor 1,2 sites)). This variant is reported to result in aberrant mRNA splicing. Mini-gene demonstrated that the variant impacts splicing by usage of a cryptic splice site, in agreement with SpliceAI prediction (PMID: 24667779). Frameshift variants in exon 9(10) are expected to be functionally rescued by normal levels of the naturally occurring splicing isoform Δ(E8,9) [Δ(E9,10)] (PMIDs:24569164 and 27008870) (PVS1_N/A). The ENIGMA BRCA1/2 VCEP considered multiple lines of functional and clinical evidence to define exon-specific weights for PTC in BRCA1, and results indicate that no evidence towards pathogenicity may be applied for a PTC variant in exon 9(10) (PM5_N/A). In summary, this variant did not meet any criteria and is classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/3eb7d48a-01f6-43f5-9a98-057e764132ca",
+      "source_status": "unversioned_vcep_assertion"
+    },
+    {
+      "uuid": "31c465e1-e0e0-46aa-a6a7-06fa0dbe0e1a",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.671-1G>C",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA003804",
+      "clinvar_variation_id": "91663",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1_Moderate",
+        "PM2_Supporting"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.671-1G>C variant is an intronic variant within the native acceptor 1,2 splice site occurring in intron 9(10) of the BRCA1 gene. Legacy exon numbering is shown in parentheses. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This variant has a SpliceAI score of 0.98, predicting an impact on splicing (score threshold ≥0.2) (PP3_N/A for variants inside the donor/acceptor 1,2 sites). It is predicted to cause in-frame ΔE10[ΔE11] and Δ(E8_E10)[Δ(E9_E11)] and several other minor isoforms, suspected (partially) functional. In-frame deletion variant of exon 10(11) that does not overlap a (potentially) clinically important functional domain (RING/BRCT domain) but removes >10% of the coding sequence. RNA-seq demonstrated that the variant impacts splicing by skipping of exons E8_E10(E9_E11) and 10(11), however this was not considered as evidence as RNA was derived from tumor tissue (Internal lab contributor) (PVS1_Moderate met). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PVS1_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1530970787",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA1 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/31c465e1-e0e0-46aa-a6a7-06fa0dbe0e1a",
+      "source_status": "current_vcep_assertion"
+    },
+    {
+      "uuid": "49dd97b5-5b05-4190-942f-01da63a37533",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.671-1G>T",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA003805",
+      "clinvar_variation_id": "125908",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PP4_Moderate",
+        "PVS1_Moderate",
+        "PM2_Supporting"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.671-1G>T variant is an intronic variant within the native acceptor 1,2 splice site occurring in intron 9(10) of the BRCA1 gene. Legacy exon numbering is shown in parentheses. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This variant has a SpliceAI score of 0.98, predicting an impact on splicing (score threshold ≥0.2) (PP3_N/A for variants inside the donor/acceptor 1,2 sites). It is predicted to cause in-frame ΔE10[ΔE11] and Δ(E8_E10)[Δ(E9_E11)] and several other minor isoforms, suspected (partially) functional. In-frame deletion variant of exon 10(11) that does not overlap a (potentially) clinically important functional domain (RING/BRCT domain) but removes >10% of the coding sequence. RT-PCRseq demonstrated that the variant impacts splicing by skipping of exon 10(11). The percent of aberrant transcripts produced was 35-45%, using a non-allele specific quantitative assessment with sequence analysis (Ambry internal data) (PVS1_Moderate (RNA) met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 7.08 (based on Pathology LR=0.4; Segregation LR=6.09; Co-occurrence LR=1.03; Family History LR=2.82), within the thresholds for moderate evidence towards pathogenicity (LR ≥4.3 & <18.7) (PP4_Moderate met; PMID: 31853058, Internal lab contributors). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, PP4_Moderate, PVS1_Moderate (RNA)).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "",
+      "assertion_method_label": "",
+      "assertion_method_version": "",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/49dd97b5-5b05-4190-942f-01da63a37533",
+      "source_status": "unversioned_vcep_assertion"
     },
     {
       "uuid": "8cc9bd83-9b2d-4a38-ba40-c2010955350d",
@@ -2943,6 +3383,37 @@
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/4d3e12ea-f24b-44fe-9769-5b139434744b",
       "source_status": "unversioned_vcep_assertion"
+    },
+    {
+      "uuid": "96206eea-d656-4630-9ee0-3f58235a9c77",
+      "gene": "BRCA1",
+      "transcript": "NM_007294.4",
+      "c_notation": "c.80G>C",
+      "p_notation": "p.(Cys27Ser)",
+      "classification": "Likely Pathogenic",
+      "caid": "CA10601997",
+      "clinvar_variation_id": "418064",
+      "disease": "BRCA1-related cancer predisposition",
+      "mondo_id": "MONDO:0700268",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PM2_Supporting",
+        "PS3",
+        "PP3"
+      ],
+      "criteria_not_met": [],
+      "interpretation_summary": "The c.80G>C variant in BRCA1 is a missense variant predicted to cause substitution of Cysteine by Serine at amino acid 27 (p.(Cys27Ser)). This is the last nucleotide of exon 2. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This BRCA1 missense variant is within a key functional domain and a SpliceAI score of 0.56 indicates a predicted impact on splicing (skipping of exon 2, which would lead to start codon loss). The computational predictor BayesDel (noAF) gives a score of 0.48, above the recommended threshold of 0.28 for prediction of impact on BRCA1 function via protein change (PP3 met). Missense variant predicted to alter splicing, functional data considered from assays that measure effect via mRNA and protein. Reported by one calibrated study incorporating mRNA splicing effects to exhibit function similar to pathogenic control variants (PMID: 30209399). Additionally reported by one calibrated study with cDNA based design to exhibit protein function similar to pathogenic control variants (PMID: 35659930) (PS3 met). In summary, this variant meets the criteria to be classified as a Likely pathogenic variant for BRCA1-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PP3, PS3).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1530970787",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA1 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/96206eea-d656-4630-9ee0-3f58235a9c77",
+      "source_status": "current_vcep_assertion"
     },
     {
       "uuid": "103a51b8-d098-4844-b998-328ce4a4acb7",
@@ -3986,6 +4457,41 @@
       "source_status": "historical_vcep_assertion"
     },
     {
+      "uuid": "2878a34b-53a0-4df6-b9e7-758453aabb0d",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.7786G>A",
+      "p_notation": "p.(Gly2596Arg)",
+      "classification": "Uncertain Significance",
+      "caid": "CA025274",
+      "clinvar_variation_id": "91492",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PS3",
+        "PP3",
+        "BP5"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "BS1",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.7786G>A variant in BRCA2 is a missense variant predicted to cause substitution of Glycine by Arginine at amino acid 2596 (p.(Gly2596Arg)). The Total GrpMax filtering allele frequency (the lower threshold of the 95% CI) in gnomAD v4.1 is 0.00000247 in the Non-Finnish European genetic ancestry group (based on 7/1179912 alleles) which is below the ENIGMA BRCA1/2 VCEP threshold (>0.00002) for BS1_Supporting and does not meet any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met). This BRCA2 missense variant is within a key functional domain, a SpliceAI score of 0.22, predicts an impact on splicing (score threshold >0.20) and the computational predictor BayesDel (noAF) gives a score of 0.45, above the recommended threshold of 0.30 for prediction of impact on BRCA2 function via protein change (PP3 met). Missense variant predicted to alter splicing and predicted to impact via protein change, functional data considered only from assays that measure effect via mRNA and protein. Results from one calibrated study with cDNA based design not considered for code application (PMID:38417439). Reported by three calibrated studies incorporating mRNA splicing effects to exhibit function similar to pathogenic control variants (PMID:33293522, 39779857, 39779848) (PS3 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.18 (based on Family History LR=0.41, Case control LR=0.45), within the thresholds for moderate benign evidence (LR >0.05 & ≤0.23) (BP5_Moderate met; PMIDs: 31853058, 40413188). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PS3, PP3, BP5_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.1.0",
+      "assertion_method_version": "1.1.0",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/2878a34b-53a0-4df6-b9e7-758453aabb0d",
+      "source_status": "historical_vcep_assertion"
+    },
+    {
       "uuid": "15ebd6ed-65a2-4f92-8fdb-cd0021488264",
       "gene": "BRCA2",
       "transcript": "NM_000059.4",
@@ -4046,6 +4552,41 @@
       "published_date": "2026-07-24",
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/3b78f2f4-c9a2-4f6c-a699-d8b0931557ed",
+      "source_status": "current_vcep_assertion"
+    },
+    {
+      "uuid": "41597833-4998-4a1f-ae06-ff349b2c6c89",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.7792GAA[1]",
+      "p_notation": "p.(Glu2599del)",
+      "classification": "Likely Pathogenic",
+      "caid": "CA025277",
+      "clinvar_variation_id": "52409",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PP4_Strong",
+        "PP3"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "BS1",
+        "BP7",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.7795_7797del variant in BRCA2 is predicted to cause a change in the length of the protein due to an in-frame deletion of 1 amino acid (p.(Glu2599del)). The Total GrpMax filtering allele frequency (the lower threshold of the 95% CI) in gnomAD v4.1 is 0.00000028 in the Non-Finnish European genetic ancestry group (based on 2/1179946 alleles) which is below the ENIGMA BRCA1/2 VCEP threshold (>0.00002) for BS1_Supporting and does not meet any population code (BA1, BS1, BS1_Supporting, PM2_Supporting are not met). This BRCA2 in-frame deletion variant is within a key functional domain and the computational predictor BayesDel (noAF) gives a score of 0.64, above the recommended threshold of 0.30 for prediction of impact on BRCA2 function via protein change. A SpliceAI score of 0.03 predicts no impact on splicing (score threshold ≤0.1) (PP3 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 2883172307.4 (based on Cosegregation LR=10545472; Pathology LR=0.93; Co-occurrence LR=1.03; Family History LR=285.42), above the thresholds for very strong evidence towards pathogenicity (LR >350) (PP4_Very strong met; PMID: 34597585, 31853058, 31131967).  This is an in-frame variant inside a key functional domain. Impact via the protein change has not been assessed yet. mRNA experimental analysis indicates no impact on splicing (PMIDs: 22505045, 27886673) but is not applied as strong evidence against pathogenicity since missense impact has not been excluded (BP7_Strong (RNA) not met). In summary, this variant meets the criteria to be classified as a Likely pathogenic variant for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PP3, PP4_Very strong).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/41597833-4998-4a1f-ae06-ff349b2c6c89",
       "source_status": "current_vcep_assertion"
     },
     {
@@ -4569,6 +5110,44 @@
       "source_status": "historical_vcep_assertion"
     },
     {
+      "uuid": "c5a43173-5dc6-49bf-9628-0e783a914146",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.7892T>C",
+      "p_notation": "p.(Leu2631Pro)",
+      "classification": "Pathogenic",
+      "caid": "CA387747130",
+      "clinvar_variation_id": "1005003",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PP1_Strong",
+        "PM2_Supporting",
+        "PS3",
+        "BP5"
+      ],
+      "criteria_not_met": [
+        "PP3",
+        "BS1",
+        "BP4",
+        "BP1",
+        "BA1"
+      ],
+      "interpretation_summary": "The c.7892T>C variant in BRCA2 is a missense variant predicted to cause substitution of Leucine by Proline at amino acid 2631 (p.(Leu2631Pro)). This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met). This BRCA2 missense variant is within a key functional domain and the computational predictor BayesDel (noAF) gives a score of 0.296, indicating impact on BRCA2 function via protein change is unclear (score range 0.18-0.30). A SpliceAI score of 0.02 predicts no impact on splicing (score threshold <0.10) (no bioinformatic code is applied). Reported by two calibrated studies to exhibit protein function similar to pathogenic control variants (PMIDs:39779857, 39779848) (PS3 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.4 (based on Pathology LR=0.4), within the thresholds for supporting benign evidence (LR >0.23 & ≤0.48) (BP5 met; Internal lab contributor). Cosegregation analysis of two families carrying this variant provided evidence towards pathogenicity, and has a Bayes Score of 13,131,457,856 (applied as LR), above the thresholds for very strong pathogenic evidence (LR ≥350) (PP1_Very strong met; PMID: 41699384, Internal lab contributor). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (PM2_Supporting, PS3, BP5, PP1_Very strong).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/c5a43173-5dc6-49bf-9628-0e783a914146",
+      "source_status": "current_vcep_assertion"
+    },
+    {
       "uuid": "acfe8132-31ef-4038-b902-acc810414de5",
       "gene": "BRCA2",
       "transcript": "NM_000059.4",
@@ -4733,6 +5312,41 @@
       "source_status": "historical_vcep_assertion"
     },
     {
+      "uuid": "8dcc8360-5fa5-4f11-8163-22494a3da622",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.7976+5G>T",
+      "p_notation": "",
+      "classification": "Pathogenic",
+      "caid": "CA658656488",
+      "clinvar_variation_id": "462463",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1",
+        "PP4_Moderate",
+        "PM2_Supporting"
+      ],
+      "criteria_not_met": [
+        "PS3",
+        "PP3",
+        "BS3"
+      ],
+      "interpretation_summary": "The c.7976+5G>T variant is an intronic variant occurring in intron 17 of the BRCA2 gene. This variant is absent from gnomAD v4.1 (read depth ≥25x in >90% samples, PM2_Supporting met). This variant is reported to result in aberrant mRNA splicing. RT-PCRseq demonstrated that the variant impacts splicing by exon skipping and multiple exon skipping. The percent of aberrant transcripts produced was 50-60% in-frame E17 skipping and 15-25% out-of-frame E17_18 skipping, using a non-allele specific quantitative assessment with sequence analysis (Ambry internal data). The VCEP estimate no full-length transcript is produced by the variant allele. A mini-gene assay detected in-frame E17 skipping as the only aberrant transcript (PMID: 29969168). Testing of patient material showed that a variety of predicted non-functional transcripts as well as less than 5% full length transcript are produced by the variant allele (PMID: 29969168). Appropriate code strength determined by comparison of results to PVS1 decision tree: PVS1 (RNA). This BRCA2 intronic variant is located outside of the native donor and acceptor 1,2 splice sites, and has a SpliceAI score of 0.89, predicting an impact on splicing (score threshold ≥0.2) (PP3 not applied because a PVS1 (RNA) code is met). Intronic variant, functional data considered only from assays that measure effect via mRNA and protein. Reported by two calibrated studies with discordant results. Functional effect similar to benign control variants (PMID:39779848) and to pathogenic control variants (PMID:39779857) (PS3 and BS3 not met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 11.85 (based on Cosegregation LR=3.49; Pathology LR=3.396), within the thresholds for moderate evidence towards pathogenicity (LR ≥4.3 & <18.7) (PP4_Moderate met; PMID: 29969168). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PVS1 (RNA), PP4_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/8dcc8360-5fa5-4f11-8163-22494a3da622",
+      "source_status": "current_vcep_assertion"
+    },
+    {
       "uuid": "9c75627c-0e4b-4cd2-8dd4-37371b31c1bc",
       "gene": "BRCA2",
       "transcript": "NM_000059.4",
@@ -4765,6 +5379,40 @@
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/9c75627c-0e4b-4cd2-8dd4-37371b31c1bc",
       "source_status": "historical_vcep_assertion"
+    },
+    {
+      "uuid": "8a4171ba-232c-4728-ae2a-2a103a8829c4",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.7977-4_7977-3del",
+      "p_notation": "",
+      "classification": "Uncertain Significance",
+      "caid": "CA10579763",
+      "clinvar_variation_id": "232794",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "BP4"
+      ],
+      "criteria_not_met": [
+        "PM2",
+        "PVS1",
+        "PP4",
+        "BP5"
+      ],
+      "interpretation_summary": "The c.7977-4_7977-3del variant is an intronic variant occurring in intron 17 of the BRCA2 gene. This deletion variant was not observed in gnomAD v4.1, but PM2_Supporting was not applied since recall is considered suboptimal for this type of variant (PM2_Supporting not met). This BRCA2 intronic variant is outside of the native donor and acceptor 1,2 splice sites, and has a SpliceAI score of 0.05 predicting no impact on splicing (score threshold <0.10). This variant lies within the +7/−21 intronic region (BP4 met, BP7 not met). RT-PCRseq using patient mRNA demonstrated that the variant impacts splicing by skipping of E18 and E17_E18 (both out-of-frame), without allele-specific quantitation. The percent of aberrant transcripts produced was 35-40% and 5-10% (~45%) respectively. This was notably lower than the positive control variant c.7977-1G>C, which produced the same transcripts at ~70% (Ambry internal data). The VCEP interprets these results as showing an incomplete effect. An additional assay reported no impact on splicing, however the technical quality could not be adequately assessed (PMID: 16619214). Appropriate code strength determined by comparison with the rubric for weighting of mRNA data for variants outside of the donor/acceptor ±1,2 positions, according to assay methodology and proportion of functional transcript retained, PVS1_N/A (RNA). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 0.93 (based on Family History LR=0.93), which is above the ENIGMA BRCA1/2 VCEP threshold for BP5 (>0.48) and below PP4 (<2.08) (BP5 and PP4 not met; PMID: 31853058). In summary, this variant meets the criteria to be classified as a Variant of uncertain significance for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (BP4, PVS1_N/A (RNA)).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-10-30",
+      "published_date": "2026-10-29",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/8a4171ba-232c-4728-ae2a-2a103a8829c4",
+      "source_status": "current_vcep_assertion"
     },
     {
       "uuid": "2ff00378-eca0-4d90-84eb-884213792a9d",
@@ -5420,6 +6068,40 @@
       "retracted": false,
       "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/0bb1bc0b-aa35-4a02-8479-8e4ab6e5f89a",
       "source_status": "historical_vcep_assertion"
+    },
+    {
+      "uuid": "898d1843-e31f-4d56-b9be-0a164e5cdd9e",
+      "gene": "BRCA2",
+      "transcript": "NM_000059.4",
+      "c_notation": "c.8486A>G",
+      "p_notation": "p.(Gln2829Arg)",
+      "classification": "Pathogenic",
+      "caid": "CA025666",
+      "clinvar_variation_id": "38161",
+      "disease": "BRCA2-related cancer predisposition",
+      "mondo_id": "MONDO:0700269",
+      "mode_of_inheritance": "Autosomal dominant inheritance",
+      "criteria_met": [
+        "PVS1",
+        "PP4_Moderate",
+        "PM2_Supporting",
+        "PS3"
+      ],
+      "criteria_not_met": [
+        "PP3"
+      ],
+      "interpretation_summary": "The c.8486A>G p.(Gln2829Arg) variant in BRCA2 involves the second to last nucleotide of exon 19. This BRCA2 variant has a SpliceAI score of 0.36, predicting an impact on splicing (score threshold ≥0.2) (PP3 not applied because a PVS1 code is met). This variant is absent from gnomAD v2.1 (exomes only, non-cancer subset, read depth ≥25) and gnomAD v3.1 (non-cancer subset, read depth ≥25) (PM2_Supporting met). This variant is reported to result in aberrant mRNA splicing. RT-PCR demonstrated that the variant impacts splicing by skipping of exon 19 (PMIDs: 22505045, 16489001, 32123317) which results in the production of an in-frame transcript (r.8332_8487del p.(Ile2778_Gln2829del), PMID: 32123317). The effect is complete and no full length transcript is produced by the variant allele (PMID: 22505045, Internal lab collaborator). Appropriate code strength determined by comparison of results to PVS1 decision tree and assessment of mRNA splicing data (In-frame deletion variant of exon 19 that overlaps a (potentially) clinically important functional domain (DNA-binding domain)) (PVS1 (RNA) met). Missense variant shown to alter splicing, functional data considered only from assays that measure effect via mRNA and protein. Reported by three calibrated studies incorporating mRNA splicing effects to exhibit function similar to pathogenic control variants (PMID:39779857, 39779848, 33293522) (PS3 met). Multifactorial likelihood ratio analysis using clinically calibrated data produced a combined LR for this variant of 15.5 (based on Cosegregation LR=14.3; Pathology LR=1.90; PMID: 31131967 and Family History LR=0.569; PMID: 31853058), within the thresholds for moderate evidence towards pathogenicity (LR ≥4.3 & <18.7) (PP4_Moderate met). In summary, this variant meets the criteria to be classified as a Pathogenic variant for BRCA2-related cancer predisposition based on the ACMG/AMP criteria applied as specified by the ENIGMA BRCA1/2 VCEP (v1.2) (PM2_Supporting, PVS1 (RNA), PS3, PP4_Moderate).",
+      "pubmed_articles": [],
+      "expert_panel": "ENIGMA BRCA1 and BRCA2 VCEP",
+      "guideline_url": "https://cspec.clinicalgenome.org/cspec/ui/svi/affiliation/50087",
+      "assertion_method_id": "https://cspec.genome.network/cspec/SequenceVariantInterpretation/id/1535438831",
+      "assertion_method_label": "ClinGen ENIGMA BRCA1 and BRCA2 Expert Panel Specifications to the ACMG/AMP Variant Interpretation Guidelines for BRCA2 Version 1.2",
+      "assertion_method_version": "1.2.0",
+      "approval_date": "2026-09-21",
+      "published_date": "2026-09-21",
+      "retracted": false,
+      "erepo_url": "https://erepo.genome.network/evrepo/ui/classification/898d1843-e31f-4d56-b9be-0a164e5cdd9e",
+      "source_status": "current_vcep_assertion"
     },
     {
       "uuid": "458dcea9-e400-41fe-ae82-e81eccaa7ffb",
