@@ -408,22 +408,30 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         self.assertEqual(extensions["schema_version"], 1)
         self.assertEqual(extensions["records"], [])
 
-        erepo = json.loads(
-            (DATA / "enigma_erepo_vcep_registry.json").read_text(encoding="utf-8")
-        )
+        erepo_path = DATA / "enigma_erepo_vcep_registry.json"
+        erepo = json.loads(erepo_path.read_text(encoding="utf-8"))
         erepo_metadata = json.loads(
             (DATA / "enigma_erepo_vcep_registry.metadata.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(erepo["record_count"], 180)
+        self.assertEqual(erepo["record_count"], len(erepo["records"]))
+        self.assertEqual(erepo_metadata["record_count"], erepo["record_count"])
         self.assertEqual(
-            erepo["source_status_counts"],
-            {
-                "current_vcep_assertion": 44,
-                "historical_vcep_assertion": 90,
-                "unversioned_vcep_assertion": 46,
-            },
+            hashlib.sha256(erepo_path.read_bytes()).hexdigest(),
+            erepo_metadata["registry_sha256"],
         )
-        self.assertEqual(erepo_metadata["record_count"], 180)
+        for counts_field in (
+            "classification_counts",
+            "assertion_method_version_counts",
+            "source_status_counts",
+        ):
+            self.assertEqual(erepo_metadata[counts_field], erepo[counts_field])
+            self.assertEqual(sum(erepo[counts_field].values()), erepo["record_count"])
+        self.assertEqual(
+            erepo["runtime_policy"]["current_records"],
+            "eligible_for_rule_specific_runtime_review",
+        )
+        self.assertFalse(erepo["runtime_policy"]["network_fallback"])
+        self.assertTrue(erepo["source_status_counts"]["current_vcep_assertion"] > 0)
 
         st2 = json.loads(
             (DATA / "enigma_st2_splice_evidence.json").read_text(encoding="utf-8")
