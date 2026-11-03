@@ -14,6 +14,7 @@ from typing import Literal
 SUPPORTED_AUTOMATIC_VARIANT_TYPES = (
     "nonsense",
     "frameshift",
+    "ptc_delins",
     "splice_site",
     "initiation_codon",
     "exon_deletion",

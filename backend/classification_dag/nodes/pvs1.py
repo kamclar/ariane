@@ -68,6 +68,7 @@ class Pvs1CriteriaNode:
         elif pvs1.get("requires_rna") or ci.variant_type.lower() in {
             "nonsense",
             "frameshift",
+            "ptc_delins",
             "splice_site",
             "initiation_codon",
             "exon_deletion",

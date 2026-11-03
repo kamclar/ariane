@@ -230,11 +230,12 @@ def table4_lookup_pvs1_ptc(
     termination_aa: Optional[int] = None,
 ) -> Dict:
     """
-    Lookup PVS1/PM5 codes for PTC (nonsense/frameshift) variants using Table 4.
+    Lookup PVS1/PM5 codes for PTC variants using Table 4.
 
-    PVS1 and PM5 (PTC) are taken from the same Table 4 row.  For frameshifts,
-    Appendix D assigns the PM5 weight by the exon containing the nucleotide
-    change, even when the predicted termination codon lies in a later exon.
+    PVS1 and PM5 (PTC) are taken from the same Table 4 row. For frameshifts and
+    coding delins that introduce a stop codon, Appendix D assigns the PM5
+    weight by the exon containing the nucleotide change, even when the
+    predicted termination codon lies in a later exon.
     """
     result = {
         "pvs1_code": None,

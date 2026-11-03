@@ -202,6 +202,13 @@ class VariantTypeTests(unittest.TestCase):
         self.assertEqual(infer_variant_type("c.123_125del", "p.(Val41del)"), "inframe_deletion")
         self.assertEqual(infer_variant_type("c.123_125insAAA", "p.(Val41_Gly42insLys)"), "inframe_insertion")
         self.assertEqual(infer_variant_type("c.123_125delinsAAA", "p.(Val41delinsLys)"), "inframe_delins")
+        self.assertEqual(
+            infer_variant_type(
+                "c.3789_3790delinsTT",
+                "p.(Leu1263_Lys1264delinsPheTer)",
+            ),
+            "ptc_delins",
+        )
         self.assertEqual(infer_variant_type("c.123dup", "p.(Val41dup)"), "inframe_insertion")
 
     def test_initiation_codon_is_not_treated_as_missense(self):
@@ -798,6 +805,29 @@ class FrequencyTests(unittest.TestCase):
 
 
 class CriticalPtcBoundaryTests(unittest.TestCase):
+    def test_protein_delins_with_ter_uses_ptc_table4_branch(self):
+        c_notation = "c.3789_3790delinsTT"
+        p_notation = "p.(Leu1263_Lys1264delinsPheTer)"
+        variant_type = infer_variant_type(c_notation, p_notation)
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type=variant_type,
+            p_notation=p_notation,
+            c_notation=c_notation,
+        )
+
+        self.assertEqual(variant_type, "ptc_delins")
+        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
+        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
+        self.assertNotIn("PP3", result["criteria"])
+        self.assertNotIn("BP1", result["criteria"])
+        self.assertEqual(result["total_points"], 12)
+        self.assertEqual(result["predicted_class"], 5)
+        self.assertIn(
+            "predicted termination p.1264",
+            result["criteria"]["PVS1"]["reason"],
+        )
+
     def test_missing_termination_does_not_infer_nmd_from_variant_position(self):
         complete = evaluate_pvs1(
             "BRCA1", "frameshift", "p.(Arg1737LysfsTer93)", "c.5209dup"

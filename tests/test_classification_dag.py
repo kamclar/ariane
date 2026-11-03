@@ -577,6 +577,12 @@ def test_table9_provider_rejects_conflicting_pre_dag_value():
     (
         ("BRCA1", "nonsense", "c.303T>G", "p.(Tyr101Ter)"),
         ("BRCA1", "frameshift", "c.5266dup", "p.(Gln1756ProfsTer74)"),
+        (
+            "BRCA1",
+            "ptc_delins",
+            "c.3789_3790delinsTT",
+            "p.(Leu1263_Lys1264delinsPheTer)",
+        ),
         ("BRCA1", "synonymous", "c.4185G>A", "p.(Gln1395=)"),
         ("BRCA1", "intronic", "c.548-9A>G", "p.(?)"),
         (

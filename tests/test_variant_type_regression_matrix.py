@@ -35,10 +35,10 @@ class VariantTypeInferenceMatrixTests(unittest.TestCase):
             "inframe_deletion",
         ),
         (
-            "DNA delins encoding a protein delins",
+            "DNA delins introducing a protein termination codon",
             "c.3789_3790delinsTT",
             "p.(Leu1263_Lys1264delinsPheTer)",
-            "inframe_delins",
+            "ptc_delins",
         ),
         (
             "DNA delins with unresolved protein consequence",
@@ -102,6 +102,33 @@ class VariantTypeInferenceMatrixTests(unittest.TestCase):
             for record in candidates
         ))
 
+    def test_all_pinned_protein_delins_with_ter_route_to_ptc(self):
+        snapshot_path = (
+            Path(__file__).resolve().parents[1]
+            / "data"
+            / "precomputed"
+            / "brca_normalized_indel_snapshot.index.json"
+        )
+        records = json.loads(snapshot_path.read_text(encoding="utf-8")).values()
+        protein_delins_ptc = re.compile(
+            r"delins(?:[A-Z][a-z]{2})*?Ter"
+        )
+        candidates = [
+            record
+            for record in records
+            if "delins" in record["canonical_c_notation"].lower()
+            and protein_delins_ptc.search(record.get("p_notation", ""))
+        ]
+
+        self.assertEqual(len(candidates), 22)
+        self.assertTrue(all(
+            infer_variant_type(
+                record["canonical_c_notation"],
+                record["p_notation"],
+            ) == "ptc_delins"
+            for record in candidates
+        ))
+
 
 class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
     """Representative variants must enter only the intended rule branches."""
@@ -126,6 +153,15 @@ class VariantTypeRuleRoutingMatrixTests(unittest.TestCase):
             "pp4": True,
             "required": {"PVS1", "PM5_PTC"},
             "forbidden": {"PP4", "PP3", "BP1", "BP4", "BP7"},
+            "class": 5,
+        },
+        {
+            "label": "protein delins introducing a PTC",
+            "gene": "BRCA1",
+            "c": "c.3789_3790delinsTT",
+            "p": "p.(Leu1263_Lys1264delinsPheTer)",
+            "required": {"PVS1", "PM5_PTC"},
+            "forbidden": {"PP3", "BP1", "BP4", "BP7"},
             "class": 5,
         },
         {

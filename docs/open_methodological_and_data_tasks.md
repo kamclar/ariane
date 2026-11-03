@@ -146,6 +146,10 @@ souřadnicový manifest bez změny klasifikačního DAGu.
   indel ani intronická pozice bez ověřitelného vyloučení `+/-1,2` nevstupují do
   bodování. Hranice `+7/-21` a interakce s RNA a funkční evidencí mají úplnou
   regresní matici.
+- Coding DNA `delins` s ověřeným proteinovým následkem obsahujícím předčasný
+  `Ter` se typuje jako `ptc_delins` a směruje do Table 4 větve PVS1/PM5 PTC,
+  nikoli do in-frame Figure 1A. V připnutém indelovém snapshotu tuto cestu
+  regresně pokrývá všech 22 takových záznamů.
 
 ## 8. Současné použití PS3 nebo BS3 a PVS1 RNA, čeká se na VCEP
 
@@ -213,22 +217,7 @@ pozorování ke každému kódu a vyloučit opakované použití stejné evidenc
 `BRCA2 c.7976G>A` je takto označen PMID `33293522`; automaticky se započítává jen
 PS3 a předvyplnění PVS1 RNA odkazuje na tři jiné ST3 publikace.
 
-## 9. Proteinový delins s terminačním kodonem
-
-V připnutém indelovém snapshotu je 22 coding DNA `delins` variant, jejichž
-normalizovaný proteinový následek je proteinový `delins` obsahující `Ter`,
-například `BRCA1 c.3789_3790delinsTT`
-`p.(Leu1263_Lys1264delinsPheTer)`. HGVS takový zápis připouští, pokud je
-terminační kodon součástí vložené proteinové sekvence. Nejde o jednoduchou
-nonsense substituci.
-
-ENIGMA Table 4 popisuje PTC váhy pro protein termination variants, ale její
-přehled automatických větví uvádí nonsense a frameshift. Není výslovně určeno,
-zda se proteinový delins s `Ter` má posoudit v PVS1 a PM5 PTC větvi, nebo jako
-in-frame delins ve Figure 1A. ARIANE tyto varianty bez metodického potvrzení
-nepřeklápí do PTC větve. Bod vyžaduje konzultaci s VCEP.
-
-## 10. Strojově ověřitelná verze služby SpliceAI
+## 9. Strojově ověřitelná verze služby SpliceAI
 
 ARIANE připíná scoring profil, kontroluje GRCh38, `distance=10000`, `mask=0`,
 úplnost všech skórovacích komponent a přesnou verzi referenčního transkriptu.
@@ -253,7 +242,7 @@ v placené diagnostické službě je potřeba písemné vyjasnění s Illumina.
 Podrobnosti implementace jsou v
 [`implementation_and_data_sources.md`](implementation_and_data_sources.md).
 
-## 11. Historická Class 5 a současná klasifikace podle VCEP v1.2
+## 10. Historická Class 5 a současná klasifikace podle VCEP v1.2
 
 Varianta `BRCA1 NM_007294.4:c.4185G>A p.(Gln1395=)` má v ClinVaru ENIGMA
 expert-panel assertion `SCV001161546` s klasifikací Pathogenic, hodnocenou

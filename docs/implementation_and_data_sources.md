@@ -365,6 +365,7 @@ Typ varianty se odvozuje z kombinace `c.` a `p.` notace. Rozlišují se zejména
 
 - nonsense,
 - frameshift,
+- coding delins zavádějící předčasný terminační kodon,
 - missense,
 - synonymous,
 - intronic,
@@ -380,7 +381,7 @@ Rozpoznání typu není samo o sobě oprávněním vydat automatickou klasifikac
 Produkční publikační brána povoluje pouze typy, pro které je v ARIANE dokončena
 odpovídající větev ENIGMA v1.2:
 
-- `nonsense`, `frameshift`, `splice_site`, `initiation_codon`,
+- `nonsense`, `frameshift`, `ptc_delins`, `splice_site`, `initiation_codon`,
 - `exon_deletion`, `exon_duplication`,
 - `missense`, `synonymous`, `intronic`,
 - `inframe_deletion`, `inframe_insertion`, `inframe_delins`.
@@ -1010,9 +1011,13 @@ Operace v `c.` notaci sama neurčuje proteinovou větev. DNA `delins`, který po
 lokálního referenčního transkriptu způsobí jednu aminokyselinovou substituci, se
 pro rozhodování klasifikuje jako `missense`. Proteinová delece, inserce,
 duplikace nebo skutečný proteinový `delins` vstoupí do odpovídající in-frame
-větve. Frameshift, synonymous a jednoduchý nonsense následek zůstávají ve svých
-vlastních větvích. Zdrojové pole typu varianty z BRCA Exchange snapshotu je
-auditní údaj a runtime typování nepřebíjí.
+větve. Proteinový `delins`, jehož ověřený následek obsahuje předčasný `Ter`, má
+samostatný interní typ `ptc_delins` a vstoupí do stejné Table 4 větve PVS1 a
+PM5 PTC jako nonsense a frameshift. První terminační kodon vložené proteinové
+sekvence určuje polohu PTC; varianta se neposuzuje jako běžný in-frame delins ve
+Figure 1A. Frameshift, synonymous a jednoduchý nonsense následek zůstávají ve
+svých vlastních větvích. Zdrojové pole typu varianty z BRCA Exchange snapshotu
+je auditní údaj a runtime typování nepřebíjí.
 Pokud u coding DNA `delins` nelze proteinový následek určit, ARIANE nevrátí
 klasifikaci. Odpověď vysvětlí, že bez následku nelze vybrat PTC nebo Figure 1A
 větev.

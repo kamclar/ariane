@@ -193,6 +193,7 @@ def test_public_api_capabilities_publish_limits_and_policy():
         "BRCA2",
     }
     assert "missense" in payload["supported_variant_types"]
+    assert "ptc_delins" in payload["supported_variant_types"]
     assert payload["out_of_scope_variant_types"] == ["5utr", "3utr", "stop_lost"]
     assert set(payload["unresolved_variant_types"]) == {
         "unknown",

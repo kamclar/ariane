@@ -58,6 +58,17 @@ def _opening(gene: str, c_notation: str, p_notation: str, variant_type: str) -> 
         return (f"{gene} {c_notation} introduces a premature termination codon at position {pos}{tail}."
                 if pos else f"{gene} {c_notation} is a nonsense variant{tail}.")
 
+    if vt == "ptc_delins":
+        pos = _extract_aa_pos(p)
+        tail = f" {p}" if p else ""
+        return (
+            f"{gene} {c_notation} is a coding deletion-insertion beginning at "
+            f"codon {pos} that introduces a premature termination codon{tail}."
+            if pos
+            else f"{gene} {c_notation} is a coding deletion-insertion that "
+            f"introduces a premature termination codon{tail}."
+        )
+
     if vt == "splice_site":
         info = _parse_intron_offset(c_notation)
         if info:

@@ -6,6 +6,11 @@ _SIMPLE_PROTEIN_SUBSTITUTION = re.compile(
     re.IGNORECASE,
 )
 
+_PROTEIN_DELINS_PTC = re.compile(
+    r"delins(?:[a-z]{3})*?ter",
+    re.IGNORECASE,
+)
+
 
 def _delins_protein_type(p_notation: str) -> str:
     """Return the rule-facing type of a coding DNA delins consequence.
@@ -18,6 +23,10 @@ def _delins_protein_type(p_notation: str) -> str:
     p = (p_notation or "").lower()
     if not p or "?" in p:
         return "delins"
+    if _PROTEIN_DELINS_PTC.search(p):
+        # Preserve the DNA/protein delins identity while routing its verified
+        # premature termination consequence through the Table 4 PTC branch.
+        return "ptc_delins"
     if "delins" in p:
         return "inframe_delins"
     if "del" in p:

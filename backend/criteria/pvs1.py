@@ -78,7 +78,20 @@ def _termination_aa_position(p_notation: str) -> Optional[int]:
     if frameshift:
         return int(frameshift.group(1)) + int(frameshift.group(2)) - 1
     nonsense = re.search(r"[A-Z][a-z]{2}(\d+)Ter", text)
-    return int(nonsense.group(1)) if nonsense else None
+    if nonsense:
+        return int(nonsense.group(1))
+    protein_delins = re.search(
+        r"[A-Z][a-z]{2}(\d+)"
+        r"(?:_[A-Z][a-z]{2}\d+)?"
+        r"delins((?:[A-Z][a-z]{2})*?)Ter",
+        text,
+    )
+    if protein_delins:
+        inserted_residues = re.findall(
+            r"[A-Z][a-z]{2}", protein_delins.group(2)
+        )
+        return int(protein_delins.group(1)) + len(inserted_residues)
+    return None
 
 def evaluate_pvs1(
     gene: str,
@@ -111,7 +124,7 @@ def evaluate_pvs1(
     }
 
     lof_types = [
-        "frameshift", "nonsense", "splice_site", "initiation_codon",
+        "frameshift", "nonsense", "ptc_delins", "splice_site", "initiation_codon",
         "exon_deletion", "exon_duplication",
     ]
     if variant_type.lower() not in lof_types:
@@ -221,8 +234,8 @@ def evaluate_pvs1(
 
         return result
 
-    # ---- Frameshift and nonsense variants ----
-    if variant_type.lower() in ["frameshift", "nonsense"]:
+    # ---- Protein-termination variants ----
+    if variant_type.lower() in ["frameshift", "nonsense", "ptc_delins"]:
         if cds_pos is None:
             result["reason"] = f"Could not parse CDS position from {c_notation}"
             return result
