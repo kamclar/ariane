@@ -2627,6 +2627,14 @@ vyžadující revizi a technicky neprovedenou kontrolu. Síťová chyba source w
 nemění připravenost produkce; aplikace dále používá poslední schválený lokální
 snapshot.
 
+Nález nové upstream verze nebo změněných záznamů není vykazován jako chyba CI.
+Workflow vytvoří nebo aktualizuje jedno GitHub issue s konkrétním diffem a
+odkazem na kontrolu. Technická chyba kontroly zůstává chybou workflow. Samostatný
+ručně spouštěný workflow `Prepare source update` může pro podporovaný zdroj
+sestavit kandidátní snapshot a otevřít draft pull request. Kandidát se vytváří
+pouze v GitHub runneru a aktivní data ani server nemění. Aktualizace vstoupí do
+větve `main` až po odborném schválení a merge pull requestu.
+
 Žádný checker nesmí zapisovat do aktivních dat, měnit manifest ani aktivovat
 release. Každá nalezená změna nejprve vytvoří kandidátní podklad. Aktivace
 vyžaduje kontrolu release notes a ENIGMA kompatibility, zdrojovou identitu,

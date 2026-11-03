@@ -103,7 +103,7 @@ def load_registry(path: Path = DEFAULT_REGISTRY) -> dict[str, Any]:
             raise SourceWatchConfigurationError(
                 f"Automated source {source['id']!r} needs a positive cadence_days"
             )
-        for field in ("manifest_path", "metadata_path"):
+        for field in ("manifest_path", "metadata_path", "registry_path"):
             if source.get(field):
                 local_path = _project_path(str(source[field]))
                 if not local_path.is_file():
@@ -321,6 +321,14 @@ def check_erepo_export(
         expert_panel=str(metadata["expert_panel"]),
         genes=set(source["genes"]),
     )
+    candidate_diff: dict[str, Any] | None = None
+    if source.get("registry_path"):
+        candidate_diff = erepo_record_diff(
+            export,
+            pinned_registry=_load_json(_project_path(str(source["registry_path"]))),
+            expert_panel=str(metadata["expert_panel"]),
+            genes=set(source["genes"]),
+        )
     pinned_selected_sha256 = str(source["selected_rows_sha256"])
     service = _request_json(
         str(metadata["source_service_url"]), timeout=timeout, opener=opener
@@ -339,7 +347,7 @@ def check_erepo_export(
         if api_changed
         else "current"
     )
-    return {
+    result = {
         "status": status,
         "review_required": selected_rows_changed or api_changed,
         "source_url": export_url,
@@ -356,6 +364,29 @@ def check_erepo_export(
         "pinned_retrieved_at": metadata.get("retrieved_at"),
         "pinned_record_count": metadata.get("record_count"),
     }
+    if candidate_diff is not None:
+        result["candidate_diff"] = candidate_diff
+    return result
+
+
+def _erepo_selected_rows(
+    export: bytes,
+    *,
+    expert_panel: str,
+    genes: set[str],
+) -> list[dict[str, str]]:
+    text = export.decode("utf-8-sig")
+    rows = list(csv.DictReader(io.StringIO(text), delimiter="\t"))
+    selected = [
+        {str(key): str(value or "").strip() for key, value in row.items()}
+        for row in rows
+        if str(row.get("Expert Panel") or "").strip() == expert_panel
+        and str(row.get("HGNC Gene Symbol") or "").strip() in genes
+    ]
+    if not selected:
+        raise RuntimeError("ERepo export contains no selected ENIGMA BRCA1/2 rows")
+    selected.sort(key=lambda row: (row.get("Uuid", ""), row.get("Variation", "")))
+    return selected
 
 
 def erepo_selection_identity(
@@ -371,17 +402,11 @@ def erepo_selection_identity(
     projection still records the full-export checksum for provenance but uses
     only ENIGMA BRCA1/2 rows to decide whether ARIANE review is required.
     """
-    text = export.decode("utf-8-sig")
-    rows = list(csv.DictReader(io.StringIO(text), delimiter="\t"))
-    selected = [
-        {str(key): str(value or "").strip() for key, value in row.items()}
-        for row in rows
-        if str(row.get("Expert Panel") or "").strip() == expert_panel
-        and str(row.get("HGNC Gene Symbol") or "").strip() in genes
-    ]
-    if not selected:
-        raise RuntimeError("ERepo export contains no selected ENIGMA BRCA1/2 rows")
-    selected.sort(key=lambda row: (row.get("Uuid", ""), row.get("Variation", "")))
+    selected = _erepo_selected_rows(
+        export,
+        expert_panel=expert_panel,
+        genes=genes,
+    )
     canonical = json.dumps(
         selected,
         ensure_ascii=False,
@@ -389,6 +414,105 @@ def erepo_selection_identity(
         separators=(",", ":"),
     ).encode("utf-8")
     return {"row_count": len(selected), "sha256": hashlib.sha256(canonical).hexdigest()}
+
+
+def _criterion_list(value: object) -> list[str]:
+    return [item.strip() for item in str(value or "").split(",") if item.strip()]
+
+
+def _erepo_remote_semantics(row: dict[str, str]) -> dict[str, Any]:
+    return {
+        "classification": row.get("Assertion", ""),
+        "criteria_met": _criterion_list(row.get("Applied Evidence Codes (Met)")),
+        "criteria_not_met": _criterion_list(
+            row.get("Applied Evidence Codes (Not Met)")
+        ),
+        "interpretation_summary": row.get("Summary of interpretation", ""),
+        "approval_date": row.get("Approval Date", ""),
+        "published_date": row.get("Published Date", ""),
+        "retracted": row.get("Retracted", "").lower() == "true",
+    }
+
+
+def erepo_record_diff(
+    export: bytes,
+    *,
+    pinned_registry: dict[str, Any],
+    expert_panel: str,
+    genes: set[str],
+) -> dict[str, Any]:
+    """Return a review-oriented row diff without activating remote ERepo data."""
+    selected = _erepo_selected_rows(
+        export,
+        expert_panel=expert_panel,
+        genes=genes,
+    )
+    remote = {row.get("Uuid", ""): row for row in selected}
+    if "" in remote or len(remote) != len(selected):
+        raise RuntimeError("ERepo selection contains a missing or duplicate UUID")
+    pinned_records = pinned_registry.get("records")
+    if not isinstance(pinned_records, list):
+        raise SourceWatchConfigurationError("Pinned ERepo registry has no records")
+    pinned = {
+        str(record.get("uuid") or ""): record
+        for record in pinned_records
+        if isinstance(record, dict)
+    }
+    if "" in pinned or len(pinned) != len(pinned_records):
+        raise SourceWatchConfigurationError(
+            "Pinned ERepo registry contains a missing or duplicate UUID"
+        )
+
+    def remote_summary(row: dict[str, str]) -> dict[str, Any]:
+        return {
+            "uuid": row["Uuid"],
+            "gene": row.get("HGNC Gene Symbol", ""),
+            "variant": row.get("Variation", ""),
+            "classification": row.get("Assertion", ""),
+            "approval_date": row.get("Approval Date", ""),
+            "published_date": row.get("Published Date", ""),
+            "erepo_url": row.get("Evidence Repo Link", ""),
+        }
+
+    added = [remote_summary(remote[key]) for key in sorted(remote.keys() - pinned.keys())]
+    removed = [
+        {
+            "uuid": pinned[key].get("uuid"),
+            "gene": pinned[key].get("gene"),
+            "variant": " ".join(
+                part
+                for part in (
+                    str(pinned[key].get("c_notation") or ""),
+                    str(pinned[key].get("p_notation") or ""),
+                )
+                if part
+            ),
+            "classification": pinned[key].get("classification"),
+            "erepo_url": pinned[key].get("erepo_url"),
+        }
+        for key in sorted(pinned.keys() - remote.keys())
+    ]
+    modified: list[dict[str, Any]] = []
+    semantic_fields = tuple(_erepo_remote_semantics({}).keys())
+    for key in sorted(remote.keys() & pinned.keys()):
+        current = _erepo_remote_semantics(remote[key])
+        changes = {
+            field: {"pinned": pinned[key].get(field), "remote": current[field]}
+            for field in semantic_fields
+            if pinned[key].get(field) != current[field]
+        }
+        if changes:
+            modified.append({**remote_summary(remote[key]), "changes": changes})
+    return {
+        "pinned_count": len(pinned),
+        "remote_count": len(remote),
+        "added_count": len(added),
+        "removed_count": len(removed),
+        "modified_count": len(modified),
+        "added": added,
+        "removed": removed,
+        "modified": modified,
+    }
 
 
 def _load_script_module(name: str, filename: str) -> ModuleType:
@@ -488,6 +612,7 @@ def run_checks(
             "checker": source["checker"],
             "cadence_days": source.get("cadence_days"),
             "official_url": source.get("official_url"),
+            "activation_command": source.get("activation_command"),
             "checked_utc": checked_at,
         }
         try:
@@ -514,7 +639,7 @@ def run_checks(
     else:
         overall = "current"
         exit_code = 0
-    return {
+    report = {
         "schema_version": 1,
         "generated_utc": _utc_now().isoformat(),
         "overall_status": overall,
@@ -535,6 +660,116 @@ def run_checks(
         "sources": results,
         "activation_policy": registry["policy"]["required_before_activation"],
     }
+    review_material = [
+        {
+            key: value
+            for key, value in source.items()
+            if key not in {"checked_utc", "error", "error_type"}
+        }
+        for source in results
+        if source["status"] in REVIEW_STATUSES
+    ]
+    report["review_fingerprint"] = hashlib.sha256(
+        json.dumps(
+            review_material,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    return report
+
+
+def _markdown_cell(value: object) -> str:
+    return str(value or "").replace("|", "\\|").replace("\n", " ")
+
+
+def render_erepo_diff(lines: list[str], diff: dict[str, Any]) -> None:
+    lines.extend(
+        [
+            "",
+            "### Candidate record diff",
+            "",
+            (
+                f"Pinned: **{diff['pinned_count']}**; remote: "
+                f"**{diff['remote_count']}**; added: **{diff['added_count']}**; "
+                f"modified: **{diff['modified_count']}**; removed: "
+                f"**{diff['removed_count']}**."
+            ),
+        ]
+    )
+    for heading, key in (
+        ("Added records", "added"),
+        ("Modified records", "modified"),
+        ("Removed records", "removed"),
+    ):
+        records = diff.get(key, [])
+        if not records:
+            continue
+        lines.extend(
+            [
+                "",
+                f"#### {heading}",
+                "",
+                "| Gene | Variant | Classification | Details |",
+                "|---|---|---|---|",
+            ]
+        )
+        for record in records[:50]:
+            details = ""
+            if key == "modified":
+                rendered_changes: list[str] = []
+                for field, change in sorted(record.get("changes", {}).items()):
+                    if field == "interpretation_summary":
+                        rendered_changes.append("interpretation summary changed")
+                        continue
+                    pinned = change.get("pinned")
+                    remote = change.get("remote")
+                    rendered_changes.append(f"{field}: {pinned} -> {remote}")
+                details = "; ".join(rendered_changes)
+            elif record.get("published_date"):
+                details = f"published {record['published_date']}"
+            link = str(record.get("erepo_url") or "")
+            variant = _markdown_cell(record.get("variant"))
+            if link:
+                variant = f"[{variant}]({link})"
+            lines.append(
+                f"| {_markdown_cell(record.get('gene'))} | {variant} | "
+                f"{_markdown_cell(record.get('classification'))} | "
+                f"{_markdown_cell(details)} |"
+            )
+        if len(records) > 50:
+            lines.append(f"\nOnly the first 50 of {len(records)} records are shown.")
+
+
+def _render_source_details(lines: list[str], source: dict[str, Any]) -> None:
+    if source["status"] not in REVIEW_STATUSES:
+        return
+    lines.extend(["", f"## {source['name']}", ""])
+    if source.get("official_url"):
+        lines.append(f"Official source: {source['official_url']}")
+    if source.get("activation_command"):
+        lines.append(
+            f"Candidate builder: `{source['activation_command']}` "
+            "(not run by the read-only check)."
+        )
+    if source.get("candidate_diff"):
+        render_erepo_diff(lines, source["candidate_diff"])
+    if source.get("records"):
+        lines.extend(
+            [
+                "",
+                "| Gene | Pinned version | Remote version | Remote modified |",
+                "|---|---|---|---|",
+            ]
+        )
+        for record in source["records"]:
+            lines.append(
+                f"| {_markdown_cell(record.get('gene'))} | "
+                f"{_markdown_cell(record.get('pinned_version'))} | "
+                f"{_markdown_cell(record.get('remote_version'))} | "
+                f"{_markdown_cell(record.get('remote_modified'))} |"
+            )
 
 
 def render_markdown(report: dict[str, Any]) -> str:
@@ -558,13 +793,28 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| {source['name']} | `{source['checker']}` | "
             f"`{source['status']}` | {action} |"
         )
+    for source in report["sources"]:
+        _render_source_details(lines, source)
     lines.extend(
         [
             "",
             "The check is read-only. No production dataset or manifest was changed.",
+            "A detected source change is a review notice, not a CI failure.",
             "",
         ]
     )
+    if report["overall_status"] == "review_required":
+        lines.extend(
+            [
+                "## Approval path",
+                "",
+                "Use the **Prepare source update** GitHub workflow to build a "
+                "draft pull request. Review its source provenance, record-level "
+                "diff and test results. The active snapshot changes only after "
+                "the pull request is approved and merged.",
+                "",
+            ]
+        )
     return "\n".join(lines)
 
 

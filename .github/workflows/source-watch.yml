@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: source-watch
@@ -29,11 +30,17 @@ jobs:
 
       - name: Check official sources without activating them
         id: source_watch
-        continue-on-error: true
-        run: >-
-          python scripts/check_source_updates.py
-          --output /tmp/ariane-source-watch.json
-          --markdown-output /tmp/ariane-source-watch.md
+        run: |
+          set +e
+          python scripts/check_source_updates.py \
+            --output /tmp/ariane-source-watch.json \
+            --markdown-output /tmp/ariane-source-watch.md
+          status=$?
+          set -e
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          # Exit 2 is an expected review notice, not a CI failure. A later step
+          # still fails the workflow for technical/configuration errors.
+          exit 0
 
       - name: Publish source-watch summary
         if: always()
@@ -45,8 +52,24 @@ jobs:
             echo "The checker failed before it could create a report." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Require review of changes or failed checks
-        if: steps.source_watch.outcome == 'failure'
+      - name: Create or update the source-review notice
+        if: >-
+          steps.source_watch.outputs.exit_code == '0' ||
+          steps.source_watch.outputs.exit_code == '2'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SOURCE_WATCH_ASSIGNEE: ${{ github.repository_owner }}
+        run: >-
+          python scripts/sync_source_watch_issue.py
+          --report /tmp/ariane-source-watch.json
+          --markdown /tmp/ariane-source-watch.md
+          --repository "${{ github.repository }}"
+          --run-url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+      - name: Fail only when a source could not be checked
+        if: >-
+          steps.source_watch.outputs.exit_code != '0' &&
+          steps.source_watch.outputs.exit_code != '2'
         run: |
-          echo "The source-watch report requires attention. See the job summary."
+          echo "The source watch did not complete. See the job summary."
           exit 1

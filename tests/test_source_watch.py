@@ -253,6 +253,65 @@ def test_erepo_checker_ignores_changes_outside_enigma_scope(
     assert result["review_required"] is False
 
 
+def test_erepo_record_diff_reports_added_modified_and_removed_records() -> None:
+    export = (
+        "Uuid\tExpert Panel\tHGNC Gene Symbol\tVariation\tAssertion\t"
+        "Applied Evidence Codes (Met)\tApplied Evidence Codes (Not Met)\t"
+        "Summary of interpretation\tApproval Date\tPublished Date\tRetracted\t"
+        "Evidence Repo Link\n"
+        "kept\tPanel\tBRCA1\tNM_007294.4(BRCA1):c.1A>G\tLikely Pathogenic\t"
+        "PS3\t\tnew summary\t2026-10-30\t2026-10-29\tfalse\t"
+        "https://example.test/kept\n"
+        "added\tPanel\tBRCA2\tNM_000059.4(BRCA2):c.2T>C\tUncertain Significance\t"
+        "\tPP3\tadded summary\t2026-10-30\t2026-10-29\tfalse\t"
+        "https://example.test/added\n"
+    ).encode()
+    pinned = {
+        "records": [
+            {
+                "uuid": "kept",
+                "gene": "BRCA1",
+                "c_notation": "c.1A>G",
+                "p_notation": "",
+                "classification": "Uncertain Significance",
+                "criteria_met": [],
+                "criteria_not_met": ["PS3"],
+                "interpretation_summary": "old summary",
+                "approval_date": "2026-01-01",
+                "published_date": "2026-01-01",
+                "retracted": False,
+            },
+            {
+                "uuid": "removed",
+                "gene": "BRCA2",
+                "c_notation": "c.3G>A",
+                "p_notation": "",
+                "classification": "Benign",
+                "erepo_url": "https://example.test/removed",
+            },
+        ]
+    }
+
+    diff = source_watch.erepo_record_diff(
+        export,
+        pinned_registry=pinned,
+        expert_panel="Panel",
+        genes={"BRCA1", "BRCA2"},
+    )
+
+    assert diff["added_count"] == 1
+    assert diff["modified_count"] == 1
+    assert diff["removed_count"] == 1
+    assert diff["added"][0]["uuid"] == "added"
+    assert diff["removed"][0]["uuid"] == "removed"
+    assert diff["modified"][0]["uuid"] == "kept"
+    assert set(diff["modified"][0]["changes"]) >= {
+        "classification",
+        "criteria_met",
+        "criteria_not_met",
+    }
+
+
 def test_run_checks_distinguishes_review_from_operational_failure() -> None:
     registry = {
         "policy": {
@@ -279,6 +338,7 @@ def test_run_checks_distinguishes_review_from_operational_failure() -> None:
 
     assert review_report["overall_status"] == "review_required"
     assert review_report["exit_code"] == 2
+    assert len(review_report["review_fingerprint"]) == 64
 
     def failing(_source: dict, _timeout: float) -> dict:
         raise TimeoutError("upstream timed out")
@@ -290,6 +350,48 @@ def test_run_checks_distinguishes_review_from_operational_failure() -> None:
     assert failed_report["overall_status"] == "check_failed"
     assert failed_report["exit_code"] == 3
     assert failed_report["sources"][0]["error_type"] == "TimeoutError"
+
+
+def test_markdown_explains_review_notice_and_candidate_diff() -> None:
+    report = {
+        "overall_status": "review_required",
+        "generated_utc": "2026-11-03T00:00:00Z",
+        "sources": [
+            {
+                "name": "ClinGen ERepo ENIGMA VCEP assertions",
+                "checker": "erepo_export",
+                "status": "update_available",
+                "review_required": True,
+                "official_url": "https://example.test",
+                "activation_command": "python build.py",
+                "candidate_diff": {
+                    "pinned_count": 1,
+                    "remote_count": 2,
+                    "added_count": 1,
+                    "modified_count": 0,
+                    "removed_count": 0,
+                    "added": [
+                        {
+                            "gene": "BRCA1",
+                            "variant": "c.1A>G",
+                            "classification": "Likely Pathogenic",
+                            "published_date": "2026-10-29",
+                            "erepo_url": "https://example.test/record",
+                        }
+                    ],
+                    "modified": [],
+                    "removed": [],
+                },
+            }
+        ],
+    }
+
+    markdown = source_watch.render_markdown(report)
+
+    assert "Candidate record diff" in markdown
+    assert "[c.1A>G](https://example.test/record)" in markdown
+    assert "review notice, not a CI failure" in markdown
+    assert "Prepare source update" in markdown
 
 
 def test_manual_source_is_visible_but_does_not_claim_freshness() -> None:

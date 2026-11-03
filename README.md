@@ -170,9 +170,11 @@ can be activated safely:
 python scripts/check_source_updates.py
 ```
 
-The scheduled GitHub workflow runs this check weekly. It reports a change or an
-unavailable upstream source, but never updates active data. The review and
-activation policy is documented in
+The scheduled GitHub workflow runs this check weekly. A source change creates
+or updates a review issue with the affected records and does not fail CI.
+Technical check failures remain visible as failed runs. A separate manually
+dispatched workflow can prepare a draft pull request, but never updates the
+deployed application automatically. The review and activation policy is documented in
 [`docs/source_freshness_and_update_policy.md`](docs/source_freshness_and_update_policy.md).
 
 Refresh and validate the panel snapshots in a separate data-build environment:

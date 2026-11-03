@@ -79,8 +79,17 @@ snapshot zůstává beze změny.
 
 GitHub workflow `.github/workflows/source-watch.yml` spouští kontrolu každé
 pondělí a lze jej spustit ručně před releasem. Výsledek zapisuje do job summary.
-Nález změny i technicky neúspěšná kontrola workflow zviditelní jako neúspěšný
-job, ale nic neaktivuje a nepotřebuje přístup k produkčnímu serveru.
+Nález změny není chyba CI. Workflow zůstane úspěšný a vytvoří nebo aktualizuje
+GitHub issue `ARIANE source update available for review`, které obsahuje dotčený
+zdroj, record-level diff a odkaz na běh kontroly. Opakovaný nezměněný nález
+nevytváří další issue ani komentář. Červeně končí pouze technicky neprovedená
+kontrola nebo chyba konfigurace.
+
+Issue odkazuje na ručně spouštěný workflow `Prepare source update`. Ten pro
+podporovaný zdroj sestaví kandidátní snapshot v dočasném GitHub runneru, zapíše
+provenanci a review report, provede cílené testy a otevře **draft pull request**.
+Nic nenasazuje na server. Schválením je až odborná kontrola a merge pull requestu;
+produkční nasazení zůstává samostatným krokem.
 
 ## Postup po nálezu změny
 

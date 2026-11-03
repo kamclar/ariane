@@ -49,6 +49,7 @@
       "cadence_days": 7,
       "official_url": "https://erepo.clinicalgenome.org/evrepo/",
       "metadata_path": "backend/data/enigma_erepo_vcep_registry.metadata.json",
+      "registry_path": "backend/data/enigma_erepo_vcep_registry.json",
       "genes": ["BRCA1", "BRCA2"],
       "selected_rows_sha256": "34b2ccbae0d644bb9ca5f45f433f6e64d53163b828d587ce366e2006fc9c0f07",
       "selected_row_count": 180,
