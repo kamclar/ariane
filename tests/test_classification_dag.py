@@ -250,6 +250,41 @@ def test_single_very_strong_benign_is_likely_benign():
     )
 
 
+def test_mixed_pvs1_and_bp7_remains_vus_until_second_pathogenic_code():
+    pvs1_and_bp7 = {
+        "PVS1": {"strength": "Very Strong", "points": 8},
+        "BP7": {"strength": "Supporting", "points": -1},
+    }
+
+    result = classify_by_enigma_combination(pvs1_and_bp7, 7)
+
+    assert result[:2] == (3, "VUS")
+    assert "only 1 pathogenic criterion" in result[2]
+    assert "at least 2 different criteria" in result[2]
+    assert "requires expert discussion" in result[2]
+
+    with_second_pathogenic_code = {
+        **pvs1_and_bp7,
+        "PM2_Supporting": {"strength": "Supporting", "points": 1},
+    }
+    assert classify_by_enigma_combination(
+        with_second_pathogenic_code, 8
+    )[:2] == (4, "Likely Pathogenic")
+
+
+def test_mixed_one_code_per_direction_cannot_publish_likely_benign():
+    pp3_and_bs3 = {
+        "PP3": {"strength": "Supporting", "points": 1},
+        "BS3": {"strength": "Strong", "points": -4},
+    }
+
+    result = classify_by_enigma_combination(pp3_and_bs3, -3)
+
+    assert result[:2] == (3, "VUS")
+    assert "only 1 benign criterion" in result[2]
+    assert "requires expert discussion" in result[2]
+
+
 def test_two_very_strong_pathogenic_criteria_are_pathogenic():
     criteria = {
         "PVS1": {

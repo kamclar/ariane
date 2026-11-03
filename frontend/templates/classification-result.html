@@ -73,7 +73,8 @@
                      x-show="result?.mixed_evidence">
                     <strong>Mixed evidence.</strong>
                     Pathogenic and benign evidence co-occur. ENIGMA v1.2 second classification approach,
-                    using Tavtigian 2020 points, was applied. Expert review required.
+                    using Tavtigian 2020 points, was evaluated. ARIANE requires at least two different
+                    criteria in the direction of a non-VUS automated result. Expert review required.
                     <a href="https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data"
                        target="_blank" rel="noopener">
                         ENIGMA v1.2, Classification Methods, second approach
@@ -697,7 +698,7 @@
                         <div><dt>Pathogenic points</dt><dd x-text="`+${result?.pathogenic_points || 0}`"></dd></div>
                         <div><dt>Benign points</dt><dd x-text="result?.benign_points || 0"></dd></div>
                         <div><dt>Total</dt><dd x-text="result?.total_points"></dd></div>
-                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA VCEP v1.2 second classification approach for mixed evidence, using the Tavtigian 2020 point system</dd></div>
+                        <div class="evidence-detail-wide"><dt>Method</dt><dd>ENIGMA VCEP v1.2 second classification approach for mixed evidence, using the Tavtigian 2020 point system with the VCEP minimum-two-code publication guard</dd></div>
                     </dl>
                 </details>
                 </div>

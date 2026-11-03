@@ -121,6 +121,10 @@ souřadnicový manifest bez změny klasifikačního DAGu.
 
 ## Již opravené auditní body
 
+- U smíšené patogenní a benigní evidence se bodový systém vyhodnotí, ale
+  nepublikuje ne-VUS třídu, pokud ji podporuje jen jeden kód v daném směru.
+  Například `PVS1 Very Strong + BP7 Supporting` zůstává VUS a vyžaduje odbornou
+  diskusi. Druhý nezávislý patogenní kód dovolí použít vypočtenou bodovou třídu.
 - BP1 a BP7 normalizují token typu varianty na hranici pravidla stejnou sdílenou
   funkcí jako PP3/BP4. Velikost písmen ani okolní mezery proto nemohou změnit
   použitelnost kritéria, sílu, body nebo větev auditního rozhodovacího stromu.
@@ -296,47 +300,3 @@ revizi a následující dotaz pro ENIGMA:
 
 Zdroje: [ClinVar RCV000112286](https://www.ncbi.nlm.nih.gov/clinvar/RCV000112286/)
 a [ClinGen ERepo c.4185G>C](https://erepo.clinicalgenome.org/evrepo/ui/classification/9ef5ebb6-b717-4061-8655-b7c3bf79b9a5).
-
-## 12. Přechod mezi Table 3 a bodovým systémem pro mixed evidence
-
-ENIGMA VCEP v1.2 určuje Table 3 jako výchozí způsob kombinace kritérií. Pokud
-jsou současně splněna patogenní i benigní kritéria, předepisuje druhý postup
-založený na bodovém systému Tavtigian 2020. ARIANE tento přechod implementuje
-doslovně.
-
-Mezi oběma postupy však existují hraniční rozdíly:
-
-| Evidence | Table 3 | Bodový systém |
-|---|---|---|
-| PVS1 Very Strong | VUS | Likely Pathogenic, 8 bodů |
-| šest patogenních Supporting | VUS | Likely Pathogenic, 6 bodů |
-| jedno benigní Strong bez více doložených složek | VUS | Likely Benign, -4 body |
-
-Konkrétně samotné PVS1 Very Strong zůstane podle Table 3 VUS. Přidání BP7
-Supporting vytvoří mixed evidence, přepne klasifikaci do bodového systému a
-součet `8 - 1 = 7` vede k Likely Pathogenic. Benigní kritérium tedy formálně
-zvýší třídu, protože změnilo použitý klasifikační postup.
-
-Nejde o chybu přepisu ARIANE. Specifications v1.2 výslovně uvádějí, že druhý
-postup se použije při současném splnění benigních a patogenních kritérií.
-Specifikace současně požaduje opatrnost a diskusi VCEP při významné konfliktní
-evidenci. Není však vysvětleno, zda je popsaná diskontinuita zamýšlená a jak má
-být takový výsledek klinicky komunikován.
-
-Dotaz pro ENIGMA:
-
-> ENIGMA BRCA1/2 VCEP v1.2 specifies the adapted Table 3 combinations as the
-> default classification approach and the Tavtigian 2020 point system when
-> both pathogenic and benign criteria are met. This creates a boundary case in
-> which PVS1 Very Strong alone is VUS under Table 3, while adding BP7 Supporting
-> changes the method and produces 7 points, formally Likely Pathogenic. Similar
-> differences occur for six pathogenic Supporting criteria and for a single
-> benign Strong criterion without multiple evidence contributions. Is this
-> change in class at the transition between the two approaches intended? Should
-> the point-based class be reported as the working result pending VCEP
-> discussion, or should an additional constraint prevent evidence in the
-> opposite direction from increasing the class?
-
-Do metodického potvrzení ARIANE zachovává doslovný výpočet v1.2, označuje
-výsledek jako mixed evidence a požaduje odbornou revizi. Bodová třída nesmí být
-interpretována jako důkaz, že benigní kritérium posílilo patogenní evidenci.

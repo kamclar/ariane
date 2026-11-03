@@ -1209,7 +1209,8 @@ vlastnost není odvozena z názvu kódu:
 
 Pokud se Strong kritérium kombinuje s další benigní evidencí podle Table 3,
 platí běžné kombinace Table 3 bez ohledu na tuto výjimku pro jediné Strong.
-Při mixed evidence se nadále použije druhý klasifikační postup a bodový systém.
+Při mixed evidence se použije druhý klasifikační postup a bodový systém spolu
+s níže popsanou publikační brzdou pro automatický výsledek.
 
 Příklad: PVS1 Very Strong bez dalšího kritéria zůstává Class 3, protože nesplňuje kombinaci pro Likely Pathogenic.
 
@@ -1234,17 +1235,22 @@ Pokud jsou současně přítomna patogenní i benigní kritéria, nastává druh
 | -6 až -2 | Class 2, Likely Benign |
 | méně než -6 | Class 1, Benign |
 
-Přepnutí mezi postupy může vytvořit nemonotónní hraniční výsledek. Například
-samotné PVS1 Very Strong nesplňuje kombinaci Table 3 pro Likely Pathogenic a
-zůstává VUS. Po přidání BP7 Supporting vznikne mixed evidence, použije se druhý
-postup a součet `8 - 1 = 7` odpovídá Likely Pathogenic. Přidání benigní evidence
-tak může formálně zvýšit výslednou třídu, protože se současně změnil
-klasifikační postup. ARIANE tento výsledek nevydává za posílení patogenní
-evidence. Zachovává oba směry, použitou metodu a požadavek na odbornou diskusi.
-Zda je tato diskontinuita zamýšleným důsledkem v1.2, je otevřená metodická
-otázka vedená v `open_methodological_and_data_tasks.md`.
+Následná metodická odpověď VCEP upřesnila, že automatická ne-VUS klasifikace
+smíšené evidence vyžaduje nejméně dva různé kódy ve směru výsledné třídy.
+Bodový systém se vždy vyhodnotí, ale při jediném patogenním kódu se Class 4 nebo
+Class 5 nepublikuje a při jediném benigním kódu se nepublikuje Class 1 nebo
+Class 2. Výsledek zůstane VUS a vyžaduje odbornou diskusi. BA1 zůstává
+samostatnou stand-alone výjimkou.
 
-Výsledek s protichůdnými směry zachovává vypočtenou ENIGMA třídu a obsahuje barevný pruh `Mixed evidence`. Pruh uvádí, že byla použita ENIGMA bodová kombinace a že je nutná expertní revize. Odkazuje přímo na verzovaný dokument [ENIGMA Specifications v1.2](https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data), část `Classification Methods`, druhý postup. Rozbalovací technický detail zvlášť ukazuje součet patogenních bodů, benigních bodů a celkový výsledek.
+Například `PVS1 Very Strong + BP7 Supporting` má bodový součet `8 - 1 = 7`, ale
+jen jeden patogenní kód, a proto zůstává VUS. Přidání dalšího nezávislého
+patogenního Supporting kódu vytvoří dva kódy v patogenním směru; součet 8 bodů
+pak lze publikovat jako Likely Pathogenic. Stejná brzda se zrcadlově používá pro
+benigní směr.
+
+Výsledek s protichůdnými směry obsahuje barevný pruh `Mixed evidence`. Pruh
+uvádí bodovou metodu, publikační brzdu a nutnost expertní revize. Odkazuje přímo
+na verzovaný dokument [ENIGMA Specifications v1.2](https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data), část `Classification Methods`, druhý postup. Rozbalovací technický detail zvlášť ukazuje součet patogenních bodů, benigních bodů a celkový výsledek.
 
 ENIGMA v úvodní poznámce Specifications v1.2 upozorňuje, že pravidla nemusí
 spolehlivě odlišit varianty se středním rizikem nebo sníženou penetrancí. Rozpor

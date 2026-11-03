@@ -2325,13 +2325,15 @@ class GoldenCaseRegressionTests(unittest.TestCase):
         )
         self.assert_golden_case(
             result,
-            predicted_class=2,
+            predicted_class=3,
             total_points=-3,
             criteria={"BS3", "PP3"},
+            vus_category="conflicting_pp3_bs3",
         )
         self.assertTrue(result["mixed_evidence"])
         self.assertEqual(result["pathogenic_points"], 1)
         self.assertEqual(result["benign_points"], -4)
+        self.assertIn("only 1 benign criterion", result["classification_note"])
 
     def test_likely_benign_has_no_vus_explanation_golden_case(self):
         result = evaluate_variant(

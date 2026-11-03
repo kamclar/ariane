@@ -631,7 +631,8 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertIn("combined LR=8.9313", criteria["PP4"].reason)
         self.assertIn("PMID 31853058, 40413188", criteria["PP4"].reason)
         self.assertEqual(result.total_points, -2)
-        self.assertEqual(result.predicted_class, 2)
+        self.assertEqual(result.predicted_class, 3)
+        self.assertIn("only 1 benign criterion", result.classification_note)
 
     def test_brca2_multibase_duplication_receives_bp5_supporting(self):
         from backend.main import CLASSIFICATION_API

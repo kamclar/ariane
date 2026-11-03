@@ -40,7 +40,7 @@
             else position = "Benign point threshold reached.";
 
             const method = mixedEvidence
-                ? "Mixed evidence: the ENIGMA point-based classification method applies."
+                ? "Mixed evidence: the ENIGMA point-based method is evaluated with the VCEP minimum-two-code publication guard."
                 : "One-direction evidence: ENIGMA criterion combinations determine the class; the point position is contextual only.";
             return `${formatted} points. ${position} ${method}`;
         },

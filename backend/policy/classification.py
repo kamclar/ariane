@@ -128,6 +128,36 @@ def classify_by_enigma_combination(
     has_benign = any(item.get("points", 0) < 0 for item in criteria.values())
     if has_pathogenic and has_benign:
         cls, label, _ = classify_by_points(points, gene=gene)
+        thresholds = mixed_evidence_point_thresholds(gene)
+        minimum_codes = thresholds["minimum_codes_in_classification_direction"]
+        pathogenic_codes = sum(
+            item.get("points", 0) > 0 for item in criteria.values()
+        )
+        benign_codes = sum(
+            item.get("points", 0) < 0 for item in criteria.values()
+        )
+        if cls >= 4 and pathogenic_codes < minimum_codes:
+            return (
+                3,
+                "VUS",
+                "Mixed pathogenic and benign evidence. The Tavtigian 2020 point "
+                f"total reaches {label}, but only {pathogenic_codes} pathogenic "
+                "criterion supports that direction. ENIGMA VCEP methodological "
+                f"guidance requires at least {minimum_codes} different criteria in "
+                "the classification direction for an automated non-VUS result. "
+                "The result remains VUS and requires expert discussion.",
+            )
+        if cls <= 2 and benign_codes < minimum_codes:
+            return (
+                3,
+                "VUS",
+                "Mixed pathogenic and benign evidence. The Tavtigian 2020 point "
+                f"total reaches {label}, but only {benign_codes} benign criterion "
+                "supports that direction. ENIGMA VCEP methodological guidance "
+                f"requires at least {minimum_codes} different criteria in the "
+                "classification direction for an automated non-VUS result. The "
+                "result remains VUS and requires expert discussion.",
+            )
         return (
             cls,
             label,

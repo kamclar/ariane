@@ -168,6 +168,7 @@ def validate_gene_policy_payload(
             {
                 "pathogenic_min_inclusive", "likely_pathogenic_min_inclusive",
                 "vus_min_inclusive", "likely_benign_min_inclusive",
+                "minimum_codes_in_classification_direction",
             },
             f"policies/{policy_id}/thresholds/mixed_evidence_points",
         )
@@ -180,6 +181,15 @@ def validate_gene_policy_payload(
         ]
         if point_values != sorted(point_values, reverse=True) or len(set(point_values)) != 4:
             raise GenePolicyError("Mixed-evidence class thresholds must strictly decrease")
+        minimum_codes = point_thresholds["minimum_codes_in_classification_direction"]
+        if (
+            isinstance(minimum_codes, bool)
+            or not isinstance(minimum_codes, int)
+            or minimum_codes < 2
+        ):
+            raise GenePolicyError(
+                "Mixed-evidence classification-direction minimum must be an integer >= 2"
+            )
         rules = policy["supported_rule_codes"]
         if not isinstance(rules, list) or not rules or len(rules) != len(set(rules)):
             raise GenePolicyError(f"Policy {policy_id} supported_rule_codes must be a unique non-empty list")

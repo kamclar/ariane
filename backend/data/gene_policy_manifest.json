@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "manifest_id": "ariane_gene_policy_registry",
-  "manifest_version": "2026.09.12",
+  "manifest_version": "2026.11.03",
   "status": "active",
   "policies": {
     "enigma_brca_vcep_1_2": {
@@ -12,7 +12,7 @@
       "external_evidence": {
         "clingen_erepo_affiliate": "ENIGMA BRCA1 and BRCA2 VCEP"
       },
-      "classification_method": "ENIGMA Table 3; Tavtigian 2020 points for mixed evidence",
+      "classification_method": "ENIGMA Table 3; Tavtigian 2020 points for mixed evidence with the VCEP minimum-two-code publication guard",
       "source_url": "https://cspec.genome.network/cspec/ui/svi/doc/GN092?version=1.2.0",
       "thresholds": {
         "spliceai": {
@@ -45,7 +45,8 @@
           "pathogenic_min_inclusive": 10,
           "likely_pathogenic_min_inclusive": 6,
           "vus_min_inclusive": -1,
-          "likely_benign_min_inclusive": -6
+          "likely_benign_min_inclusive": -6,
+          "minimum_codes_in_classification_direction": 2
         }
       },
       "supported_rule_codes": [

@@ -34,7 +34,10 @@ def _modified_manifest():
 def test_checked_manifest_and_source_bindings_are_valid():
     manifest = load_gene_policy_manifest()
     assert active_genes() == ("BRCA1", "BRCA2")
-    assert manifest["manifest_version"] == "2026.09.12"
+    assert manifest["manifest_version"] == "2026.11.03"
+    assert manifest["policies"]["enigma_brca_vcep_1_2"]["thresholds"][
+        "mixed_evidence_points"
+    ]["minimum_codes_in_classification_direction"] == 2
     assert reference_transcript("BRCA1") == "NM_007294.4"
     assert runtime_policy_id("BRCA2") == "ENIGMA_BRCA_VCEP_1.2"
     assert manifest["genes"]["BRCA1"]["decision_assets"]["PVS1"][
@@ -69,6 +72,23 @@ def test_incomplete_gene_threshold_set_is_rejected():
     manifest = _modified_manifest()
     del manifest["genes"]["BRCA1"]["thresholds"]["bayesdel_noaf"]["pp3_min_inclusive"]
     with pytest.raises(GenePolicyError, match="incomplete"):
+        validate_gene_policy_payload(manifest)
+
+
+def test_mixed_evidence_publication_guard_is_required_and_at_least_two():
+    manifest = _modified_manifest()
+    mixed = manifest["policies"]["enigma_brca_vcep_1_2"]["thresholds"][
+        "mixed_evidence_points"
+    ]
+    del mixed["minimum_codes_in_classification_direction"]
+    with pytest.raises(GenePolicyError, match="incomplete"):
+        validate_gene_policy_payload(manifest)
+
+    manifest = _modified_manifest()
+    manifest["policies"]["enigma_brca_vcep_1_2"]["thresholds"][
+        "mixed_evidence_points"
+    ]["minimum_codes_in_classification_direction"] = 1
+    with pytest.raises(GenePolicyError, match="integer >= 2"):
         validate_gene_policy_payload(manifest)
 
 
