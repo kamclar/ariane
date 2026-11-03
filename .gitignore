@@ -114,3 +114,4 @@ htmlcov/
 !/docs/enigma/
 !/docs/enigma/**
 data/spliceai/build/
+/experiments/spliceai_distance/artifacts/build/

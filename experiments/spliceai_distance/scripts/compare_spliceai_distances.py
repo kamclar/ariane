@@ -23,7 +23,8 @@ import time
 from types import SimpleNamespace
 
 
-ROOT = Path(__file__).resolve().parents[1]
+EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 CHANNELS = {"AG": (1, 1), "AL": (1, -1), "DG": (2, 1), "DL": (2, -1)}
 MODEL_RADIUS = 5000
 
@@ -401,7 +402,8 @@ def main():
     parser.add_argument("--repeats", type=int, default=2)
     parser.add_argument("--threads", type=int, default=4)
     parser.add_argument("--tolerance", type=float, default=1e-6)
-    parser.add_argument("--cohort", choices=("pilot", "stratified"), default="pilot")
+    parser.add_argument("--cohort", choices=("pilot", "stratified", "targeted-indels"),
+                        default="pilot")
     parser.add_argument("--positions-per-region", type=int, default=3)
     parser.add_argument("--seed", type=int, default=20260915)
     parser.add_argument("--no-indels", action="store_true")
@@ -415,13 +417,13 @@ def main():
     parser.add_argument("--progress-every", type=int, default=100)
     parser.add_argument("--save-arrays", choices=("all", "changed", "none"), default="changed")
     args = parser.parse_args()
-    if args.cohort == "stratified":
+    if args.cohort in ("stratified", "targeted-indels"):
         if str(ROOT) not in sys.path:
             sys.path.insert(0, str(ROOT))
-        from scripts.spliceai_distance_scan import run_scan
+        from experiments.spliceai_distance.scripts.spliceai_distance_scan import run_scan
         return run_scan(args)
     if args.resume or args.prepare_only or args.retry_errors or args.max_cases or args.max_seconds:
-        parser.error("Prepare, resume and run limits require --cohort stratified")
+        parser.error("Prepare, resume and run limits require a resumable cohort")
     args.output_created = False
     try:
         return run(args)

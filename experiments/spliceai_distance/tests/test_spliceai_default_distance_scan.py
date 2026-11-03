@@ -3,7 +3,7 @@
 import json
 import sqlite3
 
-from scripts.spliceai_default_distance_scan import (
+from experiments.spliceai_distance.scripts.spliceai_default_distance_scan import (
     baseline_projection,
     baseline_summary,
     differing_paths,

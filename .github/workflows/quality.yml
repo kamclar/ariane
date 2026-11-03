@@ -41,3 +41,6 @@ jobs:
 
       - name: Run tests
         run: python -m pytest
+
+      - name: Run isolated SpliceAI experiment tests
+        run: python -m pytest experiments/spliceai_distance/tests

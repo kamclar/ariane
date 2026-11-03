@@ -8,7 +8,7 @@ import sys
 
 import pytest
 
-from scripts.spliceai_distance_store import ResultStore
+from experiments.spliceai_distance.scripts.spliceai_distance_store import ResultStore
 
 
 @pytest.fixture
@@ -170,14 +170,14 @@ def test_committed_put_survives_abrupt_process_exit(tmp_path, identity):
     script = """
 import json, os, sys
 from pathlib import Path
-from scripts.spliceai_distance_store import ResultStore
+from experiments.spliceai_distance.scripts.spliceai_distance_store import ResultStore
 store = ResultStore(Path(sys.argv[1]), json.loads(sys.argv[2]))
 store.put('done', {'id': 'done', 'status': 'ok'})
 os._exit(17)
 """
     process = subprocess.run(
         [sys.executable, "-c", script, str(path), json.dumps(identity)],
-        check=False, cwd=Path(__file__).resolve().parents[1],
+        check=False, cwd=Path(__file__).resolve().parents[3],
     )
     assert process.returncode == 17
     with ResultStore(path, identity, resume=True) as store:

@@ -6,7 +6,13 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.spliceai_distance_cases import build_cohort, variant_kind
+from experiments.spliceai_distance.scripts.spliceai_distance_cases import (
+    build_cohort,
+    variant_kind,
+)
+from experiments.spliceai_distance.scripts.spliceai_indel_distance_cases import (
+    build_targeted_indel_cohort,
+)
 
 
 class FakeSequence:
@@ -184,3 +190,47 @@ def test_reject_truncated_fasta_missing_pinned_transcript_and_invalid_sample_siz
     for count in (0, -1, True, 1.5):
         with pytest.raises(ValueError, match="positive integer"):
             build_cohort(*inputs(), seed=1, positions_per_region=count)
+
+
+def test_targeted_indel_cohort_covers_regions_boundaries_lengths_and_strands():
+    annotator, profile, fixture = inputs()
+    result = build_targeted_indel_cohort(annotator, profile, fixture, seed=23)
+    assert result == build_targeted_indel_cohort(annotator, profile, fixture, seed=23)
+    assert result["coverage"]["targeted_indel_cases"] == 76
+    assert result["coverage"]["control_cases"] == 0
+    assert result["coverage"]["variant_kinds"] == {"deletion": 38, "insertion": 38}
+    assert len(result["coverage"]["regions"]) == 10
+    assert all(row["targeted_anchor_positions"] for row in result["coverage"]["regions"])
+    assert all(row["total_cases"] >= 6 for row in result["coverage"]["regions"])
+    assert result["coverage"]["skipped_target_requests"] == {}
+    assert "emits missing values" in result["design"]["complex_allele_policy"]
+
+    lengths = defaultdict(set)
+    genes = defaultdict(set)
+    for case in result["cases"]:
+        chrom, position, ref, alt = case["variant"].split("-")
+        position = int(position)
+        assert annotator.ref_fasta[chrom][position - 1:position - 1 + len(ref)].seq == ref
+        length = abs(len(ref) - len(alt))
+        lengths[case["variant_kind"]].add(length)
+        genes[case["gene"]].add(case["variant_kind"])
+        assert {"targeted"} == set(case["selections"])
+        assert "region_systematic" in case["strata"] or "splice_boundary_stress" in case["strata"]
+    assert lengths == {"deletion": {1, 2, 3, 6}, "insertion": {1, 2, 3, 6}}
+    assert genes == {"BRCA1": {"deletion", "insertion"},
+                     "BRCA2": {"deletion", "insertion"}}
+
+
+def test_targeted_indel_cohort_keeps_fixture_controls_separate():
+    annotator, profile, fixture = inputs()
+    fixture["cases"] = [{
+        "id": "control", "variant": "chr17-101-A-C", "gene": "BRCA1",
+        "transcript": "BRCA1_tx", "delta_scores": {"DS_AG": 0.1},
+    }]
+    result = build_targeted_indel_cohort(annotator, profile, fixture, seed=23)
+    assert result["coverage"]["targeted_indel_cases"] == 76
+    assert result["coverage"]["control_cases"] == 1
+    control = result["cases"][0]
+    assert control["selection"] == "control"
+    assert control["control_ids"] == ["control"]
+    assert control["delta_scores"] == {"DS_AG": 0.1}

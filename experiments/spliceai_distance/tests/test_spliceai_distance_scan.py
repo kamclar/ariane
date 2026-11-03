@@ -5,9 +5,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from scripts import spliceai_distance_scan as scan
-from scripts.compare_spliceai_distances import align_predictions
-from scripts.spliceai_distance_store import ResultStore
+from experiments.spliceai_distance.scripts import spliceai_distance_scan as scan
+from experiments.spliceai_distance.scripts.compare_spliceai_distances import align_predictions
+from experiments.spliceai_distance.scripts.spliceai_distance_store import ResultStore
 
 
 def test_simple_indel_alignment_matches_reference_coordinates():
@@ -69,3 +69,20 @@ def test_retry_requires_explicit_resume():
                            distances=[4999, 5000, 10000], retry_errors=True, resume=False)
     with pytest.raises(ValueError, match="--resume"):
         scan.validate_options(args)
+
+
+def test_two_high_distances_are_sufficient_for_targeted_followup(monkeypatch, tmp_path):
+    def fake_infer(_annotator, _case, distance):
+        ref = np.zeros((2 * distance + 1, 3), dtype=np.float32)
+        return (ref, ref.copy()), {}, 0.01
+
+    monkeypatch.setattr(scan.core, "infer", fake_infer)
+    monkeypatch.setattr(scan.core, "validate_capture", lambda *_: None)
+    args = SimpleNamespace(distances=[4999, 10000], repeats=1,
+                           timing_repeat_cases=0, tolerance=1e-6,
+                           save_arrays="none", output=tmp_path)
+    result = scan.evaluate_case(None, case("targeted"), 0, args)
+    assert result["status"] == "ok"
+    assert [run["distance"] for run in result["runs"]] == [4999, 10000]
+    assert [(item["smaller_distance"], item["larger_distance"])
+            for item in result["comparisons"]] == [(4999, 10000)]

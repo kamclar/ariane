@@ -19,9 +19,12 @@ import sys
 import time
 from types import SimpleNamespace
 
-from scripts import compare_spliceai_distances as core
-from scripts.spliceai_distance_cases import build_cohort
-from scripts.spliceai_distance_store import ResultStore
+from experiments.spliceai_distance.scripts import compare_spliceai_distances as core
+from experiments.spliceai_distance.scripts.spliceai_distance_cases import build_cohort
+from experiments.spliceai_distance.scripts.spliceai_indel_distance_cases import (
+    build_targeted_indel_cohort,
+)
+from experiments.spliceai_distance.scripts.spliceai_distance_store import ResultStore
 
 
 def canonical_hash(value):
@@ -81,10 +84,10 @@ def validate_options(args):
         raise ValueError("max_cases must be positive")
     if args.max_seconds is not None and (not math.isfinite(args.max_seconds) or args.max_seconds <= 0):
         raise ValueError("max_seconds must be positive and finite")
-    if not {4999, 5000, 10000}.issubset(args.distances) or any(
+    if not {4999, 10000}.issubset(args.distances) or any(
         d < 1 or d > 10000 for d in args.distances
     ):
-        raise ValueError("Distances must include 4999, 5000 and 10000, within 1..10000")
+        raise ValueError("Distances must include 4999 and 10000, within 1..10000")
     if args.retry_errors and not args.resume:
         raise ValueError("Use --resume together with --retry-errors")
 
@@ -105,9 +108,16 @@ def prepare(args):
     if fixture["profile_id"] != profile["profile_id"]:
         raise ValueError("Control fixture/profile mismatch")
     view = annotation_view(annotation, args.fasta)
-    cohort = build_cohort(view, profile, fixture, seed=args.seed,
-                          positions_per_region=args.positions_per_region,
-                          include_indels=not args.no_indels)
+    if args.cohort == "targeted-indels":
+        if args.no_indels:
+            raise ValueError("--no-indels is incompatible with --cohort targeted-indels")
+        cohort = build_targeted_indel_cohort(
+            view, profile, fixture, seed=args.seed,
+        )
+    else:
+        cohort = build_cohort(view, profile, fixture, seed=args.seed,
+                              positions_per_region=args.positions_per_region,
+                              include_indels=not args.no_indels)
     spec = importlib.util.find_spec("spliceai")
     model_dir = Path(spec.origin).parent / "models"
     identity = {
@@ -119,9 +129,10 @@ def prepare(args):
         "image_digest": args.image_digest, "model_commit": os.environ["MODEL_COMMIT"],
         "model_weights_sha256": {f"spliceai{i}.h5": core.sha256(model_dir / f"spliceai{i}.h5")
                                  for i in range(1, 6)},
-        "sources_sha256": {name: core.sha256(core.ROOT / "scripts" / name) for name in (
+        "sources_sha256": {name: core.sha256(core.EXPERIMENT_ROOT / "scripts" / name) for name in (
             "compare_spliceai_distances.py", "spliceai_distance_scan.py",
-            "spliceai_distance_cases.py", "spliceai_distance_store.py")},
+            "spliceai_distance_cases.py", "spliceai_indel_distance_cases.py",
+            "spliceai_distance_store.py")},
         "packages": {name: version(name) for name in ("spliceai", "tensorflow-cpu", "numpy")},
         "settings": {"distances": sorted(set(args.distances)), "mask": 0,
                      "tolerance": args.tolerance, "threads": args.threads,
@@ -192,9 +203,13 @@ def evaluate_case(annotator, case, index, args):
                                                         distance, args.tolerance))
             else:
                 first[distance] = arrays
-    for small, large in ((4999, 5000), (4999, 10000), (5000, 10000)):
-        comparisons.append(core.compare_arrays(first[small], first[large], small, large,
-                                               args.tolerance))
+    available = sorted(first)
+    for pair_index, small in enumerate(available):
+        for large in available[pair_index + 1:]:
+            if small < 4999:
+                continue
+            comparisons.append(core.compare_arrays(first[small], first[large], small, large,
+                                                   args.tolerance))
     if 50 in first:
         comparisons.append(core.compare_arrays(first[50], first[10000], 50, 10000, args.tolerance))
     flags = comparison_flags(comparisons, runs, case["variant_kind"], args.tolerance)
@@ -270,7 +285,7 @@ def publish_summary(output, summary):
     lines = ["# SpliceAI distance scan", "", f"Status: {summary['status']}", "",
              f"Planned: {counts['planned']}; successful: {counts['ok']}; "
              f"errors: {counts['error']}; remaining: {counts['remaining']}.", "",
-             summary["statistical_scope"], "", "## Differences among D=4999/5000/10000", ""]
+             summary["statistical_scope"], "", "## Differences among configured distances", ""]
     lines += [f"- {key}: {value}" for key, value in summary["flags"].items()]
     lines += ["", "Complete per-case data and failures: `results.sqlite3`.",
               "Coverage and group counts: `summary.json`. Selected raw arrays: `arrays/`.", ""]

@@ -19,9 +19,9 @@ import sqlite3
 import sys
 import time
 
-from scripts import compare_spliceai_distances as core
-from scripts import spliceai_distance_scan as scan
-from scripts.spliceai_distance_store import ResultStore
+from experiments.spliceai_distance.scripts import compare_spliceai_distances as core
+from experiments.spliceai_distance.scripts import spliceai_distance_scan as scan
+from experiments.spliceai_distance.scripts.spliceai_distance_store import ResultStore
 
 
 DISTANCES = (50, 500, 4999)
@@ -240,12 +240,15 @@ def prepare(args):
     if core.sha256(annotation) != engine["reference_transcript_annotation_sha256"]:
         raise ValueError("Annotation checksum does not match the profile")
     base_identity = base_plan["identity"]
+    base_distances = base_identity.get("settings", {}).get("distances", [])
+    if 4999 not in base_distances:
+        raise ValueError("Base experiment does not contain the required D=4999 anchor")
     if (base_identity["image_digest"] != args.image_digest
             or base_identity["fasta_sha256"] != core.sha256(args.fasta)
             or base_identity["annotation_sha256"] != core.sha256(annotation)):
         raise ValueError("Base experiment used different model/reference inputs")
     for name, expected in base_identity["sources_sha256"].items():
-        if core.sha256(core.ROOT / "scripts" / name) != expected:
+        if core.sha256(core.EXPERIMENT_ROOT / "scripts" / name) != expected:
             raise ValueError(f"Base experiment source changed: {name}")
 
     import_source = None
@@ -290,7 +293,7 @@ def prepare(args):
         "base_experiment": {
             "directory": args.base_output.name,
             "completed_at": base_summary.get("updated_at"),
-            "distances": [4999, 5000, 10000],
+            "distances": base_distances,
         },
         "import_source": import_source,
     }

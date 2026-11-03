@@ -15,8 +15,9 @@ param(
     [switch]$RetryErrors
 )
 $ErrorActionPreference = 'Stop'
-$scanRoot = Split-Path -Parent $PSScriptRoot
-$scanBuild = Join-Path $scanRoot 'data/spliceai/build'
+$experimentRoot = Split-Path -Parent $PSScriptRoot
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
+$scanBuild = Join-Path $experimentRoot 'artifacts/build'
 $scanOutput = Join-Path $scanBuild $OutputName
 if ($Action -eq 'Status') {
     $summaryPath = Join-Path $scanOutput 'summary.json'
@@ -30,18 +31,19 @@ if ($Action -eq 'Status') {
 }
 if ($RetryErrors -and $Action -ne 'Resume') { throw 'RetryErrors requires Resume.' }
 if ($Detached -and $Action -eq 'Plan') { throw 'Detached is only for Run/Resume.' }
-$profilePath = Join-Path $scanRoot 'data/spliceai/enigma_v1_2_spliceai_profile.json'
+$profilePath = Join-Path $repoRoot 'data/spliceai/enigma_v1_2_spliceai_profile.json'
 $scanImage = (Get-Content -LiteralPath $profilePath -Raw | ConvertFrom-Json).approved_engine.docker_image
 New-Item -ItemType Directory -Path $scanBuild -Force | Out-Null
 $dockerArgs = @('run', '--rm', '--init', '--network', 'none', '--cap-drop', 'ALL',
     '--security-opt', 'no-new-privileges:true', '--cpus', '4', '--memory', '6g',
     '--env', 'PYTHONDONTWRITEBYTECODE=1', '--env', 'OMP_NUM_THREADS=4',
     '--env', 'TF_NUM_INTRAOP_THREADS=4', '--env', 'TF_NUM_INTEROP_THREADS=1',
-    '--mount', "type=bind,src=$scanRoot,dst=/workspace,readonly",
+    '--mount', "type=bind,src=$repoRoot,dst=/workspace,readonly",
     '--mount', "type=bind,src=$scanBuild,dst=/experiment-output")
 if ($Detached) { $dockerArgs += @('--detach', '--name', "ariane-$OutputName") }
 $dockerArgs += @('--entrypoint', 'python', $scanImage,
-    '/workspace/scripts/compare_spliceai_distances.py', '--fasta', '/hg38.fa.gz',
+    '/workspace/experiments/spliceai_distance/scripts/compare_spliceai_distances.py',
+    '--fasta', '/hg38.fa.gz',
     '--output', "/experiment-output/$OutputName", '--image-digest', $scanImage,
     '--cohort', 'stratified', '--positions-per-region', "$PositionsPerRegion")
 if ($Action -eq 'Plan') { $dockerArgs += '--prepare-only' }

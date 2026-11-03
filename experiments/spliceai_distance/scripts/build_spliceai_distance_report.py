@@ -32,13 +32,14 @@ from reportlab.platypus import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
-BASE_DATABASE = ROOT / "data/spliceai/build/distance-stratified/results.sqlite3"
+EXPERIMENT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
+BASE_DATABASE = EXPERIMENT_ROOT / "artifacts/build/distance-stratified/results.sqlite3"
 EXTENSION_DATABASE = (
-    ROOT / "data/spliceai/build/distance-defaults-server-v2/results.sqlite3"
+    EXPERIMENT_ROOT / "artifacts/build/distance-defaults-server-v2/results.sqlite3"
 )
-OUTPUT = ROOT / "output/pdf/spliceai_distance_experiment_report.pdf"
-WORK = ROOT / "tmp/pdfs/spliceai_distance_experiment"
+OUTPUT = EXPERIMENT_ROOT / "artifacts/spliceai_distance_experiment_report.pdf"
+WORK = EXPERIMENT_ROOT / "artifacts/build/report-work"
 FONT_REGULAR = Path(r"C:\Windows\Fonts\segoeui.ttf")
 FONT_BOLD = Path(r"C:\Windows\Fonts\segoeuib.ttf")
 TOLERANCE = 1e-6
@@ -630,8 +631,9 @@ def build_pdf(analysis: dict, charts: dict[str, Path]) -> None:
             ),
             Spacer(1, 3 * mm),
             Paragraph(
-                "Source records: data/spliceai/build/distance-stratified and "
-                "data/spliceai/build/distance-defaults-server-v2. Analysis tolerance: 1e-6. "
+                "Source records: experiments/spliceai_distance/artifacts/build/"
+                "distance-stratified and distance-defaults-server-v2. "
+                "Analysis tolerance: 1e-6. "
                 "Decision bands: 0.10 or lower, above 0.10 and below 0.20, and 0.20 or higher.",
                 styles["small"],
             ),

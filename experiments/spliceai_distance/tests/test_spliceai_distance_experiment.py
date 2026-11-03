@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from scripts.compare_spliceai_distances import (
+from experiments.spliceai_distance.scripts.compare_spliceai_distances import (
     compare_arrays,
     score_band,
     summarize_arrays,

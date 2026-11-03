@@ -3,6 +3,14 @@
 This experiment compares `D=50`, `4999`, `5000`, and `10000` using the exact
 SpliceAI container and reference-transcript annotation pinned by ARIANE. It is
 an isolated research check. It does not change the Appendix J production profile.
+Nothing in this directory is imported by the ARIANE classification runtime.
+
+All experiment code, tests and retained outputs are kept under this directory:
+
+- `scripts/`: offline runners and report generator;
+- `tests/`: experiment-only tests, outside the production pytest test path;
+- `artifacts/`: versioned report and pilot JSON;
+- `artifacts/build/`: ignored raw arrays and resumable checkpoints.
 
 ## Method
 
@@ -44,7 +52,7 @@ baseline mismatches are explicit, rather than accepted as equivalent results.
 
 ## Results: 2026-09-15
 
-The [machine-readable report](../../../data/spliceai/distance_comparison_20260915.json)
+The [machine-readable report](artifacts/distance_comparison_20260915.json)
 records a completed local run: six SNVs, four distances, two repeats (48 fresh
 timed evaluations), plus four excluded warmups. Both existing D=10000 validation
 fixtures passed for all their delta, REF and ALT component scores.
@@ -91,7 +99,7 @@ CPU timings with a four-CPU container limit and four TensorFlow intra-op threads
 they are not a measured production-server slowdown or a general speed guarantee.
 
 The original report and 48 compressed raw-array files remain locally under
-`data/spliceai/build/distance-20260915/` (about 8.3 MiB in total). The versioned
+`artifacts/build/distance-20260915/` (about 8.3 MiB in total). The versioned
 report is an exact copy of that run's `report.json`; its array filenames refer
 to the original experiment directory. Recompute using the procedure below to
 obtain another complete raw dataset.
@@ -108,7 +116,7 @@ From the repository root on Linux, with Docker running and the pinned image
 available:
 
 ```bash
-mkdir -p data/spliceai/build
+mkdir -p experiments/spliceai_distance/artifacts/build
 image='docker.io/weisburd/spliceai-38@sha256:c2bb3d5c65eee01087b5dd130d72233fc812d158dce9779ae63117e826ec8399'
 docker run --rm --init --network none \
   --cap-drop ALL --security-opt no-new-privileges:true \
@@ -116,9 +124,9 @@ docker run --rm --init --network none \
   --env PYTHONDONTWRITEBYTECODE=1 --env OMP_NUM_THREADS=4 \
   --env TF_NUM_INTRAOP_THREADS=4 --env TF_NUM_INTEROP_THREADS=1 \
   --mount "type=bind,src=$PWD,dst=/workspace,readonly" \
-  --mount "type=bind,src=$PWD/data/spliceai/build,dst=/experiment-output" \
+  --mount "type=bind,src=$PWD/experiments/spliceai_distance/artifacts/build,dst=/experiment-output" \
   --entrypoint python "$image" \
-  /workspace/scripts/compare_spliceai_distances.py \
+  /workspace/experiments/spliceai_distance/scripts/compare_spliceai_distances.py \
   --fasta /hg38.fa.gz \
   --output /experiment-output/distance-new-run \
   --image-digest "$image" --repeats 2 --threads 4
@@ -133,7 +141,7 @@ signal at exactly +5000 that D=4999 must miss. They verify the analysis itself;
 they are separate from the real-model experiment:
 
 ```bash
-python -m pytest tests/test_spliceai_distance_experiment.py -q
+python -m pytest experiments/spliceai_distance/tests/test_spliceai_distance_experiment.py -q
 ```
 
 ## Interpretation limits
@@ -177,23 +185,23 @@ Docker must be running, with the pinned image available. From the repository:
 
 ```powershell
 # Prepare and inspect plan.json, without loading the models.
-.\scripts\run_spliceai_distance_scan.ps1 -Action Plan
+.\experiments\spliceai_distance\scripts\run_spliceai_distance_scan.ps1 -Action Plan
 
 # Run independently in the background, bounded to four CPUs and 6 GiB RAM.
-.\scripts\run_spliceai_distance_scan.ps1 -Action Run -Detached
+.\experiments\spliceai_distance\scripts\run_spliceai_distance_scan.ps1 -Action Run -Detached
 
 # Read the compact progress summary, without contacting the model.
-.\scripts\run_spliceai_distance_scan.ps1 -Action Status
+.\experiments\spliceai_distance\scripts\run_spliceai_distance_scan.ps1 -Action Status
 
 # After interruption, continue only unfinished cases.
-.\scripts\run_spliceai_distance_scan.ps1 -Action Resume -Detached
+.\experiments\spliceai_distance\scripts\run_spliceai_distance_scan.ps1 -Action Resume -Detached
 ```
 
 If Windows blocks unsigned local scripts, invoke this file in a process-scoped
 PowerShell session, without changing the machine's execution policy:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run_spliceai_distance_scan.ps1 -Action Run -Detached
+powershell -NoProfile -ExecutionPolicy Bypass -File .\experiments\spliceai_distance\scripts\run_spliceai_distance_scan.ps1 -Action Run -Detached
 ```
 
 For a bounded test, use `-Action Run -MaxCases 6` or `-MaxSeconds 300`, then
@@ -206,7 +214,7 @@ and `--max-seconds`. Use a new directory for a changed design.
 
 The calculation uses no LLM calls, public API, production ARIANE instance or
 classification cache. Only a progress line per 100 completed cases is printed.
-Results are stored under `data/spliceai/build/<OutputName>/`:
+Results are stored under `experiments/spliceai_distance/artifacts/build/<OutputName>/`:
 
 - `plan.json`: full cohort, seed, settings, reference/model/source checksums.
 - `results.sqlite3`: per-case scores, differences, timing, failures and provenance;
@@ -234,11 +242,11 @@ Offline tests cover cohort/reference boundaries, array alignment, analysis,
 atomic checkpointing/crash recovery, resume identity and error denominators:
 
 ```powershell
-.\venv\Scripts\python.exe -m pytest tests/test_spliceai_distance_experiment.py tests/test_spliceai_distance_cases.py tests/test_spliceai_distance_store.py tests/test_spliceai_distance_scan.py -q
+.\venv\Scripts\python.exe -m pytest experiments/spliceai_distance/tests -q
 ```
 
 The original six-SNV report remains unchanged. Its historical script checksum
-refers to the archived pilot script in `data/spliceai/build/distance-20260915/`,
+refers to the archived pilot script in `artifacts/build/distance-20260915/`,
 not the subsequently extended runner. Neither experiment changes production
 SpliceAI settings or classification criteria.
 
@@ -246,7 +254,7 @@ Implementation verification on 16 September 2026: 58 offline tests passed. A
 bounded real-model run completed the two fixture SNVs plus a deletion and an
 insertion on each strand, then paused at six cases. A separate resumed process
 added two cases, yielding eight successful cases and no errors. The outputs are
-under `data/spliceai/build/distance-scaled-smoke-20260916/`. This verifies the
+under `artifacts/build/distance-scaled-smoke-20260916/`. This verifies the
 runner and resume path, **not** completion of the 4,047-case experiment.
 
 ## Full stratified results: 2026-09-17
@@ -279,5 +287,62 @@ must not be interpreted as population prevalence estimates.
 No production setting or classification rule was changed. ARIANE remains pinned
 to D=10000 in `data/spliceai/enigma_v1_2_spliceai_profile.json`.
 
+## Targeted simple-indel follow-up
+
+The initial stratified cohort contained only 128 simple indels. A separate,
+resumable follow-up therefore compares only D=4999 and D=10000 for approximately
+780 targeted simple insertions and deletions. It places three distributed anchors
+in every canonical BRCA1/2 exon and intron and tests both genomic sides of every
+internal exon boundary. Net lengths 1, 2, 3 and 6 bp cover lengths that are and
+are not divisible by three. Low-complexity, alternating and mixed insertion
+sequences are represented, and all alleles remain in genomic-forward VCF form.
+
+This is deterministic engineering coverage, not a sample from clinical or
+population prevalence. Alleles at the same locus are correlated and are reported
+as one locus cluster where appropriate.
+
+Complex delins and MNVs are not silently decomposed. The pinned upstream
+[`get_delta_scores`](https://github.com/Illumina/SpliceAI/blob/master/spliceai/utils.py)
+implementation returns unavailable scores when both REF and ALT have length
+greater than one. They therefore require a separately specified and validated
+scoring method before they can enter a comparable experiment.
+
+From the repository on Windows:
+
+```powershell
+# Build and inspect the immutable plan without loading the models.
+.\experiments\spliceai_distance\scripts\run_spliceai_indel_distance_scan.ps1 -Action Plan
+
+# Smoke-test four cases, then resume the same output directory in the background.
+.\experiments\spliceai_distance\scripts\run_spliceai_indel_distance_scan.ps1 -Action Run -MaxCases 4
+.\experiments\spliceai_distance\scripts\run_spliceai_indel_distance_scan.ps1 -Action Resume -Detached
+
+# Inspect checkpointed progress or the final result.
+.\experiments\spliceai_distance\scripts\run_spliceai_indel_distance_scan.ps1 -Action Status
+```
+
+Outputs are stored under `artifacts/build/distance-targeted-indels/`. The
+directory is intentionally ignored by Git; the plan, SQLite results and summary
+retain the pinned image, model, reference, source checksums and per-case timing.
+
+After the D=4999 versus D=10000 run completes, evaluate D=50 and D=500 over the
+identical saved cohort with a freshly computed D=4999 anchor:
+
+```powershell
+.\experiments\spliceai_distance\scripts\run_spliceai_default_distance_scan.ps1 -Action Plan `
+  -BaseOutputName distance-targeted-indels `
+  -OutputName distance-targeted-indels-defaults
+
+.\experiments\spliceai_distance\scripts\run_spliceai_default_distance_scan.ps1 -Action Run -Detached `
+  -BaseOutputName distance-targeted-indels `
+  -OutputName distance-targeted-indels-defaults
+```
+
+Recomputing D=4999 is intentional: raw arrays are needed for the D=50/500/4999
+comparisons, and every recomputed summary must reproduce the persisted base run.
+D=5000 is not repeated in this follow-up. The original stratified experiment
+already tested positions at 4999, 5000 and 5001 bp and found no decision-band
+difference between D=4999 and D=5000; repeating it would add little information.
+
 The formatted report with figures is available as
-[`output/pdf/spliceai_distance_experiment_report.pdf`](../../../output/pdf/spliceai_distance_experiment_report.pdf).
+[`artifacts/spliceai_distance_experiment_report.pdf`](artifacts/spliceai_distance_experiment_report.pdf).
