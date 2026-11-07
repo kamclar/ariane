@@ -39,6 +39,42 @@ _CACHE_PATH = runtime_cache_path("bayesdel_api_cache.json")
 _FILE_LOCK  = threading.Lock()
 
 
+def _bayesdel_status_details(value: dict) -> dict:
+    """Return a BayesDel-specific status from the combined MyVariant result."""
+    score = value.get("bayesdel")
+    if score is not None:
+        return {
+            "status": "ok",
+            "reason": str(
+                value.get("bayesdel_reason")
+                or value.get("reason")
+                or "BayesDel_noAF score is available"
+            ),
+        }
+
+    upstream_status = str(value.get("status") or "unavailable")
+    if upstream_status == "ok":
+        # The combined request can be successful because AlphaMissense is
+        # present even when the required BayesDel_noAF field is absent.
+        return {
+            "status": "no_score",
+            "reason": str(
+                value.get("bayesdel_reason")
+                or "MyVariant response parsed successfully but contained no "
+                "unambiguous BayesDel_noAF score"
+            ),
+        }
+    return {
+        "status": str(value.get("bayesdel_status") or upstream_status),
+        "reason": str(
+            value.get("bayesdel_reason")
+            or value.get("error")
+            or value.get("reason")
+            or "The MyVariant/BayesDel lookup did not return a score"
+        ),
+    }
+
+
 def _clear_runtime_cache() -> None:
     BAYESDEL_CACHE.clear()
     BAYESDEL_STATUS_CACHE.clear()
@@ -65,6 +101,10 @@ def _load_cache(health: DataHealthRegistry | None = None) -> None:
                 # negative result that prevents a later retry.
                 if (
                     val.get("status") == "no_score"
+                    or (
+                        val.get("status") == "ok"
+                        and val.get("bayesdel") is None
+                    )
                     or (
                         val.get("status") in {None, ""}
                         and val.get("bayesdel") is None
@@ -282,10 +322,7 @@ def get_bayesdel_and_alphamissense(
         am_score = entry.get("am_score") if isinstance(entry, dict) else None
         am_class = entry.get("am_class") if isinstance(entry, dict) else None
         am = {"am_score": am_score, "am_class": am_class} if am_score is not None else None
-        BAYESDEL_STATUS_CACHE[variant_key] = {
-            "status": entry.get("status", "ok" if bd is not None or am_score is not None else "no_score"),
-            "reason": entry.get("reason", "Loaded from local MyVariant/BayesDel cache"),
-        }
+        BAYESDEL_STATUS_CACHE[variant_key] = _bayesdel_status_details(entry)
         return bd, am
 
     rv = coordinates.resolve_variant(gene, c_notation)
@@ -295,9 +332,7 @@ def get_bayesdel_and_alphamissense(
                 "ref": rv.grch37.ref, "alt": rv.grch37.alt}
 
     data = fetch_variant_data_myvariant(gene, c_notation, hg37)
-    BAYESDEL_STATUS_CACHE[variant_key] = {
-        "status": data["status"],
-        "reason": data.get("error") or {
+    combined_reason = data.get("error") or {
             "no_grch37_coords": "No GRCh37 coordinates available for MyVariant",
             "not_found": "Variant was not found by MyVariant",
             "no_score": "MyVariant response contained no BayesDel or AlphaMissense score",
@@ -306,18 +341,24 @@ def get_bayesdel_and_alphamissense(
                 "an explicit value-to-transcript mapping"
             ),
             "ok": "MyVariant response parsed successfully",
-        }.get(data["status"], data["status"]),
-    }
+        }.get(data["status"], data["status"])
+    data["reason"] = combined_reason
+    BAYESDEL_STATUS_CACHE[variant_key] = _bayesdel_status_details(data)
 
     # Only stable responses belong in the persistent cache. Coordinate and API
     # failures remain retryable instead of being converted to a silent null.
-    if data["status"] in {"ok", "not_found", "ambiguous_transcript"}:
+    cacheable = data["status"] in {"not_found", "ambiguous_transcript"} or (
+        data["status"] == "ok" and data["bayesdel"] is not None
+    )
+    if cacheable:
         BAYESDEL_CACHE[variant_key] = {
             "bayesdel": data["bayesdel"],
             "am_score": data["am_score"],
             "am_class": data["am_class"],
             "status": data["status"],
-            "reason": BAYESDEL_STATUS_CACHE[variant_key]["reason"],
+            "reason": combined_reason,
+            "bayesdel_status": BAYESDEL_STATUS_CACHE[variant_key]["status"],
+            "bayesdel_reason": BAYESDEL_STATUS_CACHE[variant_key]["reason"],
             "selection_policy": data.get("selection_policy"),
             "selection_basis": data.get("selection_basis"),
             "reference_transcript": data.get("reference_transcript"),

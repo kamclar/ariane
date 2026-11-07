@@ -282,6 +282,26 @@ def test_required_bayesdel_timeout_stops_in_domain_figure1a_classification():
     assert error.value.retryable is True
 
 
+def test_terminal_ba1_does_not_require_bayesdel():
+    service = EvidenceOrchestrationService()
+    _, variant = service.prepare(
+        ClassificationCommand("BRCA2", "c.7469T>C", "p.(Ile2490Thr)")
+    )
+
+    service._require_complete_classification_evidence(
+        variant,
+        _complete_artifacts(
+            spliceai_score=0.03,
+            spliceai_status={"status": "ok", "score": 0.03},
+            bayesdel_score=None,
+            bayesdel_status={"status": "api_error", "reason": "timeout"},
+        ),
+        classification_result={
+            "criteria": {"BA1": {"strength": "Stand-alone", "points": -99}}
+        },
+    )
+
+
 def test_bayesdel_is_not_required_after_spliceai_pp3_branch_is_resolved():
     service = EvidenceOrchestrationService()
     _, variant = service.prepare(

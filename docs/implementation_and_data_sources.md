@@ -676,6 +676,14 @@ pozorování v téže publikaci podporují jednotlivá kritéria. U `BRCA2 c.797
 je překryvový PMID `33293522`; předvyplněný PVS1 RNA záznam používá samostatné
 ST3 zdroje PMID `28339459`, `18451181` a `12624152`.
 
+Pokud Table 9 uvádí konkrétní publikovaný splice výsledek s PMID odlišnými od
+PMID funkčního assay pro PS3 nebo BS3, ARIANE tento popis a odkazy předvyplní do
+manuálního formuláře PVS1 RNA. Jde pouze o kurátorský kontext. Table 9 tím
+nevytváří automatické PVS1 RNA, neurčuje jeho sílu, formulář sama nezapne a
+nepřidá žádné body. Kurátor musí nadále ověřit assay, relevantní transkript,
+kvantifikaci, NMD, zbývající funkční transkript a větev Appendix E. PMID použitý
+současně pro funkční assay se jako nezávislý RNA zdroj nepředvyplní.
+
 Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
 pacientskou mRNA s delecí exonu 12, standardizovanou LoF kategorii a čtyři
 propojené studie v ST3. Delece exonu 12 se jednoznačně mapuje na výchozí PVS1 v
@@ -1199,7 +1207,9 @@ souřadnicového resolveru, SpliceAI ani BayesDel. Tyto služby vyžadují konkr
 genomovou alelu a jejich použití na intervalový exonový zápis by nebylo
 interpretovatelné. PVS1 se pro takovou variantu vyhodnotí přímo z ENIGMA Table 4.
 
-BA1 ukončí klasifikaci jako Class 1.
+BA1 ukončí klasifikaci jako Class 1. Po dokončeném populačním rozhodovacím stromu
+a aplikaci BA1 už kontrola úplnosti nevyžaduje SpliceAI ani BayesDel, protože tyto
+prediktory nemohou změnit samostatnou benigní klasifikaci BA1.
 
 Pokud jsou všechna aplikovaná kritéria pouze v jednom směru, používají se kombinace ENIGMA VCEP v1.2 Table 3. Samotný součet bodů v tomto případě neurčuje třídu. Tavtigian 2020 je bodový systém a pro evidenci pouze jedním směrem se v ARIANE nepoužívá.
 
@@ -2146,6 +2156,16 @@ patogenních founder variant není v ENIGMA publikován jako úplný strojově
 
 BayesDel_noAF a AlphaMissense se získávají jedním dotazem nad genomovou variantou přes MyVariant.info a ukládají se do lokální cache.
 
+Síťový adaptér MyVariant má dvacetisekundový HTTP timeout a aplikační obálka
+čeká nejvýše 25 sekund. Tím aplikační timeout nemůže vrátit prázdný výsledek,
+zatímco původní pracovní vlákno ještě dokončuje stejný dotaz a mění jeho stav.
+Pokud přesto selže aplikační obálka, provider vytvoří lokální opakovatelný stav
+`api_error`; nepřebírá pozdější stav ze sdílené cache.
+
+Stav BayesDel je oddělen od úspěchu kombinovaného dotazu. Odpověď může obsahovat
+AlphaMissense, ale ne BayesDel_noAF. V takovém případě je kombinovaná odpověď
+platná, ale BayesDel má explicitní stav `no_score`, nikoli zavádějící `ok`.
+
 Provider tento dotaz spouští pouze pro missense a proteinovou notací potvrzené
 in-frame varianty. Pro nonsense, frameshift, synonymous, intronické, exonové CNV
 a další větve mimo proteinovou část Figure 1A vrací explicitní stav
@@ -2153,8 +2173,8 @@ a další větve mimo proteinovou část Figure 1A vrací explicitní stav
 
 Do trvalé cache se ukládá pouze úspěšná anotace, stabilní nejednoznačný výsledek
 nebo explicitní odpověď, že
-varianta v MyVariant nebyla nalezena. Odpověď `no_score`, při které služba
-variantu vrátí bez BayesDel i AlphaMissense anotace, se považuje za opakovatelný
+varianta v MyVariant nebyla nalezena. Odpověď bez použitelného BayesDel_noAF,
+včetně odpovědi obsahující pouze AlphaMissense, se považuje za opakovatelný
 neúplný výsledek. Neukládá se a následující požadavek provede nový dotaz. Při
 načtení cache se ignorují také starší prázdné a `no_score` záznamy. Ignorují se
 i staré BayesDel záznamy bez verze politiky výběru, protože mohly vzniknout

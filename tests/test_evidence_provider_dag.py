@@ -359,6 +359,30 @@ def test_unavailable_bayesdel_is_audited_and_does_not_create_protein_prediction(
     )
 
 
+def test_bayesdel_lookup_failure_cannot_inherit_later_ok_status():
+    def failed_lookup(*_args):
+        raise TimeoutError("upstream request exceeded its deadline")
+
+    dependencies = replace(
+        _dependencies(),
+        bayesdel_lookup=failed_lookup,
+        bayesdel_status=lambda *_args: {
+            "status": "ok",
+            "reason": "a later worker completed successfully",
+        },
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        _request(), dependencies=dependencies
+    ))
+    status = execution.provider_artifacts["bayesdel_status"]
+
+    assert execution.provider_artifacts["bayesdel_score"] is None
+    assert status["status"] == "api_error"
+    assert status["retryable"] is True
+    assert "lookup timed out" in status["reason"]
+
+
 def test_unavailable_coordinates_do_not_query_population_as_if_variant_were_absent():
     dependencies = replace(
         _dependencies(),

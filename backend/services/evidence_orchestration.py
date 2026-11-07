@@ -280,7 +280,11 @@ class EvidenceOrchestrationService:
         external_diagnostics = list(external_diagnostics_tuple)
 
         artifacts = dict(execution.provider_artifacts)
-        self._require_complete_classification_evidence(variant, artifacts)
+        self._require_complete_classification_evidence(
+            variant,
+            artifacts,
+            classification_result=execution.result,
+        )
         result = dict(execution.result)
         result["warnings"] = list(result.get("warnings", []))
         self._record_diagnostics(variant, execution, external_diagnostics)
@@ -309,7 +313,20 @@ class EvidenceOrchestrationService:
     def _require_complete_classification_evidence(
         variant: NormalizedVariant,
         artifacts: Mapping[str, Any],
+        *,
+        classification_result: Mapping[str, Any] | None = None,
     ) -> None:
+        criteria = (
+            classification_result.get("criteria")
+            if isinstance(classification_result, Mapping)
+            else None
+        )
+        if isinstance(criteria, Mapping) and "BA1" in criteria:
+            # BA1 is a terminal stand-alone benign classification.  Once its
+            # complete population decision path has applied, unrelated
+            # protein/splicing predictors cannot change the result and must
+            # not turn it into an availability error.
+            return
         gap = first_required_evidence_gap(variant, artifacts)
         if gap is None:
             return

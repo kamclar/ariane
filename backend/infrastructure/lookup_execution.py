@@ -12,6 +12,11 @@ SERVICE_LOOKUP_TIMEOUTS = {
     # This covers two bounded 20-second source attempts, rate scheduling and
     # one retry delay. Nginx allows 180 seconds for the complete request.
     "SpliceAI": int(os.environ.get("SPLICEAI_LOOKUP_TIMEOUT", "135")),
+    # The MyVariant adapter has its own bounded 20-second HTTP timeout.  The
+    # orchestration deadline must be longer so asyncio does not return a null
+    # result while the worker thread is still completing and updating its
+    # status/cache in the background.
+    "MyVariant/BayesDel": int(os.environ.get("BAYESDEL_LOOKUP_TIMEOUT", "25")),
 }
 
 

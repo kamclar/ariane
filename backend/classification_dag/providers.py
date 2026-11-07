@@ -35,6 +35,9 @@ from backend.reference_data.table9 import (
 )
 
 
+_BAYESDEL_LOOKUP_UNAVAILABLE = object()
+
+
 @dataclass(frozen=True)
 class ClassificationRequest:
     """Normalized request entering the evidence and classification DAG."""
@@ -512,17 +515,37 @@ class BayesDelEvidenceNode:
             )
 
         diagnostics: list[str] = []
-        score, alphamissense = await lookup_or_unavailable(
+        lookup_result = await lookup_or_unavailable(
             self.dependencies.bayesdel_lookup,
-            (None, None),
+            _BAYESDEL_LOOKUP_UNAVAILABLE,
             "MyVariant/BayesDel",
             diagnostics,
             variant.gene,
             variant.c_notation,
         )
-        status = dict(self.dependencies.bayesdel_status(
-            variant.gene, variant.c_notation
-        ))
+        if lookup_result is _BAYESDEL_LOOKUP_UNAVAILABLE:
+            score, alphamissense = None, None
+            status = {
+                "status": "api_error",
+                "reason": diagnostics[-1] if diagnostics else (
+                    "MyVariant/BayesDel lookup did not complete"
+                ),
+                "retryable": True,
+            }
+        else:
+            score, alphamissense = lookup_result
+            status = dict(self.dependencies.bayesdel_status(
+                variant.gene, variant.c_notation
+            ))
+            if score is None and status.get("status") == "ok":
+                status = {
+                    **status,
+                    "status": "no_score",
+                    "reason": (
+                        "MyVariant response parsed successfully but contained no "
+                        "unambiguous BayesDel_noAF score"
+                    ),
+                }
         evidence = EvidenceItem(
             id="bayesdel",
             kind="protein_prediction",

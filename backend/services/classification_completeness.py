@@ -236,7 +236,7 @@ def _bayesdel_gap(
         "BayesDel_noAF",
         status,
         reason,
-        retryable=status == "api_error",
+        retryable=(status == "api_error" or bool(status_details.get("retryable"))),
     )
 
 

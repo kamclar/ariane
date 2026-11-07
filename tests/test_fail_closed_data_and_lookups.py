@@ -355,7 +355,8 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
         )
 
         self.assertEqual(EXTERNAL_LOOKUP_TIMEOUT, 12)
-        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS, {"SpliceAI": 135})
+        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 135)
+        self.assertEqual(SERVICE_LOOKUP_TIMEOUTS["MyVariant/BayesDel"], 25)
         self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 180)
         self.assertLess(SERVICE_LOOKUP_TIMEOUTS["SpliceAI"], 180)
 
@@ -542,6 +543,13 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
                             "am_class": None,
                             "status": "ok",
                         },
+                        "BRCA1:c.5A>G": {
+                            "bayesdel": None,
+                            "am_score": 0.73,
+                            "am_class": "likely_pathogenic",
+                            "status": "ok",
+                            "selection_policy": bayesdel.BAYESDEL_SELECTION_POLICY,
+                        },
                     }),
                     encoding="utf-8",
                 )
@@ -555,6 +563,7 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
                 bayesdel.BAYESDEL_CACHE["BRCA1:c.3A>G"]["bayesdel"], 0.42
             )
             self.assertNotIn("BRCA1:c.4A>G", bayesdel.BAYESDEL_CACHE)
+            self.assertNotIn("BRCA1:c.5A>G", bayesdel.BAYESDEL_CACHE)
         finally:
             bayesdel.BAYESDEL_CACHE.clear()
             bayesdel.BAYESDEL_CACHE.update(previous_cache)
@@ -587,6 +596,19 @@ class LookupDiagnosticsTests(unittest.IsolatedAsyncioTestCase):
                 bayesdel.BAYESDEL_CACHE.pop(key, None)
             else:
                 bayesdel.BAYESDEL_CACHE[key] = previous
+
+    def test_bayesdel_status_is_specific_when_only_alphamissense_is_available(self):
+        from backend.lookups import bayesdel
+
+        status = bayesdel._bayesdel_status_details({
+            "bayesdel": None,
+            "am_score": 0.73,
+            "status": "ok",
+            "reason": "MyVariant response parsed successfully",
+        })
+
+        self.assertEqual(status["status"], "no_score")
+        self.assertIn("no unambiguous BayesDel_noAF", status["reason"])
 
 
 class DataHealthTests(unittest.TestCase):
