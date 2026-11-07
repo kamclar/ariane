@@ -76,6 +76,27 @@ class ExonCnvEvidenceTests(unittest.TestCase):
         self.assertEqual(result["variant_size_bp"], 1)
         self.assertEqual(result["criteria"], [])
 
+    def test_exact_small_intronic_deletions_do_not_enter_structural_path(self):
+        cases = {
+            "c.81-11delT": 1,
+            "c.317-19_317-12delAATTATTG": 8,
+            "c.426-12_426-8delGTTTT": 5,
+        }
+        for c_notation, expected_size in cases.items():
+            with self.subTest(c_notation=c_notation):
+                result = lookup_exon_cnv_evidence("BRCA1", c_notation)
+                self.assertEqual(result["pm2_applicability"], "not_applicable")
+                self.assertEqual(result["variant_size_bp"], expected_size)
+                self.assertNotIn(">50 bp deletion could not", result["reason"])
+
+    def test_conflicting_explicit_intronic_reference_length_fails_closed(self):
+        result = lookup_exon_cnv_evidence(
+            "BRCA1", "c.317-19_317-12delAATTATT"
+        )
+
+        self.assertEqual(result["pm2_applicability"], "unavailable")
+        self.assertIn("conflicts", result["decision_trace"][0]["detail"]["reason"])
+
     def test_50_and_51_bp_boundary_uses_appendix_g_threshold(self):
         fifty = lookup_exon_cnv_evidence("BRCA1", "c.100_149del")
         fifty_one = lookup_exon_cnv_evidence("BRCA1", "c.100_150del")

@@ -216,6 +216,14 @@ def test_variant_request_retains_submitted_and_canonical_descriptions():
     assert request.reference_transcript == "NM_007294.4"
 
 
+def test_explicit_cross_boundary_duplication_reference_must_match_interval():
+    with pytest.raises(ValueError, match="explicit dup sequence has 31 bp"):
+        normalize_variant_input(
+            "BRCA1",
+            "c.5468-10_5521dupCTGTCTCCAGCAATTGGGCAGATGTGTGAGG",
+        )
+
+
 def test_variant_request_uses_explicit_gene_from_notation():
     request = VariantRequest(
         gene="BRCA2",

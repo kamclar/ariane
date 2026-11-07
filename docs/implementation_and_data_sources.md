@@ -512,9 +512,14 @@ ARIANE v takovém případě nepoužije BA1, BS1 ani PM2. Pro BA1 nebo BS1 jsou
 požadována alespoň dvě outbred pozorování v datasetu, který poskytl skórované
 FAF95. Počet pozorování se bere z populačních AC, neodhaduje se z AF.
 
-PM2 se nepoužívá pro malé indely do 50 bp. Velikost se určuje ze strukturovaně
-parsované `c.` HGVS: u delece a duplikace z celého referenčního intervalu, u
-inserce z explicitně uvedené vložené sekvence. U delins se uchovává délka
+PM2 se nepoužívá pro malé indely do 50 bp; běžný gnomAD short-variant lookup se
+však dokončí, aby populační evidence nezůstala nevyhodnocená. Velikost se určuje
+ze strukturovaně parsované `c.` HGVS: u delece a duplikace z celého referenčního
+intervalu, u inserce z explicitně uvedené vložené sekvence. Přesný intronický
+interval se změří, pokud oba endpointy sdílejí jeden HGVS anchor, například
+`c.317-19_317-12del`. Velikost může potvrdit také explicitně uvedená odstraněná
+nebo duplikovaná sekvence; rozpor její délky s endpointy klasifikaci zastaví.
+U delins se uchovává délka
 odstraněné i vložené sekvence samostatně. Pokud se liší, ARIANE bez výslovné
 metodické definice nevymýšlí jednu společnou velikost. Neurčité breakpointy,
 symbolická délka a takový delins se nepovažují za malý indel.
@@ -1857,27 +1862,46 @@ Převod není prosté přičtení coding pozice ke genomové pozici. Musí respe
 - normalizaci REF a ALT alely u inzercí, delecí a duplikací,
 - rozdíly mezi GRCh37 a GRCh38.
 
-Runtime proto souřadnice ručně nepočítá. Čte již normalizované souřadnice pouze
-z verzovaných a checksumem ověřených lokálních dat.
+Runtime proto nepoužívá aritmetický posun od jediné souřadnice ani vzdálenou
+mapovací službu. SNV čte přímo z verzovaných map. U přesně popsaných malých
+indelů může souřadnice deterministicky odvodit z per-base map popsaných níže;
+výsledek vrátí pouze při úplném pokrytí intervalu a ověřitelné normalizaci.
 
 ### 9.2 Lokální souřadnicové zdroje
 
-Coding SNV mají GRCh37 a GRCh38 ve verzovaném coding SNV snapshotu. Malé indely
-mají obě sestavy, REF a ALT ve verzovaném normalizovaném indel snapshotu.
-Intronické SNV v podporovaném okně používají rozšířenou lokální souřadnicovou
-mapu. Její referenční báze pocházejí z UCSC Genome Browser sequence API pro hg19
-a hg38 a jsou navázány na stejné referenční transkripty jako ostatní snapshoty.
+Coding SNV mají GRCh37 a GRCh38 ve verzovaném coding SNV snapshotu. Intronické
+SNV do 50 bp od podporovaných exonových hranic používají rozšířenou lokální
+souřadnicovou mapu. Její referenční báze pocházejí z UCSC Genome Browser
+sequence API pro hg19 a hg38 a jsou navázány na stejné referenční transkripty
+jako ostatní snapshoty. Normalizovaný indel snapshot zůstává validačním a
+záložním zdrojem pro již známé varianty.
+
+Pro přesně popsaný coding nebo near-exon intronický indel sestaví resolver alelu
+obecně z těchto dvou per-base map. Požaduje oba endpointy na stejném chromozomu,
+souvislé pokrytí každé dotčené genomové báze, shodu explicitně uvedené
+referenční sekvence a dostupný kontext pro VCF normalizaci. REF a ALT minimalizuje
+a čisté inserce nebo delece posune do nejlevější genomové reprezentace. Tato
+normalizace je podstatná zejména pro BRCA2 na plus strand; transkriptový HGVS
+3′ zápis nemusí být totožný s levostranně normalizovaným gnomAD VCF ID.
+
+Projektor není seznam povolených variant. Stejný algoritmus se použije pro
+libovolný přesný indel uvnitř pokrytého coding a near-exon prostoru. Interval
+přesahující lokální mapu, nesouvislý genomový interval, neověřitelná reference
+nebo chybějící normalizační kontext vedou ke stavu `failed`.
 
 Registr `data/coordinates/coordinate_sources.manifest.json` určuje zdroje, jejich
 pořadí, datový formát, podporované geny, referenční transkripty a genomové
 sestavy. Manifest i intronická mapa se při startu kontrolují proti checksumům.
 Coding SNV a indel snapshoty mají vlastní povinnou kontrolu checksumu, počtu
-záznamů a stavu validace. Mutable coordinate cache se nenačítá.
+záznamů a stavu validace. Manifest navíc připíná politiku obecné projekce
+malých indelů, zdrojové mapy, maximální intronický offset a levostrannou VCF
+normalizaci. Mutable coordinate cache se nenačítá.
 
 ### 9.3 Chybějící souřadnice a další geny
 
-Pokud varianta není v žádném registrovaném lokálním zdroji, resolver vrátí stav
-`failed` a vysvětlení, že souřadnicově závislá evidence nebyla vyhodnocena.
+Pokud variantu nelze odvodit z úplných lokálních per-base map ani nalézt v
+registrovaném snapshotu, resolver vrátí stav `failed` a vysvětlení, že
+souřadnicově závislá evidence nebyla vyhodnocena.
 VariantValidator ani Mutalyzer se za běhu klasifikace nevolají. Chybějící
 souřadnice se nenahrazují starým výsledkem z runtime cache ani prvním výsledkem
 externí služby.

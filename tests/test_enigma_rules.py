@@ -293,8 +293,135 @@ class CoordinateResolverTests(unittest.TestCase):
                 self.assertEqual(result.grch37.variant_id(), grch37)
                 self.assertEqual(result.grch38.variant_id(), grch38)
 
+    def test_general_local_projector_resolves_exact_coding_indels(self):
+        from backend.lookups import coordinates
+
+        variants = (
+            ("BRCA1", "c.2022_2031dupTGCAACTGGA"),
+            ("BRCA1", "c.3912delA"),
+            ("BRCA1", "c.465dupA"),
+            ("BRCA1", "c.5355dupG"),
+            ("BRCA2", "c.1054delT"),
+            ("BRCA2", "c.1681_1685delGGAAG"),
+            ("BRCA2", "c.2774delC"),
+            ("BRCA2", "c.3996_4002delTAACTTA"),
+            ("BRCA2", "c.4053delA"),
+            ("BRCA2", "c.4265delA"),
+            ("BRCA2", "c.4868_4871dupAAAC"),
+            ("BRCA2", "c.604_613delCCCACCCTTA"),
+            ("BRCA2", "c.6230_6231dupAG"),
+            ("BRCA2", "c.7346_7347insAA"),
+        )
+        for gene, c_notation in variants:
+            with self.subTest(gene=gene, c_notation=c_notation):
+                coordinates._RESOLVER_CACHE.pop(f"{gene}:{c_notation}", None)
+                result = coordinates.resolve_variant(gene, c_notation)
+                self.assertEqual(result.status, "ok")
+                self.assertEqual(result.source, "derived_versioned_local_base_maps")
+                self.assertTrue(result.grch37.is_valid())
+                self.assertTrue(result.grch38.is_valid())
+
+    def test_general_projector_resolves_covered_intron_to_exon_duplication(self):
+        from backend.lookups import coordinates
+
+        result = coordinates.resolve_variant("BRCA1", "c.5468-10_5521dup")
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual(result.source, "derived_versioned_local_base_maps")
+        self.assertTrue(result.grch37.is_valid())
+        self.assertTrue(result.grch38.is_valid())
+
+    def test_projector_left_normalizes_against_gnomad_representation(self):
+        from backend.lookups import coordinates
+
+        result = coordinates.resolve_variant("BRCA2", "c.10091_10092del")
+
+        self.assertEqual(result.source, "derived_versioned_local_base_maps")
+        self.assertEqual(result.grch38.variant_id(), "13-32398602-ATC-A")
+
+    def test_general_local_projector_resolves_near_exon_intronic_indels(self):
+        from backend.lookups import coordinates
+
+        variants = (
+            ("BRCA1", "c.81-11delT"),
+            ("BRCA2", "c.317-19_317-12delAATTATTG"),
+            ("BRCA2", "c.426-12_426-8delGTTTT"),
+        )
+        for gene, c_notation in variants:
+            with self.subTest(gene=gene, c_notation=c_notation):
+                coordinates._RESOLVER_CACHE.pop(f"{gene}:{c_notation}", None)
+                result = coordinates.resolve_variant(gene, c_notation)
+                self.assertEqual(result.status, "ok")
+                self.assertEqual(result.source, "derived_versioned_local_base_maps")
+
+    def test_general_local_projector_rejects_uncovered_or_conflicting_indels(self):
+        from backend.lookups import coordinates
+
+        for c_notation in (
+            "c.134+51delA",
+            "c.317-19_317-12delAATTATT",
+        ):
+            with self.subTest(c_notation=c_notation):
+                coordinates._RESOLVER_CACHE.pop(f"BRCA1:{c_notation}", None)
+                result = coordinates.resolve_variant("BRCA1", c_notation)
+                self.assertEqual(result.status, "failed")
+                self.assertIsNone(result.grch37)
+                self.assertIsNone(result.grch38)
+
+    def test_projector_does_not_map_utr_coordinates_as_coding_positions(self):
+        from backend.lookups import coordinates
+
+        result = coordinates.resolve_variant("BRCA1", "c.*101_*103del")
+
+        self.assertEqual(result.status, "ok")
+        self.assertEqual(result.source, "normalized_indel_snapshot")
+
 
 class FrequencyTests(unittest.TestCase):
+    def test_external_validation_indels_complete_required_population_lookups(self):
+        from backend.lookups.coordinates import resolve_variant
+
+        variants = (
+            ("BRCA1", "c.2022_2031dupTGCAACTGGA"),
+            ("BRCA1", "c.3912delA"),
+            ("BRCA1", "c.465dupA"),
+            ("BRCA1", "c.5355dupG"),
+            ("BRCA1", "c.81-11delT"),
+            ("BRCA1", "c.5468-10_5521dup"),
+            ("BRCA2", "c.317-19_317-12delAATTATTG"),
+            ("BRCA2", "c.426-12_426-8delGTTTT"),
+            ("BRCA2", "c.604_613delCCCACCCTTA"),
+            ("BRCA2", "c.1054delT"),
+            ("BRCA2", "c.1681_1685delGGAAG"),
+            ("BRCA2", "c.2774delC"),
+            ("BRCA2", "c.3996_4002delTAACTTA"),
+            ("BRCA2", "c.4053delA"),
+            ("BRCA2", "c.4265delA"),
+            ("BRCA2", "c.4868_4871dupAAAC"),
+            ("BRCA2", "c.6230_6231dupAG"),
+            ("BRCA2", "c.7346_7347insAA"),
+        )
+        complete = {
+            "found", "absent", "absent_in_non_founder_populations", "filtered_record",
+        }
+        for gene, c_notation in variants:
+            with self.subTest(gene=gene, c_notation=c_notation):
+                coords = resolve_variant(gene, c_notation)
+                result = get_gnomad_frequencies(
+                    gene,
+                    coords.grch37,
+                    coords.grch38,
+                    c_notation=c_notation,
+                )
+                self.assertTrue(coords.has_grch37())
+                self.assertTrue(coords.has_grch38())
+                self.assertTrue(
+                    all(
+                        dataset["status"] in complete
+                        for dataset in result["datasets"].values()
+                    )
+                )
+
     def test_unknown_gene_has_no_inherited_brca_frequency_policy(self):
         data = get_gnomad_frequencies("TP53")
         self.assertEqual(data["status"], "policy_unavailable")

@@ -17,6 +17,11 @@ import re
 from typing import Any, Dict, Optional
 
 from backend.policy.catalog import TRANSCRIPTS
+from backend.domain.small_variant_projection import (
+    AssemblyBaseMap,
+    build_assembly_base_maps,
+    project_exact_indel,
+)
 from backend.infrastructure.health import DataHealthRegistry
 from backend.reference_data import classification_snapshot, indel_snapshot
 
@@ -38,6 +43,7 @@ _ALLOWED_SOURCE_TYPES = {
 _SOURCE_MANIFEST: Optional[dict[str, Any]] = None
 _COORDINATE_MAPS: dict[str, dict[str, Any]] = {}
 _RESOLVER_CACHE: Dict[str, "ResolvedVariant"] = {}
+_ASSEMBLY_BASE_MAPS: dict[tuple[str, str], AssemblyBaseMap] = {}
 
 
 @dataclass
@@ -111,7 +117,7 @@ def _source_path(relative_path: object, label: str) -> Path:
 
 def validate_coordinate_source_manifest() -> dict[str, Any]:
     """Validate the source registry and every directly loaded coordinate map."""
-    global _SOURCE_MANIFEST, _COORDINATE_MAPS
+    global _SOURCE_MANIFEST, _COORDINATE_MAPS, _ASSEMBLY_BASE_MAPS
 
     manifest = _read_object(COORDINATE_SOURCE_MANIFEST, "coordinate source manifest")
     metadata = _read_object(COORDINATE_SOURCE_METADATA, "coordinate source metadata")
@@ -137,6 +143,15 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
         raise RuntimeError("Production coordinate network resolution must be disabled")
     if runtime_policy.get("missing_coordinate_status") != "failed":
         raise RuntimeError("Missing local coordinates must have failed status")
+    projection_policy = runtime_policy.get("exact_small_indel_projection")
+    if not isinstance(projection_policy, dict) or (
+        projection_policy.get("status") != "active"
+        or projection_policy.get("source_ids")
+        != ["brca_coding_snv_snapshot", "brca_intronic_snv_map"]
+        or projection_policy.get("maximum_intronic_offset_bp") != 50
+        or projection_policy.get("vcf_normalization") != "left_aligned_minimal"
+    ):
+        raise RuntimeError("Exact small-indel coordinate projection policy is invalid")
 
     sources = manifest.get("sources")
     if not isinstance(sources, list) or not sources:
@@ -221,6 +236,10 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
     classification_snapshot.validate_classification_snapshot()
     indel_snapshot.load_indel_snapshot()
     _COORDINATE_MAPS = loaded_coordinate_maps
+    _ASSEMBLY_BASE_MAPS = build_assembly_base_maps(
+        classification_snapshot.load_classification_snapshot_index(),
+        loaded_coordinate_maps,
+    )
     _SOURCE_MANIFEST = manifest
     return manifest
 
@@ -351,6 +370,56 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
         load_local_coordinate_sources()
     assert _SOURCE_MANIFEST is not None
 
+    transcript = TRANSCRIPTS.get(normalized_gene, "")
+    grch37_map = _ASSEMBLY_BASE_MAPS.get((normalized_gene, "GRCh37"))
+    grch38_map = _ASSEMBLY_BASE_MAPS.get((normalized_gene, "GRCh38"))
+    grch37_projected = (
+        project_exact_indel(normalized_gene, transcript, normalized_c, grch37_map)
+        if grch37_map is not None else None
+    )
+    grch38_projected = (
+        project_exact_indel(normalized_gene, transcript, normalized_c, grch38_map)
+        if grch38_map is not None else None
+    )
+    if grch37_projected is not None or grch38_projected is not None:
+        result = ResolvedVariant(
+            gene=normalized_gene,
+            transcript=transcript,
+            c_notation=normalized_c,
+            status=(
+                "ok"
+                if grch37_projected is not None and grch38_projected is not None
+                else "partial"
+            ),
+            source="derived_versioned_local_base_maps",
+            grch37=(
+                GenomicCoords(
+                    grch37_projected.chrom,
+                    grch37_projected.pos,
+                    grch37_projected.ref,
+                    grch37_projected.alt,
+                    "GRCh37",
+                )
+                if grch37_projected is not None else None
+            ),
+            grch38=(
+                GenomicCoords(
+                    grch38_projected.chrom,
+                    grch38_projected.pos,
+                    grch38_projected.ref,
+                    grch38_projected.alt,
+                    "GRCh38",
+                )
+                if grch38_projected is not None else None
+            ),
+            warnings=[
+                "Coordinates derived from checksum-validated local coding and "
+                "near-exon reference base maps"
+            ],
+        )
+        _RESOLVER_CACHE[key] = result
+        return result
+
     sources = sorted(_SOURCE_MANIFEST["sources"], key=lambda item: item["priority"])
     for source in sources:
         if normalized_gene not in source["genes"]:
@@ -360,7 +429,6 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
             _RESOLVER_CACHE[key] = result
             return result
 
-    transcript = TRANSCRIPTS.get(normalized_gene, "")
     return ResolvedVariant(
         gene=normalized_gene,
         transcript=transcript,
