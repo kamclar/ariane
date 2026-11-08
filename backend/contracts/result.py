@@ -60,6 +60,19 @@ class ExternalComparison(BaseModel):
     erepo_registry_method_version: str = ""
     historical_expert_panel_warning: str = ""
     expert_panel_difference_message: str = ""
+    erepo_reconciliation_status: Literal[
+        "not_found",
+        "current_agreement",
+        "current_discordance",
+        "historical_context",
+        "unversioned_context",
+    ] = "not_found"
+    erepo_reconciliation_title: str = ""
+    erepo_reconciliation_explanation: str = ""
+    erepo_reconciliation_requires_review: bool = False
+    erepo_registry_published_date: str = ""
+    erepo_registry_url: str = ""
+    erepo_registry_criteria_met: list[str] = Field(default_factory=list)
 
 
 class AlphaMissenseResult(BaseModel):

@@ -200,12 +200,22 @@ def test_rna_and_table9_evidence_labels_are_not_conflated():
 
 def test_expert_panel_classification_difference_is_outside_collapsed_comparison():
     html = frontend_html()
-    banner = html.index('class="expert-classification-difference"')
+    banner = html.index('class="expert-classification-difference')
     external = html.index('class="external-section"')
 
     assert banner < external
-    assert "result?.external?.expert_panel_difference_message" in html
-    assert "does not replace" in html[banner:external]
+    assert "result?.external?.erepo_reconciliation_status === 'current_discordance'" in html
+    assert "result?.external?.erepo_reconciliation_explanation" in html[banner:external]
+    assert "Open the exact ERepo assertion" in html[banner:external]
+
+
+def test_historical_erepo_context_is_not_labelled_as_current_discordance():
+    html = frontend_html()
+
+    assert "'historical_context', 'unversioned_context'" in html
+    assert 'class="erepo-reconciliation-context"' in html
+    assert "result?.external?.erepo_registry_published_date" in html
+    assert "result.external.erepo_registry_criteria_met.join(', ')" in html
 
 
 def test_external_comparison_remains_visible_for_not_found_or_failed_sources():

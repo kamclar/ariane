@@ -256,6 +256,34 @@
     line-height: 1.45;
 }
 
+.expert-classification-difference a {
+    width: fit-content;
+    color: #783800;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.erepo-reconciliation-context {
+    display: grid;
+    gap: 0.3rem;
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid #d3a32f;
+    border-left-width: 5px;
+    border-radius: var(--radius);
+    background: #fff9e8;
+    color: #624b10;
+}
+
+.erepo-reconciliation-context strong {
+    font-size: 0.9rem;
+}
+
+.erepo-reconciliation-context span {
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
 .manual-review-callout {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);

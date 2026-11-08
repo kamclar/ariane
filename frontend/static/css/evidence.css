@@ -205,6 +205,17 @@ h3 {
     margin-top: 0.65rem;
 }
 
+.erepo-reconciliation-agreement {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.7rem 0.8rem;
+    border-left: 4px solid var(--color-success);
+    background: #eef9f1;
+    color: #225c37;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;

@@ -2582,6 +2582,14 @@ evidence ze Supplementary Tables 2 a 3. Příznak PVS1 RNA proto nesmí vyvolat
 hlášku o dostupné Table 9 evidenci. Hláška Table 9 se zobrazí pouze tehdy, pokud
 je aplikováno PS3 nebo BS3 s odpovídající auditní stopou Table 9.
 
+Prezentační vrstva používá explicitní ERepo reconciliation pravidlo. Přesná
+assertion z checksumovaného snapshotu se rozdělí na `current_agreement`,
+`current_discordance`, `historical_context`, `unversioned_context` nebo
+`not_found`. Pouze rozdíl proti přesné aktuální v1.2 assertion se označí jako
+aktuální diskordance a vyžaduje odbornou revizi. Rozhraní zobrazí obě třídy,
+rozsah rozdílu, verzi assertion, datum, kritéria zaznamenaná v ERepo a odkaz na
+přesný záznam. Pravidlo nikdy nepřepíše vypočtenou třídu ani nepřidá body.
+
 Pokud se automatický výsledek liší od ENIGMA expert-panel klasifikace, rozhraní
 zobrazí rozdíl přímo pod klasifikační kartou. Historická assertion zůstává
 oddělena od aktuálního v1.2 výpočtu a nemění kritéria ani body. U

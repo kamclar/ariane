@@ -82,14 +82,21 @@
                 </div>
             </div>
 
-            <aside class="expert-classification-difference"
-                   x-show="result?.external?.expert_panel_difference_message"
+            <aside class="expert-classification-difference erepo-reconciliation-discordance"
+                   x-show="result?.external?.erepo_reconciliation_status === 'current_discordance'"
                    role="alert">
-                <strong x-text="result?.external?.expert_panel_difference_message"></strong>
-                <span>
-                    The external assertion is shown for comparison and does not replace
-                    the current criterion-by-criterion calculation.
-                </span>
+                <strong x-text="result?.external?.erepo_reconciliation_title"></strong>
+                <span x-text="result?.external?.erepo_reconciliation_explanation"></span>
+                <a x-show="result?.external?.erepo_registry_url"
+                   :href="result?.external?.erepo_registry_url"
+                   target="_blank" rel="noopener">Open the exact ERepo assertion</a>
+            </aside>
+
+            <aside class="erepo-reconciliation-context"
+                   x-show="['historical_context', 'unversioned_context'].includes(result?.external?.erepo_reconciliation_status)"
+                   role="note">
+                <strong x-text="result?.external?.erepo_reconciliation_title"></strong>
+                <span x-text="result?.external?.erepo_reconciliation_explanation"></span>
             </aside>
 
             <section class="manual-review-callout"

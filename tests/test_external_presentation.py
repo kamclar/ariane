@@ -99,6 +99,67 @@ def test_historical_erepo_assertion_is_labelled_as_context_only():
     assert result.enigma_ep_class == "Pathogenic"
     assert "context only" in result.enigma_ep_source
     assert "not the active v1.2" in result.historical_expert_panel_warning
+    assert result.erepo_reconciliation_status == "historical_context"
+    assert result.erepo_reconciliation_requires_review is False
+
+
+def test_current_erepo_agreement_is_explicit_and_does_not_require_review():
+    with patch(
+        "backend.services.classification_presentation.lookup_erepo_vcep_assertion",
+        return_value={
+            "status": "current_vcep_assertion",
+            "record": {
+                "classification": "Likely Pathogenic",
+                "assertion_method_version": "1.2.0",
+                "published_date": "2025-08-18",
+                "criteria_met": ["PS3", "PM2_Supporting", "PP3"],
+                "erepo_url": "https://erepo.example/current",
+                "uuid": "11111111-2222-3333-4444-555555555555",
+            },
+        },
+    ):
+        result = _external_model(evidence(
+            clinvar={"status": "not_found"},
+            clingen={"status": "not_found"},
+            predicted_class=4,
+        ))
+
+    assert result.erepo_reconciliation_status == "current_agreement"
+    assert result.erepo_reconciliation_requires_review is False
+    assert "both classify" in result.erepo_reconciliation_explanation
+    assert result.erepo_registry_criteria_met == ["PS3", "PM2_Supporting", "PP3"]
+    assert result.erepo_registry_published_date == "2025-08-18"
+    assert result.erepo_registry_url == "https://erepo.example/current"
+
+
+def test_current_erepo_discordance_is_prominent_and_requires_review():
+    with patch(
+        "backend.services.classification_presentation.lookup_erepo_vcep_assertion",
+        return_value={
+            "status": "current_vcep_assertion",
+            "record": {
+                "classification": "Pathogenic",
+                "assertion_method_version": "1.2.0",
+                "published_date": "2026-07-15",
+                "criteria_met": ["PVS1", "PM2_Supporting"],
+                "erepo_url": "https://erepo.example/discordant",
+                "uuid": "11111111-2222-3333-4444-555555555555",
+            },
+        },
+    ):
+        result = _external_model(evidence(
+            clinvar={"status": "not_found"},
+            clingen={"status": "not_found"},
+            predicted_class=3,
+        ))
+
+    assert result.erepo_reconciliation_status == "current_discordance"
+    assert result.erepo_reconciliation_requires_review is True
+    assert result.erepo_reconciliation_title == (
+        "Current ENIGMA VCEP and ARIANE results differ"
+    )
+    assert "crosses the VUS boundary" in result.erepo_reconciliation_explanation
+    assert "has not overwritten either result" in result.erepo_reconciliation_explanation
 
 
 def test_ambiguous_clinvar_candidates_are_reported_without_selecting_one():

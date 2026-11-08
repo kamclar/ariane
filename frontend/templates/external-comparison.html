@@ -97,6 +97,11 @@
                     <!-- ENIGMA EP comparison -->
                     <div class="external-block">
                         <h4>ENIGMA Expert Panel</h4>
+                        <p class="erepo-reconciliation-agreement"
+                           x-show="result?.external?.erepo_reconciliation_status === 'current_agreement'">
+                            <strong x-text="result?.external?.erepo_reconciliation_title"></strong>
+                            <span x-text="result?.external?.erepo_reconciliation_explanation"></span>
+                        </p>
                         <p class="curation-warning"
                            x-show="result?.external?.historical_expert_panel_warning"
                            x-text="result?.external?.historical_expert_panel_warning"></p>
@@ -115,7 +120,24 @@
                                 <td>Source</td>
                                 <td x-text="result?.external?.enigma_ep_source"></td>
                             </tr>
+                            <tr x-show="result?.external?.erepo_registry_method_version">
+                                <td>Assertion method</td>
+                                <td x-text="`ENIGMA VCEP v${result?.external?.erepo_registry_method_version}`"></td>
+                            </tr>
+                            <tr x-show="result?.external?.erepo_registry_published_date">
+                                <td>Published</td>
+                                <td x-text="result?.external?.erepo_registry_published_date"></td>
+                            </tr>
+                            <tr x-show="result?.external?.erepo_registry_criteria_met?.length">
+                                <td>Criteria recorded in ERepo</td>
+                                <td x-text="result.external.erepo_registry_criteria_met.join(', ')"></td>
+                            </tr>
                         </table>
+                        <p class="external-evidence-codes"
+                           x-show="result?.external?.erepo_registry_url">
+                            <a :href="result?.external?.erepo_registry_url"
+                               target="_blank" rel="noopener">Open the exact ERepo assertion</a>
+                        </p>
                         <p class="external-evidence-codes"
                            x-show="result?.external?.erepo_evidence_codes?.length"
                            x-text="'ClinGen evidence codes: ' + result.external.erepo_evidence_codes.join(', ')"></p>

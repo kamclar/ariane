@@ -22,7 +22,7 @@ from backend.criteria.bp7_rna import evaluate_bp7_rna_variant_context
 from backend.presentation.criterion_order import sorted_criterion_items
 from backend.reference_data.enigma_rules import clinical_annotations_for_variant
 from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
-from backend.presentation.external import external_comparison
+from backend.presentation.external import erepo_reconciliation, external_comparison
 from backend.presentation.narrative import generate_narrative
 from backend.presentation.vus_explanation import explain_vus
 from backend.services.evidence_orchestration import (
@@ -192,6 +192,7 @@ def _external_model_from_values(
         clinvar_stars=stars,
         enigma_submission=enigma_submission,
     )
+    reconciliation = erepo_reconciliation(predicted_class, local_erepo)
     difference_message = ""
     if comparison.get("match") is False:
         prefix = (
@@ -241,6 +242,13 @@ def _external_model_from_values(
         ),
         historical_expert_panel_warning=warning,
         expert_panel_difference_message=difference_message,
+        erepo_reconciliation_status=reconciliation["status"],
+        erepo_reconciliation_title=reconciliation["title"],
+        erepo_reconciliation_explanation=reconciliation["explanation"],
+        erepo_reconciliation_requires_review=reconciliation["requires_review"],
+        erepo_registry_published_date=reconciliation["published_date"],
+        erepo_registry_url=reconciliation["assertion_url"],
+        erepo_registry_criteria_met=reconciliation["criteria_met"],
     )
 
 
