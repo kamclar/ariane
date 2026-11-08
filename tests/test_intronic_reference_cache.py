@@ -19,6 +19,11 @@ def sha256(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def normalized_text_sha256(path):
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
+
+
 class IntronicCoordinateDatasetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -35,7 +40,11 @@ class IntronicCoordinateDatasetTests(unittest.TestCase):
         manifest = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
         metadata = json.loads(SOURCE_MANIFEST_METADATA.read_text(encoding="utf-8"))
         self.assertEqual(metadata["validation_status"], "approved")
-        self.assertEqual(metadata["manifest_sha256"], sha256(SOURCE_MANIFEST))
+        self.assertEqual(
+            metadata["manifest_sha256"],
+            normalized_text_sha256(SOURCE_MANIFEST),
+        )
+        self.assertEqual(manifest["checksum_line_endings"], "LF")
         self.assertFalse(manifest["runtime_policy"]["network_resolution_allowed"])
         self.assertEqual(
             [source["id"] for source in manifest["sources"]],
@@ -43,7 +52,12 @@ class IntronicCoordinateDatasetTests(unittest.TestCase):
                 "brca_normalized_indel_snapshot",
                 "brca_coding_snv_snapshot",
                 "brca_intronic_snv_map",
+                "brca_transcript_alignments",
             ],
+        )
+        self.assertEqual(
+            manifest["runtime_policy"]["utr_snv_projection"]["source_id"],
+            "brca_transcript_alignments",
         )
 
     def test_every_site_has_three_alternatives_and_both_builds(self):

@@ -333,7 +333,8 @@ def create_public_api_router(
                 "A recognized HGVS consequence is classified only when the "
                 "current ARIANE ENIGMA BRCA1/2 VCEP v1.2 implementation has a "
                 "complete automatic path. Out-of-scope or unresolved types "
-                "return an error and no VUS classification."
+                "return an error and no VUS classification. UTR support is "
+                "limited to exact single-nucleotide substitutions."
             ),
             limits=PublicApiLimits(
                 maximum_batch_items=PUBLIC_API_MAXIMUM_BATCH_ITEMS,

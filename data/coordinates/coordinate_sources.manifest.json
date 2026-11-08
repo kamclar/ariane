@@ -2,6 +2,7 @@
   "schema_version": 1,
   "manifest_id": "ariane_local_coordinate_sources",
   "manifest_version": "2026.11.07",
+  "checksum_line_endings": "LF",
   "status": "active",
   "runtime_policy": {
     "network_resolution_allowed": false,
@@ -14,6 +15,13 @@
       ],
       "maximum_intronic_offset_bp": 50,
       "vcf_normalization": "left_aligned_minimal"
+    },
+    "utr_snv_projection": {
+      "status": "active",
+      "source_id": "brca_transcript_alignments",
+      "variant_types": ["5utr", "3utr"],
+      "operation": "single_nucleotide_substitution",
+      "reference_validation": "checksum_pinned_transcript_fasta"
     }
   },
   "sources": [
@@ -50,6 +58,19 @@
       "path": "data/coordinates/brca_intronic_snv_coordinates.json",
       "metadata_path": "data/coordinates/brca_intronic_snv_coordinates.metadata.json",
       "runtime_source_label": "versioned_intronic_coordinate_map",
+      "assemblies": ["GRCh37", "GRCh38"],
+      "genes": {
+        "BRCA1": "NM_007294.4",
+        "BRCA2": "NM_000059.4"
+      }
+    },
+    {
+      "id": "brca_transcript_alignments",
+      "priority": 40,
+      "source_type": "transcript_alignment",
+      "path": "data/coordinates/brca_transcript_alignments.json",
+      "metadata_path": "data/coordinates/brca_transcript_alignments.metadata.json",
+      "runtime_source_label": "versioned_transcript_alignment",
       "assemblies": ["GRCh37", "GRCh38"],
       "genes": {
         "BRCA1": "NM_007294.4",

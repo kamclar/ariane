@@ -194,7 +194,9 @@ def test_public_api_capabilities_publish_limits_and_policy():
     }
     assert "missense" in payload["supported_variant_types"]
     assert "ptc_delins" in payload["supported_variant_types"]
-    assert payload["out_of_scope_variant_types"] == ["5utr", "3utr", "stop_lost"]
+    assert "5utr" in payload["supported_variant_types"]
+    assert "3utr" in payload["supported_variant_types"]
+    assert payload["out_of_scope_variant_types"] == ["stop_lost"]
     assert set(payload["unresolved_variant_types"]) == {
         "unknown",
         "delins",
@@ -203,6 +205,7 @@ def test_public_api_capabilities_publish_limits_and_policy():
         "duplication",
     }
     assert "no VUS classification" in payload["variant_scope_semantics"]
+    assert "exact single-nucleotide substitutions" in payload["variant_scope_semantics"]
 
 
 def test_public_api_rejects_out_of_scope_type_without_classification(monkeypatch):

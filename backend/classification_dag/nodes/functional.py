@@ -16,21 +16,31 @@ def functional_decision_path(
     table9: Mapping[str, Any],
 ) -> dict[str, Any]:
     specification = vcep_specification(variant.gene)
-    branch = (
-        "intronic-silent"
-        if variant.variant_type.lower() in {"intronic", "synonymous", "silent"}
-        else "exonic-missense-inframe"
-    )
-    if branch == "intronic-silent":
+    variant_type = variant.variant_type.lower()
+    if variant_type in {"5utr", "3utr"}:
+        branch = "utr-exact"
+    elif variant_type in {"intronic", "synonymous", "silent"}:
+        branch = "intronic-silent"
+    else:
+        branch = "exonic-missense-inframe"
+    if branch in {"intronic-silent", "utr-exact"}:
+        scope_description = (
+            "For UTR variants, ARIANE uses only the exact variant-specific "
+            "functional recommendation recorded in ENIGMA Table 9."
+            if branch == "utr-exact"
+            else (
+                "For intronic and silent variants, ENIGMA considers only "
+                "functional assays that measure effects via both mRNA and protein."
+            )
+        )
         steps = [
             {
                 "node_id": "func-assay-scope-combined",
                 "question": "Which assay scope is eligible under Figure 1C?",
                 "result": "combined_mRNA_and_protein_only",
                 "observed": (
-                    "For intronic and silent variants, ENIGMA considers only "
-                    "functional assays that measure effects via both mRNA and "
-                    f"protein. Reviewed Table 9 recommendation: {table9['reason']}"
+                    f"{scope_description} Reviewed Table 9 recommendation: "
+                    f"{table9['reason']}"
                 ),
             }
         ]

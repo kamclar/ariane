@@ -22,6 +22,11 @@ from backend.domain.small_variant_projection import (
     build_assembly_base_maps,
     project_exact_indel,
 )
+from backend.domain.transcript_projection import (
+    TranscriptAlignment,
+    parse_transcript_alignment,
+    project_utr_substitution,
+)
 from backend.infrastructure.health import DataHealthRegistry
 from backend.reference_data import classification_snapshot, indel_snapshot
 
@@ -39,11 +44,15 @@ _ALLOWED_SOURCE_TYPES = {
     "classification_snapshot",
     "normalized_indel_snapshot",
     "coordinate_map",
+    "transcript_alignment",
 }
 _SOURCE_MANIFEST: Optional[dict[str, Any]] = None
 _COORDINATE_MAPS: dict[str, dict[str, Any]] = {}
 _RESOLVER_CACHE: Dict[str, "ResolvedVariant"] = {}
 _ASSEMBLY_BASE_MAPS: dict[tuple[str, str], AssemblyBaseMap] = {}
+_TRANSCRIPT_ALIGNMENTS: dict[str, TranscriptAlignment] = {}
+_TRANSCRIPT_SEQUENCES: dict[str, str] = {}
+_TRANSCRIPT_ALIGNMENT_SOURCE: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -92,6 +101,12 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _normalized_text_sha256(path: Path) -> str:
+    """Hash repository text independently of the checkout line endings."""
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
+
+
 def _read_object(path: Path, label: str) -> dict[str, Any]:
     if not path.is_file():
         raise RuntimeError(f"Required {label} is missing: {path}")
@@ -102,6 +117,29 @@ def _read_object(path: Path, label: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise RuntimeError(f"Required {label} must contain a JSON object: {path}")
     return value
+
+
+def _read_fasta(path: Path, label: str) -> dict[str, str]:
+    if not path.is_file():
+        raise RuntimeError(f"Required {label} is missing: {path}")
+    records: dict[str, list[str]] = {}
+    accession = ""
+    try:
+        lines = path.read_text(encoding="ascii").splitlines()
+    except OSError as exc:
+        raise RuntimeError(f"Required {label} cannot be loaded: {path}: {exc}") from exc
+    for line in lines:
+        if line.startswith(">"):
+            accession = line[1:].split()[0]
+            if not accession or accession in records:
+                raise RuntimeError(f"Required {label} has an invalid FASTA header")
+            records[accession] = []
+        elif accession:
+            sequence = line.strip().upper()
+            if sequence and not set(sequence).issubset({"A", "C", "G", "T"}):
+                raise RuntimeError(f"Required {label} contains a non-ACGT sequence")
+            records[accession].append(sequence)
+    return {key: "".join(value) for key, value in records.items()}
 
 
 def _source_path(relative_path: object, label: str) -> Path:
@@ -118,11 +156,13 @@ def _source_path(relative_path: object, label: str) -> Path:
 def validate_coordinate_source_manifest() -> dict[str, Any]:
     """Validate the source registry and every directly loaded coordinate map."""
     global _SOURCE_MANIFEST, _COORDINATE_MAPS, _ASSEMBLY_BASE_MAPS
+    global _TRANSCRIPT_ALIGNMENTS, _TRANSCRIPT_SEQUENCES
+    global _TRANSCRIPT_ALIGNMENT_SOURCE
 
     manifest = _read_object(COORDINATE_SOURCE_MANIFEST, "coordinate source manifest")
     metadata = _read_object(COORDINATE_SOURCE_METADATA, "coordinate source metadata")
     expected_sha = str(metadata.get("manifest_sha256") or "").lower()
-    actual_sha = _sha256(COORDINATE_SOURCE_MANIFEST)
+    actual_sha = _normalized_text_sha256(COORDINATE_SOURCE_MANIFEST)
     if expected_sha != actual_sha:
         raise RuntimeError(
             "Coordinate source manifest checksum mismatch: "
@@ -152,6 +192,16 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
         or projection_policy.get("vcf_normalization") != "left_aligned_minimal"
     ):
         raise RuntimeError("Exact small-indel coordinate projection policy is invalid")
+    utr_policy = runtime_policy.get("utr_snv_projection")
+    if not isinstance(utr_policy, dict) or (
+        utr_policy.get("status") != "active"
+        or utr_policy.get("source_id") != "brca_transcript_alignments"
+        or utr_policy.get("variant_types") != ["5utr", "3utr"]
+        or utr_policy.get("operation") != "single_nucleotide_substitution"
+        or utr_policy.get("reference_validation")
+        != "checksum_pinned_transcript_fasta"
+    ):
+        raise RuntimeError("UTR SNV coordinate projection policy is invalid")
 
     sources = manifest.get("sources")
     if not isinstance(sources, list) or not sources:
@@ -159,6 +209,9 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
     seen_ids: set[str] = set()
     seen_priorities: set[int] = set()
     loaded_coordinate_maps: dict[str, dict[str, Any]] = {}
+    loaded_transcript_alignments: dict[str, TranscriptAlignment] = {}
+    loaded_transcript_sequences: dict[str, str] = {}
+    transcript_alignment_source: Optional[dict[str, Any]] = None
     for source in sources:
         if not isinstance(source, dict):
             raise RuntimeError("Coordinate source entries must be JSON objects")
@@ -232,6 +285,51 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
                         f"Coordinate source {source_id} has invalid or incomplete record {key}"
                     )
             loaded_coordinate_maps[source_id] = records
+        if source_type == "transcript_alignment":
+            source_metadata = _read_object(metadata_path, f"{source_id} metadata")
+            if str(source_metadata.get("sha256") or "").lower() != _sha256(data_path):
+                raise RuntimeError(f"Coordinate source {source_id} checksum mismatch")
+            records = _read_object(data_path, source_id)
+            if (
+                records.get("schema_version") != 1
+                or records.get("snapshot_id") != source_id
+                or source_metadata.get("snapshot_id") != source_id
+                or source_metadata.get("snapshot_version")
+                != records.get("snapshot_version")
+                or source_metadata.get("validation_status") != "approved"
+                or source_metadata.get("records") != records.get("record_count")
+            ):
+                raise RuntimeError(
+                    f"Coordinate source {source_id} metadata is inconsistent"
+                )
+            raw_genes = records.get("genes")
+            if not isinstance(raw_genes, dict) or set(raw_genes) != set(genes):
+                raise RuntimeError(f"Coordinate source {source_id} gene set mismatch")
+            fasta_metadata = source_metadata.get("sources", {}).get("transcript_fasta", {})
+            fasta_path = _source_path(fasta_metadata.get("path"), "transcript FASTA")
+            if str(fasta_metadata.get("sha256") or "").lower() != _sha256(fasta_path):
+                raise RuntimeError("Transcript FASTA checksum mismatch")
+            sequences = _read_fasta(fasta_path, "transcript FASTA")
+            for gene, transcript in genes.items():
+                raw_record = raw_genes.get(gene)
+                if not isinstance(raw_record, dict):
+                    raise RuntimeError(
+                        f"Coordinate source {source_id} has no record for {gene}"
+                    )
+                alignment = parse_transcript_alignment(gene, raw_record)
+                sequence = sequences.get(transcript, "")
+                if (
+                    alignment.transcript != transcript
+                    or len(sequence) != alignment.transcript_length
+                    or hashlib.sha256(sequence.encode("ascii")).hexdigest()
+                    != alignment.sequence_sha256
+                ):
+                    raise RuntimeError(
+                        f"Coordinate source {source_id} transcript mismatch for {gene}"
+                    )
+                loaded_transcript_alignments[gene] = alignment
+                loaded_transcript_sequences[transcript] = sequence
+            transcript_alignment_source = source
 
     classification_snapshot.validate_classification_snapshot()
     indel_snapshot.load_indel_snapshot()
@@ -240,6 +338,9 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
         classification_snapshot.load_classification_snapshot_index(),
         loaded_coordinate_maps,
     )
+    _TRANSCRIPT_ALIGNMENTS = loaded_transcript_alignments
+    _TRANSCRIPT_SEQUENCES = loaded_transcript_sequences
+    _TRANSCRIPT_ALIGNMENT_SOURCE = transcript_alignment_source
     _SOURCE_MANIFEST = manifest
     return manifest
 
@@ -326,6 +427,8 @@ def _resolve_source(
             grch37=_parse_snapshot_coords(record.get("grch37"), "GRCh37"),
             grch38=_parse_snapshot_coords(record.get("grch38"), "GRCh38"),
         )
+    if source_type == "transcript_alignment":
+        return None
     records = _COORDINATE_MAPS[source["id"]]
     record = records.get(f"{gene}:{c_notation}")
     if not isinstance(record, dict):
@@ -371,6 +474,69 @@ def resolve_variant(gene: str, c_notation: str) -> ResolvedVariant:
     assert _SOURCE_MANIFEST is not None
 
     transcript = TRANSCRIPTS.get(normalized_gene, "")
+    alignment = _TRANSCRIPT_ALIGNMENTS.get(normalized_gene)
+    transcript_sequence = _TRANSCRIPT_SEQUENCES.get(transcript, "")
+    grch37_utr = (
+        project_utr_substitution(
+            normalized_c,
+            transcript_sequence=transcript_sequence,
+            transcript_alignment=alignment,
+            assembly="GRCh37",
+        )
+        if alignment is not None and transcript_sequence
+        else None
+    )
+    grch38_utr = (
+        project_utr_substitution(
+            normalized_c,
+            transcript_sequence=transcript_sequence,
+            transcript_alignment=alignment,
+            assembly="GRCh38",
+        )
+        if alignment is not None and transcript_sequence
+        else None
+    )
+    if grch37_utr is not None or grch38_utr is not None:
+        source = _TRANSCRIPT_ALIGNMENT_SOURCE or {
+            "id": "brca_transcript_alignments",
+            "runtime_source_label": "versioned_transcript_alignment",
+        }
+        result = ResolvedVariant(
+            gene=normalized_gene,
+            transcript=transcript,
+            c_notation=normalized_c,
+            status="ok" if grch37_utr is not None and grch38_utr is not None else "partial",
+            source=str(source["runtime_source_label"]),
+            grch37=(
+                GenomicCoords(
+                    grch37_utr.chrom,
+                    grch37_utr.pos,
+                    grch37_utr.ref,
+                    grch37_utr.alt,
+                    "GRCh37",
+                )
+                if grch37_utr is not None
+                else None
+            ),
+            grch38=(
+                GenomicCoords(
+                    grch38_utr.chrom,
+                    grch38_utr.pos,
+                    grch38_utr.ref,
+                    grch38_utr.alt,
+                    "GRCh38",
+                )
+                if grch38_utr is not None
+                else None
+            ),
+            warnings=[
+                "Coordinates projected from checksum-validated transcript "
+                f"alignments in local source {source['id']}"
+            ],
+        )
+        _RESOLVER_CACHE[key] = result
+        return result
+
     grch37_map = _ASSEMBLY_BASE_MAPS.get((normalized_gene, "GRCh37"))
     grch38_map = _ASSEMBLY_BASE_MAPS.get((normalized_gene, "GRCh38"))
     grch37_projected = (

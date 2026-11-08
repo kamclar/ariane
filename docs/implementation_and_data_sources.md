@@ -284,7 +284,9 @@ Každá SNV prochází před klasifikací kontrolou referenční báze. Kontrola
 Zdroje kontroly:
 
 1. coding SNV snapshot pro kódující pozice,
-2. intronická souřadnicová mapa pro podporované intronické pozice.
+2. intronická souřadnicová mapa pro podporované intronické pozice,
+3. checksumovaný transkriptový FASTA a exonové alignmenty GRCh37 a GRCh38 pro
+   přesné 5' UTR a 3' UTR SNV.
 
 Příklad:
 
@@ -384,15 +386,21 @@ odpovídající větev ENIGMA v1.2:
 - `nonsense`, `frameshift`, `ptc_delins`, `splice_site`, `initiation_codon`,
 - `exon_deletion`, `exon_duplication`,
 - `missense`, `synonymous`, `intronic`,
-- `inframe_deletion`, `inframe_insertion`, `inframe_delins`.
+- `inframe_deletion`, `inframe_insertion`, `inframe_delins`,
+- přesné jednonukleotidové substituce `5utr` a `3utr`.
 
-Typy `5utr`, `3utr` a `stop_lost` lze normalizovat a rozpoznat, ale současná
-implementace pro ně nemá úplnou automatickou cestu. Výsledek proto končí
-chybou `unsupported_variant_type` a nevrací třídu VUS. Specifikace v1.2 uvádí,
-že se PM4 pro stop-loss nepoužívá a změna délky proteinu je součástí
-bioinformatického posouzení. Figure 1A však poskytuje automatické větve pro
-missense a in-frame varianty, silent varianty a příslušné intronické varianty;
-ARIANE proto stop-loss nepřeklápí do jiné větve odhadem.
+UTR větev je záměrně omezená. U přesné UTR SNV se vyhodnotí populační kritéria
+Appendix G a pouze přesná variantově specifická kurátorovaná evidence, například
+záznam ENIGMA Table 9 nebo klinického LR registru. Samotná poloha v UTR nevytváří
+patogenní ani benigní kód. Figure 1A SpliceAI a BayesDel se pro UTR nepoužijí.
+UTR indely zůstávají mimo automatický rozsah a vracejí
+`unsupported_utr_edit` bez klasifikace.
+
+Typ `stop_lost` lze normalizovat a rozpoznat, ale současná implementace pro něj
+nemá úplnou automatickou cestu. Výsledek proto končí chybou
+`unsupported_variant_type` a nevrací třídu VUS. Specifikace v1.2 uvádí, že se
+PM4 pro stop-loss nepoužívá a změna délky proteinu je součástí bioinformatického
+posouzení. ARIANE proto stop-loss nepřeklápí do jiné větve odhadem.
 
 Typy `unknown`, `delins`, `deletion`, `insertion` a `duplication` označují
 nedostatečně určený proteinový následek. Nelze u nich bezpečně vybrat PTC,
@@ -1594,7 +1602,9 @@ variant byly nahrazeny kanonickými tvary, například `p.(Met1?)` a
 `scripts/refresh_snv_snapshot_protein_consequences.py`; úplný rozdílový audit
 provádí `scripts/audit_hgvs_snapshot_consistency.py`.
 
-Tento snapshot pokrývá coding SNV. Coding malé indely pokrývá samostatný snapshot popsaný níže. Exonové CNV a všechny UTR varianty pokryté nejsou.
+Tento snapshot pokrývá coding SNV. Coding malé indely pokrývá samostatný snapshot
+popsaný níže. Exonové CNV ani UTR varianty v něm nejsou. Přesné UTR SNV používají
+samostatný transkriptový alignment snapshot popsaný v oddílu 9.2.
 
 ### 7.4 Normalizovaný snapshot malých indelů
 
@@ -1886,6 +1896,17 @@ sequence API pro hg19 a hg38 a jsou navázány na stejné referenční transkrip
 jako ostatní snapshoty. Normalizovaný indel snapshot zůstává validačním a
 záložním zdrojem pro již známé varianty.
 
+Přesné 5' UTR a 3' UTR SNV používají
+`data/coordinates/brca_transcript_alignments.json`. Snapshot obsahuje úplné
+exonové alignmenty schválených BRCA1 a BRCA2 RefSeq transkriptů pro GRCh37 a
+GRCh38. GRCh37 alignmenty pocházejí z NCBI RefSeq annotation release
+`GCF_000001405.25-RS_2024_09`, GRCh38 alignmenty z připnutého cdot balíku a
+referenční báze z připnutého transkriptového FASTA. Runtime před použitím ověří
+checksum dat, FASTA i délku a souvislost všech exonů. Projektor přijímá pouze
+přesnou SNV se shodnou referenční bází; nejde o seznam konkrétních UTR variant.
+Reprodukovatelný builder je
+`scripts/build_brca_transcript_alignment_snapshot.py`.
+
 Pro přesně popsaný coding nebo near-exon intronický indel sestaví resolver alelu
 obecně z těchto dvou per-base map. Požaduje oba endpointy na stejném chromozomu,
 souvislé pokrytí každé dotčené genomové báze, shodu explicitně uvedené
@@ -1904,8 +1925,9 @@ pořadí, datový formát, podporované geny, referenční transkripty a genomov
 sestavy. Manifest i intronická mapa se při startu kontrolují proti checksumům.
 Coding SNV a indel snapshoty mají vlastní povinnou kontrolu checksumu, počtu
 záznamů a stavu validace. Manifest navíc připíná politiku obecné projekce
-malých indelů, zdrojové mapy, maximální intronický offset a levostrannou VCF
-normalizaci. Mutable coordinate cache se nenačítá.
+malých indelů, zdrojové mapy, maximální intronický offset, levostrannou VCF
+normalizaci a omezení UTR projektoru na přesné SNV. Mutable coordinate cache se
+nenačítá.
 
 ### 9.3 Chybějící souřadnice a další geny
 
@@ -1923,14 +1945,12 @@ klasifikační DAG se kvůli novému genu nemění. Externí HGVS nástroje lze 
 při samostatném sestavení kandidátní mapy. Výstup se do produkčního manifestu
 zařadí až po validaci, vytvoření metadat, checksumu a regresních testů.
 
-Pro větší počet dalších genů bude dlouhodobě vhodnější lokální HGVS mapper
-s genomovými sekvencemi a transkriptovými alignmenty pro GRCh37 i GRCh38.
-Současný checksumovaný referenční balík tuto funkci zatím neposkytuje. Obsahuje
-pouze alignment pro GRCh38 a neobsahuje genomové sekvence. Proto se používá pro
-lokální převod `c.` na `p.`, nikoli jako obecný zdroj genomových souřadnic.
-Souřadnicový manifest odděluje rozhraní resolveru od konkrétního způsobu
-mapování. Později tak umožní připojit lokální HGVS provider bez změny
-klasifikačního DAGu.
+Pro větší počet dalších genů bude dlouhodobě vhodnější lokální HGVS mapper s
+genomovými sekvencemi a transkriptovými alignmenty pro GRCh37 i GRCh38. Současný
+BRCA alignment snapshot řeší obecně UTR SNV, ale není plným genomovým mapperem
+pro libovolné editace. Souřadnicový manifest odděluje rozhraní resolveru od
+konkrétního způsobu mapování. Později tak umožní připojit lokální HGVS provider
+bez změny klasifikačního DAGu.
 
 Souřadnice jsou verzovaná vlastnost kombinace referenčního transkriptu,
 genomového sestavení a normalizační politiky. Nemění se při každém dotazu, ale
@@ -2245,7 +2265,7 @@ Změna oficiální ENIGMA verze, transkriptu, genomového sestavení, predikčn�
 
 ### 14.1 Regresní matice typů variant
 
-Soubor `tests/test_variant_type_regression_matrix.py` udržuje explicitní regresní matici rozpoznávaných typů variant. První část ověřuje odvození normalizovaného typu pro nonsense, frameshift, missense, synonymous, intronickou SNV, canonical splice-site variantu, in-frame indel, exonovou deleci a duplikaci, iniciační kodon, stop-loss a obě UTR oblasti. Samostatné testy produkční publikační brány ověřují, že rozpoznaný typ bez úplné automatické cesty nevede k VUS ani k uložení výsledku do cache.
+Soubor `tests/test_variant_type_regression_matrix.py` udržuje explicitní regresní matici rozpoznávaných typů variant. První část ověřuje odvození normalizovaného typu pro nonsense, frameshift, missense, synonymous, intronickou SNV, canonical splice-site variantu, in-frame indel, exonovou deleci a duplikaci, iniciační kodon, stop-loss a obě UTR oblasti. `tests/test_utr_transcript_projection.py` navíc prochází každou referenční UTR pozici obou genů na GRCh37 i GRCh38, kontroluje referenční alelu a odděluje přesné UTR SNV od nepodporovaných UTR indelů. Samostatné testy produkční publikační brány ověřují, že rozpoznaný typ bez úplné automatické cesty nevede k VUS ani k uložení výsledku do cache.
 
 Druhá část pro reprezentativní varianty kontroluje celý deterministický průchod Module 1 od typu varianty přes lokální tabulky a snapshoty po aplikovaná kritéria a výslednou třídu. Každý řádek obsahuje očekávaná i zakázaná kritéria. Tím se kontroluje nejen přítomnost správné větve, ale také nepřípustné přičtení kritéria z jiné větve, například PP3 u nonsense nebo frameshift varianty.
 

@@ -165,11 +165,12 @@ technické vazby zdrojů jsou v
   funkcí jako PP3/BP4. Velikost písmen ani okolní mezery proto nemohou změnit
   použitelnost kritéria, sílu, body nebo větev auditního rozhodovacího stromu.
 - Rozpoznaný typ varianty se již nepovažuje automaticky za klasifikovatelný.
-  `5utr`, `3utr` a `stop_lost` končí jako `unsupported_variant_type`; neurčené
-  `unknown`, `delins`, `deletion`, `insertion` a `duplication` končí jako
-  `protein_consequence_unresolved`. V obou případech se nevrací VUS a výsledek
-  se neukládá do cache. Nejde o otevřenou metodickou otázku: brána pouze brání
-  publikaci výsledku tam, kde ARIANE nemá dokončenou větev popsaných pravidel.
+  Přesné `5utr` a `3utr` SNV mají omezenou větev pro populační kritéria a
+  přesnou variantově specifickou kurátorovanou evidenci; samotná UTR poloha kód
+  nevytváří. UTR indely končí jako `unsupported_utr_edit` a `stop_lost` jako
+  `unsupported_variant_type`. Neurčené `unknown`, `delins`, `deletion`,
+  `insertion` a `duplication` končí jako `protein_consequence_unresolved`.
+  Nepodporované větve nevracejí VUS a výsledek se neukládá do cache.
 - ST7 P/LP je přijatý klasifikační základ proteinové PS1 reference; body se
   přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
 - Nekvantifikovaná ST2 přiděluje PVS1 RNA jen v přesné standardizované LoF

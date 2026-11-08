@@ -1,0 +1,654 @@
+{
+  "genes": {
+    "BRCA1": {
+      "assemblies": {
+        "GRCh37": {
+          "accession": "NC_000017.10",
+          "chrom": "17",
+          "exons": [
+            {
+              "genomic_end": 41277381,
+              "genomic_start": 41277288,
+              "transcript_end": 94,
+              "transcript_start": 0
+            },
+            {
+              "genomic_end": 41276132,
+              "genomic_start": 41276034,
+              "transcript_end": 193,
+              "transcript_start": 94
+            },
+            {
+              "genomic_end": 41267796,
+              "genomic_start": 41267743,
+              "transcript_end": 247,
+              "transcript_start": 193
+            },
+            {
+              "genomic_end": 41258550,
+              "genomic_start": 41258473,
+              "transcript_end": 325,
+              "transcript_start": 247
+            },
+            {
+              "genomic_end": 41256973,
+              "genomic_start": 41256885,
+              "transcript_end": 414,
+              "transcript_start": 325
+            },
+            {
+              "genomic_end": 41256278,
+              "genomic_start": 41256139,
+              "transcript_end": 554,
+              "transcript_start": 414
+            },
+            {
+              "genomic_end": 41251897,
+              "genomic_start": 41251792,
+              "transcript_end": 660,
+              "transcript_start": 554
+            },
+            {
+              "genomic_end": 41249306,
+              "genomic_start": 41249261,
+              "transcript_end": 706,
+              "transcript_start": 660
+            },
+            {
+              "genomic_end": 41247939,
+              "genomic_start": 41247863,
+              "transcript_end": 783,
+              "transcript_start": 706
+            },
+            {
+              "genomic_end": 41246877,
+              "genomic_start": 41243452,
+              "transcript_end": 4209,
+              "transcript_start": 783
+            },
+            {
+              "genomic_end": 41243049,
+              "genomic_start": 41242961,
+              "transcript_end": 4298,
+              "transcript_start": 4209
+            },
+            {
+              "genomic_end": 41234592,
+              "genomic_start": 41234421,
+              "transcript_end": 4470,
+              "transcript_start": 4298
+            },
+            {
+              "genomic_end": 41228631,
+              "genomic_start": 41228505,
+              "transcript_end": 4597,
+              "transcript_start": 4470
+            },
+            {
+              "genomic_end": 41226538,
+              "genomic_start": 41226348,
+              "transcript_end": 4788,
+              "transcript_start": 4597
+            },
+            {
+              "genomic_end": 41223255,
+              "genomic_start": 41222945,
+              "transcript_end": 5099,
+              "transcript_start": 4788
+            },
+            {
+              "genomic_end": 41219712,
+              "genomic_start": 41219625,
+              "transcript_end": 5187,
+              "transcript_start": 5099
+            },
+            {
+              "genomic_end": 41215968,
+              "genomic_start": 41215891,
+              "transcript_end": 5265,
+              "transcript_start": 5187
+            },
+            {
+              "genomic_end": 41215390,
+              "genomic_start": 41215350,
+              "transcript_end": 5306,
+              "transcript_start": 5265
+            },
+            {
+              "genomic_end": 41209152,
+              "genomic_start": 41209069,
+              "transcript_end": 5390,
+              "transcript_start": 5306
+            },
+            {
+              "genomic_end": 41203134,
+              "genomic_start": 41203080,
+              "transcript_end": 5445,
+              "transcript_start": 5390
+            },
+            {
+              "genomic_end": 41201211,
+              "genomic_start": 41201138,
+              "transcript_end": 5519,
+              "transcript_start": 5445
+            },
+            {
+              "genomic_end": 41199720,
+              "genomic_start": 41199660,
+              "transcript_end": 5580,
+              "transcript_start": 5519
+            },
+            {
+              "genomic_end": 41197819,
+              "genomic_start": 41196312,
+              "transcript_end": 7088,
+              "transcript_start": 5580
+            }
+          ],
+          "strand": "-"
+        },
+        "GRCh38": {
+          "accession": "NC_000017.11",
+          "chrom": "17",
+          "exons": [
+            {
+              "genomic_end": 43125364,
+              "genomic_start": 43125271,
+              "transcript_end": 94,
+              "transcript_start": 0
+            },
+            {
+              "genomic_end": 43124115,
+              "genomic_start": 43124017,
+              "transcript_end": 193,
+              "transcript_start": 94
+            },
+            {
+              "genomic_end": 43115779,
+              "genomic_start": 43115726,
+              "transcript_end": 247,
+              "transcript_start": 193
+            },
+            {
+              "genomic_end": 43106533,
+              "genomic_start": 43106456,
+              "transcript_end": 325,
+              "transcript_start": 247
+            },
+            {
+              "genomic_end": 43104956,
+              "genomic_start": 43104868,
+              "transcript_end": 414,
+              "transcript_start": 325
+            },
+            {
+              "genomic_end": 43104261,
+              "genomic_start": 43104122,
+              "transcript_end": 554,
+              "transcript_start": 414
+            },
+            {
+              "genomic_end": 43099880,
+              "genomic_start": 43099775,
+              "transcript_end": 660,
+              "transcript_start": 554
+            },
+            {
+              "genomic_end": 43097289,
+              "genomic_start": 43097244,
+              "transcript_end": 706,
+              "transcript_start": 660
+            },
+            {
+              "genomic_end": 43095922,
+              "genomic_start": 43095846,
+              "transcript_end": 783,
+              "transcript_start": 706
+            },
+            {
+              "genomic_end": 43094860,
+              "genomic_start": 43091435,
+              "transcript_end": 4209,
+              "transcript_start": 783
+            },
+            {
+              "genomic_end": 43091032,
+              "genomic_start": 43090944,
+              "transcript_end": 4298,
+              "transcript_start": 4209
+            },
+            {
+              "genomic_end": 43082575,
+              "genomic_start": 43082404,
+              "transcript_end": 4470,
+              "transcript_start": 4298
+            },
+            {
+              "genomic_end": 43076614,
+              "genomic_start": 43076488,
+              "transcript_end": 4597,
+              "transcript_start": 4470
+            },
+            {
+              "genomic_end": 43074521,
+              "genomic_start": 43074331,
+              "transcript_end": 4788,
+              "transcript_start": 4597
+            },
+            {
+              "genomic_end": 43071238,
+              "genomic_start": 43070928,
+              "transcript_end": 5099,
+              "transcript_start": 4788
+            },
+            {
+              "genomic_end": 43067695,
+              "genomic_start": 43067608,
+              "transcript_end": 5187,
+              "transcript_start": 5099
+            },
+            {
+              "genomic_end": 43063951,
+              "genomic_start": 43063874,
+              "transcript_end": 5265,
+              "transcript_start": 5187
+            },
+            {
+              "genomic_end": 43063373,
+              "genomic_start": 43063333,
+              "transcript_end": 5306,
+              "transcript_start": 5265
+            },
+            {
+              "genomic_end": 43057135,
+              "genomic_start": 43057052,
+              "transcript_end": 5390,
+              "transcript_start": 5306
+            },
+            {
+              "genomic_end": 43051117,
+              "genomic_start": 43051063,
+              "transcript_end": 5445,
+              "transcript_start": 5390
+            },
+            {
+              "genomic_end": 43049194,
+              "genomic_start": 43049121,
+              "transcript_end": 5519,
+              "transcript_start": 5445
+            },
+            {
+              "genomic_end": 43047703,
+              "genomic_start": 43047643,
+              "transcript_end": 5580,
+              "transcript_start": 5519
+            },
+            {
+              "genomic_end": 43045802,
+              "genomic_start": 43044295,
+              "transcript_end": 7088,
+              "transcript_start": 5580
+            }
+          ],
+          "strand": "-"
+        }
+      },
+      "cds_end_index": 5705,
+      "cds_start_index": 113,
+      "sequence_sha256": "3a3ba131ece216aadd66b93e8ee16949e73e9307dbabcda3730b3934bff4b8fb",
+      "transcript": "NM_007294.4",
+      "transcript_length": 7088
+    },
+    "BRCA2": {
+      "assemblies": {
+        "GRCh37": {
+          "accession": "NC_000013.10",
+          "chrom": "13",
+          "exons": [
+            {
+              "genomic_end": 32889804,
+              "genomic_start": 32889645,
+              "transcript_end": 160,
+              "transcript_start": 0
+            },
+            {
+              "genomic_end": 32890664,
+              "genomic_start": 32890559,
+              "transcript_end": 266,
+              "transcript_start": 160
+            },
+            {
+              "genomic_end": 32893462,
+              "genomic_start": 32893214,
+              "transcript_end": 515,
+              "transcript_start": 266
+            },
+            {
+              "genomic_end": 32899321,
+              "genomic_start": 32899213,
+              "transcript_end": 624,
+              "transcript_start": 515
+            },
+            {
+              "genomic_end": 32900287,
+              "genomic_start": 32900238,
+              "transcript_end": 674,
+              "transcript_start": 624
+            },
+            {
+              "genomic_end": 32900419,
+              "genomic_start": 32900379,
+              "transcript_end": 715,
+              "transcript_start": 674
+            },
+            {
+              "genomic_end": 32900750,
+              "genomic_start": 32900636,
+              "transcript_end": 830,
+              "transcript_start": 715
+            },
+            {
+              "genomic_end": 32903629,
+              "genomic_start": 32903580,
+              "transcript_end": 880,
+              "transcript_start": 830
+            },
+            {
+              "genomic_end": 32905167,
+              "genomic_start": 32905056,
+              "transcript_end": 992,
+              "transcript_start": 880
+            },
+            {
+              "genomic_end": 32907524,
+              "genomic_start": 32906409,
+              "transcript_end": 2108,
+              "transcript_start": 992
+            },
+            {
+              "genomic_end": 32915333,
+              "genomic_start": 32910402,
+              "transcript_end": 7040,
+              "transcript_start": 2108
+            },
+            {
+              "genomic_end": 32918790,
+              "genomic_start": 32918695,
+              "transcript_end": 7136,
+              "transcript_start": 7040
+            },
+            {
+              "genomic_end": 32921033,
+              "genomic_start": 32920964,
+              "transcript_end": 7206,
+              "transcript_start": 7136
+            },
+            {
+              "genomic_end": 32929425,
+              "genomic_start": 32928998,
+              "transcript_end": 7634,
+              "transcript_start": 7206
+            },
+            {
+              "genomic_end": 32930746,
+              "genomic_start": 32930565,
+              "transcript_end": 7816,
+              "transcript_start": 7634
+            },
+            {
+              "genomic_end": 32932066,
+              "genomic_start": 32931879,
+              "transcript_end": 8004,
+              "transcript_start": 7816
+            },
+            {
+              "genomic_end": 32936830,
+              "genomic_start": 32936660,
+              "transcript_end": 8175,
+              "transcript_start": 8004
+            },
+            {
+              "genomic_end": 32937670,
+              "genomic_start": 32937316,
+              "transcript_end": 8530,
+              "transcript_start": 8175
+            },
+            {
+              "genomic_end": 32944694,
+              "genomic_start": 32944539,
+              "transcript_end": 8686,
+              "transcript_start": 8530
+            },
+            {
+              "genomic_end": 32945237,
+              "genomic_start": 32945093,
+              "transcript_end": 8831,
+              "transcript_start": 8686
+            },
+            {
+              "genomic_end": 32950928,
+              "genomic_start": 32950807,
+              "transcript_end": 8953,
+              "transcript_start": 8831
+            },
+            {
+              "genomic_end": 32953652,
+              "genomic_start": 32953454,
+              "transcript_end": 9152,
+              "transcript_start": 8953
+            },
+            {
+              "genomic_end": 32954050,
+              "genomic_start": 32953887,
+              "transcript_end": 9316,
+              "transcript_start": 9152
+            },
+            {
+              "genomic_end": 32954282,
+              "genomic_start": 32954144,
+              "transcript_end": 9455,
+              "transcript_start": 9316
+            },
+            {
+              "genomic_end": 32969070,
+              "genomic_start": 32968826,
+              "transcript_end": 9700,
+              "transcript_start": 9455
+            },
+            {
+              "genomic_end": 32971181,
+              "genomic_start": 32971035,
+              "transcript_end": 9847,
+              "transcript_start": 9700
+            },
+            {
+              "genomic_end": 32974405,
+              "genomic_start": 32972299,
+              "transcript_end": 11954,
+              "transcript_start": 9847
+            }
+          ],
+          "strand": "+"
+        },
+        "GRCh38": {
+          "accession": "NC_000013.11",
+          "chrom": "13",
+          "exons": [
+            {
+              "genomic_end": 32315667,
+              "genomic_start": 32315508,
+              "transcript_end": 160,
+              "transcript_start": 0
+            },
+            {
+              "genomic_end": 32316527,
+              "genomic_start": 32316422,
+              "transcript_end": 266,
+              "transcript_start": 160
+            },
+            {
+              "genomic_end": 32319325,
+              "genomic_start": 32319077,
+              "transcript_end": 515,
+              "transcript_start": 266
+            },
+            {
+              "genomic_end": 32325184,
+              "genomic_start": 32325076,
+              "transcript_end": 624,
+              "transcript_start": 515
+            },
+            {
+              "genomic_end": 32326150,
+              "genomic_start": 32326101,
+              "transcript_end": 674,
+              "transcript_start": 624
+            },
+            {
+              "genomic_end": 32326282,
+              "genomic_start": 32326242,
+              "transcript_end": 715,
+              "transcript_start": 674
+            },
+            {
+              "genomic_end": 32326613,
+              "genomic_start": 32326499,
+              "transcript_end": 830,
+              "transcript_start": 715
+            },
+            {
+              "genomic_end": 32329492,
+              "genomic_start": 32329443,
+              "transcript_end": 880,
+              "transcript_start": 830
+            },
+            {
+              "genomic_end": 32331030,
+              "genomic_start": 32330919,
+              "transcript_end": 992,
+              "transcript_start": 880
+            },
+            {
+              "genomic_end": 32333387,
+              "genomic_start": 32332272,
+              "transcript_end": 2108,
+              "transcript_start": 992
+            },
+            {
+              "genomic_end": 32341196,
+              "genomic_start": 32336265,
+              "transcript_end": 7040,
+              "transcript_start": 2108
+            },
+            {
+              "genomic_end": 32344653,
+              "genomic_start": 32344558,
+              "transcript_end": 7136,
+              "transcript_start": 7040
+            },
+            {
+              "genomic_end": 32346896,
+              "genomic_start": 32346827,
+              "transcript_end": 7206,
+              "transcript_start": 7136
+            },
+            {
+              "genomic_end": 32355288,
+              "genomic_start": 32354861,
+              "transcript_end": 7634,
+              "transcript_start": 7206
+            },
+            {
+              "genomic_end": 32356609,
+              "genomic_start": 32356428,
+              "transcript_end": 7816,
+              "transcript_start": 7634
+            },
+            {
+              "genomic_end": 32357929,
+              "genomic_start": 32357742,
+              "transcript_end": 8004,
+              "transcript_start": 7816
+            },
+            {
+              "genomic_end": 32362693,
+              "genomic_start": 32362523,
+              "transcript_end": 8175,
+              "transcript_start": 8004
+            },
+            {
+              "genomic_end": 32363533,
+              "genomic_start": 32363179,
+              "transcript_end": 8530,
+              "transcript_start": 8175
+            },
+            {
+              "genomic_end": 32370557,
+              "genomic_start": 32370402,
+              "transcript_end": 8686,
+              "transcript_start": 8530
+            },
+            {
+              "genomic_end": 32371100,
+              "genomic_start": 32370956,
+              "transcript_end": 8831,
+              "transcript_start": 8686
+            },
+            {
+              "genomic_end": 32376791,
+              "genomic_start": 32376670,
+              "transcript_end": 8953,
+              "transcript_start": 8831
+            },
+            {
+              "genomic_end": 32379515,
+              "genomic_start": 32379317,
+              "transcript_end": 9152,
+              "transcript_start": 8953
+            },
+            {
+              "genomic_end": 32379913,
+              "genomic_start": 32379750,
+              "transcript_end": 9316,
+              "transcript_start": 9152
+            },
+            {
+              "genomic_end": 32380145,
+              "genomic_start": 32380007,
+              "transcript_end": 9455,
+              "transcript_start": 9316
+            },
+            {
+              "genomic_end": 32394933,
+              "genomic_start": 32394689,
+              "transcript_end": 9700,
+              "transcript_start": 9455
+            },
+            {
+              "genomic_end": 32397044,
+              "genomic_start": 32396898,
+              "transcript_end": 9847,
+              "transcript_start": 9700
+            },
+            {
+              "genomic_end": 32400268,
+              "genomic_start": 32398162,
+              "transcript_end": 11954,
+              "transcript_start": 9847
+            }
+          ],
+          "strand": "+"
+        }
+      },
+      "cds_end_index": 10456,
+      "cds_start_index": 199,
+      "sequence_sha256": "c576b569d0dac71ae97219cb2a44ac2f37d01beeba234044396d825c44355cc7",
+      "transcript": "NM_000059.4",
+      "transcript_length": 11954
+    }
+  },
+  "record_count": 4,
+  "schema_version": 1,
+  "snapshot_id": "brca_transcript_alignments",
+  "snapshot_version": "2026.11.07"
+}

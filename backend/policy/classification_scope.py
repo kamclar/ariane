@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from backend.domain.transcript_projection import is_exact_utr_substitution
+
 
 SUPPORTED_AUTOMATIC_VARIANT_TYPES = (
     "nonsense",
@@ -25,13 +27,13 @@ SUPPORTED_AUTOMATIC_VARIANT_TYPES = (
     "inframe_deletion",
     "inframe_insertion",
     "inframe_delins",
+    "5utr",
+    "3utr",
 )
 
 # These are valid, recognizable consequence families, but the current ARIANE
 # graph has no complete ENIGMA v1.2 automatic path for them.
 OUT_OF_SCOPE_VARIANT_TYPES = (
-    "5utr",
-    "3utr",
     "stop_lost",
 )
 
@@ -62,9 +64,26 @@ class ClassificationScopeDecision:
         return self.status == "supported"
 
 
-def automatic_classification_scope(variant_type: str) -> ClassificationScopeDecision:
+def automatic_classification_scope(
+    variant_type: str,
+    c_notation: str = "",
+) -> ClassificationScopeDecision:
     """Return whether a normalized type has a complete public Module 1 path."""
     normalized = (variant_type or "").strip().lower()
+    if (
+        normalized in {"5utr", "3utr"}
+        and c_notation
+        and not is_exact_utr_substitution(c_notation)
+    ):
+        return ClassificationScopeDecision(
+            normalized,
+            "out_of_scope",
+            "unsupported_utr_edit",
+            (
+                "Automatic UTR evaluation is currently limited to exact "
+                "single-nucleotide substitutions. No classification was returned."
+            ),
+        )
     if normalized in _SUPPORTED_TYPES:
         return ClassificationScopeDecision(normalized, "supported")
 
@@ -97,6 +116,9 @@ def automatic_classification_scope(variant_type: str) -> ClassificationScopeDeci
     )
 
 
-def automatic_classification_is_supported(variant_type: str) -> bool:
+def automatic_classification_is_supported(
+    variant_type: str,
+    c_notation: str = "",
+) -> bool:
     """Return whether a public automatic result may be published and cached."""
-    return automatic_classification_scope(variant_type).supported
+    return automatic_classification_scope(variant_type, c_notation).supported

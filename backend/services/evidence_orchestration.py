@@ -223,7 +223,7 @@ class EvidenceOrchestrationService:
             normalized.c_notation,
             normalized.p_notation,
         )
-        scope = automatic_classification_scope(variant_type)
+        scope = automatic_classification_scope(variant_type, normalized.c_notation)
         if not scope.supported:
             raise VariantPreparationError(
                 f"{normalized.gene} {normalized.c_notation}: {scope.reason}",
@@ -291,6 +291,7 @@ class EvidenceOrchestrationService:
         self._append_availability_warnings(
             result,
             artifacts,
+            variant_type=variant.variant_type,
             is_exon_cnv=is_exon_cnv,
             clinvar=clinvar,
             clingen=clingen,
@@ -370,11 +371,19 @@ class EvidenceOrchestrationService:
         result: dict[str, Any],
         artifacts: Mapping[str, Any],
         *,
+        variant_type: str,
         is_exon_cnv: bool,
         clinvar: Mapping[str, Any],
         clingen: Mapping[str, Any],
     ) -> None:
         warnings = result["warnings"]
+        if variant_type.lower() in {"5utr", "3utr"}:
+            warnings.append(
+                "Automatic UTR evaluation is limited to ENIGMA Appendix G "
+                "population criteria and exact variant-specific curated evidence. "
+                "No pathogenic or benign effect is inferred from UTR location alone, "
+                "and Figure 1A SpliceAI/BayesDel criteria are not applicable."
+            )
         if is_exon_cnv:
             warnings.append(
                 "Small-variant coordinate-dependent evidence was not evaluated because "

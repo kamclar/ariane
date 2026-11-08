@@ -104,26 +104,50 @@ def test_orchestrator_rejects_unresolved_coding_delins_with_explicit_reason():
     assert error.value.code == "protein_consequence_unresolved"
 
 
-@pytest.mark.parametrize(
-    ("c_notation", "expected_label"),
-    (
-        ("c.5590T>A", "stop-loss"),
-        ("c.-10A>G", "5' utr"),
-        ("c.*10G>A", "3' utr"),
-    ),
-)
-def test_orchestrator_rejects_recognized_types_without_complete_automatic_path(
-    c_notation,
-    expected_label,
-):
+def test_orchestrator_rejects_recognized_stop_loss_without_automatic_path():
     with pytest.raises(VariantPreparationError) as error:
         EvidenceOrchestrationService.prepare(
-            ClassificationCommand("BRCA1", c_notation)
+            ClassificationCommand("BRCA1", "c.5590T>A")
         )
 
     assert error.value.code == "unsupported_variant_type"
-    assert expected_label in str(error.value).lower()
+    assert "stop-loss" in str(error.value).lower()
     assert "No classification was returned" in str(error.value)
+
+
+@pytest.mark.parametrize(
+    ("c_notation", "expected_type"),
+    (("c.-10A>G", "5utr"), ("c.*10G>A", "3utr")),
+)
+def test_orchestrator_accepts_exact_utr_substitutions(c_notation, expected_type):
+    _, variant = EvidenceOrchestrationService.prepare(
+        ClassificationCommand("BRCA1", c_notation)
+    )
+
+    assert variant.variant_type == expected_type
+
+
+def test_orchestrator_rejects_non_snv_utr_edits():
+    unresolved = NormalizedVariantInput(
+        gene="BRCA2",
+        submitted_notation="c.*841del",
+        c_notation="c.*841del",
+        p_notation="p.?",
+        reference_transcript="NM_000059.4",
+        normalization_source="test source",
+        consequence_status="confirmed",
+    )
+
+    with patch(
+        "backend.services.evidence_orchestration.normalize_variant_input",
+        return_value=unresolved,
+    ), pytest.raises(VariantPreparationError) as error:
+        EvidenceOrchestrationService.prepare(
+            ClassificationCommand("BRCA2", "c.*841del")
+        )
+
+    assert error.value.code == "unsupported_utr_edit"
+    assert "single-nucleotide substitutions" in str(error.value)
 
 
 @pytest.mark.parametrize(

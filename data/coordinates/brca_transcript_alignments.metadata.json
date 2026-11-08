@@ -1,0 +1,25 @@
+{
+  "records": 4,
+  "schema_version": 1,
+  "sha256": "240eb193d4c2bcb54948f7c3604adfc0969215a7812f3a2f126ad75d5bd914b7",
+  "snapshot_id": "brca_transcript_alignments",
+  "snapshot_version": "2026.11.07",
+  "sources": {
+    "GRCh37": {
+      "annotation_release": "GCF_000001405.25-RS_2024_09",
+      "assembly": "GCF_000001405.25 GRCh37.p13",
+      "sha256": "5fcadac26be5d82a1f1c52e33cc5047247f719a60b50182c6ba298bda77cc80f",
+      "url": "https://ftp.ncbi.nlm.nih.gov/genomes/all/annotation_releases/9606/GCF_000001405.25-RS_2024_09/GCF_000001405.25_GRCh37.p13_genomic.gff.gz"
+    },
+    "GRCh38": {
+      "assembly": "GRCh38",
+      "sha256": "c65ab0a3327b28995eba87ec56a8302ef34455555730bede41bfe0728df70dde",
+      "url": "https://github.com/SACGF/cdot/releases/download/data_v0.2.32/cdot-0.2.32.refseq.GRCh38.json.gz"
+    },
+    "transcript_fasta": {
+      "path": "data/reference/panel/fasta/transcripts.fa",
+      "sha256": "8dc93330acce0a71050cef9856a49a59355dd2a99eee2387af0dedb02430ab94"
+    }
+  },
+  "validation_status": "approved"
+}

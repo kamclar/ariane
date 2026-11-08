@@ -106,6 +106,18 @@ def _opening(gene: str, c_notation: str, p_notation: str, variant_type: str) -> 
                     f"{abs(offset)} bases {direction} the {site} splice site.")
         return f"{gene} {c_notation} is an intronic variant."
 
+    if vt == "5utr":
+        return (
+            f"{gene} {c_notation} is a single-nucleotide substitution in the "
+            "5' untranslated region, upstream of the translation start codon."
+        )
+
+    if vt == "3utr":
+        return (
+            f"{gene} {c_notation} is a single-nucleotide substitution in the "
+            "3' untranslated region, downstream of the translation stop codon."
+        )
+
     if vt == "exon_deletion":
         return f"{gene} {c_notation} is an exon-level deletion."
 
