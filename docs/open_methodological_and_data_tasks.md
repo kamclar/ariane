@@ -53,6 +53,13 @@ Druhá automatická cesta používá přesné publikované assertions ClinGen ER
 které ENIGMA BRCA1/2 VCEP vytvořil podle specifikace v1.2 a ve kterých je
 konečná RNA síla výslovně určena.
 
+Synchronizace z 9. listopadu 2026 doplnila dvě takové aktuální v1.2 assertions:
+`BRCA2 c.7976+5G>T` a `BRCA2 c.8486A>G`, obě s `PVS1 (RNA) Very Strong`.
+Konzistenční test nyní vyžaduje, aby každá aktuální v1.2 ERepo assertion s
+explicitní konečnou RNA vahou byla přítomna i ve schváleném runtime registru.
+Záznamy bez výslovné finální síly nadále zůstávají pouze v předvyplněné odborné
+revizi; jejich neautomatizování není implementační chyba.
+
 Runtime používá checksumovaný lokální registr, ne živý fallback. První registr
 je záměrně označen jako neúplný. Týdenní hlídač nyní porovnává ERepo se
 zaznamenaným stavem zdroje. Při změně vytvoří nebo aktualizuje GitHub issue s

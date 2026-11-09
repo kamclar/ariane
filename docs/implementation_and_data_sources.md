@@ -718,6 +718,14 @@ nečtou za běhu přímo z ERepo API. Po kontrole se zařazují do verzovaného 
 `backend/data/enigma_erepo_pvs1_rna_registry.json`, jehož checksum kontroluje
 backend při startu. Síla ani body se z textu za běhu neodhadují.
 
+Datové vydání `2026-11-09` obsahuje šest přesných aktuálních assertions. Oproti
+předchozí verzi přidává `BRCA2 c.7976+5G>T` a `BRCA2 c.8486A>G`; u obou ENIGMA
+BRCA1/2 VCEP v aktuální metodě v1.2 výslovně uzavřel `PVS1 (RNA) Very Strong`.
+CI navíc porovnává hlavní ERepo snapshot s tímto schváleným registrem. Nová
+aktuální v1.2 assertion s explicitní konečnou RNA vahou proto nemůže při
+aktualizaci zdrojů zůstat bez povšimnutí. Kontrola pouze zastaví datové vydání;
+runtime nadále neodvozuje sílu automaticky z volného textu.
+
 První vydání registru je označené jako `partial_verified_seed`. Neobsahuje tedy
 všechny existující ERepo záznamy. Pokud v něm varianta není, znamená to pouze,
 že ARIANE nemá schválený lokální záznam pro automatické použití. Nejde o tvrzení,

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "registry_id": "enigma_erepo_pvs1_rna_registry",
-  "registry_version": "2026-09-12",
+  "registry_version": "2026-11-09",
   "status": "active",
   "coverage_status": "partial_verified_seed",
   "policy_id": "ENIGMA_BRCA_VCEP_1.2",
@@ -82,6 +82,42 @@
       "published_date": "2025-08-18",
       "classification": "Likely Pathogenic",
       "evidence_summary": "RNAseq, minigene and RT-PCR demonstrated exon skipping. Allele-specific quantitative assessment reported no full-length transcript from the variant allele. ENIGMA assigned PVS1 (RNA)."
+    },
+    {
+      "gene": "BRCA2",
+      "reference_transcript": "NM_000059.4",
+      "c_notation": "c.7976+5G>T",
+      "code": "PVS1_RNA",
+      "source_code": "PVS1 (RNA)",
+      "strength": "Very Strong",
+      "points": 8,
+      "evidence_mechanism": "rna_splicing",
+      "guideline_id": "GN097",
+      "guideline_version": "1.2.0",
+      "assertion_uuid": "8dcc8360-5fa5-4f11-8163-22494a3da622",
+      "assertion_version": "",
+      "assertion_url": "https://erepo.genome.network/evrepo/ui/classification/8dcc8360-5fa5-4f11-8163-22494a3da622",
+      "published_date": "2026-09-21",
+      "classification": "Pathogenic",
+      "evidence_summary": "Patient RNA showed multiple predicted non-functional transcripts and less than 5% full-length transcript from the variant allele. ENIGMA v1.2 assigned PVS1 (RNA)."
+    },
+    {
+      "gene": "BRCA2",
+      "reference_transcript": "NM_000059.4",
+      "c_notation": "c.8486A>G",
+      "code": "PVS1_RNA",
+      "source_code": "PVS1 (RNA)",
+      "strength": "Very Strong",
+      "points": 8,
+      "evidence_mechanism": "rna_splicing",
+      "guideline_id": "GN097",
+      "guideline_version": "1.2.0",
+      "assertion_uuid": "898d1843-e31f-4d56-b9be-0a164e5cdd9e",
+      "assertion_version": "",
+      "assertion_url": "https://erepo.genome.network/evrepo/ui/classification/898d1843-e31f-4d56-b9be-0a164e5cdd9e",
+      "published_date": "2026-09-21",
+      "classification": "Pathogenic",
+      "evidence_summary": "Patient RNA showed complete exon 19 skipping with no full-length transcript from the variant allele. The in-frame deletion overlaps the BRCA2 DNA-binding domain, and ENIGMA v1.2 assigned PVS1 (RNA)."
     }
   ]
 }

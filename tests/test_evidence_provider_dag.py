@@ -267,6 +267,23 @@ def test_variant_absent_from_partial_erepo_registry_is_not_treated_as_no_evidenc
     assert "does not mean" in result["reason"]
 
 
+def test_new_current_v12_erepo_pvs1_rna_assertions_are_available():
+    from backend.reference_data.erepo_pvs1_rna import lookup_erepo_pvs1_rna
+
+    for c_notation, assertion_uuid in (
+        ("c.7976+5G>T", "8dcc8360-5fa5-4f11-8163-22494a3da622"),
+        ("c.8486A>G", "898d1843-e31f-4d56-b9be-0a164e5cdd9e"),
+    ):
+        result = lookup_erepo_pvs1_rna("BRCA2", c_notation)
+
+        assert result["status"] == "eligible"
+        assert result["record"]["assertion_uuid"] == assertion_uuid
+        assert result["record"]["source_code"] == "PVS1 (RNA)"
+        assert result["record"]["strength"] == "Very Strong"
+        assert result["record"]["points"] == 8
+        assert result["registry_version"] == "2026-11-09"
+
+
 def test_unavailable_spliceai_remains_unavailable_and_does_not_enable_bayesdel_pp3():
     execution = asyncio.run(execute_classification_request(
         _request(), dependencies=_dependencies(spliceai_score=None)
