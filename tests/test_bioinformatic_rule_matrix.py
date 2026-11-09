@@ -316,7 +316,7 @@ def test_mrna_only_assay_cannot_create_manual_ps3():
     assert suggest_strength("PS3", evidence) == "Strong"
 
 
-def test_pvs1_rna_and_table9_ps3_are_retained_with_pending_vcep_warning():
+def test_pvs1_rna_and_table9_ps3_are_retained_with_vcep_clarification():
     combined = {
         "PVS1_RNA": {"points": 8},
         "PS3": {
@@ -335,4 +335,5 @@ def test_pvs1_rna_and_table9_ps3_are_retained_with_pending_vcep_warning():
     assert interactions[0]["status"] == "review_required"
     assert interactions[0]["retained"] == ["PVS1_RNA", "PS3"]
     assert "beyond merely detecting an aberrant transcript" in interactions[0]["reason"]
-    assert "VCEP clarification" in interactions[0]["reason"]
+    assert "VCEP confirmed that both codes may be retained" in interactions[0]["reason"]
+    assert "do not count the same experimental observation twice" in interactions[0]["reason"]

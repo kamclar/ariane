@@ -4,13 +4,14 @@ Tento dokument obsahuje pouze body, které ještě vyžadují externí metodick�
 potvrzení, nový validovaný dataset nebo dokončení validační práce. Opravené
 auditní nálezy sem nepatří.
 
-## 1. PM5 PTC uvnitř posledního exonu
+## 1. PM5 PTC uvnitř posledního exonu, vyřešeno 2026-10-15
 
-Table 4 rozlišuje v posledním exonu dvě větve podle polohy PTC, zatímco
-Appendix D určuje sílu podle exonu nukleotidové změny a uvádí příklad PTC v
-následujícím exonu. Není potvrzeno, zda se v hraniční větvi mají PVS1 a PM5 PTC
-posuzovat odděleně. Dotaz byl odeslán Janě. Do obdržení odpovědi se současná
-logika nesmí měnit odhadem.
+ENIGMA VCEP potvrdil, že v hraniční větvi posledního exonu musí první změněná
+aminokyselina i nově zavedený terminační kodon ležet na kritické hranici nebo
+před ní. PVS1 a PM5 PTC se posuzují společně podle jednoho řádku Table 4. Pokud
+jedna z poloh podmínku nesplní nebo terminační pozici nelze určit, nepoužije se
+ani jeden kód. Implementace a regresní případy jsou popsány v hlavním
+implementačním dokumentu.
 
 ## 2. Úplný seznam patogenních founder variant
 
@@ -188,16 +189,17 @@ technické vazby zdrojů jsou v
   nikoli do in-frame Figure 1A. V připnutém indelovém snapshotu tuto cestu
   regresně pokrývá všech 22 takových záznamů.
 
-## 8. Současné použití PS3 nebo BS3 a PVS1 RNA, čeká se na VCEP
+## 8. Současné použití PS3 nebo BS3 a PVS1 RNA, vyřešeno
 
 U variant na posledním nukleotidu exonu, například `BRCA1 c.5074G>A/C` nebo
 `BRCA2 c.7976G>A/C`, může Specifications Table 9 uvádět PS3 Strong z assay
 hodnotícího mRNA i protein a Supplementary Table 2 současně obsahovat samostatný
-RNA výsledek. Není potvrzeno, kdy lze PS3 nebo BS3 a PVS1 RNA použít současně,
-ani jak ENIGMA požaduje doložit nezávislost studií a assayů, aby se stejný
-mechanismus nezapočítal dvakrát.
+RNA výsledek. Původně nebylo potvrzeno, kdy lze PS3 nebo BS3 a PVS1 RNA použít
+současně ani jak doložit nezávislost studií a assayů, aby se stejný mechanismus
+nezapočítal dvakrát.
 
-Dotaz pro odbornou konzultaci:
+Tuto otázku následně uzavřelo metodické upřesnění ENIGMA VCEP z 15. října 2026.
+Původní dotaz pro odbornou konzultaci:
 
 > U variant na poslednim nukleotidu exonu, napriklad BRCA1 c.5074G>A/C nebo
 > BRCA2 c.7976G>A/C, uvadi Specifications Table 9 PS3 Strong z assay
@@ -233,13 +235,14 @@ Z odpovědi pro ARIANE vyplývá následující pracovní postup:
 - u `BRCA1 c.5074G>A/C` tento funkční podklad představuje Findlay et al.;
 - u `BRCA2 c.7976G>A/C` jej představuje Biswas et al.
 
-Jana současně uvedla, že biologická interpretace kombinace není intuitivní a
-zařadí otázku k vyjasnění směrem k VCEP. Bod proto zůstává otevřený. Do odpovědi
-VCEP se přesný ST2 záznam pouze předvyplní k odborné revizi a automaticky
-nepřidělí PVS1 RNA ani body. Explicitní PS3 z Specifications Table 9 zůstává
-zachováno. Pokud odborník přijme PVS1 RNA současně s PS3, ARIANE ponechá obě
-kritéria a zobrazí povinné upozornění na rozsah assay, funkční výsledek a
-nezávislost evidence.
+ENIGMA VCEP v metodickém upřesnění z 15. října 2026 potvrdil, že oba kódy lze
+zachovat, pokud dokládají odlišné příspěvky: PVS1 RNA pro aberantní transkript a
+PS3 nebo BS3 pro samostatný funkční dopad nad rámec pouhého průkazu sestřihu.
+Stejné experimentální pozorování se nesmí započítat dvakrát. ARIANE proto
+explicitní PS3 nebo BS3 z Table 9 zachová a při současném přijetí PVS1 RNA
+zobrazí povinné upozornění na rozsah assay, funkční výsledek, provenance a
+nezávislost evidence. Toto rozhodnutí nemění konzervativní pravidlo, že samotné
+předvyplnění formuláře nepřiděluje PVS1 RNA ani body.
 
 Do předvyplnění se přenášejí také všechny odpovídající publikace a assay údaje
 ze Supplementary Table 3. ST3 slouží k dohledání podkladů a sama nepřiděluje

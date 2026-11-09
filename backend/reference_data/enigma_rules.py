@@ -69,6 +69,7 @@ _ARIANE_TABLE_CONSUMERS = {
     "appendix-table-16": "Bioinformatic and domain decision rules",
     "supplementary-table-2": "Curated mRNA assay lookup",
     "supplementary-table-7": "Protein PS1 candidate-reference discovery",
+    "supplementary-table-16": "Table 4 RNA publication context for manual review",
 }
 
 
@@ -397,6 +398,108 @@ def search_reference_table(
             for source_row, row in selected
         ],
     }
+
+
+@lru_cache(maxsize=1)
+def _st16_table4_rna_reference_index() -> dict[tuple[str, str], dict[str, Any]]:
+    """Index exact Table 4 RNA alleles to their official ST16 publications.
+
+    Supplementary Table 16 identifies publications linked from the Table 4
+    ``PVS1 (RNA)`` rows. It does not contain an Appendix E strength and must
+    therefore remain non-scoring curator context.
+    """
+    table = next(
+        (
+            item
+            for item in _load_reference_tables()["tables"]
+            if item["id"] == "supplementary-table-16"
+        ),
+        None,
+    )
+    if table is None:
+        raise RuntimeError("ENIGMA Supplementary Table 16 is missing")
+    rows = table["sections"][0]["rows"]
+    if not rows:
+        raise RuntimeError("ENIGMA Supplementary Table 16 is empty")
+    header = [_public_cell_text(cell).strip() for cell in rows[0]]
+    required = {"Gene", "IVS 1,2 Variants", "Vt Allele", "PMIDs"}
+    if not required.issubset(header):
+        raise RuntimeError("ENIGMA Supplementary Table 16 columns are incomplete")
+
+    gene_index = header.index("Gene")
+    variant_index = header.index("IVS 1,2 Variants")
+    allele_index = header.index("Vt Allele")
+    pmid_index = header.index("PMIDs")
+    source = next(
+        item
+        for item in load_rule_catalog()["sources"]
+        if item["id"] == table["source_id"]
+    )
+
+    result: dict[tuple[str, str], dict[str, Any]] = {}
+    for source_row, row in enumerate(rows[1:], 2):
+        padded = list(row) + [None] * max(0, len(header) - len(row))
+        pmids = sorted(
+            set(re.findall(r"\d{6,9}", _public_cell_text(padded[pmid_index]))),
+            key=int,
+        )
+        # ST16 also contains a blank separator and several non-public sources
+        # labelled as personal communication or an internal contributor. They
+        # are retained in the lossless table but cannot provide a PMID prefill.
+        if not pmids:
+            continue
+        gene = _public_cell_text(padded[gene_index]).strip().upper()
+        variant_prefix = re.sub(
+            r"\s+", "", _public_cell_text(padded[variant_index]).strip()
+        )
+        allele = re.sub(
+            r"\s+", "", _public_cell_text(padded[allele_index]).strip()
+        ).upper()
+        # Most ST16 rows keep ``>`` in the shared variant prefix. One official
+        # row (BRCA2 c.317-2A>G) omits it, so restore the substitution separator
+        # deterministically rather than dropping that record.
+        c_notation = (
+            f"{variant_prefix}{allele}"
+            if variant_prefix.endswith(">")
+            else f"{variant_prefix}>{allele}"
+        )
+        if gene not in set(active_genes()) or not re.fullmatch(
+            r"c\.(?:-\d+|\*\d+|\d+)(?:[+-]\d+)?[ACGT]>[ACGT]",
+            c_notation,
+            re.I,
+        ):
+            raise RuntimeError(
+                f"Could not normalize Supplementary Table 16 row {source_row}"
+            )
+        key = (gene, c_notation)
+        if key in result:
+            raise RuntimeError(
+                f"Duplicate Supplementary Table 16 allele: {gene} {c_notation}"
+            )
+        result[key] = {
+            "gene": gene,
+            "c_notation": c_notation,
+            "pmids": pmids,
+            "source_row": source_row,
+            "source_id": table["source_id"],
+            "source_title": table["title"],
+            "source_url": source["official_url"],
+            "criteria_specification_version": "1.2.0",
+            "usage": "manual_review_context_only",
+        }
+    return result
+
+
+def lookup_st16_table4_rna_references(
+    gene: str, c_notation: str
+) -> dict[str, Any] | None:
+    """Return exact official ST16 references without inferring an RNA weight."""
+    normalized_c = re.sub(r"\s+", "", str(c_notation or ""))
+    if normalized_c[:2].lower() == "c.":
+        normalized_c = "c." + normalized_c[2:].upper()
+    key = (str(gene or "").upper(), normalized_c)
+    record = _st16_table4_rna_reference_index().get(key)
+    return deepcopy(record) if record is not None else None
 
 
 @lru_cache(maxsize=1)

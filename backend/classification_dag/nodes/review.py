@@ -30,6 +30,7 @@ class ReviewTriageNode:
             gene=ci.gene,
             variant_type=ci.variant_type,
             spliceai_score=ci.spliceai_score,
+            c_notation=ci.c_notation,
             pvs1_result=retained.metadata["pvs1"],
             pvs1_rna_result=retained.metadata["pvs1_rna"],
             criteria=result["criteria"],

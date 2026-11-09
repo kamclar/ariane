@@ -170,10 +170,15 @@ def apply_rna_interactions(
                         "cellular-function result beyond merely detecting an "
                         "aberrant transcript. If the functional assay only "
                         "documents aberrant splicing, use PVS1 (RNA) without "
-                        "PS3/BS3. Confirm assay scope and independence. VCEP "
-                        "clarification of this combination is pending."
+                        "PS3/BS3. The ENIGMA VCEP confirmed that both codes may "
+                        "be retained when they represent those distinct evidence "
+                        "contributions. Confirm assay scope and independence and "
+                        "do not count the same experimental observation twice."
                     ),
-                    source="ENIGMA v1.2 Figure 1C and Appendix E",
+                    source=(
+                        "ENIGMA v1.2 Figure 1C and Appendix E; ENIGMA BRCA1/2 "
+                        "VCEP methodological clarification, 2026-10-15"
+                    ),
                     source_url=APPENDIX_URL,
                     review_required=True,
                 )

@@ -331835,8 +331835,8 @@
       "title": "Supplementary Table 16: Table 4 PMIDs",
       "source_id": "enigma-v1.2-supplementary-tables",
       "source_sha256": "2cca22c0c0ef4fb17e95ed1c43b4b5b31f12f1659a6516a53e1b4249b3f69957",
-      "usage": "calibration_reference",
-      "usage_text": "Official calibration or reference dataset, not directly queried unless stated otherwise.",
+      "usage": "runtime_lookup",
+      "usage_text": "Exact Table 4 PVS1 RNA alleles and publication references used to prefill non-scoring manual review context.",
       "sections": [
         {
           "id": "main",

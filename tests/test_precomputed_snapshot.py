@@ -470,7 +470,7 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
         self.assertEqual(result.p_notation, "p.(Cys1225SerfsTer10)")
         self.assertEqual(result.predicted_class, 5)
 
-    def test_terminal_frameshift_receives_paired_table4_codes(self):
+    def test_terminal_frameshift_crossing_boundary_receives_neither_code(self):
         from backend.main import CLASSIFICATION_API
 
         with patch("backend.lookups.clinvar.clinvar_lookup", return_value={"status": "not_found"}), patch(
@@ -481,10 +481,14 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
-        self.assertEqual(criteria["PVS1"].strength, "Very Strong")
-        self.assertEqual(criteria["PM5_PTC"].strength, "Strong")
-        self.assertEqual(result.total_points, 12)
-        self.assertEqual(result.predicted_class, 5)
+        self.assertNotIn("PVS1", criteria)
+        self.assertNotIn("PM5_PTC", criteria)
+        self.assertEqual(result.total_points, 0)
+        self.assertEqual(result.predicted_class, 3)
+        self.assertTrue(any(
+            "predicted termination p.1877 is after p.1854" in warning
+            for warning in result.warnings
+        ))
 
     def test_exon_cnv_skips_small_variant_lookups_and_hides_provider_errors(self):
         from backend.main import CLASSIFICATION_API
@@ -647,13 +651,13 @@ class ClassificationInputIntegrationTests(unittest.TestCase):
             )
 
         criteria = {criterion.name: criterion for criterion in result.criteria}
-        self.assertEqual(criteria["PVS1"].strength, "Very Strong")
-        self.assertEqual(criteria["PM5_PTC"].strength, "Strong")
         self.assertEqual(criteria["BP5"].strength, "Supporting")
         self.assertEqual(criteria["BP5"].points, -1)
-        self.assertEqual(result.total_points, 11)
-        self.assertEqual(result.predicted_class, 5)
-        self.assertTrue(result.mixed_evidence)
+        self.assertNotIn("PVS1", criteria)
+        self.assertNotIn("PM5_PTC", criteria)
+        self.assertEqual(result.total_points, -1)
+        self.assertEqual(result.predicted_class, 3)
+        self.assertFalse(result.mixed_evidence)
 
     def test_general_indel_snapshot_rejects_random_protein_notation(self):
         from backend.main import CLASSIFICATION_API

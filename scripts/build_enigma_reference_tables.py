@@ -77,6 +77,10 @@ USAGE = {
     "appendix-table-17": ("expert_review", "PS1 splicing weights used during expert review."),
     "supplementary-table-2": ("runtime_lookup", "Curated mRNA assay results queried by the RNA and splice-review pathways."),
     "supplementary-table-7": ("candidate_registry", "Trusted P/LP reference candidates used by the protein PS1 review workflow."),
+    "supplementary-table-16": (
+        "runtime_lookup",
+        "Exact Table 4 PVS1 RNA alleles and publication references used to prefill non-scoring manual review context.",
+    ),
 }
 
 DEFAULT_USAGE = {

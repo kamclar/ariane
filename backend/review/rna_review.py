@@ -2,7 +2,12 @@
 
 import re
 from typing import Dict, List, Optional
-from backend.policy.gene import spliceai_thresholds, vcep_specification
+from backend.policy.gene import (
+    reference_transcript,
+    spliceai_thresholds,
+    vcep_specification,
+)
+from backend.reference_data.enigma_rules import lookup_st16_table4_rna_references
 
 SPLICE_RELEVANT_TYPES = {
     "splice_site",
@@ -50,10 +55,123 @@ def _table9_functional_splice_overlap(criteria: Dict) -> list[str]:
     return sorted(overlaps, key=int)
 
 
+def _table9_published_splice_prefill(gene: str, criteria: Dict) -> Dict:
+    """Prepare independent published splice context for manual RNA review.
+
+    Table 9 is an automatic PS3/BS3 source, not an automatic PVS1 RNA source.
+    Its published splice-result field can nevertheless save a curator from
+    re-entering an already structured transcript result and its references.
+    PMIDs also used for the functional assay are deliberately excluded so that
+    the prefill does not present overlapping evidence as an independent source.
+    """
+    summaries: list[str] = []
+    independent_pmids: set[str] = set()
+
+    for code in ("PS3", "BS3"):
+        criterion = criteria.get(code) or {}
+        if not criterion.get("applies"):
+            continue
+        audit = criterion.get("table9_audit") or {}
+        splice_flag = str(
+            audit.get("predicted_or_observed_splicing") or ""
+        ).strip().upper()
+        summary = str(audit.get("splice_result_published") or "").strip()
+        if not splice_flag.startswith("Y") or not summary:
+            continue
+
+        splice_pmids = _pmids(summary)
+        functional_pmids = _pmids(audit.get("assay_results") or [])
+        independent = splice_pmids - functional_pmids
+        if not independent:
+            continue
+
+        if summary not in summaries:
+            summaries.append(summary)
+        independent_pmids.update(independent)
+
+    if not summaries:
+        return {}
+
+    return {
+        "transcript_accession": reference_transcript(gene),
+        "transcript_result_summary": (
+            "ENIGMA Specifications Table 9 published splice context: "
+            + " | ".join(summaries)
+        ),
+        "source_citation": (
+            "ENIGMA Specifications Table 9 v1.2 (published splice context)"
+        ),
+        "source_references": [
+            f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+            for pmid in sorted(independent_pmids, key=int)
+        ],
+    }
+
+
+def _merge_review_prefill(existing: Dict, additional: Dict) -> Dict:
+    """Merge non-scoring review context without replacing curated ST2 data."""
+    if not existing:
+        return dict(additional)
+    merged = dict(existing)
+
+    additional_summary = str(additional.get("transcript_result_summary") or "")
+    existing_summary = str(merged.get("transcript_result_summary") or "")
+    if additional_summary and additional_summary not in existing_summary:
+        merged["transcript_result_summary"] = (
+            f"{existing_summary}\n\n{additional_summary}"
+            if existing_summary
+            else additional_summary
+        )
+
+    if not merged.get("transcript_accession"):
+        merged["transcript_accession"] = additional.get("transcript_accession")
+    if not merged.get("source_citation"):
+        merged["source_citation"] = additional.get("source_citation")
+
+    references = list(merged.get("source_references") or [])
+    for reference in additional.get("source_references") or []:
+        if reference not in references:
+            references.append(reference)
+    merged["source_references"] = references
+    return merged
+
+
+def _st16_table4_rna_prefill(
+    gene: str,
+    c_notation: str,
+    pvs1_result: Dict,
+) -> Dict:
+    """Prepare exact Table 4 RNA publication context without assigning points."""
+    if not pvs1_result.get("requires_rna") or not c_notation:
+        return {}
+    record = lookup_st16_table4_rna_references(gene, c_notation)
+    if record is None:
+        return {}
+    pmids = list(record["pmids"])
+    return {
+        "transcript_accession": reference_transcript(gene),
+        "transcript_result_summary": (
+            "ENIGMA Table 4 identifies this exact allele as PVS1 (RNA). "
+            "Supplementary Table 16 links the publication"
+            + ("s" if len(pmids) != 1 else "")
+            + " below. Review the reported transcript result under Appendix E; "
+            "ARIANE has not inferred an RNA strength."
+        ),
+        "source_citation": (
+            f"ENIGMA BRCA1/2 VCEP v1.2 Supplementary Table 16, "
+            f"row {record['source_row']}"
+        ),
+        "source_references": [
+            f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" for pmid in pmids
+        ],
+    }
+
+
 def evaluate_rna_review(
     gene: str,
     variant_type: str,
     spliceai_score: Optional[float],
+    c_notation: str = "",
     pvs1_result: Optional[Dict] = None,
     pvs1_rna_result: Optional[Dict] = None,
     criteria: Optional[Dict] = None,
@@ -102,6 +220,18 @@ def evaluate_rna_review(
         )
         potential_branches.append("PVS1 (RNA)")
 
+    st16_prefill = _st16_table4_rna_prefill(gene, c_notation, pvs1_result)
+    if st16_prefill:
+        manual_review_prefill = _merge_review_prefill(
+            manual_review_prefill,
+            st16_prefill,
+        )
+        reasons.append(
+            "ENIGMA Supplementary Table 16 links publication references to this "
+            "exact Table 4 PVS1 (RNA) allele. ARIANE has copied the references "
+            "into the manual RNA form without inferring a strength or adding points."
+        )
+
     pvs1_reason = (pvs1_result.get("reason") or "").lower()
     if variant_type == "splice_site" and not pvs1_result.get("applies"):
         priority = "high"
@@ -147,6 +277,19 @@ def evaluate_rna_review(
             "A Table 9 functional result and a predicted splice effect are both "
             "present. Review whether the assay measured splicing and whether it "
             "could detect nonsense-mediated decay."
+        )
+
+    table9_prefill = _table9_published_splice_prefill(gene, criteria)
+    if table9_prefill and reasons:
+        manual_review_prefill = _merge_review_prefill(
+            manual_review_prefill,
+            table9_prefill,
+        )
+        reasons.append(
+            "ENIGMA Specifications Table 9 contains a published splice result "
+            "with references that are distinct from its PS3/BS3 functional-assay "
+            "reference. ARIANE has copied this context into the manual RNA form "
+            "without inferring a PVS1 RNA strength or adding points."
         )
 
     publication_overlap = _table9_functional_splice_overlap(criteria)

@@ -146,6 +146,23 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
             if exact_size is not None
             else f"deleted {delins_components[0]} bp and inserted {delins_components[1]} bp"
         )
+        if size["operation"] == "dup":
+            table1_reason = (
+                "ENIGMA Table 1 names insertion, deletion and delins alleles; "
+                "ARIANE conservatively handles a small tandem duplication as "
+                "an insertion-type allele and excludes it from the small-variant "
+                "PM2 path"
+            )
+        else:
+            operation_label = {
+                "ins": "insertion",
+                "del": "deletion",
+                "delins": "delins",
+            }.get(size["operation"], size["operation"])
+            table1_reason = (
+                f"ENIGMA Table 1 excludes {operation_label} alleles from the "
+                "small-variant PM2 path"
+            )
         return {
             "found": True,
             "is_indel": True,
@@ -155,8 +172,8 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
             "decision_trace": trace,
             "reason": (
                 f"PM2 is not applicable: the {size['operation']} is "
-                f"{size_description}, while ENIGMA Appendix G limits "
-                "the structural PM2 Supporting path to variants >50 bp."
+                f"{size_description}. {table1_reason}. Appendix G "
+                "limits the structural PM2 Supporting path to variants >50 bp."
             ),
             "source": policy["source_url"],
             "snapshot_id": payload["snapshot_id"],

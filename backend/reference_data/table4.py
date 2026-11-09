@@ -268,8 +268,10 @@ def table4_lookup_pvs1_ptc(
     pm5_code = rule.get("pm5_code")
     result["pm5_exon"] = exon
 
-    # Check the first altered residue against the last-exon Table 4 boundary.
-    # PVS1 and PM5 must remain paired within the selected branch.
+    # Check both the first altered residue and the introduced termination codon
+    # against the last-exon Table 4 boundary. ENIGMA's 2026-10-15
+    # methodological clarification keeps PVS1 and PM5 (PTC) paired: both are
+    # applicable only when both positions are at or before the boundary.
     if gene in TABLE4_DATA.get("critical_boundaries", {}):
         boundary_info = TABLE4_DATA["critical_boundaries"][gene]
         if exon == boundary_info["exon"]:
@@ -284,27 +286,43 @@ def table4_lookup_pvs1_ptc(
                 return result
             boundary_aa = boundary_info["boundary_aa"]
 
-            if first_altered_aa <= boundary_aa:
-                # PVS1 follows the first altered residue because this marks the
-                # beginning of the disrupted C-terminal protein sequence.
+            if (
+                first_altered_aa <= boundary_aa
+                and termination_aa is not None
+                and termination_aa <= boundary_aa
+            ):
                 branch = boundary_info.get("at_or_before") or {}
                 pvs1_code = branch.get("pvs1_code")
                 pm5_code = branch.get("pm5_code")
                 result["reason"] = (
                     f"First altered residue p.{first_altered_aa} <= p.{boundary_aa} "
-                    f"(at/before critical boundary) "
-                    f"in {exon} -> {pvs1_code}, {pm5_code} "
-                    f"(altered sequence includes the critical C-terminal region)"
+                    f"and predicted termination p.{termination_aa} <= "
+                    f"p.{boundary_aa} in {exon} -> {pvs1_code}, {pm5_code}"
                 )
             else:
                 branch = boundary_info.get("after") or {}
                 pvs1_code = branch.get("pvs1_code")
                 pm5_code = branch.get("pm5_code")
+                if first_altered_aa > boundary_aa:
+                    boundary_reason = (
+                        f"first altered residue p.{first_altered_aa} is after "
+                        f"p.{boundary_aa}"
+                    )
+                elif termination_aa is None:
+                    boundary_reason = (
+                        "the introduced termination position could not be "
+                        "determined"
+                    )
+                else:
+                    boundary_reason = (
+                        f"predicted termination p.{termination_aa} is after "
+                        f"p.{boundary_aa}"
+                    )
                 result["reason"] = (
-                    f"First altered residue p.{first_altered_aa} > p.{boundary_aa} "
-                    f"(after critical boundary) "
-                    f"in {exon} -> {pvs1_code}, {pm5_code} "
-                    f"(critical C-terminal region preserved)"
+                    f"Last-exon PTC in {exon}: {boundary_reason}. ENIGMA requires "
+                    "both the first altered residue and introduced termination "
+                    f"to be at or before the critical boundary -> {pvs1_code}, "
+                    f"{pm5_code}"
                 )
         else:
             result["reason"] = f"Table 4 lookup: {gene} {exon} PTC -> {pvs1_code}"
@@ -318,7 +336,11 @@ def table4_lookup_pvs1_ptc(
     result["pvs1_points"] = points
     result["requires_rna"] = requires_rna
 
-    if termination_aa is not None and termination_aa != first_altered_aa:
+    if (
+        termination_aa is not None
+        and termination_aa != first_altered_aa
+        and "N/A" not in str(pvs1_code)
+    ):
         result["reason"] += (
             f"; predicted termination p.{termination_aa} recorded for the protein "
             f"consequence, but PM5 follows the selected Table 4 row for the "

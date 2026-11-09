@@ -75,6 +75,8 @@ class ExonCnvEvidenceTests(unittest.TestCase):
         self.assertEqual(result["pm2_applicability"], "not_applicable")
         self.assertEqual(result["variant_size_bp"], 1)
         self.assertEqual(result["criteria"], [])
+        self.assertIn("ENIGMA Table 1", result["reason"])
+        self.assertIn("insertion-type allele", result["reason"])
 
     def test_exact_small_intronic_deletions_do_not_enter_structural_path(self):
         cases = {

@@ -521,7 +521,11 @@ požadována alespoň dvě outbred pozorování v datasetu, který poskytl skór
 FAF95. Počet pozorování se bere z populačních AC, neodhaduje se z AF.
 
 PM2 se nepoužívá pro malé indely do 50 bp; běžný gnomAD short-variant lookup se
-však dokončí, aby populační evidence nezůstala nevyhodnocená. Velikost se určuje
+však dokončí, aby populační evidence nezůstala nevyhodnocená. Table 1 vylučuje
+z malé variantové větve inserce, delece a delins. Malou duplikaci ARIANE pro
+tento účel konzervativně interpretuje jako insertion-type alelu; nejde o tvrzení,
+že Table 1 duplikace výslovně jmenuje. Appendix G dovoluje strukturální PM2 až
+pro alely nad 50 bp. Velikost se určuje
 ze strukturovaně parsované `c.` HGVS: u delece a duplikace z celého referenčního
 intervalu, u inserce z explicitně uvedené vložené sekvence. Přesný intronický
 interval se změří, pokud oba endpointy sdílejí jeden HGVS anchor, například
@@ -599,23 +603,22 @@ nukleotidové změny a uvádí frameshift se stop kodonem v následujícím exon
 Runtime se řídí podrobným postupem a příkladem z Appendix D. Původní Readme je
 ve zdrojovém snapshotu zachován beze změny pro audit.
 
-V koncové hraniční větvi se řádek vybírá podle začátku změněné nebo zkrácené
-kritické proteinové sekvence v souladu s PVS1 flowchartem. Například `BRCA1
-c.5556_5560del p.(Tyr1853AspfsTer25)` používá řádek PVS1 Very Strong a PM5 PTC
-Strong. Výsledkem je 12 bodů a třída 5.
+V koncové hraniční větvi se podle metodického upřesnění ENIGMA VCEP z
+15. října 2026 posuzují dvě polohy současně: první změněná aminokyselina i nově
+zavedený terminační kodon musí ležet na kritické hranici nebo před ní. Jen tehdy
+se z jednoho řádku Table 4 použijí společně PVS1 a PM5 PTC. Pokud je první
+změněná aminokyselina za hranicí, terminační kodon za hranicí nebo jeho poloha
+není spolehlivě určitelná, nepoužije se ani jeden kód. Například `BRCA1
+c.5556_5560del p.(Tyr1853AspfsTer25)` začíná před hranicí p.1854, ale končí až
+na p.1877, a proto nezíská PVS1 ani PM5 PTC. Krátký frameshift se stejným
+začátkem a stop kodonem na p.1854 splní obě podmínky.
 
-#### 3.2.1 Otevřená metodická otázka PM5 PTC v posledním exonu
+#### 3.2.1 PM5 PTC v posledním exonu
 
-Interpretace PM5 PTC uvnitř posledního exonu čeká na metodické potvrzení.
-Appendix D určuje sílu podle exonu nukleotidové změny a uvádí příklad
-frameshiftu, jehož terminační kodon vznikne v následujícím exonu. Neurčuje ale,
-jak vybrat mezi dvěma řádky uvnitř posledního exonu. Table 4 rozlišuje u BRCA1
-`PTC<p.I1855` a `PTC>p.L1854` a u BRCA2 `PTC<p.T3310` a `PTC>p.E3309`.
-Readme Table 4 tento údaj popisuje jako polohu terminačního kodonu, zatímco
-PVS1 Figures 3 a 5 posuzují zachování kritické proteinové sekvence. Je proto
-otevřené, zda se v této větvi mají PVS1 a PM5 posuzovat odděleně. Dotaz byl
-odeslán ke konzultaci. Do obdržení odpovědi se klasifikační logika nemění a
-tato nejistota nesmí být odstraněna nezdokumentovaným předpokladem.
+PVS1 a PM5 PTC zůstávají v posledním exonu párovou větví jednoho řádku Table 4.
+ARIANE nezávisle nepřepíná jejich síly a při neúplném proteinovém následku
+postupuje fail-closed. Rozhodnutí i obě kontrolované polohy jsou součástí
+uživatelského důvodu a decision trace.
 
 #### 3.2.2 PVS1 z RNA evidence
 
@@ -669,9 +672,12 @@ U `BRCA1 c.5074G>A/C` Table 9 uvádí PS3 Strong podle funkčního výsledku Fin
 et al. a ST2 obsahuje samostatnou RNA evidenci. U `BRCA2 c.7976G>A/C` Table 9
 uvádí PS3 Strong podle funkčního výsledku Biswas et al. a ST2 opět popisuje RNA
 evidenci. ARIANE proto ponechá explicitní PS3 z Table 9 a PVS1 RNA připraví k
-odbornému zvážení. Při jejich současném přijetí zobrazí upozornění na kontrolu
-rozsahu assay a nezávislosti. Obecné potvrzení této kombinace bylo předáno k
-vyjasnění VCEP, takže nejde o uzavřené nové pravidlo ENIGMA.
+odbornému zvážení. ENIGMA VCEP v metodickém upřesnění z 15. října 2026
+potvrdil, že PVS1 RNA a PS3 nebo BS3 lze zachovat současně, pokud představují
+odlišné evidenční příspěvky. Assay prokazující pouze aberantní sestřih podporuje
+PVS1 RNA, nikoli současně PS3. ARIANE proto při kombinaci stále vyžaduje kontrolu
+rozsahu assay, provenance a nezávislosti a upozorňuje na zákaz dvojího započtení
+stejného experimentálního pozorování.
 
 Stejný PMID v poli funkčního assay a v přehledu publikovaných splice výsledků
 není automaticky druhé kritérium ani důkaz dvojího započtení. Jedna publikace
@@ -691,6 +697,13 @@ nevytváří automatické PVS1 RNA, neurčuje jeho sílu, formulář sama nezapn
 nepřidá žádné body. Kurátor musí nadále ověřit assay, relevantní transkript,
 kvantifikaci, NMD, zbývající funkční transkript a větev Appendix E. PMID použitý
 současně pro funkční assay se jako nezávislý RNA zdroj nepředvyplní.
+
+Supplementary Table 16 propojuje přesné alely z RNA větví Table 4 s původními
+zdroji. U přesné shody genu a c. HGVS ARIANE vloží dostupné PMID do manuálního
+RNA formuláře. Tabulka neobsahuje Appendix E váhu, proto toto předvyplnění samo
+nevytváří PVS1 RNA, neurčuje sílu a nepřidává body. Řádky označené pouze jako
+personal communication nebo internal lab contributor zůstávají v lossless
+snapshotu, ale bez publikovaného PMID se do citačního předvyplnění nepřenášejí.
 
 Například `BRCA1 c.4185G>A` má v Supplementary Table 2 nekvantifikovanou
 pacientskou mRNA s delecí exonu 12, standardizovanou LoF kategorii a čtyři

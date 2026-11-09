@@ -84,16 +84,16 @@ def test_catalog_is_valid_and_exposes_no_local_paths():
     assert {
         role["id"]: role["table_count"] for role in payload["tables"]["roles"]
     } == {
-        "used_by_ariane": 15,
+        "used_by_ariane": 16,
         "expert_review": 4,
-        "supporting_reference": 23,
+        "supporting_reference": 22,
     }
     assert all(table["role"] for table in payload["tables"]["items"])
     used_tables = [
         table for table in payload["tables"]["items"]
         if table["role"] == "used_by_ariane"
     ]
-    assert len(used_tables) == 15
+    assert len(used_tables) == 16
     assert all(table["consumer"] for table in used_tables)
     assert all(
         table["consumer"] is None

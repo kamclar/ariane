@@ -17,6 +17,7 @@ from backend.policy.classification import classify_by_enigma_combination
 from tests.dag_test_support import classify_with_dag as evaluate_variant
 from backend.criteria.evidence_interactions import clinical_functional_risk_interactions
 from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
+from backend.reference_data.enigma_rules import lookup_st16_table4_rna_references
 from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.reference_data.table4 import (
     TABLE4_DATA,
@@ -609,6 +610,8 @@ class FrequencyTests(unittest.TestCase):
         self.assertFalse(result["PM2"]["applies"])
         self.assertNotIn("PM2_Supporting", result)
         self.assertIn("1 bp", result["PM2"]["reason"])
+        self.assertIn("ENIGMA Table 1", result["PM2"]["reason"])
+        self.assertIn("excludes insertion alleles", result["PM2"]["reason"])
         self.assertIn(">50 bp", result["PM2"]["reason"])
 
     def test_large_indel_never_uses_small_variant_gnomad_pm2(self):
@@ -926,9 +929,14 @@ class FrequencyTests(unittest.TestCase):
             p_notation="p.(Gln3299IlefsTer29)",
             gnomad_data=data,
         )
-        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
-        self.assertEqual(result["total_points"], 12)
-        self.assertEqual(result["predicted_class"], 5)
+        self.assertNotIn("PVS1", result["criteria"])
+        self.assertNotIn("PM5_PTC", result["criteria"])
+        self.assertEqual(result["total_points"], 0)
+        self.assertEqual(result["predicted_class"], 3)
+        self.assertTrue(any(
+            "predicted termination p.3327 is after p.3309" in warning
+            for warning in result["warnings"]
+        ))
 
 
 class CriticalPtcBoundaryTests(unittest.TestCase):
@@ -1023,6 +1031,44 @@ class CriticalPtcBoundaryTests(unittest.TestCase):
 
 
 class SpliceTests(unittest.TestCase):
+    def test_st16_exact_table4_rna_reference_lookup_is_non_scoring_context(self):
+        record = lookup_st16_table4_rna_references("BRCA1", "c.4484+1G>T")
+
+        self.assertIsNotNone(record)
+        self.assertEqual(record["pmids"], ["21735045"])
+        self.assertEqual(record["usage"], "manual_review_context_only")
+        self.assertEqual(record["criteria_specification_version"], "1.2.0")
+        self.assertEqual(
+            lookup_st16_table4_rna_references("brca1", " c.4484+1g>t ")["pmids"],
+            ["21735045"],
+        )
+        self.assertIsNone(
+            lookup_st16_table4_rna_references("BRCA1", "c.4484+1G>C")
+        )
+
+    def test_st16_references_prefill_table4_rna_review_without_points(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="splice_site",
+            p_notation="",
+            c_notation="c.4484+1G>T",
+            gnomad_data=gnomad_data(pm2_absence_established=True),
+        )
+
+        self.assertEqual(set(result["criteria"]), {"PM2_Supporting"})
+        self.assertEqual(result["total_points"], 1)
+        prefill = result["rna_review"]["manual_review_prefill"]
+        self.assertIn("Supplementary Table 16", prefill["source_citation"])
+        self.assertEqual(
+            prefill["source_references"],
+            ["https://pubmed.ncbi.nlm.nih.gov/21735045/"],
+        )
+        self.assertIn(
+            "has not inferred an RNA strength",
+            prefill["transcript_result_summary"],
+        )
+        self.assertNotIn("PVS1_RNA", result["criteria"])
+
     def test_table9_spliceai_comparison_respects_enigma_band_boundaries(self):
         table9 = {"reviewed": True, "spliceai_prediction": 0.1}
 
@@ -1162,6 +1208,70 @@ class SpliceTests(unittest.TestCase):
             "https://pubmed.ncbi.nlm.nih.gov/33293522/",
             review["manual_review_prefill"]["source_references"],
         )
+
+    def test_table9_independent_splice_context_prefills_review_without_points(self):
+        cases = (
+            (
+                "c.5075-2A>G",
+                0.83,
+                "Exon 18 deletion",
+            ),
+            (
+                "c.81-1G>C",
+                0.96,
+                "7nt of exon 3 deleted",
+            ),
+        )
+
+        for c_notation, spliceai_score, expected_result in cases:
+            with self.subTest(c_notation=c_notation):
+                result = evaluate_variant(
+                    gene="BRCA1",
+                    variant_type=infer_variant_type(c_notation, ""),
+                    p_notation="",
+                    c_notation=c_notation,
+                    spliceai_score=spliceai_score,
+                )
+
+                self.assertEqual(set(result["criteria"]), {"PS3"})
+                self.assertEqual(result["total_points"], 4)
+                self.assertTrue(result["rna_review"]["recommended"])
+                prefill = result["rna_review"]["manual_review_prefill"]
+                self.assertEqual(prefill["transcript_accession"], "NM_007294.4")
+                self.assertIn(expected_result, prefill["transcript_result_summary"])
+                self.assertEqual(
+                    prefill["source_references"],
+                    [
+                        "https://pubmed.ncbi.nlm.nih.gov/22505045/",
+                        "https://pubmed.ncbi.nlm.nih.gov/23239986/",
+                    ],
+                )
+                self.assertNotIn("curated_strength", prefill)
+                self.assertNotIn("assay_scope", prefill)
+                self.assertNotIn("PVS1_RNA", result["criteria"])
+
+    def test_table9_prediction_without_published_splice_study_does_not_prefill(self):
+        review = evaluate_rna_review(
+            gene="BRCA1",
+            variant_type="splice_site",
+            spliceai_score=0.83,
+            pvs1_result={"requires_rna": True},
+            criteria={
+                "PS3": {
+                    "applies": True,
+                    "table9_audit": {
+                        "predicted_or_observed_splicing": "Y, predicted splicing",
+                        "splice_result_published": "",
+                        "assay_results": [
+                            "Findlay 2018 (PMID:30209399) - LOF"
+                        ],
+                    },
+                }
+            },
+        )
+
+        self.assertTrue(review["recommended"])
+        self.assertEqual(review["manual_review_prefill"], {})
 
     def test_c4185_applies_curated_st2_rna_and_replaces_prediction(self):
         result = evaluate_variant(
@@ -2016,7 +2126,7 @@ class ClassifierIntegrationTests(unittest.TestCase):
             result["classification_note"],
         )
 
-    def test_terminal_frameshift_uses_one_table4_row_for_pvs1_and_pm5(self):
+    def test_terminal_frameshift_crossing_boundary_gets_neither_code(self):
         result = evaluate_variant(
             gene="BRCA1",
             variant_type="frameshift",
@@ -2024,16 +2134,16 @@ class ClassifierIntegrationTests(unittest.TestCase):
             c_notation="c.5556_5560del",
         )
 
-        self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
-        self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
-        self.assertEqual(result["total_points"], 12)
-        self.assertEqual(result["predicted_class"], 5)
-        reason = result["criteria"]["PVS1"]["reason"]
-        self.assertIn("First altered residue p.1853 <= p.1854", reason)
-        self.assertIn("PVS1, PM5_Strong (PTC)", reason)
-        self.assertIn("PM5 follows the selected Table 4 row", reason)
+        self.assertNotIn("PVS1", result["criteria"])
+        self.assertNotIn("PM5_PTC", result["criteria"])
+        self.assertEqual(result["total_points"], 0)
+        self.assertEqual(result["predicted_class"], 3)
+        self.assertTrue(any(
+            "predicted termination p.1877 is after p.1854" in warning
+            for warning in result["warnings"]
+        ))
 
-    def test_brca2_terminal_frameshift_uses_the_same_boundary_policy(self):
+    def test_brca2_terminal_frameshift_crossing_boundary_gets_neither_code(self):
         result = evaluate_variant(
             gene="BRCA2",
             variant_type="frameshift",
@@ -2041,14 +2151,28 @@ class ClassifierIntegrationTests(unittest.TestCase):
             c_notation="c.9925del",
         )
 
+        self.assertNotIn("PVS1", result["criteria"])
+        self.assertNotIn("PM5_PTC", result["criteria"])
+        self.assertEqual(result["total_points"], 0)
+        self.assertEqual(result["predicted_class"], 3)
+        self.assertTrue(any(
+            "predicted termination p.3328 is after p.3309" in warning
+            for warning in result["warnings"]
+        ))
+
+    def test_terminal_frameshift_with_stop_at_boundary_keeps_both_codes(self):
+        result = evaluate_variant(
+            gene="BRCA1",
+            variant_type="frameshift",
+            p_notation="p.(Tyr1853AspfsTer2)",
+            c_notation="c.5556_5560del",
+        )
+
         self.assertEqual(result["criteria"]["PVS1"]["strength"], "Very Strong")
         self.assertEqual(result["criteria"]["PM5_PTC"]["strength"], "Strong")
         self.assertEqual(result["total_points"], 12)
-        self.assertEqual(result["predicted_class"], 5)
         reason = result["criteria"]["PVS1"]["reason"]
-        self.assertIn("First altered residue p.3309 <= p.3309", reason)
-        self.assertIn("PVS1, PM5_Strong (PTC)", reason)
-        self.assertIn("PM5 follows the selected Table 4 row", reason)
+        self.assertIn("predicted termination p.1854 <= p.1854", reason)
 
     def test_cross_exon_frameshift_keeps_pm5_from_nucleotide_change_exon(self):
         result = evaluate_variant(
