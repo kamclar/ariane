@@ -6,6 +6,7 @@ import pytest
 from backend.criteria.pvs1 import evaluate_pvs1
 from backend.domain.classification import NormalizedVariant
 from backend.reference_data.table4 import (
+    Table4LookupStatus,
     table4_lookup_deletion,
     table4_lookup_duplication,
     table4_lookup_initiation,
@@ -92,7 +93,9 @@ def test_all_generated_rules_are_available_to_runtime_lookups() -> None:
     for gene, rules in table4["splice_rules"].items():
         for notation, expected in rules.items():
             actual = table4_lookup_splice(gene, notation)
-            assert actual["found"], f"{gene} {notation}"
+            assert actual["status"] == Table4LookupStatus.MATCHED, (
+                f"{gene} {notation}"
+            )
             assert actual["pvs1_code"] == expected["pvs1_code"]
             assert actual["exon"] == expected["exon"]
             assert actual["notes"] == expected["notes"]
@@ -100,7 +103,9 @@ def test_all_generated_rules_are_available_to_runtime_lookups() -> None:
     for gene, rules in table4["deletion_rules"].items():
         for exon, expected in rules.items():
             actual = table4_lookup_deletion(gene, exon)
-            assert actual["found"], f"{gene} {exon} deletion"
+            assert actual["status"] == Table4LookupStatus.MATCHED, (
+                f"{gene} {exon} deletion"
+            )
             assert actual["pvs1_code"] == expected["pvs1_code"]
             assert actual["notes"] == expected["notes"]
 
@@ -108,16 +113,43 @@ def test_all_generated_rules_are_available_to_runtime_lookups() -> None:
         for exon, arrangements in rules.items():
             for arrangement, expected in arrangements.items():
                 actual = table4_lookup_duplication(gene, exon, arrangement)
-                assert actual["found"], f"{gene} {exon} {arrangement}"
+                assert actual["status"] == Table4LookupStatus.MATCHED, (
+                    f"{gene} {exon} {arrangement}"
+                )
                 assert actual["pvs1_code"] == expected["pvs1_code"]
                 assert actual["notes"] == expected["notes"]
 
     for gene, expected in table4["initiation_rules"].items():
         actual = table4_lookup_initiation(gene)
-        assert actual["found"], gene
+        assert actual["status"] == Table4LookupStatus.MATCHED, gene
         assert actual["pvs1_code"] == expected["pvs1_code"]
         assert actual["exon"] == expected["exon"]
         assert actual["notes"] == expected["notes"]
+
+
+@pytest.mark.parametrize(
+    "lookup",
+    (
+        lambda: table4_lookup_splice("BRCA1", "c.81-1G>C"),
+        lambda: table4_lookup_deletion("BRCA1", "E10(11)"),
+        lambda: table4_lookup_duplication("BRCA1", "E10(11)", "Tandem"),
+        lambda: table4_lookup_initiation("BRCA1"),
+        lambda: table4_lookup_pvs1_ptc(
+            "BRCA1",
+            100,
+            first_altered_aa=34,
+            termination_aa=34,
+        ),
+    ),
+)
+def test_table4_rule_lookups_use_one_status_contract(lookup) -> None:
+    result = lookup()
+
+    assert result["status"] == Table4LookupStatus.MATCHED
+    assert "found" not in result
+    assert "applies" not in result
+    assert "review_required" not in result
+    assert "application_status" not in result
 
 
 def test_all_ptc_exons_are_available_to_runtime_lookup() -> None:
@@ -208,8 +240,7 @@ def test_unknown_stop_before_last_exon_boundary_requires_review() -> None:
         termination_aa=None,
     )
     assert result["pvs1_code"] is None
-    assert result["review_required"] is True
-    assert result["application_status"] == "review_required"
+    assert result["status"] == Table4LookupStatus.REVIEW_REQUIRED
 
     criterion = evaluate_pvs1(
         "BRCA1",
@@ -241,9 +272,8 @@ def test_first_change_after_last_exon_boundary_is_not_ambiguous() -> None:
         first_altered_aa=1858,
         termination_aa=None,
     )
-    assert result["review_required"] is False
+    assert result["status"] == Table4LookupStatus.MATCHED
     assert result["pvs1_code"] == "PVS1_N/A"
-    assert result["application_status"] == "not_applicable"
 
 
 def test_layered_rna_rules_and_source_gaps_remain_visible() -> None:
@@ -252,5 +282,11 @@ def test_layered_rna_rules_and_source_gaps_remain_visible() -> None:
     assert brca1_rna["pvs1_code"] == "PVS1 (RNA)"
     assert brca2_rna["pvs1_code"] == "PVS1 (RNA)"
 
-    assert table4_lookup_splice("BRCA2", "c.6937+2T>A")["found"] is False
-    assert table4_lookup_splice("BRCA2", "c.8487+2T>A")["found"] is False
+    assert (
+        table4_lookup_splice("BRCA2", "c.6937+2T>A")["status"]
+        == Table4LookupStatus.NOT_FOUND
+    )
+    assert (
+        table4_lookup_splice("BRCA2", "c.8487+2T>A")["status"]
+        == Table4LookupStatus.NOT_FOUND
+    )

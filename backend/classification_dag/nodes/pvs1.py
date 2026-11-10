@@ -33,6 +33,30 @@ def _evidence_value(
     return item.value if isinstance(item.value, dict) else None
 
 
+def _resolve_rna_evidence(
+    gene: str,
+    c_notation: str,
+    *,
+    erepo_result: dict[str, Any] | None,
+    table4_result: dict[str, Any] | None,
+    st2_result: dict[str, Any] | None,
+) -> NodeResult:
+    selection = resolve_pvs1_rna(
+        gene,
+        c_notation,
+        erepo_registry_result=erepo_result,
+        table4_evidence_result=table4_result,
+        st2_evidence_result=st2_result,
+    )
+    return NodeResult.succeeded(
+        {"pvs1_rna_selection": selection},
+        provenance={
+            "source": selection.source,
+            "replaces_prediction": selection.replaces_prediction,
+        },
+    )
+
+
 @dataclass(frozen=True)
 class Pvs1RnaEvidenceResolutionNode:
     """Resolve provider evidence once before dependent rule nodes run."""
@@ -51,28 +75,21 @@ class Pvs1RnaEvidenceResolutionNode:
         variant = inputs["normalized_variant"]
         if not isinstance(variant, NormalizedVariant):
             raise TypeError("normalized_variant must be a NormalizedVariant")
-        selection = resolve_pvs1_rna(
+        return _resolve_rna_evidence(
             variant.gene,
             variant.c_notation,
-            erepo_registry_result=_evidence_value(
+            erepo_result=_evidence_value(
                 inputs,
                 "erepo_pvs1_rna_evidence",
             ),
-            table4_evidence_result=_evidence_value(
+            table4_result=_evidence_value(
                 inputs,
                 "table4_pvs1_rna_evidence",
             ),
-            st2_evidence_result=_evidence_value(
+            st2_result=_evidence_value(
                 inputs,
                 "st2_pvs1_rna_evidence",
             ),
-        )
-        return NodeResult.succeeded(
-            {"pvs1_rna_selection": selection},
-            provenance={
-                "source": selection.source,
-                "replaces_prediction": selection.replaces_prediction,
-            },
         )
 
 
@@ -94,19 +111,12 @@ class Pvs1RnaInputResolutionNode:
             if ci.st2_pvs1_rna_result is not None
             else lookup_st2_pvs1_rna_evidence(ci.gene, ci.c_notation)
         )
-        selection = resolve_pvs1_rna(
+        return _resolve_rna_evidence(
             ci.gene,
             ci.c_notation,
-            erepo_registry_result=ci.erepo_pvs1_rna_result,
-            table4_evidence_result=ci.table4_pvs1_rna_result,
-            st2_evidence_result=st2_result,
-        )
-        return NodeResult.succeeded(
-            {"pvs1_rna_selection": selection},
-            provenance={
-                "source": selection.source,
-                "replaces_prediction": selection.replaces_prediction,
-            },
+            erepo_result=ci.erepo_pvs1_rna_result,
+            table4_result=ci.table4_pvs1_rna_result,
+            st2_result=st2_result,
         )
 
 

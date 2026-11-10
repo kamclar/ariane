@@ -36,6 +36,7 @@ from backend.reference_data.table9 import (
 )
 from backend.reference_data.table4 import (
     TABLE4_SOURCE_ID,
+    Table4RnaEvidenceStatus,
     lookup_table4_pvs1_rna,
 )
 
@@ -273,7 +274,10 @@ class Table4Pvs1RnaEvidenceNode:
         variant = _request(inputs).variant
         value = lookup_table4_pvs1_rna(variant.gene, variant.c_notation)
         status = str(value.get("status") or "unavailable")
-        exact_rna_decision = status in {"eligible", "not_applicable_rna"}
+        exact_rna_decision = status in {
+            Table4RnaEvidenceStatus.ELIGIBLE,
+            Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA,
+        }
         evidence = EvidenceItem(
             id="table4_pvs1_rna",
             kind="vcep_allele_rna_rule",
@@ -281,7 +285,10 @@ class Table4Pvs1RnaEvidenceNode:
                 EvidenceStatus.AVAILABLE
                 if exact_rna_decision
                 else EvidenceStatus.NOT_APPLICABLE
-                if status in {"not_in_source", "not_applicable"}
+                if status in {
+                    Table4RnaEvidenceStatus.NOT_IN_SOURCE,
+                    Table4RnaEvidenceStatus.NOT_APPLICABLE,
+                }
                 else EvidenceStatus.UNAVAILABLE
             ),
             value=value,

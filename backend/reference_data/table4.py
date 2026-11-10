@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import StrEnum
 from functools import lru_cache
 import hashlib
 import json
@@ -12,6 +13,19 @@ from backend.reference_data.paths import TABLE4_PATH
 
 
 TABLE4_SOURCE_ID = "enigma-v1.2-table4"
+
+
+class Table4LookupStatus(StrEnum):
+    MATCHED = "matched"
+    NOT_FOUND = "not_found"
+    REVIEW_REQUIRED = "review_required"
+
+
+class Table4RnaEvidenceStatus(StrEnum):
+    ELIGIBLE = "eligible"
+    NOT_APPLICABLE_RNA = "not_applicable_rna"
+    NOT_IN_SOURCE = "not_in_source"
+    NOT_APPLICABLE = "not_applicable"
 
 
 class CriterionWeight(NamedTuple):
@@ -91,7 +105,7 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
     Table 4 has allele-specific rules for canonical splice variants.
     """
     result = {
-        "found": False,
+        "status": Table4LookupStatus.NOT_FOUND,
         "pvs1_code": None,
         "exon": None,
         "notes": "",
@@ -111,7 +125,7 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
     for fmt in formats_to_try:
         if fmt in gene_rules:
             entry = gene_rules[fmt]
-            result["found"] = True
+            result["status"] = Table4LookupStatus.MATCHED
             result["pvs1_code"] = entry["pvs1_code"]
             result["exon"] = entry["exon"]
             result["notes"] = entry.get("notes", "")
@@ -150,9 +164,9 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
         "source_url": source_url,
     }
     result = table4_lookup_splice(gene, c_notation)
-    if not result.get("found"):
+    if result["status"] != Table4LookupStatus.MATCHED:
         return {
-            "status": "not_in_source",
+            "status": Table4RnaEvidenceStatus.NOT_IN_SOURCE,
             "record": None,
             "reason": str(result.get("reason") or "No exact Table 4 splice rule"),
             **provenance,
@@ -162,7 +176,7 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
     strength, points, requires_rna = parse_pvs1_code_strength(source_code)
     if not requires_rna:
         return {
-            "status": "not_applicable",
+            "status": Table4RnaEvidenceStatus.NOT_APPLICABLE,
             "record": None,
             "reason": (
                 "The exact Table 4 rule is predictive rather than an observed "
@@ -185,7 +199,7 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
     }
     if strength is None:
         return {
-            "status": "not_applicable_rna",
+            "status": Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA,
             "record": record,
             "reason": (
                 f"ENIGMA Table 4 assigns {source_code} to the exact allele "
@@ -194,7 +208,7 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
             **provenance,
         }
     return {
-        "status": "eligible",
+        "status": Table4RnaEvidenceStatus.ELIGIBLE,
         "record": record,
         "reason": (
             f"ENIGMA Table 4 assigns {source_code} to the exact allele "
@@ -226,7 +240,7 @@ def table4_lookup_initiation(gene: str) -> Dict:
     entry = load_table4_data().get("initiation_rules", {}).get(gene)
     rule = entry if isinstance(entry, dict) else {}
     result = {
-        "found": False,
+        "status": Table4LookupStatus.NOT_FOUND,
         "pvs1_code": rule.get("pvs1_code"),
         "pvs1_strength": None,
         "pvs1_points": 0,
@@ -247,13 +261,14 @@ def table4_lookup_initiation(gene: str) -> Dict:
     pvs1_code = rule.get("pvs1_code")
     strength, points, requires_rna = parse_pvs1_code_strength(pvs1_code)
     if requires_rna or strength is None:
+        result["status"] = Table4LookupStatus.REVIEW_REQUIRED
         result["reason"] = (
             f"Table 4 initiation-codon rule for {gene} has an unsupported "
             f"code: {pvs1_code!r}"
         )
         return result
 
-    result["found"] = True
+    result["status"] = Table4LookupStatus.MATCHED
     result["pvs1_strength"] = strength
     result["pvs1_points"] = points
     result["reason"] = (
@@ -354,9 +369,7 @@ def table4_lookup_pvs1_ptc(
     predicted termination codon lies in a later exon.
     """
     result: Dict = {
-        "applies": False,
-        "review_required": False,
-        "application_status": "not_applied",
+        "status": Table4LookupStatus.NOT_FOUND,
         "pvs1_code": None,
         "pvs1_strength": None,
         "pvs1_points": 0,
@@ -397,8 +410,7 @@ def table4_lookup_pvs1_ptc(
     )
     result["reason"] = selection.reason
     if selection.review_required:
-        result["review_required"] = True
-        result["application_status"] = "review_required"
+        result["status"] = Table4LookupStatus.REVIEW_REQUIRED
         return result
 
     pvs1_code = selection.pvs1_code
@@ -409,10 +421,7 @@ def table4_lookup_pvs1_ptc(
     result["pvs1_strength"] = strength
     result["pvs1_points"] = points
     result["requires_rna"] = requires_rna
-    result["applies"] = strength is not None
-    result["application_status"] = (
-        "applied" if strength is not None else "not_applicable"
-    )
+    result["status"] = Table4LookupStatus.MATCHED
 
     if (
         termination_aa is not None
@@ -439,12 +448,18 @@ def table4_lookup_pvs1_ptc(
 
 def table4_lookup_deletion(gene: str, exon: str) -> Dict:
     """Lookup PVS1 code for exon deletion."""
-    result = {"found": False, "pvs1_code": None, "pvs1_strength": None, "pvs1_points": 0, "reason": ""}
+    result = {
+        "status": Table4LookupStatus.NOT_FOUND,
+        "pvs1_code": None,
+        "pvs1_strength": None,
+        "pvs1_points": 0,
+        "reason": "",
+    }
 
     gene_rules = load_table4_data().get("deletion_rules", {}).get(gene, {})
     if exon in gene_rules:
         rule = gene_rules[exon]
-        result["found"] = True
+        result["status"] = Table4LookupStatus.MATCHED
         result["pvs1_code"] = rule["pvs1_code"]
         result["notes"] = rule.get("notes", "")
         if rule["pvs1_code"] == "PVS1_N/A":
@@ -480,7 +495,13 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
         DUP Ex, Tandem -> usually PVS1_Moderate
         DUP Ex, Unknown -> usually PVS1_Supporting
     """
-    result = {"found": False, "pvs1_code": None, "pvs1_strength": None, "pvs1_points": 0, "reason": ""}
+    result = {
+        "status": Table4LookupStatus.NOT_FOUND,
+        "pvs1_code": None,
+        "pvs1_strength": None,
+        "pvs1_points": 0,
+        "reason": "",
+    }
 
     gene_rules = load_table4_data().get("duplication_rules", {}).get(gene)
     if not isinstance(gene_rules, dict):
@@ -503,7 +524,7 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
         )
         return result
 
-    result["found"] = True
+    result["status"] = Table4LookupStatus.MATCHED
     result["pvs1_code"] = rule["pvs1_code"]
     result["dup_type"] = dup_type
     result["notes"] = rule.get("notes", "")

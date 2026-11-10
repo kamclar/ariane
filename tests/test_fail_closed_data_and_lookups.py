@@ -847,7 +847,7 @@ class RemainingFallbackTests(unittest.TestCase):
         }
         with patch.object(table4, "load_table4_data", return_value=data):
             result = table4.table4_lookup_duplication("BRCA1", "E2", "Unknown")
-        self.assertFalse(result["found"])
+        self.assertEqual(result["status"], table4.Table4LookupStatus.NOT_FOUND)
         self.assertEqual(result["pvs1_points"], 0)
         self.assertIn("No exact", result["reason"])
 

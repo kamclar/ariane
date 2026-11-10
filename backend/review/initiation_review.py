@@ -2,7 +2,10 @@
 
 from typing import Dict
 from backend.policy.gene import vcep_specification
-from backend.reference_data.table4 import table4_lookup_initiation
+from backend.reference_data.table4 import (
+    Table4LookupStatus,
+    table4_lookup_initiation,
+)
 
 
 INITIATION_REFERENCE_SOURCE = (
@@ -38,7 +41,7 @@ def evaluate_initiation_review(
             vcep_specification(gene)["url"],
         ],
     }
-    if table4.get("found"):
+    if table4.get("status") == Table4LookupStatus.MATCHED:
         appendix_figure = table4["appendix_figure"]
         nearest_start = table4["nearest_alternative_start"]
         prefill.update({

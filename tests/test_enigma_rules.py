@@ -20,6 +20,7 @@ from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.reference_data.enigma_rules import lookup_st16_table4_rna_references
 from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.reference_data.table4 import (
+    Table4LookupStatus,
     load_table4_data,
     parse_pvs1_code_strength,
     table4_lookup_initiation,
@@ -2241,7 +2242,7 @@ class Table4RareSpliceBranchTests(unittest.TestCase):
         self.assertEqual(observed_count, source_count)
 
         lookup = table4_lookup_splice(gene, c_notation)
-        self.assertTrue(lookup["found"])
+        self.assertEqual(lookup["status"], Table4LookupStatus.MATCHED)
         self.assertEqual(lookup["pvs1_code"], source_code)
         self.assertEqual(
             parse_pvs1_code_strength(source_code),

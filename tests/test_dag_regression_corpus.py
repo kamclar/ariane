@@ -367,7 +367,7 @@ def test_unquantified_patient_rna_uses_appendix_e_weight_matrix(
 ):
     curated = lookup_st2_pvs1_rna_evidence("BRCA1", "c.4185G>A")
     baseline = {
-        "found": True,
+        "status": "matched",
         "pvs1_strength": baseline_strength,
         "pvs1_code": baseline_code,
     }

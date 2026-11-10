@@ -18,6 +18,8 @@ from backend.reference_data.ps1_splice_evidence import (
 )
 from backend.reference_data.table4 import (
     TABLE4_SOURCE_ID,
+    Table4LookupStatus,
+    Table4RnaEvidenceStatus,
     parse_pvs1_code_strength,
     table4_deletion_exons,
     table4_lookup_deletion,
@@ -164,7 +166,7 @@ def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
         }
     baseline = table4_lookup_deletion(gene, table4_exon)
     if (
-        not baseline.get("found")
+        baseline.get("status") != Table4LookupStatus.MATCHED
         or baseline.get("pvs1_strength") not in _UNQUANTIFIED_PATIENT_RNA_STRENGTH
     ):
         return {
@@ -338,16 +340,17 @@ def _evaluate_table4_rna_record(
 ) -> Optional[Dict[str, Any]]:
     """Convert one exact Table 4 RNA rule into an automatic decision."""
     if not table4_result or table4_result.get("status") in {
-        "not_in_source",
-        "not_applicable",
+        Table4RnaEvidenceStatus.NOT_IN_SOURCE,
+        Table4RnaEvidenceStatus.NOT_APPLICABLE,
     }:
         return None
 
     record = table4_result.get("record")
     status = str(table4_result.get("status") or "unknown")
-    if status not in {"eligible", "not_applicable_rna"} or not isinstance(
-        record, dict
-    ):
+    if status not in {
+        Table4RnaEvidenceStatus.ELIGIBLE,
+        Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA,
+    } or not isinstance(record, dict):
         return {
             "applies": False,
             "code": "PVS1_RNA",
@@ -370,7 +373,7 @@ def _evaluate_table4_rna_record(
     strength_value = record.get("strength")
     strength = str(strength_value) if strength_value is not None else None
     points = int(record.get("points") or 0)
-    is_not_applicable = status == "not_applicable_rna"
+    is_not_applicable = status == Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA
     source = str(table4_result.get("source_url") or "")
     version = str(table4_result.get("source_version") or "")
     result = {
@@ -538,7 +541,10 @@ def _evaluate_st2_record(
 
     baseline = table4_lookup_deletion(gene, table4_exon)
     baseline_strength = baseline.get("pvs1_strength")
-    if not baseline.get("found") or not baseline_strength:
+    if (
+        baseline.get("status") != Table4LookupStatus.MATCHED
+        or not baseline_strength
+    ):
         result["reason"] = (
             f"PVS1 (RNA) was not applied because the {gene} {table4_exon} "
             "transcript deletion has no applicable baseline PVS1 weight in Table 4. "
@@ -686,7 +692,10 @@ def resolve_pvs1_rna(
         )
     elif table4_evidence_result and table4_evidence_result.get(
         "status"
-    ) not in {"not_in_source", "not_applicable"}:
+    ) not in {
+        Table4RnaEvidenceStatus.NOT_IN_SOURCE,
+        Table4RnaEvidenceStatus.NOT_APPLICABLE,
+    }:
         source = "table4"
         source_result = table4_evidence_result
         decision = _evaluate_table4_rna_record(

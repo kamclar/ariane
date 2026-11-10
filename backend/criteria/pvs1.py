@@ -8,6 +8,7 @@ from backend.variant_processing.utils import (
 )
 from backend.reference_data.table4 import (
     TABLE4_SOURCE_ID,
+    Table4LookupStatus,
     parse_exon_from_deletion_notation,
     parse_exon_from_duplication_notation,
     parse_pvs1_code_strength,
@@ -110,7 +111,7 @@ def _evaluate_splice(
     spliceai_score: Optional[float],
 ) -> Dict:
     rule = table4_lookup_splice(gene, c_notation)
-    if rule["found"]:
+    if rule["status"] == Table4LookupStatus.MATCHED:
         pvs1_code = rule["pvs1_code"]
         strength, points, requires_rna = parse_pvs1_code_strength(pvs1_code)
         result["pvs1_code"] = pvs1_code
@@ -230,6 +231,17 @@ def _ptc_decision_path(
     )
 
 
+def _ptc_application_status(
+    lookup_status: Table4LookupStatus,
+    strength: Optional[str],
+) -> str:
+    if lookup_status == Table4LookupStatus.REVIEW_REQUIRED:
+        return "review_required"
+    if lookup_status == Table4LookupStatus.NOT_FOUND:
+        return "not_applied"
+    return "applied" if strength is not None else "not_applicable"
+
+
 def _evaluate_ptc(
     result: Dict,
     gene: str,
@@ -248,21 +260,20 @@ def _evaluate_ptc(
         get_amino_acid_position(p_notation),
         termination_aa,
     )
+    lookup_status = Table4LookupStatus(table4_result["status"])
+    strength = table4_result["pvs1_strength"]
     result.update({
         "exon": table4_result["exon"],
         "pvs1_code": table4_result.get("pvs1_code"),
         "reason": table4_result["reason"],
-        "review_required": table4_result.get("review_required", False),
-        "application_status": table4_result.get(
-            "application_status",
-            "not_applied",
-        ),
+        "review_required": lookup_status == Table4LookupStatus.REVIEW_REQUIRED,
+        "application_status": _ptc_application_status(lookup_status, strength),
     })
 
-    if table4_result["pvs1_strength"] is not None:
+    if strength is not None:
         result.update({
             "applies": True,
-            "strength": table4_result["pvs1_strength"],
+            "strength": strength,
             "points": table4_result["pvs1_points"],
             "requires_rna": False,
         })
@@ -315,7 +326,7 @@ def _evaluate_exon_deletion(
 ) -> Dict:
     exon = parse_exon_from_deletion_notation(c_notation, gene)
     rule = table4_lookup_deletion(gene, exon) if exon else None
-    if exon and rule and rule["found"]:
+    if exon and rule and rule["status"] == Table4LookupStatus.MATCHED:
         _apply_exon_rule(result, exon, rule)
         if result["applies"]:
             exon_length = _exon_length(gene, exon)
@@ -374,7 +385,7 @@ def _evaluate_exon_duplication(
 ) -> Dict:
     exon = parse_exon_from_duplication_notation(c_notation, gene)
     rule = table4_lookup_duplication(gene, exon, dup_type) if exon else None
-    if exon and rule and rule["found"]:
+    if exon and rule and rule["status"] == Table4LookupStatus.MATCHED:
         _apply_exon_rule(result, exon, rule)
         if result["applies"]:
             exon_length = _exon_length(gene, exon)
