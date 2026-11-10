@@ -8,7 +8,7 @@ from backend.domain.classification import CriterionDecision, CriterionDecisionSt
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.criteria.pvs1_rna import select_pvs1_rna_decision
 
 
 @dataclass(frozen=True)
@@ -29,25 +29,23 @@ class Pvs1CriteriaNode:
             spliceai_score=splice.effective_score,
             dup_type=ci.dup_type,
         )
-        pvs1_rna = evaluate_pvs1_rna(
+        rna_selection = select_pvs1_rna_decision(
             ci.gene,
             ci.c_notation,
             erepo_registry_result=ci.erepo_pvs1_rna_result,
             st2_evidence_result=ci.st2_pvs1_rna_result,
             table4_evidence_result=ci.table4_pvs1_rna_result,
         )
+        pvs1_rna = rna_selection.decision
         decisions: list[CriterionDecision] = []
         excluded: list[CriterionDecision] = []
         not_applicable: list[CriterionDecision] = []
         warnings: list[str] = []
         if pvs1_rna.get("applies"):
-            evidence_item_id = (
-                "erepo_pvs1_rna"
-                if pvs1_rna.get("application_status")
-                == "applied_from_approved_registry"
-                else "table4_pvs1_rna"
-                if pvs1_rna.get("application_status") == "applied_from_table4"
-                else "st2_pvs1_rna"
+            evidence_item_ids = (
+                (rna_selection.evidence_item_id,)
+                if rna_selection.evidence_item_id
+                else ()
             )
             decisions.append(
                 decision(
@@ -55,7 +53,7 @@ class Pvs1CriteriaNode:
                     pvs1_rna,
                     gene=ci.gene,
                     family_id=self.id,
-                    evidence_item_ids=(evidence_item_id,),
+                    evidence_item_ids=evidence_item_ids,
                 )
             )
         elif pvs1["applies"]:

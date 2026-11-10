@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections import Counter
 import re
 
+from backend.criteria.pvs1 import evaluate_pvs1
 from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.domain.pvs1_rna import select_pvs1_rna_source
 from backend.reference_data.table4 import (
     load_table4_data,
     lookup_table4_pvs1_rna,
@@ -92,3 +94,55 @@ def test_table4_rna_not_applicable_rows_do_not_acquire_points():
         assert result["record"]["source_code"] == "PVS1_N/A (RNA)"
         assert result["record"]["strength"] is None
         assert result["record"]["points"] == 0
+
+
+def test_rna_source_precedence_is_defined_once():
+    erepo = {"status": "eligible", "record": {}}
+    table4 = {"status": "eligible", "record": {}}
+    st2 = {"status": "eligible", "record": {}}
+
+    selected = select_pvs1_rna_source(erepo, table4, st2)
+    assert selected.source == "erepo"
+    assert selected.evidence_item_id == "erepo_pvs1_rna"
+    assert selected.replaces_prediction is True
+
+    selected = select_pvs1_rna_source(
+        {"status": "not_in_registry"},
+        table4,
+        st2,
+    )
+    assert selected.source == "table4"
+    assert selected.evidence_item_id == "table4_pvs1_rna"
+
+    selected = select_pvs1_rna_source(
+        {"status": "not_in_registry"},
+        {"status": "not_in_source"},
+        st2,
+    )
+    assert selected.source == "st2"
+    assert selected.evidence_item_id == "st2_pvs1_rna"
+
+
+def test_table4_rna_not_applicable_replaces_the_prediction_branch():
+    selected = select_pvs1_rna_source(
+        None,
+        {"status": "not_applicable_rna", "record": {}},
+        None,
+    )
+
+    assert selected.source == "table4"
+    assert selected.replaces_prediction is True
+
+
+def test_predictive_pvs1_branch_points_to_the_exact_rna_decision():
+    result = evaluate_pvs1(
+        "BRCA2",
+        "splice_site",
+        "p.?",
+        c_notation="c.476-2A>G",
+    )
+
+    assert result["applies"] is False
+    assert result["requires_rna"] is True
+    assert "evaluated by the PVS1_RNA branch" in result["reason"]
+    assert "outside the automated" not in result["reason"]

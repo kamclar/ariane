@@ -13,7 +13,7 @@ from typing import Any, Mapping
 from backend.domain.classification import NormalizedVariant
 from backend.policy.gene import spliceai_thresholds
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.criteria.pvs1_rna import select_pvs1_rna_decision
 from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
@@ -86,16 +86,14 @@ def _spliceai_gap(
 
     splice_status = dict(artifacts.get("spliceai_status") or {})
     if splice_status.get("replaced_by_curated_pvs1_rna") is True:
-        validated_rna = evaluate_pvs1_rna(
+        selection = select_pvs1_rna_decision(
             variant.gene,
             variant.c_notation,
             erepo_registry_result=artifacts.get("erepo_pvs1_rna_result"),
             st2_evidence_result=artifacts.get("st2_pvs1_rna_result"),
             table4_evidence_result=artifacts.get("table4_pvs1_rna_result"),
         )
-        if validated_rna.get("applies") or validated_rna.get(
-            "application_status"
-        ) == "not_applicable_from_table4":
+        if selection.replaces_prediction:
             return None
     score = artifacts.get("spliceai_score")
     status = str(splice_status.get("status") or "unavailable")

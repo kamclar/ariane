@@ -41,6 +41,35 @@ def get_amino_acid_position(p_notation: str) -> Optional[int]:
     return interval[0] if interval else None
 
 
+def get_termination_amino_acid_position(p_notation: str) -> Optional[int]:
+    """Return the absolute position of an introduced termination codon."""
+    text = (p_notation or "").replace("*", "Ter")
+    frameshift = re.search(
+        r"[A-Z][a-z]{2}(\d+)[A-Z][a-z]{2}fsTer(\d+)",
+        text,
+    )
+    if frameshift:
+        return int(frameshift.group(1)) + int(frameshift.group(2)) - 1
+
+    nonsense = re.search(r"[A-Z][a-z]{2}(\d+)Ter", text)
+    if nonsense:
+        return int(nonsense.group(1))
+
+    protein_delins = re.search(
+        r"[A-Z][a-z]{2}(\d+)"
+        r"(?:_[A-Z][a-z]{2}\d+)?"
+        r"delins((?:[A-Z][a-z]{2})*?)Ter",
+        text,
+    )
+    if protein_delins:
+        inserted_residues = re.findall(
+            r"[A-Z][a-z]{2}",
+            protein_delins.group(2),
+        )
+        return int(protein_delins.group(1)) + len(inserted_residues)
+    return None
+
+
 def overlapping_functional_domains(
     gene: str,
     amino_acid_interval: tuple[int, int],

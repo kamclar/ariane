@@ -8,14 +8,20 @@ Complex or insufficiently coded transcript results remain manual-review only.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import re
 from typing import Any, Dict, Optional
 
+from backend.domain.pvs1_rna import (
+    Pvs1RnaSourceSelection,
+    select_pvs1_rna_source,
+)
 from backend.reference_data.ps1_splice_evidence import (
     get_st2_source_metadata,
     get_st2_splice_record,
 )
 from backend.reference_data.table4 import (
+    TABLE4_SOURCE_ID,
     parse_pvs1_code_strength,
     table4_deletion_exons,
     table4_lookup_deletion,
@@ -284,6 +290,51 @@ def _evaluate_approved_erepo_record(
     }
 
 
+def _table4_rna_decision_path(
+    gene: str,
+    c_notation: str,
+    strength: Optional[str],
+    record: Dict[str, Any],
+    source: str,
+) -> Dict[str, Any]:
+    return {
+        "tree_id": "appendix-pvs1-splice",
+        "tree_version": "ENIGMA VCEP 1.2.0",
+        "branch_id": "table4-exact-rna-allele",
+        "criterion": "PVS1_RNA",
+        "outcome": "applied",
+        "outcome_node": "splice-table4-rna",
+        "steps": [
+            {
+                "node_id": "splice-table4-exact",
+                "question": "Exact allele-specific Table 4 rule?",
+                "result": "yes",
+                "observed": f"{gene} {c_notation}; {record.get('exon')}",
+            },
+            {
+                "node_id": "splice-table4-rna-code",
+                "question": "Observed transcript-level code?",
+                "result": str(strength),
+                "observed": str(record.get("source_code") or ""),
+            },
+        ],
+        "sources": [
+            {
+                "source_id": TABLE4_SOURCE_ID,
+                "label": "ENIGMA Specifications Table 4 v1.2",
+                "url": source,
+                "location": "Exact allele-specific splice rule",
+            },
+            {
+                "source_id": "enigma-v1.2-appendix",
+                "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
+                "url": APPENDIX_URL,
+                "location": "Appendix E",
+            },
+        ],
+    }
+
+
 def _evaluate_table4_rna_record(
     gene: str,
     c_notation: str,
@@ -296,61 +347,23 @@ def _evaluate_table4_rna_record(
     }:
         return None
 
-    specification = vcep_specification(gene)
     record = table4_result.get("record")
-    problems = []
     status = str(table4_result.get("status") or "unknown")
-    if status not in {"eligible", "not_applicable_rna"}:
-        problems.append(f"Table 4 evidence status is {status}")
-    if not isinstance(record, dict):
-        problems.append("the exact Table 4 RNA record is missing")
-        record = {}
-    if record.get("gene") != gene or record.get("c_notation") != c_notation:
-        problems.append("the Table 4 rule does not match the assessed allele exactly")
-    if record.get("code") != "PVS1_RNA":
-        problems.append("the Table 4 rule does not identify the PVS1 RNA family")
-    if record.get("evidence_mechanism") != "rna_splicing":
-        problems.append("the Table 4 rule does not identify an RNA mechanism")
-    if record.get("decision_scope") != "exact_allele":
-        problems.append("the Table 4 rule is not allele-specific")
-    if table4_result.get("source_version") != specification["version"]:
-        problems.append("the Table 4 rule does not use the active VCEP version")
-    if not table4_result.get("source_checksum"):
-        problems.append("the Table 4 source checksum is missing")
-
-    strength, points, requires_rna = parse_pvs1_code_strength(
-        str(record.get("source_code") or "")
-    )
-    if not requires_rna:
-        problems.append("the exact Table 4 source code is not RNA-derived")
-    if record.get("strength") != strength or record.get("points") != points:
-        problems.append("the parsed Table 4 strength and points are inconsistent")
-    is_not_applicable = status == "not_applicable_rna"
-    if is_not_applicable != (strength is None):
-        problems.append("the Table 4 RNA application status is inconsistent")
-
-    source = str(table4_result.get("source_url") or specification["url"])
-    source_record = {
-        **record,
-        "dataset": table4_result.get("source_id"),
-        "dataset_version": table4_result.get("source_version"),
-        "dataset_sha256": table4_result.get("source_checksum"),
-    }
-    if problems:
+    if status not in {"eligible", "not_applicable_rna"} or not isinstance(
+        record, dict
+    ):
         return {
             "applies": False,
             "code": "PVS1_RNA",
             "strength": None,
             "points": 0,
             "reason": (
-                "PVS1 (RNA) was not applied automatically because the exact "
-                "Table 4 candidate failed runtime validation: "
-                + "; ".join(problems)
-                + "."
+                "PVS1 (RNA) was not applied because the Table 4 provider "
+                f"returned an incomplete exact-allele decision ({status})."
             ),
-            "source": source,
-            "source_record": source_record,
-            "table4_exon": record.get("exon"),
+            "source": str(table4_result.get("source_url") or ""),
+            "source_record": record,
+            "table4_exon": None,
             "appendix_branch": "table4_exact_rna_requires_review",
             "application_status": "review_required",
             "review_required": True,
@@ -358,12 +371,33 @@ def _evaluate_table4_rna_record(
             "manual_review_prefill": {},
         }
 
+    strength_value = record.get("strength")
+    strength = str(strength_value) if strength_value is not None else None
+    points = int(record.get("points") or 0)
+    is_not_applicable = status == "not_applicable_rna"
+    source = str(table4_result.get("source_url") or "")
+    version = str(table4_result.get("source_version") or "")
+    result = {
+        "code": "PVS1_RNA",
+        "source": source,
+        "source_record": {
+            **record,
+            "dataset": table4_result.get("source_id"),
+            "dataset_version": version,
+            "dataset_sha256": table4_result.get("source_checksum"),
+        },
+        "table4_exon": record.get("exon"),
+        "review_required": False,
+        "prediction_replaced": True,
+        "manual_review_prefill": {},
+    }
+
     notes = str(record.get("notes") or "").strip()
     note_text = f" Table 4 note: {notes}." if notes else ""
     if is_not_applicable:
         return {
+            **result,
             "applies": False,
-            "code": "PVS1_RNA",
             "strength": None,
             "points": 0,
             "reason": (
@@ -371,95 +405,38 @@ def _evaluate_table4_rna_record(
                 f"allele {gene} {c_notation} based on observed transcript "
                 f"impact.{note_text}"
             ),
-            "source": source,
-            "source_record": source_record,
-            "table4_exon": record.get("exon"),
             "appendix_branch": "table4_exact_rna_not_applicable",
             "application_status": "not_applicable_from_table4",
-            "review_required": False,
-            "prediction_replaced": True,
-            "manual_review_prefill": {},
         }
 
     return {
+        **result,
         "applies": True,
-        "code": "PVS1_RNA",
         "strength": strength,
         "points": points,
         "reason": (
-            f"ENIGMA Specifications Table 4 v{specification['version']} assigns "
+            f"ENIGMA Specifications Table 4 v{version} assigns "
             f"{record['source_code']} to the exact allele {gene} {c_notation} "
             f"based on observed molecular impact at transcript level.{note_text}"
         ),
-        "source": source,
-        "source_record": source_record,
-        "table4_exon": record.get("exon"),
         "appendix_branch": "table4_exact_allele_rna_decision",
         "application_status": "applied_from_table4",
-        "review_required": False,
-        "prediction_replaced": True,
-        "manual_review_prefill": {},
-        "decision_path": {
-            "tree_id": "appendix-pvs1-splice",
-            "tree_version": "ENIGMA VCEP 1.2.0",
-            "branch_id": "table4-exact-rna-allele",
-            "criterion": "PVS1_RNA",
-            "outcome": "applied",
-            "outcome_node": "splice-table4-rna",
-            "steps": [
-                {
-                    "node_id": "splice-table4-exact",
-                    "question": "Exact allele-specific Table 4 rule?",
-                    "result": "yes",
-                    "observed": f"{gene} {c_notation}; {record.get('exon')}",
-                },
-                {
-                    "node_id": "splice-table4-rna-code",
-                    "question": "Observed transcript-level code?",
-                    "result": str(strength),
-                    "observed": str(record.get("source_code") or ""),
-                },
-            ],
-            "sources": [
-                {
-                    "source_id": "enigma-v1.2-table4",
-                    "label": "ENIGMA Specifications Table 4 v1.2",
-                    "url": source,
-                    "location": "Exact allele-specific splice rule",
-                },
-                {
-                    "source_id": "enigma-v1.2-appendix",
-                    "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
-                    "url": APPENDIX_URL,
-                    "location": "Appendix E",
-                },
-            ],
-        },
+        "decision_path": _table4_rna_decision_path(
+            gene,
+            c_notation,
+            strength,
+            record,
+            source,
+        ),
     }
-def evaluate_pvs1_rna(
+
+
+def _evaluate_st2_record(
     gene: str,
     c_notation: str,
-    erepo_registry_result: Optional[Dict[str, Any]] = None,
     st2_evidence_result: Optional[Dict[str, Any]] = None,
-    table4_evidence_result: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Apply exact VCEP RNA decisions or prepare structured expert review."""
-    curated_result = _evaluate_approved_erepo_record(
-        gene,
-        c_notation,
-        erepo_registry_result,
-    )
-    if curated_result is not None:
-        return curated_result
-
-    table4_result = _evaluate_table4_rna_record(
-        gene,
-        c_notation,
-        table4_evidence_result,
-    )
-    if table4_result is not None:
-        return table4_result
-
+    """Evaluate ST2 after higher-priority exact VCEP sources were absent."""
     specification = vcep_specification(gene)
     result: Dict[str, Any] = {
         "applies": False,
@@ -693,3 +670,81 @@ def evaluate_pvs1_rna(
             "no points were applied automatically."
         )
     return result
+
+
+@dataclass(frozen=True)
+class Pvs1RnaSelection:
+    """A selected RNA source and its evaluated criterion decision."""
+
+    source_selection: Pvs1RnaSourceSelection
+    decision: Dict[str, Any]
+
+    @property
+    def source(self) -> Optional[str]:
+        return self.source_selection.source
+
+    @property
+    def evidence_item_id(self) -> Optional[str]:
+        return self.source_selection.evidence_item_id
+
+    @property
+    def replaces_prediction(self) -> bool:
+        return bool(self.decision.get("applies")) or (
+            self.decision.get("application_status")
+            == "not_applicable_from_table4"
+        )
+
+
+def select_pvs1_rna_decision(
+    gene: str,
+    c_notation: str,
+    erepo_registry_result: Optional[Dict[str, Any]] = None,
+    table4_evidence_result: Optional[Dict[str, Any]] = None,
+    st2_evidence_result: Optional[Dict[str, Any]] = None,
+) -> Pvs1RnaSelection:
+    """Select one RNA source using ERepo, Table 4, then ST2 precedence."""
+    st2_result = (
+        st2_evidence_result
+        if st2_evidence_result is not None
+        else lookup_st2_pvs1_rna_evidence(gene, c_notation)
+    )
+    source_selection = select_pvs1_rna_source(
+        erepo_registry_result,
+        table4_evidence_result,
+        st2_result,
+    )
+    if source_selection.source == "erepo":
+        decision = _evaluate_approved_erepo_record(
+            gene,
+            c_notation,
+            erepo_registry_result,
+        )
+    elif source_selection.source == "table4":
+        decision = _evaluate_table4_rna_record(
+            gene,
+            c_notation,
+            table4_evidence_result,
+        )
+    else:
+        decision = _evaluate_st2_record(gene, c_notation, st2_result)
+
+    if decision is None:
+        raise RuntimeError("Selected PVS1 RNA source returned no decision")
+    return Pvs1RnaSelection(source_selection, decision)
+
+
+def evaluate_pvs1_rna(
+    gene: str,
+    c_notation: str,
+    erepo_registry_result: Optional[Dict[str, Any]] = None,
+    st2_evidence_result: Optional[Dict[str, Any]] = None,
+    table4_evidence_result: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Return the selected PVS1 RNA decision."""
+    return select_pvs1_rna_decision(
+        gene,
+        c_notation,
+        erepo_registry_result=erepo_registry_result,
+        table4_evidence_result=table4_evidence_result,
+        st2_evidence_result=st2_evidence_result,
+    ).decision

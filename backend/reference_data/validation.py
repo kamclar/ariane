@@ -152,6 +152,13 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
                         f"Required ENIGMA Table 4 dataset has unknown PVS1 code at "
                         f"{section}/{gene}/{key}: {entry.get('pvs1_code')!r}"
                     )
+                if section == "ptc_rules" and "(RNA)" in str(
+                    entry.get("pvs1_code") or ""
+                ):
+                    raise RuntimeError(
+                        "Required ENIGMA Table 4 PTC rule unexpectedly depends "
+                        f"on RNA evidence at {gene}/{key}"
+                    )
                 if section == "ptc_rules" and entry.get("pm5_code") not in allowed_pm5_codes:
                     raise RuntimeError(
                         f"Required ENIGMA Table 4 dataset has unknown PM5 code at "

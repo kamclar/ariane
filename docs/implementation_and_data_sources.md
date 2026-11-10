@@ -763,6 +763,12 @@ Audit uvádí stav `not_applicable` a
 `replaced_by_curated_pvs1_rna=true`. Výpadek SpliceAI proto nemůže zablokovat
 výsledek, který už stojí na přímé schválené RNA evidenci.
 
+Při souběhu zdrojů se používá jedno explicitní pořadí: schválená aktuální ERepo
+assertion, přesné alelové rozhodnutí Table 4 a potom jednoznačná větev ST2.
+Výběr zdroje je společný pro pravidlo PVS1 RNA, rozhodnutí o potřebě SpliceAI i
+kontrolu úplnosti výsledku. Audit vždy uvádí vybraný zdroj a jeho vlastní verzi
+a checksum.
+
 Stejný postup se používá pro přesné záznamy ST2 označené jako `last base`.
 Poslední nukleotid exonu se neposuzuje jako kanonická donorová nebo akceptorová
 pozice `+/-1,2`. Automatické body vzniknou jen při splnění všech výše uvedených

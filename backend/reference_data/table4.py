@@ -5,12 +5,13 @@ from __future__ import annotations
 from functools import lru_cache
 import hashlib
 import json
-from pathlib import Path
 import re
 from typing import Any, Dict, NamedTuple, Optional
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
-TABLE4_JSON_PATH = BACKEND_DIR / "data" / "enigma_table4.json"
+from backend.reference_data.paths import TABLE4_PATH
+
+
+TABLE4_SOURCE_ID = "enigma-v1.2-table4"
 
 
 class CriterionWeight(NamedTuple):
@@ -46,13 +47,13 @@ PM5_WEIGHTS = {
 @lru_cache(maxsize=1)
 def load_table4_data() -> dict[str, Any]:
     """Load Table 4 explicitly or on first lookup, never during module import."""
-    if not TABLE4_JSON_PATH.is_file():
-        raise RuntimeError(f"Required ENIGMA Table 4 dataset is missing: {TABLE4_JSON_PATH}")
+    if not TABLE4_PATH.is_file():
+        raise RuntimeError(f"Required ENIGMA Table 4 dataset is missing: {TABLE4_PATH}")
     try:
-        value = json.loads(TABLE4_JSON_PATH.read_text(encoding="utf-8"))
+        value = json.loads(TABLE4_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(
-            f"Required ENIGMA Table 4 dataset cannot be loaded: {TABLE4_JSON_PATH}: {exc}"
+            f"Required ENIGMA Table 4 dataset cannot be loaded: {TABLE4_PATH}: {exc}"
         ) from exc
     if not isinstance(value, dict):
         raise RuntimeError("Required ENIGMA Table 4 dataset must be a JSON object")
@@ -124,7 +125,12 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
 @lru_cache(maxsize=1)
 def table4_checksum() -> str:
     """Return the checksum of the exact Table 4 snapshot used at runtime."""
-    return hashlib.sha256(TABLE4_JSON_PATH.read_bytes()).hexdigest()
+    return hashlib.sha256(TABLE4_PATH.read_bytes()).hexdigest()
+
+
+def table4_source_url() -> str:
+    """Return the source URL recorded in the pinned Table 4 snapshot."""
+    return str(load_table4_data().get("source_url") or "")
 
 
 def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
@@ -138,7 +144,7 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
     data = load_table4_data()
     source_url = str(data.get("source_url") or "")
     provenance = {
-        "source_id": "enigma-table4-v1.2",
+        "source_id": TABLE4_SOURCE_ID,
         "source_version": str(data.get("version") or ""),
         "source_checksum": table4_checksum(),
         "source_url": source_url,
@@ -203,7 +209,7 @@ def parse_pvs1_code_strength(pvs1_code: Optional[str]) -> CriterionWeight:
     if pvs1_code is None:
         return CriterionWeight(None, 0)
 
-    requires_rna = "(RNA)" in pvs1_code or "RNA" in pvs1_code
+    requires_rna = "(RNA)" in pvs1_code
     code = pvs1_code.replace(" (RNA)", "").replace("(RNA)", "").strip()
     strength, points = PVS1_WEIGHTS.get(code, (None, 0))
     return CriterionWeight(strength, points, requires_rna)
@@ -218,64 +224,42 @@ def parse_pm5_code_strength(pm5_code: Optional[str]) -> CriterionWeight:
 def table4_lookup_initiation(gene: str) -> Dict:
     """Return the gene-level ENIGMA Table 4 initiation-codon rule."""
     entry = load_table4_data().get("initiation_rules", {}).get(gene)
-    if not isinstance(entry, dict) or not entry:
-        return {
-            "found": False,
-            "pvs1_code": None,
-            "pvs1_strength": None,
-            "pvs1_points": 0,
-            "exon": None,
-            "notes": "",
-            "source_row": None,
-            "alternative_start_assessed": None,
-            "alternative_start_conclusion": None,
-            "nearest_alternative_start": None,
-            "upstream_pathogenic_evidence": None,
-            "functional_domain_impact": None,
-            "appendix_figure": None,
-            "reason": f"No Table 4 initiation-codon rule for {gene}",
-        }
+    rule = entry if isinstance(entry, dict) else {}
+    result = {
+        "found": False,
+        "pvs1_code": rule.get("pvs1_code"),
+        "pvs1_strength": None,
+        "pvs1_points": 0,
+        "exon": rule.get("exon"),
+        "notes": rule.get("notes", ""),
+        "source_row": rule.get("source_row"),
+        "alternative_start_assessed": rule.get("alternative_start_assessed"),
+        "alternative_start_conclusion": rule.get("alternative_start_conclusion"),
+        "nearest_alternative_start": rule.get("nearest_alternative_start"),
+        "upstream_pathogenic_evidence": rule.get("upstream_pathogenic_evidence"),
+        "functional_domain_impact": rule.get("functional_domain_impact"),
+        "appendix_figure": rule.get("appendix_figure"),
+        "reason": f"No Table 4 initiation-codon rule for {gene}",
+    }
+    if not rule:
+        return result
 
-    pvs1_code = entry.get("pvs1_code")
+    pvs1_code = rule.get("pvs1_code")
     strength, points, requires_rna = parse_pvs1_code_strength(pvs1_code)
     if requires_rna or strength is None:
-        return {
-            "found": False,
-            "pvs1_code": pvs1_code,
-            "pvs1_strength": None,
-            "pvs1_points": 0,
-            "exon": entry.get("exon"),
-            "notes": entry.get("notes", ""),
-            "source_row": entry.get("source_row"),
-            "alternative_start_assessed": entry.get("alternative_start_assessed"),
-            "alternative_start_conclusion": entry.get("alternative_start_conclusion"),
-            "nearest_alternative_start": entry.get("nearest_alternative_start"),
-            "upstream_pathogenic_evidence": entry.get("upstream_pathogenic_evidence"),
-            "functional_domain_impact": entry.get("functional_domain_impact"),
-            "appendix_figure": entry.get("appendix_figure"),
-            "reason": (
-                f"Table 4 initiation-codon rule for {gene} has an unsupported "
-                f"code: {pvs1_code!r}"
-            ),
-        }
-    return {
-        "found": True,
-        "pvs1_code": pvs1_code,
-        "pvs1_strength": strength,
-        "pvs1_points": points,
-        "exon": entry.get("exon"),
-        "notes": entry.get("notes", ""),
-        "source_row": entry.get("source_row"),
-        "alternative_start_assessed": entry.get("alternative_start_assessed"),
-        "alternative_start_conclusion": entry.get("alternative_start_conclusion"),
-        "nearest_alternative_start": entry.get("nearest_alternative_start"),
-        "upstream_pathogenic_evidence": entry.get("upstream_pathogenic_evidence"),
-        "functional_domain_impact": entry.get("functional_domain_impact"),
-        "appendix_figure": entry.get("appendix_figure"),
-        "reason": (
-            f"ENIGMA Table 4 assigns {pvs1_code} to {gene} initiation-codon variants"
-        ),
-    }
+        result["reason"] = (
+            f"Table 4 initiation-codon rule for {gene} has an unsupported "
+            f"code: {pvs1_code!r}"
+        )
+        return result
+
+    result["found"] = True
+    result["pvs1_strength"] = strength
+    result["pvs1_points"] = points
+    result["reason"] = (
+        f"ENIGMA Table 4 assigns {pvs1_code} to {gene} initiation-codon variants"
+    )
+    return result
 
 
 def _select_ptc_codes(

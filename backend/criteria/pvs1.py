@@ -1,12 +1,13 @@
 from typing import Optional, Dict, List
-import re
 
 from backend.variant_processing.utils import (
     get_amino_acid_position,
     get_cds_position_from_c_notation,
     get_intron_offset_from_c_notation,
+    get_termination_amino_acid_position,
 )
 from backend.reference_data.table4 import (
+    TABLE4_SOURCE_ID,
     parse_exon_from_deletion_notation,
     parse_exon_from_duplication_notation,
     parse_pvs1_code_strength,
@@ -15,6 +16,7 @@ from backend.reference_data.table4 import (
     table4_lookup_duplication,
     table4_lookup_pvs1_ptc,
     table4_lookup_splice,
+    table4_source_url,
 )
 from backend.policy.gene import (
     decision_asset,
@@ -62,36 +64,14 @@ def _pvs1_path(
                 "figure_url": figure_url,
             },
             {
-                "source_id": "enigma-v1.2-table4",
+                "source_id": TABLE4_SOURCE_ID,
                 "label": "ENIGMA Specifications Table 4 v1.2",
-                "url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
+                "url": table4_source_url(),
                 "location": "Exact gene/exon rule",
             },
         ],
     }
 
-
-def _termination_aa_position(p_notation: str) -> Optional[int]:
-    """Return the predicted stop position for consequence provenance."""
-    text = (p_notation or "").replace("*", "Ter")
-    frameshift = re.search(r"[A-Z][a-z]{2}(\d+)[A-Z][a-z]{2}fsTer(\d+)", text)
-    if frameshift:
-        return int(frameshift.group(1)) + int(frameshift.group(2)) - 1
-    nonsense = re.search(r"[A-Z][a-z]{2}(\d+)Ter", text)
-    if nonsense:
-        return int(nonsense.group(1))
-    protein_delins = re.search(
-        r"[A-Z][a-z]{2}(\d+)"
-        r"(?:_[A-Z][a-z]{2}\d+)?"
-        r"delins((?:[A-Z][a-z]{2})*?)Ter",
-        text,
-    )
-    if protein_delins:
-        inserted_residues = re.findall(
-            r"[A-Z][a-z]{2}", protein_delins.group(2)
-        )
-        return int(protein_delins.group(1)) + len(inserted_residues)
-    return None
 
 LOF_TYPES = frozenset({
     "frameshift",
@@ -142,8 +122,8 @@ def _evaluate_splice(
         elif requires_rna:
             result["requires_rna"] = True
             result["reason"] = (
-                f"{rule['reason']} - RNA confirmation required; "
-                "PVS1 (RNA) is outside the automated Module 1 scope"
+                f"{rule['reason']} - the exact RNA-derived rule is evaluated "
+                "by the PVS1_RNA branch"
             )
         else:
             result.update({
@@ -261,7 +241,7 @@ def _evaluate_ptc(
         result["reason"] = f"Could not parse CDS position from {c_notation}"
         return result
 
-    termination_aa = _termination_aa_position(p_notation)
+    termination_aa = get_termination_amino_acid_position(p_notation)
     table4_result = table4_lookup_pvs1_ptc(
         gene,
         cds_pos,
@@ -279,10 +259,7 @@ def _evaluate_ptc(
         ),
     })
 
-    if table4_result.get("requires_rna"):
-        result["requires_rna"] = True
-        result["reason"] += " - PVS1 (RNA) is outside the automated Module 1 scope"
-    elif table4_result["pvs1_strength"] is not None:
+    if table4_result["pvs1_strength"] is not None:
         result.update({
             "applies": True,
             "strength": table4_result["pvs1_strength"],

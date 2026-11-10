@@ -27,13 +27,17 @@ from backend.policy.spliceai import (
     spliceai_required_for_classification,
 )
 from backend.domain.indel import is_indel_allele
+from backend.domain.pvs1_rna import select_pvs1_rna_source
 from backend.reference_data.table9 import (
     TABLE9_JSON_PATH,
     load_table9_data,
     table9_checksum,
     table9_lookup_ps3_bs3,
 )
-from backend.reference_data.table4 import lookup_table4_pvs1_rna
+from backend.reference_data.table4 import (
+    TABLE4_SOURCE_ID,
+    lookup_table4_pvs1_rna,
+)
 
 
 _BAYESDEL_LOOKUP_UNAVAILABLE = object()
@@ -281,7 +285,7 @@ class Table4Pvs1RnaEvidenceNode:
                 else EvidenceStatus.UNAVAILABLE
             ),
             value=value,
-            source_id=str(value.get("source_id") or "enigma-table4-v1.2"),
+            source_id=str(value.get("source_id") or TABLE4_SOURCE_ID),
             source_version=str(value.get("source_version") or ""),
             source_checksum=str(value.get("source_checksum") or ""),
             reason=str(value.get("reason") or ""),
@@ -378,27 +382,21 @@ class SpliceAiEvidenceNode:
         variant = _request(inputs).variant
         candidates = tuple(inputs["ps1_reference_candidates"])
         table4_rna = inputs["table4_pvs1_rna_evidence"]
-        curated_rna = inputs["erepo_pvs1_rna_evidence"]
+        erepo_rna = inputs["erepo_pvs1_rna_evidence"]
         st2_rna = inputs["st2_pvs1_rna_evidence"]
-        erepo_pvs1_rna = (
-            curated_rna.status == EvidenceStatus.AVAILABLE
-            and isinstance(curated_rna.value, Mapping)
-            and curated_rna.value.get("status") == "eligible"
+        selection = select_pvs1_rna_source(
+            erepo_result=(
+                erepo_rna.value if isinstance(erepo_rna.value, dict) else None
+            ),
+            table4_result=(
+                table4_rna.value if isinstance(table4_rna.value, dict) else None
+            ),
+            st2_result=(
+                st2_rna.value if isinstance(st2_rna.value, dict) else None
+            ),
         )
-        st2_pvs1_rna = (
-            st2_rna.status == EvidenceStatus.AVAILABLE
-            and isinstance(st2_rna.value, Mapping)
-            and st2_rna.value.get("status") == "eligible"
-        )
-        table4_pvs1_rna = (
-            table4_rna.status == EvidenceStatus.AVAILABLE
-            and isinstance(table4_rna.value, Mapping)
-            and table4_rna.value.get("status")
-            in {"eligible", "not_applicable_rna"}
-        )
-        curated_pvs1_rna = (
-            erepo_pvs1_rna or table4_pvs1_rna or st2_pvs1_rna
-        )
+        curated_pvs1_rna = selection.replaces_prediction
+        pvs1_rna_source = selection.source
         required = (
             spliceai_required_for_classification(variant.variant_type)
             and not curated_pvs1_rna
@@ -421,11 +419,7 @@ class SpliceAiEvidenceNode:
                     "status": "not_applicable",
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
-                    "pvs1_rna_source": (
-                        "erepo" if erepo_pvs1_rna else "table4"
-                        if table4_pvs1_rna else "st2"
-                        if st2_pvs1_rna else None
-                    ),
+                    "pvs1_rna_source": pvs1_rna_source,
                     "retryable": False,
                     "reason": reason,
                 },
@@ -439,11 +433,7 @@ class SpliceAiEvidenceNode:
                     "evidence_status": evidence.status.value,
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
-                    "pvs1_rna_source": (
-                        "erepo" if erepo_pvs1_rna else "table4"
-                        if table4_pvs1_rna else "st2"
-                        if st2_pvs1_rna else None
-                    ),
+                    "pvs1_rna_source": pvs1_rna_source,
                 },
             )
 

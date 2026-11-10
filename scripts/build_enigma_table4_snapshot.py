@@ -323,7 +323,7 @@ def build_snapshot(source: Path) -> dict[str, Any]:
                 "pvs1_code": code,
                 "notes": structural_notes,
             }
-        elif marker.startswith("DUP ") or marker == "DUP 11":
+        elif marker.startswith("DUP "):
             arrangement = str(row[Column.SECONDARY_VALUE]).strip()
             duplication_rules[gene].setdefault(exon, {})[arrangement] = {
                 "pvs1_code": code,
