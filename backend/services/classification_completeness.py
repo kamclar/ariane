@@ -66,10 +66,13 @@ def _spliceai_gap(
         validated_rna = evaluate_pvs1_rna(
             variant.gene,
             variant.c_notation,
-            artifacts.get("erepo_pvs1_rna_result"),
-            artifacts.get("st2_pvs1_rna_result"),
+            erepo_registry_result=artifacts.get("erepo_pvs1_rna_result"),
+            st2_evidence_result=artifacts.get("st2_pvs1_rna_result"),
+            table4_evidence_result=artifacts.get("table4_pvs1_rna_result"),
         )
-        if validated_rna.get("applies"):
+        if validated_rna.get("applies") or validated_rna.get(
+            "application_status"
+        ) == "not_applicable_from_table4":
             return None
     score = artifacts.get("spliceai_score")
     status = str(splice_status.get("status") or "unavailable")

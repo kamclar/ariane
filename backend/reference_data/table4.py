@@ -6,6 +6,7 @@
 from typing import Optional, Dict
 from pathlib import Path
 from functools import lru_cache
+import hashlib
 import json
 import re
 
@@ -127,6 +128,83 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
 
     result["reason"] = f"No Table 4 entry for {gene} {c_notation}"
     return result
+
+
+@lru_cache(maxsize=1)
+def table4_checksum() -> str:
+    """Return the checksum of the exact Table 4 snapshot used at runtime."""
+    return hashlib.sha256(TABLE4_JSON_PATH.read_bytes()).hexdigest()
+
+
+def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
+    """Return an exact allele-specific Table 4 RNA decision, if present.
+
+    Table 4 uses the ``(RNA)`` suffix only where the VCEP code is based on
+    observed molecular impact at transcript level.  The source code therefore
+    already contains the final allele-specific strength; this lookup exposes
+    that reviewed fact without re-interpreting individual publications.
+    """
+    data = load_table4_data()
+    source_url = str(data.get("source_url") or "")
+    provenance = {
+        "source_id": "enigma-table4-v1.2",
+        "source_version": str(data.get("version") or ""),
+        "source_checksum": table4_checksum(),
+        "source_url": source_url,
+    }
+    result = table4_lookup_splice(gene, c_notation)
+    if not result.get("found"):
+        return {
+            "status": "not_in_source",
+            "record": None,
+            "reason": str(result.get("reason") or "No exact Table 4 splice rule"),
+            **provenance,
+        }
+
+    source_code = str(result.get("pvs1_code") or "")
+    strength, points, requires_rna = parse_pvs1_code_strength(source_code)
+    if not requires_rna:
+        return {
+            "status": "not_applicable",
+            "record": None,
+            "reason": (
+                "The exact Table 4 rule is predictive rather than an observed "
+                "RNA decision."
+            ),
+            **provenance,
+        }
+
+    record = {
+        "gene": gene,
+        "c_notation": c_notation,
+        "exon": result.get("exon"),
+        "code": "PVS1_RNA",
+        "source_code": source_code,
+        "strength": strength,
+        "points": points,
+        "notes": str(result.get("notes") or ""),
+        "evidence_mechanism": "rna_splicing",
+        "decision_scope": "exact_allele",
+    }
+    if strength is None:
+        return {
+            "status": "not_applicable_rna",
+            "record": record,
+            "reason": (
+                f"ENIGMA Table 4 assigns {source_code} to the exact allele "
+                f"{gene} {c_notation}."
+            ),
+            **provenance,
+        }
+    return {
+        "status": "eligible",
+        "record": record,
+        "reason": (
+            f"ENIGMA Table 4 assigns {source_code} to the exact allele "
+            f"{gene} {c_notation} based on observed transcript impact."
+        ),
+        **provenance,
+    }
 
 
 def parse_pvs1_code_strength(pvs1_code: str) -> tuple:

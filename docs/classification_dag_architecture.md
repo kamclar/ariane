@@ -20,7 +20,7 @@ Pravidlové uzly jsou rozdělené podle odpovědnosti v
 | `context.py` | SpliceAI kontext a porovnání provenance s Table 9 |
 | `population.py` | BA1, BS1, PM2 a populační větev exonových CNV |
 | `functional.py` | Kalibrovaná funkční evidence PS3 a BS3 z Table 9 |
-| `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA z přesného schváleného ERepo registru nebo z jednoznačné kurátorované větve ST2, ostatní RNA podklady pro odbornou revizi |
+| `pvs1.py` | PVS1 a PM5 PTC; PVS1 RNA z přesného Table 4 rozhodnutí, schváleného ERepo registru nebo z jednoznačné kurátorované větve ST2, ostatní RNA podklady pro odbornou revizi |
 | `clinical.py` | Klinické LR PP4/BP5 a proteinové PS1 |
 | `bioinformatic.py` | Figure 1A, PP3, BP4, BP1 a BP7 |
 | `policy.py` | DAG uzly pro interakce evidence a předání do sdílené kombinační politiky |
@@ -34,8 +34,8 @@ Původní kompatibilní `native.py` i starý sekvenční klasifikátor byly odst
 Klasifikační evidence se již nezískává v `main.py`. Samostatné provider uzly
 získávají souřadnice, SpliceAI, BayesDel, gnomAD, Table 9, klinické LR, exonové
 CNV, důležité aminokyselinové pozice, podklady proteinového PS1, schválené
-PVS1 RNA assertions z lokálního ERepo registru a přesná ST2/ST3 RNA data s
-Table 4 kontextem. Každý zdroj
+PVS1 RNA assertions z lokálního ERepo registru, přesná alelová RNA rozhodnutí z
+Table 4 a ST2/ST3 RNA data s Table 4 kontextem. Každý zdroj
 vrací `EvidenceItem` s explicitním stavem, důvodem a provenance. Sestavovací uzel
 vytvoří jediný neměnný `EvidenceBundle`, ze kterého čtou pravidlové uzly.
 
@@ -137,7 +137,9 @@ Výjimkou není živé API, ale samostatný checksumovaný registr přesných ER
 PVS1 RNA assertions. Ten je klasifikačním zdrojem se svou verzí a je součástí
 fingerprintu klasifikátoru.
 
-Přesná schválená PVS1 RNA assertion uzavírá splice mechanismus přímou evidencí.
+Přesná schválená PVS1 RNA assertion nebo alelové RNA rozhodnutí v Table 4
+uzavírá splice mechanismus přímou evidencí. To platí i pro Table 4 RNA N/A,
+které nepřidává body, ale uzavírá predikční větev.
 Provider SpliceAI v takovém případě vrátí `NOT_APPLICABLE` a Figure 1A se
 nevyhodnotí. Nejde o chybějící povinný vstup ani o náhradu chybějícího skóre.
 
@@ -302,7 +304,7 @@ stručného klinického výsledku.
 9. sestavení a validace `EvidenceBundle`;
 10. populační BA1, BS1 a PM2;
 11. Table 9 PS3 a BS3;
-12. PVS1 a PM5 PTC, včetně nebodovaných podkladů pro manuální PVS1 RNA revizi;
+12. PVS1 a PM5 PTC, včetně přesných Table 4 RNA rozhodnutí a nebodovaných podkladů pro manuální PVS1 RNA revizi;
 13. klinické LR PP4 a BP5;
 14. proteinové PS1;
 15. Figure 1A PP3, BP4, BP7 a BP1;

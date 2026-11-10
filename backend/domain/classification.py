@@ -56,6 +56,7 @@ class ClassificationInputs:
     gnomad_data: Optional[Mapping[str, Any]] = None
     frequency_policy: Optional[Mapping[str, Any]] = None
     table9_result: Optional[Mapping[str, Any]] = None
+    table4_pvs1_rna_result: Optional[Mapping[str, Any]] = None
     erepo_pvs1_rna_result: Optional[Mapping[str, Any]] = None
     st2_pvs1_rna_result: Optional[Mapping[str, Any]] = None
     pp4_bp5_result: Optional[Mapping[str, Any]] = None
@@ -98,6 +99,7 @@ class ClassificationInputs:
             ("bayesdel", "protein_prediction", self.bayesdel_score),
             ("gnomad", "population_frequency", self.gnomad_data),
             ("clinical_lr", "clinical_likelihood_ratio", self.pp4_bp5_result),
+            ("table4_pvs1_rna", "vcep_allele_rna_rule", self.table4_pvs1_rna_result),
             ("erepo_pvs1_rna", "curated_rna_assertion", self.erepo_pvs1_rna_result),
             ("st2_pvs1_rna", "curated_rna_dataset", self.st2_pvs1_rna_result),
             ("protein_ps1", "protein_reference", self.ps1_result),

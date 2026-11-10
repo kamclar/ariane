@@ -33,6 +33,7 @@ from backend.reference_data.table9 import (
     table9_checksum,
     table9_lookup_ps3_bs3,
 )
+from backend.reference_data.table4 import lookup_table4_pvs1_rna
 
 
 _BAYESDEL_LOOKUP_UNAVAILABLE = object()
@@ -256,6 +257,53 @@ class ErepoPvs1RnaEvidenceNode:
 
 
 @dataclass(frozen=True)
+class Table4Pvs1RnaEvidenceNode:
+    """Provide exact allele-specific VCEP Table 4 RNA decisions."""
+
+    id: str = "provider.enigma.table4_pvs1_rna"
+    version: str = "1"
+    requires: frozenset[str] = frozenset({"classification_request"})
+    provides: frozenset[str] = frozenset({"table4_pvs1_rna_evidence"})
+
+    def evaluate(self, context, inputs) -> NodeResult:
+        variant = _request(inputs).variant
+        value = lookup_table4_pvs1_rna(variant.gene, variant.c_notation)
+        status = str(value.get("status") or "unavailable")
+        exact_rna_decision = status in {"eligible", "not_applicable_rna"}
+        evidence = EvidenceItem(
+            id="table4_pvs1_rna",
+            kind="vcep_allele_rna_rule",
+            status=(
+                EvidenceStatus.AVAILABLE
+                if exact_rna_decision
+                else EvidenceStatus.NOT_APPLICABLE
+                if status in {"not_in_source", "not_applicable"}
+                else EvidenceStatus.UNAVAILABLE
+            ),
+            value=value,
+            source_id=str(value.get("source_id") or "enigma-table4-v1.2"),
+            source_version=str(value.get("source_version") or ""),
+            source_checksum=str(value.get("source_checksum") or ""),
+            reason=str(value.get("reason") or ""),
+            provenance={
+                "status": status,
+                "source_url": value.get("source_url"),
+                "source_code": (value.get("record") or {}).get("source_code"),
+                "exon": (value.get("record") or {}).get("exon"),
+            },
+        )
+        return NodeResult.succeeded(
+            {"table4_pvs1_rna_evidence": evidence},
+            provenance={
+                "evidence_status": evidence.status.value,
+                "source_id": evidence.source_id,
+                "source_version": evidence.source_version,
+                "source_checksum": evidence.source_checksum,
+            },
+        )
+
+
+@dataclass(frozen=True)
 class St2Pvs1RnaEvidenceNode:
     """Provide exact ENIGMA ST2/ST3 RNA facts and Table 4 context."""
 
@@ -317,6 +365,7 @@ class SpliceAiEvidenceNode:
             "classification_request",
             "normalized_variant",
             "ps1_reference_candidates",
+            "table4_pvs1_rna_evidence",
             "erepo_pvs1_rna_evidence",
             "st2_pvs1_rna_evidence",
         }
@@ -328,6 +377,7 @@ class SpliceAiEvidenceNode:
     async def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
         candidates = tuple(inputs["ps1_reference_candidates"])
+        table4_rna = inputs["table4_pvs1_rna_evidence"]
         curated_rna = inputs["erepo_pvs1_rna_evidence"]
         st2_rna = inputs["st2_pvs1_rna_evidence"]
         erepo_pvs1_rna = (
@@ -340,7 +390,15 @@ class SpliceAiEvidenceNode:
             and isinstance(st2_rna.value, Mapping)
             and st2_rna.value.get("status") == "eligible"
         )
-        curated_pvs1_rna = erepo_pvs1_rna or st2_pvs1_rna
+        table4_pvs1_rna = (
+            table4_rna.status == EvidenceStatus.AVAILABLE
+            and isinstance(table4_rna.value, Mapping)
+            and table4_rna.value.get("status")
+            in {"eligible", "not_applicable_rna"}
+        )
+        curated_pvs1_rna = (
+            erepo_pvs1_rna or table4_pvs1_rna or st2_pvs1_rna
+        )
         required = (
             spliceai_required_for_classification(variant.variant_type)
             and not curated_pvs1_rna
@@ -364,7 +422,8 @@ class SpliceAiEvidenceNode:
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
                     "pvs1_rna_source": (
-                        "erepo" if erepo_pvs1_rna else "st2"
+                        "erepo" if erepo_pvs1_rna else "table4"
+                        if table4_pvs1_rna else "st2"
                         if st2_pvs1_rna else None
                     ),
                     "retryable": False,
@@ -381,7 +440,8 @@ class SpliceAiEvidenceNode:
                     "required_for_classification": False,
                     "replaced_by_curated_pvs1_rna": curated_pvs1_rna,
                     "pvs1_rna_source": (
-                        "erepo" if erepo_pvs1_rna else "st2"
+                        "erepo" if erepo_pvs1_rna else "table4"
+                        if table4_pvs1_rna else "st2"
                         if st2_pvs1_rna else None
                     ),
                 },
@@ -774,6 +834,7 @@ class EvidenceBundleAssemblyNode:
         "bayesdel_evidence",
         "gnomad_evidence",
         "clinical_lr_evidence",
+        "table4_pvs1_rna_evidence",
         "erepo_pvs1_rna_evidence",
         "st2_pvs1_rna_evidence",
         "protein_ps1_evidence",
@@ -793,6 +854,7 @@ class EvidenceBundleAssemblyNode:
             "bayesdel_evidence",
             "gnomad_evidence",
             "clinical_lr_evidence",
+            "table4_pvs1_rna_evidence",
             "erepo_pvs1_rna_evidence",
             "st2_pvs1_rna_evidence",
             "protein_ps1_evidence",
@@ -820,6 +882,7 @@ class EvidenceBundleAssemblyNode:
                 else None
             ),
             table9_result=value("enigma_table9"),
+            table4_pvs1_rna_result=value("table4_pvs1_rna"),
             erepo_pvs1_rna_result=value("erepo_pvs1_rna"),
             st2_pvs1_rna_result=value("st2_pvs1_rna"),
             pp4_bp5_result=value("clinical_lr"),
@@ -849,6 +912,7 @@ class EvidenceBundleAssemblyNode:
             "bayesdel_status": dict(inputs["bayesdel_evidence"].provenance),
             "gnomad_data": gnomad_value,
             "clinical_lr_result": value("clinical_lr"),
+            "table4_pvs1_rna_result": value("table4_pvs1_rna"),
             "erepo_pvs1_rna_result": value("erepo_pvs1_rna"),
             "st2_pvs1_rna_result": value("st2_pvs1_rna"),
             "table9_result": value("enigma_table9"),

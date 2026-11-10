@@ -102,7 +102,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         _request(), dependencies=_dependencies()
     ))
 
-    assert execution.graph_version == "4.2.0-curated-st2-rna-provider-dag"
+    assert execution.graph_version == "4.3.0-table4-rna-provider-dag"
     assert execution.result["criteria"]["PP3"]["points"] == 1
     assert execution.provider_artifacts["spliceai_score"] == 0.03
     assert execution.provider_artifacts["bayesdel_score"] == 0.438
@@ -117,6 +117,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         "provider.bayesdel",
         "provider.gnomad",
         "provider.enigma.table9",
+        "provider.enigma.table4_pvs1_rna",
         "provider.enigma.erepo_pvs1_rna",
         "provider.enigma.st2_pvs1_rna",
         "provider.clinical_lr",
@@ -282,6 +283,83 @@ def test_new_current_v12_erepo_pvs1_rna_assertions_are_available():
         assert result["record"]["strength"] == "Very Strong"
         assert result["record"]["points"] == 8
         assert result["registry_version"] == "2026-11-09"
+
+
+@pytest.mark.parametrize("c_notation", ["c.476-2A>G", "c.9118-2A>G"])
+def test_exact_table4_rna_decision_is_applied_without_querying_spliceai(c_notation):
+    from backend.services.classification_completeness import first_required_evidence_gap
+
+    request = ClassificationRequest(
+        variant=NormalizedVariant(
+            gene="BRCA2",
+            reference_transcript="NM_000059.4",
+            c_notation=c_notation,
+            p_notation="p.?",
+            variant_type="splice_site",
+            submitted_notation=f"BRCA2 {c_notation}",
+            normalization_source="test",
+        )
+    )
+    spliceai_calls = []
+    dependencies = replace(
+        _dependencies(spliceai_score=0.99),
+        spliceai_lookup=lambda gene, c: spliceai_calls.append((gene, c)),
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request,
+        dependencies=dependencies,
+    ))
+
+    assert spliceai_calls == []
+    assert execution.result["criteria"]["PVS1_RNA"]["strength"] == "Very Strong"
+    assert execution.result["criteria"]["PVS1_RNA"]["points"] == 8
+    assert "PP3" not in execution.result["criteria"]
+    audit = execution.audit_record()["provider_evidence"]["table4_pvs1_rna"]
+    assert audit["status"] == "available"
+    assert audit["source_checksum"]
+    splice_status = execution.provider_artifacts["spliceai_status"]
+    assert splice_status["status"] == "not_applicable"
+    assert splice_status["pvs1_rna_source"] == "table4"
+    assert splice_status["replaced_by_curated_pvs1_rna"] is True
+    gap = first_required_evidence_gap(request.variant, execution.provider_artifacts)
+    assert gap is None or gap.source != "SpliceAI"
+
+
+def test_exact_table4_rna_not_applicable_decision_suppresses_prediction_without_points():
+    from backend.services.classification_completeness import first_required_evidence_gap
+
+    request = ClassificationRequest(
+        variant=NormalizedVariant(
+            gene="BRCA1",
+            reference_transcript="NM_007294.4",
+            c_notation="c.594-2A>C",
+            p_notation="p.?",
+            variant_type="splice_site",
+            submitted_notation="BRCA1 c.594-2A>C",
+            normalization_source="test",
+        )
+    )
+    spliceai_calls = []
+    dependencies = replace(
+        _dependencies(spliceai_score=0.99),
+        spliceai_lookup=lambda gene, c: spliceai_calls.append((gene, c)),
+    )
+
+    execution = asyncio.run(execute_classification_request(
+        request,
+        dependencies=dependencies,
+    ))
+
+    assert spliceai_calls == []
+    assert "PVS1_RNA" not in execution.result["criteria"]
+    assert "PP3" not in execution.result["criteria"]
+    splice_status = execution.provider_artifacts["spliceai_status"]
+    assert splice_status["status"] == "not_applicable"
+    assert splice_status["pvs1_rna_source"] == "table4"
+    assert splice_status["replaced_by_curated_pvs1_rna"] is True
+    gap = first_required_evidence_gap(request.variant, execution.provider_artifacts)
+    assert gap is None or gap.source != "SpliceAI"
 
 
 def test_unavailable_spliceai_remains_unavailable_and_does_not_enable_bayesdel_pp3():

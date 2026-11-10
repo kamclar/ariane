@@ -32,8 +32,9 @@ class Pvs1CriteriaNode:
         pvs1_rna = evaluate_pvs1_rna(
             ci.gene,
             ci.c_notation,
-            ci.erepo_pvs1_rna_result,
-            ci.st2_pvs1_rna_result,
+            erepo_registry_result=ci.erepo_pvs1_rna_result,
+            st2_evidence_result=ci.st2_pvs1_rna_result,
+            table4_evidence_result=ci.table4_pvs1_rna_result,
         )
         decisions: list[CriterionDecision] = []
         excluded: list[CriterionDecision] = []
@@ -44,6 +45,8 @@ class Pvs1CriteriaNode:
                 "erepo_pvs1_rna"
                 if pvs1_rna.get("application_status")
                 == "applied_from_approved_registry"
+                else "table4_pvs1_rna"
+                if pvs1_rna.get("application_status") == "applied_from_table4"
                 else "st2_pvs1_rna"
             )
             decisions.append(
@@ -95,6 +98,7 @@ class Pvs1CriteriaNode:
             not pvs1.get("applies")
             and pvs1_rna.get("source_record")
             and not pvs1_rna.get("applies")
+            and pvs1_rna.get("review_required")
         ):
             warnings.append(pvs1_rna["reason"])
         if pvs1.get("pm5_code") and pvs1.get("pm5_strength"):

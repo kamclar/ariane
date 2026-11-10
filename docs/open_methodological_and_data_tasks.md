@@ -40,16 +40,25 @@ normalizované missense substituci z jiné nukleotidové změny, SpliceAI nejvý
 podmínek. Původní otázka a rozhodnutí jsou popsány v
 [`ps1_reference_validation_request.md`](ps1_reference_validation_request.md).
 
-## 5. Nekvantifikovaná RNA evidence, automatizovatelná část vyřešena 2026-09-12
+## 5. RNA evidence, automatizovatelná část vyřešena 2026-11-10
 
-Přesné ST2 řádky v ENIGMA-kurátorované kategorii pacientské mRNA bez alelově
+Primární automatická cesta používá konečný alelový kód označený `(RNA)` přímo
+z ENIGMA Specifications Table 4. Jde o výsledek VCEP po zohlednění pozorovaných
+RNA produktů, nikoli o nový odhad ARIANE. Aktuální tabulka obsahuje 144 přesných
+pravidel: 142 přiděluje PVS1 RNA v uvedené síle a dvě určují N/A. Přesné Table 4
+rozhodnutí nahrazuje predikční splice větev; SpliceAI se proto nevyžaduje ani u
+N/A záznamu, který nepřidává body.
+
+U alel bez konečného Table 4 RNA kódu mohou přesné ST2 řádky v
+ENIGMA-kurátorované kategorii pacientské mRNA bez alelově
 specifické kvantifikace s aberantním transkriptem odpovídajícím ztrátě funkce
-mohou přidělit PVS1 RNA. Automatická větev navíc vyžaduje propojenou ST3
+přidělit PVS1 RNA. Automatická větev navíc vyžaduje propojenou ST3
 referenci a jednoznačné mapování delece celého exonu na Table 4. Síla se odvodí
 z kvalitativní apparent near-complete větve Appendix E. Komplexní a částečné
-transkriptové výsledky zůstávají v předvyplněné manuální revizi bez bodů.
+transkriptové výsledky zůstávají v předvyplněné manuální revizi bez bodů pouze
+tehdy, pokud pro danou alelu není konečný Table 4 nebo schválený ERepo výsledek.
 
-Druhá automatická cesta používá přesné publikované assertions ClinGen ERepo,
+Další automatická cesta používá přesné publikované assertions ClinGen ERepo,
 které ENIGMA BRCA1/2 VCEP vytvořil podle specifikace v1.2 a ve kterých je
 konečná RNA síla výslovně určena.
 

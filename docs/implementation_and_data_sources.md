@@ -587,7 +587,7 @@ kodonu. Poloha nukleotidové změny se jako náhrada nepoužívá. Pokud poloha
 terminačního kodonu není dostupná, ARIANE větev NMD nezobrazí a uvede důvod u
 kritéria. PVS1 a PM5 PTC převzaté z Table 4 se tím nemění.
 
-U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Větve závislé na RNA se automaticky použijí jen při přesné shodě s úplnou ENIGMA Supplementary Table 2 a při jednoznačném průchodu pravidly Appendix E. Ostatní RNA větve zůstávají bez bodů a jsou označeny k odborné revizi.
+U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Pokud Table 4 uvádí pro přesnou alelu konečný kód označený `(RNA)`, ARIANE použije přímo tento VCEP výsledek včetně síly nebo N/A. U alel bez takového konečného kódu se RNA větev automaticky použije jen při přesné shodě s úplnou ENIGMA Supplementary Table 2 a při jednoznačném průchodu pravidly Appendix E. Ostatní RNA větve zůstávají bez bodů a jsou označeny k odborné revizi.
 
 U iniciačního kodonu se automatické PVS1 nepoužívá. Aplikace vytvoří doporučení pro strukturovanou revizi podle iniciačního flowchartu.
 
@@ -621,6 +621,15 @@ postupuje fail-closed. Rozhodnutí i obě kontrolované polohy jsou součástí
 uživatelského důvodu a decision trace.
 
 #### 3.2.2 PVS1 z RNA evidence
+
+Primárním automatickým zdrojem je přesné alelové rozhodnutí v ENIGMA
+Specifications Table 4. Kód označený `(RNA)` již představuje konečný výsledek
+VCEP pro pozorovaný molekulární dopad na úrovni transkriptu. ARIANE proto z
+Table 4 přímo převezme `PVS1`, `PVS1_Strong`, `PVS1_Moderate`,
+`PVS1_Supporting` nebo `PVS1_N/A`, aniž by znovu odhadovala váhu jednotlivých
+RNA produktů. Shoda musí být přesná v genu a c. HGVS a zdrojová verze i checksum
+se zapisují do auditu. Aktuální Table 4 obsahuje 144 takových alelových pravidel:
+142 přiděluje PVS1 RNA a dvě určují N/A.
 
 Supplementary Table 2 se používá jako úplný oficiální zdroj známé RNA evidence.
 Její standardizovaná kategorie je výsledkem kurátorského kódování ENIGMA. Pro
@@ -700,8 +709,8 @@ současně pro funkční assay se jako nezávislý RNA zdroj nepředvyplní.
 
 Supplementary Table 16 propojuje přesné alely z RNA větví Table 4 s původními
 zdroji. U přesné shody genu a c. HGVS ARIANE vloží dostupné PMID do manuálního
-RNA formuláře. Tabulka neobsahuje Appendix E váhu, proto toto předvyplnění samo
-nevytváří PVS1 RNA, neurčuje sílu a nepřidává body. Řádky označené pouze jako
+RNA formuláře. Tabulka sama neobsahuje Appendix E váhu a sama kód ani sílu
+neurčuje; konečné alelové rozhodnutí se přebírá z Table 4. Řádky označené pouze jako
 personal communication nebo internal lab contributor zůstávají v lossless
 snapshotu, ale bez publikovaného PMID se do citačního předvyplnění nepřenášejí.
 
@@ -711,9 +720,9 @@ propojené studie v ST3. Delece exonu 12 se jednoznačně mapuje na výchozí PV
 Table 4. Appendix E proto dává `PVS1 Strong (RNA)`. Predikční PP3 se při použití
 přímé RNA evidence nezapočítá.
 
-Automatické PVS1 RNA je možné pouze tehdy, když je pro přesnou variantu v
-referenčním transkriptu dostupná publikovaná ENIGMA BRCA1/2 VCEP assertion se
-specifikací v1.2 a s výslovně určenou konečnou RNA silou. Tyto záznamy se
+Další automatickou cestou jsou novější publikované ENIGMA BRCA1/2 VCEP
+assertions pro přesnou variantu v referenčním transkriptu se specifikací v1.2 a
+s výslovně určenou konečnou RNA silou. Tyto záznamy se
 nečtou za běhu přímo z ERepo API. Po kontrole se zařazují do verzovaného souboru
 `backend/data/enigma_erepo_pvs1_rna_registry.json`, jehož checksum kontroluje
 backend při startu. Síla ani body se z textu za běhu neodhadují.
@@ -743,8 +752,10 @@ Aktualizace registru se provádí jako datové vydání:
 5. Regresní test ověří přidělený kód, sílu, body, auditní stopu a potlačení
    překrývající se Figure 1A evidence.
 
-Pokud se přesné PVS1 RNA použije z registru nebo z uvedené jednoznačné ST2
-větve, Figure 1A se pro tuto klasifikaci nevyhodnocuje a SpliceAI se nevyžaduje.
+Pokud se přesné PVS1 RNA rozhodnutí použije z ERepo registru, Table 4 nebo z
+uvedené jednoznačné ST2 větve, Figure 1A se pro tuto klasifikaci nevyhodnocuje a
+SpliceAI se nevyžaduje. Stejně se postupuje u přesného `PVS1_N/A (RNA)` z Table 4:
+body se nepřidají, ale predikční větev nemůže přepsat pozorovaný RNA závěr.
 Audit uvádí stav `not_applicable` a
 `replaced_by_curated_pvs1_rna=true`. Výpadek SpliceAI proto nemůže zablokovat
 výsledek, který už stojí na přímé schválené RNA evidenci.
@@ -1138,10 +1149,12 @@ splňuje BP1 Strong.
 
 ## 4. Kritéria vyžadující manuální revizi
 
-Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2, BS4 ani PVS1
-RNA. PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem
-klinických LR. Přesný oficiální záznam ST2 slouží jen k předvyplnění PVS1 RNA
-revize. Síla a body vzniknou až po úplné odborné kontrole v manuálním DAGu.
+Automatická Module 1 klasifikace nepřidává PS4, PM3, PP1, BS2 ani BS4. PVS1 RNA
+přidává jen z přesného konečného rozhodnutí VCEP v Table 4, z ověřeného lokálního
+ERepo registru nebo z jednoznačné ST2/Appendix E větve popsané v části 3.2.2.
+PP4 a BP5 přidává pouze při přesné shodě s validovaným lokálním snapshotem
+klinických LR. Ostatní RNA evidence slouží k předvyplnění PVS1 RNA revize; síla
+a body vzniknou až po úplné odborné kontrole v manuálním DAGu.
 Ostatní uvedené kódy závisejí na datech, která nelze bezpečně odvodit pouze z
 HGVS varianty.
 
@@ -1178,7 +1191,8 @@ nevolá. Provider uzly grafu získají:
 - BayesDel_noAF a informační AlphaMissense,
 - gnomAD,
 - ENIGMA Table 9,
-- schválené PVS1 RNA assertions z checksumovaného ERepo registru,
+- přesná alelová PVS1 RNA rozhodnutí z Table 4 a schválené assertions z
+  checksumovaného ERepo registru,
 - combined clinical LR,
 - exonovou CNV evidenci,
 - kurátorovanou informaci o důležitém reziduu,
@@ -2244,7 +2258,8 @@ ClinVar review stars nejsou zdrojem způsobilosti. Tříhvězdičková starší 
 assertion a ERepo záznam bez explicitně uvedené v1.2 assertion method se
 zobrazí s upozorněním a automaticky se nepoužijí.
 
-Pro PVS1 RNA existuje úzce vymezená cesta přes lokální registr. Záznam musí
+Pro novější ERepo PVS1 RNA assertions existuje úzce vymezená cesta přes lokální
+registr. Záznam musí
 odpovídat přesné c. HGVS v referenčním transkriptu, genu, příslušnému CSpec ID,
 verzi 1.2.0, RNA mechanismu, konečné síle a publikované assertion. Nesplnění
 kterékoli podmínky nepřidá body a vede k odborné revizi. Živá odpověď ERepo se
@@ -2353,6 +2368,7 @@ evidence.
 | `provider.bayesdel` | BayesDel_noAF a informační AlphaMissense |
 | `provider.gnomad` | Populační frekvence a pokrytí |
 | `provider.enigma.table9` | Lookup ve validovaném Table 9 datasetu, záznam verze a checksumu |
+| `provider.enigma.table4_pvs1_rna` | Přesné alelové PVS1 RNA nebo N/A rozhodnutí z ENIGMA Table 4 |
 | `provider.enigma.erepo_pvs1_rna` | Přesná PVS1 RNA assertion ze schváleného lokálního ERepo registru |
 | `provider.clinical_lr`, `provider.exon_cnv`, `provider.protein_ps1` | Další klasifikační evidence |
 | `contract.evidence_bundle` | Sestavení a kontrola typované evidence |
@@ -2360,7 +2376,7 @@ evidence.
 | `rule.population_frequency` | BA1, BS1 a PM2 z předané gnomAD evidence |
 | `rule.exon_cnv.population` | Populační větev pro exonové delece a duplikace |
 | `rule.functional.table9` | PS3 nebo BS3 a Figure 1C decision path |
-| `rule.pvs1_pm5` | PVS1 a PM5 PTC; PVS1 RNA z přesného schváleného registru nebo jako nebodované podklady pro odbornou revizi |
+| `rule.pvs1_pm5` | PVS1 a PM5 PTC; PVS1 RNA z přesného Table 4 rozhodnutí, schváleného ERepo registru, jednoznačné ST2 větve nebo jako nebodované podklady pro odbornou revizi |
 | `rule.clinical_lr` | PP4 nebo BP5 z validované kombinované klinické LR evidence |
 | `rule.protein_ps1` | Proteinové PS1 ze schváleného registru referencí |
 | `rule.bioinformatic.figure1a` | PP3, BP4, BP7 a BP1 podle Figure 1A |
@@ -2579,6 +2595,7 @@ Závěrečná regresní sada je rozdělena podle účelu:
 |---|---|
 | Tutorialové varianty | `tests/test_dag_regression_corpus.py` kontroluje očekávaná kritéria, síly, body, třídu, mixed evidence a N/A větve jednotlivých variant. |
 | Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA. Jednoznačné delece celého exonu s propojeným ST3 zdrojem a použitelnou Table 4 větví musí získat sílu podle Appendix E. Komplexní nebo částečné výsledky musí zůstat bez bodů ve stavu `review_required`. `BRCA1 c.4185G>A` ověřuje PVS1 RNA Strong a nepoužití PP3. |
+| Přesná Table 4 RNA rozhodnutí | Parametrizovaný test načte všech 144 alelových pravidel označených `(RNA)`, ověří jejich kód, sílu, body, verzi a checksum. Dvě N/A alely nesmí získat body. End-to-end testy `BRCA2 c.476-2A>G`, `BRCA2 c.9118-2A>G` a `BRCA1 c.594-2A>C` ověřují také nepoužití SpliceAI a Figure 1A. |
 | Founder varianty | Test načte všechny varianty z aktuálního připnutého founder registru a každou nechá projít plným DAGem s frekvencí nad prahy BA1/BS1. U každého záznamu požaduje, aby se BA1 ani BS1 nepřidělilo a důvod zůstal v auditní stopě. Přidání dalšího záznamu do registru jej automaticky přidá do regrese. |
 | Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Testy připínají současnou interpretaci Table 4. Otevřená metodická otázka k poslednímu exonu zůstává popsána v `docs/open_methodological_and_data_tasks.md`. |
 | Typy variant | `tests/test_variant_type_regression_matrix.py` a `tests/test_bioinformatic_rule_matrix.py` pokrývají rozpoznání typů, větve Figure 1A a interakce s RNA a funkční evidencí. |
