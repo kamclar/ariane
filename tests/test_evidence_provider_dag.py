@@ -102,7 +102,7 @@ def test_provider_dag_acquires_evidence_and_classifies_without_preloaded_values(
         _request(), dependencies=_dependencies()
     ))
 
-    assert execution.graph_version == "4.3.0-table4-rna-provider-dag"
+    assert execution.graph_version == "4.4.0-pvs1-rna-resolution"
     assert execution.result["criteria"]["PP3"]["points"] == 1
     assert execution.provider_artifacts["spliceai_score"] == 0.03
     assert execution.provider_artifacts["bayesdel_score"] == 0.438

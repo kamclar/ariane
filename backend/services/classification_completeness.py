@@ -11,9 +11,9 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from backend.domain.classification import NormalizedVariant
+from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.policy.gene import spliceai_thresholds
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import select_pvs1_rna_decision
 from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
     spliceai_required_for_classification,
@@ -86,14 +86,18 @@ def _spliceai_gap(
 
     splice_status = dict(artifacts.get("spliceai_status") or {})
     if splice_status.get("replaced_by_curated_pvs1_rna") is True:
-        selection = select_pvs1_rna_decision(
-            variant.gene,
-            variant.c_notation,
-            erepo_registry_result=artifacts.get("erepo_pvs1_rna_result"),
-            st2_evidence_result=artifacts.get("st2_pvs1_rna_result"),
-            table4_evidence_result=artifacts.get("table4_pvs1_rna_result"),
-        )
-        if selection.replaces_prediction:
+        selection = artifacts.get("pvs1_rna_selection")
+        selected_result = None
+        if isinstance(selection, Pvs1RnaSelection) and selection.source:
+            selected_result = artifacts.get(
+                f"{selection.source}_pvs1_rna_result"
+            )
+        if (
+            isinstance(selection, Pvs1RnaSelection)
+            and selection.replaces_prediction
+            and isinstance(selected_result, Mapping)
+            and selection.matches_source_result(selected_result)
+        ):
             return None
     score = artifacts.get("spliceai_score")
     status = str(splice_status.get("status") or "unavailable")

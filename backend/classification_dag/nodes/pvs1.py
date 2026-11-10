@@ -3,24 +3,130 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, Mapping
 
-from backend.domain.classification import CriterionDecision, CriterionDecisionStatus, CriterionFamilyResult
+from backend.domain.classification import (
+    ClassificationInputs,
+    CriterionDecision,
+    CriterionDecisionStatus,
+    CriterionFamilyResult,
+    EvidenceItem,
+    NormalizedVariant,
+)
+from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import select_pvs1_rna_decision
+from backend.criteria.pvs1_rna import (
+    lookup_st2_pvs1_rna_evidence,
+    resolve_pvs1_rna,
+)
+
+
+def _evidence_value(
+    inputs: Mapping[str, Any],
+    key: str,
+) -> dict[str, Any] | None:
+    item = inputs[key]
+    if not isinstance(item, EvidenceItem):
+        raise TypeError(f"{key} must be an EvidenceItem")
+    return item.value if isinstance(item.value, dict) else None
+
+
+@dataclass(frozen=True)
+class Pvs1RnaEvidenceResolutionNode:
+    """Resolve provider evidence once before dependent rule nodes run."""
+
+    id: str = "context.pvs1_rna"
+    version: str = "1"
+    requires: frozenset[str] = frozenset({
+        "normalized_variant",
+        "erepo_pvs1_rna_evidence",
+        "table4_pvs1_rna_evidence",
+        "st2_pvs1_rna_evidence",
+    })
+    provides: frozenset[str] = frozenset({"pvs1_rna_selection"})
+
+    def evaluate(self, context, inputs) -> NodeResult:
+        variant = inputs["normalized_variant"]
+        if not isinstance(variant, NormalizedVariant):
+            raise TypeError("normalized_variant must be a NormalizedVariant")
+        selection = resolve_pvs1_rna(
+            variant.gene,
+            variant.c_notation,
+            erepo_registry_result=_evidence_value(
+                inputs,
+                "erepo_pvs1_rna_evidence",
+            ),
+            table4_evidence_result=_evidence_value(
+                inputs,
+                "table4_pvs1_rna_evidence",
+            ),
+            st2_evidence_result=_evidence_value(
+                inputs,
+                "st2_pvs1_rna_evidence",
+            ),
+        )
+        return NodeResult.succeeded(
+            {"pvs1_rna_selection": selection},
+            provenance={
+                "source": selection.source,
+                "replaces_prediction": selection.replaces_prediction,
+            },
+        )
+
+
+@dataclass(frozen=True)
+class Pvs1RnaInputResolutionNode:
+    """Resolve RNA evidence supplied directly to the synchronous DAG."""
+
+    id: str = "context.pvs1_rna"
+    version: str = "1"
+    requires: frozenset[str] = frozenset({"classification_inputs"})
+    provides: frozenset[str] = frozenset({"pvs1_rna_selection"})
+
+    def evaluate(self, context, inputs) -> NodeResult:
+        ci = inputs["classification_inputs"]
+        if not isinstance(ci, ClassificationInputs):
+            raise TypeError("classification_inputs must be ClassificationInputs")
+        st2_result = (
+            ci.st2_pvs1_rna_result
+            if ci.st2_pvs1_rna_result is not None
+            else lookup_st2_pvs1_rna_evidence(ci.gene, ci.c_notation)
+        )
+        selection = resolve_pvs1_rna(
+            ci.gene,
+            ci.c_notation,
+            erepo_registry_result=ci.erepo_pvs1_rna_result,
+            table4_evidence_result=ci.table4_pvs1_rna_result,
+            st2_evidence_result=st2_result,
+        )
+        return NodeResult.succeeded(
+            {"pvs1_rna_selection": selection},
+            provenance={
+                "source": selection.source,
+                "replaces_prediction": selection.replaces_prediction,
+            },
+        )
 
 
 @dataclass(frozen=True)
 class Pvs1CriteriaNode:
     id: str = "rule.pvs1_pm5"
     version: str = "1"
-    requires: frozenset[str] = frozenset({"classification_inputs", "splice_context"})
+    requires: frozenset[str] = frozenset({
+        "classification_inputs",
+        "splice_context",
+        "pvs1_rna_selection",
+    })
     provides: frozenset[str] = frozenset({"pvs1_family"})
 
     def evaluate(self, context, inputs) -> NodeResult:
         ci = inputs["classification_inputs"]
         splice = inputs["splice_context"]
+        rna_selection = inputs["pvs1_rna_selection"]
+        if not isinstance(rna_selection, Pvs1RnaSelection):
+            raise TypeError("pvs1_rna_selection must be a Pvs1RnaSelection")
         pvs1 = evaluate_pvs1(
             ci.gene,
             ci.variant_type,
@@ -28,13 +134,6 @@ class Pvs1CriteriaNode:
             c_notation=ci.c_notation,
             spliceai_score=splice.effective_score,
             dup_type=ci.dup_type,
-        )
-        rna_selection = select_pvs1_rna_decision(
-            ci.gene,
-            ci.c_notation,
-            erepo_registry_result=ci.erepo_pvs1_rna_result,
-            st2_evidence_result=ci.st2_pvs1_rna_result,
-            table4_evidence_result=ci.table4_pvs1_rna_result,
         )
         pvs1_rna = rna_selection.decision
         decisions: list[CriterionDecision] = []

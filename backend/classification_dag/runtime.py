@@ -49,6 +49,8 @@ from backend.classification_dag.nodes import (
     FunctionalCriteriaNode,
     ProteinPs1CriteriaNode,
     Pvs1CriteriaNode,
+    Pvs1RnaEvidenceResolutionNode,
+    Pvs1RnaInputResolutionNode,
     ReviewTriageNode,
     SpliceContextNode,
 )
@@ -167,10 +169,11 @@ def build_native_graph() -> DagDefinition:
     """Build the synchronous classification graph from explicit evidence inputs."""
     return DagDefinition(
         id="ariane.vcep.classification",
-        version="4.0.0-gene-policy",
+        version="4.1.0-pvs1-rna-resolution",
         seed_keys={"classification_inputs"},
         nodes=(
             _ClassificationInputContractNode(),
+            Pvs1RnaInputResolutionNode(),
             Table9EvidenceNode(),
             SpliceContextNode(),
             FrequencyCriteriaNode(),
@@ -196,7 +199,7 @@ def build_provider_graph(
     providers = dependencies or production_provider_dependencies()
     return DagDefinition(
         id="ariane.vcep.classification",
-        version="4.3.0-table4-rna-provider-dag",
+        version="4.4.0-pvs1-rna-resolution",
         seed_keys={"classification_request"},
         nodes=(
             ClassificationRequestContractNode(),
@@ -205,6 +208,7 @@ def build_provider_graph(
             Table4Pvs1RnaEvidenceNode(),
             ErepoPvs1RnaEvidenceNode(providers),
             St2Pvs1RnaEvidenceNode(providers),
+            Pvs1RnaEvidenceResolutionNode(),
             Ps1CandidateEvidenceNode(providers),
             SpliceAiEvidenceNode(providers),
             BayesDelEvidenceNode(providers),

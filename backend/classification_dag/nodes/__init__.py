@@ -15,7 +15,11 @@ from backend.classification_dag.nodes.population import (
     ExonCnvCriteriaNode,
     FrequencyCriteriaNode,
 )
-from backend.classification_dag.nodes.pvs1 import Pvs1CriteriaNode
+from backend.classification_dag.nodes.pvs1 import (
+    Pvs1CriteriaNode,
+    Pvs1RnaEvidenceResolutionNode,
+    Pvs1RnaInputResolutionNode,
+)
 from backend.classification_dag.nodes.review import ReviewTriageNode
 from backend.classification_dag.nodes.support import (
     FIRST_PASS_NOTE,
@@ -37,6 +41,8 @@ __all__ = [
     "FunctionalCriteriaNode",
     "ProteinPs1CriteriaNode",
     "Pvs1CriteriaNode",
+    "Pvs1RnaEvidenceResolutionNode",
+    "Pvs1RnaInputResolutionNode",
     "RetainedEvidence",
     "ReviewTriageNode",
     "SpliceContext",

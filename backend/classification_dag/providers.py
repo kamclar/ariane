@@ -27,7 +27,7 @@ from backend.policy.spliceai import (
     spliceai_required_for_classification,
 )
 from backend.domain.indel import is_indel_allele
-from backend.domain.pvs1_rna import select_pvs1_rna_source
+from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.reference_data.table9 import (
     TABLE9_JSON_PATH,
     load_table9_data,
@@ -369,9 +369,7 @@ class SpliceAiEvidenceNode:
             "classification_request",
             "normalized_variant",
             "ps1_reference_candidates",
-            "table4_pvs1_rna_evidence",
-            "erepo_pvs1_rna_evidence",
-            "st2_pvs1_rna_evidence",
+            "pvs1_rna_selection",
         }
     )
     provides: frozenset[str] = frozenset(
@@ -381,20 +379,9 @@ class SpliceAiEvidenceNode:
     async def evaluate(self, context, inputs) -> NodeResult:
         variant = _request(inputs).variant
         candidates = tuple(inputs["ps1_reference_candidates"])
-        table4_rna = inputs["table4_pvs1_rna_evidence"]
-        erepo_rna = inputs["erepo_pvs1_rna_evidence"]
-        st2_rna = inputs["st2_pvs1_rna_evidence"]
-        selection = select_pvs1_rna_source(
-            erepo_result=(
-                erepo_rna.value if isinstance(erepo_rna.value, dict) else None
-            ),
-            table4_result=(
-                table4_rna.value if isinstance(table4_rna.value, dict) else None
-            ),
-            st2_result=(
-                st2_rna.value if isinstance(st2_rna.value, dict) else None
-            ),
-        )
+        selection = inputs["pvs1_rna_selection"]
+        if not isinstance(selection, Pvs1RnaSelection):
+            raise TypeError("pvs1_rna_selection must be a Pvs1RnaSelection")
         curated_pvs1_rna = selection.replaces_prediction
         pvs1_rna_source = selection.source
         required = (
@@ -827,6 +814,7 @@ class EvidenceBundleAssemblyNode:
         "table4_pvs1_rna_evidence",
         "erepo_pvs1_rna_evidence",
         "st2_pvs1_rna_evidence",
+        "pvs1_rna_selection",
         "protein_ps1_evidence",
         "exon_cnv_evidence",
         "residue_evidence",
@@ -905,6 +893,7 @@ class EvidenceBundleAssemblyNode:
             "table4_pvs1_rna_result": value("table4_pvs1_rna"),
             "erepo_pvs1_rna_result": value("erepo_pvs1_rna"),
             "st2_pvs1_rna_result": value("st2_pvs1_rna"),
+            "pvs1_rna_selection": inputs["pvs1_rna_selection"],
             "table9_result": value("enigma_table9"),
             "exon_cnv_result": value("exon_cnv"),
             "evidence_audit": {

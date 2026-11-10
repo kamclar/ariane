@@ -8,14 +8,10 @@ Complex or insufficiently coded transcript results remain manual-review only.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
 from typing import Any, Dict, Optional
 
-from backend.domain.pvs1_rna import (
-    Pvs1RnaSourceSelection,
-    select_pvs1_rna_source,
-)
+from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.reference_data.ps1_splice_evidence import (
     get_st2_source_metadata,
     get_st2_splice_record,
@@ -453,11 +449,7 @@ def _evaluate_st2_record(
         "manual_review_prefill": {},
     }
 
-    st2_evidence = (
-        st2_evidence_result
-        if st2_evidence_result is not None
-        else lookup_st2_pvs1_rna_evidence(gene, c_notation)
-    )
+    st2_evidence = st2_evidence_result or {}
     record = st2_evidence.get("record")
     if record is None:
         result["reason"] = (
@@ -672,65 +664,48 @@ def _evaluate_st2_record(
     return result
 
 
-@dataclass(frozen=True)
-class Pvs1RnaSelection:
-    """A selected RNA source and its evaluated criterion decision."""
-
-    source_selection: Pvs1RnaSourceSelection
-    decision: Dict[str, Any]
-
-    @property
-    def source(self) -> Optional[str]:
-        return self.source_selection.source
-
-    @property
-    def evidence_item_id(self) -> Optional[str]:
-        return self.source_selection.evidence_item_id
-
-    @property
-    def replaces_prediction(self) -> bool:
-        return bool(self.decision.get("applies")) or (
-            self.decision.get("application_status")
-            == "not_applicable_from_table4"
-        )
-
-
-def select_pvs1_rna_decision(
+def resolve_pvs1_rna(
     gene: str,
     c_notation: str,
-    erepo_registry_result: Optional[Dict[str, Any]] = None,
-    table4_evidence_result: Optional[Dict[str, Any]] = None,
-    st2_evidence_result: Optional[Dict[str, Any]] = None,
+    *,
+    erepo_registry_result: Optional[Dict[str, Any]],
+    table4_evidence_result: Optional[Dict[str, Any]],
+    st2_evidence_result: Optional[Dict[str, Any]],
 ) -> Pvs1RnaSelection:
-    """Select one RNA source using ERepo, Table 4, then ST2 precedence."""
-    st2_result = (
-        st2_evidence_result
-        if st2_evidence_result is not None
-        else lookup_st2_pvs1_rna_evidence(gene, c_notation)
-    )
-    source_selection = select_pvs1_rna_source(
-        erepo_registry_result,
-        table4_evidence_result,
-        st2_result,
-    )
-    if source_selection.source == "erepo":
+    """Resolve ERepo, Table 4, then ST2 into one final decision."""
+    if (
+        erepo_registry_result
+        and erepo_registry_result.get("status") != "not_in_registry"
+    ):
+        source = "erepo"
+        source_result = erepo_registry_result
         decision = _evaluate_approved_erepo_record(
             gene,
             c_notation,
             erepo_registry_result,
         )
-    elif source_selection.source == "table4":
+    elif table4_evidence_result and table4_evidence_result.get(
+        "status"
+    ) not in {"not_in_source", "not_applicable"}:
+        source = "table4"
+        source_result = table4_evidence_result
         decision = _evaluate_table4_rna_record(
             gene,
             c_notation,
             table4_evidence_result,
         )
     else:
-        decision = _evaluate_st2_record(gene, c_notation, st2_result)
+        source = "st2" if (st2_evidence_result or {}).get("record") else None
+        source_result = st2_evidence_result if source == "st2" else None
+        decision = _evaluate_st2_record(
+            gene,
+            c_notation,
+            st2_evidence_result,
+        )
 
     if decision is None:
         raise RuntimeError("Selected PVS1 RNA source returned no decision")
-    return Pvs1RnaSelection(source_selection, decision)
+    return Pvs1RnaSelection(source, decision, source_result)
 
 
 def evaluate_pvs1_rna(
@@ -740,11 +715,21 @@ def evaluate_pvs1_rna(
     st2_evidence_result: Optional[Dict[str, Any]] = None,
     table4_evidence_result: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Return the selected PVS1 RNA decision."""
-    return select_pvs1_rna_decision(
+    """Compatibility entry point for direct rule and explorer callers.
+
+    Provider and native DAGs pass every source explicitly to
+    :func:`resolve_pvs1_rna`.  Standalone rule callers retain the historical
+    curated ST2 lookup when no ST2 result was supplied.
+    """
+    st2_result = (
+        st2_evidence_result
+        if st2_evidence_result is not None
+        else lookup_st2_pvs1_rna_evidence(gene, c_notation)
+    )
+    return dict(resolve_pvs1_rna(
         gene,
         c_notation,
         erepo_registry_result=erepo_registry_result,
         table4_evidence_result=table4_evidence_result,
-        st2_evidence_result=st2_evidence_result,
-    ).decision
+        st2_evidence_result=st2_result,
+    ).decision)

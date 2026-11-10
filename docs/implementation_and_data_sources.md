@@ -1192,7 +1192,7 @@ Manuálně doplněná kritéria vytvářejí oddělený amended working result. 
 ## 5. Postup klasifikace
 
 Po normalizaci vstupu vytvoří backend `ClassificationRequest` a předá jej
-produkčnímu grafu `4.2.0-curated-st2-rna-provider-dag`. `main.py` klasifikační zdroje přímo
+produkčnímu grafu `4.4.0-pvs1-rna-resolution`. `main.py` klasifikační zdroje přímo
 nevolá. Provider uzly grafu získají:
 
 - souřadnice GRCh37 a GRCh38,
@@ -2376,7 +2376,7 @@ kritériích, řešení interakcí evidence, výsledná klasifikace a prezentace
 oddělené vrstvy.
 
 Produkční klasifikaci provádí provider graf `ariane.vcep.classification`, verze
-`4.2.0-curated-st2-rna-provider-dag`. Starý sekvenční evaluator se v aplikační
+`4.4.0-pvs1-rna-resolution`. Starý sekvenční evaluator se v aplikační
 cestě neimportuje ani nespouští. Produkční engine je pevně daný identifikátorem
 `dag`; konfigurační volba a režimy `legacy`, `shadow` nebo fallback neexistují.
 
@@ -2398,6 +2398,8 @@ evidence.
 | `provider.enigma.table9` | Lookup ve validovaném Table 9 datasetu, záznam verze a checksumu |
 | `provider.enigma.table4_pvs1_rna` | Přesné alelové PVS1 RNA nebo N/A rozhodnutí z ENIGMA Table 4 |
 | `provider.enigma.erepo_pvs1_rna` | Přesná PVS1 RNA assertion ze schváleného lokálního ERepo registru |
+| `provider.enigma.st2_pvs1_rna` | Kurátorovaná ST2/ST3 evidence s Table 4 kontextem |
+| `context.pvs1_rna` | Jediné rozlišení precedence ERepo, Table 4 a ST2 pro PVS1, SpliceAI a kontrolu úplnosti |
 | `provider.clinical_lr`, `provider.exon_cnv`, `provider.protein_ps1` | Další klasifikační evidence |
 | `contract.evidence_bundle` | Sestavení a kontrola typované evidence |
 | `context.spliceai.provenance` | Použití konfigurovaného SpliceAI skóre a auditní porovnání s Table 9 bez přepsání výsledku |

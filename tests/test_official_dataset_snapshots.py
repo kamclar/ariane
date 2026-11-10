@@ -416,7 +416,9 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
         self.assertEqual(erepo["record_count"], len(erepo["records"]))
         self.assertEqual(erepo_metadata["record_count"], erepo["record_count"])
         self.assertEqual(
-            hashlib.sha256(erepo_path.read_bytes()).hexdigest(),
+            hashlib.sha256(
+                erepo_path.read_bytes().replace(b"\r\n", b"\n")
+            ).hexdigest(),
             erepo_metadata["registry_sha256"],
         )
         for counts_field in (

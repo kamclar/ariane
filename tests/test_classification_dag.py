@@ -457,6 +457,7 @@ def test_dag_produces_approved_representative_clinical_result():
     assert execution.graph_id == "ariane.vcep.classification"
     assert [entry.node_id for entry in execution.trace] == [
         "contract.classification_inputs",
+        "context.pvs1_rna",
         "provider.enigma.table9",
         "context.spliceai.provenance",
         "rule.population_frequency",

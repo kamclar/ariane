@@ -6,8 +6,10 @@ from collections import Counter
 import re
 
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import evaluate_pvs1_rna
-from backend.domain.pvs1_rna import select_pvs1_rna_source
+from backend.criteria.pvs1_rna import (
+    lookup_st2_pvs1_rna_evidence,
+    resolve_pvs1_rna,
+)
 from backend.reference_data.table4 import (
     load_table4_data,
     lookup_table4_pvs1_rna,
@@ -44,11 +46,13 @@ def test_every_exact_table4_rna_rule_has_a_deterministic_runtime_decision():
             assert result["source_version"] == "1.2.0"
             assert result["source_checksum"]
 
-            decision = evaluate_pvs1_rna(
+            decision = resolve_pvs1_rna(
                 gene,
                 _input_hgvs(source_key),
+                erepo_registry_result=None,
                 table4_evidence_result=result,
-            )
+                st2_evidence_result=None,
+            ).decision
             assert decision["applies"] is (strength is not None)
             assert decision["strength"] == strength
             assert decision["points"] == points
@@ -97,37 +101,53 @@ def test_table4_rna_not_applicable_rows_do_not_acquire_points():
 
 
 def test_rna_source_precedence_is_defined_once():
-    erepo = {"status": "eligible", "record": {}}
-    table4 = {"status": "eligible", "record": {}}
-    st2 = {"status": "eligible", "record": {}}
-
-    selected = select_pvs1_rna_source(erepo, table4, st2)
+    selected = resolve_pvs1_rna(
+        "BRCA1",
+        "c.1A>G",
+        erepo_registry_result={"status": "ambiguous", "record": {}},
+        table4_evidence_result={"status": "eligible", "record": {}},
+        st2_evidence_result={"status": "eligible", "record": {}},
+    )
     assert selected.source == "erepo"
     assert selected.evidence_item_id == "erepo_pvs1_rna"
-    assert selected.replaces_prediction is True
 
-    selected = select_pvs1_rna_source(
-        {"status": "not_in_registry"},
-        table4,
-        st2,
+    selected = resolve_pvs1_rna(
+        "BRCA2",
+        "c.476-2A>G",
+        erepo_registry_result={"status": "not_in_registry"},
+        table4_evidence_result=lookup_table4_pvs1_rna(
+            "BRCA2",
+            "c.476-2A>G",
+        ),
+        st2_evidence_result=None,
     )
     assert selected.source == "table4"
     assert selected.evidence_item_id == "table4_pvs1_rna"
 
-    selected = select_pvs1_rna_source(
-        {"status": "not_in_registry"},
-        {"status": "not_in_source"},
-        st2,
+    selected = resolve_pvs1_rna(
+        "BRCA1",
+        "c.4185G>A",
+        erepo_registry_result={"status": "not_in_registry"},
+        table4_evidence_result={"status": "not_in_source"},
+        st2_evidence_result=lookup_st2_pvs1_rna_evidence(
+            "BRCA1",
+            "c.4185G>A",
+        ),
     )
     assert selected.source == "st2"
     assert selected.evidence_item_id == "st2_pvs1_rna"
 
 
 def test_table4_rna_not_applicable_replaces_the_prediction_branch():
-    selected = select_pvs1_rna_source(
-        None,
-        {"status": "not_applicable_rna", "record": {}},
-        None,
+    selected = resolve_pvs1_rna(
+        "BRCA1",
+        "c.594-2A>C",
+        erepo_registry_result=None,
+        table4_evidence_result=lookup_table4_pvs1_rna(
+            "BRCA1",
+            "c.594-2A>C",
+        ),
+        st2_evidence_result=None,
     )
 
     assert selected.source == "table4"

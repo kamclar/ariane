@@ -6,7 +6,7 @@ Migrace odděluje normalizaci vstupu, získání evidence, rozhodování o krit�
 řešení interakcí evidence, klasifikaci a prezentaci. Přesun výpočtu do grafu
 nesmí sám o sobě změnit klinický výsledek.
 
-Produkční verze `4.2.0-curated-st2-rna-provider-dag` již starý sekvenční klasifikátor nevolá.
+Produkční verze `4.4.0-pvs1-rna-resolution` již starý sekvenční klasifikátor nevolá.
 Vytváří `NormalizedVariant`, `EvidenceBundle`, samostatné výsledky rodin kritérií,
 mechanism-aware interakce, výslednou ENIGMA klasifikaci a manuální review výstupy.
 Každá rodina má vlastní uzel a společný slovník výsledku vzniká až v poslední
@@ -140,6 +140,10 @@ fingerprintu klasifikátoru.
 Přesná schválená PVS1 RNA assertion nebo alelové RNA rozhodnutí v Table 4
 uzavírá splice mechanismus přímou evidencí. To platí i pro Table 4 RNA N/A,
 které nepřidává body, ale uzavírá predikční větev.
+Samostatný uzel `context.pvs1_rna` jednou vyhodnotí pořadí ERepo, Table 4 a ST2
+a předá stejný typovaný výsledek uzlům PVS1, SpliceAI, sestavení artefaktů i
+publikační bráně. Brána navíc ověří, že výsledek stále přesně odpovídá svému
+zdrojovému artefaktu; nesoulad se nesmí považovat za náhradu SpliceAI.
 Provider SpliceAI v takovém případě vrátí `NOT_APPLICABLE` a Figure 1A se
 nevyhodnotí. Nejde o chybějící povinný vstup ani o náhradu chybějícího skóre.
 
@@ -295,23 +299,24 @@ stručného klinického výsledku.
 
 1. vstupní kontrakt a normalizovaná identita varianty;
 2. provider souřadnic GRCh37 a GRCh38;
-3. provider SpliceAI včetně skóre kandidátních PS1 referencí;
-4. provider BayesDel a informační anotace AlphaMissense;
-5. provider gnomAD;
-6. provider Table 9 s verzí a SHA-256;
-7. provider klinických LR, exonových CNV a důležitých reziduí;
-8. provider proteinového PS1;
-9. sestavení a validace `EvidenceBundle`;
-10. populační BA1, BS1 a PM2;
-11. Table 9 PS3 a BS3;
-12. PVS1 a PM5 PTC, včetně přesných Table 4 RNA rozhodnutí a nebodovaných podkladů pro manuální PVS1 RNA revizi;
-13. klinické LR PP4 a BP5;
-14. proteinové PS1;
-15. Figure 1A PP3, BP4, BP7 a BP1;
-16. interakce a deduplikace evidence;
-17. ENIGMA Table 3 nebo bodová metoda pro mixed evidence;
-18. manuální review triage;
-19. validace `VariantAssertion` a veřejná projekce.
+3. providery Table 9, přesného Table 4 RNA, ERepo PVS1 RNA a ST2/ST3;
+4. jednotné rozlišení PVS1 RNA zdroje v `context.pvs1_rna`;
+5. provider SpliceAI včetně skóre kandidátních PS1 referencí;
+6. provider BayesDel a informační anotace AlphaMissense;
+7. provider gnomAD;
+8. providery klinických LR, exonových CNV a důležitých reziduí;
+9. provider proteinového PS1;
+10. sestavení a validace `EvidenceBundle`;
+11. populační BA1, BS1 a PM2;
+12. Table 9 PS3 a BS3;
+13. PVS1 a PM5 PTC, včetně přesných Table 4 RNA rozhodnutí a nebodovaných podkladů pro manuální PVS1 RNA revizi;
+14. klinické LR PP4 a BP5;
+15. proteinové PS1;
+16. Figure 1A PP3, BP4, BP7 a BP1;
+17. interakce a deduplikace evidence;
+18. ENIGMA Table 3 nebo bodová metoda pro mixed evidence;
+19. manuální review triage;
+20. validace `VariantAssertion` a veřejná projekce.
 
 Uzel `policy.enigma_combination` nerozhoduje o výjimce jediného Strong
 benigního kritéria podle názvu kódu. Čte explicitní vlastnost
@@ -331,10 +336,10 @@ BA1 zůstává stand-alone benigní klasifikací také po doplnění manuální
 evidence. Ostatní kritéria zůstávají ve výsledku pro audit, ale nepřepínají
 klasifikaci do bodového postupu pro mixed evidence.
 
-Synchronní graf `4.0.0-gene-policy`, který přijímá předem sestavené
+Synchronní graf `4.1.0-pvs1-rna-resolution`, který přijímá předem sestavené
 `ClassificationInputs`, zůstává pro izolované testy pravidel a explicitní
 regresní korpus. HTTP klasifikace vždy používá asynchronní provider graf
-`4.2.0-curated-st2-rna-provider-dag`.
+`4.4.0-pvs1-rna-resolution`.
 
 Regresní korpus nevolá alternativní klasifikátor. U každé varianty obsahuje
 schválenou třídu, počet bodů, přesný seznam kritérií, mixed evidence stav a

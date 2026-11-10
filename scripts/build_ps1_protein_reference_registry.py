@@ -41,6 +41,11 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _text_sha256(path: Path) -> str:
+    content = path.read_bytes().replace(b"\r\n", b"\n")
+    return hashlib.sha256(content).hexdigest()
+
+
 def _record_checksum(record: Dict[str, Any]) -> str:
     basis = {key: value for key, value in record.items() if key != "approval_basis_checksum"}
     encoded = json.dumps(
@@ -87,8 +92,8 @@ def build() -> Dict[str, Any]:
         "table9_sha256": _sha256(TABLE9_PATH),
         "st2_sha256": _sha256(ST2_PATH),
         "curated_extensions_sha256": _sha256(EXTENSIONS_PATH),
-        "erepo_vcep_registry_sha256": _sha256(EREPO_PATH),
-        "erepo_vcep_metadata_sha256": _sha256(EREPO_METADATA_PATH),
+        "erepo_vcep_registry_sha256": _text_sha256(EREPO_PATH),
+        "erepo_vcep_metadata_sha256": _text_sha256(EREPO_METADATA_PATH),
     }
     records = []
     for source in st7["variants"]:
@@ -165,7 +170,7 @@ def build() -> Dict[str, Any]:
     if (
         erepo.get("schema_version") != 1
         or erepo.get("status") != "active"
-        or erepo_metadata.get("registry_sha256") != _sha256(EREPO_PATH)
+        or erepo_metadata.get("registry_sha256") != _text_sha256(EREPO_PATH)
     ):
         raise RuntimeError("ENIGMA ERepo VCEP registry is unavailable or has a bad checksum")
     records_by_variant = {
