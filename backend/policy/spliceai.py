@@ -22,7 +22,6 @@ FIGURE_1A_SPLICEAI_TYPES = frozenset({
     "intronic",
 })
 SPLICEAI_PP3_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
-SPLICEAI_BP4_ALLOWED_TYPES = FIGURE_1A_SPLICEAI_TYPES
 
 
 def normalize_variant_type(variant_type: str) -> str:
@@ -33,11 +32,6 @@ def normalize_variant_type(variant_type: str) -> str:
 def variant_type_allows_spliceai_pp3(variant_type: str) -> bool:
     """Return whether Figure 1A permits PP3 from SpliceAI for this type."""
     return normalize_variant_type(variant_type) in SPLICEAI_PP3_ALLOWED_TYPES
-
-
-def variant_type_allows_spliceai_bp4(variant_type: str) -> bool:
-    """Return whether Figure 1A permits BP4 from SpliceAI for this type."""
-    return normalize_variant_type(variant_type) in SPLICEAI_BP4_ALLOWED_TYPES
 
 
 def spliceai_required_for_classification(variant_type: str) -> bool:

@@ -112,13 +112,6 @@ def _load_references() -> None:
     _LOADED = True
 
 
-def reset_ps1_reference_cache_for_tests() -> None:
-    global _LOADED, _ST7_LOOKUP, _APPROVED_LOOKUP
-    _LOADED = False
-    _ST7_LOOKUP = {}
-    _APPROVED_LOOKUP = {}
-
-
 def discover_ps1_reference_variants(
     gene: str,
     c_notation: str,

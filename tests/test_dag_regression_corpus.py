@@ -25,7 +25,7 @@ from backend.criteria.pvs1_rna import (
 )
 from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.variant_processing.variant_type import infer_variant_type
-from backend.population_frequency.indel_size import is_indel_allele
+from backend.domain.indel import is_indel_allele
 
 
 REGRESSION_VARIANTS = (

@@ -146,7 +146,3 @@ def load_panel_provider(reference_dir: str | Path | None = None) -> PanelProvide
         gene_to_transcript=gene_to_transcript,
         provenance=provenance,
     )
-
-
-def validate_panel_provider() -> None:
-    load_panel_provider()

@@ -522,11 +522,6 @@ def clinical_lr_thresholds(gene: str) -> dict[str, dict[str, float]]:
     return deepcopy(values)
 
 
-def population_thresholds(gene: str) -> dict[str, Any]:
-    values = get_gene_policy(gene)["policy"]["thresholds"]["population_frequency"]
-    return deepcopy(values)
-
-
 def mixed_evidence_point_thresholds(gene: str | None = None) -> dict[str, int]:
     policy_gene = resolve_policy_gene(gene)
     values = get_gene_policy(policy_gene)["policy"]["thresholds"]["mixed_evidence_points"]

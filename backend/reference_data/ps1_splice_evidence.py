@@ -61,12 +61,6 @@ def get_st2_splice_record(gene: str, c_notation: str) -> Optional[Dict[str, Any]
     return _load_st2_evidence().get((gene, c_notation))
 
 
-def get_st3_splice_references(gene: str, c_notation: str) -> list[Dict[str, Any]]:
-    """Return all official ST3 source rows attached to the exact ST2 variant."""
-    record = get_st2_splice_record(gene, c_notation)
-    return list((record or {}).get("st3_references") or [])
-
-
 def get_st2_source_metadata() -> Dict[str, Any]:
     """Return immutable provenance for the validated ST2/ST3 snapshot."""
     payload = _load_st2_payload()
@@ -204,9 +198,3 @@ def evaluate_defined_splice_sources(
             "defined source versions, not that no splice evidence exists."
         ),
     }
-
-
-def reset_splice_source_cache_for_tests() -> None:
-    global _ST2_BY_VARIANT, _ST2_PAYLOAD
-    _ST2_BY_VARIANT = None
-    _ST2_PAYLOAD = None

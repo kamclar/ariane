@@ -337,20 +337,6 @@ def _runtime_entry_matches_profile(entry: object, gene: str) -> bool:
     return _score_entry_is_complete({**entry, "status": "ok"})
 
 
-def _score_row(row: dict) -> tuple[float, str]:
-    best_score = 0.0
-    best_field = ""
-    for key in SPLICEAI_DELTA_FIELDS:
-        try:
-            value = float(row.get(key, 0) or 0)
-        except (ValueError, TypeError):
-            value = 0.0
-        if value > best_score:
-            best_score = value
-            best_field = key
-    return best_score, best_field
-
-
 def _row_score_audit(row: dict) -> Optional[dict]:
     delta_scores = _float_score_map(
         {field: row.get(field) for field in SPLICEAI_DELTA_FIELDS},
