@@ -4,20 +4,24 @@ from __future__ import annotations
 
 import re
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from hgvs.parser import Parser
+    from hgvs.sequencevariant import SequenceVariant
 
 _OPERATION = re.compile(r"(delins|del|dup|ins)", re.IGNORECASE)
 _LITERAL_SEQUENCE = re.compile(r"[ACGT]+", re.IGNORECASE)
 
 
 @lru_cache(maxsize=1)
-def _parser():
+def _parser() -> Parser:
     from hgvs.parser import Parser
 
     return Parser()
 
 
-def _parse_variant(value: str):
+def _parse_variant(value: str) -> SequenceVariant | None:
     from hgvs.exceptions import HGVSParseError
 
     try:

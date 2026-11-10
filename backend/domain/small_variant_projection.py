@@ -10,7 +10,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import lru_cache
 import re
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
+
+if TYPE_CHECKING:
+    from hgvs.parser import Parser
+    from hgvs.sequencevariant import SequenceVariant
 
 from backend.domain.indel import indel_operation
 
@@ -27,13 +31,13 @@ _COMPLEMENT = str.maketrans("ACGT", "TGCA")
 
 
 @lru_cache(maxsize=1)
-def _parser():
+def _parser() -> Parser:
     from hgvs.parser import Parser
 
     return Parser()
 
 
-def _parse_variant(value: str):
+def _parse_variant(value: str) -> SequenceVariant | None:
     from hgvs.exceptions import HGVSParseError
 
     try:
