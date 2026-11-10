@@ -16,8 +16,8 @@ from backend.reference_data.ps1_splice_evidence import (
     get_st2_splice_record,
 )
 from backend.reference_data.table4 import (
-    TABLE4_DATA,
     parse_pvs1_code_strength,
+    table4_deletion_exons,
     table4_lookup_deletion,
 )
 from backend.policy.gene import (
@@ -62,7 +62,7 @@ def _reported_whole_exon_deletion(value: Any) -> Optional[int]:
 def _table4_exon_for_reported_number(gene: str, exon_number: int) -> Optional[str]:
     """Map clinical exon numbering in ST2 to the corresponding Table 4 row."""
     matches = []
-    for exon in TABLE4_DATA.get("deletion_rules", {}).get(gene, {}):
+    for exon in table4_deletion_exons(gene):
         match = re.fullmatch(r"E(\d+)(?:\((\d+)\))?", exon)
         if not match:
             continue

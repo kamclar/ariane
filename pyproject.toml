@@ -34,9 +34,12 @@ select = ["E4", "E7", "E9", "F"]
 python_version = "3.12"
 files = [
     "backend/domain",
+    "backend/criteria/pvs1.py",
     "backend/policy/classification.py",
     "backend/policy/classification_scope.py",
     "backend/presentation/frontend.py",
+    "backend/reference_data/table4.py",
+    "scripts/build_enigma_table4_snapshot.py",
 ]
 check_untyped_defs = true
 disallow_incomplete_defs = true

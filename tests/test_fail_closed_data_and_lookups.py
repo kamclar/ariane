@@ -839,15 +839,14 @@ class RemainingFallbackTests(unittest.TestCase):
     def test_duplication_rule_never_substitutes_another_arrangement(self):
         from backend.reference_data import table4
 
-        old_rules = table4.TABLE4_DATA["duplication_rules"]
-        try:
-            table4.TABLE4_DATA["duplication_rules"] = {
+        data = {
+            "duplication_rules": {
                 "BRCA1": {"E2": {"Tandem": {"pvs1_code": "PVS1_Strong"}}},
                 "BRCA2": {},
-            }
+            },
+        }
+        with patch.object(table4, "load_table4_data", return_value=data):
             result = table4.table4_lookup_duplication("BRCA1", "E2", "Unknown")
-        finally:
-            table4.TABLE4_DATA["duplication_rules"] = old_rules
         self.assertFalse(result["found"])
         self.assertEqual(result["pvs1_points"], 0)
         self.assertIn("No exact", result["reason"])

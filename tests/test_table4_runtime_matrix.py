@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from backend.criteria.pvs1 import evaluate_pvs1
 from backend.domain.classification import NormalizedVariant
 from backend.reference_data.table4 import (
@@ -13,7 +15,11 @@ from backend.reference_data.table4 import (
 from backend.services.classification_completeness import (
     first_required_evidence_gap,
 )
-from scripts.build_enigma_table4_snapshot import build_snapshot
+from scripts.build_enigma_table4_snapshot import (
+    EXPECTED_HEADERS,
+    SNAPSHOT_DATE,
+    build_snapshot,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,6 +52,24 @@ def test_generated_runtime_sections_match_the_workbook() -> None:
         "critical_boundaries",
     ):
         assert stored[section] == rebuilt[section], section
+    assert rebuilt["generated"] == SNAPSHOT_DATE
+
+
+def test_builder_rejects_an_unexpected_workbook_layout(tmp_path: Path) -> None:
+    import openpyxl
+
+    workbook = openpyxl.load_workbook(SOURCE)
+    sheet = workbook["Table 4 - Annotated Exons"]
+    first_column = next(iter(EXPECTED_HEADERS))
+    sheet.cell(row=1, column=int(first_column) + 1, value="Unexpected header")
+    changed_source = tmp_path / "changed-table4.xlsx"
+    workbook.save(changed_source)
+
+    with pytest.raises(
+        RuntimeError,
+        match="Unexpected Table 4 workbook columns",
+    ):
+        build_snapshot(changed_source)
 
 
 def test_table4_runtime_rule_counts() -> None:

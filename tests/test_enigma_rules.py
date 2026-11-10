@@ -20,7 +20,7 @@ from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.reference_data.enigma_rules import lookup_st16_table4_rna_references
 from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.reference_data.table4 import (
-    TABLE4_DATA,
+    load_table4_data,
     parse_pvs1_code_strength,
     table4_lookup_initiation,
     table4_lookup_splice,
@@ -2235,7 +2235,7 @@ class Table4RareSpliceBranchTests(unittest.TestCase):
     ):
         observed_count = sum(
             entry.get("pvs1_code") == source_code
-            for gene_rules in TABLE4_DATA["splice_rules"].values()
+            for gene_rules in load_table4_data()["splice_rules"].values()
             for entry in gene_rules.values()
         )
         self.assertEqual(observed_count, source_count)

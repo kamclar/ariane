@@ -4,8 +4,9 @@ from __future__ import annotations
 import argparse
 import json
 import re
-from datetime import date
+from enum import IntEnum
 from pathlib import Path
+from typing import Any, TypeAlias
 
 import openpyxl
 
@@ -14,6 +15,46 @@ SOURCE_URL = (
     "https://cspec.genome.network/cspec/File/id/"
     "ca5cf57b-94df-4ad6-a001-c62ceccb3845/data"
 )
+SNAPSHOT_DATE = "2026-11-10"
+
+
+class Column(IntEnum):
+    GENE = 0
+    EXON = 1
+    ACCEPTOR_NOTES = 2
+    ACCEPTOR_CODE = 3
+    ACCEPTOR_PATTERN = 4
+    ACCEPTOR_ALLELES = 5
+    REGION = 7
+    EXON_START_FALLBACK = 8
+    PRIMARY_VALUE = 9
+    MARKER = 10
+    SECONDARY_VALUE = 11
+    EXON_END = 12
+    DOMAIN_VALUE = 13
+    DONOR_PATTERN = 15
+    DONOR_ALLELES = 16
+    DONOR_CODE = 17
+    DONOR_NOTES = 18
+
+
+EXPECTED_HEADERS = {
+    Column.GENE: "Gene",
+    Column.EXON: "Exon",
+    Column.ACCEPTOR_NOTES: "Notes & Warnings",
+    Column.ACCEPTOR_CODE: "Code for IVS variant",
+    Column.ACCEPTOR_PATTERN: "IVS 1,2 Variants",
+    Column.ACCEPTOR_ALLELES: "Vt Allele",
+    Column.DONOR_PATTERN: "IVS 1,2 Variants",
+    Column.DONOR_ALLELES: "Vt Allele",
+    Column.DONOR_CODE: "Code for IVS variant",
+    Column.DONOR_NOTES: "Notes & Warnings",
+}
+
+SourceRow: TypeAlias = list[Any]
+Rule: TypeAlias = dict[str, Any]
+GeneRules: TypeAlias = dict[str, dict[str, Rule]]
+ContextNotes: TypeAlias = dict[str, dict[str, dict[str, list[str]]]]
 
 
 # Appendix D records the gene-level initiation-codon branch that was used to
@@ -40,20 +81,36 @@ APPENDIX_D_INITIATION_FACTS = {
 }
 
 
-def _clean(value):
+def _clean(value: Any) -> Any:
     if isinstance(value, str):
         return value.strip()
     return value
 
 
-def _position(value) -> int | None:
+def _validate_header(header: SourceRow) -> None:
+    required_width = max(int(column) for column in EXPECTED_HEADERS) + 1
+    if len(header) < required_width:
+        raise RuntimeError(
+            "Unexpected Table 4 workbook width: "
+            f"expected at least {required_width} columns, found {len(header)}"
+        )
+    mismatches = {
+        column.name: (expected, str(header[column]).strip())
+        for column, expected in EXPECTED_HEADERS.items()
+        if str(header[column]).strip() != expected
+    }
+    if mismatches:
+        raise RuntimeError(f"Unexpected Table 4 workbook columns: {mismatches}")
+
+
+def _position(value: Any) -> int | None:
     if value is None:
         return None
     match = re.fullmatch(r"c\.(-?\d+)\*?", str(value).strip())
     return int(match.group(1)) if match else None
 
 
-def _extend_unique_notes(target: list[str], *values) -> None:
+def _extend_unique_notes(target: list[str], *values: Any) -> None:
     for value in values:
         if value in (None, ""):
             continue
@@ -62,38 +119,38 @@ def _extend_unique_notes(target: list[str], *values) -> None:
             target.append(note)
 
 
-def _notes(*values) -> str:
+def _notes(*values: Any) -> str:
     notes: list[str] = []
     _extend_unique_notes(notes, *values)
     return " | ".join(notes)
 
 
-def _with_notes(rule: dict, notes: str) -> dict:
+def _with_notes(rule: Rule, notes: str) -> Rule:
     if notes:
         rule["notes"] = notes
     return rule
 
 
-def _alleles(value) -> list[str]:
+def _alleles(value: Any) -> list[str]:
     if value is None:
         return []
     return [part.strip() for part in str(value).split(",") if part.strip()]
 
 
-def _context_notes(rows) -> dict:
-    notes = {"BRCA1": {}, "BRCA2": {}}
+def _context_notes(rows: list[SourceRow]) -> ContextNotes:
+    notes: ContextNotes = {"BRCA1": {}, "BRCA2": {}}
     for row in rows[1:]:
-        gene, exon = row[0], row[1]
+        gene, exon = row[Column.GENE], row[Column.EXON]
         if gene not in notes or not exon:
             continue
         entry = notes[gene].setdefault(
             exon,
             {"acceptor": [], "donor": [], "exon": []},
         )
-        if not (row[3] and row[4]):
-            _extend_unique_notes(entry["acceptor"], row[2])
-        if not (row[15] and row[17]):
-            _extend_unique_notes(entry["donor"], row[18])
+        if not (row[Column.ACCEPTOR_CODE] and row[Column.ACCEPTOR_PATTERN]):
+            _extend_unique_notes(entry["acceptor"], row[Column.ACCEPTOR_NOTES])
+        if not (row[Column.DONOR_PATTERN] and row[Column.DONOR_CODE]):
+            _extend_unique_notes(entry["donor"], row[Column.DONOR_NOTES])
 
     for gene_notes in notes.values():
         for entry in gene_notes.values():
@@ -110,7 +167,15 @@ def _context_notes(rows) -> dict:
     return notes
 
 
-def _add_splice_rules(target, gene, exon, pattern, alleles, code, notes):
+def _add_splice_rules(
+    target: GeneRules,
+    gene: str,
+    exon: str,
+    pattern: Any,
+    alleles: Any,
+    code: Any,
+    notes: str,
+) -> None:
     if not pattern or not code:
         return
     pattern = str(pattern).strip()
@@ -134,47 +199,65 @@ def _add_splice_rules(target, gene, exon, pattern, alleles, code, notes):
         }
 
 
-def build_snapshot(source: Path) -> dict:
+def build_snapshot(source: Path) -> dict[str, Any]:
     workbook = openpyxl.load_workbook(source, read_only=True, data_only=True)
     readme_sheet = workbook["Specifications - Table 4 Readme"]
     sheet = workbook["Table 4 - Annotated Exons"]
     rows = [[_clean(value) for value in row] for row in sheet.iter_rows(values_only=True)]
+    _validate_header(rows[0])
     context_notes = _context_notes(rows)
 
-    exon_ranges = {"BRCA1": {}, "BRCA2": {}}
-    initiation_rules = {"BRCA1": {}, "BRCA2": {}}
-    ptc_rules = {"BRCA1": {}, "BRCA2": {}}
-    splice_rules = {"BRCA1": {}, "BRCA2": {}}
-    deletion_rules = {"BRCA1": {}, "BRCA2": {}}
-    duplication_rules = {"BRCA1": {}, "BRCA2": {}}
-    critical_boundaries = {}
+    exon_ranges: dict[str, dict[str, list[int]]] = {"BRCA1": {}, "BRCA2": {}}
+    initiation_rules: dict[str, Rule] = {"BRCA1": {}, "BRCA2": {}}
+    ptc_rules: GeneRules = {"BRCA1": {}, "BRCA2": {}}
+    splice_rules: GeneRules = {"BRCA1": {}, "BRCA2": {}}
+    deletion_rules: GeneRules = {"BRCA1": {}, "BRCA2": {}}
+    duplication_rules: GeneRules = {"BRCA1": {}, "BRCA2": {}}
+    critical_boundaries: dict[str, Rule] = {}
 
     for row_number, row in enumerate(rows[1:], 2):
-        gene, exon = row[0], row[1]
+        gene, exon = row[Column.GENE], row[Column.EXON]
         if gene not in {"BRCA1", "BRCA2"} or not exon:
             continue
 
         start = next(
-            (position for index in (9, 8, 7) if (position := _position(row[index])) is not None),
+            (
+                position
+                for column in (
+                    Column.PRIMARY_VALUE,
+                    Column.EXON_START_FALLBACK,
+                    Column.REGION,
+                )
+                if (position := _position(row[column])) is not None
+            ),
             None,
         )
         end_positions = [
             position
-            for index in (11, 12, 13)
-            if (position := _position(row[index])) is not None
+            for column in (
+                Column.SECONDARY_VALUE,
+                Column.EXON_END,
+                Column.DOMAIN_VALUE,
+            )
+            if (position := _position(row[column])) is not None
         ]
         end = max(end_positions) if end_positions else None
         if start is not None and end is not None:
             exon_ranges[gene][exon] = [start, end]
 
-        marker = str(row[10]).strip() if row[10] is not None else ""
-        code = row[9]
+        marker_value = row[Column.MARKER]
+        marker = str(marker_value).strip() if marker_value is not None else ""
+        code = row[Column.PRIMARY_VALUE]
         note_context = context_notes[gene].get(
             exon,
             {"acceptor": [], "donor": [], "exon": []},
         )
         exon_notes = note_context["exon"]
-        structural_notes = _notes(row[2], row[18], *exon_notes)
+        structural_notes = _notes(
+            row[Column.ACCEPTOR_NOTES],
+            row[Column.DONOR_NOTES],
+            *exon_notes,
+        )
         if marker == "START codon":
             if initiation_rules[gene]:
                 raise RuntimeError(
@@ -191,7 +274,7 @@ def build_snapshot(source: Path) -> dict:
             ptc_rules[gene][exon] = _with_notes(
                 {
                     "pvs1_code": code,
-                    "pm5_code": row[11],
+                    "pm5_code": row[Column.SECONDARY_VALUE],
                     "condition": None,
                 },
                 structural_notes,
@@ -208,7 +291,7 @@ def build_snapshot(source: Path) -> dict:
                     "rule": marker,
                     "at_or_before": {
                         "pvs1_code": code,
-                        "pm5_code": row[11],
+                        "pm5_code": row[Column.SECONDARY_VALUE],
                     },
                 },
                 structural_notes,
@@ -217,7 +300,7 @@ def build_snapshot(source: Path) -> dict:
             ptc_rules[gene][exon] = _with_notes(
                 {
                     "pvs1_code": code,
-                    "pm5_code": row[11],
+                    "pm5_code": row[Column.SECONDARY_VALUE],
                     "condition": marker,
                 },
                 structural_notes,
@@ -233,7 +316,7 @@ def build_snapshot(source: Path) -> dict:
                     ptc_rules[gene][exon]["notes"] = boundary_notes
                 critical_boundaries[gene]["after"] = {
                     "pvs1_code": code,
-                    "pm5_code": row[11],
+                    "pm5_code": row[Column.SECONDARY_VALUE],
                 }
         elif marker.startswith("DEL "):
             deletion_rules[gene][exon] = {
@@ -241,7 +324,7 @@ def build_snapshot(source: Path) -> dict:
                 "notes": structural_notes,
             }
         elif marker.startswith("DUP ") or marker == "DUP 11":
-            arrangement = str(row[11]).strip()
+            arrangement = str(row[Column.SECONDARY_VALUE]).strip()
             duplication_rules[gene].setdefault(exon, {})[arrangement] = {
                 "pvs1_code": code,
                 "notes": structural_notes,
@@ -249,13 +332,25 @@ def build_snapshot(source: Path) -> dict:
 
         _add_splice_rules(
             splice_rules, gene, exon,
-            row[4], row[5], row[3],
-            _notes(row[2], *exon_notes, *note_context["acceptor"]),
+            row[Column.ACCEPTOR_PATTERN],
+            row[Column.ACCEPTOR_ALLELES],
+            row[Column.ACCEPTOR_CODE],
+            _notes(
+                row[Column.ACCEPTOR_NOTES],
+                *exon_notes,
+                *note_context["acceptor"],
+            ),
         )
         _add_splice_rules(
             splice_rules, gene, exon,
-            row[15], row[16], row[17],
-            _notes(row[18], *exon_notes, *note_context["donor"]),
+            row[Column.DONOR_PATTERN],
+            row[Column.DONOR_ALLELES],
+            row[Column.DONOR_CODE],
+            _notes(
+                row[Column.DONOR_NOTES],
+                *exon_notes,
+                *note_context["donor"],
+            ),
         )
 
     for gene in ("BRCA1", "BRCA2"):
@@ -275,7 +370,7 @@ def build_snapshot(source: Path) -> dict:
         "released": "2025-01-09",
         "source": "ClinGen ENIGMA BRCA1/2 VCEP Specifications Table 4",
         "source_url": SOURCE_URL,
-        "generated": date.today().isoformat(),
+        "generated": SNAPSHOT_DATE,
         "readme": readme,
         "source_columns": 20,
         "source_rows": rows,

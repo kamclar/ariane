@@ -1393,6 +1393,13 @@ akceptorové, donorové nebo exonové větvi. Přesný RNA řádek pro stejnou a
 přednost před obecným predikčním řádkem, oba zdrojové řádky však zůstávají
 zachovány pro audit.
 
+Generátor používá pojmenované sloupce a před zpracováním ověřuje hlavičku
+workbooku. Datum snapshotu je explicitní součást revize a nezávisí na dni, kdy
+se skript spustí. Runtime data se načítají pouze přes modul Table 4. Pravidlová
+vrstva nečte ani nemění globální JSON objekt. Hodnocení PVS1 je rozděleno na
+samostatné splice, PTC, deleční a duplikační větve se společným veřejným
+vstupem. Tyto moduly jsou součástí pravidelné typové kontroly.
+
 Regresní matice znovu sestaví snapshot z původního workbooku a porovná všechny
 runtime sekce. Dále projde 575 jedinečných splice alel, 48 PTC exonových
 pravidel, 50 delečních pravidel, 100 duplikačních uspořádání a oba iniciační

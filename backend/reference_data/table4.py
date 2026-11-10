@@ -1,24 +1,50 @@
-# ============================================================
-# ENIGMA Table 4 - Load from JSON file
-# ============================================================
-# v1.6.0: Load Table 4 data from JSON file in data/ directory
+"""Read and query the pinned ENIGMA Table 4 snapshot."""
 
-from typing import Optional, Dict
-from pathlib import Path
+from __future__ import annotations
+
 from functools import lru_cache
 import hashlib
 import json
+from pathlib import Path
 import re
+from typing import Any, Dict, NamedTuple, Optional
 
-from backend.domain.lazy_mapping import LazyJsonObject
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+TABLE4_JSON_PATH = BACKEND_DIR / "data" / "enigma_table4.json"
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-# Load Table 4 from JSON
-TABLE4_JSON_PATH = PROJECT_ROOT / "data" / "enigma_table4.json"
+class CriterionWeight(NamedTuple):
+    strength: Optional[str]
+    points: int
+    requires_rna: bool = False
+
+
+class PtcSelection(NamedTuple):
+    pvs1_code: Optional[str]
+    pm5_code: Optional[str]
+    reason: str
+    review_required: bool
+
+
+PVS1_WEIGHTS = {
+    "PVS1": ("Very Strong", 8),
+    "PVS1_VeryStrong": ("Very Strong", 8),
+    "PVS1_Strong": ("Strong", 4),
+    "PVS1_Moderate": ("Moderate", 2),
+    "PVS1_Supporting": ("Supporting", 1),
+}
+
+PM5_WEIGHTS = {
+    "PM5_Strong (PTC)": ("Strong", 4),
+    "PM5 (PTC)": ("Moderate", 2),
+    "PM5": ("Moderate", 2),
+    "PM5_Moderate": ("Moderate", 2),
+    "PM5_Supporting (PTC)": ("Supporting", 1),
+}
+
 
 @lru_cache(maxsize=1)
-def load_table4_data() -> dict:
+def load_table4_data() -> dict[str, Any]:
     """Load Table 4 explicitly or on first lookup, never during module import."""
     if not TABLE4_JSON_PATH.is_file():
         raise RuntimeError(f"Required ENIGMA Table 4 dataset is missing: {TABLE4_JSON_PATH}")
@@ -33,63 +59,29 @@ def load_table4_data() -> dict:
     return value
 
 
-# Backward-compatible mapping. Access is lazy so importing criteria remains safe.
-TABLE4_DATA = LazyJsonObject(load_table4_data)
-
-
-# Validate Table 4 data - check that all exons in rules have ranges
-def validate_table4_data():
-    """Check that all exons referenced in rules have corresponding ranges."""
-    issues = []
-    gene_sections = (
-        "exon_ranges", "initiation_rules", "ptc_rules", "deletion_rules",
-        "duplication_rules",
-    )
-    genes = sorted({
-        gene
-        for section in gene_sections
-        for gene in (TABLE4_DATA.get(section, {}) or {})
-    })
-    for gene in genes:
-        exon_ranges = set(TABLE4_DATA.get("exon_ranges", {}).get(gene, {}).keys())
-
-        # Check ptc_rules
-        ptc_exons = set(TABLE4_DATA.get("ptc_rules", {}).get(gene, {}).keys())
-        missing_ptc = ptc_exons - exon_ranges
-        if missing_ptc:
-            issues.append(f"{gene} ptc_rules missing ranges: {missing_ptc}")
-
-        # Check deletion_rules
-        del_exons = set(TABLE4_DATA.get("deletion_rules", {}).get(gene, {}).keys())
-        missing_del = del_exons - exon_ranges
-        if missing_del:
-            issues.append(f"{gene} deletion_rules missing ranges: {missing_del}")
-
-        # Check duplication_rules
-        dup_exons = set(TABLE4_DATA.get("duplication_rules", {}).get(gene, {}).keys())
-        missing_dup = dup_exons - exon_ranges
-        if missing_dup:
-            issues.append(f"{gene} duplication_rules missing ranges: {missing_dup}")
-
-    if issues:
-        for issue in issues:
-            print(f"WARNING: Table 4 data validation issue: {issue}")
-
-if __name__ == "__main__":
-    validate_table4_data()
-
-
 def get_table4_exon(gene: str, cds_pos: int) -> Optional[str]:
     """Find the Table 4 exon for a given CDS position."""
-    if gene not in TABLE4_DATA["exon_ranges"]:
-        return None
-
-    for exon_name, bounds in TABLE4_DATA["exon_ranges"][gene].items():
+    ranges = load_table4_data().get("exon_ranges", {}).get(gene, {})
+    for exon_name, bounds in ranges.items():
         start, end = bounds[0], bounds[1]
         if start <= cds_pos <= end:
-            return exon_name
+            return str(exon_name)
 
     return None
+
+
+def table4_exon_range(gene: str, exon: str) -> Optional[tuple[int, int]]:
+    """Return the exact coding range stored for one Table 4 exon."""
+    bounds = load_table4_data().get("exon_ranges", {}).get(gene, {}).get(exon)
+    if not isinstance(bounds, list) or len(bounds) != 2:
+        return None
+    return int(bounds[0]), int(bounds[1])
+
+
+def table4_deletion_exons(gene: str) -> tuple[str, ...]:
+    """Return exon labels that have an exact Table 4 deletion rule."""
+    rules = load_table4_data().get("deletion_rules", {}).get(gene, {})
+    return tuple(rules)
 
 
 def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
@@ -105,20 +97,19 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
         "reason": ""
     }
 
-    if gene not in TABLE4_DATA["splice_rules"]:
+    gene_rules = load_table4_data().get("splice_rules", {}).get(gene)
+    if not isinstance(gene_rules, dict):
         result["reason"] = f"No Table 4 splice rules for {gene}"
         return result
 
-    # Try different notation formats
-    # Table 4 uses format like "c.8953+2TC" (no ">")
     formats_to_try = [
         c_notation,
         c_notation.replace(">", ""),
     ]
 
     for fmt in formats_to_try:
-        if fmt in TABLE4_DATA["splice_rules"][gene]:
-            entry = TABLE4_DATA["splice_rules"][gene][fmt]
+        if fmt in gene_rules:
+            entry = gene_rules[fmt]
             result["found"] = True
             result["pvs1_code"] = entry["pvs1_code"]
             result["exon"] = entry["exon"]
@@ -207,40 +198,26 @@ def lookup_table4_pvs1_rna(gene: str, c_notation: str) -> Dict:
     }
 
 
-def parse_pvs1_code_strength(pvs1_code: str) -> tuple:
-    """
-    Parse PVS1 code to get strength and points.
-
-    Handles: PVS1, PVS1_N/A, PVS1_Strong, PVS1_Moderate, PVS1_Supporting
-    And RNA variants: PVS1 (RNA), PVS1_Strong (RNA), etc.
-
-    Returns: (strength, points, requires_rna)
-    """
+def parse_pvs1_code_strength(pvs1_code: Optional[str]) -> CriterionWeight:
+    """Translate one Table 4 PVS1 code into strength and points."""
     if pvs1_code is None:
-        return (None, 0, False)
+        return CriterionWeight(None, 0)
 
     requires_rna = "(RNA)" in pvs1_code or "RNA" in pvs1_code
-
-    # Remove (RNA) suffix for parsing
     code = pvs1_code.replace(" (RNA)", "").replace("(RNA)", "").strip()
+    strength, points = PVS1_WEIGHTS.get(code, (None, 0))
+    return CriterionWeight(strength, points, requires_rna)
 
-    if code == "PVS1" or code == "PVS1_VeryStrong":
-        return ("Very Strong", 8, requires_rna)
-    elif code == "PVS1_Strong":
-        return ("Strong", 4, requires_rna)
-    elif code == "PVS1_Moderate":
-        return ("Moderate", 2, requires_rna)
-    elif code == "PVS1_Supporting":
-        return ("Supporting", 1, requires_rna)
-    elif code == "PVS1_N/A" or "N/A" in code:
-        return (None, 0, requires_rna)
-    # Unknown source codes must never acquire evidence weight implicitly.
-    return (None, 0, requires_rna)
+
+def parse_pm5_code_strength(pm5_code: Optional[str]) -> CriterionWeight:
+    """Translate one Table 4 PM5 PTC code into strength and points."""
+    strength, points = PM5_WEIGHTS.get(str(pm5_code), (None, 0))
+    return CriterionWeight(strength, points)
 
 
 def table4_lookup_initiation(gene: str) -> Dict:
     """Return the gene-level ENIGMA Table 4 initiation-codon rule."""
-    entry = TABLE4_DATA.get("initiation_rules", {}).get(gene)
+    entry = load_table4_data().get("initiation_rules", {}).get(gene)
     if not isinstance(entry, dict) or not entry:
         return {
             "found": False,
@@ -301,6 +278,83 @@ def table4_lookup_initiation(gene: str) -> Dict:
     }
 
 
+def _select_ptc_codes(
+    data: dict[str, Any],
+    gene: str,
+    exon: str,
+    default_pvs1_code: Optional[str],
+    default_pm5_code: Optional[str],
+    first_altered_aa: Optional[int],
+    termination_aa: Optional[int],
+) -> PtcSelection:
+    boundary = data.get("critical_boundaries", {}).get(gene)
+    if not isinstance(boundary, dict) or exon != boundary.get("exon"):
+        return PtcSelection(
+            default_pvs1_code,
+            default_pm5_code,
+            f"Table 4 lookup: {gene} {exon} PTC -> {default_pvs1_code}",
+            False,
+        )
+
+    boundary_aa = int(boundary["boundary_aa"])
+    missing_first_position = first_altered_aa is None
+    missing_required_stop = (
+        first_altered_aa is not None
+        and first_altered_aa <= boundary_aa
+        and termination_aa is None
+    )
+    if missing_first_position or missing_required_stop:
+        missing_value = (
+            "the first altered amino acid"
+            if missing_first_position
+            else "the introduced termination position"
+        )
+        return PtcSelection(
+            None,
+            None,
+            (
+                f"Critical boundary exon {exon}, but {missing_value} could "
+                f"not be determined. Manual review is required to compare "
+                f"the complete protein consequence with p.{boundary_aa}."
+            ),
+            True,
+        )
+
+    assert first_altered_aa is not None
+    if (
+        first_altered_aa <= boundary_aa
+        and termination_aa is not None
+        and termination_aa <= boundary_aa
+    ):
+        branch = boundary["at_or_before"]
+        pvs1_code = branch.get("pvs1_code")
+        pm5_code = branch.get("pm5_code")
+        reason = (
+            f"First altered residue p.{first_altered_aa} <= p.{boundary_aa} "
+            f"and predicted termination p.{termination_aa} <= p.{boundary_aa} "
+            f"in {exon} -> {pvs1_code}, {pm5_code}"
+        )
+        return PtcSelection(pvs1_code, pm5_code, reason, False)
+
+    branch = boundary["after"]
+    pvs1_code = branch.get("pvs1_code")
+    pm5_code = branch.get("pm5_code")
+    if first_altered_aa > boundary_aa:
+        boundary_reason = (
+            f"first altered residue p.{first_altered_aa} is after p.{boundary_aa}"
+        )
+    else:
+        boundary_reason = (
+            f"predicted termination p.{termination_aa} is after p.{boundary_aa}"
+        )
+    reason = (
+        f"Last-exon PTC in {exon}: {boundary_reason}. ENIGMA requires both "
+        "the first altered residue and introduced termination to be at or "
+        f"before the critical boundary -> {pvs1_code}, {pm5_code}"
+    )
+    return PtcSelection(pvs1_code, pm5_code, reason, False)
+
+
 def table4_lookup_pvs1_ptc(
     gene: str,
     cds_pos: int,
@@ -315,7 +369,7 @@ def table4_lookup_pvs1_ptc(
     weight by the exon containing the nucleotide change, even when the
     predicted termination codon lies in a later exon.
     """
-    result = {
+    result: Dict = {
         "applies": False,
         "review_required": False,
         "application_status": "not_applied",
@@ -332,7 +386,7 @@ def table4_lookup_pvs1_ptc(
         "reason": ""
     }
 
-    # Find exon
+    data = load_table4_data()
     exon = get_table4_exon(gene, cds_pos)
     if exon is None:
         result["reason"] = f"CDS position {cds_pos} not found in Table 4 exon ranges for {gene}"
@@ -340,91 +394,32 @@ def table4_lookup_pvs1_ptc(
 
     result["exon"] = exon
 
-    # Get PTC rules for this exon
-    if gene not in TABLE4_DATA["ptc_rules"] or exon not in TABLE4_DATA["ptc_rules"][gene]:
+    gene_rules = data.get("ptc_rules", {}).get(gene, {})
+    if exon not in gene_rules:
         result["reason"] = f"No Table 4 PTC rule for {gene} {exon}"
         return result
 
-    rule = TABLE4_DATA["ptc_rules"][gene][exon]
-    pvs1_code = rule["pvs1_code"]
-    pm5_code = rule.get("pm5_code")
+    rule = gene_rules[exon]
     result["pm5_exon"] = exon
     result["notes"] = str(rule.get("notes") or "")
+    selection = _select_ptc_codes(
+        data,
+        gene,
+        exon,
+        rule.get("pvs1_code"),
+        rule.get("pm5_code"),
+        first_altered_aa,
+        termination_aa,
+    )
+    result["reason"] = selection.reason
+    if selection.review_required:
+        result["review_required"] = True
+        result["application_status"] = "review_required"
+        return result
 
-    # Check both the first altered residue and the introduced termination codon
-    # against the last-exon Table 4 boundary. ENIGMA's 2026-10-15
-    # methodological clarification keeps PVS1 and PM5 (PTC) paired: both are
-    # applicable only when both positions are at or before the boundary.
-    if gene in TABLE4_DATA.get("critical_boundaries", {}):
-        boundary_info = TABLE4_DATA["critical_boundaries"][gene]
-        if exon == boundary_info["exon"]:
-            boundary_aa = boundary_info["boundary_aa"]
-            missing_first_position = first_altered_aa is None
-            missing_required_stop = (
-                first_altered_aa is not None
-                and first_altered_aa <= boundary_aa
-                and termination_aa is None
-            )
-            if missing_first_position or missing_required_stop:
-                result["applies"] = False
-                result["review_required"] = True
-                result["application_status"] = "review_required"
-                result["pvs1_code"] = None
-                missing_value = (
-                    "the first altered amino acid"
-                    if missing_first_position
-                    else "the introduced termination position"
-                )
-                result["reason"] = (
-                    f"Critical boundary exon {exon}, but {missing_value} could "
-                    f"not be determined. Manual review is required to compare "
-                    f"the complete protein consequence with p.{boundary_aa}."
-                )
-                return result
+    pvs1_code = selection.pvs1_code
+    pm5_code = selection.pm5_code
 
-            if (
-                first_altered_aa <= boundary_aa
-                and termination_aa <= boundary_aa
-            ):
-                branch = boundary_info.get("at_or_before") or {}
-                pvs1_code = branch.get("pvs1_code")
-                pm5_code = branch.get("pm5_code")
-                result["reason"] = (
-                    f"First altered residue p.{first_altered_aa} <= p.{boundary_aa} "
-                    f"and predicted termination p.{termination_aa} <= "
-                    f"p.{boundary_aa} in {exon} -> {pvs1_code}, {pm5_code}"
-                )
-            else:
-                branch = boundary_info.get("after") or {}
-                pvs1_code = branch.get("pvs1_code")
-                pm5_code = branch.get("pm5_code")
-                if first_altered_aa > boundary_aa:
-                    boundary_reason = (
-                        f"first altered residue p.{first_altered_aa} is after "
-                        f"p.{boundary_aa}"
-                    )
-                elif termination_aa is None:
-                    boundary_reason = (
-                        "the introduced termination position could not be "
-                        "determined"
-                    )
-                else:
-                    boundary_reason = (
-                        f"predicted termination p.{termination_aa} is after "
-                        f"p.{boundary_aa}"
-                    )
-                result["reason"] = (
-                    f"Last-exon PTC in {exon}: {boundary_reason}. ENIGMA requires "
-                    "both the first altered residue and introduced termination "
-                    f"to be at or before the critical boundary -> {pvs1_code}, "
-                    f"{pm5_code}"
-                )
-        else:
-            result["reason"] = f"Table 4 lookup: {gene} {exon} PTC -> {pvs1_code}"
-    else:
-        result["reason"] = f"Table 4 lookup: {gene} {exon} PTC -> {pvs1_code}"
-
-    # Parse PVS1 code to get strength and points
     strength, points, requires_rna = parse_pvs1_code_strength(pvs1_code)
     result["pvs1_code"] = pvs1_code
     result["pvs1_strength"] = strength
@@ -449,20 +444,11 @@ def table4_lookup_pvs1_ptc(
     if result["notes"]:
         result["reason"] += f"; Table 4 note: {result['notes']}"
 
-    # Parse PM5 code
-    # PM5_Strong (PTC), PM5_Supporting (PTC), PM5 (PTC), PM5_N/A
-    if pm5_code and "N/A" not in pm5_code:
+    pm5_weight = parse_pm5_code_strength(pm5_code)
+    if pm5_weight.strength is not None:
         result["pm5_code"] = pm5_code
-        if "Strong" in pm5_code and "Very" not in pm5_code:
-            result["pm5_strength"] = "Strong"
-            result["pm5_points"] = 4
-        elif "Supporting" in pm5_code:
-            result["pm5_strength"] = "Supporting"
-            result["pm5_points"] = 1
-        elif pm5_code in ["PM5 (PTC)", "PM5", "PM5_Moderate"]:
-            # Plain PM5 (PTC) = Moderate
-            result["pm5_strength"] = "Moderate"
-            result["pm5_points"] = 2
+        result["pm5_strength"] = pm5_weight.strength
+        result["pm5_points"] = pm5_weight.points
 
     return result
 
@@ -471,8 +457,9 @@ def table4_lookup_deletion(gene: str, exon: str) -> Dict:
     """Lookup PVS1 code for exon deletion."""
     result = {"found": False, "pvs1_code": None, "pvs1_strength": None, "pvs1_points": 0, "reason": ""}
 
-    if gene in TABLE4_DATA["deletion_rules"] and exon in TABLE4_DATA["deletion_rules"][gene]:
-        rule = TABLE4_DATA["deletion_rules"][gene][exon]
+    gene_rules = load_table4_data().get("deletion_rules", {}).get(gene, {})
+    if exon in gene_rules:
+        rule = gene_rules[exon]
         result["found"] = True
         result["pvs1_code"] = rule["pvs1_code"]
         result["notes"] = rule.get("notes", "")
@@ -487,7 +474,6 @@ def table4_lookup_deletion(gene: str, exon: str) -> Dict:
                 f"{gene} {exon} deletion."
             )
 
-        # Parse strength
         strength, points, _ = parse_pvs1_code_strength(rule["pvs1_code"])
         result["pvs1_strength"] = strength
         result["pvs1_points"] = points
@@ -512,15 +498,16 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
     """
     result = {"found": False, "pvs1_code": None, "pvs1_strength": None, "pvs1_points": 0, "reason": ""}
 
-    if gene not in TABLE4_DATA.get("duplication_rules", {}):
+    gene_rules = load_table4_data().get("duplication_rules", {}).get(gene)
+    if not isinstance(gene_rules, dict):
         result["reason"] = f"No duplication rules for {gene}"
         return result
 
-    if exon not in TABLE4_DATA["duplication_rules"][gene]:
+    if exon not in gene_rules:
         result["reason"] = f"No Table 4 entry for {gene} DUP {exon}"
         return result
 
-    exon_rules = TABLE4_DATA["duplication_rules"][gene][exon]
+    exon_rules = gene_rules[exon]
 
     # Arrangement is evidence. Never substitute another arrangement rule.
     if dup_type in exon_rules:
@@ -538,7 +525,6 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
     result["notes"] = rule.get("notes", "")
     result["reason"] = f"Table 4 duplication lookup: {gene} DUP {exon} ({dup_type}) -> {rule['pvs1_code']}"
 
-    # Parse strength
     strength, points, _ = parse_pvs1_code_strength(rule["pvs1_code"])
     result["pvs1_strength"] = strength
     result["pvs1_points"] = points
@@ -546,55 +532,36 @@ def table4_lookup_duplication(gene: str, exon: str, dup_type: str = "Unknown") -
     return result
 
 
+def _parse_exon_from_structural_notation(
+    c_notation: str,
+    gene: str,
+    operation: str,
+) -> Optional[str]:
+    pattern = rf"c\.\((\d+)\+1_(\d+)-1\)_\((\d+)\+1_(\d+)-1\){operation}$"
+    match = re.fullmatch(pattern, c_notation)
+    if match is None:
+        return None
 
-def parse_exon_from_duplication_notation(c_notation: str, gene: str) -> Optional[str]:
-    """
-    Try to parse exon from complex duplication notation.
-
-    Examples:
-        c.(793+1_794-1)_(1909+1_1910-1)dup -> E10 (BRCA2)
-        c.(670+1_671-1)_(4096+1_4097-1)dup -> E10(11) (BRCA1)
-
-    Pattern: c.(X+1_Y-1)_(Z+1_W-1)dup
-    """
-
-    match = re.match(r'c\.\((\d+)\+1_(\d+)-1\)_\((\d+)\+1_(\d+)-1\)dup', c_notation)
-
-    if match:
-        exon_start = int(match.group(2))
-        exon_end = int(match.group(3))
-
-        if gene in TABLE4_DATA["exon_ranges"]:
-            for exon_name, (start, end) in TABLE4_DATA["exon_ranges"][gene].items():
-                if start == exon_start and end == exon_end:
-                    return exon_name
-
+    exon_start = int(match.group(2))
+    exon_end = int(match.group(3))
+    ranges = load_table4_data().get("exon_ranges", {}).get(gene, {})
+    for exon_name, (start, end) in ranges.items():
+        if start == exon_start and end == exon_end:
+            return str(exon_name)
     return None
-def parse_exon_from_deletion_notation(c_notation: str, gene: str) -> Optional[str]:
-    """
-    Try to parse exon from complex deletion notation.
 
-    Examples:
-        c.(793+1_794-1)_(1909+1_1910-1)del -> E10 (BRCA2)
-        c.(670+1_671-1)_(4096+1_4097-1)del -> E10(11) (BRCA1)
 
-    Pattern: c.(X+1_Y-1)_(Z+1_W-1)del
-    Where Y is exon start and Z is exon end
-    """
+def parse_exon_from_duplication_notation(
+    c_notation: str,
+    gene: str,
+) -> Optional[str]:
+    """Map an exact whole-exon duplication HGVS expression to Table 4."""
+    return _parse_exon_from_structural_notation(c_notation, gene, "dup")
 
-    # Pattern for exon deletion: c.(X+1_Y-1)_(Z+1_W-1)del
-    # Y = first coding position of deleted exon
-    # Z = last coding position of deleted exon
-    match = re.match(r'c\.\((\d+)\+1_(\d+)-1\)_\((\d+)\+1_(\d+)-1\)del', c_notation)
 
-    if match:
-        exon_start = int(match.group(2))  # Y = first coding pos
-        exon_end = int(match.group(3))    # Z = last coding pos
-
-        # Find matching exon in Table 4
-        if gene in TABLE4_DATA["exon_ranges"]:
-            for exon_name, (start, end) in TABLE4_DATA["exon_ranges"][gene].items():
-                if start == exon_start and end == exon_end:
-                    return exon_name
-
-    return None
+def parse_exon_from_deletion_notation(
+    c_notation: str,
+    gene: str,
+) -> Optional[str]:
+    """Map an exact whole-exon deletion HGVS expression to Table 4."""
+    return _parse_exon_from_structural_notation(c_notation, gene, "del")
