@@ -12,6 +12,7 @@ from typing import Any, Mapping
 
 from backend.domain.classification import NormalizedVariant
 from backend.policy.gene import spliceai_thresholds
+from backend.criteria.pvs1 import evaluate_pvs1
 from backend.criteria.pvs1_rna import evaluate_pvs1_rna
 from backend.policy.spliceai import (
     spliceai_failure_is_retryable,
@@ -45,6 +46,8 @@ _COMPLETE_STRUCTURAL_PM2_STATUSES = frozenset({
     "not_met",
 })
 
+_PTC_TYPES = frozenset({"frameshift", "nonsense", "ptc_delins"})
+
 
 @dataclass(frozen=True)
 class RequiredEvidenceGap:
@@ -52,6 +55,26 @@ class RequiredEvidenceGap:
     status: str
     reason: str
     retryable: bool = False
+
+
+def _ptc_consequence_gap(
+    variant: NormalizedVariant,
+) -> RequiredEvidenceGap | None:
+    if variant.variant_type.lower() not in _PTC_TYPES:
+        return None
+    result = evaluate_pvs1(
+        variant.gene,
+        variant.variant_type,
+        variant.p_notation,
+        c_notation=variant.c_notation,
+    )
+    if not result.get("review_required"):
+        return None
+    return RequiredEvidenceGap(
+        "protein consequence",
+        "manual_review_required",
+        str(result.get("reason") or "The PTC consequence requires manual review"),
+    )
 
 
 def _spliceai_gap(
@@ -248,6 +271,10 @@ def first_required_evidence_gap(
     artifacts: Mapping[str, Any],
 ) -> RequiredEvidenceGap | None:
     """Return the first source gap that prevents publishing a classification."""
+    gap = _ptc_consequence_gap(variant)
+    if gap is not None:
+        return gap
+
     gap = _spliceai_gap(variant, artifacts)
     if gap is not None:
         return gap

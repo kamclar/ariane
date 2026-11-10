@@ -113,14 +113,23 @@ class RequiredEvidenceUnavailableError(RuntimeError):
             self.code = "population_evidence_unavailable"
         elif source == "ENIGMA Appendix G population evidence":
             self.code = "structural_population_evidence_unavailable"
+        elif source == "protein consequence" and status == "manual_review_required":
+            self.code = "ptc_consequence_review_required"
         elif source == "protein consequence":
             self.code = "protein_interval_unavailable"
         else:
             self.code = "required_evidence_unavailable"
-        super().__init__(
-            f"{source} is required for this automatic classification but is "
-            f"unavailable ({status}): {reason}. No classification was returned."
-        )
+        if status == "manual_review_required":
+            message = (
+                "Automatic classification requires expert review of the "
+                f"{source}: {reason}. No classification was returned."
+            )
+        else:
+            message = (
+                f"{source} is required for this automatic classification but is "
+                f"unavailable ({status}): {reason}. No classification was returned."
+            )
+        super().__init__(message)
 
 
 @dataclass(frozen=True)

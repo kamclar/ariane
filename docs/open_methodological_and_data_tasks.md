@@ -10,8 +10,9 @@ ENIGMA VCEP potvrdil, že v hraniční větvi posledního exonu musí první zm�
 aminokyselina i nově zavedený terminační kodon ležet na kritické hranici nebo
 před ní. PVS1 a PM5 PTC se posuzují společně podle jednoho řádku Table 4. Pokud
 jedna z poloh podmínku nesplní nebo terminační pozici nelze určit, nepoužije se
-ani jeden kód. Implementace a regresní případy jsou popsány v hlavním
-implementačním dokumentu.
+ani jeden kód. Pokud bez terminační pozice nelze vybrat větev, ARIANE nevrátí
+automatickou klasifikaci a vyžádá odbornou revizi. Implementace a regresní
+případy jsou popsány v hlavním implementačním dokumentu.
 
 ## 2. Úplný seznam patogenních founder variant
 
@@ -345,3 +346,21 @@ revizi a následující dotaz pro ENIGMA:
 
 Zdroje: [ClinVar RCV000112286](https://www.ncbi.nlm.nih.gov/clinvar/RCV000112286/)
 a [ClinGen ERepo c.4185G>C](https://erepo.clinicalgenome.org/evrepo/ui/classification/9ef5ebb6-b717-4061-8655-b7c3bf79b9a5).
+
+## 11. Dvě podezřelé alely ve zdrojové Table 4
+
+Audit původního workbooku Table 4 našel dva případy, které vyžadují potvrzení
+ENIGMA:
+
+- BRCA2 obsahuje vzor `c.6937+1T>`. Referenční sekvence má na pozici `+1` bázi
+  G a na pozici `+2` bázi T. Pravděpodobně má jít o `c.6937+2T>`.
+- Pro BRCA2 `c.8487+2T>` jsou uvedeny alternativy C a G, ale chybí A. Je třeba
+  potvrdit, zda jde o záměrnou alelovou výjimku nebo vynechanou alternativu.
+
+ARIANE tyto případy neopravuje vlastní výjimkou. Zachovává zdrojový workbook a
+pro chybějící přesnou alelu postupuje fail-closed. Případná oprava se provede
+až v nové schválené verzi zdroje nebo na základě výslovného stanoviska ENIGMA.
+
+Dvojí zápis `BRCA1 c.81-1G>C` a `BRCA2 c.8487+2T>C` není považován za chybu.
+Workbook u nich obsahuje obecný predikční řádek a přesnější RNA řádek. Runtime
+použije RNA rozhodnutí, ale oba původní řádky uchovává pro audit.

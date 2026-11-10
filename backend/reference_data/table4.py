@@ -316,6 +316,9 @@ def table4_lookup_pvs1_ptc(
     predicted termination codon lies in a later exon.
     """
     result = {
+        "applies": False,
+        "review_required": False,
+        "application_status": "not_applied",
         "pvs1_code": None,
         "pvs1_strength": None,
         "pvs1_points": 0,
@@ -325,6 +328,7 @@ def table4_lookup_pvs1_ptc(
         "pm5_points": 0,
         "exon": None,
         "pm5_exon": None,
+        "notes": "",
         "reason": ""
     }
 
@@ -345,6 +349,7 @@ def table4_lookup_pvs1_ptc(
     pvs1_code = rule["pvs1_code"]
     pm5_code = rule.get("pm5_code")
     result["pm5_exon"] = exon
+    result["notes"] = str(rule.get("notes") or "")
 
     # Check both the first altered residue and the introduced termination codon
     # against the last-exon Table 4 boundary. ENIGMA's 2026-10-15
@@ -353,20 +358,32 @@ def table4_lookup_pvs1_ptc(
     if gene in TABLE4_DATA.get("critical_boundaries", {}):
         boundary_info = TABLE4_DATA["critical_boundaries"][gene]
         if exon == boundary_info["exon"]:
-            # Safety check: if AA position unknown in critical boundary exon, require manual review
-            if first_altered_aa is None:
+            boundary_aa = boundary_info["boundary_aa"]
+            missing_first_position = first_altered_aa is None
+            missing_required_stop = (
+                first_altered_aa is not None
+                and first_altered_aa <= boundary_aa
+                and termination_aa is None
+            )
+            if missing_first_position or missing_required_stop:
                 result["applies"] = False
+                result["review_required"] = True
+                result["application_status"] = "review_required"
                 result["pvs1_code"] = None
+                missing_value = (
+                    "the first altered amino acid"
+                    if missing_first_position
+                    else "the introduced termination position"
+                )
                 result["reason"] = (
-                    f"Critical boundary exon {exon} but amino acid position could not be parsed from p_notation. "
-                    f"Manual review required to determine if PTC is before or after p.{boundary_info['boundary_aa']}."
+                    f"Critical boundary exon {exon}, but {missing_value} could "
+                    f"not be determined. Manual review is required to compare "
+                    f"the complete protein consequence with p.{boundary_aa}."
                 )
                 return result
-            boundary_aa = boundary_info["boundary_aa"]
 
             if (
                 first_altered_aa <= boundary_aa
-                and termination_aa is not None
                 and termination_aa <= boundary_aa
             ):
                 branch = boundary_info.get("at_or_before") or {}
@@ -413,6 +430,10 @@ def table4_lookup_pvs1_ptc(
     result["pvs1_strength"] = strength
     result["pvs1_points"] = points
     result["requires_rna"] = requires_rna
+    result["applies"] = strength is not None
+    result["application_status"] = (
+        "applied" if strength is not None else "not_applicable"
+    )
 
     if (
         termination_aa is not None
@@ -424,6 +445,9 @@ def table4_lookup_pvs1_ptc(
             f"consequence, but PM5 follows the selected Table 4 row for the "
             f"nucleotide-change exon {exon}"
         )
+
+    if result["notes"]:
+        result["reason"] += f"; Table 4 note: {result['notes']}"
 
     # Parse PM5 code
     # PM5_Strong (PTC), PM5_Supporting (PTC), PM5 (PTC), PM5_N/A

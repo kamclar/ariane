@@ -53,14 +53,61 @@ def _position(value) -> int | None:
     return int(match.group(1)) if match else None
 
 
+def _extend_unique_notes(target: list[str], *values) -> None:
+    for value in values:
+        if value in (None, ""):
+            continue
+        note = str(value).strip()
+        if note and note not in target:
+            target.append(note)
+
+
 def _notes(*values) -> str:
-    return " | ".join(str(value).strip() for value in values if value not in (None, ""))
+    notes: list[str] = []
+    _extend_unique_notes(notes, *values)
+    return " | ".join(notes)
+
+
+def _with_notes(rule: dict, notes: str) -> dict:
+    if notes:
+        rule["notes"] = notes
+    return rule
 
 
 def _alleles(value) -> list[str]:
     if value is None:
         return []
     return [part.strip() for part in str(value).split(",") if part.strip()]
+
+
+def _context_notes(rows) -> dict:
+    notes = {"BRCA1": {}, "BRCA2": {}}
+    for row in rows[1:]:
+        gene, exon = row[0], row[1]
+        if gene not in notes or not exon:
+            continue
+        entry = notes[gene].setdefault(
+            exon,
+            {"acceptor": [], "donor": [], "exon": []},
+        )
+        if not (row[3] and row[4]):
+            _extend_unique_notes(entry["acceptor"], row[2])
+        if not (row[15] and row[17]):
+            _extend_unique_notes(entry["donor"], row[18])
+
+    for gene_notes in notes.values():
+        for entry in gene_notes.values():
+            shared = [
+                note for note in entry["acceptor"] if note in entry["donor"]
+            ]
+            entry["exon"] = shared
+            entry["acceptor"] = [
+                note for note in entry["acceptor"] if note not in shared
+            ]
+            entry["donor"] = [
+                note for note in entry["donor"] if note not in shared
+            ]
+    return notes
 
 
 def _add_splice_rules(target, gene, exon, pattern, alleles, code, notes):
@@ -92,6 +139,7 @@ def build_snapshot(source: Path) -> dict:
     readme_sheet = workbook["Specifications - Table 4 Readme"]
     sheet = workbook["Table 4 - Annotated Exons"]
     rows = [[_clean(value) for value in row] for row in sheet.iter_rows(values_only=True)]
+    context_notes = _context_notes(rows)
 
     exon_ranges = {"BRCA1": {}, "BRCA2": {}}
     initiation_rules = {"BRCA1": {}, "BRCA2": {}}
@@ -110,15 +158,23 @@ def build_snapshot(source: Path) -> dict:
             (position for index in (9, 8, 7) if (position := _position(row[index])) is not None),
             None,
         )
-        end = next(
-            (position for index in (11, 12, 13) if (position := _position(row[index])) is not None),
-            None,
-        )
+        end_positions = [
+            position
+            for index in (11, 12, 13)
+            if (position := _position(row[index])) is not None
+        ]
+        end = max(end_positions) if end_positions else None
         if start is not None and end is not None:
             exon_ranges[gene][exon] = [start, end]
 
         marker = str(row[10]).strip() if row[10] is not None else ""
         code = row[9]
+        note_context = context_notes[gene].get(
+            exon,
+            {"acceptor": [], "donor": [], "exon": []},
+        )
+        exon_notes = note_context["exon"]
+        structural_notes = _notes(row[2], row[18], *exon_notes)
         if marker == "START codon":
             if initiation_rules[gene]:
                 raise RuntimeError(
@@ -127,38 +183,54 @@ def build_snapshot(source: Path) -> dict:
             initiation_rules[gene] = {
                 "exon": exon,
                 "pvs1_code": str(code).strip(),
-                "notes": _notes(row[2], row[18]),
+                "notes": structural_notes,
                 "source_row": row_number,
                 **APPENDIX_D_INITIATION_FACTS[gene],
             }
         elif marker == "PTC":
-            ptc_rules[gene][exon] = {
-                "pvs1_code": code,
-                "pm5_code": row[11],
-                "condition": None,
-            }
+            ptc_rules[gene][exon] = _with_notes(
+                {
+                    "pvs1_code": code,
+                    "pm5_code": row[11],
+                    "condition": None,
+                },
+                structural_notes,
+            )
         elif marker.startswith("PTC<"):
             boundary_match = re.search(r"p\.[A-Z][a-z]{0,2}(\d+)", marker)
             if not boundary_match:
                 raise RuntimeError(f"Cannot parse PTC boundary at row {row_number}: {marker}")
             first_na_aa = int(boundary_match.group(1))
-            critical_boundaries[gene] = {
-                "exon": exon,
-                "boundary_aa": first_na_aa - 1,
-                "rule": marker,
-                "at_or_before": {
+            critical_boundaries[gene] = _with_notes(
+                {
+                    "exon": exon,
+                    "boundary_aa": first_na_aa - 1,
+                    "rule": marker,
+                    "at_or_before": {
+                        "pvs1_code": code,
+                        "pm5_code": row[11],
+                    },
+                },
+                structural_notes,
+            )
+        elif marker.startswith("PTC>"):
+            ptc_rules[gene][exon] = _with_notes(
+                {
                     "pvs1_code": code,
                     "pm5_code": row[11],
+                    "condition": marker,
                 },
-            }
-        elif marker.startswith("PTC>"):
-            ptc_rules[gene][exon] = {
-                "pvs1_code": code,
-                "pm5_code": row[11],
-                "condition": marker,
-            }
+                structural_notes,
+            )
             if gene in critical_boundaries:
                 critical_boundaries[gene]["rule"] += f"; {marker}"
+                boundary_notes = _notes(
+                    critical_boundaries[gene].get("notes"),
+                    structural_notes,
+                )
+                if boundary_notes:
+                    critical_boundaries[gene]["notes"] = boundary_notes
+                    ptc_rules[gene][exon]["notes"] = boundary_notes
                 critical_boundaries[gene]["after"] = {
                     "pvs1_code": code,
                     "pm5_code": row[11],
@@ -166,22 +238,24 @@ def build_snapshot(source: Path) -> dict:
         elif marker.startswith("DEL "):
             deletion_rules[gene][exon] = {
                 "pvs1_code": code,
-                "notes": _notes(row[2], row[18]),
+                "notes": structural_notes,
             }
         elif marker.startswith("DUP ") or marker == "DUP 11":
             arrangement = str(row[11]).strip()
             duplication_rules[gene].setdefault(exon, {})[arrangement] = {
                 "pvs1_code": code,
-                "notes": _notes(row[2], row[18]),
+                "notes": structural_notes,
             }
 
         _add_splice_rules(
             splice_rules, gene, exon,
-            row[4], row[5], row[3], row[2],
+            row[4], row[5], row[3],
+            _notes(row[2], *exon_notes, *note_context["acceptor"]),
         )
         _add_splice_rules(
             splice_rules, gene, exon,
-            row[15], row[16], row[17], row[18],
+            row[15], row[16], row[17],
+            _notes(row[18], *exon_notes, *note_context["donor"]),
         )
 
     for gene in ("BRCA1", "BRCA2"):

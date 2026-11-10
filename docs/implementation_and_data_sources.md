@@ -585,7 +585,9 @@ NMD větev v zobrazovaném rozhodovacím grafu se určí pouze tehdy, když lze 
 normalizovaného proteinového následku určit polohu predikovaného terminačního
 kodonu. Poloha nukleotidové změny se jako náhrada nepoužívá. Pokud poloha
 terminačního kodonu není dostupná, ARIANE větev NMD nezobrazí a uvede důvod u
-kritéria. PVS1 a PM5 PTC převzaté z Table 4 se tím nemění.
+kritéria. Mimo kritickou C-terminální větev se PVS1 a PM5 PTC převzaté z Table 4
+tím nemění. V kritické větvi je poloha stop kodonu součástí samotného rozhodnutí
+a její chybění může vyžadovat odbornou revizi.
 
 U splice variant se PVS1 nepřidává pouze podle vzdálenosti od exonu. Varianta musí mít odpovídající pravidlo v Table 4. Pokud Table 4 uvádí pro přesnou alelu konečný kód označený `(RNA)`, ARIANE použije přímo tento VCEP výsledek včetně síly nebo N/A. U alel bez takového konečného kódu se RNA větev automaticky použije jen při přesné shodě s úplnou ENIGMA Supplementary Table 2 a při jednoznačném průchodu pravidly Appendix E. Ostatní RNA větve zůstávají bez bodů a jsou označeny k odborné revizi.
 
@@ -607,8 +609,9 @@ V koncové hraniční větvi se podle metodického upřesnění ENIGMA VCEP z
 15. října 2026 posuzují dvě polohy současně: první změněná aminokyselina i nově
 zavedený terminační kodon musí ležet na kritické hranici nebo před ní. Jen tehdy
 se z jednoho řádku Table 4 použijí společně PVS1 a PM5 PTC. Pokud je první
-změněná aminokyselina za hranicí, terminační kodon za hranicí nebo jeho poloha
-není spolehlivě určitelná, nepoužije se ani jeden kód. Například `BRCA1
+změněná aminokyselina za hranicí nebo je terminační kodon za hranicí, nepoužije
+se ani jeden kód. Pokud změna začíná před hranicí a polohu terminačního kodonu
+nelze určit, ARIANE klasifikaci nepublikuje a vyžádá odbornou revizi. Například `BRCA1
 c.5556_5560del p.(Tyr1853AspfsTer25)` začíná před hranicí p.1854, ale končí až
 na p.1877, a proto nezíská PVS1 ani PM5 PTC. Krátký frameshift se stejným
 začátkem a stop kodonem na p.1854 splní obě podmínky.
@@ -1382,6 +1385,18 @@ Obsah:
 - splice pravidla,
 - pravidla exonových delecí,
 - pravidla exonových duplikací.
+
+Generátor zachovává původní řádky a zároveň vytváří oddělené runtime indexy.
+Rozsah exonu se určuje z nejzazší dostupné kódující hranice, ne z hranice
+funkční domény. Poznámky uvedené na samostatných řádcích se připojí k příslušné
+akceptorové, donorové nebo exonové větvi. Přesný RNA řádek pro stejnou alelu má
+přednost před obecným predikčním řádkem, oba zdrojové řádky však zůstávají
+zachovány pro audit.
+
+Regresní matice znovu sestaví snapshot z původního workbooku a porovná všechny
+runtime sekce. Dále projde 575 jedinečných splice alel, 48 PTC exonových
+pravidel, 50 delečních pravidel, 100 duplikačních uspořádání a oba iniciační
+kodony přes stejné lookup funkce, které používá klasifikace.
 
 ### 6.2 Table 9
 
@@ -2597,7 +2612,7 @@ Závěrečná regresní sada je rozdělena podle účelu:
 | Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA. Jednoznačné delece celého exonu s propojeným ST3 zdrojem a použitelnou Table 4 větví musí získat sílu podle Appendix E. Komplexní nebo částečné výsledky musí zůstat bez bodů ve stavu `review_required`. `BRCA1 c.4185G>A` ověřuje PVS1 RNA Strong a nepoužití PP3. |
 | Přesná Table 4 RNA rozhodnutí | Parametrizovaný test načte všech 144 alelových pravidel označených `(RNA)`, ověří jejich kód, sílu, body, verzi a checksum. Dvě N/A alely nesmí získat body. End-to-end testy `BRCA2 c.476-2A>G`, `BRCA2 c.9118-2A>G` a `BRCA1 c.594-2A>C` ověřují také nepoužití SpliceAI a Figure 1A. |
 | Founder varianty | Test načte všechny varianty z aktuálního připnutého founder registru a každou nechá projít plným DAGem s frekvencí nad prahy BA1/BS1. U každého záznamu požaduje, aby se BA1 ani BS1 nepřidělilo a důvod zůstal v auditní stopě. Přidání dalšího záznamu do registru jej automaticky přidá do regrese. |
-| Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Testy připínají současnou interpretaci Table 4. Otevřená metodická otázka k poslednímu exonu zůstává popsána v `docs/open_methodological_and_data_tasks.md`. |
+| Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Neurčitelný stop kodon před kritickou hranicí zastaví automatickou klasifikaci a vyžádá odbornou revizi. Změna začínající za hranicí může bezpečně použít N/A i bez určené polohy stop kodonu. |
 | Typy variant | `tests/test_variant_type_regression_matrix.py` a `tests/test_bioinformatic_rule_matrix.py` pokrývají rozpoznání typů, větve Figure 1A a interakce s RNA a funkční evidencí. |
 | Chybějící zdroje | Startup test odmítá chybějící Table 4, Table 9, ST7, proteinový PS1 registr, ST2, exonový CNV snapshot nebo manifest a gene policy soubory. Provider testy rozlišují nedostupné SpliceAI, BayesDel a souřadnice. Chybějící hodnota se nesmí převést na nulu, nepřítomnost varianty ani náhradní skóre. |
 

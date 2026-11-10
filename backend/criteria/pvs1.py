@@ -120,6 +120,7 @@ def evaluate_pvs1(
         "exon": None,
         "pm5_exon": None,
         "pvs1_code": None,
+        "review_required": False,
         "source": vcep_specification(gene)["url"],
     }
 
@@ -247,8 +248,13 @@ def evaluate_pvs1(
         result["exon"] = table4_result["exon"]
         result["pvs1_code"] = table4_result.get("pvs1_code")
         result["reason"] = table4_result["reason"]
+        result["review_required"] = table4_result.get("review_required", False)
+        result["application_status"] = table4_result.get(
+            "application_status",
+            "not_applied",
+        )
 
-        if table4_result["pvs1_strength"] is None:  # PVS1_N/A
+        if table4_result["pvs1_strength"] is None:
             result["applies"] = False
         elif table4_result.get("requires_rna"):
             result["applies"] = False

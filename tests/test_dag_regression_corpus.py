@@ -62,7 +62,7 @@ REGRESSION_VARIANTS = (
     ("BRCA1", "c.3247A>G", "p.(Met1083Val)", 0.01, None, "Unknown", 3,
      -3, {"PP4": ("Supporting", 1), "BP1": ("Strong", -4)}, True, ()),
     ("BRCA1", "c.5556_5560del", "p.(Gln1853fs)", None, None, "Unknown", 3,
-     0, {}, False, ("PM2", "PVS1")),
+     0, {}, False, ("PM2",)),
     ("BRCA1", "c.5533_5534insG", "p.(Tyr1845Ter)", None, None, "Unknown",
      5, 12, {"PVS1": ("Very Strong", 8), "PM5_PTC": ("Strong", 4)},
      False, ("PM2",)),

@@ -4,7 +4,7 @@
   "released": "2025-01-09",
   "source": "ClinGen ENIGMA BRCA1/2 VCEP Specifications Table 4",
   "source_url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
-  "generated": "2026-10-13",
+  "generated": "2026-11-10",
   "readme": [
     "ACMG/AMP Classification Rules Specified for BRCA1 & BRCA2",
     "ENIGMA Variant Curation Expert Panel, Classification Criteria V1.2 2024-11-18.",
@@ -10981,7 +10981,7 @@
       ],
       "E23(24)": [
         5468,
-        5571
+        5592
       ]
     },
     "BRCA2": {
@@ -11141,12 +11141,14 @@
       "E5(6)": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_Strong (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "E6(7)": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_Strong (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "E7(8)": {
         "pvs1_code": "PVS1",
@@ -11166,7 +11168,8 @@
       "E10(11)": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_Strong (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E11(12)": {
         "pvs1_code": "PVS1",
@@ -11248,7 +11251,8 @@
       "E4": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5 (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E5": {
         "pvs1_code": "PVS1",
@@ -11263,12 +11267,14 @@
       "E7": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_Strong (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E8": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_Strong (PTC)",
-        "condition": null
+        "condition": null,
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E9": {
         "pvs1_code": "PVS1",
@@ -11288,7 +11294,8 @@
       "E12": {
         "pvs1_code": "PVS1",
         "pm5_code": "PM5_N/A",
-        "condition": null
+        "condition": null,
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E13": {
         "pvs1_code": "PVS1",
@@ -11592,7 +11599,7 @@
       "c.301+1GC": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting (RNA)",
-        "notes": "Small in-frame observed"
+        "notes": "Small in-frame observed | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.213-2AT": {
         "exon": "E5(6)",
@@ -11602,12 +11609,12 @@
       "c.301+1GA": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting",
-        "notes": "Small in-frame predicted"
+        "notes": "Small in-frame predicted | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.301+1GT": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting",
-        "notes": "Small in-frame predicted"
+        "notes": "Small in-frame predicted | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.213-1GC": {
         "exon": "E5(6)",
@@ -11622,17 +11629,17 @@
       "c.301+2TA": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting",
-        "notes": "Small in-frame predicted"
+        "notes": "Small in-frame predicted | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.301+2TC": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting",
-        "notes": "Small in-frame predicted"
+        "notes": "Small in-frame predicted | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.301+2TG": {
         "exon": "E5(6)",
         "pvs1_code": "PVS1_Supporting",
-        "notes": "Small in-frame predicted"
+        "notes": "Small in-frame predicted | *Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7) | Conflicting functional/clinical data for E5(6) donor site variants exists"
       },
       "c.213-1GA": {
         "exon": "E5(6)",
@@ -11642,7 +11649,7 @@
       "c.302-2AC": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.441+1GA": {
         "exon": "E6(7)",
@@ -11652,12 +11659,12 @@
       "c.302-2AG": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.302-2AT": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.441+1GC": {
         "exon": "E6(7)",
@@ -11672,12 +11679,12 @@
       "c.302-1GC": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.302-1GT": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.441+2TC": {
         "exon": "E6(7)",
@@ -11687,7 +11694,7 @@
       "c.302-1GA": {
         "exon": "E6(7)",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": ""
+        "notes": "*Note that codon 101 (RING C-terminal boundary) is split between exon 5(6) and exon 6(7)"
       },
       "c.441+2TA": {
         "exon": "E6(7)",
@@ -11882,62 +11889,62 @@
       "c.671-2AG": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.671-2AT": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+1GA": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate (RNA)",
-        "notes": "Observed in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Observed in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.671-2AC": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate (RNA)",
-        "notes": "Observed in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Observed in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+1GT": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+1GC": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.671-1GA": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.671-1GC": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.671-1GT": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E8_E10)[Δ(E9_E11)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+2TC": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+2TG": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4096+2TA": {
         "exon": "E10(11)",
         "pvs1_code": "PVS1_Moderate",
-        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional"
+        "notes": "Expected in-frame Δ(E10q3309) [Δ(E11q3309)] suspected (partially) functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.4097-2AC": {
         "exon": "E11(12)",
@@ -12844,62 +12851,62 @@
       "c.317-2AG": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) observed"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) observed | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.317-2AC": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.317-2AT": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+1GA": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+1GC": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+1GT": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.317-1GA": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.317-1GC": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.317-1GT": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E4) predicted. Δ(E4) and in-frame Δ(E4,5) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+2TA": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+2TC": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.425+2TG": {
         "exon": "E4",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional"
+        "notes": "PTC_NMD Δ(E4) predicted. In-frame Δ(E4,5) expected (c.425G>T data) and suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.426-2AT": {
         "exon": "E5",
@@ -13024,122 +13031,122 @@
       "c.517-1GA": {
         "exon": "E7",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": "PTC_NMD Δ(E7p1) predicted. PTC_NMD observed"
+        "notes": "PTC_NMD Δ(E7p1) predicted. PTC_NMD observed | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.631+1GA": {
         "exon": "E7",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": "PTC_NMD Δ(E7) predicted. PTC_NMD Δ(E7) observed"
+        "notes": "PTC_NMD Δ(E7) predicted. PTC_NMD Δ(E7) observed | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.517-1GC": {
         "exon": "E7",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.517-1GT": {
         "exon": "E7",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.631+1GC": {
         "exon": "E7",
         "pvs1_code": "PVS1",
-        "notes": "PTC_NMD Δ(E7) predicted"
+        "notes": "PTC_NMD Δ(E7) predicted | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.631+1GT": {
         "exon": "E7",
         "pvs1_code": "PVS1",
-        "notes": "PTC_NMD Δ(E7) predicted"
+        "notes": "PTC_NMD Δ(E7) predicted | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.517-2AC": {
         "exon": "E7",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.517-2AT": {
         "exon": "E7",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.631+2TA": {
         "exon": "E7",
         "pvs1_code": "PVS1",
-        "notes": "PTC_NMD Δ(E7) predicted"
+        "notes": "PTC_NMD Δ(E7) predicted | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.631+2TC": {
         "exon": "E7",
         "pvs1_code": "PVS1",
-        "notes": "PTC_NMD Δ(E7) predicted"
+        "notes": "PTC_NMD Δ(E7) predicted | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.517-2AG": {
         "exon": "E7",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) observed"
+        "notes": "PTC_NMD Δ(E7) predicted. Δ(E7) and in-frame Δ(E4_E7) (suspected functional) observed | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.631+2TG": {
         "exon": "E7",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": "PTC_NMD Δ(E7) predicted. Main transcript Δ(E7), in-frame Δ(E4_E7) also observed at low levels. Clinical data supports pathogenicity."
+        "notes": "PTC_NMD Δ(E7) predicted. Main transcript Δ(E7), in-frame Δ(E4_E7) also observed at low levels. Clinical data supports pathogenicity. | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.632-2AG": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) observed"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) observed | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.681+1GA": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) observed"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) observed | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.632-2AC": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.632-2AT": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.681+1GC": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.681+1GT": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.632-1GT": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD Δ(E4_8) , Δ(6q39_E7) and in-frame Δ(6q39_E8) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.681+2TA": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.681+2TC": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.681+2TG": {
         "exon": "E8",
         "pvs1_code": "PVS1_N/A",
-        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected"
+        "notes": "PTC_NMD Δ(E8)/▼(E8q4) predicted. In-frame Δ(E8_E10) (suspected functional) expected | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.632-1GA": {
         "exon": "E8",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD  Δ(E8p4), Δ(E8), Δ(6q39_E8p4) observed"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD  Δ(E8p4), Δ(E8), Δ(6q39_E8p4) observed | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.632-1GC": {
         "exon": "E8",
         "pvs1_code": "PVS1 (RNA)",
-        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD  Δ(E8p4), Δ(E8), Δ(6q39_E8p4) observed"
+        "notes": "PTC_NMD Δ(E8p4) predicted. PTC_NMD  Δ(E8p4), Δ(E8), Δ(6q39_E8p4) observed | The possibility of intermediate risk variants should not be disregarded | Conflicting Splicing data for variants with similar SpliceAI scores"
       },
       "c.682-2AC": {
         "exon": "E9",
@@ -13324,62 +13331,62 @@
       "c.6842-2AG": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Observed in-frame Δ(12) suspected functional"
+        "notes": "Observed in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1GA": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Observed in-frame Δ(12) suspected functional"
+        "notes": "Observed in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6842-2AC": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6842-2AT": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1GC": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1GT": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6842-1GA": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6842-1GC": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6842-1GT": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1TA": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1TC": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.6937+1TG": {
         "exon": "E12",
         "pvs1_code": "PVS1_N/A",
-        "notes": "Predicted in-frame Δ(12) suspected functional"
+        "notes": "Predicted in-frame Δ(12) suspected functional | The possibility of intermediate risk variants should not be disregarded"
       },
       "c.7007+1GC": {
         "exon": "E13",
@@ -14288,7 +14295,7 @@
       },
       "E10(11)": {
         "pvs1_code": "PVS1_Moderate",
-        "notes": ""
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E11(12)": {
         "pvs1_code": "PVS1",
@@ -14358,7 +14365,7 @@
       },
       "E4": {
         "pvs1_code": "PVS1",
-        "notes": ""
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E5": {
         "pvs1_code": "PVS1",
@@ -14374,7 +14381,7 @@
       },
       "E8": {
         "pvs1_code": "PVS1",
-        "notes": "Conflicting Splicing data for variants with similar SpliceAI scores"
+        "notes": "Conflicting Splicing data for variants with similar SpliceAI scores | The possibility of intermediate risk variants should not be disregarded"
       },
       "E9": {
         "pvs1_code": "PVS1",
@@ -14390,7 +14397,7 @@
       },
       "E12": {
         "pvs1_code": "PVS1_N/A",
-        "notes": ""
+        "notes": "The possibility of intermediate risk variants should not be disregarded"
       },
       "E13": {
         "pvs1_code": "PVS1",
@@ -14549,11 +14556,11 @@
       "E10(11)": {
         "Tandem": {
           "pvs1_code": "PVS1_Moderate",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         },
         "Unknown": {
           "pvs1_code": "PVS1_Supporting",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         }
       },
       "E11(12)": {
@@ -14721,11 +14728,11 @@
       "E4": {
         "Tandem": {
           "pvs1_code": "PVS1",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         },
         "Unknown": {
           "pvs1_code": "PVS1_Strong",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         }
       },
       "E5": {
@@ -14755,7 +14762,7 @@
         },
         "Unknown": {
           "pvs1_code": "PVS1_Strong",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         }
       },
       "E8": {
@@ -14765,7 +14772,7 @@
         },
         "Unknown": {
           "pvs1_code": "PVS1_Strong",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         }
       },
       "E9": {
@@ -14801,11 +14808,11 @@
       "E12": {
         "Tandem": {
           "pvs1_code": "PVS1_N/A",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         },
         "Unknown": {
           "pvs1_code": "PVS1_N/A",
-          "notes": ""
+          "notes": "The possibility of intermediate risk variants should not be disregarded"
         }
       },
       "E13": {

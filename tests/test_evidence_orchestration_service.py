@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
+from backend.domain.classification import NormalizedVariant
 from backend.services.variant_classification_service import execute_variant_classification
 from backend.services.evidence_orchestration import (
     ClassificationCommand,
@@ -78,6 +79,27 @@ def test_orchestrator_rejects_invalid_input_before_provider_planning():
     service = EvidenceOrchestrationService()
     with pytest.raises(VariantPreparationError):
         service.prepare(ClassificationCommand("BRCA1", "c.181A>C"))
+
+
+def test_orchestrator_stops_when_last_exon_stop_position_needs_review():
+    variant = NormalizedVariant(
+        gene="BRCA1",
+        reference_transcript="NM_007294.4",
+        c_notation="c.5556_5560del",
+        p_notation="p.(Tyr1853Aspfs)",
+        variant_type="frameshift",
+    )
+
+    with pytest.raises(RequiredEvidenceUnavailableError) as error:
+        EvidenceOrchestrationService._require_complete_classification_evidence(
+            variant,
+            {},
+        )
+
+    assert error.value.code == "ptc_consequence_review_required"
+    assert error.value.retryable is False
+    assert "introduced termination position" in error.value.reason
+    assert "requires expert review" in str(error.value)
 
 
 def test_orchestrator_rejects_unresolved_coding_delins_with_explicit_reason():
