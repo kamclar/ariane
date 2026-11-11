@@ -228,16 +228,11 @@ def _normalized_vcf_allele(
     return ProjectedAllele(chrom=chrom, pos=edit_pos, ref=deleted, alt=inserted)
 
 
-def project_exact_indel(
-    gene: str,
+def _mapped_cds_interval(
     transcript: str,
     c_notation: str,
     assembly_map: AssemblyBaseMap,
-) -> ProjectedAllele | None:
-    """Project one exact small indel, returning ``None`` when proof is incomplete."""
-    operation = indel_operation(c_notation)
-    if operation not in {"del", "dup", "ins", "delins"}:
-        return None
+) -> tuple[SequenceVariant, ReferenceBase, ReferenceBase] | None:
     variant = _parse_variant(f"{transcript}:{c_notation}")
     if variant is None:
         return None
@@ -252,12 +247,31 @@ def project_exact_indel(
         or int(end.base) < 1
     ):
         return None
-    start_key = (int(start.base), int(start.offset or 0))
-    end_key = (int(end.base), int(end.offset or 0))
-    first = assembly_map.by_transcript_position.get(start_key)
-    last = assembly_map.by_transcript_position.get(end_key)
+    first = assembly_map.by_transcript_position.get(
+        (int(start.base), int(start.offset or 0))
+    )
+    last = assembly_map.by_transcript_position.get(
+        (int(end.base), int(end.offset or 0))
+    )
     if first is None or last is None or first.chrom != last.chrom:
         return None
+    return variant, first, last
+
+
+def project_exact_indel(
+    gene: str,
+    transcript: str,
+    c_notation: str,
+    assembly_map: AssemblyBaseMap,
+) -> ProjectedAllele | None:
+    """Project one exact small indel, returning ``None`` when proof is incomplete."""
+    operation = indel_operation(c_notation)
+    if operation not in {"del", "dup", "ins", "delins"}:
+        return None
+    interval = _mapped_cds_interval(transcript, c_notation, assembly_map)
+    if interval is None:
+        return None
+    variant, first, last = interval
 
     edit = variant.posedit.edit
     explicit_ref = getattr(edit, "ref", None)
@@ -317,28 +331,10 @@ def expected_transcript_reference(
     """Return the exact local reference span for an indel when fully covered."""
     if indel_operation(c_notation) not in {"del", "dup", "delins"}:
         return None
-    variant = _parse_variant(f"{transcript}:{c_notation}")
-    if variant is None:
+    interval = _mapped_cds_interval(transcript, c_notation, assembly_map)
+    if interval is None:
         return None
-    start = variant.posedit.pos.start
-    end = variant.posedit.pos.end
-    if (
-        start.base is None
-        or end.base is None
-        or getattr(start.datum, "name", "") != "CDS_START"
-        or getattr(end.datum, "name", "") != "CDS_START"
-        or int(start.base) < 1
-        or int(end.base) < 1
-    ):
-        return None
-    first = assembly_map.by_transcript_position.get(
-        (int(start.base), int(start.offset or 0))
-    )
-    last = assembly_map.by_transcript_position.get(
-        (int(end.base), int(end.offset or 0))
-    )
-    if first is None or last is None or first.chrom != last.chrom:
-        return None
+    _, first, last = interval
     low, high = sorted((first.pos, last.pos))
     bases = [assembly_map.by_genomic_position.get(pos) for pos in range(low, high + 1)]
     if any(base is None for base in bases):
