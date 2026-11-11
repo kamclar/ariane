@@ -14,7 +14,7 @@
 # file uses an older Gencode version and gives incorrect scores for some variants
 # (e.g. BRCA1 c.4185G>A: MANE gives DS_DL=0.01, Broad API gives DS_DL=0.93).
 # ============================================================
-from typing import Optional, Dict
+from typing import Any, Dict, Mapping, Optional
 from pathlib import Path
 import json
 import socket
@@ -117,6 +117,37 @@ SPLICEAI_API_SOURCE = os.environ.get(
 )
 
 REFERENCE_TRANSCRIPTS = SPLICEAI_REFERENCE_TRANSCRIPTS
+
+_SCORING_PROFILE_FIELDS = {
+    "scoring_profile_id": SPLICEAI_PROFILE_ID,
+    "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
+    "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
+    "distance": SPLICEAI_MAX_DISTANCE,
+    "mask": SPLICEAI_MASK,
+    "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
+    "aggregation": SPLICEAI_AGGREGATION,
+}
+
+
+def _score_fields(source: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "selected_transcript": source.get("selected_transcript"),
+        "reference_transcript_score": source.get("reference_transcript_score"),
+        "max_any_transcript_score": source.get("max_any_transcript_score"),
+        "max_any_transcript": source.get("max_any_transcript"),
+        "max_delta_field": source.get("max_delta_field"),
+        "delta_scores": source.get("delta_scores", {}),
+        "reference_scores": source.get("reference_scores", {}),
+        "alternate_scores": source.get("alternate_scores", {}),
+    }
+
+
+def _status_score_fields(source: Mapping[str, Any]) -> dict[str, Any]:
+    fields = _score_fields(source)
+    for name in ("max_any_transcript", "max_delta_field"):
+        if name not in source:
+            fields[name] = ""
+    return fields
 
 _API_REQUEST_GATE = threading.BoundedSemaphore(SPLICEAI_API_MAX_CONCURRENT)
 _API_RATE_LOCK = threading.Lock()
@@ -307,10 +338,13 @@ def _score_entry_is_complete(entry: object) -> bool:
     if delta_scores is None or reference_scores is None or alternate_scores is None:
         return False
     max_field = entry.get("max_delta_field")
-    if max_field not in SPLICEAI_DELTA_FIELDS:
+    if not isinstance(max_field, str) or max_field not in SPLICEAI_DELTA_FIELDS:
+        return False
+    raw_score = entry.get("score")
+    if raw_score is None:
         return False
     try:
-        score = float(entry.get("score"))
+        score = float(raw_score)
     except (TypeError, ValueError):
         return False
     return score == max(delta_scores.values()) and score == delta_scores[max_field]
@@ -520,15 +554,7 @@ def _query_spliceai_api_once(
             return selected
         selected["api_source"] = data.get("source") or SPLICEAI_API_SOURCE
         selected["n_transcript_scores"] = len(scores)
-        selected.update({
-            "scoring_profile_id": SPLICEAI_PROFILE_ID,
-            "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-            "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-            "distance": response_distance,
-            "mask": response_mask,
-            "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-            "aggregation": SPLICEAI_AGGREGATION,
-        })
+        selected.update(_SCORING_PROFILE_FIELDS)
         return selected
 
     except urllib.error.HTTPError as exc:
@@ -645,23 +671,10 @@ def _get_spliceai_score_serialized(
                 "reason": "Loaded from persistent SpliceAI runtime cache",
                 "source": entry.get("source") or entry.get("api_source") or "SpliceAI runtime cache",
                 "transcript_policy": entry.get("transcript_policy"),
-                "selected_transcript": entry.get("selected_transcript"),
-                "reference_transcript_score": entry.get("reference_transcript_score"),
-                "max_any_transcript_score": entry.get("max_any_transcript_score"),
-                "max_any_transcript": entry.get("max_any_transcript", ""),
-                "max_delta_field": entry.get("max_delta_field", ""),
-                "delta_scores": entry.get("delta_scores", {}),
-                "reference_scores": entry.get("reference_scores", {}),
-                "alternate_scores": entry.get("alternate_scores", {}),
+                **_status_score_fields(entry),
                 "grch38": f"{entry.get('chrom')}:{entry.get('pos')}:{entry.get('ref')}>{entry.get('alt')}",
                 "cache_key": cache_key,
-                "scoring_profile_id": SPLICEAI_PROFILE_ID,
-                "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-                "distance": SPLICEAI_MAX_DISTANCE,
-                "mask": SPLICEAI_MASK,
-                "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-                "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-                "aggregation": SPLICEAI_AGGREGATION,
+                **_SCORING_PROFILE_FIELDS,
             }
             return score
         if health is not None:
@@ -684,9 +697,7 @@ def _get_spliceai_score_serialized(
             "reason": "No GRCh38 coordinates available",
             "source": SPLICEAI_API_SOURCE,
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
-            "scoring_profile_id": SPLICEAI_PROFILE_ID,
-            "distance": SPLICEAI_MAX_DISTANCE,
-            "mask": SPLICEAI_MASK,
+            **_SCORING_PROFILE_FIELDS,
         }
         return None
 
@@ -706,9 +717,7 @@ def _get_spliceai_score_serialized(
             "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
             "source": SPLICEAI_API_SOURCE,
             "grch38": f"{coords['chrom']}:{coords['pos']}:{coords['ref']}>{coords['alt']}",
-            "scoring_profile_id": SPLICEAI_PROFILE_ID,
-            "distance": SPLICEAI_MAX_DISTANCE,
-            "mask": SPLICEAI_MASK,
+            **_SCORING_PROFILE_FIELDS,
             "retryable": bool(
                 selected.get("retryable")
                 if isinstance(selected, dict)
@@ -717,7 +726,7 @@ def _get_spliceai_score_serialized(
         }
         return None
 
-    score = selected["score"]
+    score = float(selected["score"])
 
     # cache result
     SPLICEAI_CACHE[cache_key] = score
@@ -731,23 +740,10 @@ def _get_spliceai_score_serialized(
         "api_source": selected.get("api_source"),
         "api_url": SPLICEAI_API_URL,
         "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
-        "selected_transcript": selected.get("selected_transcript"),
-        "max_delta_field": selected.get("max_delta_field"),
-        "delta_scores": selected.get("delta_scores", {}),
-        "reference_scores": selected.get("reference_scores", {}),
-        "alternate_scores": selected.get("alternate_scores", {}),
-        "reference_transcript_score": selected.get("reference_transcript_score"),
+        **_score_fields(selected),
         "reference_transcript": selected.get("reference_transcript"),
-        "max_any_transcript_score": selected.get("max_any_transcript_score"),
-        "max_any_transcript": selected.get("max_any_transcript"),
         "n_transcript_scores": selected.get("n_transcript_scores"),
-        "scoring_profile_id": SPLICEAI_PROFILE_ID,
-        "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-        "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-        "distance": SPLICEAI_MAX_DISTANCE,
-        "mask": SPLICEAI_MASK,
-        "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-        "aggregation": SPLICEAI_AGGREGATION,
+        **_SCORING_PROFILE_FIELDS,
     }
     # Another variant may have completed since this request loaded the file.
     # Reload and merge under one lock so that neither successful result is lost.
@@ -763,23 +759,10 @@ def _get_spliceai_score_serialized(
         ),
         "transcript_policy": SPLICEAI_TRANSCRIPT_POLICY,
         "source": SPLICEAI_API_SOURCE,
-        "selected_transcript": selected.get("selected_transcript"),
-        "reference_transcript_score": selected.get("reference_transcript_score"),
-        "max_any_transcript_score": selected.get("max_any_transcript_score"),
-        "max_any_transcript": selected.get("max_any_transcript", ""),
-        "max_delta_field": selected.get("max_delta_field", ""),
-        "delta_scores": selected.get("delta_scores", {}),
-        "reference_scores": selected.get("reference_scores", {}),
-        "alternate_scores": selected.get("alternate_scores", {}),
+        **_status_score_fields(selected),
         "grch38": f"{coords['chrom']}:{coords['pos']}:{coords['ref']}>{coords['alt']}",
         "cache_key": cache_key,
-        "scoring_profile_id": SPLICEAI_PROFILE_ID,
-        "scoring_profile_sha256": SPLICEAI_PROFILE_SHA256,
-        "distance": SPLICEAI_MAX_DISTANCE,
-        "mask": SPLICEAI_MASK,
-        "annotation_subset": SPLICEAI_ANNOTATION_SUBSET,
-        "genome_assembly": SPLICEAI_GENOME_ASSEMBLY,
-        "aggregation": SPLICEAI_AGGREGATION,
+        **_SCORING_PROFILE_FIELDS,
     }
     return score
 
