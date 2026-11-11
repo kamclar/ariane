@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
 from typing import Any, Dict
 
@@ -85,14 +85,47 @@ def load_exon_cnv_evidence_snapshot() -> Dict[str, Any]:
         raise RuntimeError(
             f"Required exon-CNV population snapshot cannot be loaded: {exc}"
         ) from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError("Required exon-CNV population snapshot must be an object")
     validate_exon_cnv_evidence_snapshot(payload)
     return payload
+
+
+def _cnv_result(
+    payload: Dict[str, Any],
+    policy: Dict[str, Any],
+    *,
+    applicability: str,
+    trace: list[Dict[str, Any]],
+    reason: str,
+    found: bool = True,
+    is_indel: bool = True,
+    criteria: list[Dict[str, Any]] | None = None,
+    variant_size_bp: int | None = None,
+    exon: str | None = None,
+    population_evidence: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    return {
+        "found": found,
+        "is_indel": is_indel,
+        "criteria": criteria or [],
+        "pm2_applicability": applicability,
+        "variant_size_bp": variant_size_bp,
+        "decision_trace": trace,
+        "reason": reason,
+        "source": policy["source_url"],
+        "snapshot_id": payload["snapshot_id"],
+        "exon": exon,
+        "population_evidence": population_evidence,
+        "source_identity": payload.get("source_identity"),
+    }
 
 
 def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
     """Run the general Appendix G path; never look up the exact variant."""
     payload = load_exon_cnv_evidence_snapshot()
     policy = payload["pm2_policy"]
+    result = partial(_cnv_result, payload, policy)
     minimum_size = int(policy["minimum_variant_size_bp"])
     size = assess_indel_size_for_transcript(reference_transcript(gene), c_notation)
     is_deletion = size.get("operation") == "del"
@@ -103,15 +136,13 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
         "detail": size,
     }]
     if not size.get("is_indel"):
-        return {
-            "found": False,
-            "is_indel": False,
-            "criteria": [],
-            "pm2_applicability": "not_applicable_to_provider",
-            "decision_trace": trace,
-            "reason": "The ENIGMA Appendix G indel population path is not applicable.",
-            "snapshot_id": payload["snapshot_id"],
-        }
+        return result(
+            found=False,
+            is_indel=False,
+            applicability="not_applicable_to_provider",
+            trace=trace,
+            reason="The ENIGMA Appendix G indel population path is not applicable.",
+        )
     exact_size = size.get("affected_bp") if size.get("status") == "exact" else None
     deleted_size = size.get("reference_span_bp")
     inserted_size = size.get("inserted_bp")
@@ -126,11 +157,15 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
         delins_components is not None and max(delins_components) < minimum_size
     )
     if is_small:
-        size_description = (
-            f"{exact_size} bp"
-            if exact_size is not None
-            else f"deleted {delins_components[0]} bp and inserted {delins_components[1]} bp"
-        )
+        if exact_size is not None:
+            size_description = f"{exact_size} bp"
+        elif delins_components is not None:
+            size_description = (
+                f"deleted {delins_components[0]} bp and "
+                f"inserted {delins_components[1]} bp"
+            )
+        else:
+            raise RuntimeError("Small indel has no exact size")
         if size["operation"] == "dup":
             table1_reason = (
                 "ENIGMA Table 1 names insertion, deletion and delins alleles; "
@@ -148,77 +183,58 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
                 f"ENIGMA Table 1 excludes {operation_label} alleles from the "
                 "small-variant PM2 path"
             )
-        return {
-            "found": True,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "not_applicable",
-            "variant_size_bp": int(exact_size) if exact_size is not None else None,
-            "decision_trace": trace,
-            "reason": (
+        return result(
+            applicability="not_applicable",
+            variant_size_bp=int(exact_size) if exact_size is not None else None,
+            trace=trace,
+            reason=(
                 f"PM2 is not applicable: the {size['operation']} is "
                 f"{size_description}. {table1_reason}. Appendix G "
                 "limits the structural PM2 Supporting path to variants >50 bp."
             ),
-            "source": policy["source_url"],
-            "snapshot_id": payload["snapshot_id"],
-        }
+        )
     if (
         delins_components is not None
         and min(delins_components) < minimum_size <= max(delins_components)
     ):
-        return {
-            "found": False,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "unavailable",
-            "variant_size_bp": None,
-            "decision_trace": trace,
-            "reason": (
+        return result(
+            found=False,
+            applicability="unavailable",
+            trace=trace,
+            reason=(
                 "PM2 is unavailable: the delins deleted and inserted lengths "
                 "fall on opposite sides of the ENIGMA Appendix G >50 bp boundary, "
                 "which does not define a single automated event-size convention."
             ),
-            "source": policy["source_url"],
-            "snapshot_id": payload["snapshot_id"],
-        }
+        )
     if is_duplication:
-        return {
-            "found": True,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "not_met",
-            "variant_size_bp": exact_size,
-            "decision_trace": trace + [{
+        return result(
+            applicability="not_met",
+            variant_size_bp=exact_size,
+            trace=trace + [{
                 "step": "structural_variant_recall",
                 "status": "fail",
                 "detail": "gnomAD recall is suboptimal for large duplications",
             }],
-            "reason": (
+            reason=(
                 "PM2 Supporting was not applied to this duplication because "
                 "ENIGMA considers population-database recall suboptimal for this "
                 "variant type. Table 4 PVS1 assessment remains separate."
             ),
-            "source": policy["source_url"],
-            "snapshot_id": payload["snapshot_id"],
-        }
+        )
     if not is_deletion:
-        return {
-            "found": False,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "unavailable",
-            "variant_size_bp": exact_size,
-            "decision_trace": trace,
-            "reason": (
+        return result(
+            found=False,
+            applicability="unavailable",
+            variant_size_bp=exact_size,
+            trace=trace,
+            reason=(
                 "PM2 is unavailable: this indel is eligible for, or cannot be "
                 "excluded from, the ENIGMA Appendix G structural path, but the "
                 "current validated structural dataset supports complete exon "
                 "deletions only."
             ),
-            "source": policy["source_url"],
-            "snapshot_id": payload["snapshot_id"],
-        }
+        )
     exon = parse_exon_from_deletion_notation(c_notation, gene)
     if exon is None:
         trace.append({
@@ -226,21 +242,17 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
             "status": "fail",
             "detail": "notation does not identify one complete Table 4 exon",
         })
-        return {
-            "found": False,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "unavailable",
-            "variant_size_bp": exact_size,
-            "decision_trace": trace,
-            "reason": (
+        return result(
+            found=False,
+            applicability="unavailable",
+            variant_size_bp=exact_size,
+            trace=trace,
+            reason=(
                 "PM2 is unavailable: the >50 bp deletion could not be mapped "
                 "unambiguously to one complete ENIGMA Table 4 exon for the "
                 "validated gnomAD-SV exon-overlap lookup."
             ),
-            "source": policy["source_url"],
-            "snapshot_id": payload["snapshot_id"],
-        }
+        )
     trace.append({"step": "table4_exon_mapping", "status": "pass", "detail": exon})
 
     record = payload["exons"].get(f"{gene}:{exon}")
@@ -250,16 +262,12 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
             "status": "fail",
             "detail": "reproducible exon interval unavailable",
         })
-        return {
-            "found": True,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "unavailable",
-            "decision_trace": trace,
-            "reason": "PM2 was not applied: the GRCh37 exon interval is unavailable.",
-            "exon": exon,
-            "snapshot_id": payload["snapshot_id"],
-        }
+        return result(
+            applicability="unavailable",
+            trace=trace,
+            reason="PM2 was not applied: the GRCh37 exon interval is unavailable.",
+            exon=exon,
+        )
     trace.append({
         "step": "grch37_exon_interval", "status": "pass",
         "detail": record["grch37_coding_interval"],
@@ -272,18 +280,13 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
         "detail": f"minimum deleted coding sequence {record['coding_length_bp']} bp",
     })
     if not eligible_size:
-        return {
-            "found": True,
-            "is_indel": True,
-            "criteria": [],
-            "pm2_applicability": "not_applicable",
-            "variant_size_bp": int(record["coding_length_bp"]),
-            "decision_trace": trace,
-            "reason": "PM2 is not applicable: the deletion is not >50 bp.",
-            "source": policy["source_url"],
-            "exon": exon,
-            "snapshot_id": payload["snapshot_id"],
-        }
+        return result(
+            applicability="not_applicable",
+            variant_size_bp=int(record["coding_length_bp"]),
+            trace=trace,
+            reason="PM2 is not applicable: the deletion is not >50 bp.",
+            exon=exon,
+        )
 
     matches = record.get("all_matching_deletions", [])
     pass_matches = record.get("pass_matching_deletions", [])
@@ -314,21 +317,17 @@ def lookup_exon_cnv_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
             "PM2 was not applied: gnomAD-SV contains a deletion spanning the "
             f"complete coding interval of {gene} {exon}."
         )
-    return {
-        "found": True,
-        "is_indel": True,
-        "criteria": criteria,
-        "pm2_applicability": "applied" if criteria else "not_met",
-        "variant_size_bp": int(record["coding_length_bp"]),
-        "decision_trace": trace,
-        "reason": reason,
-        "exon": exon,
-        "population_evidence": {
+    return result(
+        criteria=criteria,
+        applicability="applied" if criteria else "not_met",
+        variant_size_bp=int(record["coding_length_bp"]),
+        trace=trace,
+        reason=reason,
+        exon=exon,
+        population_evidence={
             "dataset": "gnomAD-SV v2.1",
             "absence_established": absence_established,
             "matching_records": matches,
             "matching_pass_records": pass_matches,
         },
-        "snapshot_id": payload["snapshot_id"],
-        "source_identity": payload["source_identity"],
-    }
+    )

@@ -10,6 +10,28 @@ from scripts.build_exon_cnv_evidence_snapshot import spans_all_exons
 
 
 class ExonCnvEvidenceTests(unittest.TestCase):
+    def test_lookup_results_have_one_stable_shape(self):
+        expected = {
+            "found",
+            "is_indel",
+            "criteria",
+            "pm2_applicability",
+            "variant_size_bp",
+            "decision_trace",
+            "reason",
+            "source",
+            "snapshot_id",
+            "exon",
+            "population_evidence",
+            "source_identity",
+        }
+        for c_notation in ("c.80A>G", "c.5266dup", "c.100_150del"):
+            with self.subTest(c_notation=c_notation):
+                self.assertEqual(
+                    set(lookup_exon_cnv_evidence("BRCA1", c_notation)),
+                    expected,
+                )
+
     def test_population_match_requires_deletion_to_span_the_complete_exon(self):
         intervals = [{
             "chrom": "13",
