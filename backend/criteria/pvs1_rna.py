@@ -284,39 +284,47 @@ def _evaluate_table4_rna_record(
     }
 
 
-def _evaluate_st2_record(
+def _st2_decision(
     gene: str,
-    c_notation: str,
-    st2_evidence_result: Optional[Dict[str, Any]] = None,
+    reason: str,
+    *,
+    source_record: Optional[Dict[str, Any]] = None,
+    table4_exon: Optional[str] = None,
+    appendix_branch: Optional[str] = None,
+    application_status: str = "not_applied",
+    review_required: bool = False,
+    manual_review_prefill: Optional[Dict[str, Any]] = None,
+    source: Optional[str] = None,
+    applies: bool = False,
+    strength: Optional[str] = None,
+    points: int = 0,
+    decision_path: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Evaluate ST2 after higher-priority exact VCEP sources were absent."""
-    specification = vcep_specification(gene)
     result: Dict[str, Any] = {
-        "applies": False,
+        "applies": applies,
         "code": "PVS1_RNA",
-        "strength": None,
-        "points": 0,
-        "reason": "",
-        "source": specification["url"],
-        "source_record": None,
-        "table4_exon": None,
-        "appendix_branch": None,
-        "application_status": "not_applied",
-        "review_required": False,
-        "manual_review_prefill": {},
+        "strength": strength,
+        "points": points,
+        "reason": reason,
+        "source": source or vcep_specification(gene)["url"],
+        "source_record": source_record,
+        "table4_exon": table4_exon,
+        "appendix_branch": appendix_branch,
+        "application_status": application_status,
+        "review_required": review_required,
+        "manual_review_prefill": manual_review_prefill or {},
     }
+    if decision_path is not None:
+        result["decision_path"] = decision_path
+    return result
 
-    st2_evidence = st2_evidence_result or {}
-    record = st2_evidence.get("record")
-    if record is None:
-        result["reason"] = (
-            "PVS1 (RNA) was not applied because the exact variant has no record "
-            "in ENIGMA Supplementary Table 2 v1.2."
-        )
-        return result
 
-    st3_references = list(record.get("st3_references") or [])
-    result["source_record"] = {
+def _st2_source_record(
+    record: Dict[str, Any],
+    evidence: Dict[str, Any],
+    references: list[Dict[str, Any]],
+) -> Dict[str, Any]:
+    return {
         "dataset": "ENIGMA Supplementary Table 2 v1.2",
         "source_row": record.get("source_row"),
         "gene": record.get("gene"),
@@ -327,31 +335,27 @@ def _evaluate_st2_record(
         "assay_summary": record.get("variant_assay_summary"),
         "transcript_result": record.get("result"),
         "evidence_mechanism": "rna_splicing",
-        "supporting_st3_references": st3_references,
-        "source_version": st2_evidence.get("source_version"),
-        "source_checksum": st2_evidence.get("source_checksum"),
+        "supporting_st3_references": references,
+        "source_version": evidence.get("source_version"),
+        "source_checksum": evidence.get("source_checksum"),
     }
 
-    assay_category = record.get("splicing_assay_result_category")
-    if not is_damaging_st2_assay(assay_category):
-        result["reason"] = (
-            "PVS1 (RNA) was not applied automatically because the exact ENIGMA "
-            "ST2 record does not report an mRNA result in the damaging "
-            "loss-of-function category. The record must be considered under the "
-            "appropriate RNA branch and cannot create PVS1 (RNA)."
-        )
-        return result
 
-    is_unquantified = is_unquantified_patient_st2_assay(assay_category)
-    review_summary = (
+def _st2_review_fields(
+    gene: str,
+    record: Dict[str, Any],
+    references: list[Dict[str, Any]],
+    is_unquantified: bool,
+) -> Dict[str, Any]:
+    summary = (
         f"ENIGMA Supplementary Table 2 row {record.get('source_row')}: "
         f"{record.get('result')}. Assay category: "
         f"{record.get('splicing_assay_result_category')}. "
-        f"Supporting ST3 sources: {', '.join(_st3_citation(ref) for ref in st3_references)}. "
+        f"Supporting ST3 sources: {', '.join(_st3_citation(ref) for ref in references)}. "
         "The curator must determine the applicable Appendix E RNA weighting "
         "branch and document the supported strength."
     )
-    result.update({
+    return {
         "application_status": "review_required",
         "review_required": True,
         "appendix_branch": (
@@ -364,164 +368,228 @@ def _evaluate_st2_record(
             "assay_scope": "mrna_only",
             "rna_conclusion": "damaging",
             "transcript_accession": reference_transcript(gene),
-            "transcript_result_summary": review_summary,
+            "transcript_result_summary": summary,
             "source_citation": "ENIGMA Supplementary Tables 2 and 3 v1.2",
             "source_references": [
-                url for url in (_st3_reference_url(ref) for ref in st3_references)
-                if url
+                url for url in (_st3_reference_url(ref) for ref in references) if url
             ],
         },
-    })
+    }
 
+
+def _st2_runtime_problems(
+    gene: str,
+    c_notation: str,
+    evidence: Dict[str, Any],
+    record: Dict[str, Any],
+    references: list[Dict[str, Any]],
+    table4_exon: str,
+    baseline: Dict[str, Any],
+    strength: Optional[str],
+) -> list[str]:
+    problems = []
+    if evidence.get("status") != "eligible":
+        problems.append(f"ST2 evidence status is {evidence.get('status') or 'unknown'}")
+    if record.get("gene") != gene or record.get("c_notation") != c_notation:
+        problems.append("the ST2 evidence does not match the variant")
+    if not references:
+        problems.append("no supporting ST3 source is linked")
+    if evidence.get("table4_exon") != table4_exon:
+        problems.append("the recorded Table 4 exon does not match")
+    expected_baseline = evidence.get("table4_baseline") or {}
+    if expected_baseline.get("pvs1_code") != baseline.get("pvs1_code"):
+        problems.append("the recorded Table 4 baseline does not match")
+    if strength is None:
+        problems.append("the Table 4 baseline strength is unsupported")
+    return problems
+
+
+def _st2_decision_path(
+    gene: str,
+    record: Dict[str, Any],
+    baseline: Dict[str, Any],
+    strength: str,
+) -> Dict[str, Any]:
+    return {
+        "tree_id": "figure-1b",
+        "tree_version": f"ENIGMA VCEP {policy_version(gene)}",
+        "branch_id": "other-nucleotide-position",
+        "criterion": "PVS1_RNA",
+        "outcome": "applied",
+        "outcome_node": "rna-other-aberrant",
+        "steps": [
+            {
+                "node_id": "rna-other-quality",
+                "question": "Review assay design, source and transcript result",
+                "result": "curated_in_st2",
+                "observed": (
+                    f"ENIGMA ST2 row {record.get('source_row')}; "
+                    f"{record.get('splicing_assay_result_category')}"
+                ),
+            },
+            {
+                "node_id": "rna-other-result",
+                "question": "Observed mRNA result?",
+                "result": "aberrant_loss_of_function",
+                "observed": str(record.get("result") or ""),
+            },
+            {
+                "node_id": "rna-other-weight",
+                "question": "Appendix E qualitative RNA weight?",
+                "result": strength,
+                "observed": f"Table 4 baseline {baseline.get('pvs1_code')}",
+            },
+        ],
+        "sources": [
+            {
+                "source_id": "enigma-v1.2-specifications",
+                "label": f"{policy_name(gene)} v{policy_version(gene)} Specifications",
+                "url": vcep_specification(gene)["url"],
+                "location": "Figure 1B",
+                "figure_url": "/static/enigma/figure-1b-rna.jpg",
+            },
+            {
+                "source_id": "enigma-v1.2-appendix",
+                "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
+                "url": vcep_document_url("appendix", gene),
+                "location": "Appendix E Table 9",
+            },
+        ],
+    }
+
+
+def _evaluate_st2_record(
+    gene: str,
+    c_notation: str,
+    st2_evidence_result: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Evaluate ST2 after higher-priority exact VCEP sources were absent."""
+    evidence = st2_evidence_result or {}
+    record = evidence.get("record")
+    if record is None:
+        return _st2_decision(
+            gene,
+            "PVS1 (RNA) was not applied because the exact variant has no record "
+            "in ENIGMA Supplementary Table 2 v1.2.",
+        )
+
+    references = list(record.get("st3_references") or [])
+    source_record = _st2_source_record(record, evidence, references)
+    assay_category = record.get("splicing_assay_result_category")
+    if not is_damaging_st2_assay(assay_category):
+        return _st2_decision(
+            gene,
+            "PVS1 (RNA) was not applied automatically because the exact ENIGMA "
+            "ST2 record does not report an mRNA result in the damaging "
+            "loss-of-function category. The record must be considered under the "
+            "appropriate RNA branch and cannot create PVS1 (RNA).",
+            source_record=source_record,
+        )
+
+    is_unquantified = is_unquantified_patient_st2_assay(assay_category)
+    review = _st2_review_fields(gene, record, references, is_unquantified)
     reported_exon = reported_whole_exon_deletion(record.get("result"))
     if reported_exon is None:
-        result["reason"] = (
+        return _st2_decision(
+            gene,
             "PVS1 (RNA) was not applied automatically because ENIGMA ST2 reports "
             "a complex or partial transcript consequence that cannot be mapped "
             "unambiguously to one Table 4 deletion row. The exact RNA record has "
-            "been prepared for expert review without a code weight."
+            "been prepared for expert review without a code weight.",
+            source_record=source_record,
+            **review,
         )
-        return result
 
     table4_exon = table4_exon_for_reported_number(gene, reported_exon)
-    result["table4_exon"] = table4_exon
     if table4_exon is None:
-        result["reason"] = (
+        return _st2_decision(
+            gene,
             f"PVS1 (RNA) was not applied because reported exon {reported_exon} "
             "does not map uniquely to an ENIGMA Table 4 deletion row. The exact "
-            "RNA record has been prepared for expert review without a code weight."
+            "RNA record has been prepared for expert review without a code weight.",
+            source_record=source_record,
+            **review,
         )
-        return result
 
     baseline = table4_lookup_deletion(gene, table4_exon)
     baseline_strength = baseline.get("pvs1_strength")
-    if (
-        baseline.get("status") != Table4LookupStatus.MATCHED
-        or not baseline_strength
-    ):
-        result["reason"] = (
+    if baseline.get("status") != Table4LookupStatus.MATCHED or not baseline_strength:
+        return _st2_decision(
+            gene,
             f"PVS1 (RNA) was not applied because the {gene} {table4_exon} "
             "transcript deletion has no applicable baseline PVS1 weight in Table 4. "
             "The exact RNA record has been prepared for expert review without a "
-            "code weight."
+            "code weight.",
+            source_record=source_record,
+            table4_exon=table4_exon,
+            **review,
         )
-        return result
 
-    result["manual_review_prefill"]["table4_context"] = (
+    review["manual_review_prefill"]["table4_context"] = (
         f"{gene} {table4_exon}: {baseline.get('pvs1_code')}"
     )
-    if is_unquantified:
-        expected_status = "eligible"
-        expected_exon = st2_evidence.get("table4_exon")
-        expected_baseline = st2_evidence.get("table4_baseline") or {}
-        runtime_problems = []
-        if st2_evidence.get("status") != expected_status:
-            runtime_problems.append(
-                f"ST2 evidence status is {st2_evidence.get('status') or 'unknown'}"
-            )
-        if record.get("gene") != gene or record.get("c_notation") != c_notation:
-            runtime_problems.append("the ST2 evidence does not match the variant")
-        if not st3_references:
-            runtime_problems.append("no supporting ST3 source is linked")
-        if expected_exon != table4_exon:
-            runtime_problems.append("the recorded Table 4 exon does not match")
-        if expected_baseline.get("pvs1_code") != baseline.get("pvs1_code"):
-            runtime_problems.append("the recorded Table 4 baseline does not match")
-        strength = unquantified_patient_rna_strength(baseline_strength)
-        if strength is None:
-            runtime_problems.append("the Table 4 baseline strength is unsupported")
-        if runtime_problems:
-            result["reason"] = (
-                "PVS1 (RNA) was not applied automatically because the curated "
-                "ST2 candidate failed runtime validation: "
-                + "; ".join(runtime_problems)
-                + ". The evidence remains available for manual review."
-            )
-            return result
-
-        result.update({
-            "applies": True,
-            "strength": strength,
-            "points": points_for_strength(strength),
-            "application_status": "applied_from_curated_st2",
-            "review_required": False,
-            "appendix_branch": (
-                "patient_mrna_without_allele_specific_quantitation_"
-                "apparent_near_complete"
-            ),
-            "reason": (
-                f"ENIGMA Supplementary Table 2 row {record.get('source_row')} "
-                "codes patient mRNA without allele-specific quantitation as an "
-                "aberrant transcript consistent with loss of function "
-                f"({record.get('result')}) and links "
-                f"{len(st3_references)} supporting ST3 source(s). Table 4 assigns "
-                f"baseline {baseline.get('pvs1_code')} to {gene} {table4_exon}; "
-                f"the Appendix E qualitative patient-mRNA matrix yields PVS1 "
-                f"{strength} (RNA)."
-            ),
-            "source": vcep_document_url("appendix", gene),
-            "manual_review_prefill": {},
-            "decision_path": {
-                "tree_id": "figure-1b",
-                "tree_version": f"ENIGMA VCEP {policy_version(gene)}",
-                "branch_id": "other-nucleotide-position",
-                "criterion": "PVS1_RNA",
-                "outcome": "applied",
-                "outcome_node": "rna-other-aberrant",
-                "steps": [
-                    {
-                        "node_id": "rna-other-quality",
-                        "question": "Review assay design, source and transcript result",
-                        "result": "curated_in_st2",
-                        "observed": (
-                            f"ENIGMA ST2 row {record.get('source_row')}; "
-                            f"{record.get('splicing_assay_result_category')}"
-                        ),
-                    },
-                    {
-                        "node_id": "rna-other-result",
-                        "question": "Observed mRNA result?",
-                        "result": "aberrant_loss_of_function",
-                        "observed": str(record.get("result") or ""),
-                    },
-                    {
-                        "node_id": "rna-other-weight",
-                        "question": "Appendix E qualitative RNA weight?",
-                        "result": strength,
-                        "observed": (
-                            f"Table 4 baseline {baseline.get('pvs1_code')}"
-                        ),
-                    },
-                ],
-                "sources": [
-                    {
-                        "source_id": "enigma-v1.2-specifications",
-                        "label": (
-                            f"{policy_name(gene)} v{policy_version(gene)} Specifications"
-                        ),
-                        "url": specification["url"],
-                        "location": "Figure 1B",
-                        "figure_url": "/static/enigma/figure-1b-rna.jpg",
-                    },
-                    {
-                        "source_id": "enigma-v1.2-appendix",
-                        "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
-                        "url": vcep_document_url("appendix", gene),
-                        "location": "Appendix E Table 9",
-                    },
-                ],
-            },
-        })
-    else:
-        result["reason"] = (
+    if not is_unquantified:
+        return _st2_decision(
+            gene,
             f"ENIGMA Supplementary Table 2 row {record.get('source_row')} reports "
             f"damaging RNA evidence ({record.get('result')}). Table 4 supplies "
             f"the {baseline.get('pvs1_code')} loss-of-function context for {gene} "
             f"{table4_exon}. The ST2 record does not itself provide a final PVS1 "
             "(RNA) weight, so the result has been prepared for expert review and "
-            "no points were applied automatically."
+            "no points were applied automatically.",
+            source_record=source_record,
+            table4_exon=table4_exon,
+            **review,
         )
-    return result
+
+    strength = unquantified_patient_rna_strength(baseline_strength)
+    problems = _st2_runtime_problems(
+        gene,
+        c_notation,
+        evidence,
+        record,
+        references,
+        table4_exon,
+        baseline,
+        strength,
+    )
+    if problems:
+        return _st2_decision(
+            gene,
+            "PVS1 (RNA) was not applied automatically because the curated "
+            "ST2 candidate failed runtime validation: "
+            + "; ".join(problems)
+            + ". The evidence remains available for manual review.",
+            source_record=source_record,
+            table4_exon=table4_exon,
+            **review,
+        )
+
+    if strength is None:
+        raise RuntimeError("Validated ST2 candidate has no RNA strength")
+    return _st2_decision(
+        gene,
+        f"ENIGMA Supplementary Table 2 row {record.get('source_row')} "
+        "codes patient mRNA without allele-specific quantitation as an "
+        "aberrant transcript consistent with loss of function "
+        f"({record.get('result')}) and links "
+        f"{len(references)} supporting ST3 source(s). Table 4 assigns "
+        f"baseline {baseline.get('pvs1_code')} to {gene} {table4_exon}; "
+        f"the Appendix E qualitative patient-mRNA matrix yields PVS1 "
+        f"{strength} (RNA).",
+        source_record=source_record,
+        table4_exon=table4_exon,
+        applies=True,
+        strength=strength,
+        points=points_for_strength(strength),
+        application_status="applied_from_curated_st2",
+        appendix_branch=(
+            "patient_mrna_without_allele_specific_quantitation_"
+            "apparent_near_complete"
+        ),
+        source=vcep_document_url("appendix", gene),
+        decision_path=_st2_decision_path(gene, record, baseline, strength),
+    )
 
 
 def resolve_pvs1_rna(
@@ -533,6 +601,9 @@ def resolve_pvs1_rna(
     st2_evidence_result: Optional[Dict[str, Any]],
 ) -> Pvs1RnaSelection:
     """Resolve ERepo, Table 4, then ST2 into one final decision."""
+    source: Optional[str]
+    source_result: Optional[Dict[str, Any]]
+    decision: Optional[Dict[str, Any]]
     if (
         erepo_registry_result
         and erepo_registry_result.get("status") != "not_in_registry"
