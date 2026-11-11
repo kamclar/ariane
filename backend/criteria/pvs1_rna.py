@@ -12,6 +12,7 @@ import re
 from typing import Any, Dict, Optional
 
 from backend.domain.pvs1_rna import Pvs1RnaSelection
+from backend.policy.criterion_points import points_for_strength
 from backend.reference_data.ps1_splice_evidence import (
     get_st2_source_metadata,
     get_st2_splice_record,
@@ -46,10 +47,10 @@ _DAMAGING_RNA_RESULT = "aberrant transcripts consistent with loss of function"
 # quantitation, apparent (near) complete splicing column. ``Very Strong`` is
 # the parsed strength of the unsuffixed Table 4 code ``PVS1``.
 _UNQUANTIFIED_PATIENT_RNA_STRENGTH = {
-    "Very Strong": ("Strong", 4),
-    "Strong": ("Moderate", 2),
-    "Moderate": ("Moderate", 2),
-    "Supporting": ("Supporting", 1),
+    "Very Strong": "Strong",
+    "Strong": "Moderate",
+    "Moderate": "Moderate",
+    "Supporting": "Supporting",
 }
 
 
@@ -584,11 +585,11 @@ def _evaluate_st2_record(
             )
             return result
 
-        strength, points = _UNQUANTIFIED_PATIENT_RNA_STRENGTH[baseline_strength]
+        strength = _UNQUANTIFIED_PATIENT_RNA_STRENGTH[baseline_strength]
         result.update({
             "applies": True,
             "strength": strength,
-            "points": points,
+            "points": points_for_strength(strength),
             "application_status": "applied_from_curated_st2",
             "review_required": False,
             "appendix_branch": (

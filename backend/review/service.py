@@ -11,9 +11,10 @@ from backend.criteria.evidence_interactions import (
     clinical_functional_risk_interactions,
 )
 from backend.policy.classification import classify_by_enigma_combination
+from backend.policy.criterion_points import points_for_strength
 from backend.policy.gene import resolve_policy_gene, rule_is_applicable
 from backend.presentation.criterion_order import criterion_sort_key
-from backend.review.definitions import MANUAL_CRITERIA, STRENGTH_POINTS, STRUCTURED_CURATED_CODES
+from backend.review.definitions import MANUAL_CRITERIA, STRUCTURED_CURATED_CODES
 from backend.review.strength import (
     _clinical_lr_record_is_complete,
     evaluate_bs4_likelihood_ratio,
@@ -129,9 +130,10 @@ def evaluate_manual_evidence(
             )
         selected = suggested
         applies = bool(item.get("enabled") and selected)
-        points = STRENGTH_POINTS.get(selected, 0)
-        if definition["direction"] == "benign":
-            points *= -1
+        points = points_for_strength(
+            selected,
+            benign=definition["direction"] == "benign",
+        )
         reason = (
             f"Reviewer-curated evidence meets {code} {suggested} requirements"
             if suggested

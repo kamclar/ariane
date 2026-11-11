@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from backend.policy.criterion_points import points_for_strength
 from backend.policy.gene import (
     spliceai_thresholds,
     vcep_specification,
@@ -27,7 +28,6 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 ST7_PATH = DATA_DIR / "st7_reference_set.json"
 PS1_REGISTRY_PATH = DATA_DIR / "ps1_protein_reference_registry.json"
 
-PS1_POINTS = {"Strong": 4, "Moderate": 2}
 _ST7_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
 _APPROVED_LOOKUP: Dict[str, Dict[str, List[Dict[str, Any]]]] = {}
 _LOADED = False
@@ -392,7 +392,7 @@ def evaluate_ps1(
         {
             "applies": True,
             "strength": strength,
-            "points": PS1_POINTS[strength],
+            "points": points_for_strength(strength),
             "reference_variant": _public_approved_candidate(best),
             "reference_status": "approved",
             "application_status": "auto_applied",

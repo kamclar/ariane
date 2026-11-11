@@ -31,13 +31,6 @@ ENIGMA_RECOGNISED_PP4_SOURCES = {
     "40413188": "Zanti et al. 2025",
 }
 
-STRENGTH_POINTS = {
-    "Very Strong": 8,
-    "Strong": 4,
-    "Moderate": 2,
-    "Supporting": 1,
-}
-
 MANUAL_CRITERIA = {
     "PS3": {
         "direction": "pathogenic",

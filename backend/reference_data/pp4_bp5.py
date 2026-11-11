@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from backend.integrity.checksums import file_sha256
+from backend.policy.criterion_points import points_for_strength
 from backend.policy.gene import (
     clinical_lr_thresholds,
     policy_name,
@@ -22,9 +23,6 @@ METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_pp4_clinical_lr
 SOURCE_MANIFEST_PATH = REPOSITORY_ROOT / "data" / "sources" / "enigma" / "clinical_lr_sources.manifest.json"
 INDEL_SNAPSHOT_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.index.json"
 INDEL_METADATA_PATH = REPOSITORY_ROOT / "data" / "precomputed" / "brca_normalized_indel_snapshot.metadata.json"
-
-PP4_POINTS = {"Very Strong": 8, "Strong": 4, "Moderate": 2, "Supporting": 1}
-BP5_POINTS = {"Very Strong": -8, "Strong": -4, "Moderate": -2, "Supporting": -1}
 
 _SNAPSHOT: dict[str, dict[str, Any]] | None = None
 _ALIASES: dict[str, str] | None = None
@@ -382,7 +380,7 @@ def evaluate_pp4_bp5(gene: str, c_notation: str) -> Dict:
         "applies": True,
         "code": code,
         "strength": strength,
-        "points": (PP4_POINTS if code == "PP4" else BP5_POINTS)[strength],
+        "points": points_for_strength(strength, benign=code == "BP5"),
         "application_status": "applied",
     })
     if (

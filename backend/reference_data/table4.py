@@ -9,6 +9,7 @@ import re
 from typing import Any, Dict, NamedTuple, Optional
 
 from backend.integrity.checksums import file_sha256
+from backend.policy.criterion_points import points_for_strength
 from backend.reference_data.paths import TABLE4_PATH
 
 
@@ -41,20 +42,20 @@ class PtcSelection(NamedTuple):
     review_required: bool
 
 
-PVS1_WEIGHTS = {
-    "PVS1": ("Very Strong", 8),
-    "PVS1_VeryStrong": ("Very Strong", 8),
-    "PVS1_Strong": ("Strong", 4),
-    "PVS1_Moderate": ("Moderate", 2),
-    "PVS1_Supporting": ("Supporting", 1),
+PVS1_STRENGTHS = {
+    "PVS1": "Very Strong",
+    "PVS1_VeryStrong": "Very Strong",
+    "PVS1_Strong": "Strong",
+    "PVS1_Moderate": "Moderate",
+    "PVS1_Supporting": "Supporting",
 }
 
-PM5_WEIGHTS = {
-    "PM5_Strong (PTC)": ("Strong", 4),
-    "PM5 (PTC)": ("Moderate", 2),
-    "PM5": ("Moderate", 2),
-    "PM5_Moderate": ("Moderate", 2),
-    "PM5_Supporting (PTC)": ("Supporting", 1),
+PM5_STRENGTHS = {
+    "PM5_Strong (PTC)": "Strong",
+    "PM5 (PTC)": "Moderate",
+    "PM5": "Moderate",
+    "PM5_Moderate": "Moderate",
+    "PM5_Supporting (PTC)": "Supporting",
 }
 
 
@@ -225,14 +226,14 @@ def parse_pvs1_code_strength(pvs1_code: Optional[str]) -> CriterionWeight:
 
     requires_rna = "(RNA)" in pvs1_code
     code = pvs1_code.replace(" (RNA)", "").replace("(RNA)", "").strip()
-    strength, points = PVS1_WEIGHTS.get(code, (None, 0))
-    return CriterionWeight(strength, points, requires_rna)
+    strength = PVS1_STRENGTHS.get(code)
+    return CriterionWeight(strength, points_for_strength(strength), requires_rna)
 
 
 def parse_pm5_code_strength(pm5_code: Optional[str]) -> CriterionWeight:
     """Translate one Table 4 PM5 PTC code into strength and points."""
-    strength, points = PM5_WEIGHTS.get(str(pm5_code), (None, 0))
-    return CriterionWeight(strength, points)
+    strength = PM5_STRENGTHS.get(str(pm5_code))
+    return CriterionWeight(strength, points_for_strength(strength))
 
 
 def table4_lookup_initiation(gene: str) -> Dict:
