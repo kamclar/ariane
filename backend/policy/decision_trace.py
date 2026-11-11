@@ -1,16 +1,10 @@
-"""Small constructors for auditable ENIGMA Figure 1A decision paths."""
+"""Constructors for auditable ENIGMA Figure 1A decision paths."""
 
 from __future__ import annotations
 
 from typing import Any
 
-
-FIGURE_1A_SOURCE = {
-    "source_id": "enigma-v1.2-specifications",
-    "label": "Complete ENIGMA BRCA1/2 VCEP v1.2 specification",
-    "url": "https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data",
-    "location": "Figure 1A",
-}
+from backend.policy.gene import policy_version, vcep_document_url
 
 
 def step(node_id: str, question: str, result: str, observed: str) -> dict[str, str]:
@@ -24,6 +18,7 @@ def step(node_id: str, question: str, result: str, observed: str) -> dict[str, s
 
 def figure1a_path(
     *,
+    gene: str,
     branch_id: str,
     criterion: str,
     outcome_node: str,
@@ -36,11 +31,19 @@ def figure1a_path(
     )
     return {
         "tree_id": "figure-1a",
-        "tree_version": "ENIGMA VCEP 1.2.0",
+        "tree_version": f"ENIGMA VCEP {policy_version(gene)}",
         "branch_id": branch_id,
         "criterion": criterion,
         "outcome": "applied",
         "outcome_node": outcome_node,
         "steps": steps,
-        "sources": [{**FIGURE_1A_SOURCE, "figure_url": figure_url}],
+        "sources": [
+            {
+                "source_id": "enigma-v1.2-specifications",
+                "label": "Complete ENIGMA BRCA1/2 VCEP v1.2 specification",
+                "url": vcep_document_url("specifications", gene),
+                "location": "Figure 1A",
+                "figure_url": figure_url,
+            }
+        ],
     }

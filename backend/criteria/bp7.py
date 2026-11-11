@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 from backend.variant_processing.utils import get_intron_offset_from_c_notation
-from backend.domain.decision_trace import figure1a_path, step
+from backend.policy.decision_trace import figure1a_path, step
 from backend.policy.gene import spliceai_thresholds
 from backend.policy.spliceai import normalize_variant_type
 
@@ -60,6 +60,7 @@ def evaluate_bp7(
             "BP4 met (BP7 applied in addition to BP4 per ENIGMA)"
         )
         result["decision_path"] = figure1a_path(
+            gene=gene,
             branch_id="intronic",
             criterion="BP7",
             outcome_node="int-bp4-bp7",
@@ -104,6 +105,7 @@ def evaluate_bp7(
         "(BP7 applied in addition to BP4 per ENIGMA convention)"
     )
     result["decision_path"] = figure1a_path(
+        gene=gene,
         branch_id="synonymous",
         criterion="BP7",
         outcome_node="syn-bp4-bp7",

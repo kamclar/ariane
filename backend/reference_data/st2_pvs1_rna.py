@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from backend.policy.gene import vcep_document_url
 from backend.policy.pvs1_rna import unquantified_patient_rna_strength
 from backend.reference_data.ps1_splice_evidence import (
     get_st2_source_metadata,
@@ -14,11 +15,6 @@ from backend.reference_data.table4 import (
     Table4LookupStatus,
     table4_deletion_exons,
     table4_lookup_deletion,
-)
-
-
-APPENDIX_URL = (
-    "https://cspec.genome.network/cspec/File/id/9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
 )
 
 _PATIENT_UNQUANTIFIED_LOF = (
@@ -66,7 +62,9 @@ def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> dict[str, Any]:
         "source_id": "enigma-st2-st3-v1.2",
         "source_version": str(provenance.get("version") or ""),
         "source_checksum": str(provenance.get("source_file_sha256") or ""),
-        "source_url": str(provenance.get("source_url") or APPENDIX_URL),
+        "source_url": str(
+            provenance.get("source_url") or vcep_document_url("appendix", gene)
+        ),
         "reason": ("The exact variant has no record in ENIGMA Supplementary Table 2 v1.2."),
     }
     if record is None:

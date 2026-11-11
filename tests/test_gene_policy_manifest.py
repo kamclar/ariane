@@ -18,6 +18,7 @@ from backend.policy.gene import (
     runtime_policy_id,
     validate_gene_policy_payload,
     validate_policy_source_bindings,
+    vcep_document_url,
 )
 from backend.criteria.pp3_bp4 import evaluate_pp3_bp4
 from backend.review.manual_evidence import (
@@ -34,12 +35,16 @@ def _modified_manifest():
 def test_checked_manifest_and_source_bindings_are_valid():
     manifest = load_gene_policy_manifest()
     assert active_genes() == ("BRCA1", "BRCA2")
-    assert manifest["manifest_version"] == "2026.11.03"
+    assert manifest["manifest_version"] == "2026.11.11"
     assert manifest["policies"]["enigma_brca_vcep_1_2"]["thresholds"][
         "mixed_evidence_points"
     ]["minimum_codes_in_classification_direction"] == 2
     assert reference_transcript("BRCA1") == "NM_007294.4"
     assert runtime_policy_id("BRCA2") == "ENIGMA_BRCA_VCEP_1.2"
+    assert vcep_document_url("appendix", "BRCA1").endswith("/data")
+    assert vcep_document_url("appendix", "BRCA1") == vcep_document_url(
+        "appendix", "BRCA2"
+    )
     assert manifest["genes"]["BRCA1"]["decision_assets"]["PVS1"][
         "splice"
     ]["figure_number"] == "4"
@@ -66,6 +71,13 @@ def test_vcep_not_used_criteria_are_explicit_and_versioned():
 def test_unknown_gene_has_no_threshold_fallback():
     with pytest.raises(GenePolicyError, match="No active gene policy"):
         bayesdel_thresholds("NOT_A_CONFIGURED_GENE")
+
+
+def test_policy_source_documents_are_required():
+    manifest = _modified_manifest()
+    del manifest["policies"]["enigma_brca_vcep_1_2"]["source_documents"]["appendix"]
+    with pytest.raises(GenePolicyError, match="incomplete"):
+        validate_gene_policy_payload(manifest)
 
 
 def test_incomplete_gene_threshold_set_is_rejected():

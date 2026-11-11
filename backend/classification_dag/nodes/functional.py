@@ -73,7 +73,7 @@ def functional_decision_path(
         outcome = "func-protein-code"
     return {
         "tree_id": "figure-1c",
-        "tree_version": "ENIGMA VCEP 1.2.0",
+        "tree_version": f"ENIGMA VCEP {policy_version(variant.gene)}",
         "branch_id": branch,
         "criterion": table9["code"],
         "outcome": "applied",

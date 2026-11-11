@@ -4,7 +4,7 @@ from backend.variant_processing.utils import (
     get_amino_acid_interval,
     overlapping_functional_domains,
 )
-from backend.domain.decision_trace import figure1a_path, step
+from backend.policy.decision_trace import figure1a_path, step
 from backend.policy.gene import spliceai_thresholds
 from backend.policy.spliceai import normalize_variant_type
 
@@ -96,6 +96,7 @@ def evaluate_bp1(
     domain_node = "syn-domain" if branch_id == "synonymous" else "mi-domain-after-low"
     outcome_node = "syn-bp1" if branch_id == "synonymous" else "mi-bp1"
     result["decision_path"] = figure1a_path(
+        gene=gene,
         branch_id=branch_id,
         criterion="BP1",
         outcome_node=outcome_node,

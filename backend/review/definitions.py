@@ -14,6 +14,7 @@ from backend.policy.gene import (
     resolve_policy_gene,
     rule_is_applicable,
     spliceai_thresholds,
+    vcep_document_url,
     vcep_specification,
 )
 
@@ -281,11 +282,6 @@ _COMMON_RESOURCE_LINKS = [
         "description": "Naturally scaled point system used for contradictory evidence in ARIANE.",
     },
     {
-        "title": "Specifications v1.2",
-        "url": "https://cspec.genome.network/cspec/File/id/11e62fec-23b0-4a3e-b2df-751855301746/data",
-        "description": "Full BRCA1/2 criterion specifications, flowcharts, and supporting tables.",
-    },
-    {
         "title": "Appendix v1.2",
         "url": "https://cspec.genome.network/cspec/File/id/5a75d1a0-1222-46a2-8802-68a4f2251a3a/data",
         "description": "Detailed calibration evidence for the criteria.",
@@ -333,5 +329,12 @@ def resource_links_for_gene(gene: str | None = None) -> List[Dict[str, str]]:
                 f"Versioned criterion specifications and combination rules for {symbol}."
             ),
         })
-    return policy_links + deepcopy(_COMMON_RESOURCE_LINKS)
+    specifications = {
+        "title": "Specifications v1.2",
+        "url": vcep_document_url("specifications", gene),
+        "description": (
+            "Full BRCA1/2 criterion specifications, flowcharts, and supporting tables."
+        ),
+    }
+    return policy_links + [specifications] + deepcopy(_COMMON_RESOURCE_LINKS)
 

@@ -21,7 +21,6 @@ from backend.reference_data.table4 import (
     table4_lookup_deletion,
 )
 from backend.reference_data.st2_pvs1_rna import (
-    APPENDIX_URL,
     is_damaging_st2_assay,
     is_unquantified_patient_st2_assay,
     lookup_st2_pvs1_rna_evidence as _lookup_st2_pvs1_rna_evidence,
@@ -32,6 +31,7 @@ from backend.policy.gene import (
     policy_name,
     policy_version,
     reference_transcript,
+    vcep_document_url,
     vcep_specification,
 )
 def _st3_citation(reference: Dict[str, Any]) -> str:
@@ -151,7 +151,7 @@ def _table4_rna_decision_path(
 ) -> Dict[str, Any]:
     return {
         "tree_id": "appendix-pvs1-splice",
-        "tree_version": "ENIGMA VCEP 1.2.0",
+        "tree_version": f"ENIGMA VCEP {policy_version(gene)}",
         "branch_id": "table4-exact-rna-allele",
         "criterion": "PVS1_RNA",
         "outcome": "applied",
@@ -180,7 +180,7 @@ def _table4_rna_decision_path(
             {
                 "source_id": "enigma-v1.2-appendix",
                 "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
-                "url": APPENDIX_URL,
+                "url": vcep_document_url("appendix", gene),
                 "location": "Appendix E",
             },
         ],
@@ -359,7 +359,7 @@ def _evaluate_st2_record(
             if is_unquantified
             else "structured_rna_result_requires_curator_weighting"
         ),
-        "source": APPENDIX_URL,
+        "source": vcep_document_url("appendix", gene),
         "manual_review_prefill": {
             "assay_scope": "mrna_only",
             "rna_conclusion": "damaging",
@@ -459,11 +459,11 @@ def _evaluate_st2_record(
                 f"the Appendix E qualitative patient-mRNA matrix yields PVS1 "
                 f"{strength} (RNA)."
             ),
-            "source": APPENDIX_URL,
+            "source": vcep_document_url("appendix", gene),
             "manual_review_prefill": {},
             "decision_path": {
                 "tree_id": "figure-1b",
-                "tree_version": "ENIGMA VCEP 1.2.0",
+                "tree_version": f"ENIGMA VCEP {policy_version(gene)}",
                 "branch_id": "other-nucleotide-position",
                 "criterion": "PVS1_RNA",
                 "outcome": "applied",
@@ -506,7 +506,7 @@ def _evaluate_st2_record(
                     {
                         "source_id": "enigma-v1.2-appendix",
                         "label": "ENIGMA BRCA1/2 VCEP Appendix v1.2",
-                        "url": APPENDIX_URL,
+                        "url": vcep_document_url("appendix", gene),
                         "location": "Appendix E Table 9",
                     },
                 ],

@@ -2,15 +2,8 @@
 
 from typing import Any, Dict, Iterable, List
 
+from backend.policy.gene import vcep_document_url
 
-SPECIFICATIONS_URL = (
-    "https://cspec.genome.network/cspec/File/id/"
-    "11e62fec-23b0-4a3e-b2df-751855301746/data"
-)
-APPENDIX_URL = (
-    "https://cspec.genome.network/cspec/File/id/"
-    "9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
-)
 
 BIOINFORMATIC_CODES = {"PP3", "BP1", "BP4", "BP7"}
 PROTEIN_FUNCTION_CODES = {"PS3", "BS3"}
@@ -77,7 +70,7 @@ def automatic_functional_interactions(
                 "bioinformatic codes when PVS1 is not applied."
             ),
             source="ENIGMA v1.2 Figure 1C and Appendix E",
-            source_url=SPECIFICATIONS_URL,
+            source_url=vcep_document_url("specifications"),
             review_required=contradictory,
         )
     ]
@@ -104,7 +97,7 @@ def clinical_functional_risk_interactions(
                 "is required."
             ),
             source="ENIGMA BRCA1/2 VCEP Specifications v1.2, introductory note",
-            source_url=SPECIFICATIONS_URL,
+            source_url=vcep_document_url("specifications"),
             review_required=True,
         )
     ]
@@ -122,7 +115,7 @@ def pvs1_prediction_deduplication() -> Dict[str, Any]:
             "loss-of-function mechanism for this variant."
         ),
         source="ENIGMA v1.2 Figure 1A, Figure 1B and Appendix E",
-        source_url=SPECIFICATIONS_URL,
+        source_url=vcep_document_url("specifications"),
     )
 
 
@@ -152,7 +145,7 @@ def apply_rna_interactions(
                         "splicing consequence."
                     ),
                     source="ENIGMA v1.2 Figure 1B and Appendix E",
-                    source_url=SPECIFICATIONS_URL,
+                    source_url=vcep_document_url("specifications"),
                 )
             )
 
@@ -179,7 +172,7 @@ def apply_rna_interactions(
                         "ENIGMA v1.2 Figure 1C and Appendix E; ENIGMA BRCA1/2 "
                         "VCEP methodological clarification, 2026-10-15"
                     ),
-                    source_url=APPENDIX_URL,
+                    source_url=vcep_document_url("appendix"),
                     review_required=True,
                 )
             )
@@ -200,7 +193,7 @@ def apply_rna_interactions(
                         "same absence of a damaging transcript effect."
                     ),
                     source="ENIGMA v1.2 Figure 1B and Appendix E",
-                    source_url=SPECIFICATIONS_URL,
+                    source_url=vcep_document_url("specifications"),
                 )
             )
 
@@ -218,7 +211,7 @@ def apply_rna_interactions(
                         "review is required."
                     ),
                     source="ENIGMA v1.2 Figure 1B and Appendix E",
-                    source_url=SPECIFICATIONS_URL,
+                    source_url=vcep_document_url("specifications"),
                     review_required=True,
                 )
             )
@@ -238,7 +231,7 @@ def apply_rna_interactions(
                         "branch."
                     ),
                     source="ENIGMA v1.2 Figure 1B and Appendix E",
-                    source_url=SPECIFICATIONS_URL,
+                    source_url=vcep_document_url("specifications"),
                 )
             )
 
@@ -257,7 +250,7 @@ def apply_rna_interactions(
                         "and Appendix E."
                     ),
                     source="ENIGMA v1.2 Figure 1B, Figure 1C and Appendix E",
-                    source_url=APPENDIX_URL,
+                    source_url=vcep_document_url("appendix"),
                     review_required=True,
                 )
             )

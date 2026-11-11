@@ -11,7 +11,7 @@ from backend.policy.spliceai import (
     normalize_variant_type,
     variant_type_allows_spliceai_pp3,
 )
-from backend.domain.decision_trace import figure1a_path, step
+from backend.policy.decision_trace import figure1a_path, step
 from backend.variant_processing.utils import get_intron_offset_from_c_notation
 from backend.policy.gene import bayesdel_thresholds, spliceai_thresholds
 
@@ -104,6 +104,7 @@ def evaluate_pp3_bp4(
             f"SpliceAI {spliceai_score:.3f} ≥ {splice_high}",
         ))
         results["PP3"]["decision_path"] = figure1a_path(
+            gene=gene,
             branch_id=branch_id,
             criterion="PP3",
             outcome_node=node_id,
@@ -130,6 +131,7 @@ def evaluate_pp3_bp4(
                 else "mi-protein-pp3-unknown"
             )
             results["PP3"]["decision_path"] = figure1a_path(
+                gene=gene,
                 branch_id="missense-inframe",
                 criterion="PP3",
                 outcome_node=protein_outcome,
@@ -186,6 +188,7 @@ def evaluate_pp3_bp4(
                         )
                     }
                     results["BP4"]["decision_path"] = figure1a_path(
+                        gene=gene,
                         branch_id="missense-inframe",
                         criterion="BP4",
                         outcome_node="mi-bp4",
@@ -218,6 +221,7 @@ def evaluate_pp3_bp4(
                 "reason": f"Silent variant in domain ({domain_name}), SpliceAI {spliceai_score:.3f} <= {splice_low}"
             }
             results["BP4"]["decision_path"] = figure1a_path(
+                gene=gene,
                 branch_id="synonymous",
                 criterion="BP4",
                 outcome_node="syn-bp4-bp7",
@@ -236,6 +240,7 @@ def evaluate_pp3_bp4(
                 "reason": f"Intronic variant, SpliceAI {spliceai_score:.3f} <= {splice_low}"
             }
             results["BP4"]["decision_path"] = figure1a_path(
+                gene=gene,
                 branch_id="intronic",
                 criterion="BP4",
                 outcome_node="int-bp4",

@@ -83,7 +83,7 @@ def validate_gene_policy_payload(
             policy,
             {
                 "name", "version", "runtime_policy_id", "implementation_profile",
-                "external_evidence", "thresholds", "supported_rule_codes",
+                "external_evidence", "source_documents", "thresholds", "supported_rule_codes",
                 "criterion_applicability",
             },
             f"policies/{policy_id}",
@@ -106,6 +106,21 @@ def validate_gene_policy_payload(
             raise GenePolicyError(
                 f"Policy {policy_id} has no ClinGen ERepo affiliate"
             )
+        source_documents = policy["source_documents"]
+        if not isinstance(source_documents, dict):
+            raise GenePolicyError(
+                f"Policy {policy_id} source_documents must be an object"
+            )
+        _require_keys(
+            source_documents,
+            {"specifications", "appendix"},
+            f"policies/{policy_id}/source_documents",
+        )
+        if any(
+            not str(source_documents[name]).startswith("https://")
+            for name in ("specifications", "appendix")
+        ):
+            raise GenePolicyError(f"Policy {policy_id} has an invalid source document URL")
         active_policies += 1
         thresholds = policy["thresholds"]
         _require_keys(
@@ -463,6 +478,15 @@ def resolve_policy_gene(gene: str | None = None) -> str:
         return str(gene).strip().upper()
     resolve_policy_identity(None)
     return active_genes()[0]
+
+
+def vcep_document_url(document: str, gene: str | None = None) -> str:
+    policy_gene = resolve_policy_gene(gene)
+    documents = get_gene_policy(policy_gene)["policy"]["source_documents"]
+    try:
+        return str(documents[document])
+    except KeyError as exc:
+        raise GenePolicyError(f"Unknown VCEP source document: {document}") from exc
 
 
 def rule_is_applicable(gene: str, code: str) -> bool:

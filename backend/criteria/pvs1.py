@@ -22,13 +22,8 @@ from backend.reference_data.table4 import (
 from backend.policy.gene import (
     decision_asset,
     pvs1_thresholds,
+    vcep_document_url,
     vcep_specification,
-)
-
-
-APPENDIX_URL = (
-    "https://cspec.genome.network/cspec/File/id/"
-    "9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
 )
 
 
@@ -50,7 +45,7 @@ def _pvs1_path(
     figure_url = asset["figure_url"]
     return {
         "tree_id": tree_id,
-        "tree_version": "ENIGMA VCEP 1.2.0",
+        "tree_version": f"ENIGMA VCEP {specification['version']}",
         "branch_id": branch_id,
         "criterion": "PVS1",
         "outcome": "applied",
@@ -60,7 +55,7 @@ def _pvs1_path(
             {
                 "source_id": "enigma-v1.2-appendix",
                 "label": f"VCEP {specification['id']} Appendix v{specification['version']}",
-                "url": APPENDIX_URL,
+                "url": vcep_document_url("appendix", gene),
                 "location": f"Figure {figure_number}",
                 "figure_url": figure_url,
             },
