@@ -6,10 +6,8 @@ from collections import Counter
 import re
 
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import (
-    lookup_st2_pvs1_rna_evidence,
-    resolve_pvs1_rna,
-)
+from backend.criteria.pvs1_rna import resolve_pvs1_rna
+from backend.reference_data.st2_pvs1_rna import lookup_st2_pvs1_rna_evidence
 from backend.reference_data.table4 import (
     load_table4_data,
     lookup_table4_pvs1_rna,

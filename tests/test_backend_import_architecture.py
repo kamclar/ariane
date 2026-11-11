@@ -177,6 +177,32 @@ def test_criteria_do_not_import_lookups_or_presentation() -> None:
     assert not violations, "Criterion modules contain an inverted dependency:\n" + "\n".join(violations)
 
 
+def test_criteria_do_not_access_filesystem() -> None:
+    filesystem_calls = {
+        "open",
+        "read_bytes",
+        "read_text",
+        "write_bytes",
+        "write_text",
+    }
+    violations: list[str] = []
+    for path in sorted((BACKEND_ROOT / "criteria").glob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            name = (
+                node.func.id
+                if isinstance(node.func, ast.Name)
+                else node.func.attr
+                if isinstance(node.func, ast.Attribute)
+                else ""
+            )
+            if name in filesystem_calls:
+                violations.append(f"{path.name}:{node.lineno}: {name}(...)")
+    assert not violations, "Criterion modules access the filesystem:\n" + "\n".join(violations)
+
+
 def test_lookups_do_not_import_criteria_or_review_layers() -> None:
     forbidden = (
         "backend.api",

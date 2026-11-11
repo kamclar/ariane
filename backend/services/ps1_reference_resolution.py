@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, Optional
 
 from backend.lookups import clingen, clinvar, spliceai
 from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
-from backend.criteria.ps1 import lookup_ps1_reference_variant
+from backend.reference_data.ps1_protein import lookup_ps1_reference_variant
 from backend.variant_processing.variant_input import normalize_variant_input
 from backend.variant_processing.variant_type import infer_variant_type
 

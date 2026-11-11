@@ -8,22 +8,25 @@ Complex or insufficiently coded transcript results remain manual-review only.
 
 from __future__ import annotations
 
-import re
 from typing import Any, Dict, Optional
 
 from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.policy.criterion_points import points_for_strength
-from backend.reference_data.ps1_splice_evidence import (
-    get_st2_source_metadata,
-    get_st2_splice_record,
-)
+from backend.policy.pvs1_rna import unquantified_patient_rna_strength
 from backend.reference_data.table4 import (
     TABLE4_SOURCE_ID,
     Table4LookupStatus,
     Table4RnaEvidenceStatus,
     parse_pvs1_code_strength,
-    table4_deletion_exons,
     table4_lookup_deletion,
+)
+from backend.reference_data.st2_pvs1_rna import (
+    APPENDIX_URL,
+    is_damaging_st2_assay,
+    is_unquantified_patient_st2_assay,
+    lookup_st2_pvs1_rna_evidence as _lookup_st2_pvs1_rna_evidence,
+    reported_whole_exon_deletion,
+    table4_exon_for_reported_number,
 )
 from backend.policy.gene import (
     policy_name,
@@ -31,52 +34,6 @@ from backend.policy.gene import (
     reference_transcript,
     vcep_specification,
 )
-
-
-APPENDIX_URL = (
-    "https://cspec.genome.network/cspec/File/id/"
-    "9e6119dc-90b9-42b5-a3b7-1a2eb28b1b12/data"
-)
-
-_PATIENT_UNQUANTIFIED_LOF = (
-    "patient not allele-specific; aberrant transcripts consistent with loss of function"
-)
-_DAMAGING_RNA_RESULT = "aberrant transcripts consistent with loss of function"
-
-# Appendix E, assay results with patient mRNA without allele-specific
-# quantitation, apparent (near) complete splicing column. ``Very Strong`` is
-# the parsed strength of the unsuffixed Table 4 code ``PVS1``.
-_UNQUANTIFIED_PATIENT_RNA_STRENGTH = {
-    "Very Strong": "Strong",
-    "Strong": "Moderate",
-    "Moderate": "Moderate",
-    "Supporting": "Supporting",
-}
-
-
-def _normalized_text(value: Any) -> str:
-    return " ".join(str(value or "").split()).strip().lower()
-
-
-def _reported_whole_exon_deletion(value: Any) -> Optional[int]:
-    """Parse only an unambiguous whole-exon deletion transcript result."""
-    match = re.fullmatch(r"exon\s+(\d+)\s+deletion", _normalized_text(value))
-    return int(match.group(1)) if match else None
-
-
-def _table4_exon_for_reported_number(gene: str, exon_number: int) -> Optional[str]:
-    """Map clinical exon numbering in ST2 to the corresponding Table 4 row."""
-    matches = []
-    for exon in table4_deletion_exons(gene):
-        match = re.fullmatch(r"E(\d+)(?:\((\d+)\))?", exon)
-        if not match:
-            continue
-        reported_number = int(match.group(2) or match.group(1))
-        if reported_number == exon_number:
-            matches.append(exon)
-    return matches[0] if len(matches) == 1 else None
-
-
 def _st3_citation(reference: Dict[str, Any]) -> str:
     author = str(reference.get("author") or "Unknown author")
     year = str(reference.get("year") or "unknown year")
@@ -90,110 +47,6 @@ def _st3_citation(reference: Dict[str, Any]) -> str:
 def _st3_reference_url(reference: Dict[str, Any]) -> Optional[str]:
     pmid = str(reference.get("pmid") or "").strip()
     return f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else None
-
-
-def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> Dict[str, Any]:
-    """Return exact ST2 facts eligible for the qualitative Appendix E branch.
-
-    This lookup does not assign a criterion. It verifies that the official ST2
-    curator coding, supporting ST3 rows and Table 4 transcript consequence are
-    sufficiently explicit for the rule layer to derive the RNA strength.
-    """
-    provenance = get_st2_source_metadata()
-    record = get_st2_splice_record(gene, c_notation)
-    base: Dict[str, Any] = {
-        "status": "not_in_source",
-        "record": record,
-        "table4_exon": None,
-        "table4_baseline": None,
-        "source_id": "enigma-st2-st3-v1.2",
-        "source_version": str(provenance.get("version") or ""),
-        "source_checksum": str(provenance.get("source_file_sha256") or ""),
-        "source_url": str(provenance.get("source_url") or APPENDIX_URL),
-        "reason": (
-            "The exact variant has no record in ENIGMA Supplementary Table 2 v1.2."
-        ),
-    }
-    if record is None:
-        return base
-
-    assay_category = _normalized_text(record.get("splicing_assay_result_category"))
-    if _DAMAGING_RNA_RESULT not in assay_category:
-        return {
-            **base,
-            "status": "not_applicable",
-            "reason": (
-                "The exact ST2 record does not report an mRNA result in the "
-                "damaging loss-of-function category."
-            ),
-        }
-    if assay_category != _PATIENT_UNQUANTIFIED_LOF:
-        return {
-            **base,
-            "status": "review_required",
-            "reason": (
-                "The exact ST2 record contains damaging RNA evidence but uses "
-                "an assay category that requires a different Appendix E review."
-            ),
-        }
-
-    references = list(record.get("st3_references") or [])
-    if not references:
-        return {
-            **base,
-            "status": "review_required",
-            "reason": "The ST2 result has no linked supporting ST3 source row.",
-        }
-
-    reported_exon = _reported_whole_exon_deletion(record.get("result"))
-    if reported_exon is None:
-        return {
-            **base,
-            "status": "review_required",
-            "reason": (
-                "The ST2 transcript result is complex or partial and cannot be "
-                "mapped unambiguously to one Table 4 deletion row."
-            ),
-        }
-    table4_exon = _table4_exon_for_reported_number(gene, reported_exon)
-    if table4_exon is None:
-        return {
-            **base,
-            "status": "review_required",
-            "reason": (
-                f"Reported exon {reported_exon} does not map uniquely to a "
-                "Table 4 deletion row."
-            ),
-        }
-    baseline = table4_lookup_deletion(gene, table4_exon)
-    if (
-        baseline.get("status") != Table4LookupStatus.MATCHED
-        or baseline.get("pvs1_strength") not in _UNQUANTIFIED_PATIENT_RNA_STRENGTH
-    ):
-        return {
-            **base,
-            "status": "review_required",
-            "table4_exon": table4_exon,
-            "table4_baseline": baseline,
-            "reason": (
-                f"The {gene} {table4_exon} transcript deletion has no applicable "
-                "baseline PVS1 weight in Table 4."
-            ),
-        }
-    return {
-        **base,
-        "status": "eligible",
-        "table4_exon": table4_exon,
-        "table4_baseline": baseline,
-        "assay_interpretation": (
-            "enigma_st2_curated_apparent_near_complete_loss_of_function"
-        ),
-        "reason": (
-            "The exact checksum-bound ST2 row contains ENIGMA-curated patient "
-            "mRNA evidence, a loss-of-function transcript category, linked ST3 "
-            "sources and an unambiguous Table 4 consequence."
-        ),
-    }
 
 
 def _evaluate_approved_erepo_record(
@@ -479,8 +332,8 @@ def _evaluate_st2_record(
         "source_checksum": st2_evidence.get("source_checksum"),
     }
 
-    assay_category = _normalized_text(record.get("splicing_assay_result_category"))
-    if _DAMAGING_RNA_RESULT not in assay_category:
+    assay_category = record.get("splicing_assay_result_category")
+    if not is_damaging_st2_assay(assay_category):
         result["reason"] = (
             "PVS1 (RNA) was not applied automatically because the exact ENIGMA "
             "ST2 record does not report an mRNA result in the damaging "
@@ -489,7 +342,7 @@ def _evaluate_st2_record(
         )
         return result
 
-    is_unquantified = assay_category == _PATIENT_UNQUANTIFIED_LOF
+    is_unquantified = is_unquantified_patient_st2_assay(assay_category)
     review_summary = (
         f"ENIGMA Supplementary Table 2 row {record.get('source_row')}: "
         f"{record.get('result')}. Assay category: "
@@ -520,7 +373,7 @@ def _evaluate_st2_record(
         },
     })
 
-    reported_exon = _reported_whole_exon_deletion(record.get("result"))
+    reported_exon = reported_whole_exon_deletion(record.get("result"))
     if reported_exon is None:
         result["reason"] = (
             "PVS1 (RNA) was not applied automatically because ENIGMA ST2 reports "
@@ -530,7 +383,7 @@ def _evaluate_st2_record(
         )
         return result
 
-    table4_exon = _table4_exon_for_reported_number(gene, reported_exon)
+    table4_exon = table4_exon_for_reported_number(gene, reported_exon)
     result["table4_exon"] = table4_exon
     if table4_exon is None:
         result["reason"] = (
@@ -574,7 +427,8 @@ def _evaluate_st2_record(
             runtime_problems.append("the recorded Table 4 exon does not match")
         if expected_baseline.get("pvs1_code") != baseline.get("pvs1_code"):
             runtime_problems.append("the recorded Table 4 baseline does not match")
-        if baseline_strength not in _UNQUANTIFIED_PATIENT_RNA_STRENGTH:
+        strength = unquantified_patient_rna_strength(baseline_strength)
+        if strength is None:
             runtime_problems.append("the Table 4 baseline strength is unsupported")
         if runtime_problems:
             result["reason"] = (
@@ -585,7 +439,6 @@ def _evaluate_st2_record(
             )
             return result
 
-        strength = _UNQUANTIFIED_PATIENT_RNA_STRENGTH[baseline_strength]
         result.update({
             "applies": True,
             "strength": strength,
@@ -734,7 +587,7 @@ def evaluate_pvs1_rna(
     st2_result = (
         st2_evidence_result
         if st2_evidence_result is not None
-        else lookup_st2_pvs1_rna_evidence(gene, c_notation)
+        else _lookup_st2_pvs1_rna_evidence(gene, c_notation)
     )
     return dict(resolve_pvs1_rna(
         gene,

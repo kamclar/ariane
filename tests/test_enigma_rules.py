@@ -1,6 +1,5 @@
 import unittest
 from copy import deepcopy
-from unittest.mock import patch
 from pathlib import Path
 
 from backend.population_frequency.coverage import (
@@ -32,13 +31,15 @@ from backend.criteria.pvs1 import evaluate_pvs1
 from backend.criteria.pvs1_rna import evaluate_pvs1_rna
 from backend.review.rna_review import evaluate_rna_review
 from backend.criteria.ps1 import (
-    compute_approval_basis_checksum,
     evaluate_ps1,
     select_vua_spliceai_for_ps1,
+)
+from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
+from backend.reference_data.ps1_protein import Ps1ReferenceMatches
+from backend.reference_data.ps1_registry_validation import (
+    compute_approval_basis_checksum,
     validate_ps1_reference_registry,
 )
-import backend.criteria.ps1 as ps1_module
-from backend.lookups.founder_variants import lookup_pathogenic_founder_variant
 from backend.reference_data.ps1_splice_evidence import evaluate_defined_splice_sources
 from backend.policy.spliceai import compare_table9_spliceai
 from backend.variant_processing.utils import is_in_functional_domain
@@ -1616,23 +1617,17 @@ class SpliceTests(unittest.TestCase):
             "classification_source": "ClinGen ENIGMA expert panel test assertion",
             "candidate_source": "test",
         }
-        with patch.object(ps1_module, "_LOADED", True), patch.object(
-            ps1_module, "_ST7_LOOKUP", {}
-        ), patch.object(
-            ps1_module,
-            "_APPROVED_LOOKUP",
-            {"BRCA1": {"His41Arg": [approved]}},
-        ):
-            result = evaluate_ps1(
-                gene="BRCA1",
-                c_notation="c.123A>G",
-                p_notation="p.(His41Arg)",
-                variant_type="missense",
-                spliceai_score=0.1,
-                vua_splice_evidence_status="none_identified",
-                vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
-                reference_spliceai_scores={"c.122A>G": 0.01},
-            )
+        result = evaluate_ps1(
+            gene="BRCA1",
+            c_notation="c.123A>G",
+            p_notation="p.(His41Arg)",
+            variant_type="missense",
+            spliceai_score=0.1,
+            vua_splice_evidence_status="none_identified",
+            vua_splice_sources_checked=["ENIGMA Table 9", "ENIGMA ST2"],
+            reference_spliceai_scores={"c.122A>G": 0.01},
+            reference_matches=Ps1ReferenceMatches((), (approved,)),
+        )
         self.assertTrue(result["applies"])
         self.assertEqual(result["strength"], "Strong")
         self.assertEqual(result["points"], 4)

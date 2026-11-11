@@ -12,13 +12,15 @@ from typing import Any, Callable
 
 from backend.classification_dag.providers import ProviderDependencies
 from backend.lookups import bayesdel, coordinates, spliceai
-from backend.criteria import ps1, pvs1_rna
+from backend.criteria import ps1
 from backend.reference_data import (
     exon_cnv_evidence,
     pp4_bp5,
     ps1_splice_evidence,
     residues,
     erepo_pvs1_rna,
+    ps1_protein,
+    st2_pvs1_rna,
 )
 from backend.population_frequency import PopulationFrequencyService
 from backend.infrastructure.health import DataHealthRegistry
@@ -62,9 +64,10 @@ def production_provider_dependencies(
         residue_lookup=lambda *args, **kwargs: residues.check_important_residue(
             *args, **kwargs
         ),
-        ps1_candidate_lookup=lambda *args, **kwargs: ps1.discover_ps1_reference_variants(
+        ps1_candidate_lookup=lambda *args, **kwargs: ps1_protein.discover_ps1_reference_variants(
             *args, **kwargs
         ),
+        ps1_reference_lookup=ps1_protein.matching_ps1_references,
         splice_source_lookup=lambda *args, **kwargs: ps1_splice_evidence.evaluate_defined_splice_sources(
             *args, **kwargs
         ),
@@ -75,7 +78,7 @@ def production_provider_dependencies(
         erepo_pvs1_rna_lookup=lambda *args, **kwargs: erepo_pvs1_rna.lookup_erepo_pvs1_rna(
             *args, **kwargs
         ),
-        st2_pvs1_rna_lookup=lambda *args, **kwargs: pvs1_rna.lookup_st2_pvs1_rna_evidence(
+        st2_pvs1_rna_lookup=lambda *args, **kwargs: st2_pvs1_rna.lookup_st2_pvs1_rna_evidence(
             *args, **kwargs
         ),
     )

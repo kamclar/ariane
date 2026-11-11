@@ -19,10 +19,8 @@ from backend.reference_data.exon_cnv_evidence import lookup_exon_cnv_evidence
 from backend.population_frequency.policy import classification_policy_for_gene
 from backend.reference_data.pp4_bp5 import evaluate_pp4_bp5
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import (
-    evaluate_pvs1_rna,
-    lookup_st2_pvs1_rna_evidence,
-)
+from backend.criteria.pvs1_rna import evaluate_pvs1_rna
+from backend.reference_data.st2_pvs1_rna import lookup_st2_pvs1_rna_evidence
 from backend.reference_data.table9 import table9_lookup_ps3_bs3
 from backend.variant_processing.variant_type import infer_variant_type
 from backend.domain.indel import is_indel_allele

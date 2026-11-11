@@ -15,6 +15,7 @@ from backend.classification_dag import (
     ProviderDependencies,
     execute_classification_request,
 )
+from backend.reference_data.ps1_protein import Ps1ReferenceMatches
 
 
 def _request() -> ClassificationRequest:
@@ -79,6 +80,7 @@ def _dependencies(*, spliceai_score=0.03, bayesdel_score=0.438):
         exon_cnv_lookup=lambda gene, c: None,
         residue_lookup=lambda gene, p: {},
         ps1_candidate_lookup=lambda gene, c, p, variant_type: [],
+        ps1_reference_lookup=lambda gene, c, p: Ps1ReferenceMatches((), ()),
         splice_source_lookup=lambda gene, c, table9: {
             "status": "none_identified", "sources_checked": [],
         },
@@ -206,7 +208,7 @@ def test_approved_erepo_pvs1_rna_is_applied_and_replaces_figure1a_prediction():
 
 
 def test_curated_st2_pvs1_rna_is_applied_without_querying_spliceai():
-    from backend.criteria.pvs1_rna import lookup_st2_pvs1_rna_evidence
+    from backend.reference_data.st2_pvs1_rna import lookup_st2_pvs1_rna_evidence
     from backend.services.classification_completeness import first_required_evidence_gap
 
     request = ClassificationRequest(

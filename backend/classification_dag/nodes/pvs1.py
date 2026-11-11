@@ -17,10 +17,8 @@ from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.classification_dag.nodes.support import decision
 from backend.classification_dag.types import NodeResult
 from backend.criteria.pvs1 import evaluate_pvs1
-from backend.criteria.pvs1_rna import (
-    lookup_st2_pvs1_rna_evidence,
-    resolve_pvs1_rna,
-)
+from backend.criteria.pvs1_rna import resolve_pvs1_rna
+from backend.reference_data.st2_pvs1_rna import lookup_st2_pvs1_rna_evidence
 
 
 def _evidence_value(

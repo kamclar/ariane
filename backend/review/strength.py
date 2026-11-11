@@ -6,8 +6,8 @@ import math
 from typing import Any, Dict, Mapping, Optional, Sequence
 
 from backend.criteria.bp7_rna import evaluate_bp7_rna_variant_context
-from backend.criteria.ps1 import lookup_ps1_reference_variant
 from backend.policy.gene import clinical_lr_thresholds, resolve_policy_gene, spliceai_thresholds
+from backend.reference_data.ps1_protein import lookup_ps1_reference_variant
 from backend.reference_data.ps1_splice_evidence import DEFINED_SOURCES as PS1_SPLICE_SOURCES
 from backend.review.definitions import ENIGMA_RECOGNISED_PP4_SOURCES, MANUAL_CRITERIA
 from backend.variant_processing.variant_input import normalize_variant_input

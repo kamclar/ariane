@@ -39,6 +39,7 @@ from backend.reference_data.table4 import (
     Table4RnaEvidenceStatus,
     lookup_table4_pvs1_rna,
 )
+from backend.reference_data.ps1_protein import Ps1ReferenceMatches
 
 
 _BAYESDEL_LOOKUP_UNAVAILABLE = object()
@@ -77,6 +78,7 @@ class ProviderDependencies:
     exon_cnv_lookup: Callable[..., Any]
     residue_lookup: Callable[..., Any]
     ps1_candidate_lookup: Callable[..., Any]
+    ps1_reference_lookup: Callable[[str, str, str], Ps1ReferenceMatches]
     splice_source_lookup: Callable[..., Any]
     select_ps1_spliceai: Callable[..., Any]
     ps1_lookup: Callable[..., Any]
@@ -770,6 +772,11 @@ class ProteinPs1EvidenceNode:
         score, source = self.dependencies.select_ps1_spliceai(
             spliceai.value, table9
         )
+        reference_matches = self.dependencies.ps1_reference_lookup(
+            variant.gene,
+            variant.c_notation,
+            variant.p_notation,
+        )
         value = self.dependencies.ps1_lookup(
             variant.gene,
             variant.c_notation,
@@ -780,6 +787,7 @@ class ProteinPs1EvidenceNode:
             vua_splice_evidence_status=splice_sources["status"],
             vua_splice_sources_checked=splice_sources["sources_checked"],
             reference_spliceai_scores=dict(inputs["ps1_reference_spliceai_scores"]),
+            reference_matches=reference_matches,
         )
         evidence = EvidenceItem(
             id="protein_ps1",
