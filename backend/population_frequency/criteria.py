@@ -62,6 +62,16 @@ def _founder_exception(gnomad_data: Mapping[str, Any]) -> Mapping[str, Any]:
     }
 
 
+def _ba1_bs1_not_applied(reason: str, **details: Any) -> dict[str, Any]:
+    return {
+        "_gnomad_info": {
+            "applies": False,
+            "reason": f"BA1/BS1 not applied: {reason}",
+            **details,
+        }
+    }
+
+
 @dataclass(frozen=True)
 class _FrequencyPolicy:
     source: Mapping[str, Any]
@@ -153,16 +163,11 @@ def _founder_screen(
             },
         }, ""
     if founder.get("status") not in {"not_listed", "reviewed_not_found"}:
-        return {
-            "_gnomad_info": {
-                "applies": False,
-                "reason": (
-                    "BA1/BS1 not applied: the pathogenic founder exception "
-                    f"screen is unavailable or invalid; {founder.get('reason')}"
-                ),
-                "founder_exception": founder,
-            }
-        }, ""
+        return _ba1_bs1_not_applied(
+            "the pathogenic founder exception screen is unavailable or invalid; "
+            f"{founder.get('reason')}",
+            founder_exception=founder,
+        ), ""
     note = (
         "; no pathogenic-founder exception match in snapshot "
         f"{founder.get('snapshot_version') or 'unknown'}"
@@ -225,13 +230,12 @@ def _evaluate_ba1_bs1(
     max_af = as_float(gnomad_data.get("max_af"))
     metric = gnomad_data.get("frequency_metric") or "frequency"
     if max_af is not None and metric != "faf95":
-        criteria["_gnomad_info"] = {
-            "applies": False,
-            "reason": (
-                "BA1/BS1 not applied: ENIGMA-compatible non-cancer FAF95 "
-                f"is unavailable; {metric} cannot be used as a fallback"
-            ),
-        }
+        criteria.update(
+            _ba1_bs1_not_applied(
+                "ENIGMA-compatible non-cancer FAF95 is unavailable; "
+                f"{metric} cannot be used as a fallback"
+            )
+        )
         max_af = None
 
     if max_af is not None:
@@ -244,50 +248,27 @@ def _evaluate_ba1_bs1(
         if max_af > policy.bs1_supporting_threshold and (
             not counts or any(count is None for count in counts)
         ):
-            return {
-                "_gnomad_info": {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: the outbred observation count is "
-                        "missing from the approved gnomAD result"
-                    ),
-                }
-            }, True
+            return _ba1_bs1_not_applied(
+                "the outbred observation count is missing from the approved gnomAD result"
+            ), True
         if max_af > policy.bs1_supporting_threshold and all(
             count < policy.minimum_observations
             for count in counts
             if count is not None
         ):
-            return {
-                "_gnomad_info": {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: a single observation in an ENIGMA "
-                        "outbred population is not informative"
-                    ),
-                }
-            }, True
+            return _ba1_bs1_not_applied(
+                "a single observation in an ENIGMA outbred population is not informative"
+            ), True
         if max_af > policy.bs1_supporting_threshold:
             if not frequency_qc_ok(gnomad_data):
-                return {
-                    "_gnomad_info": {
-                        "applies": False,
-                        "reason": (
-                            "BA1/BS1 not applied: the contributing gnomAD record "
-                            "did not pass dataset QC filters"
-                        ),
-                    }
-                }, True
+                return _ba1_bs1_not_applied(
+                    "the contributing gnomAD record did not pass dataset QC filters"
+                ), True
             if not frequency_depth_ok(gnomad_data, policy.frequency_depth_threshold):
-                return {
-                    "_gnomad_info": {
-                        "applies": False,
-                        "reason": (
-                            "BA1/BS1 not applied: active policy requires mean read "
-                            f"depth >= {policy.frequency_depth_threshold:g}"
-                        ),
-                    }
-                }, True
+                return _ba1_bs1_not_applied(
+                    "active policy requires mean read depth "
+                    f">= {policy.frequency_depth_threshold:g}"
+                ), True
             metric_note = scored_frequency_label(gnomad_data)
             af_pct = f"{max_af * 100:.6g}%"
             founder_result, founder_note = _founder_screen(
@@ -307,20 +288,17 @@ def _evaluate_ba1_bs1(
             and dataset.get("quality_filter_passed") is False
             for dataset in gnomad_data.get("datasets", {}).values()
         )
-        criteria.setdefault(
-            "_gnomad_info",
-            {
-                "applies": False,
-                "reason": (
-                    "BA1/BS1 not applied: the variant is present in gnomAD, but "
-                    + (
-                        "the record failed dataset QC filters"
-                        if failed_qc
-                        else "ENIGMA-compatible non-cancer FAF95 is unavailable"
-                    )
-                ),
-            },
-        )
+        if "_gnomad_info" not in criteria:
+            reason = (
+                "the record failed dataset QC filters"
+                if failed_qc
+                else "ENIGMA-compatible non-cancer FAF95 is unavailable"
+            )
+            criteria.update(
+                _ba1_bs1_not_applied(
+                    f"the variant is present in gnomAD, but {reason}"
+                )
+            )
     return criteria, False
 
 
