@@ -44,6 +44,24 @@ from backend.reference_data.ps1_protein import Ps1ReferenceMatches
 
 _BAYESDEL_LOOKUP_UNAVAILABLE = object()
 
+_EREPO_STATUSES = {
+    "eligible": EvidenceStatus.AVAILABLE,
+    "not_in_registry": EvidenceStatus.NOT_APPLICABLE,
+    "ambiguous": EvidenceStatus.AMBIGUOUS,
+}
+_TABLE4_RNA_STATUSES = {
+    str(Table4RnaEvidenceStatus.ELIGIBLE): EvidenceStatus.AVAILABLE,
+    str(Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA): EvidenceStatus.AVAILABLE,
+    str(Table4RnaEvidenceStatus.NOT_IN_SOURCE): EvidenceStatus.NOT_APPLICABLE,
+    str(Table4RnaEvidenceStatus.NOT_APPLICABLE): EvidenceStatus.NOT_APPLICABLE,
+}
+_ST2_RNA_STATUSES = {
+    "eligible": EvidenceStatus.AVAILABLE,
+    "review_required": EvidenceStatus.REVIEW_REQUIRED,
+    "not_in_source": EvidenceStatus.NOT_APPLICABLE,
+    "not_applicable": EvidenceStatus.NOT_APPLICABLE,
+}
+
 
 @dataclass(frozen=True)
 class ClassificationRequest:
@@ -96,6 +114,22 @@ def _evidence_status(value: Any, *, applicable: bool = True) -> EvidenceStatus:
     if not applicable:
         return EvidenceStatus.NOT_APPLICABLE
     return EvidenceStatus.AVAILABLE if value is not None else EvidenceStatus.UNAVAILABLE
+
+
+def _evidence_result(
+    output: str,
+    evidence: EvidenceItem,
+    *,
+    provenance: Mapping[str, Any] | None = None,
+) -> NodeResult:
+    audit = {
+        "evidence_status": evidence.status.value,
+        "source_id": evidence.source_id,
+        "source_version": evidence.source_version,
+        "source_checksum": evidence.source_checksum,
+    }
+    audit.update(provenance or {})
+    return NodeResult.succeeded({output: evidence}, provenance=audit)
 
 
 @dataclass(frozen=True)
@@ -231,15 +265,7 @@ class ErepoPvs1RnaEvidenceNode:
         evidence = EvidenceItem(
             id="erepo_pvs1_rna",
             kind="curated_rna_assertion",
-            status=(
-                EvidenceStatus.AVAILABLE
-                if status == "eligible"
-                else EvidenceStatus.NOT_APPLICABLE
-                if status == "not_in_registry"
-                else EvidenceStatus.AMBIGUOUS
-                if status == "ambiguous"
-                else EvidenceStatus.UNAVAILABLE
-            ),
+            status=_EREPO_STATUSES.get(status, EvidenceStatus.UNAVAILABLE),
             value=value,
             source_id=str(value.get("registry_id") or "enigma-erepo-pvs1-rna"),
             source_version=str(value.get("registry_version") or ""),
@@ -252,15 +278,7 @@ class ErepoPvs1RnaEvidenceNode:
                 "assertion_uuid": (value.get("record") or {}).get("assertion_uuid"),
             },
         )
-        return NodeResult.succeeded(
-            {"erepo_pvs1_rna_evidence": evidence},
-            provenance={
-                "evidence_status": evidence.status.value,
-                "source_id": evidence.source_id,
-                "source_version": evidence.source_version,
-                "source_checksum": evidence.source_checksum,
-            },
-        )
+        return _evidence_result("erepo_pvs1_rna_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -276,23 +294,10 @@ class Table4Pvs1RnaEvidenceNode:
         variant = _request(inputs).variant
         value = lookup_table4_pvs1_rna(variant.gene, variant.c_notation)
         status = str(value.get("status") or "unavailable")
-        exact_rna_decision = status in {
-            Table4RnaEvidenceStatus.ELIGIBLE,
-            Table4RnaEvidenceStatus.NOT_APPLICABLE_RNA,
-        }
         evidence = EvidenceItem(
             id="table4_pvs1_rna",
             kind="vcep_allele_rna_rule",
-            status=(
-                EvidenceStatus.AVAILABLE
-                if exact_rna_decision
-                else EvidenceStatus.NOT_APPLICABLE
-                if status in {
-                    Table4RnaEvidenceStatus.NOT_IN_SOURCE,
-                    Table4RnaEvidenceStatus.NOT_APPLICABLE,
-                }
-                else EvidenceStatus.UNAVAILABLE
-            ),
+            status=_TABLE4_RNA_STATUSES.get(status, EvidenceStatus.UNAVAILABLE),
             value=value,
             source_id=str(value.get("source_id") or TABLE4_SOURCE_ID),
             source_version=str(value.get("source_version") or ""),
@@ -305,15 +310,7 @@ class Table4Pvs1RnaEvidenceNode:
                 "exon": (value.get("record") or {}).get("exon"),
             },
         )
-        return NodeResult.succeeded(
-            {"table4_pvs1_rna_evidence": evidence},
-            provenance={
-                "evidence_status": evidence.status.value,
-                "source_id": evidence.source_id,
-                "source_version": evidence.source_version,
-                "source_checksum": evidence.source_checksum,
-            },
-        )
+        return _evidence_result("table4_pvs1_rna_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -336,15 +333,7 @@ class St2Pvs1RnaEvidenceNode:
         evidence = EvidenceItem(
             id="st2_pvs1_rna",
             kind="curated_rna_dataset",
-            status=(
-                EvidenceStatus.AVAILABLE
-                if status == "eligible"
-                else EvidenceStatus.REVIEW_REQUIRED
-                if status == "review_required"
-                else EvidenceStatus.NOT_APPLICABLE
-                if status in {"not_in_source", "not_applicable"}
-                else EvidenceStatus.UNAVAILABLE
-            ),
+            status=_ST2_RNA_STATUSES.get(status, EvidenceStatus.UNAVAILABLE),
             value=value,
             source_id=str(value.get("source_id") or "enigma-st2-st3-v1.2"),
             source_version=str(value.get("source_version") or ""),
@@ -357,15 +346,7 @@ class St2Pvs1RnaEvidenceNode:
                 "table4_exon": value.get("table4_exon"),
             },
         )
-        return NodeResult.succeeded(
-            {"st2_pvs1_rna_evidence": evidence},
-            provenance={
-                "evidence_status": evidence.status.value,
-                "source_id": evidence.source_id,
-                "source_version": evidence.source_version,
-                "source_checksum": evidence.source_checksum,
-            },
-        )
+        return _evidence_result("st2_pvs1_rna_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -661,10 +642,7 @@ class GnomadEvidenceNode:
                 "policy_id": value.get("policy_id") if isinstance(value, Mapping) else None,
             },
         )
-        return NodeResult.succeeded(
-            {"gnomad_evidence": evidence},
-            provenance={"evidence_status": evidence.status.value},
-        )
+        return _evidence_result("gnomad_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -690,8 +668,9 @@ class ClinicalLrEvidenceNode:
             source_checksum=str(value.get("source_checksum") or ""),
             reason=str(value.get("reason") or "No applicable combined clinical LR"),
         )
-        return NodeResult.succeeded(
-            {"clinical_lr_evidence": evidence},
+        return _evidence_result(
+            "clinical_lr_evidence",
+            evidence,
             provenance={"applies": bool(value.get("applies"))},
         )
 
@@ -722,10 +701,7 @@ class ExonCnvEvidenceNode:
                 else "Not an insertion, deletion, duplication, or delins allele"
             ),
         )
-        return NodeResult.succeeded(
-            {"exon_cnv_evidence": evidence},
-            provenance={"evidence_status": evidence.status.value},
-        )
+        return _evidence_result("exon_cnv_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -746,7 +722,7 @@ class ResidueEvidenceNode:
             value=value,
             source_id="curated protein residue data",
         )
-        return NodeResult.succeeded({"residue_evidence": evidence})
+        return _evidence_result("residue_evidence", evidence)
 
 
 @dataclass(frozen=True)
@@ -805,12 +781,10 @@ class ProteinPs1EvidenceNode:
                 "reference_status": value.get("reference_status"),
             },
         )
-        return NodeResult.succeeded(
-            {"protein_ps1_evidence": evidence},
-            provenance={
-                "evidence_status": evidence.status.value,
-                "application_status": value.get("application_status"),
-            },
+        return _evidence_result(
+            "protein_ps1_evidence",
+            evidence,
+            provenance={"application_status": value.get("application_status")},
         )
 
 
@@ -972,12 +946,8 @@ class Table9EvidenceNode:
                 "runtime_rows": table9_data.get("row_count"),
             },
         )
-        return NodeResult.succeeded(
-            {"table9_evidence": evidence},
-            provenance={
-                "source_id": evidence.source_id,
-                "source_version": evidence.source_version,
-                "source_checksum": evidence.source_checksum,
-                "reviewed": reviewed,
-            },
+        return _evidence_result(
+            "table9_evidence",
+            evidence,
+            provenance={"reviewed": reviewed},
         )
