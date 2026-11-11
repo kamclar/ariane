@@ -6,6 +6,7 @@ population-frequency provider. It performs no file, network or registry I/O.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Mapping
 
 from backend.population_frequency.coverage import frequency_depth_ok, frequency_qc_ok
@@ -61,80 +62,166 @@ def _founder_exception(gnomad_data: Mapping[str, Any]) -> Mapping[str, Any]:
     }
 
 
-def evaluate_frequency_criteria(
+@dataclass(frozen=True)
+class _FrequencyPolicy:
+    source: Mapping[str, Any]
+    ba1: Mapping[str, Any]
+    bs1_strong: Mapping[str, Any]
+    bs1_supporting: Mapping[str, Any]
+    pm2: Mapping[str, Any]
+    ba1_threshold: float
+    bs1_strong_threshold: float
+    bs1_supporting_threshold: float
+    frequency_depth_threshold: float
+    pm2_depth_threshold: float
+    minimum_observations: int
+
+
+def _parse_frequency_policy(policy: Mapping[str, Any]) -> _FrequencyPolicy | None:
+    frequency = policy.get("frequency_criteria") or {}
+    ba1 = frequency.get("ba1") or {}
+    bs1 = frequency.get("bs1") or {}
+    bs1_strong = bs1.get("strong") or {}
+    bs1_supporting = bs1.get("supporting") or {}
+    pm2 = frequency.get("pm2") or {}
+    observations = frequency.get("outbred_observation_count") or {}
+    values = (
+        as_float(ba1.get("threshold")),
+        as_float(bs1_strong.get("threshold")),
+        as_float(bs1_supporting.get("lower_threshold")),
+        as_float(ba1.get("minimum_mean_depth")),
+        as_float(pm2.get("minimum_mean_depth")),
+        as_int(observations.get("minimum_observations_for_ba1_bs1")),
+    )
+    if any(value is None for value in values):
+        return None
+    return _FrequencyPolicy(
+        source=frequency,
+        ba1=ba1,
+        bs1_strong=bs1_strong,
+        bs1_supporting=bs1_supporting,
+        pm2=pm2,
+        ba1_threshold=float(values[0]),
+        bs1_strong_threshold=float(values[1]),
+        bs1_supporting_threshold=float(values[2]),
+        frequency_depth_threshold=float(values[3]),
+        pm2_depth_threshold=float(values[4]),
+        minimum_observations=int(values[5]),
+    )
+
+
+def _founder_screen(
     gnomad_data: Mapping[str, Any],
-    variant_type: str,
-    gene: str | None = None,
-    c_notation: str | None = None,
-    policy: Mapping[str, Any] | None = None,
-    appendix_g_evidence: Mapping[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Evaluate BA1, BS1 and PM2 from validated provider evidence."""
-    criteria: dict[str, Any] = {}
-    if policy is None:
-        candidate = gnomad_data.get("classification_policy")
-        policy = candidate if isinstance(candidate, Mapping) else None
-    if policy is None or policy.get("policy_id") != gnomad_data.get("policy_id"):
+    policy: _FrequencyPolicy,
+    max_af: float,
+    metric_note: str,
+    af_pct: str,
+) -> tuple[dict[str, Any] | None, str]:
+    founder = _founder_exception(gnomad_data)
+    if founder.get("is_pathogenic_founder") is True:
+        if max_af > policy.ba1_threshold:
+            code, excluded_policy, threshold = "BA1", policy.ba1, policy.ba1_threshold
+        elif max_af > policy.bs1_strong_threshold:
+            code = "BS1_Strong"
+            excluded_policy = policy.bs1_strong
+            threshold = policy.bs1_strong_threshold
+        else:
+            code = "BS1_Supporting"
+            excluded_policy = policy.bs1_supporting
+            threshold = policy.bs1_supporting_threshold
+        reason = (
+            f"gnomAD {metric_note} {af_pct} exceeds the "
+            f"{code.replace('_', ' ')} threshold {threshold * 100:g}%, but "
+            f"{code.split('_')[0]} was not applied and added no points: "
+            "ENIGMA v1.2 excludes well-established pathogenic founder variants; "
+            f"{founder.get('reason')}"
+        )
+        return {
+            "_excluded_criteria": {
+                code: {
+                    "applies": False,
+                    "strength": excluded_policy.get("strength"),
+                    "points": 0,
+                    "reason": reason,
+                    "source": policy.source.get("source_url", ""),
+                }
+            },
+            "_gnomad_info": {
+                "applies": False,
+                "reason": reason,
+                "founder_exception": founder,
+            },
+        }, ""
+    if founder.get("status") not in {"not_listed", "reviewed_not_found"}:
         return {
             "_gnomad_info": {
                 "applies": False,
                 "reason": (
-                    "Frequency criteria not applied: no matching active "
-                    f"gene-specific gnomAD policy for {gene or 'unspecified gene'}"
+                    "BA1/BS1 not applied: the pathogenic founder exception "
+                    f"screen is unavailable or invalid; {founder.get('reason')}"
+                ),
+                "founder_exception": founder,
+            }
+        }, ""
+    note = (
+        "; no pathogenic-founder exception match in snapshot "
+        f"{founder.get('snapshot_version') or 'unknown'}"
+    )
+    return None, note
+
+
+def _applied_frequency_criterion(
+    policy: _FrequencyPolicy,
+    max_af: float,
+    metric_note: str,
+    af_pct: str,
+    founder_note: str,
+) -> dict[str, Any]:
+    policy_note = (
+        "; founder and other non-scoring population groups excluded per "
+        f"{policy.source.get('source') or 'the active gene-specific policy'}"
+    )
+    if max_af > policy.ba1_threshold:
+        return {
+            "BA1": {
+                "applies": True,
+                "strength": policy.ba1["strength"],
+                "points": policy.ba1["points"],
+                "reason": (
+                    f"gnomAD {metric_note} {af_pct} > {policy.ba1_threshold * 100:g}% "
+                    f"- Stand-alone Benign{policy_note}{founder_note}"
                 ),
             }
         }
-
-    frequency_policy = policy.get("frequency_criteria") or {}
-    ba1_policy = frequency_policy.get("ba1") or {}
-    bs1_policy = frequency_policy.get("bs1") or {}
-    bs1_strong_policy = bs1_policy.get("strong") or {}
-    bs1_supporting_policy = bs1_policy.get("supporting") or {}
-    pm2_policy = frequency_policy.get("pm2") or {}
-    observation_policy = frequency_policy.get("outbred_observation_count") or {}
-    ba1_threshold = as_float(ba1_policy.get("threshold"))
-    bs1_strong_threshold = as_float(bs1_strong_policy.get("threshold"))
-    bs1_supporting_threshold = as_float(bs1_supporting_policy.get("lower_threshold"))
-    frequency_depth_threshold = as_float(ba1_policy.get("minimum_mean_depth"))
-    pm2_depth_threshold = as_float(pm2_policy.get("minimum_mean_depth"))
-    minimum_ba1_bs1_observations = as_int(
-        observation_policy.get("minimum_observations_for_ba1_bs1")
-    )
-    required_values = (
-        ba1_threshold,
-        bs1_strong_threshold,
-        bs1_supporting_threshold,
-        frequency_depth_threshold,
-        pm2_depth_threshold,
-        minimum_ba1_bs1_observations,
-    )
-    if any(value is None for value in required_values):
+    if max_af > policy.bs1_strong_threshold:
         return {
-            "_gnomad_info": {
-                "applies": False,
-                "reason": "Frequency criteria not applied: active policy is incomplete",
+            "BS1_Strong": {
+                "applies": True,
+                "strength": policy.bs1_strong["strength"],
+                "points": policy.bs1_strong["points"],
+                "reason": (
+                    f"gnomAD {metric_note} {af_pct} > "
+                    f"{policy.bs1_strong_threshold * 100:g}%{policy_note}{founder_note}"
+                ),
             }
         }
+    return {
+        "BS1_Supporting": {
+            "applies": True,
+            "strength": policy.bs1_supporting["strength"],
+            "points": policy.bs1_supporting["points"],
+            "reason": (
+                f"gnomAD {metric_note} {af_pct} > "
+                f"{policy.bs1_supporting_threshold * 100:g}%{policy_note}{founder_note}"
+            ),
+        }
+    }
 
-    # The checks above make the numeric policy values non-null.
-    ba1_threshold = float(ba1_threshold)
-    bs1_strong_threshold = float(bs1_strong_threshold)
-    bs1_supporting_threshold = float(bs1_supporting_threshold)
-    frequency_depth_threshold = float(frequency_depth_threshold)
-    pm2_depth_threshold = float(pm2_depth_threshold)
-    minimum_ba1_bs1_observations = int(minimum_ba1_bs1_observations)
 
-    pm2_not_applicable = pm2_not_applicable_decision(
-        variant_type,
-        gene=gene,
-        c_notation=c_notation,
-        policy=policy,
-        appendix_g_evidence=appendix_g_evidence,
-    )
-    if pm2_not_applicable:
-        criteria["PM2"] = pm2_not_applicable
-
-    status = str(gnomad_data.get("status") or "not_queried")
+def _evaluate_ba1_bs1(
+    gnomad_data: Mapping[str, Any], policy: _FrequencyPolicy
+) -> tuple[dict[str, Any], bool]:
+    criteria: dict[str, Any] = {}
     max_af = as_float(gnomad_data.get("max_af"))
     metric = gnomad_data.get("frequency_metric") or "frequency"
     if max_af is not None and metric != "faf95":
@@ -148,153 +235,71 @@ def evaluate_frequency_criteria(
         max_af = None
 
     if max_af is not None:
-        af_pct = f"{max_af * 100:.6g}%"
-        metric_note = scored_frequency_label(gnomad_data)
-        population_policy_note = (
-            "; founder and other non-scoring population groups excluded per "
-            f"{frequency_policy.get('source') or 'the active gene-specific policy'}"
-        )
-        contributing_observation_counts = [
+        counts = [
             as_int(dataset.get("non_founder_allele_count"))
             for dataset in gnomad_data.get("datasets", {}).values()
             if dataset.get("status") == "found"
             and as_float(dataset.get("max_af")) == max_af
         ]
-        if max_af > bs1_supporting_threshold and (
-            not contributing_observation_counts
-            or any(count is None for count in contributing_observation_counts)
+        if max_af > policy.bs1_supporting_threshold and (
+            not counts or any(count is None for count in counts)
         ):
-            criteria["_gnomad_info"] = {
-                "applies": False,
-                "reason": (
-                    "BA1/BS1 not applied: the outbred observation count is "
-                    "missing from the approved gnomAD result"
-                ),
-            }
-            return criteria
-        if max_af > bs1_supporting_threshold and all(
-            count < minimum_ba1_bs1_observations
-            for count in contributing_observation_counts
+            return {
+                "_gnomad_info": {
+                    "applies": False,
+                    "reason": (
+                        "BA1/BS1 not applied: the outbred observation count is "
+                        "missing from the approved gnomAD result"
+                    ),
+                }
+            }, True
+        if max_af > policy.bs1_supporting_threshold and all(
+            count < policy.minimum_observations
+            for count in counts
             if count is not None
         ):
-            criteria["_gnomad_info"] = {
-                "applies": False,
-                "reason": (
-                    "BA1/BS1 not applied: a single observation in an ENIGMA "
-                    "outbred population is not informative"
-                ),
-            }
-            return criteria
-
-        if max_af > bs1_supporting_threshold:
+            return {
+                "_gnomad_info": {
+                    "applies": False,
+                    "reason": (
+                        "BA1/BS1 not applied: a single observation in an ENIGMA "
+                        "outbred population is not informative"
+                    ),
+                }
+            }, True
+        if max_af > policy.bs1_supporting_threshold:
             if not frequency_qc_ok(gnomad_data):
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: the contributing gnomAD record "
-                        "did not pass dataset QC filters"
-                    ),
-                }
-                return criteria
-            if not frequency_depth_ok(gnomad_data, frequency_depth_threshold):
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: active policy requires mean read "
-                        f"depth >= {frequency_depth_threshold:g}"
-                    ),
-                }
-                return criteria
-
-            founder = _founder_exception(gnomad_data)
-            if founder.get("is_pathogenic_founder") is True:
-                if max_af > ba1_threshold:
-                    excluded_code = "BA1"
-                    excluded_policy = ba1_policy
-                    threshold = ba1_threshold
-                elif max_af > bs1_strong_threshold:
-                    excluded_code = "BS1_Strong"
-                    excluded_policy = bs1_strong_policy
-                    threshold = bs1_strong_threshold
-                else:
-                    excluded_code = "BS1_Supporting"
-                    excluded_policy = bs1_supporting_policy
-                    threshold = bs1_supporting_threshold
-                exclusion_reason = (
-                    f"gnomAD {metric_note} {af_pct} exceeds the "
-                    f"{excluded_code.replace('_', ' ')} threshold "
-                    f"{threshold * 100:g}%, but {excluded_code.split('_')[0]} was "
-                    "not applied and added no points: ENIGMA v1.2 excludes "
-                    "well-established pathogenic founder variants; "
-                    f"{founder.get('reason')}"
-                )
-                criteria["_excluded_criteria"] = {
-                    excluded_code: {
+                return {
+                    "_gnomad_info": {
                         "applies": False,
-                        "strength": excluded_policy.get("strength"),
-                        "points": 0,
-                        "reason": exclusion_reason,
-                        "source": frequency_policy.get("source_url", ""),
+                        "reason": (
+                            "BA1/BS1 not applied: the contributing gnomAD record "
+                            "did not pass dataset QC filters"
+                        ),
                     }
-                }
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": exclusion_reason,
-                    "founder_exception": founder,
-                }
-                return criteria
-            if founder.get("status") not in {"not_listed", "reviewed_not_found"}:
-                criteria["_gnomad_info"] = {
-                    "applies": False,
-                    "reason": (
-                        "BA1/BS1 not applied: the pathogenic founder exception "
-                        "screen is unavailable or invalid; "
-                        f"{founder.get('reason')}"
-                    ),
-                    "founder_exception": founder,
-                }
-                return criteria
-            founder_note = (
-                "; no pathogenic-founder exception match in snapshot "
-                f"{founder.get('snapshot_version') or 'unknown'}"
+                }, True
+            if not frequency_depth_ok(gnomad_data, policy.frequency_depth_threshold):
+                return {
+                    "_gnomad_info": {
+                        "applies": False,
+                        "reason": (
+                            "BA1/BS1 not applied: active policy requires mean read "
+                            f"depth >= {policy.frequency_depth_threshold:g}"
+                        ),
+                    }
+                }, True
+            metric_note = scored_frequency_label(gnomad_data)
+            af_pct = f"{max_af * 100:.6g}%"
+            founder_result, founder_note = _founder_screen(
+                gnomad_data, policy, max_af, metric_note, af_pct
             )
-            if max_af > ba1_threshold:
-                criteria["BA1"] = {
-                    "applies": True,
-                    "strength": ba1_policy["strength"],
-                    "points": ba1_policy["points"],
-                    "reason": (
-                        f"gnomAD {metric_note} {af_pct} > {ba1_threshold * 100:g}% "
-                        "- Stand-alone Benign"
-                        f"{population_policy_note}{founder_note}"
-                    ),
-                }
-                return criteria
-            if max_af > bs1_strong_threshold:
-                criteria["BS1_Strong"] = {
-                    "applies": True,
-                    "strength": bs1_strong_policy["strength"],
-                    "points": bs1_strong_policy["points"],
-                    "reason": (
-                        f"gnomAD {metric_note} {af_pct} > "
-                        f"{bs1_strong_threshold * 100:g}%"
-                        f"{population_policy_note}{founder_note}"
-                    ),
-                }
-                return criteria
-            criteria["BS1_Supporting"] = {
-                "applies": True,
-                "strength": bs1_supporting_policy["strength"],
-                "points": bs1_supporting_policy["points"],
-                "reason": (
-                    f"gnomAD {metric_note} {af_pct} > "
-                    f"{bs1_supporting_threshold * 100:g}%"
-                    f"{population_policy_note}{founder_note}"
-                ),
-            }
-            return criteria
+            if founder_result is not None:
+                return founder_result, True
+            return _applied_frequency_criterion(
+                policy, max_af, metric_note, af_pct, founder_note
+            ), True
         if gnomad_data.get("found"):
-            return criteria
+            return criteria, True
 
     if gnomad_data.get("found") and max_af is None:
         failed_qc = any(
@@ -316,76 +321,11 @@ def evaluate_frequency_criteria(
                 ),
             },
         )
+    return criteria, False
 
-    if pm2_not_applicable:
-        return criteria
-    is_pm2_indel = (
-        variant_type.lower()
-        in {str(value).lower() for value in pm2_policy.get("excluded_variant_types", [])}
-        or is_indel_allele(c_notation)
-    )
-    if is_pm2_indel:
-        structural_status = str(
-            (appendix_g_evidence or {}).get("pm2_applicability") or "unavailable"
-        )
-        if structural_status == "applied":
-            return criteria
-        criteria["PM2"] = {
-            "applies": False,
-            "strength": None,
-            "points": 0,
-            "reason": str(
-                (appendix_g_evidence or {}).get("reason")
-                or "PM2 is unavailable: the ENIGMA Appendix G indel-size and structural population path was not evaluated."
-            ),
-            "source": str(
-                (appendix_g_evidence or {}).get("source")
-                or frequency_policy.get("source_url", "")
-            ),
-        }
-        return criteria
-    pm2_coverage_method = gnomad_data.get("pm2_coverage_method")
-    if (
-        not isinstance(pm2_coverage_method, Mapping)
-        or pm2_coverage_method.get("automatic_assignment_allowed") is not True
-    ):
-        criteria["PM2"] = {
-            "applies": False,
-            "strength": None,
-            "points": 0,
-            "reason": (
-                "PM2 not applied: the coverage-region method is not approved "
-                "for automatic ENIGMA classification; "
-                + str(
-                    (pm2_coverage_method or {}).get("reason")
-                    or "no explicit coverage-method review is present"
-                )
-            ),
-            "source": str(frequency_policy.get("source_url", "")),
-        }
-        return criteria
-    if gnomad_data.get("pm2_absence_established"):
-        datasets_note = gnomad_data.get("pm2_datasets_note", "v2.1.1 + v3.1.2")
-        founder_only_note = (
-            "; observations confined to excluded founder/non-scoring populations "
-            "were not treated as presence in an ENIGMA outbred population"
-            if gnomad_data.get("founder_context_only_observed")
-            else ""
-        )
-        criteria["PM2_Supporting"] = {
-            "applies": True,
-            "strength": pm2_policy["strength"],
-            "points": pm2_policy["points"],
-            "reason": (
-                f"Absent from gnomAD {datasets_note} non-cancer callset(s) "
-                "in all policy-defined non-founder populations with mean depth "
-                f">= {pm2_depth_threshold:g} across the variant reference span"
-                f"{founder_only_note}"
-            ),
-        }
-        return criteria
 
-    reason_by_status = {
+def _pm2_status_reason(status: str, depth_threshold: float) -> str | None:
+    return {
         "cache_missing": "local gnomAD cache missing or incomplete - PM2 not applied",
         "cache_untrusted": (
             "local gnomAD cache is not an approved snapshot - frequency criteria not applied"
@@ -395,7 +335,7 @@ def evaluate_frequency_criteria(
         "outside_cached_region": "Variant outside cached panel gnomAD regions - PM2 not applied",
         "absent_without_sufficient_coverage": (
             "Absent from local gnomAD cache but coverage mean depth is below "
-            f"{pm2_depth_threshold:g} or missing - PM2 not applied"
+            f"{depth_threshold:g} or missing - PM2 not applied"
         ),
         "not_queried": "gnomAD not queried - PM2 not applied",
         "absent_v2_only": (
@@ -412,12 +352,152 @@ def evaluate_frequency_criteria(
             "PM2 not applied: ENIGMA does not define the width of the coverage "
             "region around the variant"
         ),
-    }
-    if status in reason_by_status:
-        criteria["PM2"] = {
-            "applies": False,
-            "strength": None,
-            "points": 0,
-            "reason": reason_by_status[status],
+    }.get(status)
+
+
+def _evaluate_pm2(
+    gnomad_data: Mapping[str, Any],
+    variant_type: str,
+    c_notation: str | None,
+    policy: _FrequencyPolicy,
+    appendix_g_evidence: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    is_indel = (
+        variant_type.lower()
+        in {str(value).lower() for value in policy.pm2.get("excluded_variant_types", [])}
+        or is_indel_allele(c_notation)
+    )
+    if is_indel:
+        structural = appendix_g_evidence or {}
+        if str(structural.get("pm2_applicability") or "unavailable") == "applied":
+            return {}
+        return {
+            "PM2": {
+                "applies": False,
+                "strength": None,
+                "points": 0,
+                "reason": str(
+                    structural.get("reason")
+                    or "PM2 is unavailable: the ENIGMA Appendix G indel-size and structural population path was not evaluated."
+                ),
+                "source": str(
+                    structural.get("source") or policy.source.get("source_url", "")
+                ),
+            }
         }
+    coverage_method = gnomad_data.get("pm2_coverage_method")
+    if (
+        not isinstance(coverage_method, Mapping)
+        or coverage_method.get("automatic_assignment_allowed") is not True
+    ):
+        return {
+            "PM2": {
+                "applies": False,
+                "strength": None,
+                "points": 0,
+                "reason": (
+                    "PM2 not applied: the coverage-region method is not approved "
+                    "for automatic ENIGMA classification; "
+                    + str(
+                        (coverage_method or {}).get("reason")
+                        or "no explicit coverage-method review is present"
+                    )
+                ),
+                "source": str(policy.source.get("source_url", "")),
+            }
+        }
+    if gnomad_data.get("pm2_absence_established"):
+        datasets_note = gnomad_data.get("pm2_datasets_note", "v2.1.1 + v3.1.2")
+        founder_note = (
+            "; observations confined to excluded founder/non-scoring populations "
+            "were not treated as presence in an ENIGMA outbred population"
+            if gnomad_data.get("founder_context_only_observed")
+            else ""
+        )
+        return {
+            "PM2_Supporting": {
+                "applies": True,
+                "strength": policy.pm2["strength"],
+                "points": policy.pm2["points"],
+                "reason": (
+                    f"Absent from gnomAD {datasets_note} non-cancer callset(s) "
+                    "in all policy-defined non-founder populations with mean depth "
+                    f">= {policy.pm2_depth_threshold:g} across the variant reference span"
+                    f"{founder_note}"
+                ),
+            }
+        }
+    reason = _pm2_status_reason(
+        str(gnomad_data.get("status") or "not_queried"),
+        policy.pm2_depth_threshold,
+    )
+    return (
+        {
+            "PM2": {
+                "applies": False,
+                "strength": None,
+                "points": 0,
+                "reason": reason,
+            }
+        }
+        if reason
+        else {}
+    )
+
+
+def evaluate_frequency_criteria(
+    gnomad_data: Mapping[str, Any],
+    variant_type: str,
+    gene: str | None = None,
+    c_notation: str | None = None,
+    policy: Mapping[str, Any] | None = None,
+    appendix_g_evidence: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Evaluate BA1, BS1 and PM2 from validated provider evidence."""
+    if policy is None:
+        candidate = gnomad_data.get("classification_policy")
+        policy = candidate if isinstance(candidate, Mapping) else None
+    if policy is None or policy.get("policy_id") != gnomad_data.get("policy_id"):
+        return {
+            "_gnomad_info": {
+                "applies": False,
+                "reason": (
+                    "Frequency criteria not applied: no matching active "
+                    f"gene-specific gnomAD policy for {gene or 'unspecified gene'}"
+                ),
+            }
+        }
+    parsed_policy = _parse_frequency_policy(policy)
+    if parsed_policy is None:
+        return {
+            "_gnomad_info": {
+                "applies": False,
+                "reason": "Frequency criteria not applied: active policy is incomplete",
+            }
+        }
+
+    criteria: dict[str, Any] = {}
+    pm2_not_applicable = pm2_not_applicable_decision(
+        variant_type,
+        gene=gene,
+        c_notation=c_notation,
+        policy=policy,
+        appendix_g_evidence=appendix_g_evidence,
+    )
+    if pm2_not_applicable:
+        criteria["PM2"] = pm2_not_applicable
+
+    frequency_criteria, terminal = _evaluate_ba1_bs1(gnomad_data, parsed_policy)
+    criteria.update(frequency_criteria)
+    if terminal or pm2_not_applicable:
+        return criteria
+    criteria.update(
+        _evaluate_pm2(
+            gnomad_data,
+            variant_type,
+            c_notation,
+            parsed_policy,
+            appendix_g_evidence,
+        )
+    )
     return criteria
