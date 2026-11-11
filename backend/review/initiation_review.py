@@ -1,11 +1,12 @@
 """Informational recommendation for initiation-codon PVS1 review."""
 
-from typing import Dict
+from typing import Any, Dict
 from backend.policy.gene import vcep_specification
 from backend.reference_data.table4 import (
     Table4LookupStatus,
     table4_lookup_initiation,
 )
+from backend.review.recommendation import empty_review_recommendation
 
 
 INITIATION_REFERENCE_SOURCE = (
@@ -24,10 +25,10 @@ def evaluate_initiation_review(
 ) -> Dict:
     """Flag Met1/start-loss variants for curated PVS1_INIT review."""
     if (variant_type or "").lower() != "initiation_codon":
-        return _empty(gene)
+        return empty_review_recommendation(gene)
 
     table4 = table4_lookup_initiation(gene)
-    prefill = {
+    prefill: Dict[str, Any] = {
         "met1_loss_confirmed": True,
         "assessed_gene": gene,
         "assessed_c_notation": c_notation,
@@ -96,21 +97,4 @@ def evaluate_initiation_review(
         "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
         "manual_review_prefill": prefill,
-    }
-
-
-def _empty(gene: str) -> Dict:
-    return {
-        "recommended": False,
-        "priority": "none",
-        "title": "",
-        "summary": "",
-        "reasons": [],
-        "what_to_test": [],
-        "potential_branches": [],
-        "limitations": "",
-        "reference_source": "",
-        "source_url": vcep_specification(gene)["url"],
-        "is_evidence_criterion": False,
-        "manual_review_prefill": {},
     }

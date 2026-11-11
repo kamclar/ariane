@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Optional
 from backend.policy.gene import spliceai_thresholds, vcep_specification
+from backend.review.recommendation import empty_review_recommendation
 SPLICE_PS1_RULE_SOURCE = (
     "Rule and weighting source: ENIGMA BRCA1/2 VCEP v1.2 PS1 and "
     "Appendix J Table 17. ARIANE has no active curated splice-PS1 "
@@ -34,7 +35,7 @@ def evaluate_splice_ps1_review(
     splice_high = spliceai_thresholds(gene)["pp3"]
 
     if ps1_result.get("applies"):
-        return _empty(gene)
+        return empty_review_recommendation(gene)
 
     if variant_type == "splice_site":
         reasons.append(
@@ -55,7 +56,7 @@ def evaluate_splice_ps1_review(
         )
 
     if not reasons:
-        return _empty(gene)
+        return empty_review_recommendation(gene)
 
     return {
         "recommended": True,
@@ -80,22 +81,6 @@ def evaluate_splice_ps1_review(
             "is the same."
         ),
         "reference_source": SPLICE_PS1_RULE_SOURCE,
-        "source_url": vcep_specification(gene)["url"],
-        "is_evidence_criterion": False,
-    }
-
-
-def _empty(gene: str) -> Dict:
-    return {
-        "recommended": False,
-        "priority": "none",
-        "title": "",
-        "summary": "",
-        "reasons": [],
-        "what_to_test": [],
-        "potential_branches": [],
-        "limitations": "",
-        "reference_source": "",
         "source_url": vcep_specification(gene)["url"],
         "is_evidence_criterion": False,
     }

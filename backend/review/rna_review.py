@@ -1,13 +1,15 @@
 """Informational recommendation for review or generation of RNA evidence."""
 
 import re
-from typing import Dict, List, Optional
+from collections.abc import Iterable
+from typing import Any, Dict, List, Optional
 from backend.policy.gene import (
     reference_transcript,
     spliceai_thresholds,
     vcep_specification,
 )
 from backend.reference_data.enigma_rules import lookup_st16_table4_rna_references
+from backend.review.recommendation import empty_review_recommendation
 
 SPLICE_RELEVANT_TYPES = {
     "splice_site",
@@ -26,8 +28,9 @@ _PMID_CONTEXT = re.compile(r"PMIDs?|pubmed\.ncbi\.nlm\.nih\.gov/", re.I)
 _PMID_NUMBER = re.compile(r"\b\d{6,9}\b")
 
 
-def _pmids(value) -> set[str]:
+def _pmids(value: Any) -> set[str]:
     """Extract explicitly labelled PubMed identifiers from nested audit values."""
+    values: Iterable[Any]
     if isinstance(value, dict):
         values = value.values()
     elif isinstance(value, (list, tuple, set)):
@@ -189,19 +192,7 @@ def evaluate_rna_review(
     source_url = vcep_specification(gene)["url"]
 
     if criteria.get("PVS1_RNA", {}).get("applies"):
-        return {
-            "recommended": False,
-            "priority": "none",
-            "title": "",
-            "summary": "",
-            "reasons": [],
-            "what_to_test": [],
-            "potential_branches": [],
-            "limitations": "",
-            "source_url": source_url,
-            "is_evidence_criterion": False,
-            "manual_review_prefill": {},
-        }
+        return empty_review_recommendation(gene)
 
     if pvs1_rna_result.get("review_required"):
         priority = "high"
@@ -306,19 +297,7 @@ def evaluate_rna_review(
         )
 
     if not reasons:
-        return {
-            "recommended": False,
-            "priority": "none",
-            "title": "",
-            "summary": "",
-            "reasons": [],
-            "what_to_test": [],
-            "potential_branches": [],
-            "limitations": "",
-            "source_url": source_url,
-            "is_evidence_criterion": False,
-            "manual_review_prefill": {},
-        }
+        return empty_review_recommendation(gene)
 
     if "BP7 (RNA)" not in potential_branches:
         potential_branches.append("BP7 (RNA)")
