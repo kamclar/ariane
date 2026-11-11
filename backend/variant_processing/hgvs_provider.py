@@ -1,7 +1,6 @@
 """Load and validate the checksum-pinned local hgvs/cdot reference provider."""
 from __future__ import annotations
 
-import hashlib
 import importlib.metadata
 import json
 from dataclasses import dataclass
@@ -10,6 +9,7 @@ from pathlib import Path
 
 from cdot.hgvs.dataproviders import JSONDataProvider
 
+from backend.integrity.checksums import file_sha256
 from backend.policy.catalog import TRANSCRIPTS
 from backend.reference_data.paths import PANEL_REFERENCE_DIR
 from backend.variant_processing.panel_seqfetcher import PanelSequenceFetcher
@@ -19,14 +19,10 @@ EXPECTED_PACKAGES = {"hgvs": "1.5.7", "cdot": "0.2.30"}
 
 
 def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
     try:
-        with path.open("rb") as handle:
-            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                digest.update(chunk)
+        return file_sha256(path)
     except OSError as exc:
         raise RuntimeError(f"Required reference file cannot be read: {path}: {exc}") from exc
-    return digest.hexdigest()
 
 
 def _load_json(path: Path, label: str) -> dict:

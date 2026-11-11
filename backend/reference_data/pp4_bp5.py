@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+from backend.integrity.checksums import file_sha256
 from backend.policy.gene import (
     clinical_lr_thresholds,
     policy_name,
@@ -39,14 +40,6 @@ _CANONICAL_STRENGTHS = {
     "strong": "Strong",
     "very strong": "Very Strong",
 }
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def lr_to_pp4_strength(gene: str, lr: float) -> Optional[str]:
@@ -190,11 +183,11 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
     if metadata.get("status") != "validated_derived_snapshot":
         raise RuntimeError("PP4/BP5 clinical LR snapshot is not validated")
-    if metadata.get("index_sha256") != _sha256(SNAPSHOT_PATH):
+    if metadata.get("index_sha256") != file_sha256(SNAPSHOT_PATH):
         raise RuntimeError("PP4/BP5 clinical LR snapshot checksum does not match metadata")
     if not SOURCE_MANIFEST_PATH.is_file():
         raise RuntimeError("PP4/BP5 clinical LR source manifest is missing")
-    if metadata.get("source_manifest_sha256") != _sha256(SOURCE_MANIFEST_PATH):
+    if metadata.get("source_manifest_sha256") != file_sha256(SOURCE_MANIFEST_PATH):
         raise RuntimeError("PP4/BP5 clinical LR source manifest checksum mismatch")
     source_manifest = json.loads(SOURCE_MANIFEST_PATH.read_text(encoding="utf-8"))
     if source_manifest.get("schema_version") != 3:
@@ -212,9 +205,9 @@ def load_pp4_bp5_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
         raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency is missing")
     if not INDEL_SNAPSHOT_PATH.is_file() or not INDEL_METADATA_PATH.is_file():
         raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency is unavailable")
-    if indel_dependency.get("index_sha256") != _sha256(INDEL_SNAPSHOT_PATH):
+    if indel_dependency.get("index_sha256") != file_sha256(INDEL_SNAPSHOT_PATH):
         raise RuntimeError("PP4/BP5 clinical LR snapshot indel dependency checksum mismatch")
-    if indel_dependency.get("metadata_sha256") != _sha256(INDEL_METADATA_PATH):
+    if indel_dependency.get("metadata_sha256") != file_sha256(INDEL_METADATA_PATH):
         raise RuntimeError("PP4/BP5 clinical LR snapshot indel metadata checksum mismatch")
 
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))

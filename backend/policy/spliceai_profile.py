@@ -5,12 +5,12 @@ cache created with different SpliceAI parameters cannot be accepted silently.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from backend.integrity.checksums import file_sha256
 from backend.domain.lazy_mapping import LazyJsonObject
 
 
@@ -85,7 +85,7 @@ def _load_profile() -> dict[str, Any]:
             "ENIGMA SpliceAI scoring profile does not match Appendix J: "
             + ", ".join(sorted(set(mismatches)))
         )
-    digest = hashlib.sha256(PROFILE_PATH.read_bytes()).hexdigest()
+    digest = file_sha256(PROFILE_PATH)
     if digest != _EXPECTED_SHA256:
         raise RuntimeError(
             "ENIGMA SpliceAI scoring profile checksum does not match the pinned release"

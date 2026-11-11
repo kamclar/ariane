@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 from typing import Any, Dict, Optional
 
+from backend.integrity.checksums import file_sha256, normalized_text_sha256
 from backend.policy.catalog import TRANSCRIPTS
 from backend.domain.small_variant_projection import (
     AssemblyBaseMap,
@@ -97,16 +98,6 @@ class ResolvedVariant:
         return self.grch38 is not None and self.grch38.is_valid()
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def _normalized_text_sha256(path: Path) -> str:
-    """Hash repository text independently of the checkout line endings."""
-    content = path.read_bytes().replace(b"\r\n", b"\n")
-    return hashlib.sha256(content).hexdigest()
-
-
 def _read_object(path: Path, label: str) -> dict[str, Any]:
     if not path.is_file():
         raise RuntimeError(f"Required {label} is missing: {path}")
@@ -162,7 +153,7 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
     manifest = _read_object(COORDINATE_SOURCE_MANIFEST, "coordinate source manifest")
     metadata = _read_object(COORDINATE_SOURCE_METADATA, "coordinate source metadata")
     expected_sha = str(metadata.get("manifest_sha256") or "").lower()
-    actual_sha = _normalized_text_sha256(COORDINATE_SOURCE_MANIFEST)
+    actual_sha = normalized_text_sha256(COORDINATE_SOURCE_MANIFEST)
     if expected_sha != actual_sha:
         raise RuntimeError(
             "Coordinate source manifest checksum mismatch: "
@@ -264,7 +255,10 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
             )
         if source_type == "coordinate_map":
             source_metadata = _read_object(metadata_path, f"{source_id} metadata")
-            if str(source_metadata.get("sha256") or "").lower() != _sha256(data_path):
+            if (
+                str(source_metadata.get("sha256") or "").lower()
+                != file_sha256(data_path)
+            ):
                 raise RuntimeError(f"Coordinate source {source_id} checksum mismatch")
             records = _read_object(data_path, source_id)
             if source_metadata.get("variants") != len(records):
@@ -287,7 +281,10 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
             loaded_coordinate_maps[source_id] = records
         if source_type == "transcript_alignment":
             source_metadata = _read_object(metadata_path, f"{source_id} metadata")
-            if str(source_metadata.get("sha256") or "").lower() != _sha256(data_path):
+            if (
+                str(source_metadata.get("sha256") or "").lower()
+                != file_sha256(data_path)
+            ):
                 raise RuntimeError(f"Coordinate source {source_id} checksum mismatch")
             records = _read_object(data_path, source_id)
             if (
@@ -307,7 +304,10 @@ def validate_coordinate_source_manifest() -> dict[str, Any]:
                 raise RuntimeError(f"Coordinate source {source_id} gene set mismatch")
             fasta_metadata = source_metadata.get("sources", {}).get("transcript_fasta", {})
             fasta_path = _source_path(fasta_metadata.get("path"), "transcript FASTA")
-            if str(fasta_metadata.get("sha256") or "").lower() != _sha256(fasta_path):
+            if (
+                str(fasta_metadata.get("sha256") or "").lower()
+                != file_sha256(fasta_path)
+            ):
                 raise RuntimeError("Transcript FASTA checksum mismatch")
             sequences = _read_fasta(fasta_path, "transcript FASTA")
             for gene, transcript in genes.items():

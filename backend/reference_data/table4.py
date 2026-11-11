@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from enum import StrEnum
 from functools import lru_cache
-import hashlib
 import json
 import re
 from typing import Any, Dict, NamedTuple, Optional
 
+from backend.integrity.checksums import file_sha256
 from backend.reference_data.paths import TABLE4_PATH
 
 
@@ -139,7 +139,7 @@ def table4_lookup_splice(gene: str, c_notation: str) -> Dict:
 @lru_cache(maxsize=1)
 def table4_checksum() -> str:
     """Return the checksum of the exact Table 4 snapshot used at runtime."""
-    return hashlib.sha256(TABLE4_PATH.read_bytes()).hexdigest()
+    return file_sha256(TABLE4_PATH)
 
 
 def table4_source_url() -> str:

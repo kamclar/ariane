@@ -1,21 +1,17 @@
 """Validated lookup for the versioned normalized BRCA coding-indel snapshot."""
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from typing import Any, Optional
 
+from backend.integrity.checksums import file_sha256
 
 ROOT = Path(__file__).resolve().parents[2]
 INDEX_PATH = ROOT / "data/precomputed/brca_normalized_indel_snapshot.index.json"
 METADATA_PATH = ROOT / "data/precomputed/brca_normalized_indel_snapshot.metadata.json"
 _INDEX: Optional[dict[str, dict[str, Any]]] = None
 _ALIASES: Optional[dict[str, str]] = None
-
-
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def load_indel_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
@@ -27,7 +23,7 @@ def load_indel_snapshot() -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
     if metadata.get("status") != "validated_reference_snapshot":
         raise RuntimeError("Normalized BRCA indel snapshot is not validated")
-    if metadata.get("index_sha256") != _sha256(INDEX_PATH):
+    if metadata.get("index_sha256") != file_sha256(INDEX_PATH):
         raise RuntimeError("Normalized BRCA indel snapshot checksum mismatch")
     index = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
     if len(index) != metadata.get("records"):

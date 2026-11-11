@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from collections import Counter
 from functools import lru_cache
-import hashlib
 import json
 import re
 from pathlib import Path
 from typing import Any
 
+from backend.integrity.checksums import normalized_text_sha256
 from backend.policy.gene import active_genes, reference_transcript
 
 
@@ -33,11 +33,6 @@ CLASSIFICATIONS = {
 }
 
 
-def _sha256(path: Path) -> str:
-    content = path.read_bytes().replace(b"\r\n", b"\n")
-    return hashlib.sha256(content).hexdigest()
-
-
 def validate_erepo_vcep_registry(
     registry: dict[str, Any],
     metadata: dict[str, Any],
@@ -51,7 +46,10 @@ def validate_erepo_vcep_registry(
     if metadata.get("registry_file") != registry_path.name:
         raise RuntimeError("ENIGMA ERepo VCEP metadata names a different registry file")
     expected_sha = str(metadata.get("registry_sha256") or "")
-    if not re.fullmatch(r"[0-9a-f]{64}", expected_sha) or _sha256(registry_path) != expected_sha:
+    if (
+        not re.fullmatch(r"[0-9a-f]{64}", expected_sha)
+        or normalized_text_sha256(registry_path) != expected_sha
+    ):
         raise RuntimeError("ENIGMA ERepo VCEP registry checksum does not match metadata")
     for payload in (registry, metadata):
         if payload.get("expert_panel") != PANEL_NAME:

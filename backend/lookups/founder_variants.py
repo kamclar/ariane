@@ -11,12 +11,12 @@ about the variant's clinical classification.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import re
 from pathlib import Path
 from typing import Any, Dict
 
+from backend.integrity.checksums import canonical_json_sha256
 from backend.infrastructure.health import DataHealthRegistry
 from backend.policy.gene import active_genes
 
@@ -33,13 +33,7 @@ FOUNDER_VARIANT_STATUS = "not_loaded"
 
 
 def _records_sha256(records: list[dict[str, Any]]) -> str:
-    payload = json.dumps(
-        records,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest()
+    return canonical_json_sha256(records)
 
 
 def _normalise_lookup_c(c_notation: str) -> str:

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from typing import Any, Mapping
+
+from backend.integrity.checksums import canonical_json_sha256 as canonical_sha256
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -61,13 +62,6 @@ PM2_COVERAGE_METHOD_REVIEW = {
         "records that exact span, and does not add an unspecified flank."
     ),
 }
-
-
-def canonical_sha256(value: Any) -> str:
-    encoded = json.dumps(
-        value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
 
 
 def approved_manifest(

@@ -8,9 +8,9 @@
 from typing import Optional, Dict
 from pathlib import Path
 from functools import lru_cache
-import hashlib
 import json
 
+from backend.integrity.checksums import file_sha256
 from backend.domain.lazy_mapping import LazyJsonObject
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -36,7 +36,7 @@ def load_table9_data() -> dict:
 @lru_cache(maxsize=1)
 def table9_checksum() -> str:
     load_table9_data()
-    return hashlib.sha256(TABLE9_JSON_PATH.read_bytes()).hexdigest()
+    return file_sha256(TABLE9_JSON_PATH)
 
 
 TABLE9_DATA = LazyJsonObject(load_table9_data)

@@ -1,12 +1,12 @@
 """Generic ENIGMA Appendix G evaluation for exon-level BRCA CNVs."""
 from __future__ import annotations
 
-import hashlib
 import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict
 
+from backend.integrity.checksums import canonical_json_sha256, file_sha256
 from backend.reference_data.paths import (
     EXON_CNV_EVIDENCE_MANIFEST_PATH,
     EXON_CNV_EVIDENCE_PATH,
@@ -15,21 +15,6 @@ from backend.policy.gene import active_genes
 from backend.reference_data.table4 import parse_exon_from_deletion_notation
 from backend.domain.indel import assess_indel_size_for_transcript
 from backend.policy.gene import reference_transcript
-
-
-def _file_sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
-def _canonical_sha256(value: Any) -> str:
-    encoded = json.dumps(
-        value, ensure_ascii=False, sort_keys=True, separators=(",", ":")
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
 
 
 def validate_exon_cnv_evidence_snapshot(
@@ -41,7 +26,7 @@ def validate_exon_cnv_evidence_snapshot(
         raise RuntimeError("Required exon-CNV population snapshot has unknown provenance")
     if not manifest_path.is_file():
         raise RuntimeError(f"Required exon-CNV population manifest is missing: {manifest_path}")
-    if payload.get("manifest_sha256") != _file_sha256(manifest_path):
+    if payload.get("manifest_sha256") != file_sha256(manifest_path):
         raise RuntimeError("Required exon-CNV population snapshot manifest checksum mismatch")
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -65,7 +50,7 @@ def validate_exon_cnv_evidence_snapshot(
     exons = payload.get("exons")
     if not isinstance(exons, dict) or len(exons) != 50:
         raise RuntimeError("Required exon-CNV population snapshot must cover all 50 Table 4 exons")
-    if payload.get("exons_sha256") != _canonical_sha256(exons):
+    if payload.get("exons_sha256") != canonical_json_sha256(exons):
         raise RuntimeError("Required exon-CNV population snapshot exon checksum mismatch")
     if payload.get("pm2_policy") != manifest["population_source"]["pm2_policy"]:
         raise RuntimeError("Required exon-CNV population snapshot policy mismatch")

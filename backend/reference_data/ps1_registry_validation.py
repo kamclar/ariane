@@ -7,11 +7,10 @@ run before rule modules are constructed without creating a package cycle.
 
 from __future__ import annotations
 
-import hashlib
-import json
 import re
 from typing import Any, Dict, Optional
 
+from backend.integrity.checksums import canonical_json_sha256
 from backend.policy.gene import active_genes, reference_transcript, spliceai_thresholds
 
 
@@ -46,13 +45,7 @@ def _validate_sha256(value: Any, label: str) -> None:
 def compute_approval_basis_checksum(record: Dict[str, Any]) -> str:
     """Checksum every approved-record field except the checksum itself."""
     basis = {key: value for key, value in record.items() if key != "approval_basis_checksum"}
-    canonical = json.dumps(
-        basis,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return hashlib.sha256(canonical).hexdigest()
+    return canonical_json_sha256(basis)
 
 
 def validate_ps1_reference_registry(data: Dict[str, Any]) -> None:
