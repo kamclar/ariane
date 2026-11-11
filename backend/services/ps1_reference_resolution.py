@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
 
 from backend.lookups import clingen, clinvar, spliceai
+from backend.lookups.clinvar import clinvar_review_stars
 from backend.reference_data.erepo_vcep import lookup_erepo_vcep_assertion
 from backend.reference_data.ps1_protein import lookup_ps1_reference_variant
 from backend.variant_processing.variant_input import normalize_variant_input
@@ -14,21 +15,6 @@ from backend.variant_processing.variant_type import infer_variant_type
 
 
 P_LP = {"Pathogenic", "Likely Pathogenic"}
-
-
-def _clinvar_review_stars(review_status: str) -> int:
-    status = (review_status or "").strip().lower()
-    if "no assertion criteria" in status or "no classification" in status:
-        return 0
-    if "practice guideline" in status:
-        return 4
-    if "expert panel" in status:
-        return 3
-    if "multiple submitters" in status and "no conflicts" in status:
-        return 2
-    if "criteria provided" in status:
-        return 1
-    return 0
 
 
 def _classification_label(value: Any) -> str:
@@ -132,7 +118,7 @@ async def resolve_ps1_reference(
     )
     erepo_registry_record = dict(erepo_registry_result.get("record") or {})
     aggregate = dict(clinvar.get("aggregate") or {})
-    stars = _clinvar_review_stars(str(aggregate.get("review_status") or ""))
+    stars = clinvar_review_stars(str(aggregate.get("review_status") or ""))
     aggregate_class = _classification_label(aggregate.get("classification"))
     enigma_submission = dict(clinvar.get("enigma_submission") or {})
     enigma_class = _classification_label(enigma_submission.get("class"))
