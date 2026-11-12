@@ -39,6 +39,32 @@ class DagNodeExecutionError(RuntimeError):
         self.trace = trace
 
 
+def _trace_entry(
+    node: DagNode,
+    status: NodeStatus,
+    *,
+    started_at: str,
+    finished_at: str,
+    duration_ms: float,
+    reason: str = "",
+    provenance: Mapping[str, Any] | None = None,
+    warnings: tuple[str, ...] = (),
+) -> DagTraceEntry:
+    return DagTraceEntry(
+        node_id=node.id,
+        node_version=node.version,
+        status=status,
+        requires=tuple(sorted(node.requires)),
+        provides=tuple(sorted(node.provides)),
+        started_at=started_at,
+        finished_at=finished_at,
+        duration_ms=duration_ms,
+        reason=reason,
+        provenance=dict(provenance or {}),
+        warnings=warnings,
+    )
+
+
 @dataclass(frozen=True)
 class DagDefinition:
     id: str
@@ -169,12 +195,9 @@ class DagExecutor:
             if missing_inputs:
                 now = _utc_now()
                 trace.append(
-                    DagTraceEntry(
-                        node_id=node.id,
-                        node_version=node.version,
-                        status=NodeStatus.SKIPPED,
-                        requires=tuple(sorted(node.requires)),
-                        provides=tuple(sorted(node.provides)),
+                    _trace_entry(
+                        node,
+                        NodeStatus.SKIPPED,
                         started_at=now,
                         finished_at=now,
                         duration_ms=0.0,
@@ -195,12 +218,9 @@ class DagExecutor:
                 outcome = node.evaluate(context, node_inputs)
             except Exception as exc:
                 finished_at = _utc_now()
-                entry = DagTraceEntry(
-                    node_id=node.id,
-                    node_version=node.version,
-                    status=NodeStatus.FAILED,
-                    requires=tuple(sorted(node.requires)),
-                    provides=tuple(sorted(node.provides)),
+                entry = _trace_entry(
+                    node,
+                    NodeStatus.FAILED,
                     started_at=started_at,
                     finished_at=finished_at,
                     duration_ms=round((perf_counter() - started) * 1000, 3),
@@ -244,17 +264,14 @@ class DagExecutor:
                 )
 
             trace.append(
-                DagTraceEntry(
-                    node_id=node.id,
-                    node_version=node.version,
-                    status=outcome.status,
-                    requires=tuple(sorted(node.requires)),
-                    provides=tuple(sorted(node.provides)),
+                _trace_entry(
+                    node,
+                    outcome.status,
                     started_at=started_at,
                     finished_at=_utc_now(),
                     duration_ms=round((perf_counter() - started) * 1000, 3),
                     reason=outcome.reason,
-                    provenance=dict(outcome.provenance),
+                    provenance=outcome.provenance,
                     warnings=outcome.warnings,
                 )
             )
@@ -297,12 +314,9 @@ class DagExecutor:
                 for node in remaining:
                     missing_inputs = sorted(node.requires.difference(available))
                     trace.append(
-                        DagTraceEntry(
-                            node_id=node.id,
-                            node_version=node.version,
-                            status=NodeStatus.SKIPPED,
-                            requires=tuple(sorted(node.requires)),
-                            provides=tuple(sorted(node.provides)),
+                        _trace_entry(
+                            node,
+                            NodeStatus.SKIPPED,
                             started_at=now,
                             finished_at=now,
                             duration_ms=0.0,
@@ -323,12 +337,9 @@ class DagExecutor:
             for node, evaluation in zip(ready, evaluations):
                 if isinstance(evaluation, BaseException):
                     now = _utc_now()
-                    entry = DagTraceEntry(
-                        node_id=node.id,
-                        node_version=node.version,
-                        status=NodeStatus.FAILED,
-                        requires=tuple(sorted(node.requires)),
-                        provides=tuple(sorted(node.provides)),
+                    entry = _trace_entry(
+                        node,
+                        NodeStatus.FAILED,
                         started_at=now,
                         finished_at=now,
                         duration_ms=0.0,
@@ -347,12 +358,9 @@ class DagExecutor:
                 try:
                     self._validate_outcome(node, outcome)
                 except Exception as exc:
-                    failed = DagTraceEntry(
-                        node_id=node.id,
-                        node_version=node.version,
-                        status=NodeStatus.FAILED,
-                        requires=entry.requires,
-                        provides=entry.provides,
+                    failed = _trace_entry(
+                        node,
+                        NodeStatus.FAILED,
                         started_at=entry.started_at,
                         finished_at=entry.finished_at,
                         duration_ms=entry.duration_ms,
@@ -384,7 +392,11 @@ class DagExecutor:
         )
 
     @staticmethod
-    async def _evaluate_async_node(node, context, values):
+    async def _evaluate_async_node(
+        node: DagNode,
+        context: DagExecutionContext,
+        values: Mapping[str, Any],
+    ) -> tuple[Any, DagTraceEntry]:
         started_at = _utc_now()
         started = perf_counter()
         node_inputs = MappingProxyType({key: values[key] for key in node.requires})
@@ -392,23 +404,20 @@ class DagExecutor:
         if inspect.isawaitable(outcome):
             outcome = await outcome
         finished_at = _utc_now()
-        entry = DagTraceEntry(
-            node_id=node.id,
-            node_version=node.version,
-            status=(outcome.status if isinstance(outcome, NodeResult) else NodeStatus.FAILED),
-            requires=tuple(sorted(node.requires)),
-            provides=tuple(sorted(node.provides)),
+        entry = _trace_entry(
+            node,
+            outcome.status if isinstance(outcome, NodeResult) else NodeStatus.FAILED,
             started_at=started_at,
             finished_at=finished_at,
             duration_ms=round((perf_counter() - started) * 1000, 3),
             reason=(outcome.reason if isinstance(outcome, NodeResult) else ""),
-            provenance=(dict(outcome.provenance) if isinstance(outcome, NodeResult) else {}),
+            provenance=(outcome.provenance if isinstance(outcome, NodeResult) else None),
             warnings=(outcome.warnings if isinstance(outcome, NodeResult) else ()),
         )
         return outcome, entry
 
     @staticmethod
-    def _validate_outcome(node, outcome: Any) -> None:
+    def _validate_outcome(node: DagNode, outcome: Any) -> None:
         if not isinstance(outcome, NodeResult):
             raise TypeError(
                 f"returned {type(outcome).__name__}, expected NodeResult"

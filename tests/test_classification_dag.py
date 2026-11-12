@@ -1,5 +1,6 @@
 """Regression tests for the fail-closed classification DAG foundation."""
 
+import asyncio
 from dataclasses import dataclass
 from itertools import product
 
@@ -67,6 +68,36 @@ def test_graph_topologically_orders_nodes_and_records_trace():
     assert run.values["output"] == 10
     assert [entry.node_id for entry in run.trace] == ["add_one", "double"]
     assert all(entry.status.value == "succeeded" for entry in run.trace)
+
+
+def test_sync_and_async_runs_record_the_same_trace_metadata():
+    graph = DagDefinition(
+        id="test",
+        version="1",
+        seed_keys={"input"},
+        nodes=(DoubleNode(), AddOneNode()),
+    )
+    executor = DagExecutor(graph)
+    synchronous = executor.run({"input": 4}, context=CONTEXT)
+    asynchronous = asyncio.run(executor.run_async({"input": 4}, context=CONTEXT))
+
+    stable_fields = (
+        "node_id",
+        "node_version",
+        "status",
+        "requires",
+        "provides",
+        "reason",
+        "provenance",
+        "warnings",
+    )
+    assert [
+        tuple(entry.as_dict()[field] for field in stable_fields)
+        for entry in synchronous.trace
+    ] == [
+        tuple(entry.as_dict()[field] for field in stable_fields)
+        for entry in asynchronous.trace
+    ]
 
 
 def test_graph_rejects_missing_provider():
