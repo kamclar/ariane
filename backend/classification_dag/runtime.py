@@ -16,6 +16,7 @@ from backend.domain.classification import (
 )
 from backend.classification_dag.types import (
     DagExecutionContext,
+    DagNode,
     DagTraceEntry,
     NodeResult,
 )
@@ -60,7 +61,7 @@ SUPPORTED_CLASSIFICATION_PROFILES = frozenset({"enigma_brca_vcep_1_2"})
 
 
 def _require_supported_profile(gene: str) -> str:
-    profile = implementation_profile(gene)
+    profile: str = implementation_profile(gene)
     if profile not in SUPPORTED_CLASSIFICATION_PROFILES:
         raise RuntimeError(
             f"No classification DAG is implemented for policy profile {profile!r} "
@@ -105,7 +106,11 @@ class _ClassificationInputContractNode:
     requires: frozenset[str] = frozenset({"classification_inputs"})
     provides: frozenset[str] = frozenset({"normalized_variant", "evidence_bundle"})
 
-    def evaluate(self, context, inputs) -> NodeResult:
+    def evaluate(
+        self,
+        context: DagExecutionContext,
+        inputs: Mapping[str, Any],
+    ) -> NodeResult:
         classification_inputs = inputs["classification_inputs"]
         if not isinstance(classification_inputs, ClassificationInputs):
             raise TypeError("classification_inputs must be ClassificationInputs")
@@ -130,7 +135,11 @@ class _StructuredAssertionNode:
     requires: frozenset[str] = frozenset({"unvalidated_classification_result"})
     provides: frozenset[str] = frozenset({"variant_assertion"})
 
-    def evaluate(self, context, inputs) -> NodeResult:
+    def evaluate(
+        self,
+        context: DagExecutionContext,
+        inputs: Mapping[str, Any],
+    ) -> NodeResult:
         result = inputs["unvalidated_classification_result"]
         assertion = VariantAssertion.from_public_result(
             result,
@@ -153,7 +162,11 @@ class _PublicProjectionNode:
     })
     provides: frozenset[str] = frozenset({"classification_result"})
 
-    def evaluate(self, context, inputs) -> NodeResult:
+    def evaluate(
+        self,
+        context: DagExecutionContext,
+        inputs: Mapping[str, Any],
+    ) -> NodeResult:
         # The typed assertion proves the clinical contract. The established API
         # dictionary is preserved as a presentation boundary.
         assertion = inputs["variant_assertion"]
@@ -163,6 +176,24 @@ class _PublicProjectionNode:
             {"classification_result": inputs["unvalidated_classification_result"]},
             provenance={"projection": "public-result-v1"},
         )
+
+
+def _classification_tail() -> tuple[DagNode, ...]:
+    return (
+        SpliceContextNode(),
+        FrequencyCriteriaNode(),
+        ExonCnvCriteriaNode(),
+        FunctionalCriteriaNode(),
+        Pvs1CriteriaNode(),
+        ClinicalLrCriteriaNode(),
+        ProteinPs1CriteriaNode(),
+        BioinformaticCriteriaNode(),
+        EvidenceInteractionNode(),
+        ClassificationPolicyNode(),
+        ReviewTriageNode(),
+        _StructuredAssertionNode(),
+        _PublicProjectionNode(),
+    )
 
 
 def build_native_graph() -> DagDefinition:
@@ -175,19 +206,7 @@ def build_native_graph() -> DagDefinition:
             _ClassificationInputContractNode(),
             Pvs1RnaInputResolutionNode(),
             Table9EvidenceNode(),
-            SpliceContextNode(),
-            FrequencyCriteriaNode(),
-            ExonCnvCriteriaNode(),
-            FunctionalCriteriaNode(),
-            Pvs1CriteriaNode(),
-            ClinicalLrCriteriaNode(),
-            ProteinPs1CriteriaNode(),
-            BioinformaticCriteriaNode(),
-            EvidenceInteractionNode(),
-            ClassificationPolicyNode(),
-            ReviewTriageNode(),
-            _StructuredAssertionNode(),
-            _PublicProjectionNode(),
+            *_classification_tail(),
         ),
     )
 
@@ -218,19 +237,7 @@ def build_provider_graph(
             ResidueEvidenceNode(providers),
             ProteinPs1EvidenceNode(providers),
             EvidenceBundleAssemblyNode(),
-            SpliceContextNode(),
-            FrequencyCriteriaNode(),
-            ExonCnvCriteriaNode(),
-            FunctionalCriteriaNode(),
-            Pvs1CriteriaNode(),
-            ClinicalLrCriteriaNode(),
-            ProteinPs1CriteriaNode(),
-            BioinformaticCriteriaNode(),
-            EvidenceInteractionNode(),
-            ClassificationPolicyNode(),
-            ReviewTriageNode(),
-            _StructuredAssertionNode(),
-            _PublicProjectionNode(),
+            *_classification_tail(),
         ),
     )
 

@@ -475,6 +475,31 @@ def test_dag_produces_approved_representative_clinical_result():
     ]
 
 
+def test_native_and_provider_graphs_have_distinct_matching_classification_tails():
+    from backend.classification_dag.runtime import (
+        build_native_graph,
+        build_provider_graph,
+    )
+
+    native = build_native_graph()
+    provider = build_provider_graph()
+    first_tail_node = "context.spliceai.provenance"
+    native_start = next(
+        index for index, node in enumerate(native.nodes) if node.id == first_tail_node
+    )
+    provider_start = next(
+        index for index, node in enumerate(provider.nodes) if node.id == first_tail_node
+    )
+    native_tail = native.nodes[native_start:]
+    provider_tail = provider.nodes[provider_start:]
+
+    assert [node.id for node in native_tail] == [node.id for node in provider_tail]
+    assert all(native_node is not provider_node for native_node, provider_node in zip(
+        native_tail,
+        provider_tail,
+    ))
+
+
 def test_table9_provider_records_version_and_runtime_checksum():
     inputs = ClassificationInputs(
         gene="BRCA1",
