@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 from backend.policy.gene import vcep_document_url
-from backend.policy.pvs1_rna import unquantified_patient_rna_strength
+from backend.policy.pvs1_rna import patient_rna_strength
 from backend.reference_data.ps1_splice_evidence import (
     get_st2_source_metadata,
     get_st2_splice_record,
@@ -19,6 +19,18 @@ from backend.reference_data.table4 import (
 
 _PATIENT_UNQUANTIFIED_LOF = (
     "patient not allele-specific; aberrant transcripts consistent with loss of function"
+)
+_PATIENT_ALLELE_SPECIFIC_LOF = frozenset(
+    {
+        (
+            "patient plus allele-specific to confirm not leaky; "
+            "aberrant transcripts consistent with loss of function"
+        ),
+        (
+            "patient plus allele-specific; aberrant transcripts consistent "
+            "with loss of function"
+        ),
+    }
 )
 _DAMAGING_RNA_RESULT = "aberrant transcripts consistent with loss of function"
 
@@ -33,6 +45,10 @@ def is_damaging_st2_assay(value: Any) -> bool:
 
 def is_unquantified_patient_st2_assay(value: Any) -> bool:
     return normalized_st2_text(value) == _PATIENT_UNQUANTIFIED_LOF
+
+
+def is_allele_specific_patient_st2_assay(value: Any) -> bool:
+    return normalized_st2_text(value) in _PATIENT_ALLELE_SPECIFIC_LOF
 
 
 def reported_whole_exon_deletion(value: Any) -> int | None:
@@ -79,7 +95,9 @@ def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> dict[str, Any]:
                 "damaging loss-of-function category."
             ),
         }
-    if not is_unquantified_patient_st2_assay(assay_category):
+    is_unquantified = is_unquantified_patient_st2_assay(assay_category)
+    is_allele_specific = is_allele_specific_patient_st2_assay(assay_category)
+    if not (is_unquantified or is_allele_specific):
         return {
             **base,
             "status": "review_required",
@@ -114,10 +132,11 @@ def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> dict[str, Any]:
             ),
         }
     baseline = table4_lookup_deletion(gene, table4_exon)
-    if (
-        baseline.get("status") != Table4LookupStatus.MATCHED
-        or unquantified_patient_rna_strength(baseline.get("pvs1_strength")) is None
-    ):
+    strength = patient_rna_strength(
+        baseline.get("pvs1_strength"),
+        allele_specific_quantified=is_allele_specific,
+    )
+    if baseline.get("status") != Table4LookupStatus.MATCHED or strength is None:
         return {
             **base,
             "status": "review_required",
@@ -133,7 +152,11 @@ def lookup_st2_pvs1_rna_evidence(gene: str, c_notation: str) -> dict[str, Any]:
         "status": "eligible",
         "table4_exon": table4_exon,
         "table4_baseline": baseline,
-        "assay_interpretation": ("enigma_st2_curated_apparent_near_complete_loss_of_function"),
+        "assay_interpretation": (
+            "enigma_st2_curated_allele_specific_at_least_90_percent_loss_of_function"
+            if is_allele_specific
+            else "enigma_st2_curated_apparent_near_complete_loss_of_function"
+        ),
         "reason": (
             "The exact checksum-bound ST2 row contains ENIGMA-curated patient "
             "mRNA evidence, a loss-of-function transcript category, linked ST3 "

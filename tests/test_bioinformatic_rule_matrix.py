@@ -270,11 +270,9 @@ def test_functional_and_figure1a_interaction_matrix(
     (
         ("BRCA1", "c.5074G>A"),
         ("BRCA1", "c.5074G>C"),
-        ("BRCA2", "c.7976G>A"),
-        ("BRCA2", "c.7976G>C"),
     ),
 )
-def test_last_exon_base_examples_keep_table9_ps3_and_route_st2_rna_to_review(
+def test_complex_last_exon_base_examples_keep_table9_ps3_and_st2_review(
     gene, c_notation
 ):
     functional = table9_lookup_ps3_bs3(gene, c_notation)
@@ -295,6 +293,20 @@ def test_last_exon_base_examples_keep_table9_ps3_and_route_st2_rna_to_review(
         url.startswith("https://pubmed.ncbi.nlm.nih.gov/")
         for url in rna["manual_review_prefill"]["source_references"]
     )
+
+
+@pytest.mark.parametrize("c_notation", ("c.7976G>A", "c.7976G>C"))
+def test_allele_specific_last_exon_base_examples_apply_st2_rna(c_notation):
+    functional = table9_lookup_ps3_bs3("BRCA2", c_notation)
+    rna = evaluate_pvs1_rna("BRCA2", c_notation)
+
+    assert functional["applies"]
+    assert functional["code"] == "PS3"
+    assert rna["applies"]
+    assert rna["strength"] == "Very Strong"
+    assert rna["points"] == 8
+    assert rna["review_required"] is False
+    assert rna["source_record"]["supporting_st3_references"]
 
 
 def test_mrna_only_assay_cannot_create_manual_ps3():

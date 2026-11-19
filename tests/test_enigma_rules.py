@@ -1173,6 +1173,15 @@ class SpliceTests(unittest.TestCase):
                     self.assertEqual(result["strength"], "Strong")
                     self.assertEqual(result["points"], 4)
                     self.assertFalse(result["review_required"])
+                elif c_notation in {
+                    "c.4484G>T",
+                    "c.7976G>A",
+                    "c.7976G>C",
+                }:
+                    self.assertTrue(result["applies"])
+                    self.assertEqual(result["strength"], "Very Strong")
+                    self.assertEqual(result["points"], 8)
+                    self.assertFalse(result["review_required"])
                 else:
                     self.assertFalse(result["applies"])
                     self.assertEqual(result["points"], 0)
@@ -1204,7 +1213,10 @@ class SpliceTests(unittest.TestCase):
         )
 
         self.assertTrue(review["recommended"])
-        self.assertTrue(any("PMID 33293522" in reason for reason in review["reasons"]))
+        self.assertIn(
+            "33293522",
+            review["manual_review_prefill"]["transcript_result_summary"],
+        )
         self.assertTrue(any("exclude reused evidence" in item for item in review["what_to_test"]))
         self.assertNotIn(
             "https://pubmed.ncbi.nlm.nih.gov/33293522/",

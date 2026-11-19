@@ -642,10 +642,17 @@ impact. ARIANE považuje toto posouzení za již provedené pouze u přesných S
 řádků, které ENIGMA zařadila do kategorie `Patient not allele-specific;
 aberrant transcripts consistent with loss of function`.
 
+Odborné upřesnění z 19. listopadu 2026 potvrdilo, že dvě ST2 kategorie
+`Patient plus allele-specific to confirm not leaky; aberrant transcripts
+consistent with loss of function` a `Patient plus allele-specific; aberrant
+transcripts consistent with loss of function` odpovídají nejméně 90 %
+nefunkčního transkriptu. U jednoznačného RNA následku proto používají plnou
+Table 4 sílu.
+
 Automatické `PVS1_RNA` z ST2 vyžaduje současně:
 
 - přesnou shodu genu a c. HGVS v checksumovaném ST2 snapshotu;
-- uvedenou standardizovanou kategorii pacientské mRNA;
+- jednu ze tří potvrzených standardizovaných kategorií pacientské mRNA;
 - alespoň jeden propojený zdrojový řádek ST3;
 - jednoznačný výsledek delece celého exonu;
 - jednoznačné mapování tohoto exonu na použitelnou výchozí sílu PVS1 v Table 4.
@@ -653,9 +660,10 @@ Automatické `PVS1_RNA` z ST2 vyžaduje současně:
 Síla se určuje obecnou maticí Appendix E pro apparent near-complete výsledek bez
 alelově specifické kvantifikace. Výchozí PVS1 se změní na PVS1 Strong RNA,
 PVS1 Strong na PVS1 Moderate RNA, PVS1 Moderate zůstává Moderate RNA a
-PVS1 Supporting zůstává Supporting RNA. Komplexní, částečné nebo nejednoznačné
-transkriptové výsledky se automaticky nebodují. ARIANE je předvyplní k odborné
-revizi a výslednou sílu neodhaduje.
+PVS1 Supporting zůstává Supporting RNA. Dvě potvrzené allele-specific kategorie
+používají výchozí Table 4 sílu beze snížení. Komplexní, částečné nebo
+nejednoznačné transkriptové výsledky se automaticky nebodují. ARIANE je
+předvyplní k odborné revizi a výslednou sílu neodhaduje.
 
 Pokud backend doporučí manuální kritérium, rozhraní otevře sekci odborné
 evidence a zobrazí návrh s přímým odkazem na předvyplněný formulář. U RNA
@@ -683,13 +691,15 @@ funkční dopad nad rámec pouhé detekce aberrantního transkriptu.
 U `BRCA1 c.5074G>A/C` Table 9 uvádí PS3 Strong podle funkčního výsledku Findlay
 et al. a ST2 obsahuje samostatnou RNA evidenci. U `BRCA2 c.7976G>A/C` Table 9
 uvádí PS3 Strong podle funkčního výsledku Biswas et al. a ST2 opět popisuje RNA
-evidenci. ARIANE proto ponechá explicitní PS3 z Table 9 a PVS1 RNA připraví k
-odbornému zvážení. ENIGMA VCEP v metodickém upřesnění z 15. října 2026
-potvrdil, že PVS1 RNA a PS3 nebo BS3 lze zachovat současně, pokud představují
-odlišné evidenční příspěvky. Assay prokazující pouze aberantní sestřih podporuje
-PVS1 RNA, nikoli současně PS3. ARIANE proto při kombinaci stále vyžaduje kontrolu
-rozsahu assay, provenance a nezávislosti a upozorňuje na zákaz dvojího započtení
-stejného experimentálního pozorování.
+evidenci. `BRCA1 c.5074G>A/C` zůstávají kvůli komplexnímu RNA výsledku k ručnímu
+zvážení. `BRCA2 c.7976G>A/C` mají jednoznačnou deleci exonu 17 a potvrzenou
+allele-specific kategorii, takže ARIANE automaticky použije PVS1 RNA Very
+Strong. ENIGMA VCEP v metodickém upřesnění z 15. října 2026 potvrdil, že PVS1
+RNA a PS3 nebo BS3 lze zachovat současně, pokud představují odlišné evidenční
+příspěvky. Assay prokazující pouze aberantní sestřih podporuje PVS1 RNA, nikoli
+současně PS3. ARIANE proto při kombinaci stále vyžaduje kontrolu rozsahu assay,
+provenance a nezávislosti a upozorňuje na zákaz dvojího započtení stejného
+experimentálního pozorování.
 
 Stejný PMID v poli funkčního assay a v přehledu publikovaných splice výsledků
 není automaticky druhé kritérium ani důkaz dvojího započtení. Jedna publikace
@@ -699,8 +709,8 @@ takový překryv rozpozná a uvede konkrétní PMID v RNA review. Automaticky za
 Table 9 funkční výsledek pouze jednou. Před současným použitím PVS1 RNA musí
 kurátor doložit nezávislou RNA evidenci nebo popsat, které odlišné assay a
 pozorování v téže publikaci podporují jednotlivá kritéria. U `BRCA2 c.7976G>A`
-je překryvový PMID `33293522`; předvyplněný PVS1 RNA záznam používá samostatné
-ST3 zdroje PMID `28339459`, `18451181` a `12624152`.
+je překryvový PMID `33293522`; automaticky použitý PVS1 RNA záznam používá
+samostatné ST3 zdroje PMID `28339459`, `18451181` a `12624152`.
 
 Pokud Table 9 uvádí konkrétní publikovaný splice výsledek s PMID odlišnými od
 PMID funkčního assay pro PS3 nebo BS3, ARIANE tento popis a odkazy předvyplní do
@@ -2625,6 +2635,7 @@ Závěrečná regresní sada je rozdělena podle účelu:
 |---|---|
 | Tutorialové varianty | `tests/test_dag_regression_corpus.py` kontroluje očekávaná kritéria, síly, body, třídu, mixed evidence a N/A větve jednotlivých variant. |
 | Nekvantifikovaná RNA | Parametrizovaný test načte všechny záznamy ST2 v kategorii nekvantifikované pacientské RNA. Jednoznačné delece celého exonu s propojeným ST3 zdrojem a použitelnou Table 4 větví musí získat sílu podle Appendix E. Komplexní nebo částečné výsledky musí zůstat bez bodů ve stavu `review_required`. `BRCA1 c.4185G>A` ověřuje PVS1 RNA Strong a nepoužití PP3. |
+| Allele-specific RNA | Parametrizovaný test načte všech 22 záznamů druhé potvrzené ST2 kategorie. Sedm jednoznačných delecí celého exonu musí získat plnou Table 4 sílu a zbývajících 15 komplexních nebo částečných výsledků musí zůstat ve stavu `review_required`. Kohortní regrese ověřuje `BRCA1 c.4484G>T` jako Pathogenic a konfliktní `BRCA2 c.9501+3A>T` jako Likely Benign. |
 | Přesná Table 4 RNA rozhodnutí | Parametrizovaný test načte všech 144 alelových pravidel označených `(RNA)`, ověří jejich kód, sílu, body, verzi a checksum. Dvě N/A alely nesmí získat body. End-to-end testy `BRCA2 c.476-2A>G`, `BRCA2 c.9118-2A>G` a `BRCA1 c.594-2A>C` ověřují také nepoužití SpliceAI a Figure 1A. |
 | Founder varianty | Test načte všechny varianty z aktuálního připnutého founder registru a každou nechá projít plným DAGem s frekvencí nad prahy BA1/BS1. U každého záznamu požaduje, aby se BA1 ani BS1 nepřidělilo a důvod zůstal v auditní stopě. Přidání dalšího záznamu do registru jej automaticky přidá do regrese. |
 | Hranice posledního exonu | Pro BRCA1 se testují p.1854 a p.1855, pro BRCA2 p.3309 a p.3310. Neurčitelný stop kodon před kritickou hranicí zastaví automatickou klasifikaci a vyžádá odbornou revizi. Změna začínající za hranicí může bezpečně použít N/A i bez určené polohy stop kodonu. |

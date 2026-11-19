@@ -1,9 +1,8 @@
 """Evaluate ENIGMA PVS1 (RNA) from structured, versioned RNA evidence.
 
-Exact VCEP assertions retain their published strength. The qualitative
-patient-mRNA branch uses the official ST2 curator coding together with the
-Table 4 loss-of-function context and the Appendix E RNA weighting matrix.
-Complex or insufficiently coded transcript results remain manual-review only.
+Exact VCEP assertions retain their published strength. ST2 patient-mRNA
+categories use the Table 4 loss-of-function context and the applicable
+Appendix E weight. Complex transcript results remain manual-review only.
 """
 
 from __future__ import annotations
@@ -12,7 +11,7 @@ from typing import Any, Dict, Optional
 
 from backend.domain.pvs1_rna import Pvs1RnaSelection
 from backend.policy.criterion_points import points_for_strength
-from backend.policy.pvs1_rna import unquantified_patient_rna_strength
+from backend.policy.pvs1_rna import patient_rna_strength
 from backend.reference_data.table4 import (
     TABLE4_SOURCE_ID,
     Table4LookupStatus,
@@ -21,6 +20,7 @@ from backend.reference_data.table4 import (
     table4_lookup_deletion,
 )
 from backend.reference_data.st2_pvs1_rna import (
+    is_allele_specific_patient_st2_assay,
     is_damaging_st2_assay,
     is_unquantified_patient_st2_assay,
     lookup_st2_pvs1_rna_evidence as _lookup_st2_pvs1_rna_evidence,
@@ -346,6 +346,7 @@ def _st2_review_fields(
     record: Dict[str, Any],
     references: list[Dict[str, Any]],
     is_unquantified: bool,
+    is_allele_specific: bool,
 ) -> Dict[str, Any]:
     summary = (
         f"ENIGMA Supplementary Table 2 row {record.get('source_row')}: "
@@ -355,14 +356,16 @@ def _st2_review_fields(
         "The curator must determine the applicable Appendix E RNA weighting "
         "branch and document the supported strength."
     )
+    if is_unquantified:
+        appendix_branch = "unquantified_patient_mrna_requires_consensus_review"
+    elif is_allele_specific:
+        appendix_branch = "allele_specific_patient_mrna_requires_consequence_review"
+    else:
+        appendix_branch = "structured_rna_result_requires_curator_weighting"
     return {
         "application_status": "review_required",
         "review_required": True,
-        "appendix_branch": (
-            "unquantified_patient_mrna_requires_consensus_review"
-            if is_unquantified
-            else "structured_rna_result_requires_curator_weighting"
-        ),
+        "appendix_branch": appendix_branch,
         "source": vcep_document_url("appendix", gene),
         "manual_review_prefill": {
             "assay_scope": "mrna_only",
@@ -487,7 +490,14 @@ def _evaluate_st2_record(
         )
 
     is_unquantified = is_unquantified_patient_st2_assay(assay_category)
-    review = _st2_review_fields(gene, record, references, is_unquantified)
+    is_allele_specific = is_allele_specific_patient_st2_assay(assay_category)
+    review = _st2_review_fields(
+        gene,
+        record,
+        references,
+        is_unquantified,
+        is_allele_specific,
+    )
     reported_exon = reported_whole_exon_deletion(record.get("result"))
     if reported_exon is None:
         return _st2_decision(
@@ -528,7 +538,7 @@ def _evaluate_st2_record(
     review["manual_review_prefill"]["table4_context"] = (
         f"{gene} {table4_exon}: {baseline.get('pvs1_code')}"
     )
-    if not is_unquantified:
+    if not (is_unquantified or is_allele_specific):
         return _st2_decision(
             gene,
             f"ENIGMA Supplementary Table 2 row {record.get('source_row')} reports "
@@ -542,7 +552,10 @@ def _evaluate_st2_record(
             **review,
         )
 
-    strength = unquantified_patient_rna_strength(baseline_strength)
+    strength = patient_rna_strength(
+        baseline_strength,
+        allele_specific_quantified=is_allele_specific,
+    )
     problems = _st2_runtime_problems(
         gene,
         c_notation,
@@ -567,10 +580,23 @@ def _evaluate_st2_record(
 
     if strength is None:
         raise RuntimeError("Validated ST2 candidate has no RNA strength")
+    assay_description = (
+        "allele-specific patient mRNA with at least 90% non-functional transcript"
+        if is_allele_specific
+        else "patient mRNA without allele-specific quantitation"
+    )
+    appendix_branch = (
+        "patient_mrna_with_allele_specific_quantitation_at_least_90_percent"
+        if is_allele_specific
+        else (
+            "patient_mrna_without_allele_specific_quantitation_"
+            "apparent_near_complete"
+        )
+    )
     return _st2_decision(
         gene,
         f"ENIGMA Supplementary Table 2 row {record.get('source_row')} "
-        "codes patient mRNA without allele-specific quantitation as an "
+        f"codes {assay_description} as an "
         "aberrant transcript consistent with loss of function "
         f"({record.get('result')}) and links "
         f"{len(references)} supporting ST3 source(s). Table 4 assigns "
@@ -583,10 +609,7 @@ def _evaluate_st2_record(
         strength=strength,
         points=points_for_strength(strength),
         application_status="applied_from_curated_st2",
-        appendix_branch=(
-            "patient_mrna_without_allele_specific_quantitation_"
-            "apparent_near_complete"
-        ),
+        appendix_branch=appendix_branch,
         source=vcep_document_url("appendix", gene),
         decision_path=_st2_decision_path(gene, record, baseline, strength),
     )

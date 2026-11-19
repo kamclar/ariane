@@ -191,8 +191,10 @@ technické vazby zdrojů jsou v
   Nepodporované větve nevracejí VUS a výsledek se neukládá do cache.
 - ST7 P/LP je přijatý klasifikační základ proteinové PS1 reference; body se
   přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
-- Nekvantifikovaná ST2 přiděluje PVS1 RNA jen v přesné standardizované LoF
-  kategorii s propojeným ST3 zdrojem a jednoznačným Table 4 důsledkem.
+- ST2 přiděluje PVS1 RNA jen v potvrzené pacientské LoF kategorii s propojeným
+  ST3 zdrojem a jednoznačným Table 4 důsledkem. Nekvantifikovaná pacientská RNA
+  používá sníženou Appendix E sílu. Dvě potvrzené allele-specific kategorie
+  odpovídají nejméně 90 % nefunkčního transkriptu a používají plnou Table 4 sílu.
 - Rozdílné vícenásobné BayesDel hodnoty se neslučují maximem.
 - Malé indely do 50 bp jsou odděleny od strukturální větve Appendix G.
 - Nenalezení v neúplném founder registru se nepovažuje za negativní výsledek.
@@ -271,8 +273,9 @@ objeví stejný PMID, zobrazí jej jako kontrolu provenance. Shoda PMID sama
 kritérium nemaže, protože publikace může obsahovat odlišné experimenty. Před
 současným přijetím PS3/BS3 a PVS1 RNA je však nutné přiřadit konkrétní assay a
 pozorování ke každému kódu a vyloučit opakované použití stejné evidence. U
-`BRCA2 c.7976G>A` je takto označen PMID `33293522`; automaticky se započítává jen
-PS3 a předvyplnění PVS1 RNA odkazuje na tři jiné ST3 publikace.
+`BRCA2 c.7976G>A` je takto označen PMID `33293522`. Automaticky se započítá PS3
+i PVS1 RNA a výsledek vyžaduje kontrolu jejich nezávislosti. RNA záznam odkazuje
+na tři jiné ST3 publikace.
 
 ## 9. Strojově ověřitelná verze služby SpliceAI
 
@@ -364,3 +367,30 @@ až v nové schválené verzi zdroje nebo na základě výslovného stanoviska E
 Dvojí zápis `BRCA1 c.81-1G>C` a `BRCA2 c.8487+2T>C` není považován za chybu.
 Workbook u nich obsahuje obecný predikční řádek a přesnější RNA řádek. Runtime
 použije RNA rozhodnutí, ale oba původní řádky uchovává pro audit.
+
+## 12. ST2 allele-specific kategorie a plná síla PVS1 RNA
+
+Odborné upřesnění Jany z 19. listopadu 2026 potvrdilo, že následující ST2
+kategorie odpovídají nejméně 90 % nefunkčního transkriptu ve smyslu Appendix E:
+
+- `Patient plus allele-specific to confirm not leaky; aberrant transcripts
+  consistent with loss of function`;
+- `Patient plus allele-specific; aberrant transcripts consistent with loss of
+  function`.
+
+Pokud přesný ST2 záznam obsahuje propojené ST3 zdroje a jednoznačnou deleci
+celého exonu, ARIANE použije plnou sílu odpovídající tomuto exonu v Table 4.
+Komplexní a částečné transkriptové výsledky zůstávají k ruční revizi, protože
+samotná ST2 kategorie potvrzuje podíl nefunkčního transkriptu, nikoli přesný
+funkční důsledek každého produktu.
+
+Nová automatická větev pokrývá sedm jednoznačných variant: `BRCA1 c.4484G>T`,
+`BRCA1 c.5453A>G`, `BRCA2 c.7975A>G`, `BRCA2 c.7976G>A`,
+`BRCA2 c.7976G>C`, `BRCA2 c.7988A>T` a `BRCA2 c.9501+3A>T`. Všechny používají
+PVS1 RNA Very Strong podle příslušného Table 4 exonového rozhodnutí.
+
+V české laboratorní kohortě se tím mění dvě automatické klasifikace:
+
+- `BRCA1 c.4484G>T` z Likely Pathogenic na Pathogenic;
+- `BRCA2 c.9501+3A>T` z Benign na Likely Benign, s konfliktní patogenní a
+  benigní evidencí vyžadující odbornou revizi.

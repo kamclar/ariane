@@ -15,3 +15,17 @@ def unquantified_patient_rna_strength(
     baseline_strength: str | None,
 ) -> str | None:
     return _UNQUANTIFIED_PATIENT_RNA_STRENGTH.get(baseline_strength or "")
+
+
+def patient_rna_strength(
+    baseline_strength: str | None,
+    *,
+    allele_specific_quantified: bool,
+) -> str | None:
+    if allele_specific_quantified:
+        return (
+            baseline_strength
+            if baseline_strength in _UNQUANTIFIED_PATIENT_RNA_STRENGTH
+            else None
+        )
+    return unquantified_patient_rna_strength(baseline_strength)

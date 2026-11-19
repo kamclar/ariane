@@ -97,6 +97,32 @@ UNQUANTIFIED_PATIENT_RNA_VARIANTS = tuple(
 )
 
 
+ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS = tuple(
+    (record["gene"], record["c_notation"])
+    for record in json.loads(
+        ST2_SPLICE_EVIDENCE_PATH.read_text(encoding="utf-8")
+    )["variants"]
+    if " ".join(
+        str(record.get("splicing_assay_result_category") or "").split()
+    ).lower()
+    == (
+        "patient plus allele-specific; aberrant transcripts consistent with "
+        "loss of function"
+    )
+)
+
+
+UNAMBIGUOUS_ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS = (
+    ("BRCA1", "c.4484G>T", "E13(14)"),
+    ("BRCA1", "c.5453A>G", "E22(23)"),
+    ("BRCA2", "c.7975A>G", "E17"),
+    ("BRCA2", "c.7976G>A", "E17"),
+    ("BRCA2", "c.7976G>C", "E17"),
+    ("BRCA2", "c.7988A>T", "E18"),
+    ("BRCA2", "c.9501+3A>T", "E25"),
+)
+
+
 def _inputs(gene, c_notation, p_notation, spliceai, bayesdel, dup_type):
     variant_type = infer_variant_type(c_notation, p_notation)
     return ClassificationInputs(
@@ -387,6 +413,83 @@ def test_unquantified_patient_rna_uses_appendix_e_weight_matrix(
     assert result["applies"] is True
     assert result["strength"] == expected_strength
     assert result["points"] == expected_points
+
+
+@pytest.mark.parametrize(
+    "gene,c_notation,expected_exon",
+    UNAMBIGUOUS_ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS,
+)
+def test_allele_specific_patient_rna_uses_full_table4_strength(
+    gene,
+    c_notation,
+    expected_exon,
+):
+    result = evaluate_pvs1_rna(gene, c_notation)
+
+    assert result["applies"] is True
+    assert result["strength"] == "Very Strong"
+    assert result["points"] == 8
+    assert result["table4_exon"] == expected_exon
+    assert result["application_status"] == "applied_from_curated_st2"
+    assert result["appendix_branch"] == (
+        "patient_mrna_with_allele_specific_quantitation_at_least_90_percent"
+    )
+    assert result["review_required"] is False
+
+
+def test_allele_specific_patient_rna_scope_is_explicit_and_complete():
+    outcomes = [
+        evaluate_pvs1_rna(gene, c_notation)["application_status"]
+        for gene, c_notation in ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS
+    ]
+
+    assert len(outcomes) == 22
+    assert outcomes.count("applied_from_curated_st2") == 7
+    assert outcomes.count("review_required") == 15
+
+
+def test_czech_cohort_allele_specific_rna_regressions():
+    pathogenic = execute_classification(
+        _inputs(
+            "BRCA1",
+            "c.4484G>T",
+            "p.(Arg1495Met)",
+            0.668,
+            None,
+            "Unknown",
+        )
+    ).result
+    mixed = execute_classification(
+        ClassificationInputs(
+            gene="BRCA2",
+            variant_type="intronic",
+            c_notation="c.9501+3A>T",
+            p_notation="p.?",
+            spliceai_score=0.0,
+            gnomad_data=_frequency_input(
+                gene="BRCA2",
+                max_af=0.00013638,
+                found=True,
+            ),
+            frequency_policy=classification_policy_for_gene("BRCA2"),
+            pp4_bp5_result=evaluate_pp4_bp5("BRCA2", "c.9501+3A>T"),
+        )
+    ).result
+
+    assert pathogenic["predicted_class"] == 5
+    assert pathogenic["total_points"] == 16
+    assert _criterion_summary(pathogenic) == {
+        "PVS1_RNA": ("Very Strong", 8),
+        "PP4": ("Very Strong", 8),
+    }
+    assert mixed["predicted_class"] == 2
+    assert mixed["total_points"] == -4
+    assert _criterion_summary(mixed) == {
+        "PVS1_RNA": ("Very Strong", 8),
+        "BS1_Strong": ("Strong", -4),
+        "BP5": ("Very Strong", -8),
+    }
+    assert mixed["mixed_evidence"] is True
 
 
 @pytest.mark.parametrize(
