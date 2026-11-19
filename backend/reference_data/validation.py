@@ -61,6 +61,23 @@ def validate_required_datasets(paths: Mapping[str, Path]) -> None:
         for gene in table4_genes:
             if not table4.get(section, {}).get(gene):
                 raise RuntimeError(f"Required ENIGMA Table 4 dataset has no {section}/{gene} records")
+    corrections = table4.get("source_corrections")
+    if not isinstance(corrections, list):
+        raise RuntimeError("Required ENIGMA Table 4 dataset lacks source corrections")
+    for correction in corrections:
+        gene = correction.get("gene")
+        key = str(correction.get("c_notation") or "").replace(">", "")
+        rule = table4.get("splice_rules", {}).get(gene, {}).get(key)
+        if (
+            not correction.get("id")
+            or not correction.get("source_file_sha256")
+            or not correction.get("source_location")
+            or not isinstance(rule, dict)
+            or rule.get("source_correction") != correction.get("id")
+        ):
+            raise RuntimeError(
+                f"Required ENIGMA Table 4 source correction is invalid: {correction}"
+            )
     for gene in table4_genes:
         exon_ranges = set(table4["exon_ranges"][gene])
         for section in ("ptc_rules", "deletion_rules", "duplication_rules"):

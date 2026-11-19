@@ -15,7 +15,7 @@ SOURCE_URL = (
     "https://cspec.genome.network/cspec/File/id/"
     "ca5cf57b-94df-4ad6-a001-c62ceccb3845/data"
 )
-SNAPSHOT_DATE = "2026-11-10"
+SNAPSHOT_DATE = "2026-11-19"
 
 
 class Column(IntEnum):
@@ -79,6 +79,26 @@ APPENDIX_D_INITIATION_FACTS = {
         "appendix_figure": "Appendix D Figure 5",
     },
 }
+
+
+APPENDIX_D_SPLICE_CORRECTIONS = (
+    {
+        "id": "appendix-d-figure-6-brca2-c.8487+2t-a",
+        "gene": "BRCA2",
+        "c_notation": "c.8487+2T>A",
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "source_file": "docs/enigma/v1.2/source/Appendix_V1.2.docx",
+        "source_file_sha256": (
+            "9a9cc9210178e8d947597089ba8edd5ff0633ff7e4fea268b8f202d46e6c8ebb"
+        ),
+        "source_location": "Appendix D, Figure 6 continued, page 21",
+        "reason": (
+            "Appendix D lists c.8487+2T>A/C/G as PVS1, while the searchable "
+            "Table 4 workbook lists only C and G."
+        ),
+    },
+)
 
 
 def _clean(value: Any) -> Any:
@@ -197,6 +217,25 @@ def _add_splice_rules(
             "pvs1_code": str(code).strip(),
             "notes": _notes(notes),
         }
+
+
+def _apply_splice_corrections(target: GeneRules) -> list[Rule]:
+    applied = []
+    for correction in APPENDIX_D_SPLICE_CORRECTIONS:
+        gene = correction["gene"]
+        key = correction["c_notation"].replace(">", "")
+        if key in target[gene]:
+            raise RuntimeError(
+                f"Appendix D correction is no longer needed: {gene}:{key}"
+            )
+        target[gene][key] = {
+            "exon": correction["exon"],
+            "pvs1_code": correction["pvs1_code"],
+            "notes": correction["reason"],
+            "source_correction": correction["id"],
+        }
+        applied.append(dict(correction))
+    return applied
 
 
 def build_snapshot(source: Path) -> dict[str, Any]:
@@ -353,6 +392,8 @@ def build_snapshot(source: Path) -> dict[str, Any]:
             ),
         )
 
+    source_corrections = _apply_splice_corrections(splice_rules)
+
     for gene in ("BRCA1", "BRCA2"):
         expected = set(exon_ranges[gene])
         for name, section in (
@@ -374,6 +415,7 @@ def build_snapshot(source: Path) -> dict[str, Any]:
         "readme": readme,
         "source_columns": 20,
         "source_rows": rows,
+        "source_corrections": source_corrections,
         "exon_ranges": exon_ranges,
         "initiation_rules": initiation_rules,
         "ptc_rules": ptc_rules,

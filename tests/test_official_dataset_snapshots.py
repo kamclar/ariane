@@ -300,7 +300,7 @@ class OfficialDatasetSnapshotTests(unittest.TestCase):
             data["deletion_rules"]["BRCA2"]["E15"]["notes"],
         )
         self.assertEqual(len(data["splice_rules"]["BRCA1"]), 264)
-        self.assertEqual(len(data["splice_rules"]["BRCA2"]), 311)
+        self.assertEqual(len(data["splice_rules"]["BRCA2"]), 312)
         self.assertEqual(
             data["critical_boundaries"]["BRCA1"]["at_or_before"],
             {"pvs1_code": "PVS1", "pm5_code": "PM5_Strong (PTC)"},

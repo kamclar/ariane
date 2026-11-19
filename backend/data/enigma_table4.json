@@ -4,7 +4,7 @@
   "released": "2025-01-09",
   "source": "ClinGen ENIGMA BRCA1/2 VCEP Specifications Table 4",
   "source_url": "https://cspec.genome.network/cspec/File/id/ca5cf57b-94df-4ad6-a001-c62ceccb3845/data",
-  "generated": "2026-11-10",
+  "generated": "2026-11-19",
   "readme": [
     "ACMG/AMP Classification Rules Specified for BRCA1 & BRCA2",
     "ENIGMA Variant Curation Expert Panel, Classification Criteria V1.2 2024-11-18.",
@@ -10889,6 +10889,19 @@
       null
     ]
   ],
+  "source_corrections": [
+    {
+      "id": "appendix-d-figure-6-brca2-c.8487+2t-a",
+      "gene": "BRCA2",
+      "c_notation": "c.8487+2T>A",
+      "exon": "E19",
+      "pvs1_code": "PVS1",
+      "source_file": "docs/enigma/v1.2/source/Appendix_V1.2.docx",
+      "source_file_sha256": "9a9cc9210178e8d947597089ba8edd5ff0633ff7e4fea268b8f202d46e6c8ebb",
+      "source_location": "Appendix D, Figure 6 continued, page 21",
+      "reason": "Appendix D lists c.8487+2T>A/C/G as PVS1, while the searchable Table 4 workbook lists only C and G."
+    }
+  ],
   "exon_ranges": {
     "BRCA1": {
       "E1": [
@@ -14252,6 +14265,12 @@
         "exon": "E27",
         "pvs1_code": "PVS1",
         "notes": ""
+      },
+      "c.8487+2TA": {
+        "exon": "E19",
+        "pvs1_code": "PVS1",
+        "notes": "Appendix D lists c.8487+2T>A/C/G as PVS1, while the searchable Table 4 workbook lists only C and G.",
+        "source_correction": "appendix-d-figure-6-brca2-c.8487+2t-a"
       }
     }
   },

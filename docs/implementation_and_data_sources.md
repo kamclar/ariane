@@ -634,6 +634,14 @@ RNA produktů. Shoda musí být přesná v genu a c. HGVS a zdrojová verze i ch
 se zapisují do auditu. Aktuální Table 4 obsahuje 144 takových alelových pravidel:
 142 přiděluje PVS1 RNA a dvě určují N/A.
 
+Searchable Table 4 workbook vynechává alelu A u `BRCA2 c.8487+2T>`, zatímco
+Appendix D, Figure 6 continued, strana 21, uvádí `c.8487+2T>A/C/G` jako PVS1.
+Generátor zachovává původní workbook beze změny v `source_rows` a přidává pro
+`c.8487+2T>A` samostatně evidovanou runtime opravu `PVS1` Very Strong. Snapshot
+ukládá identitu opravy, lokaci v Appendixu a SHA-256 zdrojového souboru. Pokud
+budoucí Table 4 workbook alelu doplní, generátor se zastaví, aby se oprava
+neaplikovala dvakrát.
+
 Supplementary Table 2 se používá jako úplný oficiální zdroj známé RNA evidence.
 Její standardizovaná kategorie je výsledkem kurátorského kódování ENIGMA. Pro
 pacientskou mRNA bez alelově specifické kvantifikace Appendix E vyžaduje

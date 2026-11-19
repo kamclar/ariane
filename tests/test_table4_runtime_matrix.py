@@ -51,6 +51,7 @@ def test_generated_runtime_sections_match_the_workbook() -> None:
         "deletion_rules",
         "duplication_rules",
         "critical_boundaries",
+        "source_corrections",
     ):
         assert stored[section] == rebuilt[section], section
     assert rebuilt["generated"] == SNAPSHOT_DATE
@@ -76,7 +77,7 @@ def test_builder_rejects_an_unexpected_workbook_layout(tmp_path: Path) -> None:
 def test_table4_runtime_rule_counts() -> None:
     table4 = _stored_table4()
 
-    assert sum(len(rules) for rules in table4["splice_rules"].values()) == 575
+    assert sum(len(rules) for rules in table4["splice_rules"].values()) == 576
     assert sum(len(rules) for rules in table4["ptc_rules"].values()) == 48
     assert sum(len(rules) for rules in table4["deletion_rules"].values()) == 50
     assert sum(
@@ -286,7 +287,29 @@ def test_layered_rna_rules_and_source_gaps_remain_visible() -> None:
         table4_lookup_splice("BRCA2", "c.6937+2T>A")["status"]
         == Table4LookupStatus.NOT_FOUND
     )
-    assert (
-        table4_lookup_splice("BRCA2", "c.8487+2T>A")["status"]
-        == Table4LookupStatus.NOT_FOUND
+
+    corrected = table4_lookup_splice("BRCA2", "c.8487+2T>A")
+    assert corrected["status"] == Table4LookupStatus.MATCHED
+    assert corrected["pvs1_code"] == "PVS1"
+    assert corrected["exon"] == "E19"
+    assert "Appendix D" in corrected["notes"]
+
+    stored = _stored_table4()
+    correction = stored["source_corrections"][0]
+    assert correction["c_notation"] == "c.8487+2T>A"
+    assert correction["source_location"] == (
+        "Appendix D, Figure 6 continued, page 21"
     )
+    assert stored["splice_rules"]["BRCA2"]["c.8487+2TA"][
+        "source_correction"
+    ] == correction["id"]
+
+    criterion = evaluate_pvs1(
+        "BRCA2",
+        "splice_site",
+        "p.?",
+        c_notation="c.8487+2T>A",
+    )
+    assert criterion["applies"] is True
+    assert criterion["strength"] == "Very Strong"
+    assert criterion["points"] == 8

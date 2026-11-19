@@ -350,19 +350,20 @@ revizi a následující dotaz pro ENIGMA:
 Zdroje: [ClinVar RCV000112286](https://www.ncbi.nlm.nih.gov/clinvar/RCV000112286/)
 a [ClinGen ERepo c.4185G>C](https://erepo.clinicalgenome.org/evrepo/ui/classification/9ef5ebb6-b717-4061-8655-b7c3bf79b9a5).
 
-## 11. Dvě podezřelé alely ve zdrojové Table 4
+## 11. Nejasnosti ve zdrojové Table 4
 
-Audit původního workbooku Table 4 našel dva případy, které vyžadují potvrzení
-ENIGMA:
+Audit původního workbooku Table 4 našel dva nesoulady:
 
 - BRCA2 obsahuje vzor `c.6937+1T>`. Referenční sekvence má na pozici `+1` bázi
   G a na pozici `+2` bázi T. Pravděpodobně má jít o `c.6937+2T>`.
-- Pro BRCA2 `c.8487+2T>` jsou uvedeny alternativy C a G, ale chybí A. Je třeba
-  potvrdit, zda jde o záměrnou alelovou výjimku nebo vynechanou alternativu.
+- Pro BRCA2 `c.8487+2T>` uvádí workbook alternativy C a G, ale vynechává A.
+  Appendix D, Figure 6 continued, strana 21, výslovně uvádí A, C a G jako PVS1.
 
-ARIANE tyto případy neopravuje vlastní výjimkou. Zachovává zdrojový workbook a
-pro chybějící přesnou alelu postupuje fail-closed. Případná oprava se provede
-až v nové schválené verzi zdroje nebo na základě výslovného stanoviska ENIGMA.
+`BRCA2 c.6937+1T>` zůstává otevřenou nejasností a ARIANE pro domnělou pozici +2
+nadále postupuje fail-closed. Pro `BRCA2 c.8487+2T>A` je rozpor vyřešen primárním
+Appendix D zdrojem. Builder zachovává workbook beze změny v `source_rows`, ale
+do runtime pravidel přidává auditovanou opravu `PVS1` Very Strong s identitou,
+lokací a checksumem Appendixu.
 
 Dvojí zápis `BRCA1 c.81-1G>C` a `BRCA2 c.8487+2T>C` není považován za chybu.
 Workbook u nich obsahuje obecný predikční řádek a přesnější RNA řádek. Runtime
