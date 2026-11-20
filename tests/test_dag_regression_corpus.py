@@ -112,14 +112,28 @@ ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS = tuple(
 )
 
 
-UNAMBIGUOUS_ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS = (
-    ("BRCA1", "c.4484G>T", "E13(14)"),
-    ("BRCA1", "c.5453A>G", "E22(23)"),
-    ("BRCA2", "c.7975A>G", "E17"),
-    ("BRCA2", "c.7976G>A", "E17"),
-    ("BRCA2", "c.7976G>C", "E17"),
-    ("BRCA2", "c.7988A>T", "E18"),
-    ("BRCA2", "c.9501+3A>T", "E25"),
+CONFIRMED_NOT_LEAKY_PATIENT_RNA_VARIANTS = tuple(
+    (record["gene"], record["c_notation"])
+    for record in json.loads(
+        ST2_SPLICE_EVIDENCE_PATH.read_text(encoding="utf-8")
+    )["variants"]
+    if " ".join(
+        str(record.get("splicing_assay_result_category") or "").split()
+    ).lower()
+    == (
+        "patient plus allele-specific to confirm not leaky; aberrant transcripts "
+        "consistent with loss of function"
+    )
+)
+
+
+UNAMBIGUOUS_CONFIRMED_NOT_LEAKY_PATIENT_RNA_VARIANTS = (
+    ("BRCA1", "c.4357+1G>A", "E12(13)"),
+    ("BRCA1", "c.4357+1G>T", "E12(13)"),
+    ("BRCA1", "c.4675+1G>A", "E14(15)"),
+    ("BRCA1", "c.5332+1G>A", "E20(21)"),
+    ("BRCA2", "c.7617+2T>G", "E15"),
+    ("BRCA2", "c.8487+1G>A", "E19"),
 )
 
 
@@ -417,9 +431,9 @@ def test_unquantified_patient_rna_uses_appendix_e_weight_matrix(
 
 @pytest.mark.parametrize(
     "gene,c_notation,expected_exon",
-    UNAMBIGUOUS_ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS,
+    UNAMBIGUOUS_CONFIRMED_NOT_LEAKY_PATIENT_RNA_VARIANTS,
 )
-def test_allele_specific_patient_rna_uses_full_table4_strength(
+def test_confirmed_not_leaky_patient_rna_uses_full_table4_strength(
     gene,
     c_notation,
     expected_exon,
@@ -437,18 +451,35 @@ def test_allele_specific_patient_rna_uses_full_table4_strength(
     assert result["review_required"] is False
 
 
-def test_allele_specific_patient_rna_scope_is_explicit_and_complete():
+def test_confirmed_not_leaky_patient_rna_scope_is_explicit_and_complete():
     outcomes = [
         evaluate_pvs1_rna(gene, c_notation)["application_status"]
-        for gene, c_notation in ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS
+        for gene, c_notation in CONFIRMED_NOT_LEAKY_PATIENT_RNA_VARIANTS
     ]
 
     assert len(outcomes) == 22
-    assert outcomes.count("applied_from_curated_st2") == 7
-    assert outcomes.count("review_required") == 15
+    assert outcomes.count("applied_from_curated_st2") == 6
+    assert outcomes.count("review_required") == 16
 
 
-def test_czech_cohort_allele_specific_rna_regressions():
+@pytest.mark.parametrize("gene,c_notation", ALLELE_SPECIFIC_PATIENT_RNA_VARIANTS)
+def test_allele_specific_patient_rna_without_leak_exclusion_requires_review(
+    gene,
+    c_notation,
+):
+    result = evaluate_pvs1_rna(gene, c_notation)
+
+    assert result["applies"] is False
+    assert result["points"] == 0
+    assert result["review_required"] is True
+    assert result["application_status"] == "review_required"
+    assert result["appendix_branch"] == (
+        "allele_specific_patient_mrna_leaky_splicing_not_excluded"
+    )
+    assert "leaky splicing is excluded" in result["reason"]
+
+
+def test_czech_cohort_allele_specific_rna_review_regressions():
     pathogenic = execute_classification(
         _inputs(
             "BRCA1",
@@ -465,7 +496,7 @@ def test_czech_cohort_allele_specific_rna_regressions():
             variant_type="intronic",
             c_notation="c.9501+3A>T",
             p_notation="p.?",
-            spliceai_score=0.0,
+            spliceai_score=0.172,
             gnomad_data=_frequency_input(
                 gene="BRCA2",
                 max_af=0.00013638,
@@ -476,20 +507,21 @@ def test_czech_cohort_allele_specific_rna_regressions():
         )
     ).result
 
-    assert pathogenic["predicted_class"] == 5
-    assert pathogenic["total_points"] == 16
+    assert pathogenic["predicted_class"] == 4
+    assert pathogenic["total_points"] == 9
     assert _criterion_summary(pathogenic) == {
-        "PVS1_RNA": ("Very Strong", 8),
+        "PP3": ("Supporting", 1),
         "PP4": ("Very Strong", 8),
     }
-    assert mixed["predicted_class"] == 2
-    assert mixed["total_points"] == -4
+    assert pathogenic["rna_review"]["recommended"] is True
+    assert mixed["predicted_class"] == 1
+    assert mixed["total_points"] == -12
     assert _criterion_summary(mixed) == {
-        "PVS1_RNA": ("Very Strong", 8),
         "BS1_Strong": ("Strong", -4),
         "BP5": ("Very Strong", -8),
     }
-    assert mixed["mixed_evidence"] is True
+    assert mixed["mixed_evidence"] is False
+    assert mixed["rna_review"]["recommended"] is True
 
 
 @pytest.mark.parametrize(

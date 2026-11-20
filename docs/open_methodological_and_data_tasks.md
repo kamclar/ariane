@@ -369,29 +369,31 @@ Dvojí zápis `BRCA1 c.81-1G>C` a `BRCA2 c.8487+2T>C` není považován za chybu
 Workbook u nich obsahuje obecný predikční řádek a přesnější RNA řádek. Runtime
 použije RNA rozhodnutí, ale oba původní řádky uchovává pro audit.
 
-## 12. ST2 allele-specific kategorie a plná síla PVS1 RNA
+## 12. ST2 allele-specific kategorie a vyloučení leaky splicingu
 
-Odborné upřesnění Jany z 19. listopadu 2026 potvrdilo, že následující ST2
-kategorie odpovídají nejméně 90 % nefunkčního transkriptu ve smyslu Appendix E:
+Navazující odborné upřesnění Jany z 19. listopadu 2026 opravilo původní
+interpretaci. Kategorie `Patient plus allele-specific; aberrant transcripts
+consistent with loss of function` sama nepotvrzuje, že byl vyloučen leaky
+splicing. Množství aberantního sestřihu se může lišit mezi nosiči stejné varianty
+a ST2 kategorie neobsahuje standardizovanou kvantitativní hranici.
 
-- `Patient plus allele-specific to confirm not leaky; aberrant transcripts
-  consistent with loss of function`;
-- `Patient plus allele-specific; aberrant transcripts consistent with loss of
-  function`.
+Automatickou plnou sílu podle Table 4 lze použít pouze pro kategorii `Patient
+plus allele-specific to confirm not leaky; aberrant transcripts consistent with
+loss of function`, pokud má přesný ST2 záznam propojené ST3 zdroje a
+jednoznačnou deleci celého exonu. Z 22 záznamů této kategorie splňuje podmínky
+šest variant. Zbývajících 16 komplexních nebo částečných výsledků zůstává k
+ruční revizi.
 
-Pokud přesný ST2 záznam obsahuje propojené ST3 zdroje a jednoznačnou deleci
-celého exonu, ARIANE použije plnou sílu odpovídající tomuto exonu v Table 4.
-Komplexní a částečné transkriptové výsledky zůstávají k ruční revizi, protože
-samotná ST2 kategorie potvrzuje podíl nefunkčního transkriptu, nikoli přesný
-funkční důsledek každého produktu.
+Všech 22 záznamů bez formulace `to confirm not leaky` zůstává k ruční revizi,
+včetně sedmi jednoznačných delecí celého exonu. Table 4 kontext se předvyplní,
+ale PVS1 RNA nedostane automatickou sílu ani body. Kurátor musí posoudit
+kvantifikaci normálního a aberantního transkriptu, assay kontext a detekci NMD.
 
-Nová automatická větev pokrývá sedm jednoznačných variant: `BRCA1 c.4484G>T`,
-`BRCA1 c.5453A>G`, `BRCA2 c.7975A>G`, `BRCA2 c.7976G>A`,
-`BRCA2 c.7976G>C`, `BRCA2 c.7988A>T` a `BRCA2 c.9501+3A>T`. Všechny používají
-PVS1 RNA Very Strong podle příslušného Table 4 exonového rozhodnutí.
+V české laboratorní kohortě se proto ruší dvě změny zavedené ve verzi 1.9.52:
 
-V české laboratorní kohortě se tím mění dvě automatické klasifikace:
+- `BRCA1 c.4484G>T` se vrací z Pathogenic na Likely Pathogenic;
+- `BRCA2 c.9501+3A>T` se vrací z Likely Benign na Benign.
 
-- `BRCA1 c.4484G>T` z Likely Pathogenic na Pathogenic;
-- `BRCA2 c.9501+3A>T` z Benign na Likely Benign, s konfliktní patogenní a
-  benigní evidencí vyžadující odbornou revizi.
+Obě varianty nadále dostávají předvyplněnou RNA revizi. Změna je metodická a
+nepopírá existenci RNA evidence, pouze brání automatickému předpokladu, že leaky
+splicing byl vyloučen.

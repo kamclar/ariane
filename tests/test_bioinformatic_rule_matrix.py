@@ -296,16 +296,18 @@ def test_complex_last_exon_base_examples_keep_table9_ps3_and_st2_review(
 
 
 @pytest.mark.parametrize("c_notation", ("c.7976G>A", "c.7976G>C"))
-def test_allele_specific_last_exon_base_examples_apply_st2_rna(c_notation):
+def test_allele_specific_last_exon_base_examples_require_st2_rna_review(c_notation):
     functional = table9_lookup_ps3_bs3("BRCA2", c_notation)
     rna = evaluate_pvs1_rna("BRCA2", c_notation)
 
     assert functional["applies"]
     assert functional["code"] == "PS3"
-    assert rna["applies"]
-    assert rna["strength"] == "Very Strong"
-    assert rna["points"] == 8
-    assert rna["review_required"] is False
+    assert not rna["applies"]
+    assert rna["points"] == 0
+    assert rna["review_required"] is True
+    assert rna["appendix_branch"] == (
+        "allele_specific_patient_mrna_leaky_splicing_not_excluded"
+    )
     assert rna["source_record"]["supporting_st3_references"]
 
 

@@ -22,6 +22,7 @@ from backend.reference_data.table4 import (
 from backend.reference_data.st2_pvs1_rna import (
     is_allele_specific_patient_st2_assay,
     is_damaging_st2_assay,
+    is_not_leaky_allele_specific_patient_st2_assay,
     is_unquantified_patient_st2_assay,
     lookup_st2_pvs1_rna_evidence as _lookup_st2_pvs1_rna_evidence,
     reported_whole_exon_deletion,
@@ -34,6 +35,8 @@ from backend.policy.gene import (
     vcep_document_url,
     vcep_specification,
 )
+
+
 def _st3_citation(reference: Dict[str, Any]) -> str:
     author = str(reference.get("author") or "Unknown author")
     year = str(reference.get("year") or "unknown year")
@@ -491,6 +494,7 @@ def _evaluate_st2_record(
 
     is_unquantified = is_unquantified_patient_st2_assay(assay_category)
     is_allele_specific = is_allele_specific_patient_st2_assay(assay_category)
+    is_not_leaky = is_not_leaky_allele_specific_patient_st2_assay(assay_category)
     review = _st2_review_fields(
         gene,
         record,
@@ -498,6 +502,20 @@ def _evaluate_st2_record(
         is_unquantified,
         is_allele_specific,
     )
+    if is_allele_specific and not is_not_leaky:
+        review["appendix_branch"] = (
+            "allele_specific_patient_mrna_leaky_splicing_not_excluded"
+        )
+        return _st2_decision(
+            gene,
+            f"ENIGMA Supplementary Table 2 row {record.get('source_row')} reports "
+            f"allele-specific damaging RNA evidence ({record.get('result')}), but "
+            "the category does not establish that leaky splicing is excluded. "
+            "PVS1 (RNA) requires expert review of transcript quantitation, assay "
+            "context and NMD before a strength can be assigned.",
+            source_record=source_record,
+            **review,
+        )
     reported_exon = reported_whole_exon_deletion(record.get("result"))
     if reported_exon is None:
         return _st2_decision(
@@ -538,7 +556,7 @@ def _evaluate_st2_record(
     review["manual_review_prefill"]["table4_context"] = (
         f"{gene} {table4_exon}: {baseline.get('pvs1_code')}"
     )
-    if not (is_unquantified or is_allele_specific):
+    if not (is_unquantified or is_not_leaky):
         return _st2_decision(
             gene,
             f"ENIGMA Supplementary Table 2 row {record.get('source_row')} reports "
@@ -554,7 +572,7 @@ def _evaluate_st2_record(
 
     strength = patient_rna_strength(
         baseline_strength,
-        allele_specific_quantified=is_allele_specific,
+        allele_specific_quantified=is_not_leaky,
     )
     problems = _st2_runtime_problems(
         gene,
@@ -582,12 +600,12 @@ def _evaluate_st2_record(
         raise RuntimeError("Validated ST2 candidate has no RNA strength")
     assay_description = (
         "allele-specific patient mRNA with at least 90% non-functional transcript"
-        if is_allele_specific
+        if is_not_leaky
         else "patient mRNA without allele-specific quantitation"
     )
     appendix_branch = (
         "patient_mrna_with_allele_specific_quantitation_at_least_90_percent"
-        if is_allele_specific
+        if is_not_leaky
         else (
             "patient_mrna_without_allele_specific_quantitation_"
             "apparent_near_complete"

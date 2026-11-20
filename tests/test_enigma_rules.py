@@ -1173,15 +1173,6 @@ class SpliceTests(unittest.TestCase):
                     self.assertEqual(result["strength"], "Strong")
                     self.assertEqual(result["points"], 4)
                     self.assertFalse(result["review_required"])
-                elif c_notation in {
-                    "c.4484G>T",
-                    "c.7976G>A",
-                    "c.7976G>C",
-                }:
-                    self.assertTrue(result["applies"])
-                    self.assertEqual(result["strength"], "Very Strong")
-                    self.assertEqual(result["points"], 8)
-                    self.assertFalse(result["review_required"])
                 else:
                     self.assertFalse(result["applies"])
                     self.assertEqual(result["points"], 0)
