@@ -193,8 +193,10 @@ technické vazby zdrojů jsou v
   přidělí až po splnění všech nezávislých identity, mechanismu a splice kontrol.
 - ST2 přiděluje PVS1 RNA jen v potvrzené pacientské LoF kategorii s propojeným
   ST3 zdrojem a jednoznačným Table 4 důsledkem. Nekvantifikovaná pacientská RNA
-  používá sníženou Appendix E sílu. Dvě potvrzené allele-specific kategorie
-  odpovídají nejméně 90 % nefunkčního transkriptu a používají plnou Table 4 sílu.
+  používá sníženou Appendix E sílu. Plnou Table 4 sílu může použít pouze
+  allele-specific kategorie s explicitním potvrzením `to confirm not leaky`.
+  Kategorie bez tohoto potvrzení zůstává k odborné revizi bez automatických
+  bodů.
 - Rozdílné vícenásobné BayesDel hodnoty se neslučují maximem.
 - Malé indely do 50 bp jsou odděleny od strukturální větve Appendix G.
 - Nenalezení v neúplném founder registru se nepovažuje za negativní výsledek.
@@ -273,9 +275,11 @@ objeví stejný PMID, zobrazí jej jako kontrolu provenance. Shoda PMID sama
 kritérium nemaže, protože publikace může obsahovat odlišné experimenty. Před
 současným přijetím PS3/BS3 a PVS1 RNA je však nutné přiřadit konkrétní assay a
 pozorování ke každému kódu a vyloučit opakované použití stejné evidence. U
-`BRCA2 c.7976G>A` je takto označen PMID `33293522`. Automaticky se započítá PS3
-i PVS1 RNA a výsledek vyžaduje kontrolu jejich nezávislosti. RNA záznam odkazuje
-na tři jiné ST3 publikace.
+`BRCA2 c.7976G>A` je takto označen PMID `33293522`. Automaticky se započítá PS3.
+PVS1 RNA zůstává k odborné revizi, protože ST2 kategorie explicitně nevylučuje
+leaky splicing. Pokud kurátor PVS1 RNA přijme, musí zároveň zkontrolovat
+nezávislost obou evidenčních příspěvků. RNA záznam odkazuje na tři jiné ST3
+publikace.
 
 ## 9. Strojově ověřitelná verze služby SpliceAI
 
